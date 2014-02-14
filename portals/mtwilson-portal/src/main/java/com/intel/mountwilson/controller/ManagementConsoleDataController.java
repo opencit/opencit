@@ -805,12 +805,16 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             List<Map<String, Object>> localeList = new ArrayList<Map<String, Object>>();
             for (String localeName : demoPortalServices.getLocales(getApiClientService(req, ApiClient.class))) {
+                log.debug("Retrieved locale for preferences page DDL: {}", localeName);
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("localeName", localeName);
                 localeList.add(map);
             }
             responseView.addObject("locales", localeList);
-            responseView.addObject("selectedLocale", demoPortalServices.getLocale(username, getApiClientService(req, ApiClient.class)));
+            
+            String selectedLocale = demoPortalServices.getLocale(username, getApiClientService(req, ApiClient.class));
+            log.debug("Retrieved selected locale for preferences page DDL: {}", selectedLocale);
+            responseView.addObject("selectedLocale", selectedLocale);
         } catch (DemoPortalException e) {
             e.printStackTrace();
             log.error(e.toString());
@@ -2732,6 +2736,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         ModelAndView responseView = new ModelAndView(new JSONView());
         String username = req.getParameter("username");
         String locale = req.getParameter("locale");
+        log.debug("Calling api to set locale [{}] for user [{}]", locale, username);
         
         try {
             responseView.addObject("locale", demoPortalServices.setLocale(username, locale, getApiClientService(req, ApiClient.class)));

@@ -5,6 +5,7 @@
 package com.intel.mtwilson.ms.rest;
 
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
@@ -78,19 +79,17 @@ public class i18n {
      * @throws MSDataException 
      */
     @POST
-    @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
     @RolesAllowed({"Security"})
-    public String setLocaleForUser(
-            //@QueryParam("api") Boolean api,
-            @QueryParam("username") String username,
-            @QueryParam("locale") String locale) throws IOException, NonexistentEntityException, MSDataException {
-        //ValidationUtil.validate(apiClientRequest);
+    public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException {
+        log.debug("Retrieving portal user [{}] from database.", pul.getUser());
         MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
-        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(pul.getUser());
+        log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
         if (portalUser != null) {
-            portalUser.setLocale(locale);
+            log.debug("Setting locale [{}] for portal user [{}] in database.", pul.getLocale(), portalUser.getUsername());
+            portalUser.setLocale(pul.getLocale());
             mwPortalUserJpaController.edit(portalUser);
         } else { return "Portal user not found."; }
         

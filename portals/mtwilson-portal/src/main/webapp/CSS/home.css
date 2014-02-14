@@ -313,6 +313,13 @@ h5, h6
 	height: 28px;
 }
 
+.tableDivPref{
+    max-height: 330px;
+    width: 650px;
+    /*border: 1px solid #3A4F63;*/
+    height: 28px;
+}
+
 .mainTableContant{
 	width: 100%;
 	max-height: 454px;

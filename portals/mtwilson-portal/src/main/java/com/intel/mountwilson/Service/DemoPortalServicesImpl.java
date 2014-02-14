@@ -16,6 +16,7 @@ import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.PcrLogReport;
+import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
@@ -815,15 +816,18 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
      */
     @Override
     public String setLocale(String user, String locale, ApiClient apiclient) throws DemoPortalException {
+        log.debug("Calling api to set locale [{}] for user [{}]", locale, user);
+        PortalUserLocale pul = new PortalUserLocale(user, locale);
         String resp = null;
         
         try {
-            resp = apiclient.setLocaleForUser(user, locale);
+            resp = apiclient.setLocaleForUser(pul);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ConnectionUtil.handleDemoPortalException(e);
         }
-
+        
+        log.debug("resp: {}",resp);
         return resp;
     }
 }

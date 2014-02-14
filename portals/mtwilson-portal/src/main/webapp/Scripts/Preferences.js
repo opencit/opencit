@@ -5,7 +5,7 @@ $(function() {
 });
 
 function fnSavePreferences() {
-    sendHTMLAjaxRequest(false, 'getData/setLocale.html',"username="+$('#sessionUser').text(),"locale="+$('#ddlLocales option:selected').text(), fnSavePreferencesSuccess, null, 'PreferencesPage');
+    sendHTMLAjaxRequest(false, 'getData/setLocale.html',"username="+$('#sessionUser').text()+"&locale="+$('#ddlLocales option:selected').text(), fnSavePreferencesSuccess, null, null);
 }
 
 function fnSavePreferencesSuccess() {

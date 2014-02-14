@@ -25,7 +25,7 @@
             <div class="nagPanel"><span data-i18n="title.preferences">My Preferences</span> &gt;</div>
             <div id="nameOfPage" class="NameHeader"><span id="sessionUser"><%=session.getAttribute("username")%></span> <span data-i18n="header.preferences">Preferences</span></div>
             <div id="mainPreferencesDisplayDiv">
-                <div class="tableDiv" style="margin-left: 61px;" id="mainEditTable">
+                <div class="tableDivPref" style="margin-left: 61px;" id="mainEditTable">
                     <table cellpadding="3" cellspacing="5">
                         <tbody>
                             <tr>
@@ -33,7 +33,7 @@
                                 <td>
                                     <select class="textBoxClass" id="ddlLocales">
                                         <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">
-                                            <option value="${locale.localeName}"><c:if test="${locale} == ${selectedLocale}"> selected </c:if>>${locale.localeName}</option>
+                                            <option value="${locale.localeName}" <c:if test='${locale.localeName == selectedLocale}'> selected </c:if>>${locale.localeName}</option>
                                         </c:forEach>
                                     </select>
                                 </td>
@@ -41,6 +41,9 @@
                         </tbody>
                     </table>
                 </div>
+                <div>&nbsp;</div>
+                <div>&nbsp;</div>
+                <div>&nbsp;</div>
                 <div>&nbsp;</div>
                 <div style="margin-left: 61px;"><input type="button" class="button" value="Save" id="savePrefButton" onclick="fnSavePreferences()" data-i18n="[value]button.save"/></div>
                 <div id="messageSpace"></div>
