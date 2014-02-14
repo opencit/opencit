@@ -12,6 +12,7 @@ import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.wlm.helper.BaseBO;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 
 import java.util.*;
 import javax.persistence.EntityManager;
@@ -108,9 +109,11 @@ public class MleBO extends BaseBO {
                                         // If the mleUuid is not specified a new one would be created. But we need to get the reference
                                         // to either BIOS or VMM UUID from the DB.
                                         if (mleData.getMleType().equals("VMM")) {
-                                                osOemUuid = tblMle.getOsId().getUuid_hex();
+                                            TblOs osObj = My.jpa().mwOs().findTblOsByNameVersion(mleData.getOsName(), mleData.getOsVersion());
+                                            osOemUuid = osObj.getUuid_hex();
                                         } else if (mleData.getMleType().equals("BIOS")) {
-                                                osOemUuid = tblMle.getOemId().getUuid_hex();
+                                            TblOem oemObj = My.jpa().mwOem().findTblOemByName(mleData.getOemName());
+                                            osOemUuid = oemObj.getUuid_hex();
                                         }
 
                                         tblMle = getTblMle(mleData, mleUuid, osOemUuid);
@@ -559,6 +562,9 @@ public class MleBO extends BaseBO {
 				pcrManifest.setUpdatedOn(today);
                                                                                                 */
 				pcrManifest.setMleId(tblMle);
+                                // Since we are creating a new PCR manifeest, we need to generate a UUID
+                                pcrManifest.setUuid_hex(new UUID().toString());
+                                pcrManifest.setMle_uuid_hex(tblMle.getUuid_hex());
 
 				log.debug(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s",
 					pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
