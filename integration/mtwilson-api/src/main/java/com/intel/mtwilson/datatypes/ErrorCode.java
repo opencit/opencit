@@ -77,6 +77,7 @@ public enum ErrorCode {
     AS_INVALID_VMM_MLE(1035, "VMM MLE specified is not valid. %s"),
     AS_INVALID_INPUT(1036, "Input specified is not valid."),
     AS_TLS_KEYSTORE_ERROR(1037, "Error reading TLS key from keystore."),
+    AS_NOT_EDITABLE_PARAMETER(1037, "Specified parameter %s cannot be updated"),
  
 
     // Below error codes are for general white list service errors
