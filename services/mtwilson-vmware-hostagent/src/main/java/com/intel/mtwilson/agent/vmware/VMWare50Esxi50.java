@@ -1,6 +1,5 @@
 package com.intel.mtwilson.agent.vmware;
 
-import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrManifest;
 import com.vmware.vim25.HostTpmDigestInfo;

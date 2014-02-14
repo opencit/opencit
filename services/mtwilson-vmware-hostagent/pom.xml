@@ -35,11 +35,11 @@
 
 
     <dependencies>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-hostagent-ext</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>net.sourceforge.vijava</groupId>
             <artifactId>vijava</artifactId>
@@ -58,9 +58,8 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-        </dependency>
-	
+            <scope>test</scope>
+        </dependency>	
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-util</artifactId>
@@ -70,7 +69,21 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
+	<dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+        </dependency>
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <!-- <dependency>
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
         </dependency>
@@ -82,20 +95,10 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
         </dependency>
-	<dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
-    </dependency>
-    <dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
         </dependency>
-<dependency>
-    <groupId>javax.ws.rs</groupId>
-    <artifactId>javax.ws.rs-api</artifactId>
-    <version>2.0</version>
-    <scope>provided</scope>
-</dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
@@ -110,7 +113,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tls-policy</artifactId>
@@ -121,10 +124,6 @@
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-tls-policy</artifactId>
-        </dependency>
+        </dependency> -->
     </dependencies>  
 </project>
