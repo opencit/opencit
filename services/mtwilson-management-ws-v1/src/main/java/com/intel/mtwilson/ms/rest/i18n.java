@@ -61,7 +61,10 @@ public class i18n {
         log.debug("Retrieving locale for portal user: {}", portalUser.getUsername());
             if(portalUser != null) {
                 log.debug("Locale for {}: {}", portalUser.getUsername(), portalUser.getLocale());
-                return portalUser.getLocale();
+                if(portalUser.getLocale() != null) {
+                    return portalUser.getLocale();
+                } else
+                    return "NA";
             } else {
                 log.debug("Portal user not found.");
                 return "Portal user not found.";
