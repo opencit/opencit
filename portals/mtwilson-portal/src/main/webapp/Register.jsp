@@ -14,6 +14,8 @@
         <script type="text/javascript" src="Scripts/token.js"></script>
 	<script type="text/javascript" src="Scripts/commonUtils.js"></script>
 	<script type="text/javascript" src="Scripts/Register.js"></script>
+        <script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
+	<script type="text/javascript" src="Scripts/i18n_util.js"></script>
 
 </head>
 <body>
