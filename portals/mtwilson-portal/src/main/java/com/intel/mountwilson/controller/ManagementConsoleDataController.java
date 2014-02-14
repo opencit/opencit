@@ -2719,6 +2719,31 @@ public class ManagementConsoleDataController extends MultiActionController {
         responseView.addObject("message", "");
         return responseView;
     }
+    
+    /**
+     * Sets locale for specified portal user.
+     * 
+     * @param req
+     * @param res
+     * @return
+     * @throws ManagementConsolePortalException 
+     */
+    public ModelAndView setLocale(HttpServletRequest req, HttpServletResponse res) throws ManagementConsolePortalException {
+        ModelAndView responseView = new ModelAndView(new JSONView());
+        String username = req.getParameter("username");
+        String locale = req.getParameter("locale");
+        
+        try {
+            responseView.addObject("locale", demoPortalServices.setLocale(username, locale, getApiClientService(req, ApiClient.class)));
+        } catch (DemoPortalException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+            responseView.addObject("result", false);
+            responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+        }
+        responseView.addObject("message", "");
+        return responseView;
+    }
 
     // Methods to create services layer object, used by other methods while calling into a Service Layer.
     //these method are called by spring container while dependencies injuction.

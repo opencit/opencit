@@ -150,9 +150,6 @@ public class CheckLoginController extends AbstractController {
             }
             
             Cookie langCookie = new Cookie("lang", locale);
-            //langCookie.setComment("Set locale as a cookie");
-            //langCookie.setMaxAge(24 * 60 * 60); //setting max age to be 1 day
-            //locale.setPath("/ServletCookie/cookie/SetCookie"); //set path to make it accessible to only this servlet
             res.addCookie(langCookie);
             
             res.sendRedirect("home.html");

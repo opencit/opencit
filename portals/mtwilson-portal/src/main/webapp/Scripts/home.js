@@ -575,10 +575,10 @@ function displayLogingPage(responseHTML) {
 
 function openPreferences() {
     $('#mainContainer').html('<div id="PreferencesPage"></div>');
-    setLoadImage('mainContainer', '40px', '500px');
-    sendHTMLAjaxRequest(false, 'getData/openPreferences.html', null, fnDisplayContent, null,'openPreferences');
+    setLoadImage('PreferencesPage', '40px', '500px');
+    sendHTMLAjaxRequest(false, 'getData/openPreferences.html',"username="+$('#sessionUser').text(), fnDisplayContent, null, 'PreferencesPage');
 }
 
 //function displayPreferencesPage(responseHTML) {
-//	$('#mainContainer').parent().html(responseHTML);
+//    $('#mainContainer').parent().html(responseHTML);
 //}

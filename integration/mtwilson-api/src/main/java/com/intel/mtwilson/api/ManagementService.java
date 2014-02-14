@@ -66,5 +66,7 @@ public interface ManagementService {
     
     String getLocale(String username) throws IOException, ApiException, SignatureException;
     
+    String setLocaleForUser(String username, String locale) throws IOException, ApiException, SignatureException;
+    
     String[] getLocales() throws IOException, ApiException, SignatureException;
 }

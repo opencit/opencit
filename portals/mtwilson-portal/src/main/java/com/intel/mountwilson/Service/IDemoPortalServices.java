@@ -163,5 +163,16 @@ public interface IDemoPortalServices {
          * @throws DemoPortalException 
          */
         public String getLocale(String username, ApiClient apiclient) throws DemoPortalException;
+        
+        /**
+         * Sets locale for specified portal user.
+         * 
+         * @param username
+         * @param locale
+         * @param apiclient
+         * @return
+         * @throws DemoPortalException 
+         */
+        public String setLocale(String username, String locale, ApiClient apiclient) throws DemoPortalException;
 }
 

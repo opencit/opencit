@@ -803,4 +803,27 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 
         return locale;
     }
+    
+    /**
+     * Sets locale for specified portal user.
+     * 
+     * @param user
+     * @param locale
+     * @param apiclient
+     * @return
+     * @throws DemoPortalException 
+     */
+    @Override
+    public String setLocale(String user, String locale, ApiClient apiclient) throws DemoPortalException {
+        String resp = null;
+        
+        try {
+            resp = apiclient.setLocaleForUser(user, locale);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ConnectionUtil.handleDemoPortalException(e);
+        }
+
+        return resp;
+    }
 }

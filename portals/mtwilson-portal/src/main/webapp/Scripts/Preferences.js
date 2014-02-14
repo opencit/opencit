@@ -4,12 +4,11 @@ $(function() {
     //$('#ddlLocales') selected option equals ajax call to get current locale
 });
 
-function fnChangeLocale(locale) {
-//    Cookie langCookie = new Cookie("lang", locale);
-    //save to db
-    //read from db
-    //save cookie for new locale
-    //Cookie langCookie = new Cookie("lang", locale);
-    //res.addCookie(langCookie);
-    //refresh page
+function fnSavePreferences() {
+    sendHTMLAjaxRequest(false, 'getData/setLocale.html',"username="+$('#sessionUser').text(),"locale="+$('#ddlLocales option:selected').text(), fnSavePreferencesSuccess, null, 'PreferencesPage');
+}
+
+function fnSavePreferencesSuccess() {
+    document.cookie = "lang="+$('#ddlLocales option:selected').text();
+    location.reload();
 }

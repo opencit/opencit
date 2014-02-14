@@ -23,17 +23,23 @@
     <body>
         <div class="container">
             <div class="nagPanel"><span data-i18n="title.preferences">My Preferences</span> &gt;</div>
-            <div id="nameOfPage" class="NameHeader" data-i18n="header.preferences">My Preferences</div>
+            <div id="nameOfPage" class="NameHeader"><span id="sessionUser"><%=session.getAttribute("username")%></span> <span data-i18n="header.preferences">Preferences</span></div>
             <div id="mainPreferencesDisplayDiv">
-                <div class="tableDiv" style="margin-left: 61px; display: none;" id="mainEditTable">
+                <div class="tableDiv" style="margin-left: 61px;" id="mainEditTable">
                     <table cellpadding="3" cellspacing="5">
                         <tbody>
                             <tr>
                                 <td><label data-i18n="input.locale">Locale:</label></td>
                                 <td>
-                                    <select class="textBoxClass" id="ddlLocales" onchange="fnChangeLocale(this.selectedLocale)">
+                                    <select class="textBoxClass" id="ddlLocales">
                                         <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">
-                                            <option value="${locale.localeName}">${locale.localeName}</option>
+                                            <c:if test="${salary > 2000}">
+                                                <p>My salary is: <c:out value="${salary}"/><p>
+                                            </c:if>
+                                            <c:if test="${locale}=${selectedLocale}">
+                                                <option value="${locale.localeName}" selected="${test}">${locale.localeName}</option>
+                                            </c:if>
+                                            
                                         </c:forEach>
                                     </select>
                                 </td>
@@ -41,6 +47,8 @@
                         </tbody>
                     </table>
                 </div>
+                <div>&nbsp;</div>
+                <div style="margin-left: 61px;"><input type="button" class="button" value="Save" id="savePrefButton" onclick="fnSavePreferences()" data-i18n="[value]button.save"/></div>
                 <div id="messageSpace"></div>
                 <div id="errorPreferences" class="errorMessage"></div>
             </div>

@@ -54,6 +54,7 @@ public class i18n {
     @RolesAllowed({"Security"})
     public String getLocaleForUser(
             @QueryParam("username") String username) throws IOException {
+        log.debug("Retrieving information from database for portal user: {}", username);
         MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
         MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
         log.debug("Retrieving locale for portal user: {}", portalUser.getUsername());

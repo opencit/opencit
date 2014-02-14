@@ -39,8 +39,8 @@
             <div class="loginDisplay">
                 <table>
                     <tr>
-                        <td>
-                            <span id="loginStatusValue"><span data-18n="app.greeting">Welcome</span> <%=session.getAttribute("username")%></span>
+                        <td> <!-- id="loginStatusValue"-->
+                            <div><span data-18n="app.greeting">Welcome</span> <span id="sessionUser"><%=session.getAttribute("username")%></span></div>
                         </td>
                         <td>
                             <a href="javascript:logoutUser();" id="LogInOut" data-i18n="app.logout">Logout</a>
