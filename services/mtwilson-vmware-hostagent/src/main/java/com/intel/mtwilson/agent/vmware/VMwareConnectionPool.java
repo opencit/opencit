@@ -5,13 +5,9 @@
 package com.intel.mtwilson.agent.vmware;
 
 //import java.util.HashMap;
-import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;

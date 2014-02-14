@@ -1,30 +1,7 @@
 package com.intel.mtwilson.agent.vmware;
 
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.dcsg.cpg.tls.policy.TlsClient;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
-import com.vmware.vim25.*;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.ws.BindingProvider;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * How to use secure SSL connections:

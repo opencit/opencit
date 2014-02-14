@@ -57,6 +57,8 @@
 	<module>mtwilson-vm-attestation-ws-v2</module>
 	<module>mtwilson-hostagent-ext</module>
 	<module>mtwilson-vmware-hostagent</module>
+	<module>mtwilson-citrix-hostagent</module>
+	<module>mtwilson-intel-hostagent</module>
   </modules>
 
 </project>

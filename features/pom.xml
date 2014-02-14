@@ -20,6 +20,8 @@
       
   <modules>
     <module>mtwilson-vmware-attestation</module>
+	<module>mtwilson-citrix-attestation</module>
+	<module>mtwilson-intel-attestation</module>
   </modules>
 
 </project>

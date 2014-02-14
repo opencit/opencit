@@ -49,7 +49,17 @@
             <version>${project.version}</version>
         </dependency>
         
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-citrix-hostagent</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-intel-hostagent</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>junit</groupId>

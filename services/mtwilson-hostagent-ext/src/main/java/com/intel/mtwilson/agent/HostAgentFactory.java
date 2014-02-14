@@ -10,36 +10,23 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
-import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
-import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 //import com.intel.dcsg.cpg.tls.policy.TrustCaAndVerifyHostnameTlsPolicy;
 //import com.intel.dcsg.cpg.tls.policy.TrustFirstCertificateTlsPolicy;
 //import com.intel.dcsg.cpg.tls.policy.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
 import java.security.KeyManagementException;
-import java.util.EnumMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
-import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Use this class to instantiate the appropriate agent or client for a given
