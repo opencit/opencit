@@ -50,12 +50,12 @@
             <scope>test</scope>
         </dependency>
 	
-        <dependency>
+         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+       <!--  <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
@@ -66,11 +66,11 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
+        </dependency> -->
+       <!--  <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
-        </dependency>
+        </dependency> -->
 	<dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
@@ -79,10 +79,10 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-extensions</artifactId>
         </dependency>
-    <dependency>
+    <!-- <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
-        </dependency>
+        </dependency> 
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -95,7 +95,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tls-policy</artifactId>

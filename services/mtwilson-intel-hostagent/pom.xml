@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mtwilson-trust-utils</artifactId>
+    <artifactId>mtwilson-intel-hostagent</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-trust-utils</name>
+    <name>mtwilson-intel-hostagent</name>
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
@@ -35,32 +35,11 @@
 
 
     <dependencies>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-hostagent-ext</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-        
-        
-        <!-- TODO (step 2): remove mtwilson-vmware-hostagent dependnecy and load all hostagents using cpg-extensions -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-vmware-hostagent</artifactId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-citrix-hostagent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-intel-hostagent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
+        </dependency>                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -68,24 +47,13 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.xensource</groupId>
-            <artifactId>citrix-sdk</artifactId>
-            <version>6.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <!-- <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jdk14</artifactId>
-                <version>1.6.4</version>
-        </dependency> -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-	
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-util</artifactId>
@@ -100,28 +68,33 @@
             <artifactId>commons-pool</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
         </dependency>
 	<dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
-        </dependency>
-<dependency>
-    <groupId>javax.ws.rs</groupId>
-    <artifactId>javax.ws.rs-api</artifactId>
-    <version>2.0</version>
-    <scope>provided</scope>
-</dependency>
+        </dependency> 
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-trustagent-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <!-- <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
@@ -140,24 +113,23 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency> -->
+        <!-- <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tls-policy</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
+        </dependency> -->
+        <!-- <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-trustagent-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
+            <scope>test</scope> 
+        </dependency> -->
+        <!-- <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-audit-data</artifactId>
             <version>${project.version}</version>
@@ -168,24 +140,6 @@
             <artifactId>mtwilson-audit-handler</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-                <!-- must exclude com.sun.xml.bind:jaxb-impl from mtwilson-client-java6 to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java6</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jaxb-impl</artifactId>
-                    <groupId>com.sun.xml.bind</groupId>
-                </exclusion>                
-            </exclusions>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-tls-policy</artifactId>
-        </dependency>
+        </dependency> -->
     </dependencies>  
 </project>

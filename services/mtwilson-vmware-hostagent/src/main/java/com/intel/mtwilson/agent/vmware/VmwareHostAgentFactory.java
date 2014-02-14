@@ -5,7 +5,6 @@
 package com.intel.mtwilson.agent.vmware;
 
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
