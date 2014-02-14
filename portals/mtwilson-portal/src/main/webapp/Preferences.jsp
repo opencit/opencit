@@ -33,13 +33,7 @@
                                 <td>
                                     <select class="textBoxClass" id="ddlLocales">
                                         <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">
-                                            <c:if test="${salary > 2000}">
-                                                <p>My salary is: <c:out value="${salary}"/><p>
-                                            </c:if>
-                                            <c:if test="${locale}=${selectedLocale}">
-                                                <option value="${locale.localeName}" selected="${test}">${locale.localeName}</option>
-                                            </c:if>
-                                            
+                                            <option value="${locale.localeName}"><c:if test="${locale} == ${selectedLocale}"> selected </c:if>>${locale.localeName}</option>
                                         </c:forEach>
                                     </select>
                                 </td>
