@@ -61,6 +61,7 @@ public class MtWilsonClient {
             keystore = new SimpleKeystore(resource, properties.getProperty("mtwilson.api.keystore.password"));
         }
         if( keystore != null && properties.containsKey("mtwilson.api.key.alias") && properties.containsKey("mtwilson.api.key.password") ) {
+            log.debug("Loading key {} from keystore {}", properties.getProperty("mtwilson.api.key.alias"), properties.getProperty("mtwilson.api.keystore"));
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(properties.getProperty("mtwilson.api.key.alias"), properties.getProperty("mtwilson.api.key.password"));
             clientConfig.register( new X509AuthorizationFilter(credential));
         }

@@ -428,7 +428,7 @@ public class MyConfiguration {
     }
 
     public String getKeystorePassword() {
-        return conf.getString("mtwilson.api.password", conf.getString("KEYSTOREPASSWORD", "password")); // bug #733 XXX the "KEYSTOREPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("mtwilson.api.password"); 
     }
 
     public URL getMtWilsonURL() throws MalformedURLException {
@@ -447,10 +447,10 @@ public class MyConfiguration {
     public Properties getClientProperties() throws MalformedURLException {
         Properties properties = new Properties();
         properties.setProperty("mtwilson.api.url", getMtWilsonURL().toString());
-        properties.setProperty("mtwilson.api.keystore", getKeystoreUsername());
-        properties.setProperty("mtwilson.api.keystore.password", getKeystorePassword());
-        properties.setProperty("mtwilson.api.key.alias", getKeystoreUsername());
-        properties.setProperty("mtwilson.api.key.password", getKeystorePassword());
+        properties.setProperty("mtwilson.api.keystore", conf.getString("mtwilson.api.keystore", getKeystoreFile().getAbsolutePath())); // getKeystoreUsername actually looks at mtwilson.api.username and mtwilson.api.password
+        properties.setProperty("mtwilson.api.keystore.password", conf.getString("mtwilson.api.keystore.password",getKeystorePassword()));
+        properties.setProperty("mtwilson.api.key.alias", conf.getString("mtwilson.api.key.alias", getKeystoreUsername()));
+        properties.setProperty("mtwilson.api.key.password", conf.getString("mtwilson.api.key.password", getKeystorePassword()));
         return properties;
     }
     

@@ -27,6 +27,11 @@ public class Message implements Localizable {
         this.args = args;
     }
     
+    /**
+     * 
+     * @param locale must not be null
+     * @return 
+     */
     public String toString(Locale locale) {
         // load the localized resource
         ResourceBundle bundle = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), locale);

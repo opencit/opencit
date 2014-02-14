@@ -11,6 +11,7 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
@@ -20,11 +21,18 @@ import org.apache.shiro.util.ByteSource;
  * @author jbuhacoff
  */
 public class JdbcPasswordRealm extends AuthorizingRealm {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcPasswordRealm.class);
+    
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection pc) {
-//        pc.
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        SimpleAuthorizationInfo authzInfo = new SimpleAuthorizationInfo();
+        for(String realmName : pc.getRealmNames()) {
+            log.debug("doGetAuthorizationInfo for realm: {}", realmName);
+        }
+        // TDOO:  populate it with permissions...
+        authzInfo.addStringPermission("test:bleh:*");
+        return authzInfo;
     }
 
     @Override
