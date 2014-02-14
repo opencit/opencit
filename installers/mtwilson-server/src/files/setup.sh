@@ -868,9 +868,6 @@ fi
 #  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 #fi
 
-echo -n "Waiting for ${webservice_application_name} to become accessible... "
-sleep 50s        #XXX TODO: remove when we have solution for webserver up
-echo "Done"
 
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
@@ -878,6 +875,10 @@ if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
   update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
   update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+  glassfish_restart
+  echo -n "Waiting for ${webservice_application_name} to become accessible... "
+  sleep 50s        #XXX TODO: remove when we have solution for webserver up
+  echo "Done"
   glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
