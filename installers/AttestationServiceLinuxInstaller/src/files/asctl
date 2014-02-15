@@ -256,18 +256,23 @@ setup_interactive_install() {
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson.war
     if using_glassfish; then
-      glassfish_restart
-
       # temp symlink -- SAVY added 2014-02-04
       if [[ ! -e "/opt/mtwilson/java" ]]; then
         mkdir -p /opt/mtwilson
-        ln -s "/usr/share/glassfish4/glassfish/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+        ln -s "$GLASSFISH_HOME/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
       fi
-    
+
+      glassfish_restart
       echo -n "Waiting for ${webservice_application_name} to become accessible... "
       sleep 50s        #XXX TODO: remove when we have solution for webserver up
       echo "Done"
       webservice_running_report "${webservice_application_name}"
+    elif using_tomcat; then
+      # temp symlink -- SAVY added 2014-02-04
+      if [[ ! -e "/opt/mtwilson/java" ]]; then
+        mkdir -p /opt/mtwilson
+        ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+      fi
     fi
   fi
 }
