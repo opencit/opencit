@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>tomcat-installer</artifactId>
-  <version>6.0.29</version>
+  <version>7.0.34</version>
 
   <packaging>pom</packaging>
   <name>Mt Wilson Installer for Apache Tomcat</name>
@@ -30,8 +30,8 @@
       <dependency>
           <groupId>org.apache</groupId>
           <artifactId>apache-tomcat</artifactId>
-          <version>6.0.29</version>
-          <type>tgz</type>
+          <version>7.0.34</version>
+          <type>tar.gz</type>
       </dependency>
       <!--
       <dependency>
@@ -123,10 +123,10 @@
                 <artifactItem>
 				  <groupId>org.apache</groupId>
 				  <artifactId>apache-tomcat</artifactId>
-				  <version>6.0.29</version>
-                  <type>tgz</type>
+				  <version>7.0.34</version>
+                  <type>tar.gz</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>apache-tomcat-6.0.29.tgz</destFileName>
+                  <destFileName>apache-tomcat-7.0.34.tar.gz</destFileName>
                 </artifactItem>
                 <!--
                 <artifactItem>

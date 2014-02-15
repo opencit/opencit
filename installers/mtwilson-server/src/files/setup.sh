@@ -671,7 +671,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
 	$LOG_COPYTRUNCATE
 }
 
-/usr/share/apache-tomcat-6.0.29/logs/catalina.out {
+/usr/share/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
 	notifempty
 	rotate $LOG_OLD
@@ -755,7 +755,7 @@ fi
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
  echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina.sh\"
+check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
 	group tc_server
 	if does not exist then unmonitor
 #tomcat monitor
