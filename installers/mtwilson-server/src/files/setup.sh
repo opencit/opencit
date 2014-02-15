@@ -171,7 +171,7 @@ fi
 if using_glassfish; then
     export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
+    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
 export java_required_version=${JAVA_REQUIRED_VERSION}
