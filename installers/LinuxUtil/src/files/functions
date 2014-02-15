@@ -2345,7 +2345,7 @@ tomcat_install() {
       #    mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
       #fi
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
-      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tgz '{ print $1 }'`
+      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
       mv $tomcat_folder /usr/share
       tomcat_detect
     else
