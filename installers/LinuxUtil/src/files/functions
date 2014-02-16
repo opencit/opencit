@@ -3048,14 +3048,15 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp $WAR_FILE $TOMCAT_HOME/webapps/
         
+        # 2014-02-16 rksavinx removed; unnecessary block of code
         #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
-        webservice_running $webservice_application_name
-        while [ -z "$WEBSERVICE_RUNNING" ]; do
-          webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
-          echo -n "." >> $INSTALL_LOG_FILE
-          sleep 2
-        done      
+        ##webservice_running $webservice_application_name
+        ##while [ -z "$WEBSERVICE_RUNNING" ]; do
+        ##  webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
+        ##  echo -n "." >> $INSTALL_LOG_FILE
+        ##  sleep 2
+        ##done      
       fi
     fi
 }
