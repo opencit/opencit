@@ -343,7 +343,7 @@ public class TblPcrManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByMleUuidHex");
+            Query query = em.createNamedQuery("TblPcrManifest.findByMleUuidHex");
             query.setParameter("mle_uuid_hex", mleUuid);
 
             List<TblPcrManifest> pcrList = query.getResultList();
@@ -362,7 +362,7 @@ public class TblPcrManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByUuidHex");
+            Query query = em.createNamedQuery("TblPcrManifest.findByUuidHex");
             query.setParameter("uuid_hex", uuid);
 
             TblPcrManifest pcrObj = (TblPcrManifest) query.getSingleResult();
@@ -381,7 +381,7 @@ public class TblPcrManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByName");
+            Query query = em.createNamedQuery("TblPcrManifest.findByName");
             query.setParameter("name", pcrName);
 
             List<TblPcrManifest> pcrList = query.getResultList();
@@ -400,7 +400,7 @@ public class TblPcrManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByValue");
+            Query query = em.createNamedQuery("TblPcrManifest.findByValue");
             query.setParameter("value", pcrValue);
 
             List<TblPcrManifest> pcrList = query.getResultList();
