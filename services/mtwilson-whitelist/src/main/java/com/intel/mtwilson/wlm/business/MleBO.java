@@ -58,7 +58,7 @@ public class MleBO extends BaseBO {
                         
                         private void validateWhitelistValue(String componentName, String whiteList) {
                             if(!isWhiteListValid(whiteList)) {
-                                log.error("White list '{0}' specified for '{1}' is not valid.", whiteList, componentName);
+                                log.error("White list '{}' specified for '{}' is not valid.", whiteList, componentName);
                                 throw new ASException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
                             }
                         }
