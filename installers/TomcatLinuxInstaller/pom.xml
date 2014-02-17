@@ -208,6 +208,7 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-client.jar</destFileName>
                 </artifactItem>
+                -->
                 <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
                     <artifactId>jersey-common</artifactId>
@@ -215,6 +216,7 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-common.jar</destFileName>
                 </artifactItem>
+                <!--
                 <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
                     <artifactId>jersey-server</artifactId>
