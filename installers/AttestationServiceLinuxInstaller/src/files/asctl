@@ -252,9 +252,9 @@ setup_interactive_install() {
 
   # select appropriate war file
   if using_glassfish; then
-    cp "${package_dir}"/mtwilson-glassfish.war "${package_dir}"/mtwilson.war
+    cp "${package_dir}/mtwilson-glassfish.war" "${package_dir}/mtwilson.war"
   elif using_tomcat; then
-    cp "${package_dir}"/mtwilson-jetty.war "${package_dir}"/mtwilson.war
+    cp "${package_dir}/mtwilson-jetty.war" "${package_dir}/mtwilson.war"
   fi
   
   if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
