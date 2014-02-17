@@ -83,10 +83,12 @@
           <groupId>org.glassfish.jersey.core</groupId>
           <artifactId>jersey-server</artifactId>
       </dependency>
+      <!--
       <dependency>
           <groupId>org.glassfish.jersey.containers</groupId>
           <artifactId>jersey-container-servlet</artifactId>
-      </dependency>        
+      </dependency>
+      -->
       <dependency>
           <groupId>org.glassfish.jersey.media</groupId>
           <artifactId>jersey-media-multipart</artifactId>
@@ -219,13 +221,15 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-server.jar</destFileName>
                 </artifactItem>
+                <!--
                 <artifactItem>
                     <groupId>org.glassfish.jersey.containers</groupId>
                     <artifactId>jersey-container-servlet</artifactId>
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-container-servlet.jar</destFileName>
-                </artifactItem>        
+                </artifactItem>
+                -->
                 <artifactItem>
                     <groupId>org.glassfish.jersey.media</groupId>
                     <artifactId>jersey-media-multipart</artifactId>
