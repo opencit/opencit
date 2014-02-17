@@ -473,7 +473,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     private byte[] content(ApiResponse response) throws IOException, ApiException {
         log.trace("Status: {} {}", response.httpStatusCode, response.httpReasonPhrase);
-        log.trace("Content-Type: {}", response.contentType.toString());
+        //log.trace("Content-Type: {}", response.contentType.toString()); #2014-02-17 rksavinx removed due to dependency issue with tomcat for org.glassfish.jersey
         log.trace("Content: {}", response.content);
         if( response.httpStatusCode == HttpStatus.SC_OK ) {
             return response.content;
