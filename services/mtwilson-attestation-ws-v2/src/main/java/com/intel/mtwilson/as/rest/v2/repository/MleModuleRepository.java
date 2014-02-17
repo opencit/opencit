@@ -128,7 +128,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
 
     @Override
     public void delete(MleModuleLocator locator) {
-        if (locator.moduleUuid != null) { return; }
+        if (locator.moduleUuid == null) { return; }
         try {
             new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, locator.moduleUuid.toString());
         } catch (ASException aex) {

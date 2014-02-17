@@ -114,6 +114,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
         try {
             obj.setPcrName(item.getPcrIndex());
             obj.setPcrDigest(item.getPcrValue());
+            log.debug("About to add pcr {} with value {} & UUID {} for MLE {}", obj.getPcrName(), obj.getPcrDigest(), item.getId().toString(), item.getMleUuid());
             new MleBO().addPCRWhiteList(obj, null, item.getId().toString(), item.getMleUuid());
         } catch (ASException aex) {
             throw aex;            
