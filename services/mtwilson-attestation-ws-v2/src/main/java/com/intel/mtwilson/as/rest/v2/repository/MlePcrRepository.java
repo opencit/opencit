@@ -34,30 +34,29 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
         MlePcrCollection objCollection = new MlePcrCollection();
         try {
             TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
-            if (criteria.id != null) {
-                TblPcrManifest obj = jpaController.findTblPcrManifestByUuid(criteria.id.toString());
-                if (obj != null) {
-                    objCollection.getMlePcrs().add(convert(obj));
-                }
-            } else if (criteria.mleUuid != null) {
+            if (criteria.mleUuid != null) {
                 List<TblPcrManifest> objList = jpaController.findTblPcrManifestByMleUuid(criteria.mleUuid.toString());
                 if (objList != null && !objList.isEmpty()) {
-                    for(TblPcrManifest obj : objList) {
-                        objCollection.getMlePcrs().add(convert(obj));
-                    }
-                }                
-            } else if (criteria.indexEqualTo != null && !criteria.indexEqualTo.isEmpty()) {
-                List<TblPcrManifest> objList = jpaController.findTblPcrManifestByPcrName(criteria.indexEqualTo);
-                if (objList != null && !objList.isEmpty()) {
-                    for(TblPcrManifest obj : objList) {
-                        objCollection.getMlePcrs().add(convert(obj));
-                    }
-                }                
-            } else if (criteria.valueEqualTo != null && !criteria.valueEqualTo.isEmpty()) {
-                List<TblPcrManifest> objList = jpaController.findByPcrValue(criteria.valueEqualTo);
-                if (objList != null && !objList.isEmpty()) {
-                    for(TblPcrManifest obj : objList) {
-                        objCollection.getMlePcrs().add(convert(obj));
+                    // Before we add to the collection we need to check if the user has specified any other search criteria
+                    if (criteria.id != null) {
+                        for(TblPcrManifest obj : objList) {
+                            if (obj.getUuid_hex().equalsIgnoreCase(criteria.id.toString()))
+                                objCollection.getMlePcrs().add(convert(obj));
+                        }                        
+                    } else if (criteria.indexEqualTo != null && !criteria.indexEqualTo.isEmpty()) {
+                        for(TblPcrManifest obj : objList) {
+                            if (obj.getName().equalsIgnoreCase(criteria.indexEqualTo))
+                                objCollection.getMlePcrs().add(convert(obj));
+                        }
+                    } else if (criteria.valueEqualTo != null && !criteria.valueEqualTo.isEmpty()) {
+                        for(TblPcrManifest obj : objList) {
+                            if (obj.getValue().equalsIgnoreCase(criteria.valueEqualTo))
+                                objCollection.getMlePcrs().add(convert(obj));
+                        }                        
+                    } else {
+                        for(TblPcrManifest obj : objList) {
+                            objCollection.getMlePcrs().add(convert(obj));
+                        }
                     }
                 }                
             }
