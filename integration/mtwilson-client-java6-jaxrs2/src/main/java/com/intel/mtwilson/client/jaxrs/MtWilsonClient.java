@@ -19,10 +19,14 @@ import java.util.HashMap;
 import com.intel.mtwilson.security.http.jaxrs.HmacAuthorizationFilter;
 import com.intel.mtwilson.security.http.jaxrs.X509AuthorizationFilter;
 import java.io.IOException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.util.Properties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.client.filter.HttpBasicAuthFilter;
 /**
  *
  * @author jbuhacoff
@@ -35,25 +39,45 @@ public class MtWilsonClient {
     private WebTarget target;
     private String baseurl;
     
-    public MtWilsonClient() {
-        baseurl = "http://localhost:8080/v2";
+    /**
+     * Configures a client without any authentication for the given API URL
+     * @param url like http://server.com/mtwilson/v2
+     */
+    public MtWilsonClient(URL url) {
+        baseurl = url.toExternalForm(); // for example "http://localhost:8080/v2"
         clientConfig = new ClientConfig();
         clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
         clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
-        clientConfig.register(new HmacAuthorizationFilter("username", "password"));
         client = ClientBuilder.newClient(clientConfig);
         target = client.target(baseurl);
     }
 
+    /**
+     * Configures a client using authentication settings in the properties
+     * argument. The API URL must be set as mtwilson.api.url or mtwilson.api.baseurl
+     * in the properties.
+     * 
+     * To use BASIC password authentication, set mtwilson.api.username and mtwilson.api.password.
+     * 
+     * To use HMAC (MtWilson-specific) authentication, set mtwilson.api.clientId and mtwilson.api.secretKey
+     * 
+     * To use X509 (MtWilson-specific) authentication, set:
+     * mtwilson.api.keystore = path to client-keystore.jks
+     * mtwilson.api.keystore.password = password protecting client-keystore.jks
+     * mtwilson.api.key.alias = alias of private key in the keystore; usually same as username or name of keystore like "client-keystore"
+     * mtwilson.api.key.password = password protecting the key, usually same as the keystore password
+     * 
+     * @param properties
+     * @throws KeyManagementException
+     * @throws IOException
+     * @throws CryptographyException
+     * @throws GeneralSecurityException 
+     */
     public MtWilsonClient(Properties properties) throws KeyManagementException, IOException, CryptographyException, GeneralSecurityException {
         baseurl = properties.getProperty("mtwilson.api.url", properties.getProperty("mtwilson.api.baseurl")); // example: "http://localhost:8080/v2";
         clientConfig = new ClientConfig();
         clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
         clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
-        // HMAC authorization
-        if( properties.containsKey("mtwilson.api.clientId") && properties.containsKey("mtwilson.api.secretKey")) {
-            clientConfig.register( new HmacAuthorizationFilter(properties.getProperty("mtwilson.api.clientId"), properties.getProperty("mtwilson.api.secretKey")));
-        }
         // X509 authorization 
         SimpleKeystore keystore = null;
         if( properties.containsKey("mtwilson.api.keystore") && properties.containsKey("mtwilson.api.keystore.password") ) {
@@ -65,7 +89,22 @@ public class MtWilsonClient {
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(properties.getProperty("mtwilson.api.key.alias"), properties.getProperty("mtwilson.api.key.password"));
             clientConfig.register( new X509AuthorizationFilter(credential));
         }
+        // HMAC authorization
+        if( properties.containsKey("mtwilson.api.clientId") && properties.containsKey("mtwilson.api.secretKey")) {
+            log.debug("Registering HMAC credentials for {}", properties.getProperty("mtwilson.api.clientId"));
+            clientConfig.register( new HmacAuthorizationFilter(properties.getProperty("mtwilson.api.clientId"), properties.getProperty("mtwilson.api.secretKey")));
+        }
+        // BASIC authorization will only be registered if configuration is present but also the feature itself will only add an Authorization header if there isn't already one present
+        if( properties.containsKey("mtwilson.api.username") && properties.containsKey("mtwilson.api.password") ) {
+            log.debug("Registering BASIC credentials for {}", properties.getProperty("mtwilson.api.username"));
+//            clientConfig.register( new BasicPasswordAuthorizationFilter(properties.getProperty("mtwilson.api.username"), properties.getProperty("mtwilson.api.password")));
+//            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(properties.getProperty("mtwilson.api.username"), properties.getProperty("mtwilson.api.password"));
+//            clientConfig.register(feature);
+            
+            clientConfig.register( new HttpBasicAuthFilter(properties.getProperty("mtwilson.api.username"), properties.getProperty("mtwilson.api.password")));
+        }
         client = ClientBuilder.newClient(clientConfig);
+        client.register(new LoggingFilter());
         target = client.target(baseurl);
     }
 /*
