@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>tomcat-installer</artifactId>
-  <version>6.0.29</version>
+  <version>7.0.34</version>
 
   <packaging>pom</packaging>
   <name>Mt Wilson Installer for Apache Tomcat</name>
@@ -30,8 +30,8 @@
       <dependency>
           <groupId>org.apache</groupId>
           <artifactId>apache-tomcat</artifactId>
-          <version>6.0.29</version>
-          <type>tgz</type>
+          <version>7.0.34</version>
+          <type>tar.gz</type>
       </dependency>
       <!--
       <dependency>
@@ -56,21 +56,41 @@
       <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-annotations</artifactId>
-          <version>2.3.0</version>
           <type>jar</type>
       </dependency>
       <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
-          <version>2.3.0</version>
           <type>jar</type>
       </dependency>
       <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-databind</artifactId>
-          <version>2.3.0</version>
           <type>jar</type>
       </dependency>
+      <!--
+      <dependency>
+          <groupId>org.glassfish.jersey.core</groupId>
+          <artifactId>jersey-client</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.jersey.core</groupId>
+          <artifactId>jersey-common</artifactId>
+          <type>jar</type>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.jersey.core</groupId>
+          <artifactId>jersey-server</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.jersey.containers</groupId>
+          <artifactId>jersey-container-servlet</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.jersey.media</groupId>
+          <artifactId>jersey-media-multipart</artifactId>
+      </dependency>
+      -->
   </dependencies>
 
   <build>
@@ -123,10 +143,10 @@
                 <artifactItem>
 				  <groupId>org.apache</groupId>
 				  <artifactId>apache-tomcat</artifactId>
-				  <version>6.0.29</version>
-                  <type>tgz</type>
+				  <version>7.0.34</version>
+                  <type>tar.gz</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>apache-tomcat-6.0.29.tgz</destFileName>
+                  <destFileName>apache-tomcat-7.0.34.tar.gz</destFileName>
                 </artifactItem>
                 <!--
                 <artifactItem>
@@ -178,6 +198,43 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jackson-databind.jar</destFileName>
                 </artifactItem>
+                <!--
+                <artifactItem>
+                    <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-client</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-client.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-common</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-common.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-server</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-server.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.jersey.containers</groupId>
+                    <artifactId>jersey-container-servlet</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-container-servlet.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.jersey.media</groupId>
+                    <artifactId>jersey-media-multipart</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-media-multipart.jar</destFileName>
+                </artifactItem>
+                -->
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>

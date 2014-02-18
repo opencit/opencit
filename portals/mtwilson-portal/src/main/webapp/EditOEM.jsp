@@ -4,20 +4,20 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Edit OEM</title>
+<title data-i18n="title.edit_oem">Edit OEM</title>
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">Whitelist &gt; Edit OEM   <span style="float: right"><a href="javascript:fnAddOEM()">Add OEM...</a></span></div>
-		<div id="nameOfPage" class="NameHeader">OEM - Edit/Delete the Values</div>
+		<div class="nagPanel"><span data-i18n="title.whitelist">Whitelist</span> &gt; <span data-i18n="title.edit_oem">Edit OEM</span><span style="float: right"><a href="javascript:fnAddOEM()" data-i18n="link.add_oem">Add OEM</a></span></div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.edit_oem">OEM - Edit/Delete the Values</div>
 		<div id="mainEditOEMDisplayDiv">
 			<div class="tableDiv" style="margin-left: 61px; display: none;" id="mainEditTable">
 				<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
-							<th class="row1">Options</th>
-							<th class="row2">Name</th>
-							<th class="row4">Description</th>
+							<th class="row1" data-i18n="table.options">Options</th>
+							<th class="row2" data-i18n="table.name">Name</th>
+							<th class="row4" data-i18n="table.description">Description</th>
 						</tr>
 					</thead>
 					</table>

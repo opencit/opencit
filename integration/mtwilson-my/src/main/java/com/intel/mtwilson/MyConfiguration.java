@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -455,7 +456,9 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
-        return conf.getString("mtwilson.locales", "en").split(",");
+//        return conf.getString("mtwilson.locales", "en").split(",");
+        String localeParsed = conf.getProperty("mtwilson.locales").toString().replaceAll("\\s+", "");
+        return localeParsed.substring(1, localeParsed.length() - 1).split(",");
     }
 
     ///////////////////////// database //////////////////////////////////

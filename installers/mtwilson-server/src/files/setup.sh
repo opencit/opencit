@@ -171,7 +171,7 @@ fi
 if using_glassfish; then
     export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
+    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
 export java_required_version=${JAVA_REQUIRED_VERSION}
@@ -225,6 +225,7 @@ else
 fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
+update_property_in_file "mtwilson.locales" /etc/intel/cloudsecurity/mtwilson.properties "en,en-US,es,es-MX"
 
 #Save variables to properties file
 if using_mysql; then   
@@ -670,7 +671,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
 	$LOG_COPYTRUNCATE
 }
 
-/usr/share/apache-tomcat-6.0.29/logs/catalina.out {
+/usr/share/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
 	notifempty
 	rotate $LOG_OLD
@@ -754,7 +755,7 @@ fi
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
  echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina.sh\"
+check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
 	group tc_server
 	if does not exist then unmonitor
 #tomcat monitor
@@ -866,13 +867,18 @@ fi
 #elif using_postgres; then
 #  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 #fi
-  
+
+
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
   update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
   update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+  glassfish_restart
+  echo -n "Waiting for ${webservice_application_name} to become accessible... "
+  sleep 50s        #XXX TODO: remove when we have solution for webserver up
+  echo "Done"
   glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"

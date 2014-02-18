@@ -21,11 +21,24 @@ function validateValue(inputID){
 	}
 	return true;
 }
-function getRegisterUserPage(){
+
+function getRegisterUserPage() {
     $('#mainContainer').prepend(disabledDiv);
-    sendHTMLAjaxRequest(true, "getView/getRegisterPage.htm", null,registerUserPageSuccess , null);
+    //sendJSONAjaxRequest(true, 'getData/getLocales.html', null, getLocalesSuccess, null);
+    sendHTMLAjaxRequest(true, "getView/getRegisterPage.htm", null, registerUserPageSuccess, null);
 }
 
-function registerUserPageSuccess(responseHTML){
+function getLocalesSuccess(responseJSON) {
+    //$('#disabledDiv').remove();
+    if (responseJSON.result) {
+        alert(responseJSON.result.toString());
+        //responseJSON.
+        //getDashBoardPage();
+    } else {
+        $('#errorMessage').html('<div class="errorMessage">' + getHTMLEscapedMessage(responseJSON.message) + '</div>');
+    }
+}
+
+function registerUserPageSuccess(responseHTML) {
     $('#mainContainer').parent().html(responseHTML);
 }

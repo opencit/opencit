@@ -126,9 +126,16 @@ public class ApiClientBO extends BaseBO {
      * @param fingerprint
      * @return 
      */
-    private boolean isDuplicate(byte[] fingerprint) {		
-        if(new ApiClientX509JpaController(getMSEntityManagerFactory()).findApiClientX509ByFingerprint(fingerprint) != null) {
+    private boolean isDuplicate(byte[] fingerprint) {
+        try {
+            if (My.jpa().mwApiClientX509().findApiClientX509ByFingerprint(fingerprint) != null) {
                 return true;
+            }
+            // if(new ApiClientX509JpaController(getMSEntityManagerFactory()).findApiClientX509ByFingerprint(fingerprint) != null) {
+            // return true;
+            // }
+        } catch (Exception ex) {
+            return false;
         }
         return false;
     }
@@ -175,6 +182,9 @@ public class ApiClientBO extends BaseBO {
             apiClientX509.setName(x509Certificate.getSubjectX500Principal().getName());
             apiClientX509.setSerialNumber(x509Certificate.getSerialNumber().intValue());
             apiClientX509.setStatus(ApiClientStatus.PENDING.toString());
+            // XXX SAVY TODO api client set Uuid and Locale
+            //apiClientX509.setUuid_hex(null);
+            //apiClientX509.setLocale(apiClientRequest.);
 
             new ApiClientX509JpaController(getMSEntityManagerFactory()).create(apiClientX509);
 

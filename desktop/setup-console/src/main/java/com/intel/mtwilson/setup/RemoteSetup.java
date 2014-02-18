@@ -838,7 +838,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 }
                 else if( asprops.getProperty("CATALINA_HOME") != null ) {
                     ctx.webContainerType = WebContainerType.TOMCAT;
-                    // XXX TODO ... see http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html about finding tomcat's ssl certificate
+                    // XXX TODO ... see http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html about finding tomcat's ssl certificate
                     // TODO maybe move this to importTomcatProperties ?
                 }
                 // XXX TODO:  also need to handle a situation where Apache or Nginx is configured for SSL and proxies plaintext to a local tomcat or glassfish 

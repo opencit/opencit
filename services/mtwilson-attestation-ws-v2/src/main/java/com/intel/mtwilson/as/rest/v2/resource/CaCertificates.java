@@ -29,7 +29,6 @@ public class CaCertificates extends AbstractCertificateJsonapiResource<CaCertifi
     
     public CaCertificates() {
         repository = new CaCertificateRepository();
-        repository = new CaCertificateRepository();
     }
     
     @Override

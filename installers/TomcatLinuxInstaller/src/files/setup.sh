@@ -4,7 +4,7 @@
 # *** TABS will cause errors in some linux distributions
 
 # detect the packages we have to install
-TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tgz 2>/dev/null | tail -n 1`
+TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tar.gz 2>/dev/null | tail -n 1`
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
@@ -43,7 +43,7 @@ fi
 
 cd $TOMCAT_CONF
 mv tomcat-users.xml tomcat-users.xml.old
-sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
 rm  -f tomcat-users.xml.old
 
 
@@ -51,12 +51,12 @@ rm  -f tomcat-users.xml.old
 #<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
 #               maxThreads="150" scheme="https" secure="true"
 #               clientAuth="false" sslProtocol="TLS"
-#               keystoreFile="/usr/share/apache-tomcat-6.0.29/ssl/keystore.jks" keystorePass="changeit" />
+#               keystoreFile="/usr/share/apache-tomcat-7.0.34/ssl/keystore.jks" keystorePass="changeit" />
 # release the connectors!
 cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
-sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-6.0.29\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
+sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
 
 tomcat_permissions ${TOMCAT_HOME}
 

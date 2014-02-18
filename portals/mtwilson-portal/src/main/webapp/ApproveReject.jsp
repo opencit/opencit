@@ -4,42 +4,42 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Api Client Approve/Reject Page</title>
+<title data-i18n="title.approve_reject">Api Client Approve/Reject Page</title>
 </head>
 <body>
 	<div id="pendingRequestApprover">
 		<div class="singleDiv">
-			<div class="labelDiv">Name : </div>
+			<div class="labelDiv" data-i18n="input.name">Name:</div>
 			<div class="valueDiv">
 				<input type="text" class="textBox_Border" id="mainApiClient_Name" disabled="disabled">
 			</div>
 		</div>
 		<div class="singleDiv">
-			<div class="labelDiv">Finger Print : </div>
+			<div class="labelDiv" data-i18n="input.fingerprint">Fingerprint:</div>
 			<div class="valueDiv">
 				<input type="text" class="textBox_Border" id="mainApiClient_Finger_Print" disabled="disabled">
 			</div>
 		</div>
 		<div class="singleDiv">
-			<div class="labelDiv">Issuer : </div>
+			<div class="labelDiv" data-i18n="input.issuer">Issuer:</div>
 			<div class="valueDiv">
 				<input type="text" class="textBox_Border" id="mainApiClient_Issuer" disabled="disabled">
 			</div>
 		</div>
                 <div class="singleDiv">
-			<div class="labelDiv">Requested Roles: </div>
+			<div class="labelDiv" data-i18n="input.requested_roles">Requested Roles:</div>
 			<div class="valueDiv" id="mainApiClient_Roles">
 				
 			</div>
 		</div>
 		<div class="singleDiv">
-			<div class="labelDiv">Expires: </div>
+			<div class="labelDiv" data-i18n="input.expires">Expires:</div>
 			<div class="valueDiv">
 				<input type="text" class="textBox_Border" id="mainApiClient_Expires" disabled="disabled">
 			</div>
 		</div>
 		<div class="singleDiv">
-			<div class="labelDiv">Comments: </div>
+			<div class="labelDiv" data-i18n="input.comments">Comments:</div>
 			<div class="valueDiv">
 				<textarea class="textAreaBoxClass" cols="18" rows="3" id="mainApiClient_Comments"></textarea>
 			</div>
@@ -49,8 +49,8 @@
 		<div class="singleDiv">
 			<div class="labelDiv">&nbsp;</div>
 			<div class="valueDiv">
-				<input type="button" value="Approve" onclick="fnApproveSelectedRequest()">
-				<input type="button" value="Reject" onclick="fnRejectSelectedRequest()">
+				<input type="button" value="Approve" onclick="fnApproveSelectedRequest()" data-i18n="[value]button.approve">
+				<input type="button" value="Reject" onclick="fnRejectSelectedRequest()" data-i18n="[value]button.reject">
 			</div>
 		</div>
 	</div>

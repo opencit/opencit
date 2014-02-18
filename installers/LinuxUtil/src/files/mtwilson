@@ -44,9 +44,9 @@ fi
 if using_glassfish; then
     export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
+    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51} #1.6.0_29}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
 call_apiclient() {
@@ -414,7 +414,7 @@ case "$1" in
 		service monit stop &> /dev/null
 		echo "Removing mtwilson logrotate files"
 		rm -fr /etc/logrotate.d/mtwilson
-        # java:  rm -rf /usr/share/jdk1.6.0_29
+        # java:  rm -rf /usr/share/jdk1.7.0_51
         # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
         tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""

@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -52,6 +53,7 @@ public class CheckLoginController extends AbstractController {
             
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
+            String locale = "en";
 
             if (isNullOrEmpty(keyAliasName) || isNullOrEmpty(keyPassword)) {
                 view.addObject("result", false);
@@ -118,6 +120,8 @@ public class CheckLoginController extends AbstractController {
                     // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
+                    locale = rsaApiClient.getLocale(keyAliasName);
+                    log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
@@ -143,8 +147,11 @@ public class CheckLoginController extends AbstractController {
                 view.addObject("message", "Error during user authentication. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
                 return view;                    
                 
-            } 
-                
+            }
+            
+            Cookie langCookie = new Cookie("lang", locale);
+            res.addCookie(langCookie);
+            
             res.sendRedirect("home.html");
 		
             return null;

@@ -5,18 +5,18 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>White List Configuration</title>
+        <title data-i18n="title.whitelist_config">White List Configuration</title>
     </head>
     <body>
         <div class="container">
-            <div class="nagPanel">Whitelist &gt;</div> <!-- was: "Automation" -->
-            <div id="nameOfPage" class="NameHeader">Import Whitelist from Trusted Host</div> <!-- was: "White List Configuration" -->
+            <div class="nagPanel"><span data-i18n="title.whitelist">Whitelist</span> &gt;</div> <!-- was: "Automation" -->
+            <div id="nameOfPage" class="NameHeader" data-i18n="header.whitelist_config">Import Whitelist from Trusted Host</div> <!-- was: "White List Configuration" -->
             <c:set var="Data" value="${result}"></c:set>
             <c:choose>
                 <c:when test="${Data == true}">
                     <div id="mainLoadingDiv" class="mainContainer">
                         <div class="singleDiv">
-                            <div class="labelDiv">Host type : </div>
+                            <div class="labelDiv" data-i18n="input.host_type">Host Type:</div>
                             <div class="valueDiv">
                                 <select class="textBox_Border" id="MainContent_ddlHOSTType" onchange="fnChangehostType(this, true)" >
                                     <c:forEach var="HostData" varStatus="rowCounter"  items="${hostTypeList}">
@@ -28,18 +28,18 @@
                         <br>
                         <div id="mainDivForConfig">
                             <div class="singleDiv">
-                                <div class="labelDiv"><span>Configure White List For : </span><input type="image" onclick="showDialogConfigureWhiteHelp()" src="images/helpicon.png" class="helperImageClass"></div>
+                                <div class="labelDiv" data-i18n="input.config_wl_for"><span>Configure White List For:</span> <input type="image" onclick="showDialogConfigureWhiteHelp()" src="images/helpicon.png" class="helperImageClass"></div>
                                 <div class="valueDivConfig">
                                     <input type="checkbox" id="Oem_Bios_Checkbox" onclick="fnChangeApplicableFor(checked, 'oem_bios_applicable_for', 'Hypervisor_Checkbox')">
-                                    <span>BIOS</span>
+                                    <span data-i18n="label.bios">BIOS</span>
                                 </div>
                                 <div class="valueDivConfig">
                                     <input type="checkbox" id="Hypervisor_Checkbox" onclick="fnChangeApplicableFor(checked, 'Hypervisor_bios_applicable_for', 'Oem_Bios_Checkbox')">
-                                    <span>Hypervisor (VMM)</span>
+                                    <span data-i18n="label.hypervisor">Hypervisor (VMM)</span>
                                 </div>
-                            </div>     
+                            </div>
                             <div class="singleDiv" style="height: 66px;">
-                                <div class="labelDiv"><span>White List Applicable For : </span><input type="image" onclick="showDialogWhiteListApplicableHelp()" src="images/helpicon.png" class="helperImageClass"></div>
+                                <div class="labelDiv"><span data-i18n="input.wl_applicable_for">White List Applicable For:</span> <input type="image" onclick="showDialogWhiteListApplicableHelp()" src="images/helpicon.png" class="helperImageClass"></div>
                                 <div class="valueDivConfig">
                                     <select class="whiteListConfigDropDown" size="3" id="oem_bios_applicable_for" onchange="fnSelectWhiteListType(this, 'Oem_Bios_Checkbox')">
                                         <c:forEach var="BIOSWhiteListData" varStatus="rowCounter"  items="${BIOSWhiteList}">
@@ -56,7 +56,7 @@
                                 </div>
                             </div>     
                             <div class="singleDiv">
-                                <div class="labelDiv"><span>Required PCRs :</span><input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
+                                <div class="labelDiv"><span data-i18n="input.required_pcrs">Required PCRs:</span> <input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
                                 <div class="valueDivConfig" id="biosPCRsValues">
                                     <input type="checkbox" id="required_pcrs_0" name="0">
                                     <span>0</span>
@@ -87,14 +87,14 @@
                         <br>
                         <div id="openSourcesHostType" style="display: none;">
                             <div class="singleDiv">
-                                <div class="labelDiv">White List Host : </div>
+                                <div class="labelDiv" data-i18n="input.wl_host">White List Host:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListOpenSource_Host">
                                     <span class="requiredField">*</span>
                                 </div>
                             </div>
                             <div class="singleDiv">
-                                <div class="labelDiv">Port #: </div>
+                                <div class="labelDiv" data-i18n="input.port_num">Port #:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListOpenSource_portNO">
                                     <span class="requiredField">*</span>
@@ -103,28 +103,28 @@
                         </div>
                         <div id="citrixHostType" style="display: none;">
                             <div class="singleDiv">
-                                <div class="labelDiv">WhiteList Host : </div>
+                                <div class="labelDiv" data-i18n="input.wl_host">WhiteList Host:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListCitrix_Host">
                                     <span class="requiredField">*</span>
                                 </div>
                             </div>
                             <div class="singleDiv">
-                                <div class="labelDiv">Port #: </div>
+                                <div class="labelDiv" data-i18n="input.port_num">Port #:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListCitrix_portNO">
                                     <span class="requiredField">*</span>
                                 </div>
                             </div>
                             <div class="singleDiv">
-                                <div class="labelDiv">UserName: </div>
+                                <div class="labelDiv" data-i18n="input.username">User Name:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListCitrix_userName">
                                     <span class="requiredField">*</span>
                                 </div>
                             </div>
                             <div class="singleDiv">
-                                <div class="labelDiv">Password: </div>
+                                <div class="labelDiv" data-i18n="input.password">Password:</div>
                                 <div class="valueDiv">
                                     <input type="password" class="textBox_Border" id="whiteListCitrix_password">
                                     <span class="requiredField">*</span>
@@ -134,28 +134,28 @@
                         <div id="vmwareHostType" style="display: none;" >
                             <div id="defineVMWareHostType">
                                 <div class="singleDiv">
-                                    <div class="labelDiv">WhiteList Host : </div>
+                                    <div class="labelDiv" data-i18n="input.wl_host">WhiteList Host:</div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="whiteListVMware_Host">
                                         <span class="requiredField">*</span>
                                     </div>
                                 </div>                                            
                                 <div class="singleDiv">
-                                    <div class="labelDiv">vCenter Server : <img alt="image" style="cursor:pointer"onclick="showDialogVcenterHelp()"src="images/helpicon.png"     class="helperImageClass"></div>
+                                    <div class="labelDiv"><span data-i18n="input.vcenter_server">vCenter Server:</span> <img alt="image" style="cursor:pointer"onclick="showDialogVcenterHelp()"src="images/helpicon.png"     class="helperImageClass"></div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="whiteListVMWare_vCenterServer">
                                         <span class="requiredField">*</span>
                                     </div>
                                 </div>
                                 <div class="singleDiv">
-                                    <div class="labelDiv">Login ID: </div>
+                                    <div class="labelDiv" data-i18n="input.login_id">Login ID:</div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="whiteListVMWare_LoginID">
                                         <span class="requiredField">*</span>
                                     </div>
                                 </div>
                                 <div class="singleDiv">
-                                    <div class="labelDiv">Password: </div>
+                                    <div class="labelDiv" data-i18n="input.password">Password:</div>
                                     <div class="valueDiv">
                                         <input type="password" class="textBox_Border" id="whiteListVMWare_password">
                                         <span class="requiredField">*</span>
@@ -165,13 +165,13 @@
                             </div>
                         </div>
                         <div class="singleDiv">
-                            <div class="labelDiv"><span>Register Host: </span></div>
+                            <div class="labelDiv"><span data-i18n="input.register_host">Register Host:</span></div>
                             <div class="valueDivConfig">
                                 <input type="checkbox" id="RegisterWhiteListHost" checked="yes">
                             </div>
                         </div> 
                         <div class="singleDiv">
-                            <div class="labelDiv"><span>Overwrite Whitelist <br> (If exists): </span></div>
+                            <div class="labelDiv"><span data-i18n="input.overwrite_wl">Overwrite Whitelist <br> (If exists):</span></div>
                             <div class="valueDivConfig">
                                 <input type="checkbox" id="OverwriteWhitelist">
                             </div>
@@ -179,15 +179,15 @@
                         <div class="singleDiv" id="uploadButtonID">
                             <div class="labelDiv">&nbsp;</div>
                             <div class="valueDiv">
-                                <input type="button" class="" value="Import White List" onclick="fnUploadWhiteListConfigurationData()"> <!-- was: "Upload White List" -->
-                                <input type="button" value="Clear" onclick="fnClearAllFiled()">
+                                <input type="button" class="" value="Import White List" onclick="fnUploadWhiteListConfigurationData()" data-i18n="[value]button.import_whitelist"> <!-- was: "Upload White List" -->
+                                <input type="button" value="Clear" onclick="fnClearAllFiled()" data-i18n="[value]button.clear">
                             </div>
                         </div>
                     </div>
                 </c:when>
                 <c:otherwise>
                     <div class="errorMessage">
-                        <span>Error While Getting MLE Data.</span>
+                        <span data-i18n="error.wl_config_error_msg">Error While Getting MLE Data.</span>
                         <c:out value="${message}"></c:out>
                         </div>
                 </c:otherwise>

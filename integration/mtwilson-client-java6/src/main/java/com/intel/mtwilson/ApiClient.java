@@ -473,7 +473,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     private byte[] content(ApiResponse response) throws IOException, ApiException {
         log.trace("Status: {} {}", response.httpStatusCode, response.httpReasonPhrase);
-        log.trace("Content-Type: {}", response.contentType.toString());
+        //log.trace("Content-Type: {}", response.contentType.toString()); #2014-02-17 rksavinx removed due to dependency issue with tomcat for org.glassfish.jersey
         log.trace("Content: {}", response.content);
         if( response.httpStatusCode == HttpStatus.SC_OK ) {
             return response.content;
@@ -1552,5 +1552,42 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws IOException, ApiException, SignatureException {
         HostConfigResponseList results = fromJSON(httpPost(msurl("/host/bulk/custom"), toJSON(hostRecords)), HostConfigResponseList.class);
         return results;                
+    }
+    /**
+     * Retrieves list of available i18n locales
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    @Override
+    public String[] getLocales() throws IOException, ApiException, SignatureException {
+        String localesParsed = text(httpGet(msurl("/i18n/locales"))).replaceAll("\\s+", "");
+        return localesParsed.substring(1, localesParsed.length() - 1).split(",");
+    }
+    
+    /**
+     * Retrieves locale for specific portal user
+     * 
+     * @param username
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    @Override
+    public String getLocale(String username) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("username", username);
+        String userLocale = text(httpGet(msurl("/i18n/locale", query)));
+        return userLocale;
+    }
+    
+    @Override
+    public String setLocaleForUser(PortalUserLocale pul) throws IOException, ApiException, SignatureException {
+        log.debug("Calling api to set locale [{}] for user [{}]", pul.getLocale(), pul.getUser());
+        String resp = text(httpPost(msurl("/i18n/locale"), toJSON(pul)));
+        log.debug("resp: {}",resp);
+        return resp;
     }
 }

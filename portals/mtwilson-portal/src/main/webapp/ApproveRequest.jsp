@@ -4,19 +4,19 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Api Client Pending Registration Page</title>
+<title data-i18n="title.approve_request">Pending Access Requests</title>
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Administration &gt; Pending Access Requests</div>
-		<div id="nameOfPage" class="NameHeader">View Pending Registrations</div>
+		<div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.approve_request">Pending Access Requests</span></div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.approve_request">View Pending Registrations</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="approveRegisterHostTable" class="registerHostTable" style="display: none;">
 				<table cellpadding="0" cellspacing="0" width="100%" class="tableHeader">
 					<tr>
-						<td class="viewRequestRow1">Name</td>
+						<td class="viewRequestRow1" data-i18n="table.name">Name</td>
 						<!-- <td class="row3">Finger Print</td> -->
-						<td class="viewRequestRow2">Requested Roles</td>
+						<td class="viewRequestRow2" data-i18n="table.requested_roles">Requested Roles</td>
 						<td class="viewRequestRow3Header"></td>
 					</tr>
 				</table>

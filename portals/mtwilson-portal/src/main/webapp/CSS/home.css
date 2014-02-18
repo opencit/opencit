@@ -124,8 +124,9 @@ div.hideSkiplink {
 
 .loginDisplay
 {
+    float: right;
     font-size: 1.1em;
-    text-align: right;
+    text-align: center;
     padding: 10px;
     color: White;
     height: 0px;
@@ -310,6 +311,13 @@ h5, h6
 
 .tableDiv table tr{
 	height: 28px;
+}
+
+.tableDivPref{
+    max-height: 330px;
+    width: 650px;
+    /*border: 1px solid #3A4F63;*/
+    height: 28px;
 }
 
 .mainTableContant{

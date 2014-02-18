@@ -31,7 +31,7 @@ TERM_COLOR_NORMAL="\\033[0;39m"
 
 DEFAULT_JAVA_REQUIRED_VERSION="1.7"
 DEFAULT_GLASSFISH_REQUIRED_VERSION="4.0"
-DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
+DEFAULT_TOMCAT_REQUIRED_VERSION="7.0"
 DEFAULT_MYSQL_REQUIRED_VERSION="5.0"
 DEFAULT_POSTGRES_REQUIRED_VERSION="8.4"
 
@@ -2237,14 +2237,14 @@ tomcat_version() {
 }
 
 # sample output from "$tomcat version":
-#Using CATALINA_BASE:   /usr/share/apache-tomcat-6.0.29
-#Using CATALINA_HOME:   /usr/share/apache-tomcat-6.0.29
-#Using CATALINA_TMPDIR: /usr/share/apache-tomcat-6.0.29/temp
+#Using CATALINA_BASE:   /usr/share/apache-tomcat-7.0.34
+#Using CATALINA_HOME:   /usr/share/apache-tomcat-7.0.34
+#Using CATALINA_TMPDIR: /usr/share/apache-tomcat-7.0.34/temp
 #Using JRE_HOME:        /usr/share/jdk1.7.0_51
-#Using CLASSPATH:       /usr/share/apache-tomcat-6.0.29/bin/bootstrap.jar
-#Server version: Apache Tomcat/6.0.29
+#Using CLASSPATH:       /usr/share/apache-tomcat-7.0.34/bin/bootstrap.jar
+#Server version: Apache Tomcat/7.0.34
 #Server built:   July 19 2010 1458
-#Server number:  6.0.0.29
+#Server number:  7.0.34
 #OS Name:        Linux
 #OS Version:     3.0.0-12-server
 #Architecture:   amd64
@@ -2253,7 +2253,7 @@ tomcat_version() {
 
 
 # Environment:
-# - TOMCAT_REQUIRED_VERSION  (default is 6.0.29)
+# - TOMCAT_REQUIRED_VERSION  (default is 7.0.34)
 tomcat_version_report() {
   local min_version="${1:-${tomcat_required_version:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
   #TOMCAT_VERSION=`tomcat_version`
@@ -2345,7 +2345,7 @@ tomcat_install() {
       #    mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
       #fi
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
-      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tgz '{ print $1 }'`
+      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
       mv $tomcat_folder /usr/share
       tomcat_detect
     else
@@ -3048,14 +3048,15 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp $WAR_FILE $TOMCAT_HOME/webapps/
         
+        # 2014-02-16 rksavinx removed; unnecessary block of code
         #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
-        webservice_running $webservice_application_name
-        while [ -z "$WEBSERVICE_RUNNING" ]; do
-          webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
-          echo -n "." >> $INSTALL_LOG_FILE
-          sleep 2
-        done      
+        ##webservice_running $webservice_application_name
+        ##while [ -z "$WEBSERVICE_RUNNING" ]; do
+        ##  webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
+        ##  echo -n "." >> $INSTALL_LOG_FILE
+        ##  sleep 2
+        ##done      
       fi
     fi
 }

@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>jdk</artifactId>
-      <version>1.6.0_29</version>
+      <version>1.7.0_51</version>
       <type>bin</type>
       <classifier>linux-x64</classifier>
     </dependency>	

@@ -16,15 +16,19 @@ import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.PcrLogReport;
+import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.model.Hostname;
+import java.io.IOException;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -756,4 +760,74 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		
 		return report.getPcrLogs();
 	}
+        
+    
+    /**
+     * Returns list of available locales.
+     * 
+     * @param apiClientServices
+     * @return
+     * @throws DemoPortalException 
+     */
+    @Override
+    public String[] getLocales(ManagementService apiClientServices) throws DemoPortalException {
+        String[] ret = null;
+
+        try {
+            ret = apiClientServices.getLocales();
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ConnectionUtil.handleDemoPortalException(e);
+        }
+        return ret;
+    }
+    
+    /**
+     * Returns locale for specified portal user.
+     * 
+     * @param username
+     * @param apiclient
+     * @return
+     * @throws DemoPortalException 
+     */
+    @Override
+    public String getLocale(String username, ApiClient apiclient) throws DemoPortalException {
+        String locale = null;
+        
+        try {
+            locale = apiclient.getLocale(username);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ConnectionUtil.handleDemoPortalException(e);
+        }
+
+        return locale;
+    }
+    
+    /**
+     * Sets locale for specified portal user.
+     * 
+     * @param user
+     * @param locale
+     * @param apiclient
+     * @return
+     * @throws DemoPortalException 
+     */
+    @Override
+    public String setLocale(String user, String locale, ApiClient apiclient) throws DemoPortalException {
+        log.debug("Calling api to set locale [{}] for user [{}]", locale, user);
+        PortalUserLocale pul = new PortalUserLocale(user, locale);
+        String resp = null;
+        
+        try {
+            resp = apiclient.setLocaleForUser(pul);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ConnectionUtil.handleDemoPortalException(e);
+        }
+        
+        log.debug("resp: {}",resp);
+        return resp;
+    }
 }

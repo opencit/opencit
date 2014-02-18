@@ -51,6 +51,12 @@
       <type>war</type>
     </dependency>
     <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>mtwilson-launcher-jetty9</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
+    <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
@@ -72,7 +78,7 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>jdk</artifactId>
-      <version>1.6.0_29</version>
+      <version>1.7.0_51</version>
       <type>bin</type>
       <classifier>linux-x64</classifier>
     </dependency>	
@@ -100,7 +106,15 @@
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>mtwilson.war</destFileName>
+                  <destFileName>mtwilson-glassfish.war</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.integration</groupId>
+                  <artifactId>mtwilson-launcher-jetty9</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
+                  <destFileName>mtwilson-jetty.war</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>

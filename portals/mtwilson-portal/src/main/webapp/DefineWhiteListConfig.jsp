@@ -4,39 +4,39 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title data-i18n="title.define_wl_config">Insert title here</title>
 </head>
 <body>
 	<div id="mainDivForConfig">
 		<div class="singleDivConfig">
-			<div class="labelDivConfig"><span>Configure White List For : </span><input type="image" onclick="showDialogConfigureWhiteHelp()" src="images/helpicon.png" class="helperImageClass"></div>
+			<div class="labelDivConfig"><span data-i18n="input.config_wl_for">Configure White List For:</span><input type="image" onclick="showDialogConfigureWhiteHelp()" src="images/helpicon.png" class="helperImageClass"></div>
 			<div class="valueDivConfig">
 				<input type="checkbox" id="Oem_Bios_Checkbox">
-				<span>OEM BIOS</span>
+				<span data-i18n="lable.oem_bios">OEM BIOS</span>
 			</div>
 			<div class="valueDivConfig">
 				<input type="checkbox" id="Hypervisor_Checkbox">
-				<span>Hypervisor (VMM)</span>
+				<span data-i18n="lable.hypervisor">Hypervisor (VMM)</span>
 			</div>
 		</div>     
 		<div class="singleDivConfig" style="height: 66px;">
-			<div class="labelDivConfig"><span>White List Applicable For : </span><input type="image" onclick="showDialogWhiteListApplicableHelp()" src="images/helpicon.png" class="helperImageClass"></div>
+			<div class="labelDivConfig"><span data-i18n="input.wl_applicable_for">White List Applicable For:</span><input type="image" onclick="showDialogWhiteListApplicableHelp()" src="images/helpicon.png" class="helperImageClass"></div>
 			<div class="valueDivConfig">
 				<select size="3" id="oem_bios_applicable_for" onchange="fnChangeApplicableForBios(this)">
-					<option>Host with same BIOS only</option>
-					<option goodKnown="true" class="goodKnown">Specified Good Known Host Only</option>
+					<option data-i18n="select.host_bios_same">Host with same BIOS only</option>
+					<option goodKnown="true" class="goodKnown" data-i18n="select.host_bios_good_known">Specified Good Known Host Only</option>
 				</select>
 			</div>
 			<div class="valueDivConfig">
 				<select size="3" id="Hypervisor_bios_applicable_for" onchange="fnChangeApplicableForHyper(this)">
-					<option>Host with same OS/VMM Builds</option>
-					<option>OEM Specific Hosts with same OS/VMM Builds</option>
-					<option goodKnown="true" class="goodKnown">Specified Good Known Host Only</option>
+					<option data-i18n="select.host_vmm_same">Host with same OS/VMM Builds</option>
+					<option data-i18n="select.host_oem_vmm_same">OEM Specific Hosts with same OS/VMM Builds</option>
+					<option goodKnown="true" class="goodKnown" data-i18n="select.host_vmm_good_known">Specified Good Known Host Only</option>
 				</select>
 			</div>
-		</div>     
+		</div>
 		<div class="singleDivConfig">
-			<div class="labelDivConfig"><span>Required PCRs :</span><input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
+			<div class="labelDivConfig"><span data-i18n="input.required_pcrs">Required PCRs:</span><input type="image" onclick="showDialogRequiredPCRValues()" src="images/helpicon.png" class="helperImageClass"></div>
 			<div class="valueDivConfig" id="biosPCRsValues">
 				<input type="checkbox" id="required_pcrs_0" name="0">
 				<span>0</span>
@@ -63,9 +63,9 @@
 			</div>
 		</div>
 		<div class="singleDivConfig">
-			<div class="labelDivConfig"><span>Configure Host Location To : </span>
+			<div class="labelDivConfig"><span data-i18n="input.config_host_location">Configure Host Location To:</span>
 										<input type="image" onclick="showHelpForLocation()" src="images/helpicon.png" class="helperImageClass">
-										<span style="float: left;font-size: 10px;">(If configured in TPM PCR 22)</span></div>
+										<span style="float: left;font-size: 10px;" data-i18n="label.configured_pcr22">(If configured in TPM PCR 22)</span></div>
 			<div class="valueDivConfig">
 				<input type="text" id="location_host">
 			</div>
@@ -77,9 +77,9 @@
 		<div class="singleDivConfig" style="margin-top: 35px;">
 			<div class="labelDivConfig">&nbsp;</div>
 			<div class="valueDivConfig">
-				<input type="button" id="" value="Save Configuration" onclick="fnSaveSelectedConfiguration()">
-				<input type="button" id="" value="Clear" onclick="fnClearAllConfigFiled()" style="">
-				<input type="button" id="" value="Cancel" onclick="fnCloseDialogBox()" style="float:right">
+				<input type="button" id="" value="Save Configuration" onclick="fnSaveSelectedConfiguration()" data-i18n="[value]button.save_config">
+				<input type="button" id="" value="Clear" onclick="fnClearAllConfigFiled()" style="" data-i18n="[value]button.clear">
+				<input type="button" id="" value="Cancel" onclick="fnCloseDialogBox()" style="float:right" data-i18n="[value]button.cancel">
 			</div>
 			<!-- <div class="valueDivConfig">
 				<input type="button" id="" value="Clear" onclick="fnClearAllConfigFiled()" style="margin-right: 75px;">

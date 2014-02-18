@@ -47,7 +47,7 @@ function registerUser(){
 		return false; 
     }
     
-    var data = "userNameTXT="+$.trim($('#userNameValue').val())+"&passwordTXT="+$.trim($('#passwordValue').val());
+    var data = "userNameTXT="+$.trim($('#userNameValue').val())+"&passwordTXT="+$.trim($('#passwordValue').val())+"&localeTXT="+$.trim($('#ddlLocales').find(":selected").val());
     $('#mainContainer').prepend(disabledDiv);
     sendJSONAjaxRequest(false, "RegisterUser.htm", data, registerUserSuccess, null);
     
