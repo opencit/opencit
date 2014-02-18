@@ -9,14 +9,18 @@ import com.intel.mtwilson.as.rest.v2.model.Mle;
 import com.intel.mtwilson.as.rest.v2.model.MleCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleModule;
+import com.intel.mtwilson.as.rest.v2.model.MleModuleCollection;
+import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleLocator;
 import com.intel.mtwilson.as.rest.v2.model.MlePcr;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrCollection;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrLocator;
+import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.as.rest.v2.repository.MleModuleRepository;
 import com.intel.mtwilson.as.rest.v2.repository.MlePcrRepository;
 import com.intel.mtwilson.as.rest.v2.repository.MleRepository;
+import com.intel.mtwilson.as.rest.v2.repository.MleSourceRepository;
 import com.intel.mtwilson.datatypes.ManifestData;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +32,7 @@ import org.junit.Test;
  */
 public class MlesTest {
     
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserCertificatesTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MlesTest.class);
     
     @Test
     public void testSearchMles() throws Exception{
@@ -102,8 +106,8 @@ public class MlesTest {
     public void testSearchMlePcrs() throws Exception{
         MlePcrRepository repo = new MlePcrRepository();
         MlePcrFilterCriteria criteria = new MlePcrFilterCriteria();
+        criteria.mleUuid = UUID.valueOf("8f854714-9461-11e3-8204-005056b5286f"); // This has to be specified always as it is in the pathparam        
         // criteria.indexEqualTo = "18";
-        // criteria.mleUuid = UUID.valueOf("8f854714-9461-11e3-8204-005056b5286f");
         criteria.valueEqualTo = "496C8530D2B4BA6A6F3901455C8C240BBB482D85";
         MlePcrCollection search = repo.search(criteria);
         if (search != null && !search.getMlePcrs().isEmpty()) {
@@ -138,4 +142,28 @@ public class MlesTest {
         repo.delete(locator);
         
     }
+    
+    @Test
+    public void testSearchMleModule() throws Exception{
+        MleModuleRepository repo = new MleModuleRepository();
+        MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
+        criteria.mleUuid = UUID.valueOf("8f854714-9461-11e3-8204-005056b5286f"); // This has to be specified always as it is in the pathparam
+        // criteria.nameContains = "sata";
+        criteria.valueEqualTo = "AC2D3417E3FDCBDF51D7FA16DB025D458B2470B0";
+        MleModuleCollection search = repo.search(criteria);
+        if (search != null && !search.getMleModules().isEmpty()) {
+            for (MleModule obj : search.getMleModules())
+            log.debug(obj.getModuleName()+ "--" + obj.getModuleValue());
+        }
+    }
+    
+    @Test
+    public void testUpdateMleSource() throws Exception {
+        MleSourceRepository repo = new MleSourceRepository();
+        MleSource obj = new MleSource();
+        obj.setName("Server 02");
+        obj.setMleUuid("70bae24c-ac53-4b44-adbc-e4c0c98f554e");
+        repo.store(obj);
+    }
+    
 }
