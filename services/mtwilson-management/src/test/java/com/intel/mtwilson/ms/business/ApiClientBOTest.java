@@ -41,7 +41,7 @@ public class ApiClientBOTest {
 			apiClientRequest.setCertificate(readCertificate("C:/work/temp/mw-0.5.2-integration-new/services/ManagementService/src/test/java/com/intel/mountwilson/ms/business/206.cer").getBytes());
 			apiClientRequest.setRoles(new String[]{Role.Security.toString()});
 			
-			new ApiClientBO().create(apiClientRequest, null);
+			new ApiClientBO().create(apiClientRequest);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

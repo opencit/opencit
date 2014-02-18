@@ -45,11 +45,14 @@ public class ApiClientBO extends BaseBO {
     public ApiClientBO() {
     }
 
+    public void create(ApiClientCreateRequest apiClientRequest) {
+        create(apiClientRequest, null, null);
+    }
     /**
      * 
      * @param apiClientRequest 
      */
-    public void create(ApiClientCreateRequest apiClientRequest, String uuid) {
+    public void create(ApiClientCreateRequest apiClientRequest, String userUuid, String userCertUuid) {
 
 
         try {
@@ -60,7 +63,7 @@ public class ApiClientBO extends BaseBO {
                 throw new MSException(e, ErrorCode.MS_INVALID_CERTIFICATE_DATA, e.getMessage());
             }
             validate(apiClientRequest, x509Certificate);
-            createApiClientAndRole(apiClientRequest, x509Certificate, uuid);
+            createApiClientAndRole(apiClientRequest, x509Certificate, userUuid, userCertUuid);
             
             // Log the details into the syslog
             Object[] paramArray = {Arrays.toString(getFingerPrint(x509Certificate)), Arrays.toString(apiClientRequest.getRoles())};
@@ -136,17 +139,17 @@ public class ApiClientBO extends BaseBO {
      * @param x509Certificate 
      */
     private void createApiClientAndRole(ApiClientCreateRequest apiClientRequest,
-            X509Certificate x509Certificate, String uuid) {
+            X509Certificate x509Certificate, String userUuid, String userCertUuid) {
 
         try {
-            UUID userTableUuid = new UUID();
             //Feb 12,2014 - Sudhir: First we need to create the user in the portal user table. Then we need to use that user ID and create the entry
             // in the api client x509 table.
             // Since we are reusing this function even from the new API v2, we need to check who is calling into this. If the new API is calling into
             // this API, then we should not be creating the user. It is expected that users of new API v2 should do that.
-            if (uuid == null || uuid.isEmpty()) {
+            if (userUuid == null || userUuid.isEmpty()) {
                 MwPortalUser pUser = new MwPortalUser();
-                pUser.setUuid_hex(userTableUuid.toString()); // The UUID that is being passed into the call is from the new API v2 for the api_client_x509 table.
+                userUuid = new UUID().toString();
+                pUser.setUuid_hex(userUuid); 
                 // We will not set the keystore here. The caller who calls into the keystore.createuserinresource is responsible for updating the 
                 // portal user table with the new keystore.
                 pUser.setStatus(ApiClientStatus.PENDING.toString());
@@ -156,13 +159,13 @@ public class ApiClientBO extends BaseBO {
 
             ApiClientX509 apiClientX509 = new ApiClientX509();
 
-            if (uuid != null && !uuid.isEmpty())
-                apiClientX509.setUuid_hex(uuid);
+            if (userCertUuid != null && !userCertUuid.isEmpty())
+                apiClientX509.setUuid_hex(userCertUuid);
             else
                 apiClientX509.setUuid_hex(new UUID().toString());
             
             // Feb 12, 2014: Adding the reference to the user table in the x509 table.
-            apiClientX509.setUser_uuid_hex(userTableUuid.toString());
+            apiClientX509.setUser_uuid_hex(userUuid.toString());
             
             apiClientX509.setCertificate(apiClientRequest.getCertificate());
             apiClientX509.setEnabled(false);
@@ -268,25 +271,32 @@ public class ApiClientBO extends BaseBO {
             
             apiClientX509.setEnabled(apiClientRequest.enabled);
             apiClientX509.setStatus(apiClientRequest.status);
-            apiClientX509.setComment(apiClientRequest.comment);            
+            
+            // Update the comment if there is value. Otherwise we might overwrite an existing value.
+            if (apiClientRequest.comment != null && !apiClientRequest.comment.isEmpty())
+                apiClientX509.setComment(apiClientRequest.comment);            
 
             apiClientX509JpaController.edit(apiClientX509); // IllegalOrphanException, NonexistentEntityException, Exception
 
-            clearRolesForApiClient(apiClientX509);
-            setRolesForApiClient(apiClientX509, apiClientRequest.roles);
+            // Clear the existing roles and update it with the new ones only if specified by the user
+            if (apiClientRequest.roles != null && apiClientRequest.roles.length > 0) {
+                clearRolesForApiClient(apiClientX509);
+                setRolesForApiClient(apiClientX509, apiClientRequest.roles);
+            }
                         
             MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser();//new MwPortalUserJpaController(getMSEntityManagerFactory());
             MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(apiClientX509.getUserNameFromName());
             if(portalUser != null) {
                 portalUser.setEnabled(apiClientRequest.enabled);
                 portalUser.setStatus(apiClientRequest.status);
-                portalUser.setComment(apiClientRequest.comment);
+                if (apiClientRequest.comment != null && !apiClientRequest.comment.isEmpty())
+                    portalUser.setComment(apiClientRequest.comment);
                 mwPortalUserJpaController.edit(portalUser);
             }
             
             
             // Capture the change in the syslog
-            Object[] paramArray = {Arrays.toString(apiClientRequest.fingerprint), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            Object[] paramArray = {Arrays.toString(apiClientX509.getFingerprint()), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
             log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {

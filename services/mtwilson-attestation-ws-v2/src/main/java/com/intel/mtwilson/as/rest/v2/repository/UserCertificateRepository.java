@@ -22,6 +22,7 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.business.ApiClientBO;
 import com.intel.mtwilson.ms.common.MSException;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
@@ -150,9 +151,15 @@ public class UserCertificateRepository implements SimpleRepository<UserCertifica
     public void create(UserCertificate item) {
         ApiClientCreateRequest obj = new ApiClientCreateRequest();
         try {
+            // First make sure that the user is already configured in the user table
+            MwPortalUser portalUser = My.jpa().mwPortalUser().findMwPortalUserByUUID(item.getUserUuid().toString());
+            if (portalUser == null) {
+                throw new ASException(ErrorCode.MS_USER_DOES_NOT_EXISTS, item.getUserUuid().toString());
+            }
+            
             obj.setCertificate(item.getCertificate());
             obj.setRoles(item.getRoles());
-            new ApiClientBO().create(obj, item.getId().toString());
+            new ApiClientBO().create(obj, item.getUserUuid().toString(), item.getId().toString());
         } catch (MSException aex) {
             throw aex;            
         } catch (Exception ex) {

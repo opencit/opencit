@@ -86,7 +86,7 @@ public class APIClient {
     @Produces(MediaType.TEXT_PLAIN)
     public String addApiClient(ApiClientCreateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
-        new ApiClientBO().create(apiClientRequest, null);
+        new ApiClientBO().create(apiClientRequest);
         return "OK";
     }
 
@@ -196,7 +196,7 @@ public class APIClient {
     public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
         log.debug("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
-        new ApiClientBO().create(apiClientRequest, null);
+        new ApiClientBO().create(apiClientRequest);
         return "OK";
     }
 

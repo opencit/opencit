@@ -110,6 +110,8 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
                 portalUser.setKeystore(item.getKeystore());
             if (item.getLocale() != null)
                 portalUser.setLocale(item.getLocale());
+            if (item.getComments() != null)
+                portalUser.setComment(item.getComments());
             userJpaController.edit(portalUser);
 
         } catch (ASException aex) {
@@ -129,17 +131,18 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
     public void create(User item) {
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
-            MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(item.getId().toString());
-            if (portalUser == null) {
+            MwPortalUser portalUser = userJpaController.findMwPortalUserByUserName(item.getName());
+            if (portalUser != null) {
                 throw new ASException(ErrorCode.MS_USER_ALREADY_EXISTS, item.getId().toString());
             }
-            
+            portalUser = new MwPortalUser();
             portalUser.setUsername(item.getName());
             portalUser.setStatus(ApiClientStatus.PENDING.toString()); 
             portalUser.setEnabled(Boolean.FALSE); 
             portalUser.setKeystore(item.getKeystore());
             portalUser.setLocale(item.getLocale());
-            portalUser.setUuid_hex(new UUID().toHexString());
+            portalUser.setUuid_hex(item.getId().toString());
+            portalUser.setComment(item.getComments());
             userJpaController.create(portalUser);
         } catch (ASException aex) {
             throw aex;            
