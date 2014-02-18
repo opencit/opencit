@@ -186,21 +186,11 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
     }
 
     public List<MwPortalUser> findMwPortalUsersMatchingName(String name) {
-        List<MwPortalUser> portalUsers = new ArrayList<MwPortalUser>();
-        EntityManager em = getEntityManager();
 
-        try {
-            Query query = em.createNamedQuery("MwPortalUser.findByUsernameLike");
-            query.setParameter("username", "%"+name+"%");
-
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
-
-            portalUsers = query.getResultList();
-
-        } finally {
-            em.close();
-        }
-        return portalUsers;
+        HashMap<String,Object> parameters = new HashMap<String,Object>();
+        parameters.put("username", "%"+name+"%");
+        return searchByNamedQuery("findByUsernameLike", parameters);
+        
     }
 
     public List<MwPortalUser> findMwPortalUsersWithEnabledStatus(Boolean enabled) {
