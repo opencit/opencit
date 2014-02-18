@@ -23,14 +23,16 @@ public class UserRoleRepository implements SimpleRepository<UserRole, UserRoleCo
     
     @Override
     public UserRoleCollection search(UserRoleFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        UserRoleCollection objCollection = new UserRoleCollection();
+        UserRole obj = new UserRole();
+        obj.setRoles(new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement });
+        objCollection.getUserRoles().add(obj);
+        return objCollection;
     }
 
     @Override
     public UserRole retrieve(UserRoleLocator locator) {
-        UserRole obj = new UserRole();
-        obj.setRoles(new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement });
-        return obj;
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
