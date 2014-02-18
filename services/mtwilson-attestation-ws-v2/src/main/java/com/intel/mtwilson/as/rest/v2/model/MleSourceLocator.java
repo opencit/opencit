@@ -15,14 +15,14 @@ import javax.ws.rs.PathParam;
 public class MleSourceLocator implements Locator<MleSource> {
 
     @PathParam("mle_id")
-    public String mleUuid;
+    public UUID mleUuid;
     @PathParam("id")
     public UUID id;
     
     @Override
     public void copyTo(MleSource item) {
         item.setId(id);
-        item.setMleUuid(mleUuid);
+        item.setMleUuid(mleUuid.toString());
     }
     
 }
