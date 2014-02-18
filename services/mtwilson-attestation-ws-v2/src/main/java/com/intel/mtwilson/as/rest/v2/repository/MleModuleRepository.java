@@ -34,30 +34,29 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
         MleModuleCollection objCollection = new MleModuleCollection();
         try {
             TblModuleManifestJpaController jpaController = My.jpa().mwModuleManifest();
-            if (criteria.id != null) {
-                TblModuleManifest obj = jpaController.findTblModuleManifestByUuid(criteria.id.toString());
-                if (obj != null) {
-                    objCollection.getMleModules().add(convert(obj));
-                }
-            } else if (criteria.mleUuid != null) {
+            if (criteria.mleUuid != null) {
                 List<TblModuleManifest> objList = jpaController.findTblModuleManifestByMleUuid(criteria.mleUuid.toString());
-                if (objList != null && !objList.isEmpty()) {
-                    for(TblModuleManifest obj : objList) {
-                        objCollection.getMleModules().add(convert(obj));
-                    }
-                }                
-            } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
-                List<TblModuleManifest> objList = jpaController.findTblModuleManifestByComponentNameLike(criteria.nameContains);
-                if (objList != null && !objList.isEmpty()) {
-                    for(TblModuleManifest obj : objList) {
-                        objCollection.getMleModules().add(convert(obj));
-                    }
-                }                
-            } else if (criteria.valueEqualTo != null && !criteria.valueEqualTo.isEmpty()) {
-                List<TblModuleManifest> objList = jpaController.findByComponentVlaue(criteria.valueEqualTo);
-                if (objList != null && !objList.isEmpty()) {
-                    for(TblModuleManifest obj : objList) {
-                        objCollection.getMleModules().add(convert(obj));
+                if (objList != null && !objList.isEmpty()) {                    
+                    // Before we add to the collection we need to check if the user has specified any other search criteria
+                    if (criteria.id != null) {
+                        for(TblModuleManifest obj : objList) {
+                            if (obj.getUuid_hex().contains(criteria.id.toString()))
+                                objCollection.getMleModules().add(convert(obj));
+                        }                        
+                    } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
+                        for(TblModuleManifest obj : objList) {
+                            if (obj.getComponentName().contains(criteria.nameContains))
+                                objCollection.getMleModules().add(convert(obj));
+                        }
+                    } else if (criteria.valueEqualTo != null && !criteria.valueEqualTo.isEmpty()) {
+                        for(TblModuleManifest obj : objList) {
+                            if (obj.getDigestValue().equalsIgnoreCase(criteria.valueEqualTo))
+                                objCollection.getMleModules().add(convert(obj));
+                        }                        
+                    } else {
+                        for(TblModuleManifest obj : objList) {
+                            objCollection.getMleModules().add(convert(obj));
+                        }
                     }
                 }                
             }
@@ -128,7 +127,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
 
     @Override
     public void delete(MleModuleLocator locator) {
-        if (locator.moduleUuid != null) { return; }
+        if (locator.moduleUuid == null) { return; }
         try {
             new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, locator.moduleUuid.toString());
         } catch (ASException aex) {

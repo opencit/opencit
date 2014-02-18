@@ -58,7 +58,7 @@ public class MleBO extends BaseBO {
                         
                         private void validateWhitelistValue(String componentName, String whiteList) {
                             if(!isWhiteListValid(whiteList)) {
-                                log.error("White list '{0}' specified for '{1}' is not valid.", whiteList, componentName);
+                                log.error("White list '{}' specified for '{}' is not valid.", whiteList, componentName);
                                 throw new ASException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
                             }
                         }
@@ -1333,7 +1333,7 @@ public class MleBO extends BaseBO {
          * @param mleSourceObj
          * @return 
          */
-        public String updateMleSource(MleSource mleSourceObj, String uuid) {
+        public String updateMleSource(MleSource mleSourceObj, String mleUuid) {
             TblMle tblMle = null;
             MleData mleData = null ;
             MwMleSource mwMleSource = null;
@@ -1341,8 +1341,8 @@ public class MleBO extends BaseBO {
 
                 MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
                 
-                if (uuid != null && !uuid.isEmpty()) {
-                    mwMleSource = mleSourceJpaController.findByUuid(uuid);
+                if (mleUuid != null && !mleUuid.isEmpty()) {
+                    mwMleSource = mleSourceJpaController.findByMleUuid(mleUuid);
                 } else {
                     try {
                         mleData = mleSourceObj.getMleData();
@@ -1387,14 +1387,14 @@ public class MleBO extends BaseBO {
          * @param oemName
          * @return 
          */
-        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName, String uuid) {
+        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName, String mleUuid) {
             TblMle tblMle = null;
             MwMleSource mwMleSource = null;
             try {
                  MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
                  
-                if (uuid != null && !uuid.isEmpty()) {
-                    mwMleSource = mleSourceJpaController.findByUuid(uuid);
+                if (mleUuid != null && !mleUuid.isEmpty()) {
+                    mwMleSource = mleSourceJpaController.findByMleUuid(mleUuid);
                 } else {                
                     try {
                         // First check if the entry exists in the MLE table.

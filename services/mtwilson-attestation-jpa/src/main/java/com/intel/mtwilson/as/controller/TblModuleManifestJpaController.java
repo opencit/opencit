@@ -645,7 +645,7 @@ public class TblModuleManifestJpaController implements Serializable {
         try {
 
             Query query = em.createNamedQuery("TblModuleManifest.findByComponentNameLike");
-            query.setParameter("name", moduleName);
+            query.setParameter("name", "%"+moduleName+"%");
 
             List<TblModuleManifest> pcrList = query.getResultList();
             return pcrList;

@@ -22,7 +22,9 @@ public class MlePcrLocator implements Locator<MlePcr>{
     @Override
     public void copyTo(MlePcr item) {
         item.setMleUuid(mleUuid.toString());
-        item.setPcrIndex(pcrIndex);
+        if (pcrIndex != null && !pcrIndex.isEmpty()) {
+            item.setPcrIndex(pcrIndex);
+        }
     }
     
 }
