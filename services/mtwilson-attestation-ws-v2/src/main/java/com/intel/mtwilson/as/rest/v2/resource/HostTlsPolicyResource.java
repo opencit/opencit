@@ -20,13 +20,13 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Path("/hosts/{host}/tls-policy") // Should the user specified parameter here match the filterCriteria??
-public class HostTlsPolicy extends AbstractJsonapiResource<com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, NoLinks<com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy>, HostTlsPolicyLocator> {
+@Path("/hosts/{host_id}/tls-policy") // Should the user specified parameter here match the filterCriteria??
+public class HostTlsPolicyResource extends AbstractJsonapiResource<com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, NoLinks<com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy>, HostTlsPolicyLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     private HostTlsPolicyRepository repository;
     
-    public HostTlsPolicy() {
+    public HostTlsPolicyResource() {
         repository = new HostTlsPolicyRepository();
     }
     
