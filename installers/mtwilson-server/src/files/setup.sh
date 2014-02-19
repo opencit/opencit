@@ -876,7 +876,7 @@ if using_glassfish; then
   update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
   update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
   glassfish_restart
-  echo -n "Waiting for ${webservice_application_name} to become accessible... "
+  echo -n "Waiting for mtwilson to become accessible... "
   sleep 50s        #XXX TODO: remove when we have solution for webserver up
   echo "Done"
   glassfish_restart

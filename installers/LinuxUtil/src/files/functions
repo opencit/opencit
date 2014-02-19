@@ -1254,11 +1254,11 @@ add_postgresql_install_packages() {
       echo "Running apt-get upgrade..."
       apt-get upgrade -y >> $INSTALL_LOG_FILE
     fi
-  elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+  #elif [[ -n "$yast" && -n "$yast_packages" ]]; then
     # code goes here
-  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+  #elif [[ -n "$yum" && -n "$yum_packages" ]]; then
     # code goes here
-  elif [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+  #elif [[ -n "$zypper" && -n "$zypper_packages" ]]; then
     # code goes here
   fi
 }
