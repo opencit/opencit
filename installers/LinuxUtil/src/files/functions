@@ -1214,8 +1214,9 @@ postgres_version_report() {
 # we need the postgres client to create or patch the database, but
 # the server can be installed anywhere
 postgres_install() {
-  POSTGRES_CLIENT_YUM_PACKAGES="postgresql-client-common"
-  POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-common"
+  POSTGRES_CLIENT_YUM_PACKAGES=""
+  #POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-common"
+  POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-9.3"
   postgres_detect >> $INSTALL_LOG_FILE
 
   if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
@@ -1231,12 +1232,43 @@ postgres_install() {
   fi
 }
 
+# Checks if postgresql packages need to be added to install application, and adds them
+add_postgresql_install_packages() {
+  local cprefix=${1}
+  local yum_packages=$(eval "echo \$${cprefix}_YUM_PACKAGES")
+  local apt_packages=$(eval "echo \$${cprefix}_APT_PACKAGES")
+  local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
+  local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
+  
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  
+  if [[ -n "$aptget" && -n "$aptget_packages" ]]; then
+    pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
+    if [[ -z "$pgAddPackRequired" ]]; then
+      codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
+      echo "Postgresql apt-key add status: " `wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -`
+      echo "Running apt-get update..."
+      apt-get update >> $INSTALL_LOG_FILE
+      echo "Running apt-get upgrade..."
+      apt-get upgrade -y >> $INSTALL_LOG_FILE
+    fi
+  elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+    # code goes here
+  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+    # code goes here
+  elif [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+    # code goes here
+  fi
+}
+
 # Environment:
 # - POSTGRES_REQUIRED_VERSION
 # installs postgres server 
 postgres_server_install(){
-  POSTGRES_SERVER_YUM_PACKAGES="postgresql-9.3"
-  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
+  POSTGRES_SERVER_YUM_PACKAGES=""
+  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
 
   postgres_server_detect >> $INSTALL_LOG_FILE
   if [[ -n "$postgres_com" ]]; then
@@ -1245,6 +1277,7 @@ postgres_server_install(){
     return;
   fi
   if [[ -z "$postgres_com" ]]; then
+    add_postgresql_install_packages "POSTGRES_SERVER"
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
