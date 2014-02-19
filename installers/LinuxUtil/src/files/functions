@@ -1243,7 +1243,7 @@ add_postgresql_install_packages() {
   # detect available package management tools. start with the less likely ones to differentiate.
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
   
-  if [[ -n "$aptget" && -n "$aptget_packages" ]]; then
+  if [[ -n "$aptget" && -n "$apt_packages" ]]; then
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
     if [[ -z "$pgAddPackRequired" ]]; then
       codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
