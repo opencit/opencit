@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Examples:
  * 
- * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase postgres --check
+ * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase postgresql --check
  * 
  * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase mysql --check
  * 

@@ -74,7 +74,7 @@ chmod 700 "${package_var_dir}"
     if [ -n "$psql" ]; then
       postgres_configure_connection "${package_config_filename}" mountwilson.tdbp.db
       postgres_create_database
-      mtwilson setup InitDatabase postgres
+      mtwilson setup InitDatabase postgresql
     else
       echo "psql not defined"
       exit 1
