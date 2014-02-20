@@ -200,7 +200,7 @@ public class HostBO extends BaseBO {
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
                         // to which the host has to be associated
-                        associateAssetTagCertForHost(host, attributes);
+                        associateAssetTagCertForHost(host, agent.getHostAttributes()); //attributes);
 
 		} catch (ASException ase) {
             //System.err.println("JIM DEBUG"); 
