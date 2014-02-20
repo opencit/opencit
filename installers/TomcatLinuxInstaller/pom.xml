@@ -76,7 +76,6 @@
       <dependency>
           <groupId>org.glassfish.jersey.core</groupId>
           <artifactId>jersey-common</artifactId>
-          <type>jar</type>
       </dependency>
       <dependency>
           <groupId>org.glassfish.jersey.core</groupId>

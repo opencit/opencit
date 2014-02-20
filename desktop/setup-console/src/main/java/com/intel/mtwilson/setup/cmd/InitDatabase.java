@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Examples:
  * 
- * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase postgres --check
+ * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase postgresql --check
  * 
  * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase mysql --check
  * 
@@ -98,10 +98,10 @@ public class InitDatabase implements Command {
 
     @Override
     public void execute(String[] args) throws Exception {
-        // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
+        // first arg:  mysql or postgresql  (installer detects and invokes this command with that argument)
         if( args.length < 1 ) {
             
-            throw new SetupException("Usage: InitDatabase mysql|postgres [--check]");
+            throw new SetupException("Usage: InitDatabase mysql|postgresql [--check]");
         }
         
         databaseVendor = args[0];
@@ -415,7 +415,7 @@ public class InitDatabase implements Command {
         if (vendor.equals("mysql")){
             sql = "SHOW TABLES";
         }
-        else if (vendor.equals("postgres")){
+        else if (vendor.equals("postgresql")){
             sql = "SELECT table_name FROM information_schema.tables;";          
         }
        

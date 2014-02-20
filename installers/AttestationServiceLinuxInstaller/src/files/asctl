@@ -229,7 +229,7 @@ setup_interactive_install() {
       postgres_configure_connection "${package_config_filename}" mountwilson.as.db
       postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
       postgres_create_database
-      mtwilson setup InitDatabase postgres
+      mtwilson setup InitDatabase postgresql
     else
       echo "psql not defined"
       exit 1
