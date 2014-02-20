@@ -84,6 +84,7 @@ This error message indicates you need a jersey implementation like org.glassfish
                     <groupId>com.sun.jersey</groupId>
                     <artifactId>jersey-client</artifactId>
                 </exclusion>
+                <!--
                 <exclusion>
                     <groupId>javax</groupId>
                     <artifactId>javaee-api</artifactId>
@@ -116,6 +117,7 @@ This error message indicates you need a jersey implementation like org.glassfish
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                -->
             </exclusions>
         </dependency>
 		<!-- TODO: PLEASE REMOVE THIS DEPENDENCY BEFORE PRODUCTION BUILD. ADDED ONLY FOR DEVELOPMENT PURPOSES -->
