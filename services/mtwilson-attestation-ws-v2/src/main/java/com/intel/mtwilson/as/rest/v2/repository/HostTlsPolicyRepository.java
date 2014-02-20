@@ -28,7 +28,7 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     
     @Override
     public HostTlsPolicyCollection search(HostTlsPolicyFilterCriteria criteria) {
-       /* HostTlsPolicyCollection objCollection = new HostTlsPolicyCollection();
+        HostTlsPolicyCollection objCollection = new HostTlsPolicyCollection();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
@@ -43,8 +43,8 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
             log.error("Error during search for hosts.", ex);
             throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
         }
-        return objCollection;*/
-        throw new UnsupportedOperationException("Not supported yet.");
+        return objCollection;
+        // throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

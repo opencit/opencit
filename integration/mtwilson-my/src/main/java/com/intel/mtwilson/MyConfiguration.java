@@ -448,7 +448,7 @@ public class MyConfiguration {
     public Properties getClientProperties() throws MalformedURLException {
         Properties properties = new Properties();
         properties.setProperty("mtwilson.api.url", getMtWilsonURL().toString());
-        properties.setProperty("mtwilson.api.keystore", getKeystoreUsername());
+        properties.setProperty("mtwilson.api.keystore", getKeystoreFile().toString());
         properties.setProperty("mtwilson.api.keystore.password", getKeystorePassword());
         properties.setProperty("mtwilson.api.key.alias", getKeystoreUsername());
         properties.setProperty("mtwilson.api.key.password", getKeystorePassword());
