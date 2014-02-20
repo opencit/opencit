@@ -145,9 +145,19 @@
             <version>1.6.4</version>
         </dependency>
   	-->
-	<dependency>
-	    <groupId>com.intel.dcsg.cpg</groupId>
-	    <artifactId>cpg-validation</artifactId>
-  	</dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <optional>true</optional>
+        </dependency>
   </dependencies>  
 </project>
