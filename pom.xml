@@ -732,11 +732,6 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>2.5.1</version>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet-core</artifactId>
-            <version>2.5.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-multipart</artifactId>
             <version>2.5.1</version>
