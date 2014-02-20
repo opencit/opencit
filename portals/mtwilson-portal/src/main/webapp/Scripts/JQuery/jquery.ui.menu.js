@@ -12,6 +12,8 @@
  *	jquery.ui.widget.js
  */
 (function($) {
+    
+    //alert("starting MENU script!!");
 
 var idIncrement = 0;
 

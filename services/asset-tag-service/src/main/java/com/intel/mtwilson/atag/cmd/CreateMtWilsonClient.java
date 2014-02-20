@@ -85,7 +85,8 @@ public class CreateMtWilsonClient extends AtagCommand {
         }
 
         URL url = new URL(mtwilsonUrl);
-        String[] roles = new String[] { "AssetTagManagement" };
+        String[] roles = new String[] { "Attestation", "Report","Whitelist", "AssetTagManagement" };
+                
         ByteArrayResource keystoreResource = new ByteArrayResource();
 //        SimpleKeystore keystore = new SimpleKeystore(keystoreResource, mtwilsonClientKeystorePassword);
 //        TrustFirstCertificateTlsPolicy policy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));

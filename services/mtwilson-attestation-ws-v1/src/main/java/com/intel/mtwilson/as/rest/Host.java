@@ -323,11 +323,16 @@ public class Host {
         @RolesAllowed({"Attestation", "Report", "Security"})
         @GET
         @Produces({MediaType.APPLICATION_JSON})
-        public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria) {
+        public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria,@QueryParam("includeHardwareUuid")  @DefaultValue("false") boolean includeHardwareUuid) {
+            log.debug("queryForHosts api searchCriteria["+searchCriteria+"] ");
             ValidationUtil.validate(searchCriteria);
                 //if( searchCriteria == null || searchCriteria.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
                 //else 
-            return hostBO.queryForHosts(searchCriteria);
+            if(includeHardwareUuid != false) {
+                return hostBO.queryForHosts(searchCriteria,includeHardwareUuid);
+            }else{
+                return hostBO.queryForHosts(searchCriteria);
+            }
         }
 
         @RolesAllowed({"Attestation"})

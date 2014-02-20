@@ -315,6 +315,20 @@ if [ ! -f /etc/monit/conf.d/ta.monit ]; then
  cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" "y"
+if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
+	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://a.b.c.d:9999)" ${ASSET_TAG_URL}
+	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
+	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
+	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
+	TPM_PASSWORD=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
+	UUID=`dmidecode |grep UUID | awk '{print $2}'`
+	echo "registering $TPM_PASSWORD to $UUID"
+	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data="" "$ASSET_TAG_URL/tpm-passwords?uuid=$UUID&password=$TPM_PASSWORD"
+fi
+
+
 chmod 700 /etc/monit/monitrc
 service monit restart
 

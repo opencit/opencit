@@ -223,6 +223,11 @@ public class Derby {
     return dbi.open(FileDAO.class);
   } 
  
+ public static TpmPasswordDAO tpmPasswordDao() throws SQLException {
+     DBI dbi = new DBI(getDataSource());
+     return dbi.open(TpmPasswordDAO.class);
+ }
+ 
   // helper methods for JOOQ
  
  public static DSLContext jooq() throws SQLException {

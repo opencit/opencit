@@ -134,6 +134,9 @@ public class TblHosts implements Serializable {
     @Column(name = "vmm_mle_uuid_hex")
     private String vmm_mle_uuid_hex;
 
+    @Column(name = "hardware_uuid")
+    private String hardware_uuid;
+    
     public TblHosts() {
     }
 
@@ -431,6 +434,11 @@ public class TblHosts implements Serializable {
         this.tblSamlAssertionCollection = tblSamlAssertionCollection;
     }
 
- 
+    public String getHardwareUuid() {
+        return hardware_uuid;
+    }
     
+    public void setHardwareUuid(String uuid){
+        this.hardware_uuid = uuid;
+    }
 }

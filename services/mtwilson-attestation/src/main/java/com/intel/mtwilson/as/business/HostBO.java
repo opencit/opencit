@@ -200,7 +200,7 @@ public class HostBO extends BaseBO {
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
                         // to which the host has to be associated
-                        associateAssetTagCertForHost(host, agent.getHostAttributes());
+                        associateAssetTagCertForHost(host, attributes);
 
 		} catch (ASException ase) {
             //System.err.println("JIM DEBUG"); 
@@ -473,7 +473,7 @@ public class HostBO extends BaseBO {
             AssetTagCertAssociateRequest atagRequest = new AssetTagCertAssociateRequest();
             atagRequest.setHostID(tblHosts.getId());
             AssetTagCertBO atagBO = new AssetTagCertBO();
-            atagBO.unmapAssetTagCertFromHost(atagRequest);            
+            atagBO.unmapAssetTagCertFromHostById(atagRequest);            
         }
         
         // PREMIUM FEATURE ? 
@@ -838,9 +838,12 @@ public class HostBO extends BaseBO {
          * @param searchCriteria: If in case the user has not provided any
          * search criteria, then all the hosts would be returned back to the
          * caller
+         * @param includeHardwareUuid: if this is set to true, it causes the resulting 
+         * TxtHostRecord to include the hardware_uuid field from the tblHost
          * @return
          */
-        public List<TxtHostRecord> queryForHosts(String searchCriteria) {
+        public List<TxtHostRecord> queryForHosts(String searchCriteria,boolean includeHardwareUuid) {
+                log.debug("queryForHost " + searchCriteria + " includeHardwareUuid[" + includeHardwareUuid +"]");
                 try {
                         TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
@@ -858,7 +861,7 @@ public class HostBO extends BaseBO {
                                 log.debug(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
 
                                 for (TblHosts tblHosts : tblHostList) {
-                                        TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts);
+                                        TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts,includeHardwareUuid);
                                         txtHostList.add(hostObj);
                                 }
                         } else {
@@ -877,7 +880,56 @@ public class HostBO extends BaseBO {
 
         }
 
-        public TxtHostRecord createTxtHostFromDatabaseRecord(TblHosts tblHost) {
+        
+        /**
+         * Author: Sudhir
+         *
+         * Searches for the hosts using the criteria specified.
+         *
+         * @param searchCriteria: If in case the user has not provided any
+         * search criteria, then all the hosts would be returned back to the
+         * caller
+         * @return
+         */
+        public List<TxtHostRecord> queryForHosts(String searchCriteria) {
+                log.debug("queryForHost " + searchCriteria);
+                try {
+                        TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
+                        List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
+                        List<TblHosts> tblHostList;
+
+
+                        if (searchCriteria != null && !searchCriteria.isEmpty()) {
+                                tblHostList = tblHostsJpaController.findHostsByNameSearchCriteria(searchCriteria);
+                        } else {
+                                tblHostList = tblHostsJpaController.findTblHostsEntities();
+                        }
+
+                        if (tblHostList != null) {
+
+                                log.debug(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
+
+                                for (TblHosts tblHosts : tblHostList) {
+                                        TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts, false);
+                                        txtHostList.add(hostObj);
+                                }
+                        } else {
+                                log.debug(String.format("Found no hosts for search criteria [%s]", searchCriteria));
+                        }
+
+                        return txtHostList;
+                } catch (ASException e) {
+                        throw e;
+                } catch (Exception e) {
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during querying for registered hosts.", e);
+                        throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, e.getClass().getSimpleName());
+                }
+
+        }
+
+        public TxtHostRecord createTxtHostFromDatabaseRecord(TblHosts tblHost,boolean includeHardwareUuid) {
                 TxtHostRecord hostObj = new TxtHostRecord();
                 hostObj.HostName = tblHost.getName();
                 hostObj.IPAddress = tblHost.getName();
@@ -893,7 +945,13 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_Version = tblHost.getVmmMleId().getVersion();
                 hostObj.VMM_OSName = tblHost.getVmmMleId().getOsId().getName();
                 hostObj.VMM_OSVersion = tblHost.getVmmMleId().getOsId().getVersion();
-
+                if(includeHardwareUuid){
+                    log.debug("adding in hardware uuid field["+tblHost.getHardwareUuid()+"]");
+                    hostObj.Hardware_Uuid = tblHost.getHardwareUuid();
+                }else{
+                    log.debug("not adding in hardware uuid");
+                    hostObj.Hardware_Uuid = null;
+                }
                 return hostObj;
         }
 
@@ -946,7 +1004,7 @@ public class HostBO extends BaseBO {
                     atagMapRequest.setSha1OfAssetCert(atagCert.getSHA1Hash());
                     atagMapRequest.setHostID(tblHost.getId());
                     
-                    boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHost(atagMapRequest);
+                    boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHostById(atagMapRequest);
                     if (mapAssetTagCertToHost)
                         log.info("Successfully mapped the asset tag certificate with UUID {} to host {}", atagCert.getUuid(), tblHost.getName());
                     else
@@ -976,7 +1034,7 @@ public class HostBO extends BaseBO {
             AssetTagCertAssociateRequest atagUnmapRequest = new AssetTagCertAssociateRequest();
             atagUnmapRequest.setHostID(id);
                     
-            boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHost(atagUnmapRequest);
+            boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHostById(atagUnmapRequest);
             if (unmapAssetTagCertFromHost)
                 log.info("Either the asset tag certificate was successfully unmapped from the host {} or there was not asset tag certificate associated.", name);
             else
