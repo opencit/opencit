@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- reference: http://logback.qos.ch/manual/configuration.html -->
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- the file appender is important to capture output from the restlet service when running junit tests -->
+    <!--
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>junit.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+    -->
+      
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+<!--        <appender-ref ref="FILE" /> -->
+    </root>
+
+    <!-- classes that are more or less known to be working -->
+    <logger name="com.intel.mtwilson.atag" level="DEBUG"/>
+    <logger name="org.restlet" level="TRACE"/>
+    
+</configuration>

@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.rest;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
@@ -49,7 +50,7 @@ public class Host {
          *
          * Sample output: San Jose
          *
-         * @param hostName unique name of the host to query
+         * @param inputHostname unique name of the host to query
          * @return the host location
          */
         @RolesAllowed({"Attestation", "Report"})
@@ -57,9 +58,8 @@ public class Host {
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/location")
         public HostLocation getLocation(@QueryParam("hostName") String hostName) {
-                ValidationUtil.validate(hostName);
-                if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-                else return ASComponentFactory.getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
+            if( !ValidationUtil.isValidWithRegex(hostName, RegexPatterns.IPADDR_FQDN) ) {throw new ValidationException("Invalid hostName parameter"); }
+            else return ASComponentFactory.getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
         }
 
         @RolesAllowed({"Attestation", "Security"})
@@ -210,7 +210,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse post(TxtHostRecord hostRecord) { 
         ValidationUtil.validate(hostRecord);
-        if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+        if( hostRecord == null || hostRecord.HostName == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
         else return hostBO.addHost(new TxtHost(hostRecord), null, null, null); 
     }
     
@@ -246,10 +246,8 @@ public class Host {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse put(TxtHostRecord hostRecord) {
-            
             ValidationUtil.validate(hostRecord);
-            
-            if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+            if( hostRecord == null || hostRecord.HostName == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
             else return hostBO.updateHost(new TxtHost(hostRecord), null, null, null);
     }
     
@@ -275,7 +273,7 @@ public class Host {
                 @QueryParam("hostName") String hostName,
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify) throws ASException {
                 
-                ValidationUtil.validate(hostName);
+            if( !ValidationUtil.isValidWithRegex(hostName, RegexPatterns.IPADDR_FQDN) ) {throw new ValidationException("Invalid hostName parameter"); }
                 
                 try {
                         // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
@@ -310,9 +308,8 @@ public class Host {
 //    @Consumes({"text/html"})
         @Produces({MediaType.APPLICATION_JSON})
         public HostResponse delete(@QueryParam("hostName") String hostName) {
-                ValidationUtil.validate(hostName);
-                if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-                else return hostBO.deleteHost(new Hostname(hostName), null);
+            if( !ValidationUtil.isValidWithRegex(hostName, RegexPatterns.IPADDR_FQDN) ) {throw new ValidationException("Invalid hostName parameter"); }
+            else return hostBO.deleteHost(new Hostname(hostName), null);
         }
 
         /**

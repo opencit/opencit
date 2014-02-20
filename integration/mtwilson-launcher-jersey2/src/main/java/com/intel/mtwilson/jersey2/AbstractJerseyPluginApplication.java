@@ -89,6 +89,7 @@ register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class);
         // the ShiroFilter must be declared in web.xml instead.
         log.debug("Registering exception mappers and filters");
 register(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
+register(com.intel.mtwilson.util.ThrowableMapper.class);
 register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // jersey2 equivalent of com.sun.jersey.api.container.filter.PostReplaceFilter
 //register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
 //register(com.intel.mtwilson.as.helper.ASAuthenticationFilter.class); // XXX TODO to be replaced with APACHE SHIRO

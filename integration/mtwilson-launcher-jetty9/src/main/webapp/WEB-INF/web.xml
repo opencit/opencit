@@ -20,6 +20,17 @@
         <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
     </listener>
 -->
+
+<!--
+LocalIniWebEnvironment tries to load from MTWILSON_CONF/shiro.ini first and then
+from the classpath defaults if it's not found.
+    reference: https://shiro.apache.org/static/1.2.2/apidocs/org/apache/shiro/web/env/EnvironmentLoader.html 
+    -->
+<context-param>
+    <param-name>shiroEnvironmentClass</param-name>
+    <param-value>com.intel.mtwilson.shiro.env.LocalIniWebEnvironment</param-value>
+</context-param>
+
     <listener>
         <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
     </listener>
@@ -36,6 +47,10 @@
     <filter-mapping>
         <filter-name>ShiroFilter</filter-name>
         <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
     </filter-mapping>
     <!--
     Jersey reference: https://jersey.java.net/documentation/latest/deployment.html

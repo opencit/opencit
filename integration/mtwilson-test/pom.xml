@@ -143,6 +143,11 @@
 		<artifactId>mtwilson-shiro-util</artifactId>
 		<version>${project.version}</version>        
     </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-shiro-ws-v2</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-jpa</artifactId>
@@ -230,13 +235,15 @@
     -->
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-annotations</artifactId>
-    	<version>2.3.0</version>
     </dependency>
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-databind</artifactId>
-    	<version>2.3.0</version>
     </dependency>
 <dependency>
     <groupId>com.intel.mtwilson.services</groupId>

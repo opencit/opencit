@@ -10,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresGuest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -24,7 +25,16 @@ import org.apache.shiro.subject.Subject;
 @V2
 @Path("/test/security")
 public class SecurityTestResource {
+
     
+    @GET
+    @Path("/default")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloDefault() {
+        return "hello! this method does not have any security annotations on it";
+    }
+    
+    // an authenticated user will not be allowed to access this method ; they would have to logout first to access it
     @RequiresGuest
     @GET
     @Path("/guest")
@@ -53,19 +63,42 @@ public class SecurityTestResource {
 
     @RequiresRoles("test")
     @GET
-    @Path("/rolebased")
+    @Path("/rolebased1")
     @Produces(MediaType.TEXT_PLAIN)
-    public String helloRoleBasedUser() {
+    public String helloRoleBasedUser1() {
         return "hello, role-based user! you have the 'test' role";
     }
+    @RequiresRoles("root")
+    @GET
+    @Path("/rolebased2")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloRoleBasedUser2() {
+        return "hello, role-based user! you have the 'root' role";
+    }
 
+    @RequiresRoles({"root","test"}) // requires ALL listed roles
+    @GET
+    @Path("/rolebased3")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloRoleBasedUser3() {
+        return "hello, role-based user! you have both the 'root' and the 'test' roles";
+    }
+    
+    @RequiresRoles(value={"root","test"}, logical=Logical.OR) // requires AT LEAST ONE 
+    @GET
+    @Path("/rolebased4")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloRoleBasedUser4() {
+        return "hello, role-based user! you have the 'root' or the 'test' role or both";
+    }
+    
     @RequiresUser
     @GET
     @Path("/user")
     @Produces(MediaType.TEXT_PLAIN)
     public String helloRememberMeUser() {
         Subject currentUser = SecurityUtils.getSubject();
-        return "hello, user! you are not authenticated but we remember you "+currentUser.getPrincipal().getClass().getName();
+        return "hello, user! authenticated="+String.valueOf(currentUser.isAuthenticated())+" but we remember you "+currentUser.getPrincipal().getClass().getName();
     }
     
 }

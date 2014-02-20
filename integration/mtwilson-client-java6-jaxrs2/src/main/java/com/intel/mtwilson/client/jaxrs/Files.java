@@ -25,14 +25,14 @@ public class Files extends MtWilsonClient {
     
     public FileCollection searchFiles() {
         log.debug("target: {}", getTarget().getUri().toString());
-        FileCollection files = getTarget().path("files").request(MediaType.APPLICATION_JSON).get(FileCollection.class);
+        FileCollection files = getTarget().path("files").request().accept(MediaType.APPLICATION_JSON).get(FileCollection.class);
         return files;
     }
     public File retrieveFile(String id) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", id);
-        File file = getTarget().path("files/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(File.class);
+        File file = getTarget().path("files/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).get(File.class);
         return file;
     }
     public File createFile(File file) {
@@ -45,7 +45,7 @@ public class Files extends MtWilsonClient {
         }
         return null;
         */
-        File responseFile = getTarget().path("files").request(MediaType.APPLICATION_JSON).post(Entity.entity(file, MediaType.APPLICATION_JSON)).readEntity(File.class);
+        File responseFile = getTarget().path("files").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(file)).readEntity(File.class);
         return responseFile;
     }
     

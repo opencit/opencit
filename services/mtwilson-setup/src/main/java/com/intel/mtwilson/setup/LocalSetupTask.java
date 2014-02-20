@@ -10,7 +10,8 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 
 /**
- *
+ * Adds convenience methods for filesystem tasks
+ * 
  * @author jbuhacoff
  */
 public abstract class LocalSetupTask extends AbstractSetupTask {

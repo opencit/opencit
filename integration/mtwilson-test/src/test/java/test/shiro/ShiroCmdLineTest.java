@@ -4,9 +4,13 @@
  */
 package test.shiro;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.as.data.MwApiClientHttpBasic;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import org.apache.shiro.config.IniSecurityManagerFactory;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.util.Factory;
+//import org.apache.shiro.ShiroException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
@@ -54,7 +58,7 @@ public class ShiroCmdLineTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ShiroCmdLineTest.class);
 
     @Test
-    public void testCmdLine() {
+    public void testCmdLine() throws Exception {
         // pretend to be a cmd line tool
         log.debug("initializing shiro");
         
@@ -69,8 +73,8 @@ public class ShiroCmdLineTest {
         // check if user is authenticated (username/password env vars or http Authorization header)
         if( !currentUser.isAuthenticated() ) {
             log.debug("authenticating...");
-            // for this junit test automatically create a gueset user... a command line app would use the env vars, and a web app would use http Authorization header
-            UsernamePasswordToken token = new UsernamePasswordToken("guest", "guest"); // guest doesn't need a password
+            // for this junit test we're using mtwilson.api.username and mtwilson.api.password properties from  mtwilson.properties on the local system, c:/mtwilson/configuration/mtwilson.properties is default location on windows 
+            UsernamePasswordToken token = new UsernamePasswordToken(getBasicUsername(), getBasicPassword()); // guest doesn't need a password
 //            UsernamePasswordToken token = new UsernamePasswordToken("root", "root"); // guest doesn't need a password
             token.setRememberMe(true); // in web environment this might relate to cookies, but what about command line or others?
             currentUser.login(token); // throws UnknownAccountException , IncorrectCredentialsException , LockedAccountException , other specific exceptions, and AuthenticationException 
@@ -128,6 +132,41 @@ public class ShiroCmdLineTest {
         // logout the user
         currentUser.logout(); // removes all identifying information and invalidates session
         
+        
+    }
+    
+    private String getBasicUsername() throws Exception {
+        return My.configuration().getConfiguration().getString("mtwilson.api.username", System.getProperty("user.name", "guest"));
+    }
+    private String getBasicPassword() throws Exception {
+        return My.configuration().getConfiguration().getString("mtwilson.api.password", "");
+    }
+    
+    /**
+     * See createUser tests in test.jdbi.RepositoryTest  in mtwilson-shiro-jdbi
+     * 
+     * @throws Exception
+     * @deprecated
+     */
+    @Deprecated
+    @Test
+    public void createUser() throws Exception {
+        /*
+        MwApiClientHttpBasic userPassword = new MwApiClientHttpBasic();
+        userPassword.setUserName(getBasicUsername());
+        userPassword.setPassword(getBasicPassword());
+        log.debug("Creating login username {} password {}", userPassword.getUserName(), userPassword.getPassword());
+//        My.jpa().mwApiClientHttpBasic().create(userPassword);
+        MwPortalUser portalUser = new MwPortalUser();
+        portalUser.setEnabled(true);
+        portalUser.setStatus("APPROVED");
+        portalUser.setUsername(getBasicUsername());
+        portalUser.setUuid_hex(new UUID().toString());
+        // keystore was required for mtwilson 1.2 portal user, but in 2.0 it's moving to a separate table ... until that happens we have to provide SOME value here so we use an empty byte array:
+        portalUser.setKeystore(new byte[0]);
+        log.debug("Creating profile username {} uuid {}", portalUser.getUsername(), portalUser.getUuid_hex()); // for example  jonathan cc1de7dd-3f1b-41e6-92ab-ed62250979db
+//        My.jpa().mwPortalUser().create(portalUser);
+*/
         
     }
 }

@@ -106,6 +106,14 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
     <artifactId>jersey-media-multipart</artifactId>
 </dependency>
         
+        
+        <!-- janino is required to evaluate the throwable filter expressions in logback.xml , only needed if that feature is used -->
+<dependency>
+    <groupId>janino</groupId>
+    <artifactId>janino</artifactId>
+    <version>2.5.10</version>
+</dependency>        
+        
     </dependencies>
     
 </project>

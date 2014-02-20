@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 //import org.codehaus.jackson.annotate.JsonValue;
 
 /**
@@ -94,7 +96,8 @@ public class Hostname implements Model {
         // TODO: ValidHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$";
         // TODO: ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
         // right now valid hostname can be any string that does not contain a comma
-        return ( !hostname.contains(",") );
+//        return ( !hostname.contains(",") );
+        return ValidationUtil.isValidWithRegex(hostname, RegexPatterns.FQDN);
         /*
         try {
             if (hostname.contains(":")) {

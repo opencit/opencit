@@ -447,10 +447,24 @@ public class MyConfiguration {
     public Properties getClientProperties() throws MalformedURLException {
         Properties properties = new Properties();
         properties.setProperty("mtwilson.api.url", getMtWilsonURL().toString());
+        // x509 authentication
+        if( conf.containsKey("mtwilson.api.keystore")  ) {
         properties.setProperty("mtwilson.api.keystore", conf.getString("mtwilson.api.keystore", getKeystoreFile().getAbsolutePath())); // getKeystoreUsername actually looks at mtwilson.api.username and mtwilson.api.password
         properties.setProperty("mtwilson.api.keystore.password", conf.getString("mtwilson.api.keystore.password",getKeystorePassword()));
         properties.setProperty("mtwilson.api.key.alias", conf.getString("mtwilson.api.key.alias", getKeystoreUsername()));
         properties.setProperty("mtwilson.api.key.password", conf.getString("mtwilson.api.key.password", getKeystorePassword()));
+        }
+        // hmac authentication
+        if( conf.containsKey("mtwilson.api.clientId") && conf.containsKey("mtwilson.api.secretKey")) {
+            properties.setProperty("mtwilson.api.clientId", conf.getString("mtwilson.api.clientId"));
+            properties.setProperty("mtwilson.api.secretKey", conf.getString("mtwilson.api.secretKey"));
+        }
+        // basic password authentication
+        if( conf.containsKey("mtwilson.api.username") && conf.containsKey("mtwilson.api.password")) {
+            properties.setProperty("mtwilson.api.username", conf.getString("mtwilson.api.username"));
+            properties.setProperty("mtwilson.api.password", conf.getString("mtwilson.api.password"));
+            
+        }
         return properties;
     }
     
