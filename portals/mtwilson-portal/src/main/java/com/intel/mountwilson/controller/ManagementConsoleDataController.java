@@ -33,14 +33,12 @@ import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.vmware.VMwareConnectionPool;
 import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
 import com.intel.mtwilson.api.*;
-import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostVMMType;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -63,7 +61,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.DatatypeConverter;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -409,8 +406,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             log.debug("Acquiring vmware client...");
             URL url = new URL(vCenterConnection);
-            TlsPolicyManager.getInstance().setTlsPolicy(vCenterConnection, new InsecureTlsPolicy()); // TODO BUG #1068
-            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance())); 
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
             List<String> datacenters = services.getDatacenterNames(client);
 
             for (String dc : datacenters) {
@@ -456,8 +452,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             log.debug("Acquiring vmware client...");
             URL url = new URL(vCenterConnection);
-            TlsPolicyManager.getInstance().setTlsPolicy(vCenterConnection, new InsecureTlsPolicy());  // TODO BUG #1068
-            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance())); 
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
             List<String> clusters = services.getClusterNamesWithDC(client);
             Collections.sort(clusters);
             for (String cluster : clusters) {
@@ -505,8 +500,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             log.debug("Acquiring vmware client...");
             URL url = new URL(vCenterConnection);
-            TlsPolicyManager.getInstance().setTlsPolicy(vCenterConnection, new InsecureTlsPolicy());  // TODO BUG #1068
-            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance())); 
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
             List<HostDetails> hosts = services.getHostNamesForCluster(client, clusterName);
 
             for (HostDetails hostDetail : hosts) {

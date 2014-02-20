@@ -9,7 +9,6 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import java.io.IOException;
 import java.net.URL;
 
@@ -28,8 +27,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
           
           URL url = new URL(vendorConnectionString);
           
-          TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-          CitrixClient client = new CitrixClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+          CitrixClient client = new CitrixClient(new TlsConnection(url, tlsPolicy));
           client.init();
           return new CitrixHostAgent(client);
         }
@@ -44,8 +42,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
           
           URL url = new URL(vendorConnectionString);
           
-          TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-          CitrixClient client = new CitrixClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+          CitrixClient client = new CitrixClient(new TlsConnection(url, tlsPolicy));
           client.init();
           return new CitrixHostAgent(client);
         }

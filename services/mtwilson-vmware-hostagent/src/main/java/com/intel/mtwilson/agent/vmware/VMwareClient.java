@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsClient;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.vmware.vim25.*;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
@@ -25,15 +25,9 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.Map.Entry;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.ws.BindingProvider;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +88,6 @@ public class VMwareClient implements TlsClient {
     protected void connect2(URL url, String userName, String password) throws KeyManagementException, NoSuchAlgorithmException, IOException {
         log.debug("VMwareClient: connect2 | setting TlsPolicy...");
         setTlsPolicy(new InsecureTlsPolicy());
-        TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
         log.debug("VMwareClient: calling connect...");
         connect(url.toExternalForm(), userName, password);
 
@@ -152,13 +145,20 @@ public class VMwareClient implements TlsClient {
         log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
         log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
         log.debug("Connecting to vcenter with ProtocolSelector: {}", tlsPolicy.getProtocolSelector().preferred());
-        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable; was hardcoded to "SSL"
-        javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
-        sslsc.setSessionTimeout(0);
-        sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+//        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
+//        javax.net.ssl.SSLContext sc = tlsConnection.getSSLContext();
+//        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable; was hardcoded to "SSL"
+//        javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
+//        sslsc.setSessionTimeout(0);
+//        sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);
+//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier()); // XXX  assumes (correctly) TlsConnection registers tlsPolicy with TlsPolicyManager  but maybe we should just add a TlsConnection  getter for this... can't do getTlsPolicy().getHostnameVerifier()  because it's the non-tlspolicymanager one which will not work w/ multi-threading. must use tlspolicymanager's verifier.
 
+//        HttpsURLConnection.setDefaultSSLSocketFactory(new TlsPolicyAwareSSLSocketFactory());
+//        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier());
+        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
+        TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
+        
         SVC_INST_REF.setType(SVC_INST_NAME);
         SVC_INST_REF.setVal(SVC_INST_NAME);
 

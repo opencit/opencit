@@ -34,7 +34,7 @@ import org.skife.jdbi.v2.unstable.BindIn;
 @UseStringTemplate3StatementLocator
 @RegisterArgumentFactory({UUIDArgument.class, LocaleArgument.class, StatusArgument.class})
 @RegisterMapper({UserResultMapper.class,UserKeystoreResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
-public interface LoginDAO extends AutoCloseable {
+public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
     // use the .sql scripts in mtwilson-postgresql and mtwilson-mysql instead.  
     // TODO: check if JDBI has an update for database system dialects.

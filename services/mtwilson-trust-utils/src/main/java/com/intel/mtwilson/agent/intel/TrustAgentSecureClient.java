@@ -131,18 +131,19 @@ public class TrustAgentSecureClient {
 
     
     private byte[] sendRequestWithSSLSocket() throws NoSuchAlgorithmException, NoSuchAlgorithmException, KeyManagementException, UnknownHostException, IOException {
-        log.trace( "Opening connection to {} port {}", new String[]{serverHostname, String.valueOf(serverPort)});
+        log.trace( "Opening connection to {} port {}", serverHostname, String.valueOf(serverPort));
         
         if( data == null ) {
         	throw new IllegalArgumentException("Attempted to send request without data");
         }
 
-        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
-        SSLSocketFactory sslsocketfactory = getSSLContext().getSocketFactory();
-        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
+//        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+//        SSLSocketFactory sslsocketfactory = getSSLContext().getSocketFactory();
+//        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://"+serverHostname+":"+serverPort), tlsPolicy); 
         
-        try {            
-            sock.connect(new InetSocketAddress(serverHostname,serverPort), TIME_OUT);
+        try(SSLSocket sock = tlsConnection.connect()) {            
+//            sock.connect(new InetSocketAddress(serverHostname,serverPort), TIME_OUT);
             InputStream sockInput = sock.getInputStream();
             OutputStream sockOutput = sock.getOutputStream();
 
@@ -156,9 +157,6 @@ public class TrustAgentSecureClient {
         }
         catch(SocketTimeoutException e){
             throw new ASException(e,ErrorCode.AS_TRUST_AGENT_CONNNECT_TIMED_OUT,serverHostname,serverPort,(TIME_OUT/1000));           
-        }
-        finally {
-            sock.close();        
         }
     }
     
@@ -203,8 +201,8 @@ public class TrustAgentSecureClient {
     }
 
     // XXX TODO  bug #497  currently this is not using the hostname verifier in the tls policy... it should be.
-    private SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
         /*
+    private SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
         javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {
 
             @Override
@@ -240,12 +238,12 @@ public class TrustAgentSecureClient {
 
     	SSLContext ctx = SSLContext.getInstance("SSL");
         ctx.init(null, new javax.net.ssl.TrustManager[]{x509}, null);
-        */
         log.debug("Connecting to trust agent with ProtocolSelector: {}", tlsPolicy.getProtocolSelector().preferred());
     	SSLContext ctx = SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // bug #871 ssl policy should be configurable; was hardcoded to "SSL"
         ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null);
         return ctx;
     }
+        */
 
     // XXX TODO  we need to return an X509Certificate here;   if the caller wants it in PEM format they can encode it.  returning a String is ambiguous and leaves open possibiility of parsing errors later. we should catch them here.
     /**

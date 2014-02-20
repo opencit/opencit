@@ -1,9 +1,8 @@
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.io.ByteArray;
+import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import java.io.File;
@@ -41,18 +40,15 @@ import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
-import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URL;
-import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.xml.bind.PropertyException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -60,7 +56,6 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,8 +147,7 @@ public class TAHelper {
             }
 
             URL url = new URL(connectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
 
             String sessionId = generateSessionId();
 
@@ -238,8 +232,7 @@ public class TAHelper {
 
 
             URL url = new URL(connectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
             return getQuoteInformationForHost(tblHosts.getName(), client);
 
