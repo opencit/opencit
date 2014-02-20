@@ -426,6 +426,7 @@ public class HostBO extends BaseBO {
                         TblHosts tblHosts = null;
                         if (uuid != null && !uuid.isEmpty()) {
                             tblHosts = My.jpa().mwHosts().findHostByUuid(uuid);
+                            hostName = new Hostname(tblHosts.getName());
                         } else {                            
                             tblHosts = getHostByName(hostName);
                         }
