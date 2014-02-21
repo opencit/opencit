@@ -36,7 +36,8 @@ public class SetupTest {
         tasks.add(new InitDatabase());
         
         tasks.add(new CreateAdministrator());
-        tasks.add(new MigrateUsers());
+        tasks.add(new CreatePortalAdministrator());
+//        tasks.add(new MigrateUsers());
         
         return tasks;
     }

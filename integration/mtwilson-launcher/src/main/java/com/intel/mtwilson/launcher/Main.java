@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class Main {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Main.class);
 
-    private static final DirectoryLauncher launcher = new DirectoryLauncher();
+    private static final ModuleDirectoryLauncher launcher = new ModuleDirectoryLauncher();
     
     public static void main(String[] args) throws IOException {
         // read environment variable so we know where to find our plugins

@@ -35,9 +35,9 @@ import java.util.jar.Manifest;
  *
  * @author jbuhacoff
  */
-public class DirectoryLauncher {
+public class ModuleDirectoryLauncher {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectoryLauncher.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ModuleDirectoryLauncher.class);
     private static final JarFilter jarfilter = new JarFilter();
     private Container container = new Container();
     private ClassLoadingStrategy classLoadingStrategy = new FencedClassLoadingStrategy(); // a reasonable default until we get semantic versioning working

@@ -29,7 +29,7 @@ public class LauncherTest {
      */
     @Test
     public void testActivateModulesInDirectory() throws Exception {
-        DirectoryLauncher launcher = new DirectoryLauncher();
+        ModuleDirectoryLauncher launcher = new ModuleDirectoryLauncher();
         launcher.launch();
 
         Container container = launcher.getContainer();
@@ -58,7 +58,7 @@ public class LauncherTest {
     
     @Test
     public void testEventLoop() {
-        DirectoryLauncher launcher = new DirectoryLauncher();
+        ModuleDirectoryLauncher launcher = new ModuleDirectoryLauncher();
         
         LaunchThread r = new LaunchThread(launcher);
         
@@ -75,8 +75,8 @@ public class LauncherTest {
     }
 
     public static class LaunchThread implements Runnable {
-        private DirectoryLauncher launcher;
-        public LaunchThread(DirectoryLauncher launcher) {
+        private ModuleDirectoryLauncher launcher;
+        public LaunchThread(ModuleDirectoryLauncher launcher) {
             this.launcher = launcher;
         }
         public void run() {

@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.performance.CountingIterator;
 import com.intel.dcsg.cpg.util.ArrayIterator;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.Version;
-import com.intel.mtwilson.launcher.DirectoryLauncher;
+import com.intel.mtwilson.launcher.ModuleDirectoryLauncher;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -23,6 +23,8 @@ import java.util.Iterator;
 public class Util {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Util.class);
     
+    // moved to ExtensionDirectoryLauncher in mtwilson-launcher
+    @Deprecated
     public static File[] findAllJars() {
         try {
             // XXX TODO SETUP use MyFilesystem
@@ -41,7 +43,7 @@ public class Util {
     //            targetWebinfLib = new File("C:\\Users\\jbuhacof\\workspace\\dcg_security-mtwilson\\integration\\mtwilson-launcher-jersey2\\target\\mtwilson-launcher-jersey2-1.2.3-SNAPSHOT\\WEB-INF\\lib");
                 // check mtwilson home ... or maybe reverse the order?
             }
-            DirectoryLauncher.JarFilter jarfilter = new DirectoryLauncher.JarFilter();
+            ModuleDirectoryLauncher.JarFilter jarfilter = new ModuleDirectoryLauncher.JarFilter();
             return javaPath.listFiles(jarfilter);
         }
         catch(IOException e) {
@@ -49,6 +51,7 @@ public class Util {
         }
     }
 
+    // XXX NOTE:   moved to ExtensionDirectoryLauncher in  mtwilson-launcher
     // TODO :   Extensions find* functions need to record the *results* that
     //  they provide to callers in an in-memory log;  then at application shtudown
     //  we can record the classes that were used during that run (maybe combine
@@ -58,6 +61,7 @@ public class Util {
     //  complete with this function.  that will makea pplication startup much
     //  faster (with the assumption that any new plugins wont' be requested 
     //  within the first 5-10 seconds of the app starting up) 
+    @Deprecated
     public static void scanJars(File[] jars, Registrar[] registrars) {
         long time0 = System.currentTimeMillis();
         CountingIterator<File> it = new CountingIterator<File>(new ArrayIterator<File>(jars)); // only scans directory for jar files; does NOT scan subdirectories

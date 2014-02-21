@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.extensions.ExtensionUtil;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.util.ArrayIterator;
-import com.intel.mtwilson.launcher.DirectoryLauncher;
+import com.intel.mtwilson.launcher.ModuleDirectoryLauncher;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.File;
 import java.io.IOException;
