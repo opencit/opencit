@@ -76,7 +76,6 @@
           <groupId>org.glassfish.jersey.core</groupId>
           <artifactId>jersey-common</artifactId>
       </dependency>
-      <!--
       <dependency>
           <groupId>org.glassfish.jersey.core</groupId>
           <artifactId>jersey-client</artifactId>
@@ -93,7 +92,6 @@
           <groupId>org.glassfish.jersey.media</groupId>
           <artifactId>jersey-media-multipart</artifactId>
       </dependency>
-      -->
   </dependencies>
 
   <build>
@@ -215,7 +213,6 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-common.jar</destFileName>
                 </artifactItem>
-                <!--
                 <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
                     <artifactId>jersey-client</artifactId>
@@ -244,7 +241,6 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-media-multipart.jar</destFileName>
                 </artifactItem>
-                -->
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
