@@ -146,6 +146,10 @@ setup_interactive_install() {
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson-portal.war
     webservice_running_report "${webservice_application_name}"
+    
+    echo -n "Waiting for ${webservice_application_name} to become accessible... "
+    sleep 50s        #XXX TODO: remove when we have solution for webserver up
+    echo "Done"
   fi
   bootstrap_first_user
 }

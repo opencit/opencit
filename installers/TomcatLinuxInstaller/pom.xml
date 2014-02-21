@@ -68,14 +68,41 @@
           <artifactId>jackson-databind</artifactId>
           <type>jar</type>
       </dependency>
-      <!--
       <dependency>
-          <groupId>org.glassfish.jersey.core</groupId>
-          <artifactId>jersey-client</artifactId>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>javax.ws.rs-api</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.jvnet.hk2</groupId>
+          <artifactId>hk2-locator</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish</groupId>
+          <artifactId>javax.servlet</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.hk2</groupId>
+          <artifactId>hk2-api</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.hk2</groupId>
+          <artifactId>hk2-utils</artifactId>
       </dependency>
       <dependency>
           <groupId>org.glassfish.jersey.core</groupId>
           <artifactId>jersey-common</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.glassfish.jersey.core</groupId>
+          <artifactId>jersey-client</artifactId>
       </dependency>
       <dependency>
           <groupId>org.glassfish.jersey.core</groupId>
@@ -86,10 +113,13 @@
           <artifactId>jersey-container-servlet</artifactId>
       </dependency>
       <dependency>
+          <groupId>org.glassfish.jersey.containers</groupId>
+          <artifactId>jersey-container-servlet-core</artifactId>
+      </dependency>
+      <dependency>
           <groupId>org.glassfish.jersey.media</groupId>
           <artifactId>jersey-media-multipart</artifactId>
       </dependency>
-      -->
   </dependencies>
 
   <build>
@@ -197,13 +227,54 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jackson-databind.jar</destFileName>
                 </artifactItem>
-                <!--
                 <artifactItem>
-                    <groupId>org.glassfish.jersey.core</groupId>
-                    <artifactId>jersey-client</artifactId>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>jersey-client.jar</destFileName>
+                    <destFileName>guava.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs-api</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>javax.ws.rs-api.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>javax.inject</groupId>
+                    <artifactId>javax.inject</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>javax.inject.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.jvnet.hk2</groupId>
+                    <artifactId>hk2-locator</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>hk2-locator.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>javax.servlet.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.hk2</groupId>
+                    <artifactId>hk2-api</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>hk2-api.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.hk2</groupId>
+                    <artifactId>hk2-utils</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>hk2-utils.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
@@ -211,6 +282,13 @@
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-common.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-client</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-client.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
@@ -227,13 +305,19 @@
                     <destFileName>jersey-container-servlet.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
+                    <groupId>org.glassfish.jersey.containers</groupId>
+                    <artifactId>jersey-container-servlet-core</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jersey-container-servlet-core.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
                     <groupId>org.glassfish.jersey.media</groupId>
                     <artifactId>jersey-media-multipart</artifactId>
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jersey-media-multipart.jar</destFileName>
                 </artifactItem>
-                -->
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
