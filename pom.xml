@@ -719,6 +719,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>14.0.1</version>
         </dependency>
         <dependency>
+            <groupId>org.jvnet.hk2</groupId>
+            <artifactId>hk2-locator</artifactId>
+            <version>2.1.96</version>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
             <version>3.1.1</version>
