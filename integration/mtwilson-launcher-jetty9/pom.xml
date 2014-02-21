@@ -84,11 +84,15 @@ This error message indicates you need a jersey implementation like org.glassfish
                     <groupId>com.sun.jersey</groupId>
                     <artifactId>jersey-client</artifactId>
                 </exclusion>
-                <!--
                 <exclusion>
                     <groupId>javax</groupId>
                     <artifactId>javaee-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
+                <!--
                 <exclusion>
                     <groupId>javax</groupId>
                     <artifactId>javaee-web-api</artifactId>
@@ -104,10 +108,6 @@ This error message indicates you need a jersey implementation like org.glassfish
                 <exclusion>
                     <groupId>javax</groupId>
                     <artifactId>javax.resource</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javax.servlet</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>javax</groupId>
