@@ -709,9 +709,9 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>2.0</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.servlet</artifactId>
+            <version>3.1.1</version>
         </dependency>
         
         <!-- jersey -->

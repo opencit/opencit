@@ -73,8 +73,8 @@
           <artifactId>javax.ws.rs-api</artifactId>
       </dependency>
       <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>javax.servlet-api</artifactId>
+          <groupId>org.glassfish</groupId>
+          <artifactId>javax.servlet</artifactId>
       </dependency>
       <dependency>
           <groupId>org.glassfish.jersey.core</groupId>
@@ -211,11 +211,11 @@
                     <destFileName>javax.ws.rs-api.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.servlet</artifactId>
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>javax.servlet-api</destFileName>
+                    <destFileName>javax.servlet.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
