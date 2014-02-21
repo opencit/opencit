@@ -202,6 +202,13 @@
                     <destFileName>jackson-databind.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs-api</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>javax.ws.rs-api.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
                     <groupId>org.glassfish.jersey.core</groupId>
                     <artifactId>jersey-common</artifactId>
                     <type>jar</type>
