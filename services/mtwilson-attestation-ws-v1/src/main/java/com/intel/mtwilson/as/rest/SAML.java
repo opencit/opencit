@@ -1,12 +1,14 @@
 
 package com.intel.mtwilson.as.rest;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.io.IOException;
 //import javax.ejb.Stateless;
@@ -15,6 +17,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 
 /**
  * REST Web Service
@@ -47,6 +50,7 @@ public class SAML {
      * @return a SAML assertion document for the host
      */
     @RolesAllowed({"Attestation","Report"})
+    @RequiresRoles({"Attestation","Report"})
     @GET
     @Produces({"application/samlassertion+xml"})
     @Path("/assertions/host")
@@ -54,11 +58,7 @@ public class SAML {
             @QueryParam("hostName")String hostName,
             @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify
             ) throws IOException {
-        ValidationUtil.validate(hostName);
-        // bug #783, "missing hostname" we were not validating the input from the dashboard
-        if( hostName == null || hostName.isEmpty() ) {
-            throw new ASException(ErrorCode.AS_MISSING_INPUT, "Hostname or IP address is required");
-        }
+        if( !ValidationUtil.isValidWithRegex(hostName, RegexPatterns.IPADDR_FQDN) ) {throw new ValidationException("Hostname or IP address is missing or invalid"); }
         return hostTrustBO.getTrustWithSaml(hostName, forceVerify);
     }
 

@@ -9,7 +9,6 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import java.io.IOException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -30,8 +29,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             URL url = new URL(vendorConnectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
             log.debug("Creating IntelHostAgent for host {}", hostAddress); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             return new IntelHostAgent(client, hostAddress);
         }
@@ -44,8 +42,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             URL url = new URL(vendorConnectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
 //            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             InternetAddress hostAddress = new InternetAddress(url.getHost());
             return new IntelHostAgent(client, hostAddress);

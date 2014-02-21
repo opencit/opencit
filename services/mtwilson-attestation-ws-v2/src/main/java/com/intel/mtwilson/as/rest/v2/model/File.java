@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.validation.Regex;
 import com.intel.mtwilson.jersey.Document;
 
 /**
@@ -15,8 +16,10 @@ import com.intel.mtwilson.jersey.Document;
 public class File extends Document {
     private String name;
     private String content;
+    
     private String contentType;
 
+    @Regex("(?:[a-zA-Z0-9\\.-]+)")
     public String getName() {
         return name;
     }
@@ -25,6 +28,7 @@ public class File extends Document {
         this.name = name;
     }
 
+    @Regex("(?:[a-zA-Z0-9\\./;\" -]+)")
     public String getContentType() {
         return contentType;
     }

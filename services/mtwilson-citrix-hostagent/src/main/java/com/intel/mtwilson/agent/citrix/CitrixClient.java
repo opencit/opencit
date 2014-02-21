@@ -15,6 +15,9 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyAwareSSLSocketFactory;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
@@ -158,15 +161,18 @@ public class CitrixClient {
             throw new ASException(e, ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }
 
-        TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
+        
+//        TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
 
         log.debug("Connecting to Citrix with ProtocolSelector: {}", tlsConnection.getTlsPolicy().getProtocolSelector().preferred());
-        SSLContext sc = SSLContext.getInstance(tlsConnection.getTlsPolicy().getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable;   was hardcoded to "SSL" before
+//        SSLContext sc = SSLContext.getInstance(tlsConnection.getTlsPolicy().getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable;   was hardcoded to "SSL" before
 
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
-
+//        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); // TODO: not clear if it will be possible to create a socket factory that is tlspolicy-aware ; for now using the default Java socket factory
+//        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
+        // it would be better to use TlsConnection's openConnection directly but the URL is used from Citrix code so we try to affect it by setting the default policies
+        TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
+        
         connection = new Connection(url);
 
         Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());

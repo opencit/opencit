@@ -46,7 +46,7 @@ public interface RpcDAO {
     void updateStatus(@Bind("id") UUID id, @Bind("status") String status);
     
     @SqlUpdate("update mw_rpc set ProgressCurrent=:progressCurrent,ProgressMax=:progressMax where ID=:id")
-    void updateProgress(@Bind("id") UUID id, @Bind("proguressCurrent") Long progressCurrent, @Bind("progressMax") Long progressMax);
+    void updateProgress(@Bind("id") UUID id, @Bind("progressCurrent") Long progressCurrent, @Bind("progressMax") Long progressMax);
     
     @RegisterMapper(RpcPrivResultMapper.class)
     @SqlQuery("select ID,Name,Input,Output,Status,ProgressCurrent,ProgressMax from mw_rpc where ID=:id")

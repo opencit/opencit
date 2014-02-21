@@ -1,9 +1,8 @@
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.io.ByteArray;
+import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import java.io.File;
@@ -149,8 +148,7 @@ public class TAHelper {
             }
 
             URL url = new URL(connectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
 
             String sessionId = generateSessionId();
 
@@ -235,8 +233,7 @@ public class TAHelper {
 
 
             URL url = new URL(connectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
             return getQuoteInformationForHost(tblHosts.getName(), client);
 

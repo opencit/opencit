@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Mt Wilson Login</title>
+        <meta name="application-name" content="Mt Wilson"/>
+        <meta name="description" content="A generic web-based tool for interacting with available server resources"/>
+        <meta name="keywords" content="Mt Wilson, JSON API, jsonapi.org, HTML5" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+        <link rel="stylesheet" href="images/jsonapiclient.css" type="text/css" />
+        <link rel="stylesheet" href="style/windows/window.css" type="text/css" />
+        <link rel="stylesheet" href="style/navtabs/nav.css" type="text/css" />
+
+    </head>
+    <body>
+
+        <h1>Login</h1>
+
+        <form action="/v2/login" method="POST">
+            <label for="login-username">Username</label><input type="text" name="username" id="login-username"/>
+            <label for="login-password">Password</label><input type="password" name="password" id="login-password"/>
+            <!--
+            <label for="login-rememberMe">Remember Me</label><input type="checkbox" name="rememberMe" id="login-rememberMe"/>
+            -->
+            <input type="submit"/>
+        </form>
+        
+    </body>
+</html>

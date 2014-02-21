@@ -10,6 +10,8 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import java.util.Properties;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import org.junit.BeforeClass;
 import org.junit.Test;
 /**
@@ -48,5 +50,16 @@ public class FileTest {
     public void testRetrieveFile() {
         File file = client.retrieveFile((new UUID()).toString());
         log.debug("File name {} id {} content-type {}", file.getName(), file.getId(), file.getContentType());
+    }
+    
+    @Test
+    public void testCreateFile() {
+        File file = new File();
+        file.setId(new UUID());
+        file.setName("hellotxt");
+        file.setContent("hello world");
+        file.setContentType("textplain");
+        File responseFile = client.createFile(file);
+        log.debug("File name {} id {} content-type {}", responseFile.getName(), responseFile.getId(), responseFile.getContentType());
     }
 }

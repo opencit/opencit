@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.api.MtWilson;
+import com.intel.mtwilson.fs.ApplicationFilesystem;
 import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import java.io.IOException;
@@ -111,4 +112,8 @@ public class My {
         return locale;
     }
     */
+    
+    public static ApplicationFilesystem filesystem() {
+        return MyFilesystem.getMyFilesystem();
+    }
 }

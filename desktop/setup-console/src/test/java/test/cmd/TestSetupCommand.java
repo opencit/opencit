@@ -40,4 +40,9 @@ public class TestSetupCommand {
         TextConsole.main(new String[] { "SetMtWilsonURL" });
     }
 
+    @Test
+    public void testExecuteV2SetupTask() throws Exception {
+        TextConsole.main(new String[] { "V2", "configure-filesystem" });
+    }
+    
 }

@@ -50,7 +50,15 @@
     -->
     </build>
     <dependencies>
+
+        <!-- security annotations -->
+<dependency>
+  <groupId>org.apache.shiro</groupId>
+  <artifactId>shiro-core</artifactId>
+  <version>1.2.2</version>
+</dependency>
         
+                
         <!--
         enunciate requires the source to the datatypes in order to document them... but
         for some reason, when we include the source here, enunciate throws an exception:

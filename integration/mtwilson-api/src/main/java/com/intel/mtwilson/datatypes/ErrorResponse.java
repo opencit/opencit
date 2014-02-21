@@ -45,6 +45,10 @@ public final class ErrorResponse implements Localizable {
     }*/
     
     public String getErrorCode() {
+        if( errorCode == null ) {
+            log.debug("ErrorResponse getErrorCode called but errorCode is null");
+            return null;
+        }
         return errorCode.name();
     }
 
@@ -54,6 +58,14 @@ public final class ErrorResponse implements Localizable {
     }*/
     
     public String getErrorMessage() {
+        if( errorMessage == null ) {
+            log.debug("ErrorResponse getErrorMessage called but errorMessage is null");
+            return null;
+        }
+        if( locale == null ) {
+            log.debug("ErrorResponse getErrorMessage called but locale is null, using default");
+            locale = Locale.getDefault();
+        }
         return errorMessage.toString(locale);
     }
 

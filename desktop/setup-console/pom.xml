@@ -148,6 +148,11 @@
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
                 
         <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
