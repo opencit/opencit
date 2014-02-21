@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
@@ -27,7 +28,8 @@ public class Oems extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public Oems() {
+    public Oems(URL url) {
+        super(url);
     }
 
     public Oems(Properties properties) throws Exception {
