@@ -280,6 +280,10 @@ setup_interactive_install() {
         mkdir -p /opt/mtwilson
         ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
       fi
+      
+      echo -n "Waiting for ${webservice_application_name} to become accessible... "
+      sleep 50s        #XXX TODO: remove when we have solution for webserver up
+      echo "Done"
     fi
   fi
 }
