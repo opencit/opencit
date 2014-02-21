@@ -92,6 +92,10 @@ This error message indicates you need a jersey implementation like org.glassfish
                     <groupId>javax</groupId>
                     <artifactId>javax.servlet</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
                 <!--
                 <exclusion>
                     <groupId>javax</groupId>
