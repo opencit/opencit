@@ -69,6 +69,10 @@
           <type>jar</type>
       </dependency>
       <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
           <groupId>javax.ws.rs</groupId>
           <artifactId>javax.ws.rs-api</artifactId>
       </dependency>
@@ -206,6 +210,13 @@
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jackson-databind.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>guava.jar</destFileName>
                 </artifactItem>
                 <artifactItem>
                     <groupId>javax.ws.rs</groupId>

@@ -709,6 +709,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>2.0</version>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
             <version>3.1.1</version>
