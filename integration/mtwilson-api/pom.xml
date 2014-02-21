@@ -106,6 +106,13 @@
     	<artifactId>jackson-databind</artifactId>
         <optional>true</optional>
     </dependency>
+    <dependency>
+    	<groupId>com.intel.mtwilson.services</groupId>
+    	<artifactId>mtwilson-jackson-util</artifactId>
+        <version>${project.version}</version>
+        <optional>true</optional>
+    </dependency>
+    
     <!--
     <dependency>
 		<groupId>javax</groupId>

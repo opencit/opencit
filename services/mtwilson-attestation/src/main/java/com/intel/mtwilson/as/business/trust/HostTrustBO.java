@@ -32,6 +32,7 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.Fault;
@@ -651,6 +652,23 @@ public class HostTrustBO extends BaseBO {
         return trust;
     }
     
+    public void logTrustReport(TblHosts tblHosts, TrustReport trustReport) {
+
+        if( trustReport.getHostReport() == null || trustReport.getHostReport().pcrManifest == null ) {
+            throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+        }
+        
+        HostTrustStatus trust = new HostTrustStatus();
+        trust.bios = trustReport.isTrustedForMarker(TrustMarker.BIOS.name());
+        trust.vmm = trustReport.isTrustedForMarker(TrustMarker.VMM.name());
+        trust.asset_tag = trustReport.isTrustedForMarker(TrustMarker.ASSET_TAG.name());
+        
+        Date today = new Date(System.currentTimeMillis()); // create the date here and pass it down, in order to ensure that all created records use the same timestamp
+        logOverallTrustStatus(tblHosts, trust, today);
+        logPcrTrustStatus(tblHosts, trustReport, today);
+        
+    }
+    
     /**
      * NOTE:  the trust report MUST NOT include the host name or ip address;  it's fine to include the AIK.
      * This property allows the trust report to be used anonymously or to be attached to hostname/ipaddress 
@@ -831,6 +849,8 @@ public class HostTrustBO extends BaseBO {
         taLog.setError(toString(status));
         taLog.setManifestName(" ");
         taLog.setManifestValue(" ");
+        taLog.setHost_uuid_hex(host.getUuid_hex());
+        taLog.setUuid_hex(new UUID().toString());
         taLog.setUpdatedOn(today);
 
         TblTaLogJpaController talog = new TblTaLogJpaController(getEntityManagerFactory());
@@ -881,6 +901,8 @@ public class HostTrustBO extends BaseBO {
             TblTaLog pcr = new TblTaLog();
             pcr.setHostID(host.getId());
             pcr.setMleId(host.getBiosMleId().getId());
+            pcr.setHost_uuid_hex(host.getUuid_hex());
+            pcr.setUuid_hex(new UUID().toString());
             pcr.setUpdatedOn(today);
             pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(biosPcrIndex);
@@ -894,6 +916,8 @@ public class HostTrustBO extends BaseBO {
             TblTaLog pcr = new TblTaLog();
             pcr.setHostID(host.getId());
             pcr.setMleId(host.getVmmMleId().getId());
+            pcr.setHost_uuid_hex(host.getUuid_hex());
+            pcr.setUuid_hex(new UUID().toString());
             pcr.setUpdatedOn(today);
             pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(vmmPcrIndex);

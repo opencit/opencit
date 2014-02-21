@@ -34,4 +34,5 @@ public class OtherMediaType {
     public static final String APPLICATION_GZIP = "application/gzip"; // replaces application/x-gzip, application/x-gzip-compressed, etc. http://www.ietf.org/rfc/rfc6713.txt
     public static final String APPLICATION_ZLIB = "application/zlib"; // replaces application/x-zlib, application/x-zlib-compressed, etc. http://www.ietf.org/rfc/rfc6713.txt
     public static final String APPLICATION_X_BZIP2 = "application/x-bzip2";
+    public static final String APPLICATION_SAML = "application/samlassertion+xml";
 }
