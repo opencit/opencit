@@ -24,7 +24,6 @@
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-portal-installer</module>
     <module>mtwilson-server</module>
-    <module>mtwilson-server-installer</module>
     <module>TomcatLinuxInstaller</module>
 	<module>LogRotateLinuxInstaller</module>
   </modules>
