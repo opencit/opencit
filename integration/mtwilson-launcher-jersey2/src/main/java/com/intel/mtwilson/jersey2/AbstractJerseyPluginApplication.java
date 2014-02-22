@@ -86,7 +86,7 @@ register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // 
 //register(com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter.class);// XXX TODO re-enable
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
 register(com.intel.mtwilson.shiro.AuthorizationExceptionMapper.class);
-register(com.intel.mtwilson.jersey.filter.ASLocalizationFilter.class);
+register(com.intel.mtwilson.util.ASLocalizationFilter.class);
 register(com.intel.mtwilson.jersey.filter.ErrorLogFilter.class);
         log.debug("Registering other resources");
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
