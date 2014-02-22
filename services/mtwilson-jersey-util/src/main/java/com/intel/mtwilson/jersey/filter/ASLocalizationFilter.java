@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.helper;
+package com.intel.mtwilson.jersey.filter;
 
 import com.intel.mtwilson.My;
 import com.intel.dcsg.cpg.i18n.LocalizableResponseFilter;
