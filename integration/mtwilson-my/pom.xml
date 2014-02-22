@@ -112,6 +112,11 @@
             <optional>true</optional>
         </dependency>
         -->
+    <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-configuration</artifactId>
+		<version>${project.version}</version>
+    </dependency>
         <!--
        API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-test module
     -->
