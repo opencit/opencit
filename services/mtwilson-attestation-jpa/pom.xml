@@ -91,8 +91,8 @@
 	    <scope>test</scope>
     </dependency>            
  	<dependency>
-	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>mtwilson-webservice-util</artifactId>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-configuration</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
 	<dependency>
