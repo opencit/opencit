@@ -15,6 +15,7 @@ public interface FeatureFilesystem {
     String getLicensePath();
     String getLinuxUtilPath();
     String getSqlPath();
+    String getVarPath(); // working directory
 //    String getWindowsUtilPath();
 //    String getPerlPath();
 //    String getPythonPath();

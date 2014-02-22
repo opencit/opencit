@@ -32,6 +32,10 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-extensions</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-ext</artifactId>
             <version>${project.version}</version>
@@ -88,17 +92,17 @@
             <artifactId>cpg-performance</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>

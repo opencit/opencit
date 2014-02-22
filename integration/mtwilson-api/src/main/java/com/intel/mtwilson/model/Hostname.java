@@ -97,7 +97,7 @@ public class Hostname implements Model {
         // TODO: ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
         // right now valid hostname can be any string that does not contain a comma
 //        return ( !hostname.contains(",") );
-        return ValidationUtil.isValidWithRegex(hostname, RegexPatterns.FQDN);
+        return ValidationUtil.isValidWithRegex(hostname, RegexPatterns.IPADDR_FQDN);
         /*
         try {
             if (hostname.contains(":")) {

@@ -6,10 +6,9 @@ package com.intel.mtwilson.util;
 
 import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.ErrorResponse;
+//import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.i18n.ErrorMessage;
-import static com.intel.mtwilson.util.LocalizedExceptionMapper.getAcceptableLocale;
-import static com.intel.mtwilson.util.LocalizedExceptionMapper.getAcceptableMediaType;
+import com.intel.mtwilson.jersey.http.Util;
 import java.util.Locale;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -36,8 +35,8 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
         log.debug("ThrowableMapper toResponse {}", exception.getClass().getName());
-        Locale locale = getAcceptableLocale(headers.getAcceptableLanguages());
-        MediaType mediaType = getAcceptableMediaType(headers.getAcceptableMediaTypes());
+        Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages());
+        MediaType mediaType = Util.getAcceptableMediaType(headers.getAcceptableMediaTypes());
 
         if (exception instanceof Localizable) {
             log.debug("intercepted Localizable Throwable; localizing response to {}", locale.getDisplayName());
@@ -60,7 +59,8 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
         ErrorResponse errorResponse = new ErrorResponse(message); // error_code and error_message  , can be serialized to json, xml, yaml...
         // XXX if we want to set a different http status code for various errors, we could have different exception classes like NotFound extends MWException and sets a status code of 404
 //        Response response = Response.status(400).entity(new AuthResponse(exception.getErrorCode(), output)).type(MediaType.APPLICATION_JSON_TYPE).build();
-        Response response = Response.status(400).entity(errorResponse).type(mediaType).build();
+//        Response response = Response.status(400).entity(errorResponse).type(mediaType).build();
+        Response response = Response.status(400).entity(errorResponse).type(MediaType.APPLICATION_JSON).build(); // XXX when we use requestor's mediatype we get this error: java.lang.ClassCastException: com.intel.mtwilson.datatypes.ErrorResponse cannot be cast to java.util.Collection
         return response;
 
     }

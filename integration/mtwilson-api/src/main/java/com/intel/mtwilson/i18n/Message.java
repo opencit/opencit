@@ -7,6 +7,7 @@ package com.intel.mtwilson.i18n;
 import com.intel.dcsg.cpg.i18n.Localizable;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +38,20 @@ public class Message implements Localizable {
         ResourceBundle bundle = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), locale);
         log.debug("Message toString with locale: {}", locale.toString());
         log.debug("Message toString loaded resource bundle: {}", bundle.getLocale().toString());
-        String pattern = bundle.getString(name);
-        // use this bundle!
-        MessageFormat formatter = new MessageFormat("");
-        formatter.setLocale(locale);
-        formatter.applyPattern(pattern);
-        String output = formatter.format(args);        
-        return output;
-        
+        try {
+            String pattern = bundle.getString(name);
+            // use this bundle!
+            MessageFormat formatter = new MessageFormat("");
+            formatter.setLocale(locale);
+            formatter.applyPattern(pattern);
+            String output = formatter.format(args);        
+            return output;
+        }
+        catch(MissingResourceException e) {
+            log.error("No translation for key {} in bundle {}: {}", e.getKey(), e.getClassName(), e.getLocalizedMessage());
+            log.error("Message {} args {}", name, args);
+            return "Error (see server log for details)"; // XXX TODO can we try to translate this? might be pointless if translation file is missing, or maybe just a new key is missing from it 
+        }
     }
     
     @Override

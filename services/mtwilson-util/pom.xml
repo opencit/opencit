@@ -90,10 +90,12 @@
           <version>2.0.3</version>
     </dependency>
     -->
+    <!--
     <dependency>
           <groupId>org.eclipse.persistence</groupId>
           <artifactId>eclipselink</artifactId>
     </dependency>
+    -->
     <!--
     <dependency>
     	<groupId>org.codehaus.jackson</groupId>

@@ -10,6 +10,9 @@ import com.intel.mtwilson.model.Hostname;
 import java.io.IOException;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.datatypes.ErrorResponse;
+import com.intel.mtwilson.i18n.ErrorMessage;
 //import org.codehaus.jackson.map.DeserializationConfig;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
@@ -65,4 +68,22 @@ public class JsonTest {
         System.out.println("(array) count: "+array.hosts.length+", first: "+array.hosts[0].toString());
     }
 
+
+    /**
+No suitable constructor found for type [simple type, class com.intel.mtwilson.datatypes.ErrorResponse]: can not instantiate from JSON object (need to add/enable type information?)
+ at [Source: java.io.StringReader@380076e8; line: 1, column: 2]
+com.fasterxml.jackson.databind.JsonMappingException: No suitable constructor found for type [simple type, class com.intel.mtwilson.datatypes.ErrorResponse]: can not instantiate from JSON object (need to add/enable type information?)
+ at [Source: java.io.StringReader@380076e8; line: 1, column: 2]
+     * 
+     * @throws Exception 
+     */
+    @Test
+    public void testErrorResponse() throws Exception {
+//        ErrorResponse response = new ErrorResponse(new ErrorMessage(ErrorCode.UNKNOWN_ERROR, "test"));
+//        String json = toJSON(response);
+        String json = "{\"error_code\":\"UNKNOWN\", \"error_message\":\"test\"}";
+        log.debug("response: {}", json);
+        ErrorResponse response2 = fromJSON(json, ErrorResponse.class);
+        log.debug("response2: {} - {}", response2.getErrorCode(), response2.getErrorMessage());
+    }
 }

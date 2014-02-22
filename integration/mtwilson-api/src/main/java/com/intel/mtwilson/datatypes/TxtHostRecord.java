@@ -31,7 +31,7 @@ public class TxtHostRecord {
     @Regex(RegexPatterns.IPADDR_FQDN)
     public String IPAddress;
     @JsonProperty
-    @Regex(RegexPatterns.PORT)
+//    @Regex(RegexPatterns.PORT) // regex can only be tested against String variables ;   TODO  we need an integer range validator  annotation
     public Integer Port;
     @JsonProperty
     public String BIOS_Name;

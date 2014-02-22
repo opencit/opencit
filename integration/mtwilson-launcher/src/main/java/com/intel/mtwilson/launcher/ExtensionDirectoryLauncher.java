@@ -4,15 +4,21 @@
  */
 package com.intel.mtwilson.launcher;
 
+import com.intel.dcsg.cpg.classpath.FileURLClassLoader;
 import com.intel.dcsg.cpg.classpath.JarClassIterator;
 import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
 import com.intel.dcsg.cpg.extensions.ExtensionUtil;
+import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.dcsg.cpg.io.file.FilenameContainsFilter;
+import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.dcsg.cpg.performance.CountingIterator;
 import com.intel.dcsg.cpg.util.ArrayIterator;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyFilesystem;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  *
@@ -23,7 +29,9 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
     
     private File javaFolder;
     private ClassLoader parentClassLoader;
-    private MultiJarFileClassLoader applicationClassLoader;
+//    private MultiJarFileClassLoader applicationClassLoader;
+    private ClassLoader applicationClassLoader;
+    private Registrar[] registrars;
     
     /**
      * Initializes member variables parentClassLoader, 
@@ -40,9 +48,15 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         parentClassLoader = Thread.currentThread().getContextClassLoader();
         if(parentClassLoader==null) { parentClassLoader = ExtensionDirectoryLauncher.class.getClassLoader(); }
         // look for java extension directory
-        String javaPath = My.filesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java 
+//        String javaPath = My.filesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java 
+        String javaPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java
+        log.info("Application Java path: {}", javaPath);
+//        if( My.configuration().getmtwj)
         javaFolder = new File(javaPath);
-        applicationClassLoader = new MultiJarFileClassLoader(parentClassLoader);        
+//        applicationClassLoader = new MultiJarFileClassLoader(parentClassLoader); 
+        registrars = new Registrar[] { new ImplementationRegistrar() } ;
+        
+        log.debug("thread context class loader: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
     }
 
     public ClassLoader getParentClassLoader() {
@@ -59,7 +73,8 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         return applicationClassLoader;
     }
 
-    public void setApplicationClassLoader(MultiJarFileClassLoader applicationClassLoader) {
+//    public void setApplicationClassLoader(MultiJarFileClassLoader applicationClassLoader) {
+    public void setApplicationClassLoader(ClassLoader applicationClassLoader) {
         this.applicationClassLoader = applicationClassLoader;
     }
     
@@ -72,6 +87,16 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
     public void setJavaFolder(File javaFolder) {
         this.javaFolder = javaFolder;
     }
+
+    public Registrar[] getRegistrars() {
+        return registrars;
+    }
+
+    
+    public void setRegistrars(Registrar[] registrars) {
+        this.registrars = registrars;
+    }
+    
     
     
     
@@ -79,7 +104,7 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
     public void run() {
         // add all the jar files to a classloader
         try {
-        load(getJars());
+        load(getApplicationJars());
         }
         catch(IOException e) {
             log.error("Cannot load jars", e);
@@ -95,19 +120,44 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         
         
         // scan mtwilson jars for plugins,  in the main classloader and also in all feature classloaders / java ext dirs
-        
+        scan(getApplicationExtensionJars(), getRegistrars());
         
     }
     
-    public File[] getJars() {
+    public File[] getApplicationJars() {
         // list all the jar files in the java directory
-        ModuleDirectoryLauncher.JarFilter jarfilter = new ModuleDirectoryLauncher.JarFilter();
+        FilenameEndsWithFilter jarfilter = new FilenameEndsWithFilter(".jar");
         File[] jars = javaFolder.listFiles(jarfilter);
         return jars;
     }
     
+    /**
+     * Default behavior is to filter the application jars to select only 
+     * jars that have "mtwilson" in the name, for example mtwilson-attestation-ws-v2.jar
+     * or othercompany-mtwilson-plugin.jar 
+     * 
+     * @return 
+     */
+    public File[] getApplicationExtensionJars() {
+        FilenameContainsFilter jarfilter = new FilenameContainsFilter("mtwilson");
+        File[] jars = getApplicationJars();
+        ArrayList<File> extensionJars = new ArrayList<>();
+        for(int i=0; i<jars.length; i++) {
+            if( jarfilter.accept(jars[i]) ) {
+                extensionJars.add(jars[i]);
+            }
+        }
+        return extensionJars.toArray(new File[extensionJars.size()]);
+    }
+    
     public void load(File[] jars) throws IOException {
-        applicationClassLoader.add(jars);        
+        if( applicationClassLoader == null ) {
+            applicationClassLoader = new FileURLClassLoader(jars, parentClassLoader);
+        }
+        else {
+            // TODO:  we can't predict what classloader it would be so does it even
+            // make sense to have a load(File[]) ?? 
+        }
     }
     
     // TODO :   Extensions find* functions need to record the *results* that
@@ -119,17 +169,19 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
     //  complete with this function.  that will makea pplication startup much
     //  faster (with the assumption that any new plugins wont' be requested 
     //  within the first 5-10 seconds of the app starting up) 
-    public void scanJars(File[] jars, Registrar[] registrars) {
+    // jars need to be already filtered to the jars you want to scan 
+    public void scan(File[] jars, Registrar[] registrars) {
         long time0 = System.currentTimeMillis();
         CountingIterator<File> it = new CountingIterator<>(new ArrayIterator<>(jars)); // only scans directory for jar files; does NOT scan subdirectories
+        for(int i=0; i<registrars.length; i++) { log.debug("Scanning with registrar {}", registrars[i].getClass().getName()); }
         while (it.hasNext()) {
             File jar = it.next();
-            // XXX  for now we'll only scan mtwilson jar files  (mtwilson-* ) or jar files that were intended for use with mtwilson (some-other-company-mtwilson)
-            if( !jar.getName().contains("mtwilson") ) { continue; }
-            try {
+            log.debug("Scanning {}", jar.getAbsolutePath());
+            try {/*
                 for(Registrar registrar : registrars) {
                     ExtensionUtil.scan(registrar, new JarClassIterator(jar, applicationClassLoader));// we use our current classloader which means if any classes are already loaded we'll reuse them
-                }
+                }*/
+                ExtensionUtil.scan(new JarClassIterator(jar, applicationClassLoader), registrars);
             }
             catch(Throwable e) { // catch ClassNotFoundException and NoClassDefFoundError 
                 log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName() + ": " + e.getMessage());

@@ -18,6 +18,7 @@ import com.intel.dcsg.cpg.classpath.ClassLoadingStrategy;
 import com.intel.dcsg.cpg.classpath.DirectoryResolver;
 import com.intel.dcsg.cpg.classpath.FencedClassLoadingStrategy;
 import com.intel.dcsg.cpg.classpath.JarUtil;
+import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.util.jar.Manifest;
 public class ModuleDirectoryLauncher {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ModuleDirectoryLauncher.class);
-    private static final JarFilter jarfilter = new JarFilter();
+    private static final FilenameEndsWithFilter jarfilter = new FilenameEndsWithFilter(".jar");
     private Container container = new Container();
     private ClassLoadingStrategy classLoadingStrategy = new FencedClassLoadingStrategy(); // a reasonable default until we get semantic versioning working
 
@@ -220,23 +221,6 @@ public class ModuleDirectoryLauncher {
         @Override
         public void remove() {
             throw new UnsupportedOperationException(); //"Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-    }
-
-    public static class JarFilter implements FilenameFilter, Filter<File> {
-
-        @Override
-        public boolean accept(File dir, String name) {
-            try {
-                return /*dir.toPath().resolve(name).toFile().isFile() &&*/ name.endsWith(".jar");
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        @Override
-        public boolean accept(File item) {
-            return item.getName().endsWith(".jar");
         }
     }
 

@@ -21,21 +21,21 @@ public class ExceptionThrowingResource {
     
     @GET
     @Path("/runtime")
-    public void throwRuntimeException() {
+    public String throwRuntimeException() {
         log.debug("throwRuntimeException");
         throw new RuntimeException("deliberate non-internationalized exception");
     }
 
     @GET
     @Path("/runtime-localizable")
-    public void throwLocalizableRuntimeException() {
+    public String throwLocalizableRuntimeException() {
         log.debug("throwLocalizableRuntimeException");
         throw new MWException(ErrorCode.UNKNOWN_ERROR, "deliberate localizable exception");
     }
 
     @GET
     @Path("/error")
-    public void throwError() {
+    public String throwError() {
         log.debug("throwError");
         throw new Error("deliberate non-internationalized error");
     }

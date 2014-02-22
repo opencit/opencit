@@ -5,17 +5,8 @@
 package com.intel.mtwilson.shiro;
 
 import com.intel.mtwilson.i18n.ErrorMessage;
-import com.intel.mtwilson.datatypes.AuthResponse;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.ErrorResponse;
-import com.intel.mtwilson.i18n.BundleName;
-//import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
+import com.intel.mtwilson.util.ErrorResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;

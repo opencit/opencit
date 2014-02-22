@@ -249,6 +249,18 @@
             <scope>provided</scope>
 		</dependency>
 -->        
+
+<!-- required for ASLocalizationFilter -->
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-i18n</artifactId>
+        </dependency>
+<dependency>
+    <groupId>javax.annotation</groupId>
+    <artifactId>javax.annotation-api</artifactId>
+    <version>1.2</version>
+</dependency>
+<!-- end required for ASLocalizationFilter -->
                 
     </dependencies>
     <properties />

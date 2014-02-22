@@ -40,12 +40,13 @@
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- mtwilson-util is required when using mtwilson-my, so we can remove thsi when we rearrange the dependencies -->
+        <!-- mtwilson-util is required when using mtwilson-my, so we can remove thsi when we rearrange the dependencies 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
 
         <dependency>
             <groupId>postgresql</groupId>

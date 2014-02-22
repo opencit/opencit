@@ -32,8 +32,11 @@ when MTWILSON_CONF and MTWILSON_HOME is not set:
      */
     @Test
     public void testDefaultPaths() {
-        ApplicationFilesystem fs = MyFilesystem.getMyFilesystem();
+        ApplicationFilesystem fs = MyFilesystem.getApplicationFilesystem();
+        log.debug("app fs class: {}", fs.getClass().getName());
         log.debug("conf path: {}", fs.getConfigurationPath());
+        log.debug("bin path: {}", fs.getBootstrapFilesystem().getBinPath());
+        log.debug("var path: {}", fs.getBootstrapFilesystem().getVarPath());
     }
     
     @Test

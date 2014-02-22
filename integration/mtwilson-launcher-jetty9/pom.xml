@@ -51,21 +51,21 @@ This error message indicates you need a jersey implementation like org.glassfish
     2014-01-17 09:01:30.157:WARN:oejuc.AbstractLifeCycle:main: FAILED javax.ws.rs.core.Application@83f91b4==null,-1,false: javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application
     javax.servlet.UnavailableException: No class for Servlet or Filter for javax.ws.rs.core.Application
     
--->
-<plugin>
-    <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.1.0.RC2</version>
-        <configuration>
-          <webAppConfig>
-            <contextPath>/</contextPath>
-            <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
-<!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
-          </webAppConfig>
-          <reload>manual</reload>
-        </configuration>
-      </plugin>
+            -->
+            <plugin>
+                <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.1.0.RC2</version>
+                <configuration>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                        <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
+                        <!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
+                    </webAppConfig>
+                    <reload>manual</reload>
+                </configuration>
+            </plugin>
 
         </plugins>
     </build>
@@ -76,28 +76,17 @@ This error message indicates you need a jersey implementation like org.glassfish
             <artifactId>mtwilson-launcher-jersey2</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<!-- TODO: PLEASE REMOVE THIS DEPENDENCY BEFORE PRODUCTION BUILD. ADDED ONLY FOR DEVELOPMENT PURPOSES -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
         
-        <!-- for jersey 2.x deployment on glassfish4, we have to exclude the jersey jars because glassfish 4 already has them and will throw this error 
-		if they are included in the war file:
-org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD-001408 Unsatisfied dependencies for type [IterableProvider<InjectionResolver<Object>>] with qualifiers [@Default] at injection point [[BackedAnnotatedParameter] Parameter 2 of [BackedAnnotatedConstructor] @Inject org.glassfish.jersey.internal.inject.JerseyClassAnalyzer(@Named ClassAnalyzer, IterableProvider<InjectionResolver<Object>>)]
-        at org.glassfish.weld.WeldDeployer.event(WeldDeployer.java:225)
-        at org.glassfish.kernel.event.EventsImpl.send(EventsImpl.java:131)
-        at org.glassfish.internal.data.ApplicationInfo.load(ApplicationInfo.java:328)
-        at com.sun.enterprise.v3.server.ApplicationLifecycle.deploy(ApplicationLifecycle.java:493)
-        at com.sun.enterprise.v3.server.ApplicationLifecycle.deploy(ApplicationLifecycle.java:219)
-		
-		-->
-        <!-- XXX TODO  probably need to separate poms:  1 for war file to deploy onto glassfish 4, w/o jersey jars, and 1 for deploying on jetty/tomcat, with jersey jars included -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
         </dependency>
@@ -108,12 +97,47 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
         
         
         <!-- janino is required to evaluate the throwable filter expressions in logback.xml , only needed if that feature is used -->
-<dependency>
-    <groupId>janino</groupId>
-    <artifactId>janino</artifactId>
-    <version>2.5.10</version>
-</dependency>        
+        <dependency>
+            <groupId>janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>2.5.10</version>
+        </dependency>        
         
+        <!-- temporarily putting jpa dependencies here so we can find persistence.xml , but TODO  need to allow passing in a classloader to cpg-jpa persistencemanager  and some way for the app to know what is the application class loader used by mtwilson-launcher-xyz ... maybe MyClassLoader ?? -->
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+        <!--
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-attestation-jpa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-management-jpa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-audit-data</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-audit-handler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+        -->
+        
+        <!-- include all the app dependencies ... XXX TODO  load from java filesystem path like /opt/mtwilson/java -->
+    <dependency>
+      <groupId>com.intel.mtwilson.features</groupId>
+      <artifactId>mtwilson-server</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
     </dependencies>
     
 </project>

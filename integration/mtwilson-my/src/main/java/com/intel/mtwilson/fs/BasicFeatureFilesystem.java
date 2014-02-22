@@ -53,5 +53,9 @@ public class BasicFeatureFilesystem implements FeatureFilesystem {
         return root + File.separator + "sql";
     }
     
+    @Override
+    public String getVarPath() {
+        return root + File.separator + "var";
+    }
 
 }

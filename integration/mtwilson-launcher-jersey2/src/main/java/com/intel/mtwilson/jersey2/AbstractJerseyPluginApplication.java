@@ -5,25 +5,11 @@
 package com.intel.mtwilson.jersey2;
 
 //import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.classpath.JarClassIterator;
-import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
-import com.intel.dcsg.cpg.extensions.ExtensionUtil;
-import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.Registrar;
-import com.intel.dcsg.cpg.util.ArrayIterator;
-import com.intel.mtwilson.launcher.ModuleDirectoryLauncher;
-import com.intel.mtwilson.launcher.ws.ext.V2;
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
+import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
 import org.glassfish.jersey.server.ResourceConfig;
 //import com.intel.mtwilson.ws.jersey.util.*;
-import java.util.List;
 import java.util.Set;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.Provider;
 
 /**
  * See also:
@@ -61,7 +47,10 @@ public abstract class AbstractJerseyPluginApplication extends ResourceConfig {
     protected abstract Registrar[] getRegistrars();
     
     public AbstractJerseyPluginApplication() {
-        Util.scanJars(Util.findAllJars(),getRegistrars());
+        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
+        launcher.setRegistrars(getRegistrars());
+        launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
+//        Util.scanJars(Util.findAllJars(),getRegistrars());
 register(JacksonFeature.class);        
         log.debug("Registering YAML, XML, JSON providers");
         
@@ -97,7 +86,7 @@ register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // 
 //register(com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter.class);// XXX TODO re-enable
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
 register(com.intel.mtwilson.shiro.AuthorizationExceptionMapper.class);
-register(com.intel.mtwilson.as.helper.ASLocalizationFilter.class);
+register(com.intel.mtwilson.jersey.filter.ASLocalizationFilter.class);
 register(com.intel.mtwilson.jersey.filter.ErrorLogFilter.class);
         log.debug("Registering other resources");
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
@@ -151,15 +140,15 @@ register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
      * given list with all resources defined in the project.
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
-        resources.add(com.intel.mtwilson.as.rest.v2.resource.Files.class);
-        resources.add(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);
-        resources.add(com.intel.mtwilson.as.rest.v2.resource.Users.class);
-        resources.add(com.intel.mtwilson.jersey.provider.ApplicationYamlProvider.class);
-        resources.add(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
-        resources.add(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class);
-        resources.add(com.intel.mtwilson.jersey.provider.JacksonYamlObjectMapperProvider.class);
-        resources.add(com.intel.mtwilson.jersey.resource.AbstractResource.class);
-        resources.add(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
+//        resources.add(com.intel.mtwilson.as.rest.v2.resource.Files.class);
+//        resources.add(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);
+//        resources.add(com.intel.mtwilson.as.rest.v2.resource.Users.class);
+//        resources.add(com.intel.mtwilson.jersey.provider.ApplicationYamlProvider.class);
+//        resources.add(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
+//        resources.add(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class);
+//        resources.add(com.intel.mtwilson.jersey.provider.JacksonYamlObjectMapperProvider.class);
+//        resources.add(com.intel.mtwilson.jersey.resource.AbstractResource.class);
+//        resources.add(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
     }
 
 }

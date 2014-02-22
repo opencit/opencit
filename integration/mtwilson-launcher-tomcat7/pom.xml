@@ -31,8 +31,8 @@
                 <inherited>true</inherited>
                 <version>2.3.2</version>     
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <skip>false</skip>
                 </configuration>
             </plugin>
@@ -44,87 +44,8 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-jersey2</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun.jersey</groupId>
-                    <artifactId>jersey-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.jersey</groupId>
-                    <artifactId>jersey-client</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javax.servlet</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.glassfish</groupId>
-                    <artifactId>javax.servlet</artifactId>
-                </exclusion>
-                <!--
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-web-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javax.mail</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javax.persistence</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javax.resource</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javax.transaction</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                -->
-            </exclusions>
         </dependency>
         
-        <!-- for jersey 2.x deployment on glassfish4, we have to exclude the jersey jars because glassfish 4 already has them and will throw this error 
-		if they are included in the war file:
-org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD-001408 Unsatisfied dependencies for type [IterableProvider<InjectionResolver<Object>>] with qualifiers [@Default] at injection point [[BackedAnnotatedParameter] Parameter 2 of [BackedAnnotatedConstructor] @Inject org.glassfish.jersey.internal.inject.JerseyClassAnalyzer(@Named ClassAnalyzer, IterableProvider<InjectionResolver<Object>>)]
-        at org.glassfish.weld.WeldDeployer.event(WeldDeployer.java:225)
-        at org.glassfish.kernel.event.EventsImpl.send(EventsImpl.java:131)
-        at org.glassfish.internal.data.ApplicationInfo.load(ApplicationInfo.java:328)
-        at com.sun.enterprise.v3.server.ApplicationLifecycle.deploy(ApplicationLifecycle.java:493)
-        at com.sun.enterprise.v3.server.ApplicationLifecycle.deploy(ApplicationLifecycle.java:219)
-		
-		-->
-        <!-- XXX TODO  probably need to separate poms:  1 for war file to deploy onto glassfish 4, w/o jersey jars, and 1 for deploying on jetty/tomcat, with jersey jars included -->
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-	<dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-multipart</artifactId>
-            <scope>provided</scope>
-        </dependency>
         
     </dependencies>
     

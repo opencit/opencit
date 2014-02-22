@@ -114,6 +114,6 @@ public class My {
     */
     
     public static ApplicationFilesystem filesystem() {
-        return MyFilesystem.getMyFilesystem();
+        return MyFilesystem.getApplicationFilesystem();
     }
 }

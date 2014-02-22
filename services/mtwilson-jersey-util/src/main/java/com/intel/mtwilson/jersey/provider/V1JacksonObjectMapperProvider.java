@@ -10,9 +10,8 @@ import javax.ws.rs.ext.Provider;
 //import org.codehaus.jackson.map.SerializationConfig.Feature;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -54,6 +53,7 @@ public class V1JacksonObjectMapperProvider implements ContextResolver<ObjectMapp
         jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
         ObjectMapper mapper = new ObjectMapper(jsonFactory);
 //        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy()); // v1 apis dont' use this because it overrides @JsonProperty annotations 
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         return mapper;
     }
  

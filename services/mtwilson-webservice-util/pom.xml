@@ -42,11 +42,13 @@
             <scope>provided</scope>
         </dependency>
         -->
+        <!--
 	<dependency>
 		<groupId>javax</groupId>
 		<artifactId>javaee-web-api</artifactId>
 		<scope>provided</scope>
 	</dependency>
+    -->
     <!--
 	<dependency>
 		<groupId>org.glassfish</groupId>
@@ -72,6 +74,7 @@
                 <scope>test</scope>
         </dependency>
     
+    <!--
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
@@ -80,6 +83,7 @@
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
     </dependency>
+    -->
     <!--
     <dependency>
           <groupId>org.eclipse.persistence</groupId>
@@ -93,6 +97,7 @@
     <artifactId>javax.ws.rs-api</artifactId>
     <scope>provided</scope>
 </dependency>
+    <!--
     <dependency>
 	<groupId>javax.servlet</groupId>
 	<artifactId>javax.servlet-api</artifactId>
@@ -103,6 +108,7 @@
           <groupId>org.eclipse.persistence</groupId>
           <artifactId>eclipselink</artifactId>
     </dependency>
+    -->
     <!--
     <dependency>
     	<groupId>org.codehaus.jackson</groupId>
@@ -120,31 +126,19 @@
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-crypto</artifactId>
 		</dependency>
+        <!--
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-io</artifactId>
 		</dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
         </dependency>
-    
-	<dependency>
-	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>mtwilson-api</artifactId>
-	    <version>${project.version}</version>
-  	</dependency>
-  	<!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.6.4</version>
-        </dependency>
-  	-->
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+		</dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
@@ -159,5 +153,24 @@
             <artifactId>jackson-databind</artifactId>
             <optional>true</optional>
         </dependency>
+        -->
+    
+	<dependency>
+	    <groupId>com.intel.mtwilson.services</groupId>
+	    <artifactId>mtwilson-jersey-util</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-api</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
+  	<!--
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.4</version>
+        </dependency>
+  	-->
   </dependencies>  
 </project>

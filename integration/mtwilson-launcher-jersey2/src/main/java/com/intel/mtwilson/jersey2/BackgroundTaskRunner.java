@@ -5,8 +5,8 @@
 package com.intel.mtwilson.jersey2;
 
 import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.extensions.Registrar;
-import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
+//import com.intel.dcsg.cpg.extensions.Registrar;
+//import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.performance.BackgroundThread;
 import com.intel.dcsg.cpg.performance.RunnableCollection;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class BackgroundTaskRunner implements ServletContextListener, Runnable {
     @Override
     public void contextInitialized(ServletContextEvent context) {
         log.debug("contextInitialized");
-        Util.scanJars(Util.findAllJars(),getRegistrars());
+//        Util.scanJars(Util.findAllJars(),getRegistrars());
         List<Runnable> runnables = Extensions.findAll(Runnable.class);
         // now filter this for runnables annotated with @Background
         for(Runnable runnable : runnables) {
@@ -82,10 +82,11 @@ public class BackgroundTaskRunner implements ServletContextListener, Runnable {
         }
     }
     
+    /*
     protected Registrar[] getRegistrars() {
         ImplementationRegistrar runnables = new ImplementationRegistrar(); //  backgroudn tasks TODO  move the scanning of these into a ServletContextListener so it will happen at application startup regarldess of v1/v2  ??
         return new Registrar[] { runnables };
     }
-    
+    */
 }
 

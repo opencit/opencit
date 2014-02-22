@@ -23,6 +23,9 @@
 <!--        <appender-ref ref="FILE" /> -->
     </root>
 
+    <!-- libraries -->
+    <logger name="org.apache.commons.beanutils.converters" level="INFO"/>
+
     <!-- classes that are more or less known to be working -->
     <logger name="com.intel.mtwilson.atag" level="DEBUG"/>
     <logger name="org.restlet" level="ERROR"/>
