@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>MSCmdUtility</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>MSCmdUtility</artifactId>
+    <packaging>jar</packaging>
 
-  <name>Management Service Command Utility</name>
+    <name>Management Service Command Utility</name>
   
     <parent>
         <groupId>com.intel.mtwilson.tools</groupId>
@@ -12,7 +12,7 @@
         <version>1.2.3-SNAPSHOT</version>
     </parent>
     
-  <url>http://maven.apache.org</url>
+    <url>http://maven.apache.org</url>
 
     <build>
         <plugins>
@@ -23,45 +23,45 @@
         </plugins>
     </build>
     
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-  <dependencies>
-      <dependency>
+    <dependencies>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>         
-      </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.6.4</version>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>
             <version>${project.version}</version>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-webservice-util</artifactId>
             <version>${project.version}</version>
-    </dependency>   
+        </dependency>   
     </dependencies>
 </project>

@@ -97,72 +97,74 @@ However for a real application deployment we should KEEP the signature files... 
 production deployment unless we verify component signatures during the build and sign the entire shaded artifact for
 our customers.
             -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-            <execution>
-                <id>provisioning-service</id>
-                <phase>package</phase>
-                <goals><goal>shade</goal></goals>
-                <configuration>
-        		<shadedArtifactAttached>true</shadedArtifactAttached>
-                	<shadedClassifierName>with-dependencies</shadedClassifierName>
-                        <transformers>
-                          <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <manifestEntries>
-                                <Main-Class>com.intel.dcsg.cpg.console.Main</Main-Class>
-                            </manifestEntries>
-                          </transformer>
-                        </transformers>
-                        <filters>
-                          <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                              <exclude>META-INF/*.SF</exclude>
-                              <exclude>META-INF/*.DSA</exclude>
-                              <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                          </filter>
-                        </filters>    
-                </configuration>
-            </execution>
-            </executions>
-      </plugin>
-                <!-- begin jetty plugin for junit testing -->
-                <!--
-<plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <version>6.1.10</version>
-        <configuration>
-                <scanIntervalSeconds>10</scanIntervalSeconds>
-                <stopKey>foo</stopKey>
-                <stopPort>9999</stopPort>
-        </configuration>
-        <executions>
-                <execution>
-                        <id>start-jetty</id>
-                        <phase>pre-integration-test</phase>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>provisioning-service</id>
+                        <phase>package</phase>
                         <goals>
-                                <goal>run</goal>
+                            <goal>shade</goal>
                         </goals>
                         <configuration>
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <daemon>true</daemon>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-dependencies</shadedClassifierName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>com.intel.dcsg.cpg.console.Main</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>    
                         </configuration>
-                </execution>
-                <execution>
-                        <id>stop-jetty</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                                <goal>stop</goal>
-                        </goals>
-                </execution>
-        </executions>
-</plugin>-->
-<!-- end jetty plugin  for junit testing -->
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- begin jetty plugin for junit testing -->
+            <!--
+            <plugin>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>maven-jetty-plugin</artifactId>
+                    <version>6.1.10</version>
+                    <configuration>
+                            <scanIntervalSeconds>10</scanIntervalSeconds>
+                            <stopKey>foo</stopKey>
+                            <stopPort>9999</stopPort>
+                    </configuration>
+                    <executions>
+                            <execution>
+                                    <id>start-jetty</id>
+                                    <phase>pre-integration-test</phase>
+                                    <goals>
+                                            <goal>run</goal>
+                                    </goals>
+                                    <configuration>
+                                            <scanIntervalSeconds>0</scanIntervalSeconds>
+                                            <daemon>true</daemon>
+                                    </configuration>
+                            </execution>
+                            <execution>
+                                    <id>stop-jetty</id>
+                                    <phase>post-integration-test</phase>
+                                    <goals>
+                                            <goal>stop</goal>
+                                    </goals>
+                            </execution>
+                    </executions>
+            </plugin>-->
+            <!-- end jetty plugin  for junit testing -->
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
@@ -202,36 +204,36 @@ our customers.
             </activation>
             <build>
                 <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-javadoc-plugin</artifactId>
-			<version>2.9</version>
-			<configuration>
-				<stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
-			</configuration>
-			<executions>
-            <execution>
-                <id>attach-javadocs</id>
-                <phase>site</phase>
-                <goals>
-                    <goal>aggregate</goal>
-                </goals>
-            </execution>
-        </executions>			
-		</plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9</version>
+                        <configuration>
+                            <stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>aggregate</goal>
+                                </goals>
+                            </execution>
+                        </executions>			
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -240,96 +242,96 @@ our customers.
     <dependencies>
 
         <dependency>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>mtwilson-my</artifactId>
-		<version>${project.version}</version>            
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>            
         </dependency>
         <!-- webservice-util is required when using "my" because of the reference to ASDataCipher; but it must be a separate package to avoid circular dependencies between attestation service, asdata, and "my" -->
         <dependency>
-        <groupId>com.intel.mtwilson.services</groupId>
-        <artifactId>mtwilson-webservice-util</artifactId>
-        <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
         </dependency>
-	<dependency>
-	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>mtwilson-hostagent-ext</artifactId>
-	    <version>${project.version}</version>
-  	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.slf4j</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.jackson</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.jetty</artifactId>  
-   <version>2.2-M4</version>
-</dependency>
-<!--
- <dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.simple</artifactId>  
-   <version>2.2-M4</version>
- </dependency>
- -->
-   <dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.ssl</artifactId>  
-   <version>2.2-M4</version>
- </dependency>
-    <dependency>
-	<groupId>javax.servlet</groupId>
-	<artifactId>servlet-api</artifactId>
-	<version>2.5</version>
-    </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.slf4j</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.jackson</artifactId>  
+            <version>2.2-M4</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.jetty</artifactId>  
+            <version>2.2-M4</version>
+        </dependency>
+        <!--
+        <dependency>  
+          <groupId>org.restlet.jse</groupId>  
+          <artifactId>org.restlet.ext.simple</artifactId>  
+          <version>2.2-M4</version>
+        </dependency>
+        -->
+        <dependency>  
+            <groupId>org.restlet.jse</groupId>  
+            <artifactId>org.restlet.ext.ssl</artifactId>  
+            <version>2.2-M4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+        </dependency>
 
-    <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>asset-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>asset-tag-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>asset-tag-dao-jooq</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-    <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tls-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-<!-- mt wilson api client is used to send new x509 attribute certificates to mt wilson as they are created -->
-    <dependency>
+        <!-- mt wilson api client is used to send new x509 attribute certificates to mt wilson as they are created -->
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>
             <version>${project.version}</version>
         </dependency>
 
 
-    <dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
         </dependency>
@@ -360,16 +362,16 @@ our customers.
         </dependency>
 
         <!-- mtwilson integration -->
-		<!--
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>
             <version>1.2-SNAPSHOT</version>
         </dependency>
-		-->
+        -->
         <!-- end mtwilson integration -->
 
-      <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
+        <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
@@ -409,73 +411,73 @@ our customers.
             <artifactId>simple-framework</artifactId>
             <version>5.1</version>
         </dependency>
-    <!--
+        <!--
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                    <version>4.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                    <version>4.2</version>
+                </dependency>
+        -->
+        <!-- JSON support -->
+        <!--
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.2</version>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.11</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.2</version>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.11</version>
         </dependency>
--->
-    <!-- JSON support -->
-    <!--
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-mapper-asl</artifactId>
-	<version>1.9.11</version>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-core-asl</artifactId>
-	<version>1.9.11</version>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-xc</artifactId>
-	<version>1.9.11</version>
-</dependency>
--->
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <version>1.9.11</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
-<!-- jooq  database query assembly -->
-<dependency>
-  <groupId>org.jooq</groupId>
-  <artifactId>jooq</artifactId>
-  <version>3.1.0</version>
-</dependency>
-<dependency>
-  <groupId>org.jooq</groupId>
-  <artifactId>jooq-meta</artifactId>
-  <version>3.1.0</version>
-</dependency>
-<dependency>
-  <groupId>org.jooq</groupId>
-  <artifactId>jooq-codegen</artifactId>
-  <version>3.1.0</version>
-</dependency>
+        <!-- jooq  database query assembly -->
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-meta</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen</artifactId>
+            <version>3.1.0</version>
+        </dependency>
 
-    <!-- Jetty embedded web server -->
-<dependency>
-	<groupId>org.mortbay.jetty</groupId>
-	<artifactId>jetty-embedded</artifactId>
-	<version>6.1.26</version>
-</dependency>
-<!-- configuration support -->
+        <!-- Jetty embedded web server -->
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-embedded</artifactId>
+            <version>6.1.26</version>
+        </dependency>
+        <!-- configuration support -->
         <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -504,88 +506,88 @@ our customers.
         </dependency>
         -->
         <dependency>
-                    <artifactId>jaxb-impl</artifactId>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <version>2.2.7-b63</version>
+            <artifactId>jaxb-impl</artifactId>
+            <groupId>com.sun.xml.bind</groupId>
+            <version>2.2.7-b63</version>
         </dependency>
         
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>1.1</version>
-		</dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1</version>
+        </dependency>
         
         
-<!-- grizzly embedded webserver -->
+        <!-- grizzly embedded webserver -->
         <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-servlet-webserver</artifactId>
             <version>1.9.56</version>
         </dependency>
-<!-- end grizzly -->        
+        <!-- end grizzly -->        
 
-    <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
-    <dependency>
-      <groupId>org.jdbi</groupId>
-      <artifactId>jdbi</artifactId>
-      <version>2.49</version>
-    </dependency>        
+        <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.49</version>
+        </dependency>        
         
         
         <!-- apache 2.0 license,  database connection pooling system -->
-    <dependency>
-        <groupId>commons-dbcp</groupId>
-        <artifactId>commons-dbcp</artifactId>
-        <version>1.4</version>
-    </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
         
         <!-- apache 2.0 license ,  java database system -->
-<dependency>
-	<groupId>org.apache.derby</groupId>
-	<artifactId>derby</artifactId>
-	<version>10.10.1.1</version>
-</dependency>
-
-                    <!-- gplv2 license mysql database connector for testing only (cannot include in production build) -->
         <dependency>
-    	<groupId>mysql</groupId>
-    	<artifactId>mysql-connector-java</artifactId>
-        <scope>test</scope>
-    </dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.10.1.1</version>
+        </dependency>
+
+        <!-- gplv2 license mysql database connector for testing only (cannot include in production build) -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
     
 
-    <dependency>
-        <groupId>com.intel.mtwilson.services</groupId>
-        <artifactId>mtwilson-trust-utils</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-trust-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
                     
         <!--
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>3.2.0.RELEASE</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>3.2.0.RELEASE</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>3.2.0.RELEASE</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context-support</artifactId>
-      <version>3.2.0.RELEASE</version>
-      <type>jar</type>
-    </dependency>
--->
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-core</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-beans</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context-support</artifactId>
+              <version>3.2.0.RELEASE</version>
+              <type>jar</type>
+            </dependency>
+        -->
     </dependencies>  
     
     

@@ -26,7 +26,7 @@ public class SAMLTest {
     private boolean forceVerify = false;
     
     /**
-     * sample output:
+     * sample output using jdk7u13:
      * 
 <?xml version="1.0" encoding="UTF-8"?><saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" ID="HostTrustAssertion" IssueInstant="2014-02-23T04:46:05.708Z" Version="2.0"><saml2:Issuer>https://127.0.0.1:8080</saml2:Issuer><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI="#HostTrustAssertion"><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>aqE/pYDJljeOMQ1Pj7FOtk8f6Kk=</DigestValue></Reference></SignedInfo><SignatureValue>G6XeqweiWyqnISNC/1G38H6jejdgbApJcPXVB55lN2NNKL8HStxoPehKwlZU1Sd5fNlFWr35mR2U
 2RlWh082pTwktte4AgM0TkCR2BSpSqXEGhA4o5YVfkkXl2qAVZbUaK7pUop2IuOiOUZZP+1dfSWA

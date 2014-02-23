@@ -64,7 +64,7 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
         </dependency>

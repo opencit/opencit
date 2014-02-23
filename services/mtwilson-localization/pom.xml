@@ -5,20 +5,20 @@
     <name>mtwilson-localization</name>
 
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
-		<version>1.2.3-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
     
     
     <build>
 
-                <plugins>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-                </plugins>
+        </plugins>
     </build>
 
 </project>

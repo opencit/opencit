@@ -5,108 +5,108 @@
     <name>mtwilson-shiro-util</name>
 
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
-		<version>1.2.3-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
     
     
     <build>
 
-                <plugins>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-                </plugins>
+        </plugins>
     </build>
     <dependencies>
 
-<dependency>
-  <groupId>org.apache.shiro</groupId>
-  <artifactId>shiro-core</artifactId>
-  <version>1.2.2</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.shiro</groupId>
-  <artifactId>shiro-web</artifactId>
-  <version>1.2.2</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.shiro</groupId>
-  <artifactId>shiro-aspectj</artifactId>
-  <version>1.2.2</version>
-</dependency>		
-
-
-	<dependency>
-	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>mtwilson-shiro-jdbi</artifactId>
-	    <version>${project.version}</version>
-  	</dependency>
-
-	<dependency>
-	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>mtwilson-webservice-util</artifactId>
-	    <version>${project.version}</version>
-  	</dependency>
-
-<!-- servlet and jaxrs apis for the exception mapper -->	
-    <dependency>
-	<groupId>javax.servlet</groupId>
-	<artifactId>servlet-api</artifactId>
-	<version>2.5</version>
-	<optional>true</optional>
-    </dependency>
-
-<dependency>
-    <groupId>javax.ws.rs</groupId>
-    <artifactId>javax.ws.rs-api</artifactId>
-	<optional>true</optional>
-</dependency>
-
-                            <!-- logging -->
-    <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-api</artifactId>
-    </dependency>
-    <!-- <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-jdk14</artifactId>
-		<version>1.6.4</version>
-    </dependency> -->
         <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-web</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-aspectj</artifactId>
+            <version>1.2.2</version>
+        </dependency>		
+
+
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-jdbi</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
         </dependency>
-	<dependency>
-	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>mtwilson-api</artifactId>
-	    <version>${project.version}</version>
-  	</dependency>
-	<dependency>
-	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>mtwilson-my</artifactId>
-	    <version>${project.version}</version>
-  	</dependency>
+
+        <!-- servlet and jaxrs apis for the exception mapper -->	
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <!-- <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.4</version>
+        </dependency> -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-	<dependency>
-	    <groupId>com.intel.dcsg.cpg</groupId>
-	    <artifactId>cpg-authz-token</artifactId>
-  	</dependency>
-	<dependency>
-	    <groupId>com.intel.dcsg.cpg</groupId>
-	    <artifactId>cpg-net</artifactId>
-  	</dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-authz-token</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>

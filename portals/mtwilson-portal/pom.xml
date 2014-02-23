@@ -13,11 +13,11 @@
 
     <dependencies>
 	   
-       <dependency>
+        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
@@ -39,11 +39,11 @@
             <artifactId>javax.servlet</artifactId>
             <scope>provided</scope>
         </dependency>
-	<dependency>
-		  <groupId>com.intel.mtwilson.services</groupId>
-				 <artifactId>mtwilson-audit-data</artifactId>
-				 <version>${project.version}</version>
-	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-audit-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
@@ -154,53 +154,53 @@
             <artifactId>spring-context</artifactId>
             <version>3.1.1.RELEASE</version>
         </dependency>
-	<!--
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>3.1.1.RELEASE</version>
-        </dependency>
-	-->
+        <!--
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>3.1.1.RELEASE</version>
+            </dependency>
+        -->
         <dependency>
             <groupId>com.google.collections</groupId>
             <artifactId>google-collections</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>
-                <groupId>com.intel.mtwilson.integration</groupId>
-                <artifactId>mtwilson-api</artifactId>
-                <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-                <groupId>com.intel.mtwilson.integration</groupId>
-                <artifactId>mtwilson-client-java6</artifactId>
-                <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java6</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-                <groupId>com.intel.mtwilson.integration</groupId>
-                <artifactId>mtwilson-my</artifactId>
-                <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
         </dependency>
         
 
         <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-management-jpa</artifactId>
-			<version>${project.version}</version>
-		</dependency>	
-      <dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-management-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>	
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>         
-      </dependency>        
-      <!-- TODO for plugin architecture and html5 portal rewrite, the vmware-specific GUI features need to be moved to a plugin -->
-      <dependency>
+        </dependency>        
+        <!-- TODO for plugin architecture and html5 portal rewrite, the vmware-specific GUI features need to be moved to a plugin -->
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-vmware-hostagent</artifactId>
             <version>${project.version}</version>         
-      </dependency>        
-                <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
+        </dependency>        
+        <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
@@ -221,7 +221,7 @@
     </dependencies>
 
     <build>
-	<plugins>
+        <plugins>
         
         
         
@@ -231,30 +231,30 @@
             </plugin>
             
             <!-- to create a regular .war file you do not need to list this plugin... it's only here to configure filtering so we can get current build information into the footer of the portal pages -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-		    <archiveClasses>true</archiveClasses>
-		    <attachClasses>true</attachClasses>
-          <excludeArtifactIds>javaee-api,javax.ws.rs-api</excludeArtifactIds>
-          <webResources>
-            <resource>
-              <!-- this is relative to the pom.xml directory -->
-              <directory>src/main/webapp</directory>
-              <filtering>true</filtering>
-              <includes>
-                  <include>mtwilson-version.txt</include>
-              </includes>
-            </resource>
-          </webResources>
-        </configuration>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archiveClasses>true</archiveClasses>
+                    <attachClasses>true</attachClasses>
+                    <excludeArtifactIds>javaee-api,javax.ws.rs-api</excludeArtifactIds>
+                    <webResources>
+                        <resource>
+                            <!-- this is relative to the pom.xml directory -->
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>mtwilson-version.txt</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
                         
                         
                         
-	</plugins>	
+        </plugins>	
     
     </build>
 </project>

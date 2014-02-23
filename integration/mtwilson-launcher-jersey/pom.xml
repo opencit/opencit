@@ -40,20 +40,20 @@ This error message indicates you need jackson 1.x implementation like org.codeha
     Caused by: com.sun.jersey.api.MessageException: A message body writer for Java class com.intel.mtwilson.datatypes.AuthResponse, and Java type class com.intel.mt
     wilson.datatypes.AuthResponse, and MIME media type application/json was not found
     
--->
-<plugin>
-    <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.1.0.RC2</version>
-        <configuration>
-          <webAppConfig>
-            <contextPath>/</contextPath>
-            <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
-<!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
-          </webAppConfig>
-        </configuration>
-      </plugin>
+            -->
+            <plugin>
+                <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.1.0.RC2</version>
+                <configuration>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                        <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
+                        <!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
+                    </webAppConfig>
+                </configuration>
+            </plugin>
 
         </plugins>
     </build>
