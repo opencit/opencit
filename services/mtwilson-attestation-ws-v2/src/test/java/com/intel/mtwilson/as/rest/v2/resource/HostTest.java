@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
@@ -23,6 +24,7 @@ import org.junit.Test;
  * @author ssbangal
  */
 public class HostTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTest.class);
     
     @BeforeClass 
     public static void registerPluginsForTest() {
@@ -39,6 +41,15 @@ public class HostTest {
         HostAttestation obj = new HostAttestation();
         obj.setHostUuid("0066e3f6-c325-479a-b0ee-22d253c4369a");
         repo.create(obj);
+    }
+
+    @Test
+    public void testRetrieveHostSamlAttestation() throws Exception {
+        HostAttestations ha = new HostAttestations();
+        HostAttestation obj = new HostAttestation();
+        obj.setHostUuid("ec183203-c468-4584-8214-7bd30d0fe706");
+        String samlAssertion = ha.createSamlAssertion(obj);
+        log.debug(samlAssertion);
     }
     
 }
