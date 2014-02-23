@@ -25,6 +25,7 @@
     <module>mtwilson-client-dotnet</module>
     <module>mtwilson-client-php</module>
 	-->
+    <module>mtwilson-configuration</module>
     <module>mtwilson-launcher</module>
     <module>mtwilson-launcher-ext</module>
     <module>mtwilson-launcher-jersey2</module>
