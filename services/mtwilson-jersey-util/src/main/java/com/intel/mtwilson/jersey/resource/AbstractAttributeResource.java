@@ -29,46 +29,25 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Reference: https://jersey.java.net/documentation/latest/user-guide.html
- * https://jersey.java.net/documentation/latest/media.html
- * https://jersey.java.net/documentation/latest/deployment.html
- * https://wikis.oracle.com/display/Jersey/Overview+of+JAX-RS+1.0+Features
- * http://docs.oracle.com/cd/E19776-01/820-4867/6nga7f5o5/index.html
- *
- * When listing the media types in
- *
- * @Produces annotations, it's important to put application/json before
- * application/vnd.api+json so it will be chosen as the default if the browser
- * doesn't specify an Accept header. If application/json is first, accessing
- * /hosts will display the JSON output in the browser. If
- * application/vnd.api+json is first, the browser will not recognize that
- * content type (even though it has +json) and will download it as a file. The
- * .json file extension maps to application/json specifically. JSON API clients
- * must set the Accept header if they want to receive the output with
- * Content-Type: application/vnd.api+json
- *
- *
- * Example simple JSON output:
- *
- *
- * {"hosts":[{"id":"06285da4-e170-4322-a843-480f3a55feec","name":"hostabc","connection_url":"http://1.2.3.4","description":"test
- * host","bios_mle":"bios-4.3.2"}]}
- *
- * Example XML output:
- * * 
-<host_collection><hosts><host><id>bd7094d2-2ed3-468e-9c16-40999f9e4b8c</id><name>hostabc</name><connectionUrl>http://1.2.3.4</connectionUrl><description>test
- * host</description><biosMLE>bios-4.3.2</biosMLE></host></hosts></host_collection>
- *
- * This abstract class defines the following HTTP interface:
- *
- * GET /collection -> application/vnd.api+json, application/json,
- * application/xml, application/yaml, text/yaml
- *
- * POST /collection Content-Type: application/json, application/xml,
- * application/yaml, text/yaml -> application/json, application/xml,
- * application/yaml, text/yaml
- *
- *
+ * An attribute resource is an extended attribute of some other primary resource.
+ * It does not have its own identifier - the identifier belongs to the primary
+ * resource.
+ * 
+ * Attribute resources are singular - there can only be one.  Therefore
+ * only retrieve and store methods are supported.   Search is not supported.
+ * Delete and post are not supported either because an extended
+ * attribute can only be get or set - not removed or created. 
+ * 
+ * Subclasses of AbstractAttributeResource should be annotated with
+ * @Path("/primary-resource-name/{id}/attribute-name") where {id} refers
+ * to the primary resource's id.
+ * 
+ * There cannot be a collection of extended attributes - a collection means
+ * the client must be able to distinguish one item from another, which 
+ * in turn means they must have their own identifiers. That would make them
+ * not extended attributes but related resources and they should subclass
+ * AbstractSimpleResource or AbstractJsonapiResource instead.
+ * 
  *
  * @author jbuhacoff
  */
@@ -89,85 +68,10 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
     */
     protected abstract SimpleRepository<T,C,F,L> getRepository();
     
-    // TODO:   searchCollection  which @Produces   OtherMediaType.APPLICATION_VND_API_JSON  
-    //       must be implemented in a subclass...
-    @GET
-    public C searchCollection(@BeanParam F selector) {
-        try { log.debug("searchCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
-        ValidationUtil.validate(selector); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        return getRepository().search(selector);
-    }
 
     /**
-     * Add an item to the collection. Input Content-Type is any of
-     * application/json, application/xml, application/yaml, or text/yaml Output
-     * Content-Type is any of application/json, application/xml,
-     * application/yaml, or text/yaml
-     *
-     * The input must represent a single item NOT wrapped in a collection.
-     *
-     * @param item
-     * @return
-     */
-    @POST
-    public T createOne(@BeanParam L locator, T item) {
-        try { log.debug("createOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
-        locator.copyTo(item);
-        ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        if (item.getId() == null) {
-            item.setId(new UUID());
-        }
-        getRepository().create(item);
-        return item;
-    }
-
-    // the delete method is on a specific resource id and because we don't return any content it's the same whether its simple object or json api 
-    // jersey automatically returns status code 204 No Content (successful) to the client because
-    // we have a void return type
-    @Path("/{id}")
-    @DELETE
-    public void deleteOne(@BeanParam L locator) {
-        try { log.debug("deleteOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
-        T item = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
-        if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
-        }
-        getRepository().delete(locator);
-        /*
-        T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
-        if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
-        }
-        getRepository().delete(id);*/
-                /*
-//        C collection = getRepository().search(selector);
-//        if( collection.getDocuments().isEmpty() ) {            
-//            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
-//        }
-//        T item = collection.getDocuments().get(0);
-        
-//        getRepository().delete(item.getId().toString());
-* */
-    }
-    
-    @DELETE
-    public void deleteCollection(@BeanParam F selector) {
-        try { log.debug("deleteCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize selector: {}", e.getMessage()); }
-        C collection = getRepository().search(selector);
-        if( collection.getDocuments().isEmpty() ) {            
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
-        }
-        // Do the delete here after search
-        getRepository().delete(selector);
-        /*for(T item : collection.getDocuments()) {
-            // TODO:  multi-threaded or parallel or have a repository method for multi-delete where we collect all the id's and then send a list
-            getRepository().delete();
-        }*/
-        
-    }
-
-    /**
-     * Retrieve an item from the collection. Input Content-Type is not
+     * Retrieve the extended attribute.
+     * Input Content-Type is not
      * applicable. Output Content-Type is any of application/json,
      * application/xml, application/yaml, or text/yaml
      *
@@ -176,10 +80,10 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
      * @param id
      * @return
      */
-    @Path("/{id}")
+//    @Path("/{id}") //
     @GET
     public T retrieveOne(@BeanParam L locator) {
-        try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("retrieveOne: cannot serialize locator: {}", e.getMessage()); }
         /*
         T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
@@ -200,7 +104,8 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
     }
 
     /**
-     * Replace an item in the collection. Input Content-Type is any of
+     * Replace an extended attribute. 
+     * Input Content-Type is any of
      * application/json, application/xml, application/yaml, or text/yaml Output
      * Content-Type is any of application/json, application/xml,
      * application/yaml, or text/yaml
@@ -212,10 +117,10 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
      * @param item
      * @return
      */
-    @Path("/{id}")
+//    @Path("/{id}")
     @PUT
     public T storeOne(@BeanParam L locator, T item) {
-        try { log.debug("storeOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("storeOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("storeOne: cannot serialize locator: {}", e.getMessage()); }
         ValidationUtil.validate(item);
 //        item.setId(UUID.valueOf(id));
         locator.copyTo(item);
@@ -231,7 +136,7 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
 
     // the patch method only accepts the patch content type (TODO - DEFINE IT  - actually yaml might be a good choice because it's compact, uses multiple lines for display, and has language features that can help deserialize into java easier than json or xml)  
     /**
-     * Update an item in the collection. Input Content-Type is a special patch
+     * Update an extended attribute. Input Content-Type is a special patch
      * document format. Output Content-Type is any of application/json,
      * application/xml, application/yaml, or text/yaml.
      *
@@ -241,11 +146,11 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
      * @param id
      * @return
      */
-    @Path("/{id}")
+//    @Path("/{id}")
     @PATCH
     @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
     public T patchOne(@BeanParam L locator, Patch<T, F, P>[] patchArray) {
-        try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("patchOne: cannot serialize locator: {}", e.getMessage()); }
         T item = getRepository().retrieve(locator); // subclass is responsible for validating id
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n

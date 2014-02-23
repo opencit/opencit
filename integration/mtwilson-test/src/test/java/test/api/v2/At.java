@@ -25,26 +25,32 @@ public class At {
     }
     
     public static ClientResource userCertificates() {
-        return new ClientResource(baseurl() + "/v2/user-certificates");
+        return new ClientResource(baseurl() + "/user-certificates");
     }
     public static ClientResource userCertificates(UUID uuid) {
-        return new ClientResource(baseurl() + "/v2/user-certificates/" + uuid);
+        return new ClientResource(baseurl() + "/user-certificates/" + uuid);
     }
     
     public static ClientResource userCertificates(String anyUuidOidName) {
-        return new ClientResource(baseurl() + "/v2/user-certificates/" + anyUuidOidName);
+        return new ClientResource(baseurl() + "/user-certificates/" + anyUuidOidName);
     }
 
     public static ClientResource manifestSignature() {
-        return new ClientResource(baseurl() + "/v2/manifest-signature");
+        return new ClientResource(baseurl() + "/manifest-signature");
     }
     
     public static ClientResource testAddIntegers() {
-        return new ClientResource(baseurl() + "/v2/rpc/add_integers");
+        return new ClientResource(baseurl() + "/rpc/add_integers");
+    }
+    public static ClientResource testAddIntegersAsync() {
+        return new ClientResource(baseurl() + "/rpc-async/add_integers");
     }
 
     public static ClientResource testRpcStatus(UUID id) {
-        return new ClientResource(baseurl() + "/v2/rpcs/"+id);
+        return new ClientResource(baseurl() + "/rpcs/"+id);
+    }
+    public static ClientResource testRpcOutput(UUID id) {
+        return new ClientResource(baseurl() + "/rpcs/"+id+"/output");
     }
 
 }
