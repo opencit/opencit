@@ -6,7 +6,6 @@
 # 3. this script automatically looks for the latest rpm and deb file in the target folder. if it chooses the wrong file clean up your target folder.
 # 4. this script runs the makeself command to create the self-extracting executable
 
-
 # workspace is typically "target" and must contain the files to package in the installer including the setup script
 workspace="${1}"
 # installer name
