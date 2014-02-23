@@ -68,14 +68,14 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
  */
 @V2
 //@Stateless
-@Path("/rpc-async")
-public class AsyncRpc {
+@Path("/rpc")
+public class BlockingRpc {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AsyncRpc.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BlockingRpc.class);
     private ObjectMapper mapper; // for debug only
     private RpcRepository repository = new RpcRepository();
 
-    public AsyncRpc() {
+    public BlockingRpc() {
         mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
@@ -85,15 +85,17 @@ public class AsyncRpc {
     @Path("/{name}")
     @POST
     @Consumes(MediaType.WILDCARD)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    public Rpc invokeAsyncRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
+    @Produces(MediaType.WILDCARD)
+    public Object invokeRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
         // make sure we have an extension to handle this rpc
         RpcAdapter adapter = RpcUtil.findRpcForName(name);
         if (adapter == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
 
+        XStream xs = new XStream();
         byte[] inputXml;
+        Object inputObject;
         // convert the client's input into our internal format
         try {
             String inputAccept = RpcUtil.getPreferredTypeFromAccept(request.getHeader(HttpHeaders.ACCEPT));
@@ -112,10 +114,9 @@ public class AsyncRpc {
             MultivaluedHashMap<String, String> headerMap = RpcUtil.convertHeadersToMultivaluedMap(request);
             jaxrsHeaders.putAll(headerMap.getMap());
 
-            Object inputObject = messageBodyReader.readFrom(adapter.getInputClass(), adapter.getInputClass(), new Annotation[]{}, inputMediaType, jaxrsHeaders, new ByteArrayInputStream(input));
+            inputObject = messageBodyReader.readFrom(adapter.getInputClass(), adapter.getInputClass(), new Annotation[]{}, inputMediaType, jaxrsHeaders, new ByteArrayInputStream(input));
 
-            // now serialize the input object with xstream
-            XStream xs = new XStream();
+            // now serialize the input object with xstream;  even though we're going to process immediately, we are still going to record the call in the RPC table so we need the xml
             String xml = xs.toXML(inputObject);
             log.debug("input xml: {}", xml);
 
@@ -133,18 +134,67 @@ public class AsyncRpc {
         rpc.setInput(inputXml);
 //        com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String> headers = RpcUtil.convertHeadersToMultivaluedMap(request);
 //        rpc.setInputHeaders(toRfc822(headers));
-        rpc.setStatus(Rpc.Status.QUEUE);
+        rpc.setStatus(Rpc.Status.PROGRESS); // unlike async where we store it with QUEUE and the RpcInvoker picks it up,  in blocking mode we store it with PROGRESS because we will handle it here and don't want RpcInvoker to get it also
 
         // store it
         repository.create(rpc);
 
-        // queue it (must follow storage to prevent situation where an executing task needs to store an update to the table and it hasn't been stored yet)
-//        RpcInvoker.getInstance().add(rpc.getId());
+        // TODO  because in a blocking rpc the output is the data, we should include a custom header in the response indicating the rpc id so if the client wants to get the data again w/o redundant processing  the client can just go to /rpcs/{id}/output  to retrieve it;  or if there is an error during processing the client knows where to get error details .   do it here so the header will be present in any errors or output from this point forward. 
+        
+        // from this point forward the implmentation is a duplicate of what is in RpcInvoker after it deserializes the task object
+        Object outputObject;
+        try {
+//            adapter.setInput(inputObject);
+//            adapter.invoke();
+//            outputObject = adapter.getOutput();
+            ((Runnable)inputObject).run();
+            outputObject = inputObject;
+        }
+        catch(Exception e) {
+            log.error("Error while executing RPC {}", rpc.getName(), e);
+            rpc.setFaults(new Fault[] { new Fault("Execution failed") });
+            rpc.setStatus(Rpc.Status.ERROR);
+            repository.store(rpc);
+            throw new WebApplicationException("RPC execution failed; see server log for details");
+        }
+        
+        // format output
+        try {
+            /*
+            javax.ws.rs.core.MultivaluedHashMap jaxrsHeaders = new javax.ws.rs.core.MultivaluedHashMap();
+            jaxrsHeaders.putAll(headerMap.getMap());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            messageBodyWriter.writeTo(taskObject, adapter.getOutputClass(), adapter.getOutputClass(), new Annotation[]{}, outputMediaType, jaxrsHeaders, out);
+            byte[] output = out.toByteArray(); // this will go in database
+            log.debug("Intermediate output: {}", new String(output)); // we can only do this because we know the output is xml format for testing...
+            rpc.setOutput(output);
+            rpc.setOutputContentType(adapter.getContentType());
+            rpc.setOutputContentClass(adapter.getOutputClass().getName());
+            */
+            rpc.setOutput( xs.toXML(outputObject).getBytes("UTF-8"));
+            // the OUTPUT status indicates the task has completed and output is avaialble
+            rpc.setStatus(Rpc.Status.OUTPUT);
+            // update the status
+            // Task is done.  Now we check the progres -- if the task itself didn't report progress the current/max will be 0/0  , so we change it to 1/1  
+            // but if the task did report progress, then it's max will be non-zero ,  and in that case we leave it alone.
+            if( rpc.getMax() == null || rpc.getMax().longValue() == 0L ) {
+                rpc.setMax(1L);
+                rpc.setCurrent(1L);
+            }
+            repository.store(rpc);
+        }
+        catch(Exception e) {
+            log.error("Cannot write output: {}", e.getMessage());
+            rpc.setFaults(new Fault[] { new Fault("Cannot write output") });
+            rpc.setStatus(Rpc.Status.ERROR);
+            repository.store(rpc);
+            throw new WebApplicationException("Cannot write output");
+        }
+        
 
-        Rpc status = new Rpc();
-        status.copyFrom(rpc);
-
-        return status;
+        // from this point on the code would be duplicated from Rpcs /{id}/output  but that method simply returns the object and lets jersey serialize it. 
+        
+        return outputObject;
     }
 
     /*

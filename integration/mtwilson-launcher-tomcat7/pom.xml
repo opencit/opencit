@@ -42,8 +42,9 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-jersey2</artifactId>
+            <artifactId>mtwilson-launcher-jetty9</artifactId>
             <version>${project.version}</version>
+            <type>war</type>
         </dependency>
         
         
