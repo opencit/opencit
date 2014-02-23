@@ -89,8 +89,6 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     */
     protected abstract SimpleRepository<T,C,F,L> getRepository();
     
-    // TODO:   searchCollection  which @Produces   OtherMediaType.APPLICATION_VND_API_JSON  
-    //       must be implemented in a subclass...
     @GET
     public C searchCollection(@BeanParam F selector) {
         try { log.debug("searchCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
@@ -127,7 +125,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Path("/{id}")
     @DELETE
     public void deleteOne(@BeanParam L locator) {
-        try { log.debug("deleteOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("deleteOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("deleteOne: cannot serialize locator: {}", e.getMessage()); }
         T item = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
@@ -152,7 +150,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     
     @DELETE
     public void deleteCollection(@BeanParam F selector) {
-        try { log.debug("deleteCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize selector: {}", e.getMessage()); }
+        try { log.debug("deleteCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("deleteCollection: cannot serialize selector: {}", e.getMessage()); }
         C collection = getRepository().search(selector);
         if( collection.getDocuments().isEmpty() ) {            
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
@@ -179,7 +177,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Path("/{id}")
     @GET
     public T retrieveOne(@BeanParam L locator) {
-        try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("retrieveOne: cannot serialize locator: {}", e.getMessage()); }
         /*
         T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
@@ -215,7 +213,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Path("/{id}")
     @PUT
     public T storeOne(@BeanParam L locator, T item) {
-        try { log.debug("storeOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("storeOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("storeOne: cannot serialize locator: {}", e.getMessage()); }
         ValidationUtil.validate(item);
 //        item.setId(UUID.valueOf(id));
         locator.copyTo(item);
@@ -245,7 +243,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @PATCH
     @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
     public T patchOne(@BeanParam L locator, Patch<T, F, P>[] patchArray) {
-        try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
+        try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("patchOne: cannot serialize locator: {}", e.getMessage()); }
         T item = getRepository().retrieve(locator); // subclass is responsible for validating id
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
