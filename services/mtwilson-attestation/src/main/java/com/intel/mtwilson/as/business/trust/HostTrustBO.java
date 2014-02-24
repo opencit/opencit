@@ -1303,8 +1303,8 @@ public class HostTrustBO extends BaseBO {
         }
     }
 
-    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException {
-        Configuration conf = ASConfig.getConfiguration();
+    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
+        Configuration conf = My.configuration().getConfiguration();
         InetAddress localhost = InetAddress.getLocalHost();
         String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService";
         String issuer = conf.getString("saml.issuer", defaultIssuer);
