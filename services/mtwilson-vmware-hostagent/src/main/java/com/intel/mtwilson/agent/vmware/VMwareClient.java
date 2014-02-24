@@ -52,6 +52,8 @@ public class VMwareClient implements TlsClient {
     private ServiceInstance servInst;
     private VimPortType vimPort;
     private Folder rootFolder;
+    private static final double MIN_VCENTER_VERSION_FOR_MODULE_ATTESTATION  = 5.1;
+    private static final double MIN_ESX_VERSION_FOR_MODULE_ATTESTATION  = 5.1;
     //private VimService vimService;
     //private VimPortType vimPort;
     UserSession session = null;
@@ -796,7 +798,7 @@ public class VMwareClient implements TlsClient {
      * @return : String containing the BIOS PCR 0 value.
      * @throws Exception
      */
-    public String getHostBIOSPCRHash(ManagedObjectReference hostMOR, String hostName) throws VMwareConnectionException {
+    /*public String getHostBIOSPCRHash(ManagedObjectReference hostMOR, String hostName) throws VMwareConnectionException {
         String biosPCRHash = "";
         HostTpmDigestInfo[] pcrList;
 
@@ -841,7 +843,7 @@ public class VMwareClient implements TlsClient {
             throw new VMwareConnectionException(ex);
         }
         return biosPCRHash;
-    }
+    }*/
 
     /**
      * @deprecated just an adapter for now ; VmwareHostAgent uses
@@ -857,6 +859,16 @@ public class VMwareClient implements TlsClient {
             throw new VMwareConnectionException("Host specified does not exist in the vCenter.");
         }
         return getHostAttestationReport(hostMOR, hostObj.HostName, pcrList);
+    }
+
+    public boolean isModuleAttestationSupportedByVcenter(String vCenterVersion) {
+        double version = Double.parseDouble(vCenterVersion.substring(0, vCenterVersion.lastIndexOf(".")));
+        return (version >= MIN_VCENTER_VERSION_FOR_MODULE_ATTESTATION);
+    }
+
+    public boolean isModuleAttestationSupportedByESX(String esxVersion) {
+        double version = Double.parseDouble(esxVersion.substring(0, esxVersion.lastIndexOf(".")));
+        return (version >= MIN_VCENTER_VERSION_FOR_MODULE_ATTESTATION);
     }
 
     /**
@@ -910,13 +922,15 @@ public class VMwareClient implements TlsClient {
             xtw.writeAttribute("HostVersion", hostVer);
             xtw.writeAttribute("TXT_Support", tpmSupport.toString());
 
-            if (tpmSupport == true && serviceContent.getAbout().getVersion().contains("5.1")) {
+            // if (tpmSupport == true && serviceContent.getAbout().getVersion().contains("5.1")) {
+            if (tpmSupport == true && (isModuleAttestationSupportedByVcenter(getVCenterVersion()))) {
                 log.debug("Querying TPM attestation report...");
                 HostTpmAttestationReport hostTrustReport = vimPort.queryTpmAttestationReport(hostMOR);
                 log.debug("Query finished.");
 
                 // Process the event log only for the ESXi 5.1 or higher
-                if (hostTrustReport != null && hostVer.contains("5.1")) {
+                // if (hostTrustReport != null && hostVer.contains("5.1")) {
+                if (hostTrustReport != null && (isModuleAttestationSupportedByESX(hostVer))) {
                     log.debug("Retrieving TPM events...");
                     int numOfEvents = hostTrustReport.getTpmEvents().length;
                     for (int k = 0; k < numOfEvents; k++) {
