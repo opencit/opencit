@@ -423,13 +423,9 @@ public class KeystoreUtil {
         // download saml ca certs from server
         try {
             Set<X509Certificate> cacerts = c.getSamlCertificates();
-                
-            log.error("SAVY001: size={}", cacerts.size());
+            
             for(X509Certificate cert : cacerts) {
                 try {
-                    log.error("SAVY002: getBasicConstraints={}",cert.getBasicConstraints());
-                    log.error("SAVY003: certName={}",cert.getSubjectX500Principal().getName());
-                    log.error("SAVY004: serverGetHost={}",server.getHost());
                     if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert; so we add it as the saml cert
                         keystore.addTrustedSamlCertificate(cert, server.getHost());
                         log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() );
