@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.rest.v2.resource.*;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
@@ -109,8 +110,9 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
 
     private MleSource convert(MwMleSource obj) {
         MleSource convObj = new MleSource();
-        convObj.setMleUuid(obj.getUuid_hex());
+        convObj.setMleUuid(obj.getMle_uuid_hex());
         convObj.setName(obj.getHostName());
+        convObj.setId(UUID.valueOf(obj.getUuid_hex()));
         return convObj;
     }
 

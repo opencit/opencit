@@ -25,7 +25,5 @@ public class MleFilterCriteria implements FilterCriteria<Mle>{
     public String osUuid;
     @QueryParam("oemUuid")
     public String oemUuid;
-    @QueryParam("source")
-    public String source;
     
 }

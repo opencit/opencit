@@ -117,6 +117,16 @@ public class MlesTest {
     }
 
     @Test
+    public void testRetrieveMlePcr() throws Exception{
+        MlePcrRepository repo = new MlePcrRepository();
+        MlePcrLocator locator = new MlePcrLocator();
+        locator.mleUuid = UUID.valueOf("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
+        locator.pcrIndex = "21";
+        MlePcr obj = repo.retrieve(locator);
+        log.debug(obj.getPcrIndex() + "--" + obj.getPcrValue());
+    }
+    
+    @Test
     public void testCreateMleModule() throws Exception {
         MleModuleRepository repo = new MleModuleRepository();
         MleModule obj = new MleModule();

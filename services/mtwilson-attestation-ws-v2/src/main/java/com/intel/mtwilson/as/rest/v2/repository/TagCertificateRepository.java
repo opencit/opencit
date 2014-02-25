@@ -14,14 +14,11 @@ import com.intel.mtwilson.as.rest.v2.model.TagCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
-
 import java.util.List;
-import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

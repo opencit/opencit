@@ -38,16 +38,17 @@ public class Oems extends MtWilsonClient {
         super(properties);
     }
     
-    public OemCollection searchOems(String name) {
+    public OemCollection searchOems(OemFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        OemCollection oems = getTarget().path("oems").queryParam("nameContains", name).request(MediaType.APPLICATION_JSON).get(OemCollection.class);
+        //OemCollection oems = getTarget().path("oems").queryParam("nameContains", name).request(MediaType.APPLICATION_JSON).get(OemCollection.class);
+        OemCollection oems = getTargetPathWithQueryParams("oems", criteria).request(MediaType.APPLICATION_JSON).get(OemCollection.class);
         return oems;
     }
     
-    public Oem retrieveOem(String id) {
+    public Oem retrieveOem(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", id);
+        map.put("id", uuid);
         Oem oem = getTarget().path("oems/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Oem.class);
         return oem;
     }
@@ -66,10 +67,10 @@ public class Oems extends MtWilsonClient {
         return newOem;
     }
 
-    public void deleteOem(String id) {
+    public void deleteOem(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", id);
+        map.put("id", uuid);
         Response oem = getTarget().path("oems/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         log.debug(oem.toString());
     }

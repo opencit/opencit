@@ -98,7 +98,14 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
         try {
             obj.setPcrName(item.getPcrIndex());
             obj.setPcrDigest(item.getPcrValue());
-            new MleBO().updatePCRWhiteList(obj, null, item.getId().toString());
+
+            List<TblPcrManifest> pcrs = My.jpa().mwPcrManifest().findTblPcrManifestByMleUuid(item.getMleUuid());
+            for (TblPcrManifest pcr : pcrs) {
+                if (pcr.getName().equalsIgnoreCase(item.getPcrIndex())) {
+                    new MleBO().updatePCRWhiteList(obj, null, pcr.getUuid_hex());
+                }
+            }            
+            
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -129,10 +136,10 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
         String mleUuid = locator.mleUuid.toString();
         String pcrIndex = locator.pcrIndex;
         try {
-            TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
-            List<TblPcrManifest> pcrs = jpaController.findTblPcrManifestByMleUuid(mleUuid);
+            List<TblPcrManifest> pcrs = My.jpa().mwPcrManifest().findTblPcrManifestByMleUuid(mleUuid);
             for (TblPcrManifest pcr : pcrs) {
                 if (pcr.getName().equalsIgnoreCase(pcrIndex)) {
+                    log.debug("About to delete pcr index {} for mle with uuid {}.", locator.pcrIndex, locator.mleUuid.toString());
                     new MleBO().deletePCRWhiteList(null, null, null, null, null, null, pcr.getUuid_hex());
                 }
             }            

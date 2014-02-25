@@ -6,10 +6,9 @@ package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
+import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -30,7 +29,11 @@ public class OemTest {
     
     @Test
     public void testSearchCollection() {
-        OemCollection oems = client.searchOems("intel");
+        OemFilterCriteria criteria = new OemFilterCriteria();
+        //criteria.id = new UUID();
+        criteria.nameContains = "ibm";
+        //criteria.nameEqualTo = "nameequalto";
+        OemCollection oems = client.searchOems(criteria);
         for(Oem oem : oems.getOems()) {
             log.debug("Oem name {}", oem.getName());
         }
