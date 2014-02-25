@@ -12,6 +12,11 @@ import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import java.util.Properties;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.beanutils.PropertyUtils;
+
 /**
  *
  * @author jbuhacoff
@@ -39,7 +44,9 @@ public class FileTest {
     
     @Test
     public void testSearchCollection() {
-        FileCollection files = client.searchFiles();
+        FileFilterCriteria criteria = new FileFilterCriteria();
+        criteria.nameContains = "test";
+        FileCollection files = client.searchFiles(criteria);
         for(File file : files.getFiles()) {
             log.debug("File name {} id {} content-type {}", file.getName(), file.getId(), file.getContentType());
         }
@@ -48,5 +55,19 @@ public class FileTest {
     public void testRetrieveFile() {
         File file = client.retrieveFile((new UUID()).toString());
         log.debug("File name {} id {} content-type {}", file.getName(), file.getId(), file.getContentType());
+    }
+    
+
+    
+    @Test
+    public void testAutomaticQueryParamters() throws Exception {
+        FileFilterCriteria criteria = new FileFilterCriteria();
+        criteria.nameContains = "foo";
+        Map<String,Object> properties = ReflectionUtil.getQueryParams(criteria);
+                for(Map.Entry<String,Object> queryParam : properties.entrySet()) {
+            log.debug("queryParam {} = {}", queryParam.getKey(), queryParam.getValue());
+//            target.queryParam(attr.getKey(), queryParam.getValue());
+        }
+
     }
 }

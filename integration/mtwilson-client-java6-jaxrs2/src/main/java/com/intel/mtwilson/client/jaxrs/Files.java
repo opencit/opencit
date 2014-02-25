@@ -9,6 +9,10 @@ import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.client.WebTarget;
+import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
+import java.util.Map;
+import org.apache.commons.beanutils.PropertyUtils;
 
 /**
  *
@@ -24,9 +28,9 @@ public class Files extends MtWilsonClient {
         super(properties);
     }
     
-    public FileCollection searchFiles() {
+    public FileCollection searchFiles(FileFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        FileCollection files = getTarget().path("files").request(MediaType.APPLICATION_JSON).get(FileCollection.class);
+        FileCollection files = getTargetPathWithQueryParams("files", criteria).request(MediaType.APPLICATION_JSON).get(FileCollection.class);
         return files;
     }
     public File retrieveFile(String id) {
