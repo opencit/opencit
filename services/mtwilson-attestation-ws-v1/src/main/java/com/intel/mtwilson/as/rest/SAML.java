@@ -50,7 +50,7 @@ public class SAML {
      * @return a SAML assertion document for the host
      */
     @RolesAllowed({"Attestation","Report"})
-    @RequiresRoles({"Attestation","Report"})
+    //@RequiresRoles({"Attestation","Report"})
     @GET
     @Produces({"application/samlassertion+xml"})
     @Path("/assertions/host")
