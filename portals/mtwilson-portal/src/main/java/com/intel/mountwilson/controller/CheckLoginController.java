@@ -130,7 +130,7 @@ public class CheckLoginController extends AbstractController {
                     locale = rsaApiClient.getLocale(keyAliasName);
                     log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
                 } catch (Exception e) {
-                    log.error("Cannot retrieve locale for user: {}\r\n{}", keyAliasName, e.toString());
+                    log.warn("Cannot retrieve locale for user: {}\r\n{}", keyAliasName, e.toString());
                     locale = null;
                 }
                 
