@@ -108,10 +108,13 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @Override
     public void create(HostAttestation item) {
         try {
+            HostTrustBO asBO = new HostTrustBO();
             TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
-            TrustReport htr = new HostTrustBO().getTrustReportForHost(hostObj, hostObj.getName());
+            TrustReport htr = new HostTrustBO().getTrustReportForHost(hostObj, hostObj.getName());            
             item.setHostName(hostObj.getName());
             item.setTrustReport(htr);
+            // Need to cache the attestation report
+            asBO.logTrustReport(hostObj, htr);
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
