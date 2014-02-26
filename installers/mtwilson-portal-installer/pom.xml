@@ -31,6 +31,12 @@
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.portals</groupId>
+      <artifactId>mtwilson-portal-tomcat7</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
     <!--
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
@@ -84,7 +90,15 @@
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>mtwilson-portal.war</destFileName>
+                  <destFileName>mtwilson-portal-glassfish.war</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>com.intel.mtwilson.portals</groupId>
+                    <artifactId>mtwilson-portal-tomcat7</artifactId>
+                    <version>${project.version}</version>
+                    <type>war</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>mtwilson-portal-tomcat.war</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>

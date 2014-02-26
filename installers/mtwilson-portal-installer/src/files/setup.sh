@@ -32,7 +32,8 @@ fi
 #APICLIENT_PACKAGE=`ls -1 MtWilsonLinuxUtil*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
-WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
+WAR_PACKAGE_GLASSFISH=`ls -1 mtwilson-portal-glassfish.war 2>/dev/null | tail -n 1`
+WAR_PACKAGE_TOMCAT=`ls -1 mtwilson-portal-tomcat.war 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
 mkdir -p "${package_dir}"
@@ -40,7 +41,14 @@ mkdir -p "${package_dir}"/database
 chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
-cp $WAR_PACKAGE "${package_dir}"
+
+# select appropriate war file
+if using_glassfish; then
+  cp $WAR_PACKAGE_GLASSFISH "${package_dir}/mtwilson-portal.war"
+elif using_tomcat; then
+  cp $WAR_PACKAGE_TOMCAT "${package_dir}/mtwilson-portal.war"
+fi
+
 #cp *.sql "${package_dir}"/database/
 chmod 600 "${package_name}.properties"
 cp "${package_name}.properties" "${package_dir}/${package_name}.properties.example"
