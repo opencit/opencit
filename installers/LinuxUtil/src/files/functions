@@ -1251,10 +1251,13 @@ add_postgresql_install_packages() {
     if [[ -z "$pgAddPackRequired" ]]; then
       codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
       echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
-      echo "Postgresql apt-key add status: " `wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -`
-      echo "Running apt-get update..."
+      # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d
+      # so we avoid a download
+      #echo "Postgresql apt-key add status: " `wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -`
+      apt-key add /etc/apt/trusted.gpg.d/ACCC4CF8.asc
+      echo "Running apt-get update; this may take a while..."
       apt-get update >> $INSTALL_LOG_FILE
-      echo "Running apt-get upgrade..."
+      echo "Running apt-get upgrade; this may take a while..."
       apt-get upgrade -y >> $INSTALL_LOG_FILE
     fi
   #elif [[ -n "$yast" && -n "$yast_packages" ]]; then
