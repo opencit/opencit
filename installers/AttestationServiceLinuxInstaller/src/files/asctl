@@ -257,7 +257,7 @@ setup_interactive_install() {
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson.war
     if using_glassfish; then
       # temp symlink -- SAVY added 2014-02-04
-      if [[ ! -e "/opt/mtwilson/java" ]]; then
+      if [[ ! -h "/opt/mtwilson/java" ]]; then
         mkdir -p /opt/mtwilson
         ln -s "$GLASSFISH_HOME/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
       fi
@@ -269,7 +269,7 @@ setup_interactive_install() {
       webservice_running_report "${webservice_application_name}"
     elif using_tomcat; then
       # temp symlink -- SAVY added 2014-02-04
-      if [[ ! -e "/opt/mtwilson/java" ]]; then
+      if [[ ! -h "/opt/mtwilson/java" ]]; then
         mkdir -p /opt/mtwilson
         ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
       fi
