@@ -57,14 +57,6 @@
                 </exclusion>
                 <exclusion>
                     <groupId>javax</groupId>
-                    <artifactId>javaee-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-web-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
                     <artifactId>javax.mail</artifactId>
                 </exclusion>
                 <exclusion>
@@ -83,10 +75,20 @@
                     <groupId>javax</groupId>
                     <artifactId>javax.transaction</artifactId>
                 </exclusion>
+                <!--
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-web-api</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                -->
             </exclusions>
         </dependency>
 
@@ -112,14 +114,29 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
             <artifactId>jersey-common</artifactId>
             <scope>provided</scope>
         </dependency>
-<dependency>
-    <groupId>org.glassfish.jersey.media</groupId>
-    <artifactId>jersey-media-multipart</artifactId>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
             <scope>provided</scope>
-</dependency>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
             <scope>provided</scope>
         </dependency>
         
