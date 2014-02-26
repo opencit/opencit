@@ -5,6 +5,8 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.mtwilson.jersey.Document;
 
 /**
@@ -39,6 +41,7 @@ public class Host extends Document {
         return name;
     }
 
+    @Regex(RegexPatterns.IPADDR_FQDN)    
     public void setName(String name) {
         this.name = name;
     }
@@ -47,6 +50,7 @@ public class Host extends Document {
         return connectionUrl;
     }
 
+    @Regex(RegexPatterns.ANY_VALUE)
     public void setConnectionUrl(String connectionUrl) {
         this.connectionUrl = connectionUrl;
     }

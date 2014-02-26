@@ -2351,13 +2351,12 @@ tomcat_detect() {
   do
     #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
-      local bin_dir=`dirname $c`
-      local parent=`dirname $bin_dir`
+      local conf_dir=`dirname $c`
+      local parent=`dirname $conf_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
 	    export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
-		conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
-        export TOMCAT_CONF=`dirname $conf_dir`
+        export TOMCAT_CONF="$conf_dir"
         tomcat_bin=$parent/bin/catalina.sh
         tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
         echo "Found Tomcat: $TOMCAT_HOME" >> $INSTALL_LOG_FILE

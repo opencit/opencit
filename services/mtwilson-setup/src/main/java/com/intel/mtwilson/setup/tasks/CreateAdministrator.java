@@ -103,6 +103,7 @@ public class CreateAdministrator extends DatabaseSetupTask {
             // create the password
             UserLoginPassword userLoginPassword = new UserLoginPassword();
             userLoginPassword.setId(new UUID());
+            userLoginPassword.setUserId(user.getId());
             userLoginPassword.setAlgorithm("SHA-256");
             userLoginPassword.setEnabled(true);
             userLoginPassword.setExpires(null);

@@ -45,6 +45,6 @@
     
     <!-- for production:  log level of o.a.s.w.f.a.BasicHttpAuthenticationFilter  must be set to INFO or higher
     to avoid leaking credentials from Authorization header to log -->
-    <logger name="org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter" level="INFO"/>
+    <logger name="org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter" level="DEBUG"/>
     
 </configuration>
