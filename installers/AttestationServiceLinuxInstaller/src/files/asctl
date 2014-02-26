@@ -256,12 +256,15 @@ setup_interactive_install() {
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson.war
     if using_glassfish; then
-      glassfish_restart
+      sleep 60s
+      glassfish_stop
+      sleep 60s
+      glassfish_start
     #elif using_tomcat; then
     #  tomcat_restart
     fi
       echo -n "Waiting for ${webservice_application_name} to become accessible... "
-      sleep 50s        #XXX TODO: remove when we have solution for webserver up
+      sleep 120s        #XXX TODO: remove when we have solution for webserver up
       echo "Done"
       webservice_running_report "${webservice_application_name}"
   fi
