@@ -1249,6 +1249,11 @@ add_postgresql_install_packages() {
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
     if [[ -z "$pgAddPackRequired" ]]; then
+      prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
+      if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
+        echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
+        exit -1
+      fi
       codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
       echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
       # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d

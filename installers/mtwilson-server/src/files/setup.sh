@@ -242,6 +242,16 @@ cp logback.xml /etc/intel/cloudsecurity
 chmod 700 logback-stderr.xml
 cp logback-stderr.xml /etc/intel/cloudsecurity
 
+# copy shiro.ini api security file
+chmod 700 shiro.ini
+cp shiro.ini /etc/intel/cloudsecurity
+
+echo "Adding symlink for /opt/mtwilson/configuration..."
+# temp symlink -- SAVY added 2014-02-26
+if [[ ! -h "/opt/mtwilson/configuration" ]]; then
+  mkdir -p /opt/mtwilson
+  ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
+fi
 
 
 find_installer() {
@@ -611,6 +621,21 @@ elif using_tomcat; then
     echo_warning "Skipping webservice init"
   fi
  
+fi
+
+echo "Adding symlink for /opt/mtwilson/java..."
+if using_glassfish; then
+  # temp symlink -- SAVY added 2014-02-04
+  if [[ ! -h "/opt/mtwilson/java" ]]; then
+    mkdir -p /opt/mtwilson
+    ln -s "$GLASSFISH_HOME/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+  fi
+elif using_tomcat; then
+  # temp symlink -- SAVY added 2014-02-04
+  if [[ ! -h "/opt/mtwilson/java" ]]; then
+    mkdir -p /opt/mtwilson
+    ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+  fi
 fi
 
 if [ ! -z "$opt_privacyca" ]; then

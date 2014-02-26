@@ -249,35 +249,24 @@ setup_interactive_install() {
       tomcat_start_report
     fi
   fi
-
+  
   if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
     webservice_start_report "${webservice_application_name}"
   else
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson.war
     if using_glassfish; then
-      # temp symlink -- SAVY added 2014-02-04
-      if [[ ! -e "/opt/mtwilson/java" ]]; then
-        mkdir -p /opt/mtwilson
-        ln -s "$GLASSFISH_HOME/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
-      fi
-
-      glassfish_restart
+      sleep 60s
+      glassfish_stop
+      sleep 60s
+      glassfish_start
+    #elif using_tomcat; then
+    #  tomcat_restart
+    fi
       echo -n "Waiting for ${webservice_application_name} to become accessible... "
-      sleep 50s        #XXX TODO: remove when we have solution for webserver up
+      sleep 120s        #XXX TODO: remove when we have solution for webserver up
       echo "Done"
       webservice_running_report "${webservice_application_name}"
-    elif using_tomcat; then
-      # temp symlink -- SAVY added 2014-02-04
-      if [[ ! -e "/opt/mtwilson/java" ]]; then
-        mkdir -p /opt/mtwilson
-        ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
-      fi
-      
-      echo -n "Waiting for ${webservice_application_name} to become accessible... "
-      sleep 50s        #XXX TODO: remove when we have solution for webserver up
-      echo "Done"
-    fi
   fi
 }
 
