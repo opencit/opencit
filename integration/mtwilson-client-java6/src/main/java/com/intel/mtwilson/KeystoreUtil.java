@@ -423,6 +423,7 @@ public class KeystoreUtil {
         // download saml ca certs from server
         try {
             Set<X509Certificate> cacerts = c.getSamlCertificates();
+            
             for(X509Certificate cert : cacerts) {
                 try {
                     if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert; so we add it as the saml cert
