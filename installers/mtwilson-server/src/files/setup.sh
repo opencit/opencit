@@ -21,15 +21,17 @@ export LOG_DELAYCOMPRESS=delaycompress
 export LOG_COPYTRUNCATE=copytruncate
 export LOG_SIZE=100M
 export LOG_OLD=7
-export MTWILSON_OWNER=$currentUser
 export AUTO_UPDATE_ON_UNTRUST=false
-export WEBSERVICE_USERNAME=mtwilsonAdmin
+#export WEBSERVICE_USERNAME=mtwilsonAdmin
+export WEBSERVICE_USERNAME=admin
 export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+
+export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
 
 mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
 as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
@@ -62,9 +64,9 @@ else
   echo "Mt Wilson owner account already created, moving on"
  else
   echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
-  prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
-  pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
-  useradd -m -p $pass $MTWILSON_OWNER
+  #prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
+  #pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
+  useradd -s /bin/false -d /opt/mtwilson $MTWILSON_OWNER
   echo "Account Created!"
  fi
 fi
@@ -429,10 +431,18 @@ if using_mysql; then
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
   
 elif using_postgres; then
+  # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
+  if [ -f "/etc/apt" ]; then
+    mkdir -p /etc/apt/trusted.gpg.d
+    chmod 755 /etc/apt/trusted.gpg.d
+    cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+  fi
+
   postgres_userinput_connection_properties
+  touch ~/.pgpass
+  chmod 0600 ~/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-  chmod 0600 $HOME/.pgpass
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
 
   if [ ! -z "$opt_postgres" ]; then
     # postgres server install 
@@ -446,18 +456,22 @@ elif using_postgres; then
       if [[ -n "$aptget" ]]; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
       fi 
-      postgres_server_install 
-      postgres_restart >> $INSTALL_LOG_FILE
-      sleep 10
+
+      # don't need to restart postgres server unless the install script says we need to (by returning zero)
+      if [ postgres_server_install ]; then
+        postgres_restart >> $INSTALL_LOG_FILE
+        sleep 10
+      fi
       # postgres server end
     fi 
     # postgres client install here
       echo "Installing postgres client..."
       postgres_install
-      postgres_restart >> $INSTALL_LOG_FILE
-      sleep 10
+      # do not need to restart postgres server after installing the client.
+      #postgres_restart >> $INSTALL_LOG_FILE
+      #sleep 10
       echo "Installation of postgres client complete..." 
-      # postgres clinet install end
+      # postgres client install end
   else
     echo_warning "Relying on an existing Postgres installation"
   fi 
