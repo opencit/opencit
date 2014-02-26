@@ -99,7 +99,13 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
+        <dependency>
+            <groupId>com.intel.mtwilson.features</groupId>
+            <artifactId>mtwilson-server</artifactId>
+            <type>pom</type>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
     
 </project>
