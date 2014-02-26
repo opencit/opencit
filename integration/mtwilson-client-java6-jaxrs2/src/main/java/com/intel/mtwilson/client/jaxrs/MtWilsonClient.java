@@ -41,16 +41,21 @@ public class MtWilsonClient {
     private Client client;
     private WebTarget target;
     private String baseurl;
+    
+    protected MtWilsonClient() {
+        clientConfig = new ClientConfig();
+        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
+        clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);        
+        log.debug("configured client in empty constructor");
+    }
 
     /**
      * Configures a client without any authentication for the given API URL
      * @param url like http://server.com/mtwilson/v2
      */
     public MtWilsonClient(URL url) {
+        this();
         baseurl = url.toExternalForm(); // for example "http://localhost:8080/v2"
-        clientConfig = new ClientConfig();
-        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
-        clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
         client = ClientBuilder.newClient(clientConfig);
         target = client.target(baseurl);
     }
@@ -77,10 +82,8 @@ public class MtWilsonClient {
      * @throws GeneralSecurityException 
      */
     public MtWilsonClient(Properties properties) throws KeyManagementException, IOException, CryptographyException, GeneralSecurityException {
+        this();
         baseurl = properties.getProperty("mtwilson.api.url", properties.getProperty("mtwilson.api.baseurl")); // example: "http://localhost:8080/v2";
-        clientConfig = new ClientConfig();
-        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
-        clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
         // X509 authorization 
         SimpleKeystore keystore = null;
         if (properties.containsKey("mtwilson.api.keystore") && properties.containsKey("mtwilson.api.keystore.password")) {
@@ -130,7 +133,7 @@ public class MtWilsonClient {
      //register(com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMapper.class);
      * 
      */
-
+    
     public ClientConfig getClientConfig() {
         return clientConfig;
     }

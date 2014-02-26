@@ -118,6 +118,7 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
         return false;
     }
     
+    // moved to CsrfFilter
     private boolean isTokenRequired(HttpServletRequest request) {
         boolean tokenRequired = true;// require it by default; then make exception for GET and OPTIONS http methods -- this assumes the service follows the web architecture and does not have side effects for GET and OPTIONS
         if (request.getMethod().equals("GET") || request.getMethod().equals("HEAD") || request.getMethod().equals("OPTIONS")) {
@@ -128,7 +129,7 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
 
     }
     
-    
+    // moved to CsrfFilter
     private boolean isRequestMatchingReferer(HttpServletRequest request) {
         // fix for issue #1038 cross site request forgery (CSRF) is to ensure that logged-in users are in control of requests
         // so first we deny any request coming from a source other than a link or form in the portal by ensuring the referer 
@@ -156,6 +157,7 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
         }
     }
     
+    // moved to csrf filter
     private String getExistingToken(HttpServletRequest request) {
         // second part of fix for issue #1038 is to use a secure token to deter attackers who are able to forge the referer header by exploiting the client's insecure software stack
         // the idea is that without the help of a cross-site scripting exploit, the attacker will not be able to predict the token and therefore the CSRF attack will fail
