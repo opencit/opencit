@@ -117,13 +117,11 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
     <artifactId>jersey-media-multipart</artifactId>
             <scope>provided</scope>
 </dependency>
-<!--
-	<dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>2.4.1</version>
+            <scope>provided</scope>
         </dependency>
-        -->
         
     </dependencies>
     
