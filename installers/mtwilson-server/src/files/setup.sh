@@ -420,9 +420,10 @@ if using_mysql; then
   
 elif using_postgres; then
   postgres_userinput_connection_properties
+  touch ~/.pgpass
+  chmod 0600 ~/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-  chmod 0600 $HOME/.pgpass
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
 
   if [ ! -z "$opt_postgres" ]; then
     # postgres server install 
@@ -436,18 +437,22 @@ elif using_postgres; then
       if [[ -n "$aptget" ]]; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
       fi 
-      postgres_server_install 
-      postgres_restart >> $INSTALL_LOG_FILE
-      sleep 10
+
+      # don't need to restart postgres server unless the install script says we need to (by returning zero)
+      if [ postgres_server_install ]; then
+        postgres_restart >> $INSTALL_LOG_FILE
+        sleep 10
+      fi
       # postgres server end
     fi 
     # postgres client install here
       echo "Installing postgres client..."
       postgres_install
-      postgres_restart >> $INSTALL_LOG_FILE
-      sleep 10
+      # do not need to restart postgres server after installing the client.
+      #postgres_restart >> $INSTALL_LOG_FILE
+      #sleep 10
       echo "Installation of postgres client complete..." 
-      # postgres clinet install end
+      # postgres client install end
   else
     echo_warning "Relying on an existing Postgres installation"
   fi 
