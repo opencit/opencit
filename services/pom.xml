@@ -62,6 +62,7 @@
 	<module>mtwilson-vmware-hostagent</module>
 	<module>mtwilson-citrix-hostagent</module>
 	<module>mtwilson-intel-hostagent</module>
+	<module>mtwilson-saml</module>
   </modules>
 
 </project>
