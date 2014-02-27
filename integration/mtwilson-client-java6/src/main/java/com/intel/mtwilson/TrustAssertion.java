@@ -47,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class extracts trust information from a SAML assertion.

@@ -201,6 +201,11 @@
 			<artifactId>cpg-rfc822</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-saml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		
         <!--
        	<dependency>
