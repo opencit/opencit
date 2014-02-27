@@ -243,8 +243,10 @@ chmod 700 logback-stderr.xml
 cp logback-stderr.xml /etc/intel/cloudsecurity
 
 # copy shiro.ini api security file
-chmod 700 shiro.ini
-cp shiro.ini /etc/intel/cloudsecurity
+if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
+  chmod 700 shiro.ini
+  cp shiro.ini /etc/intel/cloudsecurity
+fi
 
 echo "Adding symlink for /opt/mtwilson/configuration..."
 # temp symlink -- SAVY added 2014-02-26
