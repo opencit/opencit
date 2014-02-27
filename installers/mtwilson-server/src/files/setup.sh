@@ -432,7 +432,7 @@ if using_mysql; then
   
 elif using_postgres; then
   # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
-  if [ -f "/etc/apt" ]; then
+  if [ -d "/etc/apt" ]; then
     mkdir -p /etc/apt/trusted.gpg.d
     chmod 755 /etc/apt/trusted.gpg.d
     cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
