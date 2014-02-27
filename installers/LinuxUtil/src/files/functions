@@ -1245,10 +1245,11 @@ add_postgresql_install_packages() {
   
   # detect available package management tools. start with the less likely ones to differentiate.
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
-  
+  echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
-    if [[ -z "$pgAddPackRequired" ]]; then
+	echo_warning "found packages $pgAddPackRequired"
+    if [ -z "$pgAddPackRequired" ]; then
       prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
       if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
         echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
