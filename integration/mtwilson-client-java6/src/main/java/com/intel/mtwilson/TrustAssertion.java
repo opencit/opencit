@@ -8,9 +8,11 @@ import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SamlUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.mtwilson.xml.ClasspathResourceResolver;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -19,11 +21,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import javax.xml.XMLConstants;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
@@ -240,10 +247,18 @@ public class TrustAssertion {
     
     
     private Element readXml(String xml) throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance ();
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        schemaFactory.setResourceResolver(new ClasspathResourceResolver());
+        Source samlSchemaProtocol = new StreamSource(getClass().getResourceAsStream("/saml-schema-protocol-2.0.xsd")); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-protocol-2.0.xsd
+        Source samlSchemaAssertion = new StreamSource(getClass().getResourceAsStream("/saml-schema-assertion-2.0.xsd")); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd
+        Source xencSchema = new StreamSource(getClass().getResourceAsStream("/xenc-schema.xsd")); // http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd
+        Source xmldsigCoreSchema = new StreamSource(getClass().getResourceAsStream("/xmldsig-core-schema.xsd")); // http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd
+        Schema schema = schemaFactory.newSchema(new Source[] { samlSchemaProtocol, samlSchemaAssertion, xencSchema, xmldsigCoreSchema });
+        DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware (true);
         factory.setExpandEntityReferences(false); // bug #1038 prevent XXE
         factory.setXIncludeAware(false); // bug #1038 prevent XXE
+        factory.setSchema(schema); // fix for javax.xml.crypto.dsig.XMLSignatureException: javax.xml.crypto.URIReferenceException: com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException: Cannot resolve element with ID HostTrustAssertion
         DocumentBuilder builder = factory.newDocumentBuilder(); // ParserConfigurationException
         ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
         Element document = builder.parse(in).getDocumentElement (); // SAXException, IOException
