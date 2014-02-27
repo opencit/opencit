@@ -37,4 +37,6 @@ public interface SetupTask extends Runnable {
     
     List<Fault> getValidationFaults();
     
+//    void setMuta
+    
 }

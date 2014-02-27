@@ -8,26 +8,19 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
-import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import java.io.File;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.client.ClientConfig;
-import java.util.HashMap;
 import com.intel.mtwilson.security.http.jaxrs.HmacAuthorizationFilter;
 import com.intel.mtwilson.security.http.jaxrs.X509AuthorizationFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.util.Map;
 import java.util.Properties;
-
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.client.filter.HttpBasicAuthFilter;
 /**

@@ -32,6 +32,7 @@
     <module>desktop</module>
     <module>features</module>
     <module>installers</module>
+    <module>maven</module>
   </modules>
 
   <url>http://cloudsecurityportal.intel.com/mtwilson</url>
