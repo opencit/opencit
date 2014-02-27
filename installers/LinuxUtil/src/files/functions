@@ -1283,16 +1283,15 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
+  echo_warning "postgres_server_install postgres_com = $postgres_com"
   if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
     return;
   fi
   if [[ -z "$postgres_com" ]]; then
-    echo "Checking to see if postgresql package is available for install..."
-    add_postgresql_install_packages "POSTGRES_SERVER"
     echo "Running postgresql auto install..."
-    auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
+    auto_install "Postgres server" "POSTGRES_SERVER"   #>> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
   
