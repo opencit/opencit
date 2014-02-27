@@ -1245,10 +1245,11 @@ add_postgresql_install_packages() {
   
   # detect available package management tools. start with the less likely ones to differentiate.
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
-  
+  echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
-    if [[ -z "$pgAddPackRequired" ]]; then
+	echo_warning "found packages $pgAddPackRequired"
+    if [ -z "$pgAddPackRequired" ]; then
       prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
       if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
         echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
@@ -1282,14 +1283,13 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
+  echo_warning "postgres_server_install postgres_com = $postgres_com"
   if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
     return;
   fi
   if [[ -z "$postgres_com" ]]; then
-    echo "Checking to see if postgresql package is available for install..."
-    add_postgresql_install_packages "POSTGRES_SERVER"
     echo "Running postgresql auto install..."
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect

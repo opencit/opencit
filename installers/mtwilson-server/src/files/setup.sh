@@ -441,9 +441,16 @@ if using_mysql; then
 elif using_postgres; then
   # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
   if [ -d "/etc/apt" ]; then
+    echo_warning "setting up postgres apt repo"
+	
     mkdir -p /etc/apt/trusted.gpg.d
     chmod 755 /etc/apt/trusted.gpg.d
     cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+	POSTGRES_SERVER_YUM_PACKAGES=""
+    POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
+	
+	echo_warning "Checking to see if postgresql package is available for install..."
+    add_postgresql_install_packages "POSTGRES_SERVER"
   fi
 
   postgres_userinput_connection_properties
