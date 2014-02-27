@@ -7,11 +7,14 @@
 
   <name>Mt Wilson Maven Parent Projects</name>
 
+		<version>1.2.3-SNAPSHOT</version>
+  <!--
 	<parent>
 		<groupId>com.intel.mtwilson</groupId>
 		<artifactId>mtwilson</artifactId>
 		<version>1.2.3-SNAPSHOT</version>
 	</parent>
+	-->
   
   <modules>
     <module>mtwilson-dist-java-zip</module>

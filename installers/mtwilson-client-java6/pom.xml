@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mtwilson-client-java6</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>mtwilson-client-java6</name>
     <description>
         The API Client provides an easy-to-use programming interface to access 
@@ -13,12 +13,11 @@
     </description>
   
     <parent> 
-        <groupId>com.intel.mtwilson.dist</groupId> 
+        <groupId>com.intel.mtwilson.maven</groupId> 
         <artifactId>mtwilson-dist-java-zip</artifactId> 
         <version>1.2.3-SNAPSHOT</version> 
+		<relativePath/>
     </parent>
-
-
 
     <dependencies>
         <dependency>
