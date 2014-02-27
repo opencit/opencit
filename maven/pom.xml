@@ -15,6 +15,7 @@
   
   <modules>
     <module>mtwilson-dist-java-zip</module>
+	<module>mtwilson-feature-zip</module>
   </modules>
 
 
