@@ -248,6 +248,12 @@ if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
   cp shiro.ini /etc/intel/cloudsecurity
 fi
 
+# add MTWILSON_SERVER to shiro trust file
+hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
+if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
+  update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
+fi
+
 echo "Adding symlink for /opt/mtwilson/configuration..."
 # temp symlink -- SAVY added 2014-02-26
 if [[ ! -h "/opt/mtwilson/configuration" ]]; then
