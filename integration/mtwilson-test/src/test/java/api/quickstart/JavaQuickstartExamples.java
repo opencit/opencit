@@ -13,6 +13,7 @@ import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.My;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -34,8 +35,7 @@ public class JavaQuickstartExamples {
         File directory = new File(System.getProperty("user.home", "."));
         String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
-//        URL server = new URL("http://127.0.0.1:48080/mtwilson/v1"); // glassfish4
-        URL server = new URL("http://127.0.0.1:58080/mtwilson/v1"); // tomcat7
+        URL server = new URL("http://127.0.0.1:8080/mtwilson/v1");
         String[] roles = new String[] { "Attestation", "Whitelist" };
         KeystoreUtil.createUserInDirectory(directory, username, password, server, roles);
     }
