@@ -1263,8 +1263,8 @@ add_postgresql_install_packages() {
       apt-key add /etc/apt/trusted.gpg.d/ACCC4CF8.asc
       echo "Running apt-get update; this may take a while..."
       apt-get update >> $INSTALL_LOG_FILE
-      echo "Running apt-get upgrade; this may take a while..."
-      apt-get upgrade -y >> $INSTALL_LOG_FILE
+      #echo "Running apt-get upgrade; this may take a while..."
+      #apt-get upgrade -y >> $INSTALL_LOG_FILE
     fi
   #elif [[ -n "$yast" && -n "$yast_packages" ]]; then
     # code goes here
