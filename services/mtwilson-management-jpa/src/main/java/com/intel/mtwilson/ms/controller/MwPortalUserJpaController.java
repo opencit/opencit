@@ -157,7 +157,8 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
             query.setParameter("username", name);
 
             //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+//            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 
             mwKeystoreObj = (MwPortalUser) query.getSingleResult();
         } catch (javax.persistence.NoResultException e) {

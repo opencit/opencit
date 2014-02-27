@@ -165,12 +165,14 @@ public class BootstrapUser implements Command {
             c.close();
             */
            
+            System.err.println(String.format("Searching for user by name: %s", username)); 
             MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);   
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
-            portalUserJpa.edit(apiClient);
             System.err.println(String.format("Attempt to approve %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
-            ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            portalUserJpa.edit(apiClient);
+//            ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            ApiClientX509JpaController x509jpaController = My.jpa().mwApiClientX509();
             ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
             if( client == null ) {
                 log.error("Cannot find client record with fingerprint {}", Hex.encodeHexString(fingerprint));

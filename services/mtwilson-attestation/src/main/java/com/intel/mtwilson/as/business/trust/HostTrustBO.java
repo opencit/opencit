@@ -1082,6 +1082,7 @@ public class HostTrustBO extends BaseBO {
 
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
+            HostBO hostBO = new HostBO();
             TblHosts tblHost = hostBO.getHostByName(hostName);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
