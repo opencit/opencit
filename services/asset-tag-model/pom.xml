@@ -6,22 +6,22 @@
     <name>Asset Tag Data Model</name>
     <description>Data Model for Asset Tag and Provisioning Service</description>
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
-		<version>1.2.3-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
 
-<!--
-IMPORTANT NOTE ON BUILDING THIS PROJECT:
-** most of below has been automated in this pom, project build should "just work" even the first time **
-When you build it the first time, the JOOQ plugin will generate sources but they will be
-incomplete because it automatically generates them from an existing database. So after
-building the first time, run the junit tests in test.jdbi.RepositoryTest; they will automatically
-create a local Derby database.
-Then delete target/generated-sources/jooq and build the project again to generate the
-complete set of jooq source classes.
-Then you'll be able to run junit tests for search APIs etc that use JOOQ in their implementation.
--->
+    <!--
+    IMPORTANT NOTE ON BUILDING THIS PROJECT:
+    ** most of below has been automated in this pom, project build should "just work" even the first time **
+    When you build it the first time, the JOOQ plugin will generate sources but they will be
+    incomplete because it automatically generates them from an existing database. So after
+    building the first time, run the junit tests in test.jdbi.RepositoryTest; they will automatically
+    create a local Derby database.
+    Then delete target/generated-sources/jooq and build the project again to generate the
+    complete set of jooq source classes.
+    Then you'll be able to run junit tests for search APIs etc that use JOOQ in their implementation.
+    -->
 
     <build>
         <!--
@@ -39,13 +39,6 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
             
             
@@ -62,42 +55,42 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             </activation>
             <build>
                 <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-javadoc-plugin</artifactId>
-			<version>2.9.1</version>
-			<configuration>
-                <show>public</show>
-				<stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
-                <includeDependencySources>true</includeDependencySources>
-                <dependencySourceIncludes>
-                    <dependencySourceInclude>com.intel.dcsg.cpg:*</dependencySourceInclude>
-                    <dependencySourceInclude>com.intel.mtwilson.*:*</dependencySourceInclude>
-                </dependencySourceIncludes>
-			</configuration>
-			<executions>
-            <execution>
-                <id>attach-javadocs</id>
-                <phase>site</phase>
-                <goals>
-                    <goal>jar</goal>
-                </goals>
-            </execution>
-        </executions>			
-		</plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <configuration>
+                            <show>public</show>
+                            <stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+                            <includeDependencySources>true</includeDependencySources>
+                            <dependencySourceIncludes>
+                                <dependencySourceInclude>com.intel.dcsg.cpg:*</dependencySourceInclude>
+                                <dependencySourceInclude>com.intel.mtwilson.*:*</dependencySourceInclude>
+                            </dependencySourceIncludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>			
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -107,7 +100,7 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
     <dependencies>
 
 
-    <dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
         </dependency>
@@ -125,7 +118,7 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </dependency>
 
 
-      <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
+        <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
@@ -163,28 +156,28 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <version>2.4</version>
             <type>jar</type>
         </dependency>
-    <!-- JSON support -->
+        <!-- JSON support -->
 
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-core</artifactId>
-    	<version>2.2.2</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-    	<version>2.2.2</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    	<version>2.2.2</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.dataformat</groupId>
-    	<artifactId>jackson-dataformat-xml</artifactId>
-    	<version>2.2.2</version>
-    </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>2.2.2</version>
+        </dependency>
 
     </dependencies>  
 </project>

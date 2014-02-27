@@ -1291,7 +1291,7 @@ postgres_server_install(){
   fi
   if [[ -z "$postgres_com" ]]; then
     echo "Running postgresql auto install..."
-    auto_install "Postgres server" "POSTGRES_SERVER"   #>> $INSTALL_LOG_FILE
+    auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
   
