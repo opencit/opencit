@@ -6,9 +6,9 @@
     <name>mtwilson-shiro-jdbi</name>
     <description>Data access layer for mtwilson-shiro-util using JDBI</description>
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
-		<version>1.2.3-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -20,12 +20,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-		<version>3.1</version>     
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
             </plugin>
                
         </plugins>
@@ -34,7 +28,7 @@
 
     <dependencies>
 
-<!-- XXX TODO  dependency will need to be the other way... eventually this should be included in mtwilson-my and obtained by mtwilson-shiro using My.jdbi().authz() -->
+        <!-- XXX TODO  dependency will need to be the other way... eventually this should be included in mtwilson-my and obtained by mtwilson-shiro using My.jdbi().authz() -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
@@ -72,25 +66,25 @@
         </dependency>
 
 
-    <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
-    <dependency>
-      <groupId>org.jdbi</groupId>
-      <artifactId>jdbi</artifactId>
-      <version>2.49</version>
-    </dependency>        
-    <dependency>
-        <groupId>org.antlr</groupId>
-        <artifactId>stringtemplate</artifactId>
-        <version>3.2.1</version>
-    </dependency>
+        <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.49</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>stringtemplate</artifactId>
+            <version>3.2.1</version>
+        </dependency>
         
         
         <!-- apache 2.0 license,  database connection pooling system -->
-    <dependency>
-        <groupId>commons-dbcp</groupId>
-        <artifactId>commons-dbcp</artifactId>
-        <version>1.4</version>
-    </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
 
     </dependencies>  
     

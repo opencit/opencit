@@ -6,81 +6,74 @@
     <name>PrivacyCA</name>
 
     <parent>
-	<groupId>com.intel.mtwilson.trustagent</groupId>
-	<artifactId>trust-agent-parent</artifactId>
-	<version>1.2.3-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.trustagent</groupId>
+        <artifactId>trust-agent-parent</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
     <build>
-		<plugins>
-	    <plugin>
+        <plugins>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-		<version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <!-- <skip>true</skip> -->
-                </configuration>
             </plugin>
 
 
-<!-- need this to include the commons-configuration, commons-lang, and commons-codec dependencies into the trustagent.jar -->	
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-assembly-plugin</artifactId>
-  <executions>
-    <execution>
-      <id>create-my-bundle</id>
-      <phase>package</phase>
-      <goals>
-        <goal>single</goal>
-      </goals>
-      <configuration>
-        <descriptorRefs>
-          <descriptorRef>jar-with-dependencies</descriptorRef>
-        </descriptorRefs>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
+            <!-- need this to include the commons-configuration, commons-lang, and commons-codec dependencies into the trustagent.jar -->	
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-my-bundle</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
         </plugins>
 
     
     </build>
     <dependencies>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-tls-policy</artifactId>
-			<version>0.2-SNAPSHOT</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>HisPrivacyCAWebServices2</artifactId>
             <version>${project.parent.version}</version>
-	    <classifier>client</classifier>
+        <classifier>client</classifier>
         </dependency>
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
             <version>1.0.1-SNAPSHOT</version>
-	    <classifier>HisWebServices-client</classifier>
+        <classifier>HisWebServices-client</classifier>
         </dependency>
         -->
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-my</artifactId>
-			<version>${project.parent.version}</version>
-			<type>jar</type>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${project.parent.version}</version>
+            <type>jar</type>
+        </dependency>
 	
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
             <version>1.0</version>
-	    <classifier>HisPrivacyCAWebServices2-client</classifier>
+            <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -93,33 +86,33 @@
             <scope>test</scope>
         </dependency>
 
-	       	<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-webservice-util</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-                <!--
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15</artifactId>
-			<version>1.41</version>
-		</dependency>
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.47</version>
-		</dependency>
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-ext-jdk15on</artifactId>
-			<version>1.46</version>
-		</dependency>
-                -->
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15</artifactId>
-			<version>1.46</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <!--
+    <dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15</artifactId>
+    <version>1.41</version>
+</dependency>
+    <dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15on</artifactId>
+    <version>1.47</version>
+</dependency>
+    <dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-ext-jdk15on</artifactId>
+    <version>1.46</version>
+</dependency>
+        -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15</artifactId>
+            <version>1.46</version>
+        </dependency>
 
     </dependencies>
     
@@ -133,23 +126,23 @@
             <build>
                 <plugins>
                     <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-javadoc-plugin</artifactId>
-                      <version>2.8.1</version>
-                      <executions>
-                          <execution>
-                              <phase>prepare-package</phase>
-                              <goals>
-              <!--                    <goal>jar</goal> -->
-                                  <goal>javadoc</goal>
-                              </goals>        
-                          </execution>
-                      </executions>
-                      <configuration>
-                          <show>public</show>
-                          <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
-                          <encoding>utf-8</encoding>
-                      </configuration>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.8.1</version>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <!--                    <goal>jar</goal> -->
+                                    <goal>javadoc</goal>
+                                </goals>        
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <show>public</show>
+                            <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
+                            <encoding>utf-8</encoding>
+                        </configuration>
                     </plugin>
                     
                 </plugins>

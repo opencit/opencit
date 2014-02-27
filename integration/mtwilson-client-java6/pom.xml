@@ -24,31 +24,31 @@
 
     <build>
 	
-<!--
-        <testResources>
-            <testResource>
-                <directory>src/test/json</directory>
-                <includes>
-                    <include>**/*.json</include>
-                </includes>
-            </testResource>
-            <testResource>
-                <directory>src/test/env</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <includes>
-                    <include>**/*.jks</include>
-                    <include>**/cacerts</include>
-                    <include>**/*.html</include>
-                    <include>**/*.xml</include>
-                </includes>
-            </testResource>
-        </testResources>
-	-->
+        <!--
+            <testResources>
+                <testResource>
+                    <directory>src/test/json</directory>
+                    <includes>
+                        <include>**/*.json</include>
+                    </includes>
+                </testResource>
+                <testResource>
+                    <directory>src/test/env</directory>
+                    <includes>
+                        <include>**/*.properties</include>
+                    </includes>
+                </testResource>
+                <testResource>
+                    <directory>src/test/resources</directory>
+                    <includes>
+                        <include>**/*.jks</include>
+                        <include>**/cacerts</include>
+                        <include>**/*.html</include>
+                        <include>**/*.xml</include>
+                    </includes>
+                </testResource>
+            </testResources>
+        -->
 	
         <plugins>
             
@@ -193,18 +193,18 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-crypto</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-rfc822</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-rfc822</artifactId>
+        </dependency>
         <!--
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -232,13 +232,13 @@
         </dependency>
                 
         <!--
-       	<dependency>
-          		<groupId>org.glassfish</groupId>
-          		<artifactId>maven-embedded-glassfish-plugin</artifactId>
-          		<version>3.1.1</version>
-          		<type>maven-plugin</type>
-       	</dependency>    
-       	-->
+        <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>maven-embedded-glassfish-plugin</artifactId>
+                <version>3.1.1</version>
+                <type>maven-plugin</type>
+        </dependency>    
+        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -251,9 +251,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        <groupId>com.intel.mtwilson.services</groupId>
-  <artifactId>mtwilson-webservice-util</artifactId>
-  <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -262,17 +262,17 @@
         </dependency>
         <!--
         <dependency>
-          		<groupId>org.slf4j</groupId>
-          		<artifactId>slf4j-simple</artifactId>
-          		<version>1.6.4</version>
-          		<scope>provided</scope>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.6.4</version>
+                <scope>provided</scope>
         </dependency>
         -->
         <!-- <dependency>
-          		<groupId>org.slf4j</groupId>
-          		<artifactId>slf4j-jdk14</artifactId>
-          		<version>1.6.4</version>
-          		<scope>test</scope>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>1.6.4</version>
+                <scope>test</scope>
         </dependency> -->
 	
         <dependency>
@@ -287,18 +287,18 @@
 
         <!--
         <dependency>
-          		<groupId>commons-logging</groupId>
-          		<artifactId>commons-logging</artifactId>
-          		<version>1.1.1</version>
-          		<scope>compile</scope>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.1</version>
+                <scope>compile</scope>
         </dependency>
         -->
         <!--
         <dependency>
-          		<groupId>commons-beanutils</groupId>
-          		<artifactId>commons-beanutils</artifactId>
-          		<version>1.8.0</version>
-          		<scope>compile</scope>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>1.8.0</version>
+                <scope>compile</scope>
         </dependency>
         -->
         <dependency>
@@ -310,19 +310,19 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <!--
-       	<dependency>
-          		<groupId>org.apache.commons</groupId>
-          		<artifactId>commons-io</artifactId>
-          		<version>1.3.2</version>
-       	</dependency>
-       	-->
+        <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>1.3.2</version>
+        </dependency>
+        -->
         <!--
             <dependency>
                     <groupId>com.jayway.restassured</groupId>
                     <artifactId>rest-assured</artifactId>
                     <version>1.5</version>
             </dependency>        
-       	-->
+        -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb</artifactId>
@@ -433,9 +433,9 @@
 <version>1.1.1</version>
 </dependency>
 <dependency>
-  		<groupId>javax</groupId>
-  		<artifactId>javaee-web-api</artifactId>
-  		<scope>provided</scope>
+        <groupId>javax</groupId>
+        <artifactId>javaee-web-api</artifactId>
+        <scope>provided</scope>
 </dependency>
 <dependency>
 <groupId>javax.mail</groupId>
@@ -445,12 +445,12 @@
         -->
         <!-- end jersey  -->
         <!--
-           	<dependency>
-         			<groupId>org.bouncycastle</groupId>
-         			<artifactId>bcprov-jdk15on</artifactId>
-         			<version>1.47</version>
-      		</dependency>
-      		-->
+        <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.47</version>
+        </dependency>
+        -->
         <!-- start saml verification -->
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -491,11 +491,11 @@
     
         <!-- for Java 1.5 version of the api client -->
         <!--
-       	<dependency>
-       	    <groupId>com.intel.mtwilson.integration</groupId>
-       	    <artifactId>java-backport-1.6-to-1.5</artifactId>
-       	    <version>0.1-SNAPSHOT</version>
-       	</dependency>-->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>java-backport-1.6-to-1.5</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>-->
         <!-- end Java 1.5 backport dependencies -->
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>

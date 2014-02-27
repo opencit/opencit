@@ -28,13 +28,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
 
 
@@ -108,10 +101,10 @@ This error message indicates you need a jersey implementation like org.glassfish
         </dependency>        
         
         <!-- temporarily putting jpa dependencies here so we can find persistence.xml , but TODO  need to allow passing in a classloader to cpg-jpa persistencemanager  and some way for the app to know what is the application class loader used by mtwilson-launcher-xyz ... maybe MyClassLoader ?? -->
-    <dependency>
-      <groupId>postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
         <!--
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
@@ -136,12 +129,12 @@ This error message indicates you need a jersey implementation like org.glassfish
         -->
         
         <!-- include all the app dependencies ... XXX TODO  load from java filesystem path like /opt/mtwilson/java -->
-    <dependency>
-      <groupId>com.intel.mtwilson.features</groupId>
-      <artifactId>mtwilson-server</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.features</groupId>
+            <artifactId>mtwilson-server</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
     
 </project>

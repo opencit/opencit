@@ -14,16 +14,9 @@
 	
 		<plugins>
 	    
-	    <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-		<version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
 
         </plugins>
@@ -172,13 +165,13 @@
             <version>${project.version}</version>
         </dependency>
         
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-            <version>1.1.1</version>
-            <scope>provided</scope>
-        </dependency>
-                -->
+<dependency>
+    <groupId>javax.ws.rs</groupId>
+    <artifactId>jsr311-api</artifactId>
+    <version>1.1.1</version>
+    <scope>provided</scope>
+</dependency>
+        -->
 
         
     </dependencies>

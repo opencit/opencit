@@ -21,13 +21,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
         </plugins>
 
@@ -35,11 +28,11 @@
 
 
     <dependencies>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-hostagent-ext</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         
         <!-- TODO (step 2): remove mtwilson-vmware-hostagent dependnecy and load all hostagents using cpg-extensions -->
@@ -107,20 +100,20 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-    </dependency>
-    <dependency>
+        </dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
         </dependency>
-<dependency>
-    <groupId>javax.ws.rs</groupId>
-    <artifactId>javax.ws.rs-api</artifactId>
-    <version>2.0</version>
-    <scope>provided</scope>
-</dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
@@ -169,7 +162,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-                <!-- must exclude com.sun.xml.bind:jaxb-impl from mtwilson-client-java6 to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->
+        <!-- must exclude com.sun.xml.bind:jaxb-impl from mtwilson-client-java6 to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
