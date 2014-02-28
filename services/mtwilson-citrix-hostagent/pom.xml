@@ -21,13 +21,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
         </plugins>
 
@@ -74,7 +67,7 @@
             <version>2.0</version>
             <scope>provided</scope>
         </dependency> 
-	<dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
         </dependency>

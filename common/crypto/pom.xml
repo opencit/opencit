@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-        <!--
-        XXX TODO (in progress)  mtwilson-crypto should be refactored into 2 parts:  1) use the cpg-crypto package instead which
-        has most of these classes, 2) mtwilson-specific code.  mtwilson-api should be refactored to move some of those
-        classes into other more suitable packages.  
-        -->
+    <!--
+    XXX TODO (in progress)  mtwilson-crypto should be refactored into 2 parts:  1) use the cpg-crypto package instead which
+    has most of these classes, 2) mtwilson-specific code.  mtwilson-api should be refactored to move some of those
+    classes into other more suitable packages.  
+    -->
 
     <artifactId>mtwilson-crypto</artifactId>
     <packaging>jar</packaging>
@@ -22,28 +22,21 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
         </plugins>
 
@@ -66,14 +59,14 @@
             <scope>test</scope>
         </dependency>
       
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-validation</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+        </dependency>
       
         <dependency>
             <groupId>junit</groupId>
@@ -85,9 +78,9 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <scope>test</scope>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -112,40 +105,40 @@
             <scope>provided</scope>
         </dependency>
 
-<!--
-<dependency>
-    <groupId>org.codehaus.jackson</groupId>
-    <artifactId>jackson-jaxrs</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-mapper-asl</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-core-asl</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-xc</artifactId>
-    <scope>test</scope>
-</dependency>
--->
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-annotations</artifactId>
-    <version>2.3.0</version>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.3.0</version>
-    <scope>test</scope>
-</dependency>
+        <!--
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>  
 </project>

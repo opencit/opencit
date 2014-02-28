@@ -203,7 +203,7 @@ function provisionCert() {
 		dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
 	fi
  fi
- if [ ! "$accept" == "yes"]; then
+ if [ ! "$accept" == "yes" ]; then
 	writeCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to deploy downloaded certificate to host TPM?" 10 60)
 	resp=$?;
  else

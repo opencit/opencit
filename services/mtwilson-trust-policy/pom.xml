@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>mtwilson-trust-policy</artifactId>
-  <packaging>jar</packaging>
-  <name>Trust Policy Library</name>
+    <artifactId>mtwilson-trust-policy</artifactId>
+    <packaging>jar</packaging>
+    <name>Trust Policy Library</name>
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
@@ -11,105 +11,98 @@
     </parent>
 
     <build>
-		<plugins>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-		<version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
         </plugins>
 
     </build>
 
 
-  <dependencies>
-    <dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<scope>test</scope>
-        <type>jar</type>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
 
-    <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.6.4</version>
-    </dependency>
+        </dependency>
         <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
-                <scope>test</scope>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.9</version>
+            <scope>test</scope>
         </dependency>
 
-<!-- testing support for serializing json -->
-<!--
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-mapper-asl</artifactId>
-	<version>1.9.11</version>
-  <scope>test</scope>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-core-asl</artifactId>
-	<version>1.9.11</version>
-  <scope>test</scope>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-xc</artifactId>
-	<version>1.9.11</version>
-  <scope>test</scope>
-</dependency>
--->
+        <!-- testing support for serializing json -->
+        <!--
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.11</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.11</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <version>1.9.11</version>
+          <scope>test</scope>
+        </dependency>
+        -->
 
-<!-- testing support for serializing xml -->
-<dependency>
-  <groupId>com.fasterxml.jackson.dataformat</groupId>
-  <artifactId>jackson-dataformat-xml</artifactId>
-  <version>2.1.4</version>
-  <scope>test</scope>
-</dependency>
-<dependency>
-  <groupId>org.codehaus.woodstox</groupId>
-  <artifactId>woodstox-core-asl</artifactId>
-  <version>4.2.0</version>
-  <scope>test</scope>
-</dependency>
+        <!-- testing support for serializing xml -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>2.1.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <version>4.2.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- testing support for deserializing json/xml, so we can operate on saved reports -->        
-<dependency>
-  <groupId>com.fasterxml.jackson.module</groupId>
-  <artifactId>jackson-module-mrbean</artifactId>
-  <version>2.1.1</version>
-  <scope>test</scope>
-</dependency>        
-<!-- end testing support -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-mrbean</artifactId>
+            <version>2.1.1</version>
+            <scope>test</scope>
+        </dependency>        
+        <!-- end testing support -->
     
-    <!-- javascript interpreter for dynamically computed expected pcr values -->
-<dependency>
-	<groupId>rhino</groupId>
-	<artifactId>js</artifactId>
-	<version>1.7R2</version>
-</dependency>
+        <!-- javascript interpreter for dynamically computed expected pcr values -->
+        <dependency>
+            <groupId>rhino</groupId>
+            <artifactId>js</artifactId>
+            <version>1.7R2</version>
+        </dependency>
             	
-    <dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.dcsg.cpg</groupId>
-      <artifactId>cpg-crypto</artifactId>
-      <version>0.1.4-SNAPSHOT</version>
-      <type>jar</type>
-    </dependency>
-  </dependencies>  
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1.4-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>  
 </project>
