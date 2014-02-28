@@ -30,7 +30,7 @@
 	        <div class="container">
 				<div class="nagPanel"></div>
 				<div id="nameOfPage" class="NameHeader" data-i18n="header.login">Login</div>
-				<div class="registerUser"><span data-i18n="label.enter_credentials">Please enter your username and password.<span> <a href="javascript:;" onclick="getRegisterUserPage()" data-i18n="link.register">Register</a> <span data-i18n="label.no_account">if you don't have an account.</span></div>
+                                <div class="registerUser"><span data-i18n="label.enter_credentials">Please enter your username and password.</span> <a href="javascript:;" onclick="getRegisterUserPage()" data-i18n="link.register">Register</a> <span data-i18n="label.no_account">if you don't have an account.</span></div>
 				<form id="loginForm" action="checkLogin.htm" method="post" style="margin-left: 60px;font-size: 16px;">
 					<table cellpadding="3" cellspacing="5">
                  	<tbody>
