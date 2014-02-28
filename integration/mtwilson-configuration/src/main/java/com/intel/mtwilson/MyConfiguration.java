@@ -548,11 +548,25 @@ public class MyConfiguration {
         return conf.getString("mtwilson.as.dek", ""); // removing default in mtwilson 1.2;  was "hPKk/2uvMFRAkpJNJgoBwA=="
     }
     
+    /////////////////////////            rootca key            //////////////////////////////////
+    public File getRootCaCertificateFile() {
+        return new File(conf.getString("mtwilson.rootca.certificate.file", getMtWilsonConf() + File.separator + "MtWilsonRootCA.crt.pem"));
+    }
+    
+    /////////////////////////             pca key              //////////////////////////////////
+    public File getPrivacyCaCertificateFile() {
+        return new File(conf.getString("mtwilson.privacyca.certificate.file", getMtWilsonConf() + File.separator + "PrivacyCA.pem"));
+    }
+    
     ///////////////////////// saml key for attestation service //////////////////////////////////
-
+    public File getSamlCertificateFile() {
+        return new File(conf.getString("mtwilson.saml.certificate.file", getMtWilsonConf() + File.separator + "saml.crt.pem"));
+    }
+    
     public File getSamlKeystoreFile() {
         return new File(conf.getString("saml.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-saml.jks"));
     }
+    
     public String getSamlKeystorePassword() {
         return conf.getString("saml.key.password"); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
     }
