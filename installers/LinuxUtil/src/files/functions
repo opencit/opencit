@@ -1224,6 +1224,7 @@ postgres_install() {
 
   if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
     auto_install "Postgres client" "POSTGRES_CLIENT" >> $INSTALL_LOG_FILE
+    postgres_detect >> $INSTALL_LOG_FILE
     if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
       echo_failure "Unable to auto-install Postgres client" | tee -a $INSTALL_LOG_FILE
       echo "Postgres download URL:" >> $INSTALL_LOG_FILE
