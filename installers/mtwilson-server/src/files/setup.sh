@@ -473,7 +473,7 @@ elif using_postgres; then
       fi 
 
       # don't need to restart postgres server unless the install script says we need to (by returning zero)
-      if [ postgres_server_install ]; then
+      if postgres_server_install; then
         postgres_restart >> $INSTALL_LOG_FILE
         sleep 10
       fi
