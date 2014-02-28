@@ -555,7 +555,7 @@ public class MyConfiguration {
     
     /////////////////////////             pca key              //////////////////////////////////
     public File getPrivacyCaCertificateFile() {
-        return new File(conf.getString("mtwilson.privacyca.certificate.file", getMtWilsonConf() + File.separator + "PrivacyCA.pem"));
+        return new File(conf.getString("mtwilson.privacyca.certificate.list.file", getMtWilsonConf() + File.separator + "PrivacyCA.pem"));
     }
     
     ///////////////////////// saml key for attestation service //////////////////////////////////
@@ -673,7 +673,8 @@ public class MyConfiguration {
         log.debug("MTWILSON_CONF={}", mtwilsonConf);
         if( mtwilsonConf == null ) {
             if( Platform.isUnix() ) {
-                mtwilsonConf = "/etc/mtwilson";
+                //mtwilsonConf = "/etc/mtwilson";
+                mtwilsonConf = "/etc/intel/cloudsecurity";
                 log.debug("MTWILSON_CONF={} (Linux default)", mtwilsonConf);
             }
             if( Platform.isWindows() ) {
