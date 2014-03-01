@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 public abstract class LocalSetupTask extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LocalSetupTask.class);
     
-    protected boolean checkFolderExists(String symbolicName, String path) {
+    protected boolean checkFileExists(String symbolicName, String path) {
         if (path == null) {
             configuration("%s is not configured", symbolicName);
             return false;

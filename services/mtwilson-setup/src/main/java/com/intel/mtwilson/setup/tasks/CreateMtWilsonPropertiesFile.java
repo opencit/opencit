@@ -19,7 +19,10 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 
 /**
- * Depends on ConfigureFilesystem
+ * Depends on ConfigureFilesystem. 
+ * TODO this really shouldn't be its own task, the setup application should
+ * create a PropertiesConfiguration object, pass it to all the setup tasks,
+ * and then store it at the end to mtwilson.properties
  *
  * @author jbuhacoff
  */
@@ -31,22 +34,24 @@ public class CreateMtWilsonPropertiesFile extends LocalSetupTask {
 
     @Override
     protected void configure() throws Exception {
-        mtwilsonConf = My.configuration().getMtWilsonConf();
+        mtwilsonConf = My.filesystem().getConfigurationPath(); //My.configuration().getMtWilsonConf();
         if (mtwilsonConf == null) {
             configuration("MTWILSON_CONF is not configured");
         }
+        // we don't store MTWILSON_CONF in the configuration because it's needed to load the configuration itself
     }
 
     @Override
     protected void validate() throws Exception {
         mtwilsonProperties = new File(mtwilsonConf + File.separator + "mtwilson.properties");
-        checkFolderExists("MTWILSON_CONF", mtwilsonConf);
-        checkFolderExists("mtwilson.properties", mtwilsonProperties.getAbsolutePath());
+        checkFileExists("MTWILSON_CONF", mtwilsonConf);
+        checkFileExists("mtwilson.properties", mtwilsonProperties.getAbsolutePath());
     }
 
     @Override
     protected void execute() throws Exception {
         FileOutputStream out = new FileOutputStream(mtwilsonProperties);
+//        getConfiguration().
         Properties properties = new Properties();
         properties.store(out, "automatically generated");
         out.close();

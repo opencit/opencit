@@ -33,8 +33,8 @@ public class ConfigureFilesystem extends LocalSetupTask {
 
     @Override
     protected void configure() throws Exception {
-        mtwilsonHome = My.configuration().getMtWilsonHome();
-        mtwilsonConf = My.configuration().getMtWilsonConf();
+        mtwilsonHome = My.filesystem().getApplicationPath(); //My.configuration().getMtWilsonHome();
+        mtwilsonConf = My.filesystem().getConfigurationPath(); //My.configuration().getMtWilsonConf();
         if (mtwilsonHome == null) {
             configuration("MTWILSON_HOME is not configured");
         }
@@ -45,8 +45,8 @@ public class ConfigureFilesystem extends LocalSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        checkFolderExists("MTWILSON_HOME", mtwilsonHome);
-        checkFolderExists("MTWILSON_CONF", mtwilsonConf);
+        checkFileExists("MTWILSON_HOME", mtwilsonHome);
+        checkFileExists("MTWILSON_CONF", mtwilsonConf);
     }
 
     @Override
@@ -55,13 +55,14 @@ public class ConfigureFilesystem extends LocalSetupTask {
             if (winHasSetx()) {
                 // we can set the variable!
                 runToVoid("setx MTWILSON_HOME " + mtwilsonHome);
-                runToVoid("cmd /c mkdir " + mtwilsonHome);//  mkdir and set are shell commands not stand-alone executables, so if we don't prefix cmd /c we would get java.io.IOException: CreateProcess error=2, The system cannot find the file specified
                 runToVoid("setx MTWILSON_CONF " + mtwilsonConf);
-                runToVoid("cmd /c mkdir " + mtwilsonConf);//  mkdir and set are shell commands not stand-alone executables, so if we don't prefix cmd /c we would get java.io.IOException: CreateProcess error=2, The system cannot find the file specified
             }
+            runToVoid("cmd /c mkdir " + mtwilsonHome);//  mkdir and set are shell commands not stand-alone executables, so if we don't prefix cmd /c we would get java.io.IOException: CreateProcess error=2, The system cannot find the file specified
+            runToVoid("cmd /c mkdir " + mtwilsonConf);//  mkdir and set are shell commands not stand-alone executables, so if we don't prefix cmd /c we would get java.io.IOException: CreateProcess error=2, The system cannot find the file specified
         }
         if (Platform.isUnix()) {
-            // TODO  create directories
+            runToVoid("mkdir -p "+mtwilsonHome);
+            runToVoid("mkdir -p "+mtwilsonConf);
         }
     }
 

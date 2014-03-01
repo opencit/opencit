@@ -16,9 +16,9 @@ import java.sql.Statement;
 public class ConfigureDatabase extends LocalSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureDatabase.class);
 
-    private String databaseHost;
-    private String databasePort;
-    private String databaseDriver;
+    private String databaseHost = "127.0.0.1";
+    private String databasePort = "5432";
+    private String databaseDriver = "postgresql";
     private String databaseUsername;
     private String databasePassword;
     private String databaseUrl;
@@ -67,6 +67,12 @@ public class ConfigureDatabase extends LocalSetupTask {
         else {
             log.debug("Database URL: {}", databaseUrl); // XXX TODO INSECURE do not print this in the log after things are worknig
         }
+        getConfiguration().setString("mtwilson.db.host", databaseHost);
+        getConfiguration().setString("mtwilson.db.port", databasePort);
+        getConfiguration().setString("mtwilson.db.driver", databaseDriver);
+        getConfiguration().setString("mtwilson.db.username", databaseUsername);
+        getConfiguration().setString("mtwilson.db.password", databasePassword);
+//        getConfiguration().setString("mtwilson.db.url", databaseUrl);
     }
 
     @Override
