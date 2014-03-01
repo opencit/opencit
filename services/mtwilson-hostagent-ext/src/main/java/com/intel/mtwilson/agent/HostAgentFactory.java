@@ -5,8 +5,8 @@
 package com.intel.mtwilson.agent;
 
 import com.intel.mtwilson.My;
-//import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
-//import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
+import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
+import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.extensions.Extensions;
@@ -22,9 +22,11 @@ import java.security.KeyManagementException;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
+import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.Vendor;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,14 +44,16 @@ public class HostAgentFactory {
     
     //private Logger log = LoggerFactory.getLogger(getClass());
     public HostAgentFactory() {
-//        vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());
-//        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostAgentFactory());
-//        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostAgentFactory());
-        List<VendorHostAgentFactory> vendorHostAgentFactories = Extensions.findAll(VendorHostAgentFactory.class);
-        for(VendorHostAgentFactory vendorHostAgentFactory : vendorHostAgentFactories) {
-            vendorFactoryMap.put(vendorHostAgentFactory.getVendorProtocol(), vendorHostAgentFactory);
-            
-        }
+        vendorFactoryMap.put(Vendor.INTEL.name().toLowerCase(), new IntelHostAgentFactory());
+        vendorFactoryMap.put(Vendor.CITRIX.name().toLowerCase(), new CitrixHostAgentFactory());
+        vendorFactoryMap.put(Vendor.VMWARE.name().toLowerCase(), new VmwareHostAgentFactory());
+//        List<VendorHostAgentFactory> vendorHostAgentFactories = Extensions.findAll(VendorHostAgentFactory.class);
+//        log.debug("vendorHostAgentFactories.size: " + vendorHostAgentFactories.size());
+//        log.debug("vendorHostAgentFactories.toArray: " + Arrays.toString(vendorHostAgentFactories.toArray()));
+//        for(VendorHostAgentFactory vendorHostAgentFactory : vendorHostAgentFactories) {
+//            vendorFactoryMap.put(vendorHostAgentFactory.getVendorProtocol(), vendorHostAgentFactory);
+//            
+//        }
     }
     
     /**
