@@ -2,15 +2,16 @@
  * Copyright (C) 2011-2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.helper.saml;
+package com.intel.mtwilson.saml;
 
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
-import com.intel.mtwilson.api.ApiException;
-import com.intel.mtwilson.as.business.AssetTagCertBO;
+//import com.intel.mountwilson.as.common.ASConfig;
+//import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
+//import com.intel.mtwilson.api.ApiException;
+//import com.intel.mtwilson.as.business.AssetTagCertBO;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
-import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.datatypes.TagDataType;
+//import com.intel.mtwilson.datatypes.HostTrustStatus;
+//import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.dcsg.cpg.io.Resource;
 import java.io.IOException;
@@ -79,6 +80,16 @@ public class SamlGenerator {
 //    private Resource keystoreResource = null;
     
     /**
+     * Compatibility constructor 
+     * @param keystoreResource  ignored
+     * @param configuration  commons-configuration object 
+     * @throws ConfigurationException 
+     */
+    public SamlGenerator(Resource keystoreResource, org.apache.commons.configuration.Configuration configuration) throws ConfigurationException {
+        this(new CommonsConfigurationAdapter(configuration));
+    }
+    
+    /**
      * Configuration keys:
      * saml.issuer=http://1.2.3.4/AttestationService          # used in SAML
      * saml.validity.seconds=3600 # 3600 seconds = 1 hour
@@ -93,25 +104,11 @@ public class SamlGenerator {
      * @param configuration with the keys described
      * @throws ConfigurationException 
      */
-    public SamlGenerator(Resource keystoreResource, org.apache.commons.configuration.Configuration configuration) throws ConfigurationException {
+    public SamlGenerator(com.intel.dcsg.cpg.configuration.Configuration configuration /*Resource keystoreResource, org.apache.commons.configuration.Configuration configuration*/) throws ConfigurationException {
         builderFactory = getSAMLBuilder();
         try {
-            signatureGenerator = new SAMLSignature(keystoreResource, configuration);
-        } catch (ClassNotFoundException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (KeyStoreException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (NoSuchAlgorithmException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (UnrecoverableEntryException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (IllegalAccessException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (InstantiationException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (IOException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (CertificateException ex) {
+            signatureGenerator = new SAMLSignature(/*keystoreResource,*/ configuration);
+        } catch (ClassNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | IllegalAccessException | InstantiationException | IOException | CertificateException ex) {
             log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
         }
         setIssuer(configuration.getString("saml.issuer", "AttestationService"));
@@ -365,30 +362,37 @@ public class SamlGenerator {
             // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
             attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
             if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
-                AssetTagCertBO certBO = new AssetTagCertBO();
+//                AssetTagCertBO certBO = new AssetTagCertBO();
                 for (AttributeOidAndValue atagAttr : atags) {
                     String tagValue = atagAttr.getValue();
                     String tagName = "N/A";
                     log.debug("tag atrr OID = " + atagAttr.getOid() + " default OID = " + DEFAULT_OID);
                     if (! atagAttr.getOid().equalsIgnoreCase(DEFAULT_OID)) { 
+                        log.error("Unsupported OID {}", atagAttr.getOid());
+                        
+                        // XXX  commenting out this code for now because we're going to limit asset tags
+                        //      to our DEFAULT_OID defined as key/value pairs until we have better general
+                        //      support for X509 OIDs  - and when we do, we won't need to query the 
+                        //      asset tag service for anything because support for additional OIDs would
+                        //      be in the form of plugins, because we will need code to interpret them
+                        //      but all the necessary information will be embedded and we won't need 
+                        //      to look anything up.
+                        /*
                         // not the default oid that means value == key/value
                         // so we need to query the service and try and get the mapping from there
                         try {
                             TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
                             log.error("createHostAttributes found tag for oid " + atagAttr.getOid());
                             tagName = tag.name;
-                        } catch (IOException ioEx) {
-                          log.error("error getting tag attributes: " + ioEx.getMessage());
-                          ioEx.printStackTrace();
-                          
-                        } catch (ApiException apiEx) {
-                           log.error("error getting tag attributes: " + apiEx.getMessage());
-                          apiEx.printStackTrace();
                         } catch (Exception ex) {
                           log.error("error getting tag attributes: " + ex.getMessage());
                           ex.printStackTrace();
                         }
+                        */
                     }
+                    // XXX TODO  change String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]")  to something more general wherein we can encode the OIDs as is - 
+                    // probaly string attribute is not the right thing to do here anymore, and the client will need the OID-parsing code too for anything that
+                    // is not a key value pair.   Possibly for our DEFAULT_OID  we can keep the easy string attribute format  like String.format(ATAG_%s, tagName) , tagValue
                     attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]"),tagValue));
                 }
             }

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.as.helper.saml;
+package com.intel.mtwilson.saml;
 
 import java.util.Date;
 

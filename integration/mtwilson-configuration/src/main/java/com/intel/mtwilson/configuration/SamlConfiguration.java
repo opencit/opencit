@@ -14,6 +14,8 @@ public class SamlConfiguration extends AbstractConfiguration {
     public static final String SAML_KEYSTORE_PASSWORD = "saml.keystore.password";
     public static final String SAML_KEY_ALIAS = "saml.key.alias";
     public static final String SAML_KEY_PASSWORD = "saml.key.password";
+    public static final String SAML_ISSUER = "saml.issuer"; // saml.certificate.dn 
+    public static final String SAML_VALIDITY_SECONDS = "saml.validity.seconds";
     
 //    private String samlKeystoreFile;
 //    private String samlKeystorePassword;

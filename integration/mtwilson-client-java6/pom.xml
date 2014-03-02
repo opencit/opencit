@@ -112,7 +112,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-saml</artifactId>
+            <artifactId>mtwilson-saml-verifier</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--
