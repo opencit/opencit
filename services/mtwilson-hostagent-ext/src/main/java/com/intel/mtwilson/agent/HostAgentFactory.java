@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.Vendor;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,7 +42,6 @@ public class HostAgentFactory {
     // XXX MOVED TO MTWILSON-TLS-POLICY TLSPOLICYFACTORY
     private TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.getInstance();
     
-    //private Logger log = LoggerFactory.getLogger(getClass());
     public HostAgentFactory() {
 //        vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());
 //        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostAgentFactory());

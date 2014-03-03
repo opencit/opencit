@@ -358,7 +358,6 @@ our customers.
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-performance</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <!-- mtwilson integration -->
@@ -582,7 +581,12 @@ our customers.
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-                    
+
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--
             <dependency>
               <groupId>org.springframework</groupId>
