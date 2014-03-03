@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.mtwilson.validators.ConnectionStringValidator;
 import java.net.MalformedURLException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,55 +18,85 @@ import org.slf4j.LoggerFactory;
 public class ConnectionStringTest {
     private transient Logger log = LoggerFactory.getLogger(getClass());
     
+    private void validate(String input) {
+        ConnectionStringValidator validator = new ConnectionStringValidator();
+        validator.setInput(input);
+        if(!validator.isValid()) {
+            log.error("Invalid connection string: {}", input);
+            for(Fault fault : validator.getFaults()) {
+                log.error("Validation error: {}", fault.toString());
+            }
+            throw new IllegalArgumentException("Validation failed for: "+input);
+        }        
+    }
+    
+    
     @Test
     public void testParseIntelVendorConnectionString() throws MalformedURLException {
-        String intelURL = "intel:https://server.com:9999";
-        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(intelURL);
+        String url = "intel:https://server.com:9999";
+        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
         log.debug("Intel vendor: {}", vc.vendor);
         log.debug("Intel url: {}", vc.url);
+        validate(url);
     }
 
     @Test
     public void testParseCitrixVendorConnectionString() throws MalformedURLException {
-        String citrixURL = "citrix:https://server.com:443;username;password";
-        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(citrixURL);
+        String url = "citrix:https://server.com:443;username;password";
+        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
         log.debug("Citrix vendor: {}", vc.vendor);
         log.debug("Citrix url: {}", vc.url);
         log.debug("Citrix option username: {}", vc.options == null ? "no options" : vc.options.getString("u"));
         log.debug("Citrix option password: {}", vc.options == null ? "no options" : vc.options.getString("p"));
+        validate(url);
     }
 
     @Test
     public void testParseCitrixVendorConnectionStringWithNamedOptions() throws MalformedURLException {
-        String citrixURL = "citrix:https://server.com:443;u=username;p=password";
-        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(citrixURL);
+        String url = "citrix:https://server.com:443;u=username;p=password";
+        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
         log.debug("Citrix vendor: {}", vc.vendor);
         log.debug("Citrix url: {}", vc.url);
         log.debug("Citrix option username: {}", vc.options == null ? "no options" : vc.options.getString("u"));
         log.debug("Citrix option password: {}", vc.options == null ? "no options" : vc.options.getString("p"));
+        validate(url);
     }
 
     
     @Test
-    public void testParseVmwareVendorConnectionString() throws MalformedURLException {
-        String citrixURL = "vmware:https://server.com:443/sdk;username;password;hostname";
-        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(citrixURL);
+    public void testParseVmwareVendorConnectionStringWithHostname() throws MalformedURLException {
+        String url = "vmware:https://server.com:443/sdk;username;password;hostname";
+        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
         log.debug("Vmware vendor: {}", vc.vendor);
         log.debug("Vmware url: {}", vc.url);
         log.debug("Vmware option username: {}", vc.options == null ? "no options" : vc.options.getString("u"));
         log.debug("Vmware option password: {}", vc.options == null ? "no options" : vc.options.getString("p"));
         log.debug("Vmware option hostname: {}", vc.options == null ? "no options" : vc.options.getString("h"));
+        validate(url);
+    }
+
+    @Test
+    public void testParseVmwareVendorConnectionString() throws MalformedURLException {
+        String url = "vmware:https://server.com:443/sdk;username;password";
+        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
+        log.debug("Vmware vendor: {}", vc.vendor);
+        log.debug("Vmware url: {}", vc.url);
+        log.debug("Vmware option username: {}", vc.options == null ? "no options" : vc.options.getString("u"));
+        log.debug("Vmware option password: {}", vc.options == null ? "no options" : vc.options.getString("p"));
+        log.debug("Vmware option hostname: {}", vc.options == null ? "no options" : vc.options.getString("h"));
+        validate(url);
     }
     
     @Test
     public void testParseVmwareVendorConnectionStringWithNamedOptions() throws MalformedURLException {
-        String citrixURL = "vmware:https://server.com:443/sdk;u=username;p=password;h=hostname";
-        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(citrixURL);
+        String url = "vmware:https://server.com:443/sdk;u=username;p=password;h=hostname";
+        ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
         log.debug("Vmware vendor: {}", vc.vendor);
         log.debug("Vmware url: {}", vc.url);
         log.debug("Vmware option username: {}", vc.options == null ? "no options" : vc.options.getString("u"));
         log.debug("Vmware option password: {}", vc.options == null ? "no options" : vc.options.getString("p"));
         log.debug("Vmware option hostname: {}", vc.options == null ? "no options" : vc.options.getString("h"));
+        validate(url);
     }
     
     @Test
@@ -77,6 +109,7 @@ public class ConnectionStringTest {
         log.debug("ConnectionString: {}", cs.getConnectionString());
         log.debug("ConnectionString with prefix: {}", cs.getConnectionStringWithPrefix());
         log.debug("Management Server: {}", cs.getManagementServerName());
+        validate(url);
     }
 
     @Test
@@ -89,6 +122,7 @@ public class ConnectionStringTest {
         log.debug("ConnectionString: {}", cs.getConnectionString());
         log.debug("ConnectionString with prefix: {}", cs.getConnectionStringWithPrefix());
         log.debug("Management Server: {}", cs.getManagementServerName());
+        validate(url);
     }
 
     @Test
@@ -101,6 +135,7 @@ public class ConnectionStringTest {
         log.debug("ConnectionString: {}", cs.getConnectionString());
         log.debug("ConnectionString with prefix: {}", cs.getConnectionStringWithPrefix());
         log.debug("Management Server: {}", cs.getManagementServerName());
+        validate(url);
     }
 
     @Test
@@ -113,6 +148,7 @@ public class ConnectionStringTest {
         log.debug("ConnectionString: {}", cs.getConnectionString());
         log.debug("ConnectionString with prefix: {}", cs.getConnectionStringWithPrefix());
         log.debug("Management Server: {}", cs.getManagementServerName());
+        validate(url);
     }
 
     

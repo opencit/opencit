@@ -25,6 +25,7 @@
     <module>mtwilson-client-dotnet</module>
     <module>mtwilson-client-php</module>
 	-->
+    <module>mtwilson-configuration</module>
     <module>mtwilson-launcher</module>
     <module>mtwilson-launcher-ext</module>
     <module>mtwilson-launcher-jersey2</module>
@@ -32,6 +33,7 @@
     <module>mtwilson-version</module>
 	<module>mtwilson-launcher-glassfish4</module>
     <module>mtwilson-launcher-jetty9</module>
+	<module>mtwilson-launcher-tomcat7</module>
     <module>mtwilson-feature-xml</module>
   </modules>
 

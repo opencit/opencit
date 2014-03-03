@@ -95,6 +95,7 @@ public class RpcInvoker implements Runnable {
         }
         // run
         try {
+        // assume that the rpc adapter is RunnableRpcAdapter    XXX TODO  need to detect it
             Runnable runnable = (Runnable)taskObject;
             runnable.run();
             // TODO   connect the task obejct to a progress monitor that has a reference to its task id to update current/max   in the database

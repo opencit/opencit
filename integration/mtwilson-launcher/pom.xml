@@ -70,12 +70,13 @@ the launcher only needs to know MTWILSON_HOME so it can load the modules.
         -->
             
             <!-- XXX TODO  move to cpg-extensions if it works out well to use this for scanning entire classpath before using findAll ... -->
+            <!--
 <dependency>
          <groupId>org.reflections</groupId>
          <artifactId>reflections</artifactId>
          <version>0.9.9-RC1</version>
      </dependency>
-     
+        -->
                              
         <!-- testing -->
         <dependency>

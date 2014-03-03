@@ -11,8 +11,10 @@ import com.intel.mtwilson.validators.ConnectionStringValidator;
 import java.net.MalformedURLException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 //import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 //import org.codehaus.jackson.annotate.JsonProperty;
+//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * A data transfer object. The TxtHost object is validated on construction
@@ -29,7 +31,7 @@ public class TxtHostRecord {
     @Regex(RegexPatterns.IPADDR_FQDN)
     public String IPAddress;
     @JsonProperty
-    @Regex(RegexPatterns.PORT)
+//    @Regex(RegexPatterns.PORT) // regex can only be tested against String variables ;   TODO  we need an integer range validator  annotation
     public Integer Port;
     @JsonProperty
     public String BIOS_Name;
@@ -63,7 +65,9 @@ public class TxtHostRecord {
     @JsonProperty
     public String AIK_SHA1;
     @JsonProperty
-    public String Processor_Info;    
+    public String Processor_Info;
+    @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+    public String Hardware_Uuid;
     
     public TxtHostRecord() {
         
@@ -90,5 +94,6 @@ public class TxtHostRecord {
         AIK_Certificate = input.getAikCertificate();
         AIK_PublicKey = input.getAikPublicKey();
         AIK_SHA1 = input.getAikSha1();
+        Hardware_Uuid = null;
     }
 }

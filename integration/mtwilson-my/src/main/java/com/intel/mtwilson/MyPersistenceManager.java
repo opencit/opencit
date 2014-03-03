@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MyPersistenceManager extends PersistenceManager {
     private transient static Logger log = LoggerFactory.getLogger(MyPersistenceManager.class);
+    private static ClassLoader jpaClassLoader = null;
+    
     private Properties jdbcProperties;
     public MyPersistenceManager(Properties jdbcProperties) {
         this.jdbcProperties = jdbcProperties;
@@ -55,6 +57,10 @@ public class MyPersistenceManager extends PersistenceManager {
     public EntityManagerFactory getAuditData() {
         return getEntityManagerFactory("AuditDataPU");
     }
+    
+    // mtwilson-launcher calls setJpaClassLoader with the application classloader as parameter so that ASPersistenceManager can pass it o PersistenceManager as the classlaoder to use for loading persistence.xml files (because they are under /opt/mtwilson/java not in the .war)
+//    public static ClassLoader getJpaClassLoader() { return jpaClassLoader; }
+//    public static void setJpaClassLoader(ClassLoader cl) { jpaClassLoader = cl; }
     
     public static Properties getJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();

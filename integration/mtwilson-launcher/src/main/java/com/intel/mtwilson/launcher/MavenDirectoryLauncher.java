@@ -40,7 +40,7 @@ import org.apache.commons.io.IOUtils;
  * 
  * @author jbuhacoff
  */
-public class MavenDirectoryLauncher extends DirectoryLauncher {
+public class MavenDirectoryLauncher extends ModuleDirectoryLauncher {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MavenDirectoryLauncher.class);
     
     public MavenDirectoryLauncher() {

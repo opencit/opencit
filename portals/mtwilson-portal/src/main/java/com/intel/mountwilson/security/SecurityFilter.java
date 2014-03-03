@@ -11,6 +11,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -114,7 +115,7 @@ public class SecurityFilter implements Filter {
         } catch (UnsupportedTokenVersionException e) {
             log.warn("Token version not supported", e);
             return null;
-        } catch (CryptographyException e) {
+        } catch (GeneralSecurityException e) {
             log.warn("Cannot validate token", e);
             return null;
         } catch (ExpiredTokenException e) {
@@ -149,7 +150,7 @@ public class SecurityFilter implements Filter {
                 // if the response is html,  the jsp tag can copy the token into a <meta> tag so that javascript can get it without making an additional ajax request;  it's also very useful for resolving an issue with the initial login page where javascript would not be able to request a token before the user logs in, but the login form requires a token
             request.setAttribute("AuthorizationToken", token); 
                 return true;
-            } catch (CryptographyException e) {
+            } catch (GeneralSecurityException e) {
                 log.error("Cannot add token to request", e);
                 return false; // we could let the request processing continue but if we cannot create new tokens the token validator will not allow any requests through anyway, so we stop early.
             }
@@ -177,7 +178,7 @@ public class SecurityFilter implements Filter {
             try {
                 existingToken = factory.create(username);
                 log.debug("processRequestToken: XXX INSECURE DEBUGGING ONLY    NEW TOKEN: {}", existingToken);
-            } catch (CryptographyException e) {
+            } catch (GeneralSecurityException e) {
                 log.error("Cannot create replacement token", e);
                 // we let the request continue because this is not a client error; however if the server issue is not fixed when the token expires the client will be locked out due to no new tokens
             }

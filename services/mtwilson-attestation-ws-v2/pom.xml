@@ -19,24 +19,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
 
         </plugins>
     </build>
     <dependencies>
 
-    <dependency>
-        <groupId>com.intel.mtwilson.integration</groupId>
-        <artifactId>mtwilson-launcher-ext</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
@@ -135,7 +128,7 @@
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-		-->
+        -->
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>

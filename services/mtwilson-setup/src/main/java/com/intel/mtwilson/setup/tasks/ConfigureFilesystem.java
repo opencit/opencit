@@ -61,6 +61,7 @@ public class ConfigureFilesystem extends LocalSetupTask {
             }
         }
         if (Platform.isUnix()) {
+            // TODO  create directories
         }
     }
 

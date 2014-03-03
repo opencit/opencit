@@ -52,6 +52,12 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>mtwilson-launcher-tomcat7</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
       <artifactId>mtwilson-launcher-jetty9</artifactId>
       <version>${project.version}</version>
       <type>war</type>
@@ -107,6 +113,14 @@
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>mtwilson-glassfish.war</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.integration</groupId>
+                  <artifactId>mtwilson-launcher-tomcat7</artifactId>
+                  <version>${project.version}</version>
+                  <type>war</type>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
+                  <destFileName>mtwilson-tomcat.war</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.integration</groupId>

@@ -15,6 +15,7 @@ import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.My;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -124,18 +125,18 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getRootCaCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
-            if( certFile != null && !certFile.startsWith(File.separator) ) {
-                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
-            }
-            if(certFile != null) {
-                File rootCaPemFile = new File(certFile); 
+//            String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
+//            if( certFile != null && !certFile.startsWith(File.separator) ) {
+//                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+//            }
+//            if(certFile != null) {
+//                File rootCaPemFile = new File(certFile);
+                File rootCaPemFile = My.configuration().getRootCaCertificateFile();
                 FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
                 String content = IOUtils.toString(in); // IOException
                 IOUtils.closeQuietly(in);
                 return content;
-            }else throw new FileNotFoundException("Could not obtain Root CA cert location from config");
-                
+//            }else throw new FileNotFoundException("Could not obtain Root CA cert location from config");
         } 
         catch (FileNotFoundException e) {
             log.error("Mt Wilson Root CA certificate file is not found. ", e);
@@ -168,17 +169,18 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getSamlCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); // PEM format file with possible CA certificate chain; not the same as mtwilson.saml.certificate which is the DER format file mtwilson.saml.certificate that we configured in mtwilson 1.0-RC2 
-            if( certFile != null && !certFile.startsWith(File.separator) ) {
-                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
-            }
-            if(certFile != null) {
-                File samlPemFile = new File(certFile);
+//            String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); // PEM format file with possible CA certificate chain; not the same as mtwilson.saml.certificate which is the DER format file mtwilson.saml.certificate that we configured in mtwilson 1.0-RC2 
+//            if( certFile != null && !certFile.startsWith(File.separator) ) {
+//                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+//            }
+//            if(certFile != null) {
+//                File samlPemFile = new File(certFile);
+                File samlPemFile = My.configuration().getSamlCertificateFile();
                 FileInputStream in = new FileInputStream(samlPemFile);
                 String content = IOUtils.toString(in);
                 IOUtils.closeQuietly(in);
                 return content;
-            }else throw new FileNotFoundException("Could not load Saml Cert location from config");
+//            }else throw new FileNotFoundException("Could not load Saml Cert location from config");
         }
         catch (FileNotFoundException e) {
             log.error("SAML certificate file is not found.", e);
@@ -213,17 +215,18 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
-             if( certFile != null && !certFile.startsWith(File.separator) ) {
-                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
-            }
-            if(certFile != null) {
-                File privacyCaPemFile = new File(certFile); 
+//            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
+//             if( certFile != null && !certFile.startsWith(File.separator) ) {
+//                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+//            }
+//            if(certFile != null) {
+//                File privacyCaPemFile = new File(certFile);
+                File privacyCaPemFile = My.configuration().getPrivacyCaCertificateFile();
                 FileInputStream in = new FileInputStream(privacyCaPemFile);
                 String content = IOUtils.toString(in);
                 IOUtils.closeQuietly(in);
                 return content;
-            }else throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
+//            }else throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
         }
         catch (FileNotFoundException e) {
             log.error("Privacy CA certificate file is not found.", e);
@@ -240,7 +243,6 @@ public class CA {
             // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
             throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
         }
-        
     }
 
     @GET @Path("/certificate/tls/current/mtwilson-tls.crt")

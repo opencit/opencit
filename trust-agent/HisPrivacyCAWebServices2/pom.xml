@@ -108,7 +108,7 @@
             </goals>
             <configuration>
               <!-- exclude all the artifacts that are already in the WEB-INF/lib that is a "source" folder -->
-                <excludeArtifactIds>javax.servlet,javax.servlet.jsp,bcprov-jdk15</excludeArtifactIds>
+                <excludeArtifactIds>javax.servlet,javax.servlet.jsp,servlet-api,bcprov-jdk15</excludeArtifactIds>
                 <!--
                 <includeArtifactIds>api-client</includeArtifactIds>
                 <includeClassifiers>with-dependencies</includeClassifiers>

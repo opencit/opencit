@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- reference: http://logback.qos.ch/manual/configuration.html -->
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- the file appender is important to capture output from the restlet service when running junit tests -->
+    <!--
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>junit.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+    -->
+      
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+<!--        <appender-ref ref="FILE" /> -->
+    </root>
+
+    <!-- libraries -->
+    <logger name="org.apache.commons.beanutils.converters" level="INFO"/>
+
+    <!-- classes that are more or less known to be working -->
+    <logger name="com.intel.mtwilson.atag" level="DEBUG"/>
+    <logger name="org.restlet" level="ERROR"/>
+    <logger name="com.intel.dcsg.cpg.extensions" level="ERROR"/>
+    <logger name="com.intel.dcsg.cpg.validation" level="ERROR"/>
+    <logger name="com.intel.dcsg.cpg.i18n" level="ERROR"/>
+    <logger name="com.intel.dcsg.cpg.performance.RunnableCollection" level="ERROR"/>
+    <logger name="com.intel.mtwilson.v2.rpc.RpcInvoker" level="ERROR"/>
+    <logger name="com.intel.mtwilson.rpc.v2.resource.RpcRepository" level="ERROR"/>
+    <logger name="com.intel.mtwilson.MyJdbc" level="ERROR"/>
+    
+</configuration>

@@ -5,168 +5,163 @@
     <name>Trust Agent</name>
 
     <parent>
-	<groupId>com.intel.mtwilson.trustagent</groupId>
-	<artifactId>trust-agent-parent</artifactId>
-	<version>1.2.3-SNAPSHOT</version>
+        <groupId>com.intel.mtwilson.trustagent</groupId>
+        <artifactId>trust-agent-parent</artifactId>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
     <build>
-		<plugins>
-	    <plugin>
+        <plugins>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-		<version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <!-- <skip>true</skip> -->
-                </configuration>
             </plugin>
 
 
-<!-- need this to include the commons-configuration, commons-lang, and commons-codec dependencies into the trustagent.jar -->	
-<!--
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-assembly-plugin</artifactId>
-  <executions>
-    <execution>
-      <id>create-my-bundle</id>
-      <phase>package</phase>
-      <goals>
-        <goal>single</goal>
-      </goals>
-      <configuration>
-        <descriptorRefs>
-          <descriptorRef>jar-with-dependencies</descriptorRef>
-        </descriptorRefs>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
--->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-            <execution>
-                <id>regular-jar-with-dependencies</id>
-                <phase>package</phase>
-                <goals><goal>shade</goal></goals>
-                <configuration>
-        		<shadedArtifactAttached>true</shadedArtifactAttached>
-                	<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
-                        <filters>
-                            <filter>
-                                <artifact>*:*</artifact>
+            <!-- need this to include the commons-configuration, commons-lang, and commons-codec dependencies into the trustagent.jar -->	
+            <!--
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>create-my-bundle</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>single</goal>
+                  </goals>
+                  <configuration>
+                    <descriptorRefs>
+                      <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>regular-jar-with-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>gov.niarl.his.webservices:his-clients</artifact>
+                                    <!--
+                                    <excludes>
+                                        <exclude>gov/niarl/his/privacyca/**</exclude>
+                                    </excludes>
+                                    -->
+                                    <includes>
+                                        <include>gov/niarl/his/webservices/**</include>
+                                    </includes>
+                                </filter>
+                            </filters>
+                            <!--
+                            <artifactSet>
                                 <excludes>
-                                    <exclude>META-INF/*.SF</exclude>
-                                    <exclude>META-INF/*.DSA</exclude>
-                                    <exclude>META-INF/*.RSA</exclude>
+                                    <exclude>org.bouncycastle:*</exclude>
                                 </excludes>
-                            </filter>
-                            <filter>
-                                <artifact>gov.niarl.his.webservices:his-clients</artifact>
-                                <!--
-                                <excludes>
-                                    <exclude>gov/niarl/his/privacyca/**</exclude>
-                                </excludes>
-                                -->
-                                <includes>
-                                    <include>gov/niarl/his/webservices/**</include>
-                                </includes>
-                            </filter>
-                        </filters>
-                        <!--
-                        <artifactSet>
-                            <excludes>
-                                <exclude>org.bouncycastle:*</exclude>
-                            </excludes>
-                        </artifactSet>
-                        -->
-                </configuration>
-            </execution>
-        </executions>
-      </plugin>
+                            </artifactSet>
+                            -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
       
-      <!-- begin copy dependencies plugin -->
-	<plugin>
-	    <artifactId>maven-dependency-plugin</artifactId>
-	    <version>2.4</version>
-		<executions>
-		    <execution>
-			<phase>generate-resources</phase>
-			<goals>
-			    <goal>copy-dependencies</goal>
-			</goals>
-			<configuration>
-			    <outputDirectory>${project.build.directory}/jars</outputDirectory>
-			</configuration>
-		    </execution>
-		</executions>
-	</plugin>
-    <!-- end copy dependencies plugin -->
+            <!-- begin copy dependencies plugin -->
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- end copy dependencies plugin -->
 
         </plugins>
 
-	<extensions>
-	    <extension>
-		<groupId>org.apache.maven.wagon</groupId>
-		<artifactId>wagon-webdav</artifactId>
-		<version>1.0-beta-2</version>
-	    </extension>
-	</extensions>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav</artifactId>
+                <version>1.0-beta-2</version>
+            </extension>
+        </extensions>
     
     </build>
     <dependencies>
-    <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-api</artifactId>
-		<version>1.6.1</version>
-    </dependency>
-    <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
-    </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.9</version>
+        </dependency>
 
-    <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.0.9</version>
-    </dependency>
-    <!-- <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-simple</artifactId>
-		<version>1.6.4</version>
-    </dependency>
-    -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.0.9</version>
+        </dependency>
+        <!-- <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.4</version>
+        </dependency>
+        -->
     
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
             <version>1.0.1-SNAPSHOT</version>
-	    <classifier>HisPrivacyCAWebServices2-client</classifier>
+            <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
-    <!--
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>HisPrivacyCAWebServices2</artifactId>
             <version>${project.parent.version}</version>
-	    <classifier>client</classifier>
+        <classifier>client</classifier>
         </dependency> -->
         <!--
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
             <version>1.0.1-SNAPSHOT</version>
-	    <classifier>HisPrivacyCAWebServices2-client</classifier>
+        <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
             <version>1.0.1-SNAPSHOT</version>
-	    <classifier>HisWebServices-client</classifier>
+        <classifier>HisWebServices-client</classifier>
         </dependency>
         -->
         <dependency>
@@ -174,31 +169,31 @@
             <artifactId>commons-codec</artifactId>
             <version>1.6</version>
         </dependency>
-    <dependency>
-		<groupId>commons-lang</groupId>
-		<artifactId>commons-lang</artifactId>
-		<version>2.6</version>
-    </dependency>
-    <dependency>
-		<groupId>commons-configuration</groupId>
-		<artifactId>commons-configuration</artifactId>
-    </dependency>
-    <dependency>
-		<groupId>commons-io</groupId>
-		<artifactId>commons-io</artifactId>
-		<version>2.2</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-io</artifactId>
-		<version>0.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-crypto</artifactId>
-		<version>0.2-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.2</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -210,38 +205,38 @@
             <version>${project.version}</version>
             <!-- classifier>jar-with-dependencies</classifier this causes an error in maven (bug in maven, it should be very straightforward) so instead of this we're going to put the PrivacyCA dependencies here -->
         </dependency>
-       		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-                        <groupId>com.intel.mtwilson.services</groupId>
-                        <artifactId>mtwilson-webservice-util</artifactId>
-                        <version>${project.version}</version>
-                </dependency>
-                <!--
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.47</version>
-		</dependency>
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.46</version>
-		</dependency>
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15</artifactId>
-			<version>1.41</version>
-		</dependency>
-                -->
-           	<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15</artifactId>
-			<version>1.46</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+    <dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15on</artifactId>
+    <version>1.47</version>
+</dependency>
+    <dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15on</artifactId>
+    <version>1.46</version>
+</dependency>
+    <dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15</artifactId>
+    <version>1.41</version>
+</dependency>
+        -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15</artifactId>
+            <version>1.46</version>
+        </dependency>
     </dependencies>
     
     <profiles>
@@ -254,23 +249,23 @@
             <build>
                 <plugins>
                     <plugin>
-                      <groupId>org.apache.maven.plugins</groupId>
-                      <artifactId>maven-javadoc-plugin</artifactId>
-                      <version>2.8.1</version>
-                      <executions>
-                          <execution>
-                              <phase>prepare-package</phase>
-                              <goals>
-              <!--                    <goal>jar</goal> -->
-                                  <goal>javadoc</goal>
-                              </goals>        
-                          </execution>
-                      </executions>
-                      <configuration>
-                          <show>public</show>
-                          <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
-                          <encoding>utf-8</encoding>
-                      </configuration>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.8.1</version>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <!--                    <goal>jar</goal> -->
+                                    <goal>javadoc</goal>
+                                </goals>        
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <show>public</show>
+                            <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
+                            <encoding>utf-8</encoding>
+                        </configuration>
                     </plugin>
                     
                 </plugins>

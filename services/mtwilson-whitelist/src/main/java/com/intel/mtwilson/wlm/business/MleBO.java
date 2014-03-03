@@ -99,12 +99,13 @@ public class MleBO extends BaseBO {
                                         }
 
                                         // XXX TODO this needs to be refactored into vendor-specific checks
-                                        if(mleData.getName().toUpperCase().contains("ESX")){
+                                        // This check has been moved to the VMware Host agent.
+                                        /*if(mleData.getName().toUpperCase().contains("ESX")){
                                                 String version = getUpperCase(mleData.getVersion()).substring(0, 2);
                                                 if(!version.equals("51") && !version.equals("50")){
                                                         throw new ASException(ErrorCode.WS_ESX_MLE_NOT_SUPPORTED);
                                                 }
-                                        }
+                                        }*/
                                         
                                         // If the mleUuid is not specified a new one would be created. But we need to get the reference
                                         // to either BIOS or VMM UUID from the DB.

@@ -61,7 +61,7 @@ fi
 #    if [ -n "$psql" ]; then
 #      postgres_configure_connection "${package_config_filename}" mountwilson.as.db
 #      postgres_create_database
-#      mtwilson setup InitDatabase postgres
+#      mtwilson setup InitDatabase postgresql
 #    else
 #      echo "psql not defined"
 #      exit 1

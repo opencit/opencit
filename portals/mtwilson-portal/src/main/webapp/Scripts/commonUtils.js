@@ -120,6 +120,7 @@ JSON.stringify = JSON.stringify || function (obj) {
  * @param divID (id of UL which contains all menu item in structural way.)
  */
 function createMenubar(divID) {
+        //alert(divID);
 	$("#"+divID).menubar({
 		autoExpand: true,
 		menuIcon: true,

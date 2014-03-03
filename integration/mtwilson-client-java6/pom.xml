@@ -10,6 +10,10 @@
         manage the list of hosts being monitored, obtain attestation on the
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
+        
+        TODO  the shade plugin and zip plugin should be moved to a pom under installers to generate
+        the distribution artifacts so that we don't have to wait for that when building the project
+        independently for testing or as part of another build that is not to create an installer.
     </description>
   
     <parent> 
@@ -20,31 +24,31 @@
 
     <build>
 	
-<!--
-        <testResources>
-            <testResource>
-                <directory>src/test/json</directory>
-                <includes>
-                    <include>**/*.json</include>
-                </includes>
-            </testResource>
-            <testResource>
-                <directory>src/test/env</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <includes>
-                    <include>**/*.jks</include>
-                    <include>**/cacerts</include>
-                    <include>**/*.html</include>
-                    <include>**/*.xml</include>
-                </includes>
-            </testResource>
-        </testResources>
-	-->
+        <!--
+            <testResources>
+                <testResource>
+                    <directory>src/test/json</directory>
+                    <includes>
+                        <include>**/*.json</include>
+                    </includes>
+                </testResource>
+                <testResource>
+                    <directory>src/test/env</directory>
+                    <includes>
+                        <include>**/*.properties</include>
+                    </includes>
+                </testResource>
+                <testResource>
+                    <directory>src/test/resources</directory>
+                    <includes>
+                        <include>**/*.jks</include>
+                        <include>**/cacerts</include>
+                        <include>**/*.html</include>
+                        <include>**/*.xml</include>
+                    </includes>
+                </testResource>
+            </testResources>
+        -->
 	
         <plugins>
             
@@ -63,24 +67,6 @@
                     </archive>
                 </configuration>
             </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-shade-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>regular-jar-with-dependencies</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>shade</goal>
-                                </goals>
-                                <configuration>
-                                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                                    <shadedClassifierName>with-dependencies</shadedClassifierName>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                                        
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -94,82 +80,6 @@
                 </configuration>
             </plugin>	    
 		
-      
-            <!-- begin copy dependencies plugin (to create zip file) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase> <!-- was: install -->
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jars</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- end copy dependencies plugin -->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-                                    <fileset dir="${project.build.directory}/jars" />
-                                    <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
-                                    <fileset dir="${basedir}" includes="pom.xml" />
-                                </zip>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant</artifactId>
-                        <version>1.8.4</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>ant-contrib</groupId>
-                        <artifactId>ant-contrib</artifactId>
-                        <version>1.0b3</version>
-                    </dependency>
-                </dependencies>
-            </plugin>	    
-      
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>                      
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
-                                    <type>zip</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
 
         </plugins>      
@@ -188,18 +98,23 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-crypto</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-rfc822</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-rfc822</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-saml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -227,13 +142,13 @@
         </dependency>
                 
         <!--
-       	<dependency>
-          		<groupId>org.glassfish</groupId>
-          		<artifactId>maven-embedded-glassfish-plugin</artifactId>
-          		<version>3.1.1</version>
-          		<type>maven-plugin</type>
-       	</dependency>    
-       	-->
+        <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>maven-embedded-glassfish-plugin</artifactId>
+                <version>3.1.1</version>
+                <type>maven-plugin</type>
+        </dependency>    
+        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -246,9 +161,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        <groupId>com.intel.mtwilson.services</groupId>
-  <artifactId>mtwilson-webservice-util</artifactId>
-  <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-webservice-util</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -257,43 +172,37 @@
         </dependency>
         <!--
         <dependency>
-          		<groupId>org.slf4j</groupId>
-          		<artifactId>slf4j-simple</artifactId>
-          		<version>1.6.4</version>
-          		<scope>provided</scope>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.6.4</version>
+                <scope>provided</scope>
         </dependency>
         -->
         <!-- <dependency>
-          		<groupId>org.slf4j</groupId>
-          		<artifactId>slf4j-jdk14</artifactId>
-          		<version>1.6.4</version>
-          		<scope>test</scope>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>1.6.4</version>
+                <scope>test</scope>
         </dependency> -->
 	
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-        </dependency>
-
         <!--
         <dependency>
-          		<groupId>commons-logging</groupId>
-          		<artifactId>commons-logging</artifactId>
-          		<version>1.1.1</version>
-          		<scope>compile</scope>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.1</version>
+                <scope>compile</scope>
         </dependency>
         -->
         <!--
         <dependency>
-          		<groupId>commons-beanutils</groupId>
-          		<artifactId>commons-beanutils</artifactId>
-          		<version>1.8.0</version>
-          		<scope>compile</scope>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>1.8.0</version>
+                <scope>compile</scope>
         </dependency>
         -->
         <dependency>
@@ -305,19 +214,19 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <!--
-       	<dependency>
-          		<groupId>org.apache.commons</groupId>
-          		<artifactId>commons-io</artifactId>
-          		<version>1.3.2</version>
-       	</dependency>
-       	-->
+        <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>1.3.2</version>
+        </dependency>
+        -->
         <!--
             <dependency>
                     <groupId>com.jayway.restassured</groupId>
                     <artifactId>rest-assured</artifactId>
                     <version>1.5</version>
             </dependency>        
-       	-->
+        -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb</artifactId>
@@ -428,9 +337,9 @@
 <version>1.1.1</version>
 </dependency>
 <dependency>
-  		<groupId>javax</groupId>
-  		<artifactId>javaee-web-api</artifactId>
-  		<scope>provided</scope>
+        <groupId>javax</groupId>
+        <artifactId>javaee-web-api</artifactId>
+        <scope>provided</scope>
 </dependency>
 <dependency>
 <groupId>javax.mail</groupId>
@@ -440,57 +349,21 @@
         -->
         <!-- end jersey  -->
         <!--
-           	<dependency>
-         			<groupId>org.bouncycastle</groupId>
-         			<artifactId>bcprov-jdk15on</artifactId>
-         			<version>1.47</version>
-      		</dependency>
-      		-->
-        <!-- start saml verification -->
         <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-            <version>2.5.1-1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <!-- this exclusion is here because we are providing our own patched version of xmltooling, see below and the "other" projects folder -->
-                <exclusion>
-                    <groupId>org.opensaml</groupId>
-                    <artifactId>xmltooling</artifactId>
-                </exclusion>
-            </exclusions>	
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.47</version>
         </dependency>
-        <!-- version 1.3.2-1a IS THE INTEL MODIFIED VERSION of 1.3.2-1 WITH FIX FOR NULL POINTER EXCEPTION, SEE THE "OTHER" PROJECT FOLDER -->
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>xmltooling</artifactId>
-            <version>1.3.2-1a</version>
-        </dependency>
-        <!-- solves java.lang.ClassNotFoundException: org/jcp/xml/dsig/internal/dom/XMLDSigRI when verifying SAML signatures -->
-        <!-- vesrion must be 1.4.3, after this the class org.jcp.xml.dsig.internal.dom.XMLDsigRI is moved to org.apache.jcp  so opensaml doesn't find it -->
-        <dependency>
-            <groupId>org.apache.santuario</groupId>
-            <artifactId>xmlsec</artifactId>
-            <version>1.4.3</version>
-        </dependency>
-            	    
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <!-- end saml verification -->
+        -->
     
     
         <!-- for Java 1.5 version of the api client -->
         <!--
-       	<dependency>
-       	    <groupId>com.intel.mtwilson.integration</groupId>
-       	    <artifactId>java-backport-1.6-to-1.5</artifactId>
-       	    <version>0.1-SNAPSHOT</version>
-       	</dependency>-->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>java-backport-1.6-to-1.5</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>-->
         <!-- end Java 1.5 backport dependencies -->
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
@@ -534,6 +407,87 @@
                             </execution>
                         </executions>
                     </plugin>
+                    
+                    
+      
+            <!-- begin copy dependencies plugin (to create zip file) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase> <!-- was: install -->
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/jars</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- end copy dependencies plugin -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+                                    <fileset dir="${project.build.directory}/jars" />
+                                    <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
+                                    <fileset dir="${basedir}" includes="pom.xml" />
+                                </zip>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant</artifactId>
+                        <version>1.8.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>	    
+      
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>                      
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+                                    <type>zip</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+                                        
                     <!-- create a shaded jar-with-dependencies.  see also:
                     http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
                     -->
@@ -541,6 +495,17 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
                         <executions>
+                            <execution>
+                                <id>regular-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>with-dependencies</shadedClassifierName>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>shaded-jar-with-dependencies</id>
                                 <phase>package</phase>

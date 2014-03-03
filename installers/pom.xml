@@ -22,10 +22,10 @@
     <module>PrivacyCAServiceLinuxInstaller</module>
     <module>TrustAgentLinuxInstaller</module>
     <module>MonitLinuxInstaller</module>
+    <module>mtwilson-client-java6</module>
     <module>mtwilson-portal-installer</module>
     <module>mtwilson-server</module>
     <module>TomcatLinuxInstaller</module>
-    <module>PostgresLinuxInstaller</module>
 	<module>LogRotateLinuxInstaller</module>
   </modules>
 

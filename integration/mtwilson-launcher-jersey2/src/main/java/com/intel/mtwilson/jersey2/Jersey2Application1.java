@@ -8,12 +8,7 @@ package com.intel.mtwilson.jersey2;
 import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.Registrar;
-import com.intel.mtwilson.My;
-import com.intel.mtwilson.Version;
-import com.intel.mtwilson.launcher.DirectoryLauncher;
 import com.intel.mtwilson.launcher.ws.ext.V1;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.Path;
 

@@ -16,6 +16,9 @@ import org.restlet.security.ChallengeAuthenticator;
 import org.restlet.security.MapVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
+import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 
 /**
  * References:
@@ -38,6 +41,12 @@ public class RestletApplication extends Application {
     
     @Override
     public synchronized Restlet createInboundRoot() {
+        ImplementationRegistrar runnables = new ImplementationRegistrar(); 
+        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
+        launcher.setRegistrars(new Registrar[] { runnables });
+        launcher.run(); // loads application jars, scans extension jars for the plugins 
+        
+        
         Router router = new Router(getContext());
         router.attach("/tags", TagListResource.class); // create tag, create multiple tags, search tags
         router.attach("/tags/{id}", TagResource.class); // update tag, delete tag, read tag
@@ -51,7 +60,9 @@ public class RestletApplication extends Application {
 //        router.attach("certificate-requests/{id}/approval", CertificateRequestApprovalResource.class); 
         router.attach("/certificate-requests/{id}/certificate", CertificateRequestApprovalResource.class); 
         router.attach("/certificates", CertificateListResource.class); 
-        router.attach("/certificates/{id}", CertificateResource.class); 
+        router.attach("/certificates/{id}", CertificateResource.class);
+        router.attach("/host-uuids", UuidResource.class);
+        router.attach("/tpm-passwords",TpmPasswordResource.class);
         router.attach("/configurations", ConfigurationListResource.class); 
         router.attach("/configurations/{id}", ConfigurationResource.class); 
         router.attach("/files", FileListResource.class); 

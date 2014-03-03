@@ -72,10 +72,10 @@
     
                 <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
                 <dependency>
-                    <groupId>com.intel.mtwilson.integration</groupId>
+                    <groupId>com.intel.mtwilson.dist</groupId>
                     <artifactId>mtwilson-client-java6</artifactId>
                     <version>${project.version}</version>
-                    <type>jar</type>
+                    <type>zip</type>
                     <!--<classifier>with-dependencies</classifier>-->
                 </dependency>
     
@@ -217,7 +217,7 @@
                                         </artifactItem>
                                         <!-- api client -->
                                         <artifactItem>
-                                            <groupId>com.intel.mtwilson.integration</groupId>
+                                            <groupId>com.intel.mtwilson.dist</groupId>
                                             <artifactId>mtwilson-client-java6</artifactId>
                                             <version>${project.version}</version>
                                             <type>zip</type>
@@ -335,7 +335,7 @@
                                         </artifactItem>
                                         <!-- api client -->
                                         <artifactItem>
-                                            <groupId>com.intel.mtwilson.integration</groupId>
+                                            <groupId>com.intel.mtwilson.dist</groupId>
                                             <artifactId>mtwilson-client-java6</artifactId>
                                             <version>${project.version}</version>
                                             <type>zip</type>

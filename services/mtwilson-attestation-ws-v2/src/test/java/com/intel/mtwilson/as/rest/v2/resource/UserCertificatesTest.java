@@ -145,7 +145,7 @@ public class UserCertificatesTest {
 //        X509Util.decodeDerCertificate(userCertificate.getCertificate()); // empty input exception from x509 engine ... 
         
         X509Certificate x509 = userCertificate.getX509Certificate();
-        log.debug("Cetificate subject: {}", x509.getSubjectX500Principal().getName());
+        log.debug("Certificate subject: {}", x509.getSubjectX500Principal().getName());
         
     }
     

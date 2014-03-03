@@ -122,6 +122,9 @@ public class CreateDatabase {
         if( !Derby.tableExists("file") ) { fileDao.create(); }
         fileDao.close();
         
+        TpmPasswordDAO tpmPasswordDao = dbi.open(TpmPasswordDAO.class);
+        if( !Derby.tableExists("tpm_password")) { tpmPasswordDao.create();}
+        tpmPasswordDao.close();
         
     }    
  

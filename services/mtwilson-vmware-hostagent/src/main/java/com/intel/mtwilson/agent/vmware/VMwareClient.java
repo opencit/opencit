@@ -6,8 +6,9 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsClient;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.vmware.vim25.*;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
@@ -51,6 +52,8 @@ public class VMwareClient implements TlsClient {
     private ServiceInstance servInst;
     private VimPortType vimPort;
     private Folder rootFolder;
+    private static final double MIN_VCENTER_VERSION_FOR_MODULE_ATTESTATION  = 5.1;
+    private static final double MIN_ESX_VERSION_FOR_MODULE_ATTESTATION  = 5.1;
     //private VimService vimService;
     //private VimPortType vimPort;
     UserSession session = null;
@@ -88,7 +91,6 @@ public class VMwareClient implements TlsClient {
     protected void connect2(URL url, String userName, String password) throws KeyManagementException, NoSuchAlgorithmException, IOException {
         log.debug("VMwareClient: connect2 | setting TlsPolicy...");
         setTlsPolicy(new InsecureTlsPolicy());
-        TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
         log.debug("VMwareClient: calling connect...");
         connect(url.toExternalForm(), userName, password);
 
@@ -146,13 +148,20 @@ public class VMwareClient implements TlsClient {
         log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
         log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
         log.debug("Connecting to vcenter with ProtocolSelector: {}", tlsPolicy.getProtocolSelector().preferred());
-        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable; was hardcoded to "SSL"
-        javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
-        sslsc.setSessionTimeout(0);
-        sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+//        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
+//        javax.net.ssl.SSLContext sc = tlsConnection.getSSLContext();
+//        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable; was hardcoded to "SSL"
+//        javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
+//        sslsc.setSessionTimeout(0);
+//        sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);
+//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier()); // XXX  assumes (correctly) TlsConnection registers tlsPolicy with TlsPolicyManager  but maybe we should just add a TlsConnection  getter for this... can't do getTlsPolicy().getHostnameVerifier()  because it's the non-tlspolicymanager one which will not work w/ multi-threading. must use tlspolicymanager's verifier.
 
+//        HttpsURLConnection.setDefaultSSLSocketFactory(new TlsPolicyAwareSSLSocketFactory());
+//        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier());
+        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
+        TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
+        
         SVC_INST_REF.setType(SVC_INST_NAME);
         SVC_INST_REF.setVal(SVC_INST_NAME);
 
@@ -789,7 +798,7 @@ public class VMwareClient implements TlsClient {
      * @return : String containing the BIOS PCR 0 value.
      * @throws Exception
      */
-    public String getHostBIOSPCRHash(ManagedObjectReference hostMOR, String hostName) throws VMwareConnectionException {
+    /*public String getHostBIOSPCRHash(ManagedObjectReference hostMOR, String hostName) throws VMwareConnectionException {
         String biosPCRHash = "";
         HostTpmDigestInfo[] pcrList;
 
@@ -834,7 +843,7 @@ public class VMwareClient implements TlsClient {
             throw new VMwareConnectionException(ex);
         }
         return biosPCRHash;
-    }
+    }*/
 
     /**
      * @deprecated just an adapter for now ; VmwareHostAgent uses
@@ -850,6 +859,16 @@ public class VMwareClient implements TlsClient {
             throw new VMwareConnectionException("Host specified does not exist in the vCenter.");
         }
         return getHostAttestationReport(hostMOR, hostObj.HostName, pcrList);
+    }
+
+    public boolean isModuleAttestationSupportedByVcenter(String vCenterVersion) {
+        double version = Double.parseDouble(vCenterVersion.substring(0, vCenterVersion.lastIndexOf(".")));
+        return (version >= MIN_VCENTER_VERSION_FOR_MODULE_ATTESTATION);
+    }
+
+    public boolean isModuleAttestationSupportedByESX(String esxVersion) {
+        double version = Double.parseDouble(esxVersion.substring(0, esxVersion.lastIndexOf(".")));
+        return (version >= MIN_VCENTER_VERSION_FOR_MODULE_ATTESTATION);
     }
 
     /**
@@ -903,13 +922,15 @@ public class VMwareClient implements TlsClient {
             xtw.writeAttribute("HostVersion", hostVer);
             xtw.writeAttribute("TXT_Support", tpmSupport.toString());
 
-            if (tpmSupport == true && serviceContent.getAbout().getVersion().contains("5.1")) {
+            // if (tpmSupport == true && serviceContent.getAbout().getVersion().contains("5.1")) {
+            if (tpmSupport == true && (isModuleAttestationSupportedByVcenter(getVCenterVersion()))) {
                 log.debug("Querying TPM attestation report...");
                 HostTpmAttestationReport hostTrustReport = vimPort.queryTpmAttestationReport(hostMOR);
                 log.debug("Query finished.");
 
                 // Process the event log only for the ESXi 5.1 or higher
-                if (hostTrustReport != null && hostVer.contains("5.1")) {
+                // if (hostTrustReport != null && hostVer.contains("5.1")) {
+                if (hostTrustReport != null && (isModuleAttestationSupportedByESX(hostVer))) {
                     log.debug("Retrieving TPM events...");
                     int numOfEvents = hostTrustReport.getTpmEvents().length;
                     for (int k = 0; k < numOfEvents; k++) {

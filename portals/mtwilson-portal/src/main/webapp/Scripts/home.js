@@ -45,6 +45,13 @@ function getViewRequest() {
 	sendHTMLAjaxRequest(false, 'getView/getViewRequestPage.html', null, fnDisplayContent, null,'getViewRequest');
 }
 
+function getAddHostPage() {
+	isAddHostPage = true;
+	$('#mainContainer').html('<div id="AddHostPage"></div>');
+	setLoadImage('AddHostPage', '40px', '500px');
+	sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnDisplayContent, null,'AddHostPage');
+}
+
 /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
 function getCAStatus() {
 	$('#mainContainer').html('<div id="getCAStatus"></div>');
@@ -119,21 +126,40 @@ function getDashBoardPage() {
 }
 
 function getAssetTagPage() {
-    //alert("setting up iframes 2");
     //setLoadImage('AddHostPage', '40px', '500px');
     //var serverAddy = <% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString();) %>;
     $('#mainContainer').html('<div id="AssetTagPage"></div>');
-    $('#AssetTagPage').html('<iframe src="' + assetTagUrl + '" width="900" height="745" > </iframe>');
+    $('#AssetTagPage').html('<iframe id="AssetTagIFrame" scrolling="no" frameborder="0" src="' + assetTagUrl + "/index_old.html"  + "/#tags" + '" width="900" height="1000" > </iframe>');
+    //$('#AssetTagPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/tags.html" + '" width="100%" height="1000" > </iframe>');
             //'<iframe height="410" width="100%" frameBorder="3" src="http://www.google.com.au/webhp?sourceid=navclient&ie=UTF-8/index.php">your browser does not support IFRAMEs</iframe>'    
     //window.open("https://127.0.0.1:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
 }
 
-function getAddHostPage() {
-	isAddHostPage = true;
-	$('#mainContainer').html('<div id="AddHostPage"></div>');
-	setLoadImage('AddHostPage', '40px', '500px');
-	sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnDisplayContent, null,'AddHostPage');
+function getAssetSelectionPage() {
+	$('#mainContainer').html('<div id="AssetSelectionPage"></div>');
+        //$('#AssetSelectionPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/selections.html" + '" width="100%" height="1000" > </iframe>');
+        $('#AssetSelectionPage').html('<iframe  scrolling="no" frameborder="0" src="' + assetTagUrl + "/index_old.html"  + "/#selections" + '" width="100%" height="1000" > </iframe>');
 }
+
+function getAssetCertificatePage() {
+	$('#mainContainer').html('<div id="AssetCertificatePage"></div>');
+        //$('#AssetCertificatePage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/certificates.html" + '" width="100%" height="2000" > </iframe>');
+        $('#AssetCertificatePage').html('<iframe  scrolling="no" frameborder="0" src="' + assetTagUrl + "/index_old.html"  + "/#certificates" + '" width="100%" height="2000" > </iframe>');
+}
+
+function getAssetSettingsPage() {
+	$('#mainContainer').html('<div id="AssetSettingsPage"></div>');
+        //$('#AssetSettingsPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/settings.html" + '" width="100%" height="1500" > </iframe>');
+        $('#AssetSettingsPage').html('<iframe  scrolling="no" frameborder="0" src="' + assetTagUrl + "/index_old.html"  + "/#configure" + '" width="100%" height="1500" > </iframe>');
+}
+
+function getAssetLogPage() {
+	$('#mainContainer').html('<div id="AssetLogPage"></div>');
+        //$('#AssetLogPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/log.html" + '" width="900" height="900" > </iframe>');
+        $('#AssetLogPage').html('<iframe  scrolling="no" frameborder="0" src="' + assetTagUrl + "/index_old.html"  + "/#log" + '" width="900" height="900" > </iframe>');
+}
+
+
 
 function getViewHostPage() {
 	$('#mainContainer').html('<div id="ViewHostPage"></div>');

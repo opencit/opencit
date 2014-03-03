@@ -927,7 +927,8 @@ public class HostTrustBO extends BaseBO {
             pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
         }
-        
+        // Here duplicate the for loop and add in pcr 22 from trustReport
+        // check if host has asset tag, then add 
         for(RuleResult result : results) {
             log.debug("Looking at policy {}", result.getRuleName());
             Rule rule = result.getRule();
@@ -1081,6 +1082,7 @@ public class HostTrustBO extends BaseBO {
 
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
+            HostBO hostBO = new HostBO();
             TblHosts tblHost = hostBO.getHostByName(hostName);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
@@ -1302,8 +1304,8 @@ public class HostTrustBO extends BaseBO {
         }
     }
 
-    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException {
-        Configuration conf = ASConfig.getConfiguration();
+    private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
+        Configuration conf = My.configuration().getConfiguration();
         InetAddress localhost = InetAddress.getLocalHost();
         String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService";
         String issuer = conf.getString("saml.issuer", defaultIssuer);

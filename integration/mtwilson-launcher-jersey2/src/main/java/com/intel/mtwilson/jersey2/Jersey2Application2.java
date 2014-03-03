@@ -9,16 +9,12 @@ import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
-import com.intel.mtwilson.My;
-import com.intel.mtwilson.launcher.DirectoryLauncher;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import java.io.File;
 //import com.intel.mtwilson.ws.jersey.util.*;
 import java.util.List;
 import javax.ws.rs.Path;
-import com.intel.mtwilson.Version;
+//import com.intel.mtwilson.Version;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
-import java.io.IOException;
 
 /**
  * See also:
@@ -66,6 +62,7 @@ register(com.intel.mtwilson.jersey.provider.X509CertificateArrayPemProvider.clas
         // now get the list of classes that implement @V2 and @Path
         List<Object> resources = Extensions.findAll(V2.class.getName()); // we could search for @Path but then we'd find v1 and v2 classes as well as utility classes for both such as the application.wadl generator ; we use .class.getName() and not just .class because we want the object instances, not the annotation itself as <T>
         for(Object resource : resources) {
+            log.debug("Looking at resource class {}", resource.getClass().getName());
             if( resource.getClass().isAnnotationPresent(Path.class) ) {
                 String resourcePath = resource.getClass().getAnnotation(Path.class).value();
                 log.debug("Found v2 class {} with @Path {}", resource.getClass().getName(), resourcePath);

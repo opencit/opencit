@@ -42,6 +42,9 @@ function fnUploadFlatFile() {
             fnuploadSuccess(data);
         },
         error: function(data, status, e) {
+            alert("data = " + data);
+            alert("status = " + status);
+            alert("e = " + e);
             $('#successMessage').html('<div class="errorMessage">* File is not processed properly. Please check file format. Use help button to know more.</div>');
         }
     });

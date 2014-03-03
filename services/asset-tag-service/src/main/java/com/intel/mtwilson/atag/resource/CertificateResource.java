@@ -27,13 +27,14 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.dcsg.cpg.io.ByteArrayResource;import com.intel.mtwilson.model.Hostname;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -160,6 +161,8 @@ public class CertificateResource extends ServerResource {
         }
         
     }
+  
+    
     public static class CertificateDeployAction extends CertificateAction {
         public Date effective;
         public CertificateDeployAction() {
@@ -204,10 +207,11 @@ public class CertificateResource extends ServerResource {
     }
     public static class CertificateProvisionAction extends CertificateAction {
         public InternetAddress host;
-        
+        public int port;
         // for citrix:
         public String username;
         public String password;
+        
         
         public CertificateProvisionAction() {
             super(CertificateActionName.PROVISION);
@@ -221,6 +225,14 @@ public class CertificateResource extends ServerResource {
             return host;
         }
 
+        public void setPort(int port) {
+            this.port = port;
+        }
+        
+        public int getPort() {
+            return port;
+        }
+        
         public String getUsername() {
             return username;
         }
@@ -252,17 +264,19 @@ public class CertificateResource extends ServerResource {
         public CertificateRevokeAction revoke;
         public CertificateProvisionAction provision;
         public CertificateDeployAction deploy;
+        
     }
     
     @Post("json:json")
     public CertificateActionChoice actionCertificate(CertificateActionChoice actionChoice) throws IOException, ApiException, SignatureException {
-        UUID uuid = UUID.valueOf(getAttribute("id"));
-        Certificate certificate = dao.findByUuid(uuid);
-        if( certificate == null ) {
+        
+         UUID uuid = UUID.valueOf(getAttribute("id"));
+          Certificate certificate = dao.findByUuid(uuid);
+          if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
-        }
-        
+          }
+          
         // only one of the actions can be processed for any one request
         if( actionChoice.revoke != null ) {
             actionChoice.revoke.setUuid(uuid);
@@ -293,7 +307,15 @@ public class CertificateResource extends ServerResource {
                 */
                 // XXX TODO send it to the host...
                 try {
-                    deployAssetTagToHost(certificate.getSha1(), actionChoice.provision.getHost(), actionChoice.provision.getUsername(), actionChoice.provision.getPassword());
+                    List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(actionChoice.provision.getHost().toString());
+                    if(hostList == null || hostList.size() == 0) {
+                        log.error("No hosts were returned back matching name " + actionChoice.provision.getHost().toString());
+                        setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+                        return null;
+                    }
+                    TxtHostRecord hostRecord = hostList.get(0);
+                    deployAssetTagToHost(certificate.getSha1(), hostRecord);
+                            //actionChoice.provision.getHost(),actionChoice.provision.port, actionChoice.provision.getUsername(), actionChoice.provision.getPassword());
                 }
                 catch(IOException e) {
                     // need a way to send the error in the result... i18n Message and error code
@@ -317,15 +339,16 @@ public class CertificateResource extends ServerResource {
          result.deploy = actionChoice.deploy;
          return result;
         }
+      
         setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         return null;
     }
     
-    private void deployAssetTagToHost(Sha1Digest tag, InternetAddress host, String username, String password) throws IOException {
+    private void deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord) throws IOException {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
 //        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
-        ConnectionString connectionString = ConnectionString.forCitrix(new Hostname(host.toString()), username, password);
+        ConnectionString connectionString = ConnectionString.from(hostRecord);
         // XXX TODO use the tls policy factory with the keystore for this host ... from the host tls keystore table
         HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
         hostAgent.setAssetTag(tag);

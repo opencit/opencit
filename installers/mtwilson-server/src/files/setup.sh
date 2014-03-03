@@ -21,15 +21,17 @@ export LOG_DELAYCOMPRESS=delaycompress
 export LOG_COPYTRUNCATE=copytruncate
 export LOG_SIZE=100M
 export LOG_OLD=7
-export MTWILSON_OWNER=$currentUser
 export AUTO_UPDATE_ON_UNTRUST=false
-export WEBSERVICE_USERNAME=mtwilsonAdmin
+#export WEBSERVICE_USERNAME=mtwilsonAdmin
+export WEBSERVICE_USERNAME=admin
 export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+
+export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
 
 mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
 as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
@@ -62,9 +64,9 @@ else
   echo "Mt Wilson owner account already created, moving on"
  else
   echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
-  prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
-  pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
-  useradd -m -p $pass $MTWILSON_OWNER
+  #prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
+  #pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
+  useradd -s /bin/false -d /opt/mtwilson $MTWILSON_OWNER
   echo "Account Created!"
  fi
 fi
@@ -166,7 +168,7 @@ fi
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
-    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
+    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
 fi
 if using_glassfish; then
     export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
@@ -240,6 +242,24 @@ cp logback.xml /etc/intel/cloudsecurity
 chmod 700 logback-stderr.xml
 cp logback-stderr.xml /etc/intel/cloudsecurity
 
+# copy shiro.ini api security file
+if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
+  chmod 700 shiro.ini
+  cp shiro.ini /etc/intel/cloudsecurity
+fi
+
+# add MTWILSON_SERVER to shiro trust file
+hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
+if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
+  update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
+fi
+
+echo "Adding symlink for /opt/mtwilson/configuration..."
+# temp symlink -- SAVY added 2014-02-26
+if [[ ! -h "/opt/mtwilson/configuration" ]]; then
+  mkdir -p /opt/mtwilson
+  ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
+fi
 
 
 find_installer() {
@@ -419,10 +439,24 @@ if using_mysql; then
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
   
 elif using_postgres; then
+  # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
+  if [ -d "/etc/apt" ]; then
+    echo_warning "setting up postgres apt repo"
+	
+    mkdir -p /etc/apt/trusted.gpg.d
+    chmod 755 /etc/apt/trusted.gpg.d
+    cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+    POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
+	
+	echo_warning "Checking to see if postgresql package is available for install..."
+    add_postgresql_install_packages "POSTGRES_SERVER"
+  fi
+
   postgres_userinput_connection_properties
+  touch ~/.pgpass
+  chmod 0600 ~/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-  chmod 0600 $HOME/.pgpass
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
 
   if [ ! -z "$opt_postgres" ]; then
     # postgres server install 
@@ -436,18 +470,22 @@ elif using_postgres; then
       if [[ -n "$aptget" ]]; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
       fi 
-      postgres_server_install 
-      postgres_restart >> $INSTALL_LOG_FILE
-      sleep 10
+
+      # don't need to restart postgres server unless the install script says we need to (by returning zero)
+      if postgres_server_install; then
+        postgres_restart >> $INSTALL_LOG_FILE
+        sleep 10
+      fi
       # postgres server end
     fi 
     # postgres client install here
       echo "Installing postgres client..."
       postgres_install
-      postgres_restart >> $INSTALL_LOG_FILE
-      sleep 10
+      # do not need to restart postgres server after installing the client.
+      #postgres_restart >> $INSTALL_LOG_FILE
+      #sleep 10
       echo "Installation of postgres client complete..." 
-      # postgres clinet install end
+      # postgres client install end
   else
     echo_warning "Relying on an existing Postgres installation"
   fi 
@@ -597,6 +635,21 @@ elif using_tomcat; then
     echo_warning "Skipping webservice init"
   fi
  
+fi
+
+echo "Adding symlink for /opt/mtwilson/java..."
+if using_glassfish; then
+  # temp symlink -- SAVY added 2014-02-04
+  if [[ ! -h "/opt/mtwilson/java" ]]; then
+    mkdir -p /opt/mtwilson
+    ln -s "$GLASSFISH_HOME/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+  fi
+elif using_tomcat; then
+  # temp symlink -- SAVY added 2014-02-04
+  if [[ ! -h "/opt/mtwilson/java" ]]; then
+    mkdir -p /opt/mtwilson
+    ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+  fi
 fi
 
 if [ ! -z "$opt_privacyca" ]; then
@@ -876,7 +929,7 @@ if using_glassfish; then
   update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
   update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
   glassfish_restart
-  echo -n "Waiting for ${webservice_application_name} to become accessible... "
+  echo -n "Waiting for mtwilson to become accessible... "
   sleep 50s        #XXX TODO: remove when we have solution for webserver up
   echo "Done"
   glassfish_restart

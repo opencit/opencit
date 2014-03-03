@@ -1,5 +1,7 @@
 package com.intel.mtwilson.util;
 
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyFilesystem;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -15,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * Classpath
  * Standard configuration locations for windows/linux
  * 
- * @author jbuhacoff
+ * @author jbuhacoffResourceFinder
  */
 public class ResourceFinder {
     private static Logger log = LoggerFactory.getLogger(ResourceFinder.class);
@@ -27,6 +29,9 @@ public class ResourceFinder {
         ArrayList<File> files = new ArrayList<File>();
         // first try an absolute filename or relative to current directory
         files.add(new File(filename));
+        // then try a location relative to application configuration dir and then application dir
+        files.add(new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath()+File.separator+filename));
+        files.add(new File(MyFilesystem.getApplicationFilesystem().getApplicationPath()+File.separator+filename));
         // windows-specific location
         if( System.getProperty("os.name", "").toLowerCase().contains("win") ) {
             System.out.println("ResourceFinder user.home="+System.getProperty("user.home"));

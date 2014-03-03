@@ -14,7 +14,13 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyAwareSSLSocketFactory;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyFilesystem;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
@@ -59,7 +65,7 @@ public class CitrixClient {
     String userName;
     String password;
     String connectionString;
-    private String aikverifyhome;
+//    private String aikverifyhome;
     private String aikverifyhomeData;
     private String aikverifyhomeBin;
     private String opensslCmd;
@@ -88,18 +94,35 @@ public class CitrixClient {
         }
         //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
 
-        Configuration config = ASConfig.getConfiguration();
-        aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
-        aikverifyhomeData = aikverifyhome + File.separator + "data";
-        aikverifyhomeBin = aikverifyhome + File.separator + "bin";
-        opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
-        aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
+        // check mtwilson 2.0 configuration first
+        String binPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        log.debug("binpath = {}", binPath);
+        log.debug("varpath = {}", varPath);
+        File bin = new File(binPath);
+        File var = new File(varPath);
+        if( bin.exists() && var.exists() ) {
+            aikverifyhomeBin = binPath;
+            aikverifyhomeData = varPath;
+            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
+            aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+        }
+        else {
+            // mtwilson 1.2 configuration
+            Configuration config = ASConfig.getConfiguration();
+            String aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
+            aikverifyhomeData = aikverifyhome + File.separator + "data";
+            aikverifyhomeBin = aikverifyhome + File.separator + "bin";
+            opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
+            aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
+        }
+        
 
     }
 
     public void init() {
         boolean foundAllRequiredFiles = true;
-        String required[] = new String[]{aikverifyhome, opensslCmd, aikverifyCmd, aikverifyhomeData};
+        String required[] = new String[]{opensslCmd, aikverifyCmd, aikverifyhomeData};
         for (String filename : required) {
             File file = new File(filename);
             if (!file.exists()) {
@@ -158,15 +181,18 @@ public class CitrixClient {
             throw new ASException(e, ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }
 
-        TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
+        
+//        TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
 
         log.debug("Connecting to Citrix with ProtocolSelector: {}", tlsConnection.getTlsPolicy().getProtocolSelector().preferred());
-        SSLContext sc = SSLContext.getInstance(tlsConnection.getTlsPolicy().getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable;   was hardcoded to "SSL" before
+//        SSLContext sc = SSLContext.getInstance(tlsConnection.getTlsPolicy().getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable;   was hardcoded to "SSL" before
 
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
-
+//        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); // TODO: not clear if it will be possible to create a socket factory that is tlspolicy-aware ; for now using the default Java socket factory
+//        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
+        // it would be better to use TlsConnection's openConnection directly but the URL is used from Citrix code so we try to affect it by setting the default policies
+        TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
+        
         connection = new Connection(url);
 
         Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
@@ -371,7 +397,7 @@ public class CitrixClient {
         FileOutputStream fileOutputStream = null;
 
         try {
-            assert aikverifyhome != null;
+//            assert aikverifyhome != null;
             log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
             file = new File(aikverifyhomeData + File.separator + fileName);
             fileOutputStream = new FileOutputStream(file);

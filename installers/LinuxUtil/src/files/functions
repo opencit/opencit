@@ -33,7 +33,7 @@ DEFAULT_JAVA_REQUIRED_VERSION="1.7"
 DEFAULT_GLASSFISH_REQUIRED_VERSION="4.0"
 DEFAULT_TOMCAT_REQUIRED_VERSION="7.0"
 DEFAULT_MYSQL_REQUIRED_VERSION="5.0"
-DEFAULT_POSTGRES_REQUIRED_VERSION="8.4"
+DEFAULT_POSTGRES_REQUIRED_VERSION="9.3"
 
 DEFAULT_MTWILSON_API_BASEURL="http://127.0.0.1:"
 DEFAULT_TOMCAT_API_PORT="8443"
@@ -1195,6 +1195,9 @@ mysql_create_ssl() {
 postgres_clear() {
   POSTGRES_HOME=""
   psql=""
+  postgres_pghb_conf=""
+  postgres_conf=""
+  postgres_com=""
 }
 
 # Environment:
@@ -1214,12 +1217,14 @@ postgres_version_report() {
 # we need the postgres client to create or patch the database, but
 # the server can be installed anywhere
 postgres_install() {
-  POSTGRES_CLIENT_YUM_PACKAGES="postgresql-client-common"
-  POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-common"
+  POSTGRES_CLIENT_YUM_PACKAGES=""
+  #POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-common"
+  POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-9.3"
   postgres_detect >> $INSTALL_LOG_FILE
 
   if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
     auto_install "Postgres client" "POSTGRES_CLIENT" >> $INSTALL_LOG_FILE
+    postgres_detect >> $INSTALL_LOG_FILE
     if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
       echo_failure "Unable to auto-install Postgres client" | tee -a $INSTALL_LOG_FILE
       echo "Postgres download URL:" >> $INSTALL_LOG_FILE
@@ -1231,20 +1236,62 @@ postgres_install() {
   fi
 }
 
+# Checks if postgresql packages need to be added to install application, and adds them
+add_postgresql_install_packages() {
+  local cprefix=${1}
+  local yum_packages=$(eval "echo \$${cprefix}_YUM_PACKAGES")
+  local apt_packages=$(eval "echo \$${cprefix}_APT_PACKAGES")
+  local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
+  local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
+  
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
+  if [[ -n "$aptget" && -n "$apt_packages" ]]; then
+    pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
+	#echo_warning "found packages $pgAddPackRequired"
+    if [ -z "$pgAddPackRequired" ]; then
+      prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
+      if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
+        echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
+        exit -1
+      fi
+      codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
+      # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d
+      # so we avoid a download
+      #echo "Postgresql apt-key add status: " `wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -`
+      apt-key add /etc/apt/trusted.gpg.d/ACCC4CF8.asc
+      echo "Running apt-get update; this may take a while..."
+      apt-get update >> $INSTALL_LOG_FILE
+      #echo "Running apt-get upgrade; this may take a while..."
+      #apt-get upgrade -y >> $INSTALL_LOG_FILE
+    fi
+  #elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+    # code goes here
+  #elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+    # code goes here
+  #elif [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+    # code goes here
+  fi
+}
+
 # Environment:
 # - POSTGRES_REQUIRED_VERSION
 # installs postgres server 
 postgres_server_install(){
-  POSTGRES_SERVER_YUM_PACKAGES="postgresql-9.1"
-  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.1"
+  POSTGRES_SERVER_YUM_PACKAGES=""
+  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
 
-  postgres_server_detect >> $INSTALL_LOG_FILE
+  postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
+  echo_warning "postgres_server_install postgres_com = $postgres_com"
   if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
     return;
   fi
   if [[ -z "$postgres_com" ]]; then
+    echo "Running postgresql auto install..."
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
@@ -1283,55 +1330,67 @@ postgres_detect(){
 echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_FILE
 }
 
+# instead of checking separately for pg_hba.conf, postgresql.conf, and /etc/init.d/postgresql
+# this is now changed to looking for the postgres server binary and checking its version
+# number. then based on its number we look for corresponding pg_hba.conf and postgresql.conf
+# files as necessary.  the /etc/init.d/postgresql is always present for all versions.
 postgres_server_detect() {
-#find the host file
-  postgres_pghb_conf=""; 
-  result=`find / -name pg_hba.conf 2>/dev/null`
-  for r in $result; do 
-    mytest=`grep "IPv4 local connections" $r 2>/dev/null`;  
-    if [ -n "$mytest" ]; then 
-      postgres_pghb_conf="$r";
-    fi ; 
-  done;  
-  echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
-  
-  #find the configuration file
-  postgres_conf="";
-  result=`find / -name postgresql.conf 2>/dev/null | tr "\n" " "`
-  echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
+  local min_version="${1:-${POSTGRES_REQUIRED_VERSION:-${DEFAULT_POSTGRES_REQUIRED_VERSION}}}"
+  local best_version=""
+  local best_version_short=""
+  local best_version_bin=""
+  # best_version will have a complete version number like 9.1.9
+  # best_version_short is the minor version name, for 9.1.9 it would be 9.1
+  # best_version_bin is the complete path to the binary like /usr/lib/postgresql/9.1/bin/postgres
 
-  for r in ${result}; do 
-    mytest=`grep "listen_addresses" $r 2>/dev/null`;  
-    if [ -n "$mytest" ]; then 
-      postgres_conf="$r"; 
-    fi ; 
-  done;
-echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
+  # find candidates like /usr/lib/postgresql/9.1/bin/postgres
+  postgres_candidates=`find / -name postgres 2>/dev/null | grep bin`
+  for c in $postgres_candidates
+  do
+    local version_name=`$c --version 2>/dev/null | head -n 1 | awk '{ print $3 }'`
+    local bin_dir=`dirname $c`
+    local version_dir=`dirname $bin_dir`
+    echo "postgres candidate version=$version_name"
 
-  # see if we have the command path already
-  if [[ -n "$postgres_com" && -f "$postgres_com" ]]; then
-    echo "Found postgres server: $postgres_com" >> $INSTALL_LOG_FILE
-
-    return 0
+    if is_version_at_least "$version_name" "$min_version"; then
+      echo "found postgres $version_name"
+      if [[ -z "$best_version" ]]; then
+        echo "setting best version $best_version"
+        best_version="$version_name"
+        best_version_bin="$c"
+        best_version_short=`basename $version_dir`
+      elif is_version_at_least "$version_name" "$best_version"; then
+        echo "current best version $best_version"
+        best_version="$version_name"
+        best_version_bin="$c"
+        best_version_short=`basename $version_dir`
+      fi
+    fi
+  done
+  if [[ -z "$best_version" ]]; then
+    echo "Cannot find postgres version $min_version or later"
+    postgres_clear
+    return 1
   fi
-  
-  #if not, find the command file
-  postgres_com="";
-  result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
-  echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
 
+  # now we have selected a postgres version so set variables accordingly
+  echo "Found PostgreSQL $best_version"
+  POSTGRES_SERVER_VERSION="$best_version"
+  POSTGRES_SERVER_BIN="$best_version_bin"  
+  POSTGRES_SERVER_VERSION_SHORT="$best_version_short"
+
+  echo "server version $POSTGRES_SERVER_VERSION"
   if [[ -f /etc/init.d/postgresql ]]; then
-    postgres_com="/etc/init.d/postgresql";
+    postgres_com=/etc/init.d/postgresql
   fi
-  echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
-
-  if [[ -n "$postgres_com" ]]; then
-    echo "Found postgres server: $postgres_com" >> $INSTALL_LOG_FILE
-    return 0
-  fi
-
-  echo "Postgres server not found"
-  return 1
+  postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
+  postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
+  # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
+  echo "postgres_pghb_conf=$postgres_pghb_conf"
+  echo "postgres_conf=$postgres_conf"
+  echo "postgres_com=$postgres_com"
+  # TODO:  add >> $INSTALL_LOG_FILE  to above three lines
+  return 0
 }
 postgres_version(){
   local min_version="${1:-${POSTGRES_REQUIRED_VERSION:-$DEFAULT_POSTGRES_REQUIRED_VERSION}}"
@@ -2087,7 +2146,7 @@ glassfish_create_ssl_cert_prompt() {
     prompt_yes_no GLASSFISH_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Glassfish?"
     echo
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
-      if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; return 1; fi
+      if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       glassfish_require
       prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
@@ -2116,7 +2175,7 @@ function valid_ip() {
 glassfish_create_ssl_cert() {
 #  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
 #  return
-  if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; return 1; fi
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"
   local keystorePassword=changeit
@@ -2311,13 +2370,12 @@ tomcat_detect() {
   do
     #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
-      local bin_dir=`dirname $c`
-      local parent=`dirname $bin_dir`
+      local conf_dir=`dirname $c`
+      local parent=`dirname $conf_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
 	    export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
-		conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
-        export TOMCAT_CONF=`dirname $conf_dir`
+        export TOMCAT_CONF="$conf_dir"
         tomcat_bin=$parent/bin/catalina.sh
         tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
         echo "Found Tomcat: $TOMCAT_HOME" >> $INSTALL_LOG_FILE
@@ -2447,7 +2505,7 @@ tomcat_create_ssl_cert_prompt() {
     prompt_yes_no TOMCAT_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Tomcat?"
     echo
     if [ "${TOMCAT_CREATE_SSL_CERT}" == "yes" ]; then
-      if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; return 1; fi
+      if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       tomcat_require
       prompt_with_default TOMCAT_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
       tomcat_create_ssl_cert "${TOMCAT_SSL_CERT_CN}"
@@ -2460,7 +2518,7 @@ tomcat_create_ssl_cert_prompt() {
 tomcat_create_ssl_cert() {
 #  echo_warning "This feature has been disabled: tomcat_create_ssl_cert"
 #  return
-  if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; return 1; fi
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   tomcat_require
   
 
@@ -2785,7 +2843,7 @@ java_install() {
 #  JAVA_APT_PACKAGES="openjdk-7-jre openjdk-7-jdk"
 #  auto_install "Java" "JAVA"
   java_clear; java_detect >> $INSTALL_LOG_FILE
-  if no_java ${JAVA_REQUIRED_VERSION:-1.7} >> $INSTALL_LOG_FILE; then
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} >> $INSTALL_LOG_FILE; then
     if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
       echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
       return 1
@@ -3218,7 +3276,7 @@ set_config_db_properties() {
 # The EclipseLink persistence framework sends messages to stdout that start with the text [EL Info] or [EL Warning].
 # We suppress those because they are not useful for the customer, only for debugging.
 call_setupcommand() {
-  if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; return 1; fi
+  if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
   $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log

@@ -120,11 +120,18 @@ public class CheckLoginController extends AbstractController {
                     // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
-                    locale = rsaApiClient.getLocale(keyAliasName);
-                    log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
+                }
+                
+                // get locale
+                try {
+                    locale = rsaApiClient.getLocale(keyAliasName);
+                    log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
+                } catch (Exception e) {
+                    log.warn("Cannot retrieve locale for user: {}\r\n{}", keyAliasName, e.toString());
+                    locale = null;
                 }
                 
                 

@@ -1,9 +1,8 @@
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.io.ByteArray;
+import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import java.io.File;
@@ -40,6 +39,9 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 //import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
@@ -80,7 +82,7 @@ com.intel.mountwilson.as.home=C:/Intel/CloudSecurity/AttestationServiceData/aikv
 public class TAHelper {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    private String aikverifyhome;
+//    private String aikverifyhome;
     private String aikverifyhomeData;
     private String aikverifyhomeBin;
     private String aikverifyCmd;
@@ -94,14 +96,37 @@ public class TAHelper {
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
     
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
-        Configuration config = ASConfig.getConfiguration();
-        aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
-        aikverifyhomeData = aikverifyhome + File.separator + "data";
-        aikverifyhomeBin = aikverifyhome + File.separator + "bin";
-        aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
-        quoteWithIPAddress = config.getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
+
+        // check mtwilson 2.0 configuration first
+        String binPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        File bin = new File(binPath);
+        File var = new File(varPath);
+        if( bin.exists() && var.exists() ) {
+            aikverifyhomeBin = binPath;
+            aikverifyhomeData = varPath;
+//            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
+            aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+        }
+        else {
+            // mtwilson 1.2 configuration
+            Configuration config = ASConfig.getConfiguration();
+            String aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
+            aikverifyhomeData = aikverifyhome + File.separator + "data";
+            aikverifyhomeBin = aikverifyhome + File.separator + "bin";
+//            opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
+            aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
+        }
+        try {
+            quoteWithIPAddress = My.configuration().getConfiguration().getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
+        }
+        catch(IOException e) {
+            log.warn("Cannot read service configuration: {}", e.getMessage());
+//            log.info("Cannot read service configuration; enabling quote with IP address by default");
+            quoteWithIPAddress = true;
+        }
         boolean foundAllRequiredFiles = true;
-        String required[] = new String[]{aikverifyhome, aikverifyCmd, aikverifyhomeData};
+        String required[] = new String[]{ aikverifyCmd, aikverifyhomeData};
         for (String filename : required) {
             File file = new File(filename);
             if (!file.exists()) {
@@ -149,8 +174,7 @@ public class TAHelper {
             }
 
             URL url = new URL(connectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
 
             String sessionId = generateSessionId();
 
@@ -235,8 +259,7 @@ public class TAHelper {
 
 
             URL url = new URL(connectionString);
-            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
             return getQuoteInformationForHost(tblHosts.getName(), client);
 
@@ -552,7 +575,7 @@ public class TAHelper {
         FileOutputStream fileOutputStream = null;
         File file = null;
         try {
-            assert aikverifyhome != null;
+//            assert aikverifyhome != null;
             log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
             file = new File(aikverifyhomeData + File.separator + fileName);
             fileOutputStream = new FileOutputStream(file);

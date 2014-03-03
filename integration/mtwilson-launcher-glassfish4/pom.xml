@@ -28,13 +28,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>     
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <skip>false</skip>
-                </configuration>
             </plugin>
 
 
@@ -57,14 +50,6 @@
                 </exclusion>
                 <exclusion>
                     <groupId>javax</groupId>
-                    <artifactId>javaee-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-web-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax</groupId>
                     <artifactId>javax.mail</artifactId>
                 </exclusion>
                 <exclusion>
@@ -83,10 +68,20 @@
                     <groupId>javax</groupId>
                     <artifactId>javax.transaction</artifactId>
                 </exclusion>
+                <!--
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-web-api</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                -->
             </exclusions>
         </dependency>
 
@@ -100,30 +95,43 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
         at com.sun.enterprise.v3.server.ApplicationLifecycle.deploy(ApplicationLifecycle.java:493)
         at com.sun.enterprise.v3.server.ApplicationLifecycle.deploy(ApplicationLifecycle.java:219)
 		
-		-->
+        -->
         <!-- XXX TODO  probably need to separate poms:  1 for war file to deploy onto glassfish 4, w/o jersey jars, and 1 for deploying on jetty/tomcat, with jersey jars included -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
             <scope>provided</scope>
         </dependency>        
-	<dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
             <scope>provided</scope>
         </dependency>
-<dependency>
-    <groupId>org.glassfish.jersey.media</groupId>
-    <artifactId>jersey-media-multipart</artifactId>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
             <scope>provided</scope>
-</dependency>
-<!--
-	<dependency>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>2.4.1</version>
+            <scope>provided</scope>
         </dependency>
-        -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         
     </dependencies>
     

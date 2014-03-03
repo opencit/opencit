@@ -6,16 +6,22 @@ package test.vendor.citrix;
 
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import com.intel.mtwilson.agent.citrix.CitrixClient;
+import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.PublicKey;
 import static org.junit.Assert.*;
@@ -60,11 +66,18 @@ public class TestCitrixHostAgent {
     }
     
     public static HostAgent getAgent() throws KeyManagementException, MalformedURLException, IOException {
+        Extensions.register(VendorHostAgentFactory.class, CitrixHostAgentFactory.class);
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
 //        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
         HostAgent hostAgent = hostAgentFactory.getHostAgent(new ConnectionString(connection), new InsecureTlsPolicy());
         return hostAgent;
+    }
+    
+    @Test
+    public void testCreateCitrixClient() throws Exception {
+        CitrixClient client = new CitrixClient(new TlsConnection(new URL("https://10.1.71.91:443/;root;P@ssw0rd"), new InsecureTlsPolicy()));
+        client.init();
     }
     
     

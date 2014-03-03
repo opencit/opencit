@@ -4,8 +4,13 @@
  */
 package validation;
 
+import com.intel.mtwilson.datatypes.ConnectionString;
+//import com.intel.mtwilson.datatypes.RegExAnnotation;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -86,4 +91,33 @@ public class DataValidationTest {
         System.out.println(parts2.length);
     }
 
+    private static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
+    
+    private static Pattern getPattern(String regex) {
+        Pattern pattern = patternMap.get(regex);
+        if( pattern == null ) {
+            pattern = Pattern.compile("^" + regex + "$");
+            patternMap.put(regex, pattern);
+        }
+        return pattern;
+    }
+    
+    private static void validateInput(String input, Pattern pattern) {
+             
+            if (input != null && !input.isEmpty()) {
+                System.err.println("validating " + input + " against " + pattern.pattern());
+                Matcher matcher = pattern.matcher(input);
+                if (!matcher.matches()) {
+                    System.err.println("Illegal characters found in : " + input);
+                    throw new IllegalArgumentException();
+                }
+            } else {
+                System.err.println("Skipping validating " + input + " against " + pattern.pattern());
+            }
+    }
+    
+    @Test
+    public void testRegex() {
+        //validateInput("Administrator", getPattern(RegExAnnotation.PASSWORD));
+    }
 }

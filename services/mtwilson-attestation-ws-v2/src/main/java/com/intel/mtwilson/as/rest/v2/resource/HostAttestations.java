@@ -25,6 +25,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -64,7 +65,7 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     @GET
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     @Produces(OtherMediaType.APPLICATION_SAML)    
-    public String searchCollectionSaml(HostAttestationFilterCriteria criteria) {
+    public String searchCollectionSaml(@BeanParam HostAttestationFilterCriteria criteria) {
         try { log.debug("searchCollection: {}", mapper.writeValueAsString(criteria)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
             /*    try {
