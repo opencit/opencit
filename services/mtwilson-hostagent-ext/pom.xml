@@ -98,23 +98,5 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-intel-hostagent</artifactId>
-            <version>1.2.3-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-vmware-hostagent</artifactId>
-            <version>1.2.3-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-citrix-hostagent</artifactId>
-            <version>1.2.3-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
     </dependencies>  
 </project>
