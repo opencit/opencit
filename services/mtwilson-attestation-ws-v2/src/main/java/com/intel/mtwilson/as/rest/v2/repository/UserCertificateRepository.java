@@ -38,76 +38,66 @@ public class UserCertificateRepository implements SimpleRepository<UserCertifica
         
     @Override
     public UserCertificateCollection search(UserCertificateFilterCriteria criteria) {
-        UserCertificateCollection userCertCollection = new UserCertificateCollection();
+        UserCertificateCollection objCollection = new UserCertificateCollection();
         try {
             ApiClientX509JpaController userCertJpaController = My.jpa().mwApiClientX509();
-            if (criteria.id != null) {
-                ApiClientX509 userCert = userCertJpaController.findApiClientX509ByUUID(criteria.id.toString());
-                if (userCert != null) {
-                    userCertCollection.getUserCertificates().add(convert(userCert));
-                }
-            } else if (criteria.userUuid != null) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByUserUUID(criteria.userUuid.toString());
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
+            if (criteria.userUuid != null) {
+                List<ApiClientX509> objList = userCertJpaController.findApiClientX509ByUserUUID(criteria.userUuid.toString());
+                if (objList != null && !objList.isEmpty()) {
+                    if (criteria.id != null) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getUuid_hex().equalsIgnoreCase(criteria.id.toString()))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getName().equalsIgnoreCase(criteria.nameEqualTo.toString()))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getName().contains(criteria.nameContains.toString()))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.fingerprint != null) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getFingerprint().equals(criteria.fingerprint))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.expiresAfter != null) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getExpires().after(criteria.expiresAfter))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.expiresBefore != null) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getExpires().before(criteria.expiresBefore))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.enabled != null) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getEnabled() == criteria.enabled)
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else if (criteria.status != null) {
+                        for(ApiClientX509 obj : objList) {
+                            if (obj.getStatus().equals(criteria.status))
+                                objCollection.getUserCertificates().add(convert(obj));
+                        }                        
+                    } else {
+                        for(ApiClientX509 obj : objList) {
+                            objCollection.getUserCertificates().add(convert(obj));
+                        }
                     }
                 }                
-            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByName(criteria.nameEqualTo);
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
-                    }
-                }                
-            } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByNameLike(criteria.nameContains);
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
-                    }
-                }                
-            } else if (criteria.fingerprint != null) {
-                ApiClientX509 userCert = userCertJpaController.findApiClientX509ByFingerprint(criteria.fingerprint);
-                if (userCert != null) {
-                    userCertCollection.getUserCertificates().add(convert(userCert));                
-                }
-            } else if (criteria.expiresAfter != null) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByExpiresAfter(criteria.expiresAfter);
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
-                    }
-                }                
-            } else if (criteria.expiresBefore != null) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByExpiresBefore(criteria.expiresBefore);
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
-                    }
-                }                
-            } else if (criteria.enabled != null) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByEnabled(criteria.enabled);
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
-                    }
-                }                
-            } else if (criteria.status != null) {
-                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByStatus(criteria.status);
-                if (userList != null && !userList.isEmpty()) {
-                    for(ApiClientX509 userObj : userList) {
-                        userCertCollection.getUserCertificates().add(convert(userObj));
-                    }
-                }                
-            }
+            }             
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during user certificate search.", ex);
             throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
         }
-        return userCertCollection;
+        return objCollection;
     }
 
     @Override
@@ -204,9 +194,6 @@ public class UserCertificateRepository implements SimpleRepository<UserCertifica
         userCert.setIssuer(apiObj.getIssuer());
         userCert.setSerialNumber(apiObj.getSerialNumber());
         userCert.setStatus(apiObj.getStatus());
-        // can't assign ApiRoleX509 to String
-//            Collection<ApiRoleX509> apiRoleX509Collection = apiObj.getApiRoleX509Collection();
-//            userCert.setRoles(apiRoleX509Collection.toArray(new String[apiRoleX509Collection.size()]));
         String[] roles = new String[apiObj.getApiRoleX509Collection().size()];
         int i = 0;
         for(ApiRoleX509 role : apiObj.getApiRoleX509Collection()) {
