@@ -48,6 +48,7 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
         if( caDistinguishedName == null ) {
             configuration("CA distinguished name is not configured");
         }
+        getConfiguration().setString("mtwilson.ca.dn", caDistinguishedName);
     }
 
     

@@ -22,8 +22,8 @@ import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.BaseBO;
-import com.intel.mtwilson.as.helper.saml.SamlAssertion;
-import com.intel.mtwilson.as.helper.saml.SamlGenerator;
+import com.intel.mtwilson.saml.SamlAssertion;
+import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 //import com.intel.mtwilson.as.premium.PremiumHostBO;
@@ -48,6 +48,7 @@ import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import com.intel.mtwilson.saml.TxtHostWithAssetTag;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -118,7 +119,7 @@ public class HostTrustBO extends BaseBO {
         }
         */
         try {
-            samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks")));
+            samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); // TODO:  use SamlConfiguration
         }
         catch(FileNotFoundException e) {
             log.error("Cannot find SAML keystore");
@@ -1243,6 +1244,62 @@ public class HostTrustBO extends BaseBO {
         return true;
     }
     
+    /**
+     * Returns a multi-host SAML assertion.  It's similar to getTrustWithSaml(TblHosts,String)
+     * but it does NOT save the generated SAML assertion.
+     */
+    public String getTrustWithSaml(Collection<TblHosts> tblHostsCollection) {
+        try {
+            //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
+            //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
+            ArrayList<TxtHostWithAssetTag> hostList = new ArrayList<TxtHostWithAssetTag>();
+            
+            for(TblHosts tblHosts : tblHostsCollection) {
+                // these 3 lines equivalent of getHostWithTrust without a host-specific saml assertion table record to update 
+                HostTrustStatus trust = getTrustStatus(tblHosts, tblHosts.getUuid_hex()); // TODO:  for anonymous assertions the host uuid needs to be replaced with AIK SHA1
+                TxtHostRecord data = createTxtHostRecord(tblHosts);
+                TxtHost host = new TxtHost(data, trust);
+                
+                // We will check if the asset-tag was verified successfully for the host. If so, we need to retrieve
+                // all the attributes for that asset-tag and send it to the saml generator.
+                ArrayList<AttributeOidAndValue> atags = null;
+                if (host.isAssetTagTrusted()) {
+                    AssetTagCertBO atagCertBO = new AssetTagCertBO();
+                    MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getHardwareUuid());
+                    if (atagCertForHost != null) {
+                        atags = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate()).getTags();
+                        atags.add(new AttributeOidAndValue("UUID", atagCertForHost.getUuid()));
+                    }
+                }
+                
+                TxtHostWithAssetTag hostWithAssetTag = new TxtHostWithAssetTag(host, atags);
+                hostList.add(hostWithAssetTag);
+            }
+            
+            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertions(hostList);
+
+            log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
+
+            return samlAssertion.assertion ;
+        } catch (ASException e) {
+            // ASException sets HTTP Status to 400 for all errors
+            // We override that here to give more specific codes when possible:
+            if (e.getErrorCode().equals(ErrorCode.AS_HOST_NOT_FOUND)) {
+                throw new WebApplicationException(Status.NOT_FOUND);
+            }
+            /*
+             * if( e.getErrorCode().equals(ErrorCode.TA_ERROR)) { throw new
+             * WebApplicationException(Status.INTERNAL_SERVER_ERROR); }
+             *
+             */
+            throw e;
+        } catch (Exception ex) {
+            // throw new ASException( e);
+            log.error("Error during retrieval of host trust status.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
+        }
+        
+    }
 
     /**
      * @param hostName
@@ -1307,7 +1364,7 @@ public class HostTrustBO extends BaseBO {
     private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
         Configuration conf = My.configuration().getConfiguration();
         InetAddress localhost = InetAddress.getLocalHost();
-        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService";
+        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
         String issuer = conf.getString("saml.issuer", defaultIssuer);
         SamlGenerator saml = new SamlGenerator(samlKeystoreResource, conf);
         saml.setIssuer(issuer);
@@ -1324,6 +1381,16 @@ public class HostTrustBO extends BaseBO {
         My.initDataEncryptionKey();
         TblHosts tblHosts = getHostByName(new Hostname((host)));
         return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify);
+    }
+
+    public String getTrustWithSamlForHostnames(Collection<String> hosts) throws IOException {
+        My.initDataEncryptionKey();
+        ArrayList<TblHosts> tblHostsList = new ArrayList<TblHosts>();
+        for(String host : hosts) {
+            TblHosts tblHosts = getHostByName(new Hostname((host)));
+            tblHostsList.add(tblHosts);
+        }
+        return getTrustWithSaml(tblHostsList);
     }
     
     public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {

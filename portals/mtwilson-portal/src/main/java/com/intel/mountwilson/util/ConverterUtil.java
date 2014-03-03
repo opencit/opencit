@@ -21,6 +21,7 @@ import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 //import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import java.io.StringReader;
@@ -94,20 +95,20 @@ public class ConverterUtil {
 	public static TrustedHostVO getTrustedHostVoFromTrustAssertion(HostDetailsEntityVO hostDetailsEntityVO, TrustAssertion trustAssertion,String errorMessage){
 		TrustedHostVO hostVO = new TrustedHostVO();
 		hostVO.setHostName(hostDetailsEntityVO.getHostName());
-		
+		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName()); // TODO:  is this always valid? 
 		if (trustAssertion != null) {
-			if (Boolean.parseBoolean(trustAssertion.getStringAttribute(HelperConstant.Trusted_BIOS))) {
+			if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.Trusted_BIOS))) {
 				hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
 			}else {
 				hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
 			}
-			if (Boolean.parseBoolean(trustAssertion.getStringAttribute(HelperConstant.Trusted_VMM))) {
+			if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.Trusted_VMM))) {
 				hostVO.setVmmStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
 			}else {
 				hostVO.setVmmStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
 			}
 			
-			if (Boolean.parseBoolean(trustAssertion.getStringAttribute(HelperConstant.OVER_ALL_TRUSTRED))) {
+			if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.OVER_ALL_TRUSTRED))) {
 				hostVO.setOverAllStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
 				hostVO.setOverAllStatusBoolean(true);
 			}else {
@@ -117,15 +118,15 @@ public class ConverterUtil {
 
 // XXX MERGE WARNING 20131119 TODO make sure this was merged correctly
 
-                        if (trustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
-                            if (Boolean.parseBoolean(trustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {
+                        if (hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
+                            if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {
                                     hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
                                     String assetTagDetails = "";
                                     // We need to retrive all the asset tag specific attributes and show it to the user
-                                    Set<String> attributeNames = trustAssertion.getAttributeNames();
+                                    Set<String> attributeNames = hostTrustAssertion.getAttributeNames();
                                     for (String attrName : attributeNames) {
                                         if (attrName.startsWith("ATAG") && !attrName.contains("UUID")) {
-                                            assetTagDetails += trustAssertion.getStringAttribute(attrName) + "\n";
+                                            assetTagDetails += hostTrustAssertion.getStringAttribute(attrName) + "\n";
                                         }
                                     }
                                     hostVO.setAssetTagDetails(assetTagDetails);

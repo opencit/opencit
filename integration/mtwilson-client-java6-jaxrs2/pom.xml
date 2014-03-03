@@ -48,21 +48,24 @@
 	
         <plugins>
             
+                            <!--  REMOVED THIS CONFIGURATION FROM MAVEN-JAR-PLUGIN BELOW 
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            -->
+                            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
                         <manifest>
-                            <!--
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            -->
                             <mainClass>com.intel.mtwilson.client.TextConsole</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
+            -->
+            <!--
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
@@ -80,7 +83,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                                        
+                            -->            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -128,7 +131,7 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-saml</artifactId>
+            <artifactId>mtwilson-saml-verifier</artifactId>
             <version>${project.version}</version>
         </dependency>
 		

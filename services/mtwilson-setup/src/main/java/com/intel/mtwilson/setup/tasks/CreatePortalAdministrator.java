@@ -96,6 +96,7 @@ public class CreatePortalAdministrator extends DatabaseSetupTask {
         if (!My.configuration().getCaKeystoreFile().exists()) {
             configuration("Mt Wilson CA is required to create the portal administrator");
         }
+        // we do not store the admin username or password in configuration - it is only to display to the administrator
     }
 
     @Override

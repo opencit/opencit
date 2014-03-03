@@ -11,8 +11,8 @@ import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.TrustAssertion;
-import com.intel.mtwilson.as.helper.saml.SamlAssertion;
-import com.intel.mtwilson.as.helper.saml.SamlGenerator;
+import com.intel.mtwilson.saml.SamlAssertion;
+import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHost;
@@ -73,7 +73,7 @@ public class SamlVerificationTest {
         TrustAssertion verifier = new TrustAssertion(new X509Certificate[] { certificate }, assertion.assertion);
         if( verifier.isValid() ) {
             log.debug("valid assertion");
-            log.debug("subject {}", verifier.getSubject());
+//            log.debug("subject {}", verifier.getSubject());
         }
         else {
             log.debug("invalid assertion", verifier.error());

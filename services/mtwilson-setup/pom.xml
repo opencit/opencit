@@ -135,6 +135,16 @@
 			<artifactId>mtwilson-management-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-saml</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-saml-verifier</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         
         
     </dependencies>  

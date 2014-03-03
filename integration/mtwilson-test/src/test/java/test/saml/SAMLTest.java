@@ -12,7 +12,9 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Set;
 import org.junit.Test;
 
@@ -62,6 +64,25 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         print(trustAssertion);
     }
     
+    @Test
+    public void testGenerateAndVerifyMultihostSaml() throws Exception {
+        // generate SAML
+        Extensions.register(VendorHostAgentFactory.class, VmwareHostAgentFactory.class); // because 10.1.71.175 is esxi
+        HostTrustBO hostTrustBO = ASComponentFactory.getHostTrustBO();
+        ArrayList<String> hostnames = new ArrayList<String>();
+        hostnames.add(hostname);
+        hostnames.add(hostname);
+        String saml = hostTrustBO.getTrustWithSamlForHostnames(hostnames);
+        log.debug("saml = {}", saml);
+        // verify SAML
+        SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
+//        X509Certificate[] trusted = keystore.getTrustedCertificates(SimpleKeystore.SAML); // this works for the api client's keystore
+        X509Certificate[] trusted = new X509Certificate[] { keystore.getX509Certificate(keystore.aliases()[0]) }; // this works for mtwilson's mtwilson-saml.jks keystore
+        TrustAssertion trustAssertion = new TrustAssertion(trusted, saml);
+        print(trustAssertion);
+    }
+    
+    
     /**
      * Example output (no aik or certificate because it was a vmware esxi host):
 2014-02-22 20:59:37,111 DEBUG [main] t.s.SAMLTest [SAMLTest.java:66] isValid true
@@ -97,20 +118,24 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
             log.debug("error {}", trustAssertion.error());
             return;
         }
-        log.debug("aikCertificate {}", trustAssertion.getAikCertificate());
-        log.debug("aikPublicKey {}", trustAssertion.getAikPublicKey());
-        log.debug("date {}", trustAssertion.getDate());
-        log.debug("issuer {}", trustAssertion.getIssuer());
-        log.debug("subjectFormat {}", trustAssertion.getSubjectFormat());
-        log.debug("subject {}", trustAssertion.getSubject());
-        log.debug("isHostBiosTrusted {}", trustAssertion.isHostBiosTrusted());
-        log.debug("isHostVmmTrusted {}", trustAssertion.isHostVmmTrusted());
-        log.debug("isHostLocationTrusted {}", trustAssertion.isHostLocationTrusted());
-        log.debug("isHostTrusted {}", trustAssertion.isHostTrusted());
-        Set<String> attributeNames = trustAssertion.getAttributeNames();
+        Set<String> hostnames = trustAssertion.getHosts();
+        for(String hostname : hostnames) {
+            HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostname);
+        log.debug("aikCertificate {}", hostTrustAssertion.getAikCertificate());
+        log.debug("aikPublicKey {}", hostTrustAssertion.getAikPublicKey());
+        log.debug("date {}", hostTrustAssertion.getDate());
+        log.debug("issuer {}", hostTrustAssertion.getIssuer());
+        log.debug("subjectFormat {}", hostTrustAssertion.getSubjectFormat());
+        log.debug("subject {}", hostTrustAssertion.getSubject());
+        log.debug("isHostBiosTrusted {}", hostTrustAssertion.isHostBiosTrusted());
+        log.debug("isHostVmmTrusted {}", hostTrustAssertion.isHostVmmTrusted());
+        log.debug("isHostLocationTrusted {}", hostTrustAssertion.isHostLocationTrusted());
+        log.debug("isHostTrusted {}", hostTrustAssertion.isHostTrusted());
+        Set<String> attributeNames = hostTrustAssertion.getAttributeNames();
         log.debug("{} attributes", attributeNames.size());
         for(String attributeName : attributeNames) {
-            log.debug("attribute {} value {}", attributeName,  trustAssertion.getStringAttribute(attributeName));            
+            log.debug("attribute {} value {}", attributeName,  hostTrustAssertion.getStringAttribute(attributeName));            
+        }
         }
         
     }

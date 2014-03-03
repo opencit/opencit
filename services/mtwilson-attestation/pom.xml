@@ -57,12 +57,16 @@
           <optional>true</optional>
         </dependency>   
         -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-saml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -119,7 +123,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>asset-tag-model</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>postgresql</groupId>
@@ -152,11 +155,6 @@
             <version>${jersey-version}</version>
         </dependency>
         -->
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-            <version>2.5.1-1</version>
-        </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -20,6 +20,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.xml.XMLConstants;
 import javax.xml.crypto.MarshalException;
@@ -66,7 +67,8 @@ public class TrustAssertion {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private Assertion assertion;
-    private HashMap<String,String> assertionMap;
+    private HashMap<String,HostTrustAssertion> hostAssertionMap; //   host ->  Map of assertions about the host
+//    private HashMap<String,String> assertionMap;
     private boolean isValid;
     private Exception error;
     
@@ -99,7 +101,8 @@ public class TrustAssertion {
                 // populate assertions map
                 DefaultBootstrap.bootstrap(); // required to load default configs that ship with opensaml that specify how to build and parse the xml (if you don't do this you will get a null unmarshaller when you try to parse xml)
                 assertion = readAssertion(document); // ParserConfigurationException, SAXException, IOException, UnmarshallingException
-                assertionMap = new HashMap<String,String>();        
+//                assertionMap = new HashMap<String,String>();        
+                hostAssertionMap = new HashMap<String,HostTrustAssertion>();
                 populateAssertionMap();
                 isValid = true;
                 error = null;
@@ -112,7 +115,8 @@ public class TrustAssertion {
             isValid = false;
             error = e;
             assertion = null;
-            assertionMap = null;
+//            assertionMap = null;
+            hostAssertionMap = null;
         }
     }
     
@@ -142,13 +146,39 @@ public class TrustAssertion {
         return assertion.getIssueInstant().toDate();
     }
     
+    public Set<String> getHosts() {
+        return hostAssertionMap.keySet();
+    }
+    public HostTrustAssertion getTrustAssertion(String hostname) {
+        return hostAssertionMap.get(hostname);
+    }
+    
+    public static class HostTrustAssertion {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTrustAssertion.class);
+
+        private Assertion assertion;
+        private Map<String,String> assertionMap; // attributes for a single host
+        public HostTrustAssertion(Assertion assertion, Map<String,String> assertionMap) {
+            this.assertion = assertion;
+            this.assertionMap = assertionMap;
+        }
+        
+    /**
+     * @return the assertion's issue instant
+     * @since 0.5.3
+     */
+    public Date getDate() {
+        return assertion.getIssueInstant().toDate();
+    }
+    
     /**
      * 
      * @return the assertion subject's AIK public key
      * @throws NullPointerException if isValid() == false
      */
     public String getSubject() {
-        return assertion.getSubject().getNameID().getValue();
+//        return assertion.getSubject().getNameID().getValue();
+        return assertionMap.get("Host_Name");
     }
     
     /**
@@ -157,7 +187,8 @@ public class TrustAssertion {
      * @throws NullPointerException if isValid() == false
      */
     public String getSubjectFormat() {
-        return assertion.getSubject().getNameID().getFormat();
+//        return assertion.getSubject().getNameID().getFormat();
+        return "hostname"; // TODO
     }
 
     /**
@@ -244,7 +275,8 @@ public class TrustAssertion {
         return trusted != null && trusted.equalsIgnoreCase("true");
     }
     
-    
+    }
+
     private Element readXml(String xml) throws ParserConfigurationException, SAXException, IOException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         schemaFactory.setResourceResolver(new ClasspathResourceResolver());
@@ -292,6 +324,8 @@ public class TrustAssertion {
     private void populateAssertionMap() {
         for (Statement statement : assertion.getStatements ()) {
             if (statement instanceof AttributeStatement) {
+                HashMap<String,String> assertionMap = new HashMap<String,String>();
+                HostTrustAssertion hostTrustAssertion = new HostTrustAssertion(assertion, assertionMap);
                 for (Attribute attribute : 
                         ((AttributeStatement) statement).getAttributes ())
                 {
@@ -307,6 +341,7 @@ public class TrustAssertion {
                     }
                     assertionMap.put(attribute.getName(), attributeValue);
                 }
+                hostAssertionMap.put(assertionMap.get("Host_Name"), hostTrustAssertion);
             }
         }
     }

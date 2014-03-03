@@ -14,9 +14,11 @@ import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -66,13 +68,17 @@ public class JavaQuickstartExamples {
         String saml = api.getSamlForHost(new Hostname("10.1.70.142"));
         TrustAssertion trust = api.verifyTrustAssertion(saml);
         assertNotNull(trust);
-        log.debug("SAML Issuer: {}", trust.getIssuer());
-        log.debug("SAML Issued On: {}", trust.getDate().toString());
-        log.debug("SAML Subject: {}", trust.getSubject());
-        for(String attr : trust.getAttributeNames()) {
-            log.debug("Host {}: {}", attr, trust.getStringAttribute(attr));
+        Set<String> hostnames = trust.getHosts();
+        for(String hostname : hostnames) {
+            HostTrustAssertion hostTrustAssertion = trust.getTrustAssertion(hostname);
+        log.debug("SAML Issuer: {}", hostTrustAssertion.getIssuer());
+        log.debug("SAML Issued On: {}", hostTrustAssertion.getDate().toString());
+        log.debug("SAML Subject: {}", hostTrustAssertion.getSubject());
+        for(String attr : hostTrustAssertion.getAttributeNames()) {
+            log.debug("Host {}: {}", attr, hostTrustAssertion.getStringAttribute(attr));
         }
-        assertNull(trust.getAikCertificate());
-        log.debug("AIK Certificate: {}", trust.getAikCertificate() == null ? "null" : Base64.encodeBase64String(trust.getAikCertificate().getEncoded()));
+        assertNull(hostTrustAssertion.getAikCertificate());
+        log.debug("AIK Certificate: {}", hostTrustAssertion.getAikCertificate() == null ? "null" : Base64.encodeBase64String(hostTrustAssertion.getAikCertificate().getEncoded()));
+        }
     }
 }

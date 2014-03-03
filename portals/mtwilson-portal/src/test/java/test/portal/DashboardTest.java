@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.ms.data.MwPortalUser;
+import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -56,7 +58,14 @@ public class DashboardTest {
         String saml = My.client().getSamlForHost(new Hostname("10.1.71.173"));
         TrustAssertion trustAssertion = new TrustAssertion(keystore.getTrustedCertificates(SimpleKeystore.SAML), saml);
         log.debug("Assertion is valid? {}", trustAssertion.isValid());
-        log.debug("Assertion attributes: {}", StringUtils.join(trustAssertion.getAttributeNames(), ", "));
+//        log.debug("Assertion attributes: {}", StringUtils.join(trustAssertion.getAttributeNames(), ", "));
+        Set<String> hostnames = trustAssertion.getHosts();
+        for(String hostname : hostnames) {
+            log.debug("Assertion for host {}", hostname);
+            HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostname);
+        log.debug("Assertion attributes: {}", StringUtils.join(hostTrustAssertion.getAttributeNames(), ", "));
+            
+        }
     }
     
     //@Test

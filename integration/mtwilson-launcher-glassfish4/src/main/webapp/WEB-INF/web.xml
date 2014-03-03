@@ -248,5 +248,9 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <extension>yaml</extension>
         <mime-type>application/yaml</mime-type>
     </mime-mapping>
+    
+    <error-page>
+        <location>/static/error.html</location>
+    </error-page>    
 
 </web-app>

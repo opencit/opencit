@@ -2,15 +2,10 @@
  * Copyright (C) 2011-2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.helper.saml;
+package com.intel.mtwilson.saml;
 
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
-import com.intel.mtwilson.api.ApiException;
-import com.intel.mtwilson.as.business.AssetTagCertBO;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
-import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.dcsg.cpg.io.Resource;
 import java.io.IOException;
@@ -22,10 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.util.*;
-import java.util.Map.Entry;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
- 
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -35,14 +28,8 @@ import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
 import org.opensaml.saml2.core.AttributeValue;
-import org.opensaml.saml2.core.AuthnContext;
-import org.opensaml.saml2.core.AuthnContextClassRef;
-import org.opensaml.saml2.core.AuthnStatement;
-import org.opensaml.saml2.core.Condition;
-import org.opensaml.saml2.core.Conditions;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameID;
-import org.opensaml.saml2.core.OneTimeUse;
 import org.opensaml.saml2.core.Subject;
 import org.opensaml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml2.core.SubjectConfirmationData;
@@ -51,8 +38,6 @@ import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.schema.XSBooleanValue;
-import org.opensaml.xml.schema.XSBoolean;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.schema.XSAny;
 import org.opensaml.xml.util.XMLHelper;
@@ -79,6 +64,16 @@ public class SamlGenerator {
 //    private Resource keystoreResource = null;
     
     /**
+     * Compatibility constructor 
+     * @param keystoreResource  ignored
+     * @param configuration  commons-configuration object 
+     * @throws ConfigurationException 
+     */
+    public SamlGenerator(Resource keystoreResource, org.apache.commons.configuration.Configuration configuration) throws ConfigurationException {
+        this(new CommonsConfigurationAdapter(configuration));
+    }
+    
+    /**
      * Configuration keys:
      * saml.issuer=http://1.2.3.4/AttestationService          # used in SAML
      * saml.validity.seconds=3600 # 3600 seconds = 1 hour
@@ -93,25 +88,11 @@ public class SamlGenerator {
      * @param configuration with the keys described
      * @throws ConfigurationException 
      */
-    public SamlGenerator(Resource keystoreResource, org.apache.commons.configuration.Configuration configuration) throws ConfigurationException {
+    public SamlGenerator(com.intel.dcsg.cpg.configuration.Configuration configuration /*Resource keystoreResource, org.apache.commons.configuration.Configuration configuration*/) throws ConfigurationException {
         builderFactory = getSAMLBuilder();
         try {
-            signatureGenerator = new SAMLSignature(keystoreResource, configuration);
-        } catch (ClassNotFoundException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (KeyStoreException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (NoSuchAlgorithmException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (UnrecoverableEntryException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (IllegalAccessException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (InstantiationException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (IOException ex) {
-            log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
-        } catch (CertificateException ex) {
+            signatureGenerator = new SAMLSignature(/*keystoreResource,*/ configuration);
+        } catch (ClassNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | IllegalAccessException | InstantiationException | IOException | CertificateException ex) {
             log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
         }
         setIssuer(configuration.getString("saml.issuer", "AttestationService"));
@@ -171,6 +152,43 @@ public class SamlGenerator {
         return samlAssertion;
     }
     
+    /**
+     * Generates a multi-host SAML assertion which contains an AttributeStatement
+     * for each host containing a Host_Address attribute with the host IP address
+     * or hostname and the trust attributes as for a single-host assertion.
+     * The Subject of the multi-host SAML assertion should not be used because
+     * it is simply the collection hosts in the assertion and no statements
+     * are made about the collection as a whole.
+     * 
+     * @param hosts
+     * @return
+     * @throws SamlException 
+     */
+    public SamlAssertion generateHostAssertions(Collection<TxtHostWithAssetTag> hosts) throws SamlException {
+        try {
+            samlAssertion = new SamlAssertion();
+            Assertion assertion = createAssertion(hosts);
+
+            AssertionMarshaller marshaller = new AssertionMarshaller();
+            Element plaintextElement = marshaller.marshall(assertion);
+
+            String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
+            System.out.println("Assertion String: " + originalAssertionString);
+
+            // add signatures and/or encryption
+            signAssertion(plaintextElement);
+
+            samlAssertion.assertion =  XMLHelper.nodeToString(plaintextElement);
+            System.out.println("Signed Assertion String: " + samlAssertion.assertion );
+            // TODO: now you can also add encryption....
+
+
+            return samlAssertion;
+        }
+        catch(Exception e) {
+            throw new SamlException(e);
+        }
+    }
  
 	public static XMLObjectBuilderFactory getSAMLBuilder() throws ConfigurationException{
  
@@ -339,6 +357,12 @@ public class SamlGenerator {
             // Builder Attributes
             SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
             AttributeStatement attrStatement = (AttributeStatement) attrStatementBuilder.buildObject();
+            // add host attributes (both for single host and multi-host assertions)
+            attrStatement.getAttributes().add(createStringAttribute("Host_Name", host.getHostName().toString()));  // TODO:  need a revised object to replace TxtHost which combines hostname/ipaddress into one field,  and also if we are doing an anonymous assertion then this would be an AIK fingerprint and not a hostname at all
+            attrStatement.getAttributes().add(createStringAttribute("Host_Address", host.getIPAddress()));  // TODO:  need a revised object to replace TxtHost which combines hostname/ipaddress into one field,  and also if we are doing an anonymous assertion then this would be an AIK fingerprint and not a hostname at all
+//            attrStatement.getAttributes().add(createStringAttribute("Host_UUID", host.getUuid()));  // TODO:  need a revised object to replace TxtHost which includes the UUID of the host (arbitrary from our database) and the hardware UUID which we get from the host agent
+//            attrStatement.getAttributes().add(createStringAttribute("Host_AIK_SHA1", host.getUuid()));  // TODO:  need a revised object to replace TxtHost which includes the UUID of the host (arbitrary from our database) and the hardware UUID which we get from the host agent
+            
 
             // Create the attribute statements that are trusted
             attrStatement.getAttributes().add(createBooleanAttribute("Trusted", host.isBiosTrusted() && host.isVmmTrusted()));
@@ -365,30 +389,37 @@ public class SamlGenerator {
             // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
             attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
             if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
-                AssetTagCertBO certBO = new AssetTagCertBO();
+//                AssetTagCertBO certBO = new AssetTagCertBO();
                 for (AttributeOidAndValue atagAttr : atags) {
                     String tagValue = atagAttr.getValue();
                     String tagName = "N/A";
                     log.debug("tag atrr OID = " + atagAttr.getOid() + " default OID = " + DEFAULT_OID);
                     if (! atagAttr.getOid().equalsIgnoreCase(DEFAULT_OID)) { 
+                        log.error("Unsupported OID {}", atagAttr.getOid());
+                        
+                        // XXX  commenting out this code for now because we're going to limit asset tags
+                        //      to our DEFAULT_OID defined as key/value pairs until we have better general
+                        //      support for X509 OIDs  - and when we do, we won't need to query the 
+                        //      asset tag service for anything because support for additional OIDs would
+                        //      be in the form of plugins, because we will need code to interpret them
+                        //      but all the necessary information will be embedded and we won't need 
+                        //      to look anything up.
+                        /*
                         // not the default oid that means value == key/value
                         // so we need to query the service and try and get the mapping from there
                         try {
                             TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
                             log.error("createHostAttributes found tag for oid " + atagAttr.getOid());
                             tagName = tag.name;
-                        } catch (IOException ioEx) {
-                          log.error("error getting tag attributes: " + ioEx.getMessage());
-                          ioEx.printStackTrace();
-                          
-                        } catch (ApiException apiEx) {
-                           log.error("error getting tag attributes: " + apiEx.getMessage());
-                          apiEx.printStackTrace();
                         } catch (Exception ex) {
                           log.error("error getting tag attributes: " + ex.getMessage());
                           ex.printStackTrace();
                         }
+                        */
                     }
+                    // XXX TODO  change String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]")  to something more general wherein we can encode the OIDs as is - 
+                    // probaly string attribute is not the right thing to do here anymore, and the client will need the OID-parsing code too for anything that
+                    // is not a key value pair.   Possibly for our DEFAULT_OID  we can keep the easy string attribute format  like String.format(ATAG_%s, tagName) , tagValue
                     attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]"),tagValue));
                 }
             }
@@ -435,6 +466,34 @@ public class SamlGenerator {
             assertion.setVersion(SAMLVersion.VERSION_20);
             assertion.setSubject(createSubject(host));
             assertion.getAttributeStatements().add(createHostAttributes(host, atags));
+
+            return assertion;
+        }
+
+        /**
+         * Differences from createAssertion:
+         * - the assertion ID is "MultipleHostTrustAssertion" instead of "HostTrustAssertion"
+         * - there is no overall Subject for the assertion because it's for multiple host
+         * - each host is identified with host attributes within its own attribute statement
+         * 
+         * @param hosts
+         * @return
+         * @throws ConfigurationException
+         * @throws UnknownHostException 
+         */
+        private Assertion createAssertion(Collection<TxtHostWithAssetTag> hosts) throws ConfigurationException, UnknownHostException {
+            // Create the assertion
+            SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
+            Assertion assertion = (Assertion) assertionBuilder.buildObject();
+            assertion.setID("MultipleHostTrustAssertion"); // ID is arbitrary, only needs to be unique WITHIN THE DOCUMENT, and is required so that the Signature element can refer to it, for example #HostTrustAssertion
+            assertion.setIssuer(createIssuer());
+            DateTime now = new DateTime();
+            assertion.setIssueInstant(now);
+            assertion.setVersion(SAMLVersion.VERSION_20);
+//            assertion.setSubject(createSubject(host));
+            for(TxtHostWithAssetTag host : hosts) {
+                assertion.getAttributeStatements().add(createHostAttributes(host.getHost(), host.getAtags()));            
+            }
 
             return assertion;
         }
