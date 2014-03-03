@@ -13,6 +13,7 @@ import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
 import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -102,9 +103,13 @@ public class SamlTest {
         log.debug(xmloutput);
         TrustAssertion trustAssertion = api.verifyTrustAssertion(xmloutput);
         if( trustAssertion.isValid() ) {
-            log.debug("Valid assertion for {}", trustAssertion.getSubject());
-            for(String attr : trustAssertion.getAttributeNames()) {
-                log.debug("Signed attribute {}: {}", new String[] { attr, trustAssertion.getStringAttribute(attr) });
+            Set<String> hostnames = trustAssertion.getHosts();
+            for(String hostname : hostnames) {
+                HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostname);
+                log.debug("Valid assertion for {}", hostTrustAssertion.getSubject());
+                for(String attr : hostTrustAssertion.getAttributeNames()) {
+                    log.debug("Signed attribute {}: {}", new String[] { attr, hostTrustAssertion.getStringAttribute(attr) });
+                }
             }
         }
         else {
@@ -131,11 +136,15 @@ public class SamlTest {
         if( trustAssertion.isValid() ) {
             System.out.println("Assertion is valid");
             log.info("Assertion is valid");
-            log.debug("Subject: {}", trustAssertion.getSubject());
-            log.debug("Issuer: {}", trustAssertion.getIssuer());
-            Set<String> attributes = trustAssertion.getAttributeNames();
-            for(String attribute : attributes) {
-                log.debug("Attribute: {} = {}", new String[] { attribute, trustAssertion.getStringAttribute(attribute) });
+            Set<String> hostnames = trustAssertion.getHosts();
+            for(String hostname : hostnames) {
+                HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostname);
+                log.debug("Subject: {}", hostTrustAssertion.getSubject());
+                log.debug("Issuer: {}", hostTrustAssertion.getIssuer());
+                Set<String> attributes = hostTrustAssertion.getAttributeNames();
+                for(String attribute : attributes) {
+                    log.debug("Attribute: {} = {}", new String[] { attribute, hostTrustAssertion.getStringAttribute(attribute) });
+                }
             }
         }
         else {
@@ -193,13 +202,17 @@ ProductName.3082=Microsoft Visual C++ 2008 Redistributable
         X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
         TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, xmlstr);
         if( trustAssertion.isValid() ) {
-            System.out.println("Assertion is valid");
-            log.info("Assertion is valid");
-            log.debug("Subject: {}", trustAssertion.getSubject());
-            log.debug("Issuer: {}", trustAssertion.getIssuer());
-            Set<String> attributes = trustAssertion.getAttributeNames();
-            for(String attribute : attributes) {
-                log.debug("Attribute: {} = {}", new String[] { attribute, trustAssertion.getStringAttribute(attribute) });
+            Set<String> hostnames = trustAssertion.getHosts();
+            for(String hostname : hostnames) {
+                HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostname);
+                System.out.println("Assertion is valid");
+                log.info("Assertion is valid");
+                log.debug("Subject: {}", hostTrustAssertion.getSubject());
+                log.debug("Issuer: {}", hostTrustAssertion.getIssuer());
+                Set<String> attributes = hostTrustAssertion.getAttributeNames();
+                for(String attribute : attributes) {
+                    log.debug("Attribute: {} = {}", new String[] { attribute, hostTrustAssertion.getStringAttribute(attribute) });
+                }
             }
         }
         else {

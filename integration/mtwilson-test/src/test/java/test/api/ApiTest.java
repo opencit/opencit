@@ -15,11 +15,13 @@ import com.intel.mtwilson.api.ClientException;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -54,14 +56,18 @@ public class ApiTest {
             log.debug("not trusted", trust.error());
             return;
         }
-        log.debug("SAML Issuer: {}", trust.getIssuer());
-        log.debug("SAML Issued On: {}", trust.getDate().toString());
-        log.debug("SAML Subject: {}", trust.getSubject());
-        for(String attr : trust.getAttributeNames()) {
-            log.debug("Host {}: {}", attr, trust.getStringAttribute(attr));
+        Set<String> hostnames = trust.getHosts();
+        for(String hostname : hostnames) {
+            HostTrustAssertion hostTrustAssertion = trust.getTrustAssertion(hostname);
+        log.debug("SAML Issuer: {}", hostTrustAssertion.getIssuer());
+        log.debug("SAML Issued On: {}", hostTrustAssertion.getDate().toString());
+        log.debug("SAML Subject: {}", hostTrustAssertion.getSubject());
+        for(String attr : hostTrustAssertion.getAttributeNames()) {
+            log.debug("Host {}: {}", attr, hostTrustAssertion.getStringAttribute(attr));
         }
-        assertNull(trust.getAikCertificate());
-        log.debug("AIK Certificate: {}", trust.getAikCertificate() == null ? "null" : Base64.encodeBase64String(trust.getAikCertificate().getEncoded()));
+        assertNull(hostTrustAssertion.getAikCertificate());
+        log.debug("AIK Certificate: {}", hostTrustAssertion.getAikCertificate() == null ? "null" : Base64.encodeBase64String(hostTrustAssertion.getAikCertificate().getEncoded()));
+        }
     }
     
     @Test

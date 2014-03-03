@@ -4,12 +4,12 @@
  */
 package com.intel.mtwilson.configuration;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.configuration.MutableConfiguration;
 
 /**
  * THIS INTERFACE IS TENTATIVE - NOT CURENTLY BEING USED OUTSIDE THIS PACKAGE
  * @author jbuhacoff
  */
-public interface Configurable {
-    void setConfiguration(Configuration configuration);
+public interface MutableConfigurable {
+    void setMutableConfiguration(MutableConfiguration configuration);
 }

@@ -73,7 +73,7 @@ public class SamlVerificationTest {
         TrustAssertion verifier = new TrustAssertion(new X509Certificate[] { certificate }, assertion.assertion);
         if( verifier.isValid() ) {
             log.debug("valid assertion");
-            log.debug("subject {}", verifier.getSubject());
+//            log.debug("subject {}", verifier.getSubject());
         }
         else {
             log.debug("invalid assertion", verifier.error());

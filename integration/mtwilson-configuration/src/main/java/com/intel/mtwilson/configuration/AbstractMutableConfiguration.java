@@ -4,22 +4,22 @@
  */
 package com.intel.mtwilson.configuration;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.configuration.MutableConfiguration;
 
 /**
  * THIS CLASS IS TENTATIVE - NOT CURENTLY BEING USED OUTSIDE THIS PACKAGE
  * @author jbuhacoff
  */
-public class AbstractConfiguration implements Configurable {
-    private Configuration configuration;
+public class AbstractMutableConfiguration implements MutableConfigurable {
+    private MutableConfiguration configuration;
     
     @Override
-    public void setConfiguration(Configuration configuration) {
+    public void setMutableConfiguration(MutableConfiguration configuration) {
         this.configuration = configuration;
     }
     
-    protected Configuration getConfiguration() {
+    protected MutableConfiguration getMutableConfiguration() {
         return configuration;
     }
-
+    
 }
