@@ -550,17 +550,17 @@ public class MyConfiguration {
     
     /////////////////////////            rootca key            //////////////////////////////////
     public File getRootCaCertificateFile() {
-        return new File(conf.getString("mtwilson.rootca.certificate.file", getMtWilsonConf() + File.separator + "MtWilsonRootCA.crt.pem"));
+        return new File(getMtWilsonConf() + File.separator + conf.getString("mtwilson.rootca.certificate.file", "MtWilsonRootCA.crt.pem"));
     }
     
     /////////////////////////             pca key              //////////////////////////////////
     public File getPrivacyCaCertificateFile() {
-        return new File(conf.getString("mtwilson.privacyca.certificate.list.file", getMtWilsonConf() + File.separator + "PrivacyCA.pem"));
+        return new File(getMtWilsonConf() + File.separator + conf.getString("mtwilson.privacyca.certificate.list.file", "PrivacyCA.p12.pem"));
     }
     
     ///////////////////////// saml key for attestation service //////////////////////////////////
     public File getSamlCertificateFile() {
-        return new File(conf.getString("mtwilson.saml.certificate.file", getMtWilsonConf() + File.separator + "saml.crt.pem"));
+        return new File(getMtWilsonConf() + File.separator + conf.getString("mtwilson.saml.certificate.file", "saml.crt.pem"));
     }
     
     public File getSamlKeystoreFile() {
