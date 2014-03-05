@@ -198,6 +198,16 @@ public class AssetTagCertBO extends BaseBO{
         boolean result = false;
         Sha1Digest expectedHash = null;
         log.debug("mapAssetTagCertToHostById");
+        
+        // Before we map the asset tag cert to the host, we first need to unmap any associations if it already exists
+        try {
+            boolean unmapResult = unmapAssetTagCertFromHostById(atagObj);
+            log.debug("Successfully unmapped the asset tag certificate assocation with host {}. ", atagObj.getHostID());
+            
+        } catch (Exception ex) {
+            log.error("Error during unmap of asset tag cert from host with id {}. {}", atagObj.getHostID(), ex.getMessage());
+        }
+        
         try {
             My.initDataEncryptionKey(); // needed for connection string decryption
             // Find the asset tag certificate for the specified Sha256Hash value
@@ -308,11 +318,13 @@ public class AssetTagCertBO extends BaseBO{
                     // Now that we have the asset tag identified, let us remove the host mapping
                     // to be associated.
                     for (MwAssetTagCertificate atagTempCert : atagCerts){
-                        if (validateAssetTagCert(atagTempCert)) {
-                            atagTempCert.setHostID(null);
-                            My.jpa().mwAssetTagCertificate().edit(atagTempCert);
-                            return true;
-                        }
+                        // There is no need to validate during unmapping the asset tag request
+                        // if (validateAssetTagCert(atagTempCert)) {
+                        atagTempCert.setHostID(null);
+                        My.jpa().mwAssetTagCertificate().edit(atagTempCert);
+                        log.debug("Successfully upmapped the host with id {} from the asset tag certificate.", atagObj.getHostID());
+                        return true;
+                        //}
                     }
                 }
             } else {
@@ -381,6 +393,8 @@ public class AssetTagCertBO extends BaseBO{
         try {
             // Find the asset tag certificates for the specified UUID of the host. Not that this might return back multiple
             // values. We need to evaluate each of the certificates to make sure that they are valid
+            // The below query has been modified to return back the results ordered by the insert date with the latest one first
+            // So if the host has been provisioned multiple times, we will pick up the latest one.
             if (uuid != null && !uuid.isEmpty()) {
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID(uuid);
                 if (atagCerts.isEmpty()) {
@@ -415,8 +429,10 @@ public class AssetTagCertBO extends BaseBO{
         MwAssetTagCertificate atagCert = null;
 
         try {
-            // Find the asset tag certificates for the specified UUID of the host. Not that this might return back multiple
+            // Find the asset tag certificates for the specified UUID of the host. Note that this might return back multiple
             // values. We need to evaluate each of the certificates to make sure that they are valid
+            // The below query has been modified to return back the results ordered by the insert date with the latest one first
+            // So if the host has been provisioned multiple times, we will pick up the latest one.
             if (hostID != 0) {
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(hostID);
                 if (atagCerts.isEmpty()) {
