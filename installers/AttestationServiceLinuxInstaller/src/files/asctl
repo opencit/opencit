@@ -169,12 +169,15 @@ create_saml_key() {
   # the saml.keystore.file property is just a file name and not an absolute path
   # TODO XXX: use convention over configuration... document that the SAML keystore file is a file called SAML.jks inside the
   # configuration directory, and use that fact everywhere instead of reading a configuration.
-  saml_keystore_file="$SAML_KEYSTORE_FILE"          #`read_property_from_file saml.keystore.file ${package_config_filename}`
+  saml_keystore_file="${SAML_KEYSTORE_FILE:-SAML.jks}"          #`read_property_from_file saml.keystore.file ${package_config_filename}`
   saml_keystore_password="$SAML_KEYSTORE_PASSWORD"  #`read_property_from_file saml.keystore.password ${package_config_filename}`
   saml_key_alias="$SAML_KEY_ALIAS"                  #`read_property_from_file saml.key.alias ${package_config_filename}`
   saml_key_password="$SAML_KEY_PASSWORD"            #`read_property_from_file saml.key.password ${package_config_filename}`
   # prepend the configuration directory to the keystore filename
-  saml_keystore_file=${intel_conf_dir}/${saml_keystore_file:-"SAML.jks"}
+  if [ ! -f $saml_keystore_file ]; then
+    saml_keystore_file=${intel_conf_dir}/${saml_keystore_file}
+  fi
+  
   saml_keystore_password=${saml_keystore_password:-"changeit"}
   saml_key_alias=${saml_key_alias:-"samlkey1"}
   saml_key_password=${saml_key_password:-"changeit"}
