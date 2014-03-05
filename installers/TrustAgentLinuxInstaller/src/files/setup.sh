@@ -11,6 +11,8 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 
+ASSET_TAG_SETUP="y"
+
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
 APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip"
@@ -315,7 +317,7 @@ if [ ! -f /etc/monit/conf.d/ta.monit ]; then
  cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
-prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" "y"
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
 	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://a.b.c.d:9999)" ${ASSET_TAG_URL}
 	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
