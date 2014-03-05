@@ -548,23 +548,32 @@ public class MyConfiguration {
         return conf.getString("mtwilson.as.dek", ""); // removing default in mtwilson 1.2;  was "hPKk/2uvMFRAkpJNJgoBwA=="
     }
     
+    private File findConfigurationFile(String path) {
+        File f = new File(path);
+        if (f.isAbsolute()) {
+            return f;
+        } else {
+            return new File(getMtWilsonConf() + File.separator + path);
+        }
+    }
+    
     /////////////////////////            rootca key            //////////////////////////////////
     public File getRootCaCertificateFile() {
-        return new File(getMtWilsonConf() + File.separator + conf.getString("mtwilson.rootca.certificate.file", "MtWilsonRootCA.crt.pem"));
+        return findConfigurationFile(conf.getString("mtwilson.rootca.certificate.file", "MtWilsonRootCA.crt.pem"));
     }
     
     /////////////////////////             pca key              //////////////////////////////////
     public File getPrivacyCaCertificateFile() {
-        return new File(getMtWilsonConf() + File.separator + conf.getString("mtwilson.privacyca.certificate.list.file", "PrivacyCA.p12.pem"));
+        return findConfigurationFile(conf.getString("mtwilson.privacyca.certificate.list.file", "PrivacyCA.p12.pem"));
     }
     
     ///////////////////////// saml key for attestation service //////////////////////////////////
     public File getSamlCertificateFile() {
-        return new File(getMtWilsonConf() + File.separator + conf.getString("mtwilson.saml.certificate.file", "saml.crt.pem"));
+        return findConfigurationFile(conf.getString("mtwilson.saml.certificate.file", "saml.crt.pem"));
     }
     
     public File getSamlKeystoreFile() {
-        return new File(conf.getString("saml.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-saml.jks"));
+        return findConfigurationFile(conf.getString("saml.keystore.file", "mtwilson-saml.jks"));
     }
     
     public String getSamlKeystorePassword() {
