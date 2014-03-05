@@ -88,6 +88,43 @@ cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
 
 mkdir -p "${package_dir}"
 mkdir -p "${package_dir}"/bin
+
+#tpm_nvinfo
+tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
+  ln -s "$tpmnvinfo" "${package_dir}/bin"
+fi
+
+#tpm_nvrelease
+tpmnvrelease=`which tpm_nvinfo 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
+  ln -s "$tpmnvinfo" "${package_dir}/bin"
+fi
+
+#tpm_nvwrite
+tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvwrite" ]]; then
+  ln -s "$tpmnvwrite" "${package_dir}/bin"
+fi
+
+#tpm_nvread
+tpmnvread=`which tpm_nvread 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvread" ]]; then
+  ln -s "$tpmnvread" "${package_dir}/bin"
+fi
+
+#tpm_nvdefine
+tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
+  ln -s "$tpmnvdefine" "${package_dir}/bin"
+fi
+
+#hex2bin
+hex2bin=`which hex2bin 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
+  ln -s "$hex2bin" "${package_dir}/bin"
+fi
+
 mkdir -p "${package_dir}"/cert
 mkdir -p "${package_dir}"/data
 mkdir -p "${package_dir}"/lib
