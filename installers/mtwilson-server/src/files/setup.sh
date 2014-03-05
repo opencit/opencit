@@ -253,6 +253,7 @@ hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shi
 if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
   update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
 fi
+hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_IP* ]]; then
   update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
 fi
