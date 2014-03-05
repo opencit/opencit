@@ -291,6 +291,11 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
+cd hex2bin
+make
+cp hex2bin /usr/local/bin
+cd ..
+
 cd $saveD
 if [ ! -d /etc/monit ]; then
  mkdir /etc/monit
