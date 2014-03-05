@@ -6,6 +6,8 @@ package com.intel.mtwilson.setup.cmd;
 
 import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
+import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
+import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mountwilson.as.common.ASConfig;
@@ -46,8 +48,9 @@ public class ImportConfig implements Command {
         
             String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         
+            PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
             FileResource resource = new FileResource(new File(filename));
-            PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
+            PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password, protection);
         
             String content ;
             if( options.containsKey("in") ) {

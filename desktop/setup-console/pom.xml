@@ -242,6 +242,10 @@
 </dependency>
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-crypto-key</artifactId>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-net</artifactId>
 </dependency>
 <dependency>
