@@ -13,7 +13,9 @@ import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.mtwilson.atag.dao.jdbi.*;
@@ -23,9 +25,11 @@ import com.intel.mtwilson.atag.model.SelectionTagValue;
 import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -192,9 +196,18 @@ public class CertificateRequestListResource extends ServerResource {
      * object. Then we can insert it to the database.
      */
 //    @Post("json:json")
-    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException {
+    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
+        if(! UUID.isValid(certificateRequest.getSubject())) {
+            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(certificateRequest.getSubject(),true);
+            if(hostList == null || hostList.size() < 1) {
+                log.debug("host uuid didn't return back any results");
+                throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field."));
+            }
+            log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
+            certificateRequest.setSubject(hostList.get(0).Hardware_Uuid);
+        }
         // IMPORTANT: provisioning policy choices:
         // Automatic Server-Based: always use the same pre-configured selection; find it in static config, ignore the requestor's selection
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up

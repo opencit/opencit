@@ -71,6 +71,14 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.ApacheHttpClient;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.datatypes.TagDataType;
+import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import org.apache.http.auth.UsernamePasswordCredentials;
 //import org.codehaus.jackson.JsonParseException;
 //import org.codehaus.jackson.map.JsonMappingException;
 //import org.codehaus.jackson.map.ObjectMapper;
@@ -868,8 +876,20 @@ public class ManagementConsoleDataController extends MultiActionController {
         }
         return service;
     }
+    
+    protected static final ObjectMapper mapper = new ObjectMapper();
+     
+    private <T> T fromJSON(String document, Class<T> valueType) throws IOException, ApiException {
+        try {
+            return mapper.readValue(document, valueType);
+        }
+        catch(com.fasterxml.jackson.core.JsonParseException e) {
+           
+            throw new ApiException("Cannot parse response", e);
+        }
+    }
 
-    private ModelAndView getListofRegisteredHost(List<HostDetails> listOfRegisterHost, ModelAndView responseView, ApiClient apiClient) {
+    private ModelAndView getListofRegisteredHost(List<HostDetails> listOfRegisterHost, ModelAndView responseView, ApiClient apiClient) throws IOException, NoSuchAlgorithmException, KeyManagementException, ApiException, SignatureException {
         List<HostDetails> listToSend = new ArrayList<HostDetails>();
 
         for (HostDetails hostDetails : listOfRegisterHost) {
@@ -924,6 +944,19 @@ public class ManagementConsoleDataController extends MultiActionController {
         wlVMM.add(HostWhiteListTarget.VMM_GLOBAL.getValue());
         responseView.addObject("wlVMMList", wlVMM);
         responseView.addObject("SpecificHostValue", HostWhiteListTarget.VMM_HOST.getValue());
+        
+        //List<String> selectionList = new ArrayList<String>();
+        //String requestURL = My.configuration().getAssetTagServerURL() + "/selections";
+        
+        // XXX TODO  1) during setup need to save asset tag service ssl cert so we can use the secure tls policy;  2) add the asset tag apis to the java client 
+        //1.3.6.1.4.1.99999.3"; 
+        //ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
+
+        //ApiRequest request = new ApiRequest(MediaType., "");
+        //ApiResponse response = client.get(requestURL);    
+
+        //String str = new String(response.content);
+        
         return responseView;
     }
 
