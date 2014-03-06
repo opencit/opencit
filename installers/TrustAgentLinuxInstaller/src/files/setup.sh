@@ -119,6 +119,17 @@ if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
 fi
 
+cd hex2bin
+make
+cp hex2bin /usr/local/bin
+cd ..
+
+#hex2bin
+hex2bin=`which hex2bin 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
+  ln -s "$hex2bin" "${package_dir}/bin"
+fi
+
 mkdir -p "${package_dir}"/cert
 mkdir -p "${package_dir}"/data
 mkdir -p "${package_dir}"/lib
@@ -323,17 +334,6 @@ monit_src_install() {
 }
 
 monit_install $MONIT_PACKAGE
-
-cd hex2bin
-make
-cp hex2bin /usr/local/bin
-cd ..
-
-#hex2bin
-hex2bin=`which hex2bin 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
-  ln -s "$hex2bin" "${package_dir}/bin"
-fi
 
 cd $saveD
 if [ ! -d /etc/monit ]; then
