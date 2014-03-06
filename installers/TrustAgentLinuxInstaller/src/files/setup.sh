@@ -96,9 +96,9 @@ if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
 fi
 
 #tpm_nvrelease
-tpmnvrelease=`which tpm_nvinfo 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
-  ln -s "$tpmnvinfo" "${package_dir}/bin"
+tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvrelease" ]]; then
+  ln -s "$tpmnvrelease" "${package_dir}/bin"
 fi
 
 #tpm_nvwrite
@@ -117,12 +117,6 @@ fi
 tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
 if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
-fi
-
-#hex2bin
-hex2bin=`which hex2bin 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
-  ln -s "$hex2bin" "${package_dir}/bin"
 fi
 
 mkdir -p "${package_dir}"/cert
@@ -334,6 +328,12 @@ cd hex2bin
 make
 cp hex2bin /usr/local/bin
 cd ..
+
+#hex2bin
+hex2bin=`which hex2bin 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
+  ln -s "$hex2bin" "${package_dir}/bin"
+fi
 
 cd $saveD
 if [ ! -d /etc/monit ]; then
