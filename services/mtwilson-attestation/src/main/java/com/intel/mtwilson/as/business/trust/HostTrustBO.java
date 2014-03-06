@@ -329,6 +329,7 @@ public class HostTrustBO extends BaseBO {
 
             HostResponse hostResponse = null;
             
+            HostBO hostBO = new HostBO();
             // We need to check if the host is already configured in the system. If yes, we need to update the host or else create a new one
             if (hostBO.getHostByName(new Hostname((hostObj.HostName))) != null) {
                 // update the host
@@ -1083,7 +1084,6 @@ public class HostTrustBO extends BaseBO {
 
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
-            HostBO hostBO = new HostBO();
             TblHosts tblHost = hostBO.getHostByName(hostName);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){

@@ -30,9 +30,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "MwAssetTagCertificate.findAll", query = "SELECT m FROM MwAssetTagCertificate m"),
     @NamedQuery(name = "MwAssetTagCertificate.findById", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.id = :id"),
-    @NamedQuery(name = "MwAssetTagCertificate.findByHostID", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.hostID = :hostID"),
+    @NamedQuery(name = "MwAssetTagCertificate.findByHostID", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.hostID = :hostID ORDER BY m.insert_date DESC"),
     @NamedQuery(name = "MwAssetTagCertificate.findByUuidHex", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid_hex = :uuid_hex"),
-    @NamedQuery(name = "MwAssetTagCertificate.findByUuid", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid = :uuid"),
+    @NamedQuery(name = "MwAssetTagCertificate.findByUuid", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid = :uuid ORDER BY m.insert_date DESC"),
     @NamedQuery(name = "MwAssetTagCertificate.findByRevoked", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.revoked = :revoked"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotBefore", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notBefore = :notBefore"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotAfter", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notAfter = :notAfter"),
@@ -59,7 +59,9 @@ public class MwAssetTagCertificate implements Serializable {
     private byte[] sHA1Hash;
     @Column(name = "uuid_hex")
     private String uuid_hex;
-    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "insert_date")
+    private Date insert_date;    
     /*
     @Lob
     @Column(name = "SHA256_Hash")

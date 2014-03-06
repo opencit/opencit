@@ -11,6 +11,8 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 
+ASSET_TAG_SETUP="y"
+
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
 APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip"
@@ -86,6 +88,48 @@ cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
 
 mkdir -p "${package_dir}"
 mkdir -p "${package_dir}"/bin
+
+#tpm_nvinfo
+tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
+  ln -s "$tpmnvinfo" "${package_dir}/bin"
+fi
+
+#tpm_nvrelease
+tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvrelease" ]]; then
+  ln -s "$tpmnvrelease" "${package_dir}/bin"
+fi
+
+#tpm_nvwrite
+tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvwrite" ]]; then
+  ln -s "$tpmnvwrite" "${package_dir}/bin"
+fi
+
+#tpm_nvread
+tpmnvread=`which tpm_nvread 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvread" ]]; then
+  ln -s "$tpmnvread" "${package_dir}/bin"
+fi
+
+#tpm_nvdefine
+tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
+  ln -s "$tpmnvdefine" "${package_dir}/bin"
+fi
+
+cd hex2bin
+make
+cp hex2bin /usr/local/bin
+cd ..
+
+#hex2bin
+hex2bin=`which hex2bin 2>/dev/null`
+if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
+  ln -s "$hex2bin" "${package_dir}/bin"
+fi
+
 mkdir -p "${package_dir}"/cert
 mkdir -p "${package_dir}"/data
 mkdir -p "${package_dir}"/lib
@@ -315,7 +359,7 @@ if [ ! -f /etc/monit/conf.d/ta.monit ]; then
  cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
-prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" "y"
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
 	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://a.b.c.d:9999)" ${ASSET_TAG_URL}
 	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
