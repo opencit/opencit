@@ -221,7 +221,7 @@ public class CA {
 //            }
 //            if(certFile != null) {
 //                File privacyCaPemFile = new File(certFile);
-                File privacyCaPemFile = My.configuration().getPrivacyCaCertificateFile();
+                File privacyCaPemFile = My.configuration().getPrivacyCaIdentityCacertsFile();
                 FileInputStream in = new FileInputStream(privacyCaPemFile);
                 String content = IOUtils.toString(in);
                 IOUtils.closeQuietly(in);

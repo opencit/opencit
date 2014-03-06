@@ -96,10 +96,13 @@ public class RpcInvoker implements Runnable {
         // run
         try {
         // assume that the rpc adapter is RunnableRpcAdapter    XXX TODO  need to detect it
-            Runnable runnable = (Runnable)taskObject;
-            runnable.run();
+//            Runnable runnable = (Runnable)taskObject;
+//            runnable.run();
+            adapter.setInput(taskObject);
+            adapter.invoke();
             // TODO   connect the task obejct to a progress monitor that has a reference to its task id to update current/max   in the database
-            log.debug("After run: {}", mapper.writeValueAsString(taskObject));
+//            log.debug("After run: {}", mapper.writeValueAsString(taskObject));
+            log.debug("After run: {}", mapper.writeValueAsString(adapter.getOutput()));
         }
         catch(Exception e) {
             log.error("Error while executing RPC {}", rpc.getName(), e);
@@ -122,7 +125,8 @@ public class RpcInvoker implements Runnable {
             rpc.setOutputContentType(adapter.getContentType());
             rpc.setOutputContentClass(adapter.getOutputClass().getName());
             */
-            rpc.setOutput( xs.toXML(taskObject).getBytes("UTF-8"));
+//            rpc.setOutput( xs.toXML(taskObject).getBytes("UTF-8"));
+            rpc.setOutput(xs.toXML(adapter.getOutput()).getBytes("UTF-8"));
             // the OUTPUT status indicates the task has completed and output is avaialble
             rpc.setStatus(Rpc.Status.OUTPUT);
         }

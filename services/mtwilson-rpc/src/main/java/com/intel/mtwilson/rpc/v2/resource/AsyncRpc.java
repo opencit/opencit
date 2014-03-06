@@ -88,7 +88,7 @@ public class AsyncRpc {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public Rpc invokeAsyncRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
         // make sure we have an extension to handle this rpc
-        RpcAdapter adapter = RpcUtil.findRpcForName(name);
+        RpcAdapter adapter = RpcUtil.findRpcForName(name);// always creates a new instance of the adapter for the rpc
         if (adapter == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }

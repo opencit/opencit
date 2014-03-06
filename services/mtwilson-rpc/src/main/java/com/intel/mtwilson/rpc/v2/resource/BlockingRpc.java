@@ -88,7 +88,7 @@ public class BlockingRpc {
     @Produces(MediaType.WILDCARD)
     public Object invokeRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
         // make sure we have an extension to handle this rpc
-        RpcAdapter adapter = RpcUtil.findRpcForName(name);
+        RpcAdapter adapter = RpcUtil.findRpcForName(name); // always creates a new instance of the adapter for the rpc
         if (adapter == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -144,11 +144,11 @@ public class BlockingRpc {
         // from this point forward the implmentation is a duplicate of what is in RpcInvoker after it deserializes the task object
         Object outputObject;
         try {
-//            adapter.setInput(inputObject);
-//            adapter.invoke();
-//            outputObject = adapter.getOutput();
-            ((Runnable)inputObject).run();
-            outputObject = inputObject;
+            adapter.setInput(inputObject);
+            adapter.invoke();
+            outputObject = adapter.getOutput();
+//            ((Runnable)inputObject).run();
+//            outputObject = inputObject;
         }
         catch(Exception e) {
             log.error("Error while executing RPC {}", rpc.getName(), e);
