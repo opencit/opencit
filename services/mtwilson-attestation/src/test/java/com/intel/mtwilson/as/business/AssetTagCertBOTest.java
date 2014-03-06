@@ -6,8 +6,11 @@ package com.intel.mtwilson.as.business;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
@@ -15,15 +18,18 @@ import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.TagDataType;
+import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.bouncycastle.util.encoders.Base64Encoder;
 import org.junit.Test;
 
@@ -157,5 +163,21 @@ public class AssetTagCertBOTest {
             System.out.println("ATAG_" + atagAttr.getOid() + ":" + atagAttr.getValue());
         }
         
+    }
+    
+    @Test
+    public void parseSelection() throws IOException, NoSuchAlgorithmException, KeyManagementException, ApiException, SignatureException {
+        List<String> selectionList = new ArrayList<String>();
+        String requestURL = My.configuration().getAssetTagServerURL() + "/selections";
+        
+        // XXX TODO  1) during setup need to save asset tag service ssl cert so we can use the secure tls policy;  2) add the asset tag apis to the java client 
+        //1.3.6.1.4.1.99999.3"; 
+        ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
+
+        //ApiRequest request = new ApiRequest(MediaType., "");
+        ApiResponse response = client.get(requestURL);    
+
+        String str = new String(response.content);
+        System.err.println(str);
     }
 }

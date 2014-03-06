@@ -195,6 +195,7 @@ public class CertificateRequestListResource extends ServerResource {
     public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
+      
         // IMPORTANT: provisioning policy choices:
         // Automatic Server-Based: always use the same pre-configured selection; find it in static config, ignore the requestor's selection
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
