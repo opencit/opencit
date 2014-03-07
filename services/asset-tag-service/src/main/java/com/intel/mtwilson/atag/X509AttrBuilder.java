@@ -5,31 +5,23 @@
 package com.intel.mtwilson.atag;
 
 import com.intel.mtwilson.atag.model.OID;
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
+import com.intel.mtwilson.atag.model.x509.*;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
-import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.validation.BuilderModel;
-import com.intel.dcsg.cpg.x509.X509Builder;
-import java.io.ByteArrayInputStream;
+import org.bouncycastle.asn1.ASN1Encodable;
 import java.math.BigInteger;
-import java.security.KeyPair;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -72,8 +64,17 @@ public class X509AttrBuilder extends BuilderModel {
     private X500Name subjectName = null;
     private Date notBefore = null;
     private Date notAfter = null;
-    private ArrayList<AttributeOidAndValue> attributes = new ArrayList<AttributeOidAndValue>();
+    private ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
+    public static class Attribute {
+        public ASN1ObjectIdentifier oid;
+        public ASN1Encodable value;
+        public Attribute(ASN1ObjectIdentifier oid, ASN1Encodable value) {
+            this.oid = oid;
+            this.value = value;
+        }
+    }
+    
     public X509AttrBuilder() {
     }
 
@@ -107,6 +108,11 @@ public class X509AttrBuilder extends BuilderModel {
 
     public X509AttrBuilder randomSerial() {
         serialNumber = new BigInteger(64, new SecureRandom());
+        return this;
+    }
+    
+    public X509AttrBuilder dateSerial() {
+        serialNumber = new BigInteger( String.valueOf(Calendar.getInstance().getTimeInMillis()) );
         return this;
     }
 
@@ -174,13 +180,18 @@ public class X509AttrBuilder extends BuilderModel {
         return this;
     }
 
-    public X509AttrBuilder attribute(String oid, String textValue) {
-        attributes.add(new AttributeOidAndValue(oid, textValue));
+    public X509AttrBuilder attribute(String name, String textValue) {
+        attributes.add(new Attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(name, textValue)));
+        return this;
+    }
+    
+    public X509AttrBuilder attribute(String name, String... textValues) {
+        attributes.add(new Attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(name, textValues)));
         return this;
     }
 
-    public X509AttrBuilder attribute(AttributeOidAndValue attr) {
-        attributes.add(attr);
+    public X509AttrBuilder attribute(ASN1ObjectIdentifier oid, ASN1Encodable value) {
+        attributes.add(new Attribute(oid, value));
         return this;
     }
 
@@ -189,7 +200,7 @@ public class X509AttrBuilder extends BuilderModel {
             expires(1, TimeUnit.DAYS); // 1 day default
         }
         if (serialNumber == null) {
-            randomSerial();
+            dateSerial();
         }
         if (subjectName == null) {
             fault("Subject name is missing");
@@ -212,10 +223,12 @@ public class X509AttrBuilder extends BuilderModel {
                 AttributeCertificateHolder holder = new AttributeCertificateHolder(subjectName); // which is expected to be a UUID  like this: 33766a63-5c55-4461-8a84-5936577df450
                 AttributeCertificateIssuer issuer = new AttributeCertificateIssuer(issuerName);
                 X509v2AttributeCertificateBuilder builder = new X509v2AttributeCertificateBuilder(holder, issuer, serialNumber, notBefore, notAfter);
-                for (AttributeOidAndValue attr : attributes) {
-                    builder.addAttribute(new ASN1ObjectIdentifier(attr.getOid()), new DERUTF8String(attr.getValue()));
+                for (Attribute attribute : attributes) {
+                    builder.addAttribute(attribute.oid, attribute.value);
                 }
-                // third, sign the attribute certificate
+                // third, add extensions - information regarding the certificate itself which is not an attribute of the subject
+//                builder.addExtension(oid, /*critical*/true, /*asn1encodable*/)
+                // fourth, sign the attribute certificate
                 X509AttributeCertificateHolder cert = builder.build(authority);
                 log.debug("cert: {}", Base64.encodeBase64String(cert.getEncoded())); // MIICGDCCAQACAQEwH6EdpBswGTEXMBUGAWkEEJKnGiKMF0UioYv9PtPQCzmgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjIyMTEzWhgPMjAxMzA5MDgyMjIxMTNaMEMwEwYLKwYBBAG9hDcBAQExBAwCVVMwEwYLKwYBBAG9hDgCAgIxBAwCQ0EwFwYLKwYBBAG9hDkDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQCcN8KjjmR2H3LT5aL1SCFS4joy/7vAd3/xdJtkqrb3UAQHMdUUJQHf3frJsMJs22m0So0xs/f1sB15frC1LsQGF5+RYVXsClv0glStWbPYiqEfdM7dc/RDMRtrXKEH3sBlxMT7YS/g5E6qwmKZX9shQ3BYmeZi5A3DTzgHCbA3Cm4/MQbgWGjoamfWZ9EDk4Bww2y0ueRi60PfoLg43rcijr8Wf+JEzCRw040vIaH3DtFdmzvvGRdqE3YlEkrUL3gEIZNY3Po1NL4cb238vT5CHZTt9NyD7xSv0XkwOY4RbSUdYBsxfH3mEcdQ6LtJdfF1BUXfMThKN3TctFcY/dLF
 

@@ -4,9 +4,8 @@
  */
 package com.intel.mtwilson.saml;
 
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
+import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.TxtHost;
-import java.util.ArrayList;
 
 /**
  * TEMPORARY class to encapsulate TxtHost and asset tag attributes until
@@ -17,12 +16,12 @@ import java.util.ArrayList;
 public class TxtHostWithAssetTag {
 //    private String hostId; // host id to use in the assertion - could be a UUID, or an AIK SHA1, or an IP address, or a hardware UUID
     private TxtHost host;
-    private ArrayList<AttributeOidAndValue> atags;
+    private X509AttributeCertificate tagCertificate;
 
     public TxtHostWithAssetTag() { }
-    public TxtHostWithAssetTag(TxtHost host, ArrayList<AttributeOidAndValue> atags) {
+    public TxtHostWithAssetTag(TxtHost host, X509AttributeCertificate tagCertificate) {
         this.host = host;
-        this.atags = atags;
+        this.tagCertificate = tagCertificate;
     }
     
     public TxtHost getHost() {
@@ -34,13 +33,13 @@ public class TxtHostWithAssetTag {
         this.host = host;
     }
 
-    public ArrayList<AttributeOidAndValue> getAtags() {
-        return atags;
+    public X509AttributeCertificate getTagCertificate() {
+        return tagCertificate;
     }
 
     
-    public void setAtags(ArrayList<AttributeOidAndValue> atags) {
-        this.atags = atags;
+    public void setTagCertificate(X509AttributeCertificate tagCertificate) {
+        this.tagCertificate = tagCertificate;
     }
     
     
