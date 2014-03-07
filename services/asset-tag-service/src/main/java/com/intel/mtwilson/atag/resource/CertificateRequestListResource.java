@@ -379,7 +379,7 @@ public class CertificateRequestListResource extends ServerResource {
                     X509AttrBuilder builder = X509AttrBuilder.factory()
                             .issuerName(cakeyCert)
                             .issuerPrivateKey(cakey)
-                            .randomSerial()
+                            .dateSerial()
                             .subjectUuid(UUID.valueOf(certificateRequest.getSubject()))
                             .expires(7, TimeUnit.DAYS);
                     for (SelectionTagValue tag : selection.getTags()) {
