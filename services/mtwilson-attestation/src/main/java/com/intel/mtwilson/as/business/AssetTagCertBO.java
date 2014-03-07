@@ -107,6 +107,10 @@ public class AssetTagCertBO extends BaseBO{
             atagCert.setNotBefore(x509AttrCert.getNotBefore());
             atagCert.setRevoked(false);
             atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
+            log.error("CERTIFICATE CREATION TIME IS: {}", x509AttrCert.getSerialNumber());
+            log.error("CERTIFICATE SHA1 IS: {}", Sha1Digest.digestOf(atagObj.getCertificate()).toHexString());
+            log.error("CERTIFICATE SHA1 IS: {}", Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray().toString());
+            atagCert.setCreate_time(x509AttrCert.getSerialNumber());
             //atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
             
             // We are just writing some default value here, which would be changed when the host would be mapped to this
@@ -354,8 +358,10 @@ public class AssetTagCertBO extends BaseBO{
         try {
             // Find the asset tag certificate for the specified Sha256Hash value
             if (uuid != null && !uuid.isEmpty()) {
+                log.error("UUID {} is specified for revoking the asset tag certificate", uuid);
                 atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByUuid(uuid);
             } else if (atagObj.getSha1fAssetCert() != null) {
+                log.error("SHA1 {} is specified for revoking the asset tag certificate", atagObj.getSha1fAssetCert().toString());
                 atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1fAssetCert());
             } else {
                 log.error("Sha256Hash for the asset tag is not specified.");

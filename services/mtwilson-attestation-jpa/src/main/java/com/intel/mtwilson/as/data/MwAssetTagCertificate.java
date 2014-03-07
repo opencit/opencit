@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.data;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -19,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import sun.security.util.BigInt;
 
 /**
  *
@@ -30,9 +32,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "MwAssetTagCertificate.findAll", query = "SELECT m FROM MwAssetTagCertificate m"),
     @NamedQuery(name = "MwAssetTagCertificate.findById", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.id = :id"),
-    @NamedQuery(name = "MwAssetTagCertificate.findByHostID", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.hostID = :hostID ORDER BY m.insert_date DESC"),
+    @NamedQuery(name = "MwAssetTagCertificate.findByHostID", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.hostID = :hostID ORDER BY m.create_time DESC"),
     @NamedQuery(name = "MwAssetTagCertificate.findByUuidHex", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid_hex = :uuid_hex"),
-    @NamedQuery(name = "MwAssetTagCertificate.findByUuid", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid = :uuid ORDER BY m.insert_date DESC"),
+    @NamedQuery(name = "MwAssetTagCertificate.findByUuid", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid = :uuid ORDER BY m.create_time DESC"),
     @NamedQuery(name = "MwAssetTagCertificate.findByRevoked", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.revoked = :revoked"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotBefore", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notBefore = :notBefore"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotAfter", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notAfter = :notAfter"),
@@ -59,9 +61,8 @@ public class MwAssetTagCertificate implements Serializable {
     private byte[] sHA1Hash;
     @Column(name = "uuid_hex")
     private String uuid_hex;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "insert_date")
-    private Date insert_date;    
+    @Column(name = "create_time")
+    private BigInteger create_time;    
     /*
     @Lob
     @Column(name = "SHA256_Hash")
@@ -178,6 +179,14 @@ public class MwAssetTagCertificate implements Serializable {
 
     public void setUuid_hex(String uuid_hex) {
         this.uuid_hex = uuid_hex;
+    }
+
+    public BigInteger getCreate_time() {
+        return create_time;
+    }
+
+    public void setCreate_time(BigInteger create_time) {
+        this.create_time = create_time;
     }
 
     
