@@ -4,10 +4,8 @@
  */
 package com.intel.mtwilson.saml;
 
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.TxtHost;
-import java.util.ArrayList;
 
 /**
  * TEMPORARY class to encapsulate TxtHost and asset tag attributes until

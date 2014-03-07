@@ -281,6 +281,10 @@ public class AttrCertificateTest {
             if( attrCert.isValid(cacert, future.getTime()) ) {
                 log.debug("Certificate is valid in 5 minutes");
             }        
+            log.debug("cert serial: {}", attrCert.getSerialNumber().longValue() );
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(attrCert.getSerialNumber().longValue());
+            log.debug("cert serial date: {}", c.getTime().toString());
         }
     }
     
