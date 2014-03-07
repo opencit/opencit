@@ -67,7 +67,7 @@ public class SamlVerificationTest {
         TxtHost host = new TxtHost(txtHostRecord, hostTrustStatus);
         // generate SAML assertion
         SamlGenerator generator = new SamlGenerator(resource, configuration);
-        SamlAssertion assertion = generator.generateHostAssertion(host, new ArrayList<AttributeOidAndValue>());
+        SamlAssertion assertion = generator.generateHostAssertion(host, null);
         log.debug("assertion: {}", assertion.assertion);
         // verify SAML assertion
         TrustAssertion verifier = new TrustAssertion(new X509Certificate[] { certificate }, assertion.assertion);

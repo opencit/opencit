@@ -7,14 +7,19 @@ package com.intel.mtwilson.atag.model;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.atag.model.OID;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueMicroformat;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
@@ -45,7 +50,9 @@ public class X509AttributeCertificate {
 //    private UUID subjectUuid = null;
     private Date notBefore;
     private Date notAfter;
-    private ArrayList<AttributeOidAndValue> tags = new ArrayList<AttributeOidAndValue>();
+    private ArrayList<UTF8NameValueMicroformat> tags1 = new ArrayList<>();
+    private ArrayList<UTF8NameValueSequence> tags2 = new ArrayList<>();
+    private ArrayList<ASN1Encodable> tagsOther = new ArrayList<>();
     
     private X509AttributeCertificate(byte[] encoded) {
         this.encoded = encoded;
@@ -75,8 +82,14 @@ public class X509AttributeCertificate {
         return notAfter;
     }
     
-    public ArrayList<AttributeOidAndValue> getTags() {
-        return tags;
+    public <T extends ASN1Encodable> List<T> getAttributes(Class<T> clazz) {
+        if( clazz.equals(UTF8NameValueMicroformat.class) ) {
+            return (List<T>)tags1;
+        }
+        if( clazz.equals(UTF8NameValueSequence.class)) {
+            return (List<T>)tags2;
+        }
+        return (List<T>)tagsOther;
     }
     
     @Override
@@ -127,11 +140,31 @@ public class X509AttributeCertificate {
         result.notAfter = cert.getNotAfter();
         Attribute[] attributes = cert.getAttributes();
         
+        result.tags1 = new ArrayList<>();
+        result.tags2 = new ArrayList<>();
+        result.tagsOther = new ArrayList<>();
         for (Attribute attr : attributes) {
             for (ASN1Encodable value : attr.getAttributeValues()) {
 //                log.trace("encoded value: {}", Base64.encodeBase64String(value.getEncoded())); // throws IOException
                 log.debug("attribute: {} is {}", attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string
-                result.tags.add(new AttributeOidAndValue(attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()));
+//                result.tags.add(new AttributeOidAndValue(attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()));
+                if( attr.getAttrType().toString().equals(UTF8NameValueMicroformat.OID)) {
+                    log.debug("name-value microformat attribute: {}",  DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string                    
+                    UTF8NameValueMicroformat microformat = new UTF8NameValueMicroformat(DERUTF8String.getInstance(value));
+                    log.debug("name-value microformat attribute (2)  name {} value {}", microformat.getName(), microformat.getValue());
+                    result.tags1.add(microformat);
+                }
+                else if( attr.getAttrType().toString().equals(UTF8NameValueSequence.OID)) {
+                    UTF8NameValueSequence sequence = new UTF8NameValueSequence(ASN1Sequence.getInstance(value));
+                    String name = sequence.getName();
+                    List<String> values = sequence.getValues();
+                    log.debug("name-values asn.1 attribute {} values {}",  name, values); 
+                    result.tags2.add(sequence);
+                }
+                else {
+                    log.debug("unrecognzied attribute type {}", attr.getAttrType().toString());
+                    result.tagsOther.add(value);
+                }
                 /*
                  * output examples:
                  * attribute: 1.3.6.1.4.1.99999.1.1.1.1 is US

@@ -5,13 +5,14 @@
 package com.intel.mtwilson.atag;
 
 import com.intel.mtwilson.atag.model.OID;
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
+import com.intel.mtwilson.atag.model.x509.*;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.validation.BuilderModel;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import org.bouncycastle.asn1.ASN1Encodable;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -72,8 +73,17 @@ public class X509AttrBuilder extends BuilderModel {
     private X500Name subjectName = null;
     private Date notBefore = null;
     private Date notAfter = null;
-    private ArrayList<AttributeOidAndValue> attributes = new ArrayList<AttributeOidAndValue>();
+    private ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
+    public static class Attribute {
+        public ASN1ObjectIdentifier oid;
+        public ASN1Encodable value;
+        public Attribute(ASN1ObjectIdentifier oid, ASN1Encodable value) {
+            this.oid = oid;
+            this.value = value;
+        }
+    }
+    
     public X509AttrBuilder() {
     }
 
@@ -174,13 +184,18 @@ public class X509AttrBuilder extends BuilderModel {
         return this;
     }
 
-    public X509AttrBuilder attribute(String oid, String textValue) {
-        attributes.add(new AttributeOidAndValue(oid, textValue));
+    public X509AttrBuilder attribute(String name, String textValue) {
+        attributes.add(new Attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(name, textValue)));
+        return this;
+    }
+    
+    public X509AttrBuilder attribute(String name, String... textValues) {
+        attributes.add(new Attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(name, textValues)));
         return this;
     }
 
-    public X509AttrBuilder attribute(AttributeOidAndValue attr) {
-        attributes.add(attr);
+    public X509AttrBuilder attribute(ASN1ObjectIdentifier oid, ASN1Encodable value) {
+        attributes.add(new Attribute(oid, value));
         return this;
     }
 
@@ -212,8 +227,8 @@ public class X509AttrBuilder extends BuilderModel {
                 AttributeCertificateHolder holder = new AttributeCertificateHolder(subjectName); // which is expected to be a UUID  like this: 33766a63-5c55-4461-8a84-5936577df450
                 AttributeCertificateIssuer issuer = new AttributeCertificateIssuer(issuerName);
                 X509v2AttributeCertificateBuilder builder = new X509v2AttributeCertificateBuilder(holder, issuer, serialNumber, notBefore, notAfter);
-                for (AttributeOidAndValue attr : attributes) {
-                    builder.addAttribute(new ASN1ObjectIdentifier(attr.getOid()), new DERUTF8String(attr.getValue()));
+                for (Attribute attribute : attributes) {
+                    builder.addAttribute(attribute.oid, attribute.value);
                 }
                 // third, sign the attribute certificate
                 X509AttributeCertificateHolder cert = builder.build(authority);

@@ -385,9 +385,16 @@ public class CertificateRequestListResource extends ServerResource {
                     for (SelectionTagValue tag : selection.getTags()) {
                         log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
                         if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
-                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+//                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+                        }
+                        else if( tag.getTagOid().equals("2.5.4.789.2") ) { // name-valuesequence with just one value
+                            // XXX TODO   we need to collate these  (all  attribtues with oid 2.5.4.789.2 and same "name" should be combined to one attribute in the cert ...  or fix the UI to send them as a sequence  like { name: "name", value: [value1, value2, ...] }  so we can easily use all the values here
+//                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
                         }
                         else {
+                            // XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
                             builder.attribute(tag.getTagOid(), tag.getTagValue());                            
                         }
                     }
@@ -450,7 +457,7 @@ public class CertificateRequestListResource extends ServerResource {
      * @throws SQLException
      */
     @Post("json:json")
-    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException {
+    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
             results[i] = insertCertificateRequest(certificateRequests[i]);
