@@ -27,6 +27,7 @@ tpmnvwrite=/usr/local/sbin/tpm_nvwrite
 tpmnvrelease=/usr/local/sbin/tpm_nvrelease
 tpmnvread=/usr/local/sbin/tpm_nvread
 tpmtakeownership=/usr/local/sbin/tpm_takeownership
+tpmclear=/usr/local/sbin/tpm_clear
 expect=/usr/bin/expect
 INDEX=0x40000010
 SIZE=0x14
@@ -112,6 +113,12 @@ function takeOwnershipTpm() {
 #expect eof
 #EOD
 #) > /dev/null 2>&1
+}
+
+function clearOwnershipTpm() {
+  if [ "$mode" == "VMWARE" ]; then
+    $tpmclear -t -x -oownerPass > /dev/null 2>&1
+  fi
 }
 
 function releaseNvram() {
@@ -237,8 +244,9 @@ function provisionCert() {
   echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
   $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
   result=$?
+  clearOwnershipTpm
   sleep 5;
-  if [ $result -eq 0 ]; then 
+  if [ $result -eq 0 ]; then
    if [ "$accept" == "yes" ]; then
      echo "completed sucessfully " > /tmp/completion
    else
