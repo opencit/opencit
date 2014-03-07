@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.atag.resource;
 
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
+import com.intel.mtwilson.atag.model.x509.*;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.atag.model.CertificateRequest;
@@ -94,8 +94,8 @@ public class CertificateRequestApprovalResource extends ServerResource {
     public CertificateRequest approveCertificateRequest(InputStream input) throws IOException {
 //        String uuid = getAttribute("id");
         X509AttributeCertificate cert = X509AttributeCertificate.valueOf(IOUtils.toByteArray(input));
-        String tags = ""; for(AttributeOidAndValue attr : cert.getTags()) { tags += attr.getOid()+": "+attr.getValue(); }
-        log.debug("Received certificate: {}", String.format("issuer: %s  subject: %s  from: %s  to: %s  attrs: %s", cert.getIssuer(), cert.getSubject(), cert.getNotBefore().toString(), cert.getNotAfter().toString(), tags));
+//        String tags = ""; for(AttributeOidAndValue attr : cert.getTags()) { tags += attr.getOid()+": "+attr.getValue(); }
+        log.debug("Received certificate: {}", String.format("issuer: %s  subject: %s  from: %s  to: %s  attrs: %s", cert.getIssuer(), cert.getSubject(), cert.getNotBefore().toString(), cert.getNotAfter().toString()));
         Certificate record = new Certificate();
         record.setCertificate(cert.getEncoded());
         return approveCertificateRequest(record);
