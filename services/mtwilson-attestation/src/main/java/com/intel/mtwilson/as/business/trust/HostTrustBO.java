@@ -1259,7 +1259,19 @@ public class HostTrustBO extends BaseBO {
                 HostTrustStatus trust = getTrustStatus(tblHosts, tblHosts.getUuid_hex()); // TODO:  for anonymous assertions the host uuid needs to be replaced with AIK SHA1
                 TxtHostRecord data = createTxtHostRecord(tblHosts);
                 TxtHost host = new TxtHost(data, trust);
+
+                // We need to add the Asset tag related data only if the host is provisioned for it. This is done
+                // by verifying in the asset tag certificate table. 
+                X509AttributeCertificate tagCertificate = null; 
+                AssetTagCertBO atagCertBO = new AssetTagCertBO();
+                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getHardwareUuid());
+                if (atagCertForHost != null) {
+                    tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
+                } else {
+                    tagCertificate = null;
+                }
                 
+                /*
                 // We will check if the asset-tag was verified successfully for the host. If so, we need to retrieve
                 // all the attributes for that asset-tag and send it to the saml generator.
                 X509AttributeCertificate tagCertificate = null; 
@@ -1270,7 +1282,7 @@ public class HostTrustBO extends BaseBO {
                         tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
 //                        atags.add(new AttributeOidAndValue("UUID", atagCertForHost.getUuid())); // should already be the "Subject" attribute of the certificate, if not then we need to get it from one of the cert attributes
                     }
-                }
+                }*/
                 
                 TxtHostWithAssetTag hostWithAssetTag = new TxtHostWithAssetTag(host, tagCertificate);
                 hostList.add(hostWithAssetTag);
@@ -1317,10 +1329,25 @@ public class HostTrustBO extends BaseBO {
             tblSamlAssertion.setBiosTrust(host.isBiosTrusted());
             tblSamlAssertion.setVmmTrust(host.isVmmTrusted());
 
+            // We need to add the Asset tag related data only if the host is provisioned for it. This is done
+            // by verifying in the asset tag certificate table. 
+            X509AttributeCertificate tagCertificate = null; 
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
+            if (atagCertForHost != null) {
+                log.debug("Host has been provisioned in the system with a TAG.");
+                tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
+            } else {
+                log.debug("Host has not been provisioned in the system with a TAG.");
+                tagCertificate = null;
+            }
+
+            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate);
+
             
             // We will check if the asset-tag was verified successfully for the host. If so, we need to retrieve
             // all the attributes for that asset-tag and send it to the saml generator.
-            X509AttributeCertificate tagCertificate = null; 
+/*            X509AttributeCertificate tagCertificate = null; 
             if (host.isAssetTagTrusted()) {
                 AssetTagCertBO atagCertBO = new AssetTagCertBO();
                 MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
@@ -1331,7 +1358,7 @@ public class HostTrustBO extends BaseBO {
             }
 
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate);
-
+*/
             log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
 
             tblSamlAssertion.setSaml(samlAssertion.assertion);

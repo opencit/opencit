@@ -386,24 +386,29 @@ public class SamlGenerator {
             //if( host.isLocationTrusted() ) {
             //    attrStatement.getAttributes().add(createStringAttribute("Location", host.getLocation()));            
             //}
-            
-            // add the asset tag attestation status and if the status is trusted, then add all the attributes. In order to uniquely
-            // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
-            attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
-            if( host.isAssetTagTrusted() && tagCertificate != null ) {
-                // get all microformat attributes
-                List<UTF8NameValueMicroformat> microformatAttributes = tagCertificate.getAttributes(UTF8NameValueMicroformat.class);
-                for(UTF8NameValueMicroformat microformatAttribute : microformatAttributes) {
-                    log.debug("microformat attribute OID {} name {} value {}", UTF8NameValueMicroformat.OID, microformatAttribute.getName(), microformatAttribute.getValue());
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + microformatAttribute.getName() + "]"),microformatAttribute.getValue()));
+            if (tagCertificate != null) {
+                // add the asset tag attestation status and if the status is trusted, then add all the attributes. In order to uniquely
+                // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
+                attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
+                if( host.isAssetTagTrusted()) {
+                    // get all microformat attributes
+                    List<UTF8NameValueMicroformat> microformatAttributes = tagCertificate.getAttributes(UTF8NameValueMicroformat.class);
+                    for(UTF8NameValueMicroformat microformatAttribute : microformatAttributes) {
+                        log.debug("microformat attribute OID {} name {} value {}", UTF8NameValueMicroformat.OID, microformatAttribute.getName(), microformatAttribute.getValue());
+                        attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + microformatAttribute.getName() + "]"),microformatAttribute.getValue()));
+                    }
+                    // get all name-valuesequence attributes
+                    List<UTF8NameValueSequence> nameValueSequenceAttributes = tagCertificate.getAttributes(UTF8NameValueSequence.class);
+                    for(UTF8NameValueSequence nameValueSequenceAttribute : nameValueSequenceAttributes) {
+                        log.debug("namevaluesequence attribute OID {} name {} values {}", UTF8NameValueSequence.OID, nameValueSequenceAttribute.getName(), nameValueSequenceAttribute.getValues());
+                        // TODO:  should we make one saml attribute for each value... or enter them all in CSV format?    currently using CSV:
+                        attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + nameValueSequenceAttribute.getName() + "]"), StringUtils.join(nameValueSequenceAttribute.getValues(), ",")));
+                    }
+                } else {
+                    log.debug("Since Asset tag is not verified, no attributes would be added");
                 }
-                // get all name-valuesequence attributes
-                List<UTF8NameValueSequence> nameValueSequenceAttributes = tagCertificate.getAttributes(UTF8NameValueSequence.class);
-                for(UTF8NameValueSequence nameValueSequenceAttribute : nameValueSequenceAttributes) {
-                    log.debug("namevaluesequence attribute OID {} name {} values {}", UTF8NameValueSequence.OID, nameValueSequenceAttribute.getName(), nameValueSequenceAttribute.getValues());
-                    // TODO:  should we make one saml attribute for each value... or enter them all in CSV format?    currently using CSV:
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + nameValueSequenceAttribute.getName() + "]"), StringUtils.join(nameValueSequenceAttribute.getValues(), ",")));
-                }
+            } else {
+                log.debug("Since asset tag is not provisioned, asset tag attribute will not be added to the assertion.");
             }
 
             if( host.getAikCertificate() != null ) {
