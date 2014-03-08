@@ -1264,8 +1264,11 @@ public class ManagementConsoleDataController extends MultiActionController {
         } catch (Exception e) {
             log.error(e.toString());
             responseView.addObject("hostVo", "");
-            responseView.addObject("result", false);
-            if (e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
+            responseView.addObject("result", false);    
+            if (e.getMessage() == null) {
+                responseView.addObject("parseError", true);
+                responseView.addObject("message", "Please review the server log for error details.");
+            } else if (e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
                 responseView.addObject("noHosts", true);
                 responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             } else if (e.getMessage().toLowerCase().contains("peer not authenticated")) {
