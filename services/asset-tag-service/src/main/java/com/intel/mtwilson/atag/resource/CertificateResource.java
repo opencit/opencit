@@ -284,8 +284,10 @@ public class CertificateResource extends ServerResource {
                 // update the database...
                 dao.updateRevoked(certificate.getId(), true);
                 // update mt wilson ...
+                log.debug("ASSET_SHA1 {}", certificate.getSha1());
                 AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
-                request.setSha256OfAssetCert(certificate.getSha256().toByteArray());
+                request.setSha1OfAssetCert(certificate.getSha1().toByteArray());
+                //request.setSha256OfAssetCert(certificate.getSha256().toByteArray());
                 Global.mtwilson().revokeAssetTagCertificate(request);
 //                        My.client().revokeAssetTagCertificate(request);
                 // XXX TODO revoke it from host (send zeros);
