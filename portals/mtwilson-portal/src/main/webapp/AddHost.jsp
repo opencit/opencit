@@ -130,7 +130,7 @@
 					<table style="padding-top:80px;padding-bottom: 10px;padding-right:50px;padding-left:50px;">
 						<tr>
 							<td><input type="button" class="button" value="Add Host" id="addHostButton" onclick="addNewHost()" data-i18n="[value]button.add_host"/></td>
-                                                        <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()" data-i18n="[value].button.update_host"/></td>
+                                                        <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()" data-i18n="[value]button.update_host"/></td>
 							<td><input type="button" class="button" value="Cancel" onclick="getEditHostPage()" data-i18n="[value]button.cancel"/></td>
 							<td><input type="button" value="Clear" class="button" onclick="clearAllFiled('mainAddHostContainer')" data-i18n="[value]button.clear"/></td>
 						</tr>
