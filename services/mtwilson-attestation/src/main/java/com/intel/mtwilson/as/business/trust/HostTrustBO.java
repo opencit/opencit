@@ -1412,16 +1412,11 @@ public class HostTrustBO extends BaseBO {
         if (!agent.isTpmPresent()) {
             throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, hostId);
         }
-        log.debug("SAVY001");
         if(forceVerify != true){
-            log.debug("SAVY002");
             //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
             TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(hostId);
-            log.debug("SAVY003");
             if(tblSamlAssertion != null){
-                log.debug("SAVY004");
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
-                    log.debug("SAVY005: {}", tblSamlAssertion.getSaml());
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
                     return tblSamlAssertion.getSaml();
                 }else{
