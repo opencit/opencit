@@ -20,6 +20,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.mtwilson.My;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -63,8 +64,8 @@ public class SAMLSignature {
 //            URL keystore = getClass().getResource(config.getString ("saml.keystore.file"));
 //            System.out.println("keystore url: "+keystore.toString());
 //            InputStream keystoreInputStream = keystore.openStream();
-        File keystoreFile = new File(saml.getSamlKeystoreFile());// new File(configuration.getString("saml.keystore.file")); //ResourceFinder.getFile(config.getString("saml.keystore.file"));
-
+        //File keystoreFile = new File(saml.getSamlKeystoreFile());// new File(configuration.getString("saml.keystore.file")); //ResourceFinder.getFile(config.getString("saml.keystore.file"));
+        File keystoreFile = My.configuration().getSamlKeystoreFile();
 //            InputStream keystoreInputStream = keystoreResource.getInputStream(); // this obtains it from the database (or whatever resource is provided)
 //            keyStore = KeyStoreUtil.getKeyStore(SAMLSignature.class.getResourceAsStream(config.getString ("keystore")),config.getString ("storepass"));
         try (FileInputStream keystoreInputStream = new FileInputStream(keystoreFile)) {

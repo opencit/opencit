@@ -56,6 +56,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.mtwilson.atag.model.Certificate;
 import java.util.ArrayList;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -106,7 +107,11 @@ public class AssetTagCertBO extends BaseBO{
             atagCert.setNotAfter(x509AttrCert.getNotAfter());
             atagCert.setNotBefore(x509AttrCert.getNotBefore());
             atagCert.setRevoked(false);
-            atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
+            //atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
+            atagCert.setSHA1Hash(Sha1Digest.digestOf(x509AttrCert.getEncoded()).toByteArray());
+            log.debug("Certificate creation time is {}", x509AttrCert.getSerialNumber());
+            log.error("Certificate SHA1 is {}", Sha1Digest.digestOf(x509AttrCert.getEncoded()).toHexString());
+            atagCert.setCreate_time(x509AttrCert.getSerialNumber());
             //atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
             
             // We are just writing some default value here, which would be changed when the host would be mapped to this
@@ -354,11 +359,13 @@ public class AssetTagCertBO extends BaseBO{
         try {
             // Find the asset tag certificate for the specified Sha256Hash value
             if (uuid != null && !uuid.isEmpty()) {
+                log.debug("UUID {} is specified for revoking the asset tag certificate", uuid);
                 atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByUuid(uuid);
-            } else if (atagObj.getSha1fAssetCert() != null) {
-                atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1fAssetCert());
+            } else if (atagObj.getSha1OfAssetCert() != null) {
+                log.error("SHA1 {} is specified for revoking the asset tag certificate", atagObj.getSha1OfAssetCert());
+                atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
             } else {
-                log.error("Sha256Hash for the asset tag is not specified.");
+                log.error("Sha1 for the asset tag is not specified.");
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
 

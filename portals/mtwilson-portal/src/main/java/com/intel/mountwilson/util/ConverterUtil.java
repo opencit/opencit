@@ -95,8 +95,8 @@ public class ConverterUtil {
 	public static TrustedHostVO getTrustedHostVoFromTrustAssertion(HostDetailsEntityVO hostDetailsEntityVO, TrustAssertion trustAssertion,String errorMessage){
 		TrustedHostVO hostVO = new TrustedHostVO();
 		hostVO.setHostName(hostDetailsEntityVO.getHostName());
-		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName()); // TODO:  is this always valid? 
 		if (trustAssertion != null) {
+        		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName()); // TODO:  is this always valid? 
 			if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.Trusted_BIOS))) {
 				hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
 			}else {
