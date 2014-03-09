@@ -266,11 +266,9 @@ function isNumber(n) {
 
                                     <div class="singleDiv" style="height: 66px;">
                                         <div class="labelDiv">Tag values</div> 
-                                         <div class="valueDiv">
+                                        <div class="valueDiv">
                                             <input type="text" class="textBox_Border" id="tag-create-values" placeholder="Value"  data-validator="tag_create_form_validateValues">
-
-
-                                         </div>
+                                        </div>
                                         <div class="valueDiv">
                                             <input type="button" class="uploadButton" value="Add" onclick="tag_create_form_addValue();">
                                             <input type="button" class="uploadButton" value="Save" onclick="ws.createTag(this); return false;">
@@ -394,6 +392,10 @@ function isNumber(n) {
                                 }
 
                                 function selection_create_form_addValue() {
+				    if($("selection-create-name").value.trim() == "") {
+					return false;
+				    }
+				    $('selection-create-name').disable();
                                     var tag = ws.findTagByUuid(getSelectOptionValue('selection-create-tags-select'));
                                     var tagValue = $F('selection-create-tags-values');
 				    if(!verify_selections_for_duplicates(tag, tagValue)) {
@@ -424,8 +426,10 @@ function isNumber(n) {
                                     }
                                     log.debug("removed tag ("+tagOid+","+tagValue+") from selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
                                     mtwilson.rivets.views['selection-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
-				    if(mtwilson.rivets.forms['selection-create-form'].input.selection.length == 0) 
+				    if(mtwilson.rivets.forms['selection-create-form'].input.selection.length == 0) {
 				    	$('tableDisplayScroll_small').hide();
+				        $('selection-create-name').enable();
+				    }
 
                                 }
 
@@ -435,6 +439,7 @@ function isNumber(n) {
                                             mtwilson.rivets.forms['selection-create-form'].input.selection.splice(i,1);
                                     }
 				    $('tableDisplayScroll_small').hide();
+				    $('selection-create-name').enable();
 				}
 
                                 // called when submitting the form... checks that at least one value was added
