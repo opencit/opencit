@@ -119,10 +119,14 @@ public class HostTrustBO extends BaseBO {
         }
         */
         try {
-            samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); // TODO:  use SamlConfiguration
+            //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); // TODO:  use SamlConfiguration
+            samlKeystoreResource = new FileResource(My.configuration().getSamlKeystoreFile());
         }
         catch(FileNotFoundException e) {
             log.error("Cannot find SAML keystore");
+        }
+        catch(IOException e) {
+            log.error("Cannot read configuration file.");
         }
     }
         
@@ -1393,7 +1397,7 @@ public class HostTrustBO extends BaseBO {
         return getTrustWithSaml(tblHostsList);
     }
     
-    public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
+        public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
         log.debug("getTrustWithSaml: Getting trust for host: " + tblHosts.getName() + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
@@ -1408,11 +1412,16 @@ public class HostTrustBO extends BaseBO {
         if (!agent.isTpmPresent()) {
             throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, hostId);
         }
-                
+        log.debug("SAVY001");
         if(forceVerify != true){
-            TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
+            log.debug("SAVY002");
+            //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(hostId);
+            log.debug("SAVY003");
             if(tblSamlAssertion != null){
+                log.debug("SAVY004");
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
+                    log.debug("SAVY005: {}", tblSamlAssertion.getSaml());
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
                     return tblSamlAssertion.getSaml();
                 }else{
