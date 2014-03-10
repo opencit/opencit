@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <selections xmlns="urn:intel-mtwilson-asset-tag-attribute-selections">
     <selection>
-        <attribute oid="2.5.4.6">US</attribute>
-        <attribute oid="2.5.4.8">CA</attribute>
-        <attribute oid="2.5.4.8">TX</attribute>
-        <attribute oid="2.5.4.7">Folsom</attribute>
-        <attribute oid="2.5.4.7">El Paso</attribute>
+        <attribute oid="2.5.4.6"><text>US</text></attribute>
+        <attribute oid="2.5.4.8"><text>CA</text></attribute>
+        <attribute oid="2.5.4.8"><text>TX</text></attribute>
+        <attribute oid="2.5.4.7"><text>Folsom</text></attribute>
+        <attribute oid="2.5.4.7"><text>El Paso</text></attribute>
     </selection>
 </selections>
 <!--

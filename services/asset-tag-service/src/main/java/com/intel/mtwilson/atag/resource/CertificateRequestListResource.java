@@ -24,6 +24,8 @@ import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
 import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.atag.model.TagValue;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueMicroformat;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.io.IOException;
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -386,7 +389,8 @@ public class CertificateRequestListResource extends ServerResource {
                         log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
                         if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
 //                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
-                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+//                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
                         else if( tag.getTagOid().equals("2.5.4.789.2") ) { // name-valuesequence with just one value
                             // XXX TODO   we need to collate these  (all  attribtues with oid 2.5.4.789.2 and same "name" should be combined to one attribute in the cert ...  or fix the UI to send them as a sequence  like { name: "name", value: [value1, value2, ...] }  so we can easily use all the values here
