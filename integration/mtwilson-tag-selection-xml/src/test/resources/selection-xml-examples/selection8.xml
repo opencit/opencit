@@ -14,6 +14,8 @@
     </selection>
     <selection name="Canada">
         <subject><ip>192.168.1.103</ip></subject>
+        <subject><ip>192.168.1.104</ip></subject>
+        <subject><ip>192.168.1.105</ip></subject>
         <attribute oid="2.5.4.789.1"><text>Country=CA</text></attribute>
         <attribute oid="2.5.4.789.1"><text>Province=Quebec</text></attribute>
         <attribute oid="2.5.4.789.1"><text>City=Quebec City</text></attribute>
@@ -27,4 +29,5 @@ The "name" attribute in the <selection> tag is optional, but helps users when
 reviewing selections.
 Each selection is associated with a specific host by ip address so when that
 host requests an asset tag the associated selection will be used automatically.
+The third selection is associated with three separate hosts.
 -->

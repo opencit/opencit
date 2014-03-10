@@ -167,8 +167,8 @@ public class ReadXmlTest {
 //        validateXML("/selection-xml-examples/selection5.xml");
 //        validateXML("/selection-xml-examples/selection6.xml");
 //        validateXML("/selection-xml-examples/selection7.xml");
-//        validateXML("/selection-xml-examples/selection8.xml");
-        validateXML("/selection-xml-examples/selection9.xml");
+        validateXML("/selection-xml-examples/selection8.xml");
+//        validateXML("/selection-xml-examples/selection9.xml");
 
     }
 
