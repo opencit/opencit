@@ -13,7 +13,6 @@ import gov.niarl.his.privacyca.TpmKeyParams;
 import gov.niarl.his.privacyca.TpmPubKey;
 import gov.niarl.his.privacyca.TpmSymmetricKey;
 import gov.niarl.his.privacyca.TpmUtils;
-import gov.niarl.his.privacyca.TpmUtils.TpmIdentityProofOptions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,16 +38,15 @@ import org.apache.commons.io.IOUtils;
 public class IdentityRequestSubmitResponse implements Callable<byte[]> {
     private byte[] identityRequestResponseToChallenge;
 
-    public void setIdentityRequestResponseToChallenge(byte[] identityRequestResponseToChallenge) {
+    public void setChallengeResponse(byte[] identityRequestResponseToChallenge) {
         this.identityRequestResponseToChallenge = identityRequestResponseToChallenge;
     }
 
-    public byte[] getIdentityRequestResponseToChallenge() {
+    public byte[] getChallengeResponse() {
         return identityRequestResponseToChallenge;
     }
 
     
-    // TODO:   fix the implementation... apparently  HisPrivacyCAWebService2Impl  was using member variables to store info between two requests steps, but we are stateless so need to address that somehow.
     @Override
     public byte[] call() throws Exception {
 	 RSAPrivateKey caPrivKey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
@@ -76,7 +74,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
                 String optionsFilename = filename + ".opt";
                 try(FileInputStream optionsIn = new FileInputStream(datadir.toPath().resolve(optionsFilename).toFile())) {
                     String hexOptions = IOUtils.toString(optionsIn);
-                    TpmIdentityProofOptions options = TpmUtils.decodeTpmIdentityProofOptionsFromHex(hexOptions);
+                    Util.TpmIdentityProofOptions options = Util.decodeTpmIdentityProofOptionsFromHex(hexOptions);
                     idProof = new TpmIdentityProof(idProofBytes, options.TrousersModeIV, options.TrousersModeSymkeyEncscheme, options.TrousersModeBlankOeap);
                 }
             }

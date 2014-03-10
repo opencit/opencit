@@ -25,7 +25,7 @@ public class Users extends MtWilsonClient {
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
     public Users(URL url) {
-        //super(url);
+        super(url);
     }
 
     public Users(Properties properties) throws Exception {

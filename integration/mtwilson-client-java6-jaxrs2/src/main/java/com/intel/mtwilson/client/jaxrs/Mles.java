@@ -25,7 +25,7 @@ public class Mles extends MtWilsonClient {
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
     public Mles(URL url) {
-        //super(url);
+        super(url);
     }
 
     public Mles(Properties properties) throws Exception {

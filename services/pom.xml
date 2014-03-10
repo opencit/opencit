@@ -64,6 +64,9 @@
 	<module>mtwilson-intel-hostagent</module>
 	<module>mtwilson-saml</module>
 	<module>mtwilson-saml-verifier</module>
+	<module>mtwilson-privacyca-niarl</module>
+	<module>mtwilson-privacyca-ws-v2</module>
+	<module>mtwilson-privacyca-model</module>
   </modules>
 
 </project>

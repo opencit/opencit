@@ -28,11 +28,9 @@ public class Oems extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    /* commenting out because the corresponding MtWilsonClient constructor is already fixed in dev-2.0-sprint-1-atag-merge  but not yet merged into dev-2.0-sprint-1 , so TODO re-enable this after everything is merged back
     public Oems(URL url) {
         super(url);
     }
-    */
 
     public Oems(Properties properties) throws Exception {
         super(properties);

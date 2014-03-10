@@ -115,11 +115,11 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
             String optionsFilename = filename + ".opt";
             try(FileOutputStream out = new FileOutputStream(datadir.toPath().resolve(optionsFilename).toFile())) {
                 // and save the 3 trousers mode options into a second file because they are not included 
-                TpmUtils.TpmIdentityProofOptions options = new TpmUtils.TpmIdentityProofOptions();
+                Util.TpmIdentityProofOptions options = new Util.TpmIdentityProofOptions();
                 options.TrousersModeIV = idProof.getIVmode();
                 options.TrousersModeSymkeyEncscheme = idProof.getSymkeyEncscheme();
                 options.TrousersModeBlankOeap = idProof.getOeapMode();
-                String hexOptions = TpmUtils.encodeTpmIdentityProofOptionsToHex(options);
+                String hexOptions = Util.encodeTpmIdentityProofOptionsToHex(options);
                 IOUtils.write(hexOptions, out);
             }
             // also save the ekcert for the identity request submit response 
@@ -129,11 +129,11 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
             }
             
 			//encrypt the challenge and return
-			System.out.println("Phase 1 details:");
-			System.out.println(" AIK blob: " + TpmUtils.byteArrayToHexString(idProof.getAik().toByteArray()));
-			System.out.println(" challenge: " + TpmUtils.byteArrayToHexString(identityRequestChallenge));
+			log.debug("Phase 1 details:");
+			log.debug(" AIK blob: " + TpmUtils.byteArrayToHexString(idProof.getAik().toByteArray()));
+			log.debug(" challenge: " + TpmUtils.byteArrayToHexString(identityRequestChallenge));
 			byte[] toReturn = createReturn(idProof.getAik(), (RSAPublicKey)ekCert.getPublicKey(), identityRequestChallenge);
-			System.out.println(" toReturn: " + TpmUtils.byteArrayToHexString(toReturn));
+			log.debug(" toReturn: " + TpmUtils.byteArrayToHexString(toReturn));
 			return toReturn;        
     }
     

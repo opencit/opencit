@@ -21,7 +21,7 @@ public class UserRoles extends MtWilsonClient {
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
     public UserRoles(URL url) {
-        //super(url);
+        super(url);
     }
 
     public UserRoles(Properties properties) throws Exception {

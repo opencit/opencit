@@ -24,7 +24,7 @@ public class HostTlsCertificates extends MtWilsonClient {
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
     public HostTlsCertificates(URL url) {
-        //super(url);
+        super(url);
     }
 
     public HostTlsCertificates(Properties properties) throws Exception {

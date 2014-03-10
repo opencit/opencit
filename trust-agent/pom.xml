@@ -15,9 +15,9 @@
   
 
   <modules>
-    <module>HisPrivacyCAWebServices2</module>
-    <module>PrivacyCA</module>
-    <module>TrustAgent</module>
+    <module>mtwilson-privacyca-client-jaxrs2</module>
+    <module>mtwilson-trustagent-privacyca-niarl</module>
+    <module>mtwilson-trustagent</module>
   </modules>
 
 
