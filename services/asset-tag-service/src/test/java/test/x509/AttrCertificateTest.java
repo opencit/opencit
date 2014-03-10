@@ -5,6 +5,7 @@
 package test.x509;
 
 import com.intel.mtwilson.atag.model.OID;
+import com.intel.mtwilson.atag.model.x509.*;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
@@ -52,6 +53,9 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Enumeration;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -78,6 +82,7 @@ public class AttrCertificateTest {
     public final static String OID_ASSET_TAG_HOST_UUID = OID.HOST_UUID; // same as "2.25"; // see http://oid-info.com/get/2.25  for standard OID for UUIDs // OID_ASSET_TAG_SOLUTION + ".1";
     public final static String OID_CUSTOMER_ROOT = "1.3.6.1.4.1.99999"; // instead of OID_ASSET_TAG_SOLUTION + ".9"; // http://oid-info.com/get/1.3.6.1.4.1  is private organizations on internet, 999999 is INVENTED value that is not curently registered , for use in our demonstrations
     public final static String OID_NAMEVALUE_UTF8 = "2.5.4.789.1";
+    public final static String OID_NAMEVALUE_LIST_UTF8 = "2.5.4.789.2";
     
     @BeforeClass
     public static void addBouncyCastleProvider() {
@@ -108,10 +113,15 @@ public class AttrCertificateTest {
         Calendar notAfter = Calendar.getInstance();
         notAfter.add(Calendar.MONTH, 1);
         X509v2AttributeCertificateBuilder builder = new X509v2AttributeCertificateBuilder(holder, issuer, serialNumber, notBefore.getTime(), notAfter.getTime());
-        // example of customer-defined location tags,  
+        // example of customer-defined location tags,  in the text microformat
         builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_UTF8), new DERUTF8String("Country=US")); // a country tag
         builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_UTF8), new DERUTF8String("State=CA")); // a state tag
         builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_UTF8), new DERUTF8String("City=Folsom")); // a city tag
+        // example of customer defined location tags in the ASN.1  format
+        builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_LIST_UTF8), new UTF8NameValueSequence("Country", "US"));
+        builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_LIST_UTF8), new UTF8NameValueSequence("State", "CA", "TX"));
+        builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_LIST_UTF8), new UTF8NameValueSequence("City", "Folsom", "El Paso"));
+        
         // third, sign the attribute certificate
         X509AttributeCertificateHolder cert = builder.build(authority);
         log.debug("cert: {}", Base64.encodeBase64String(cert.getEncoded())); // MIICGDCCAQACAQEwH6EdpBswGTEXMBUGAWkEEJKnGiKMF0UioYv9PtPQCzmgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjIyMTEzWhgPMjAxMzA5MDgyMjIxMTNaMEMwEwYLKwYBBAG9hDcBAQExBAwCVVMwEwYLKwYBBAG9hDgCAgIxBAwCQ0EwFwYLKwYBBAG9hDkDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQCcN8KjjmR2H3LT5aL1SCFS4joy/7vAd3/xdJtkqrb3UAQHMdUUJQHf3frJsMJs22m0So0xs/f1sB15frC1LsQGF5+RYVXsClv0glStWbPYiqEfdM7dc/RDMRtrXKEH3sBlxMT7YS/g5E6qwmKZX9shQ3BYmeZi5A3DTzgHCbA3Cm4/MQbgWGjoamfWZ9EDk4Bww2y0ueRi60PfoLg43rcijr8Wf+JEzCRw040vIaH3DtFdmzvvGRdqE3YlEkrUL3gEIZNY3Po1NL4cb238vT5CHZTt9NyD7xSv0XkwOY4RbSUdYBsxfH3mEcdQ6LtJdfF1BUXfMThKN3TctFcY/dLF
@@ -148,7 +158,9 @@ public class AttrCertificateTest {
     public void readAttrCertificate() throws IOException {
 //        String input = "MIICGzCCAQMCAQEwH6EdpBswGTEXMBUGAWkEEDN2amNcVURhioRZNld99FCgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjI0NDI3WhgPMjAxMzA5MDgyMjQ0MjdaMEYwFAYMKwYBBAGGjR8BAQEBMQQMAlVTMBQGDCsGAQQBho0fAgICAjEEDAJDQTAYBgwrBgEEAYaNHwMDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQAIPESDSy8TLMzlhO3kpOSUU2Y063qS4iaSHEaX4CDG1hMD/VMcu0MKIaZnr83RzHIv1Z+01s8HDbW5IMwU3rOE99sR1e4DmP0a4hh3GLL38Rta6FkxSt8vL2ie7irK4BWCgWZd3Oc1xeCyLZ7uK6jerw+Qt6zzMRy74z6+5k2jLsveF1XqJvdTQZZYeyeSLFBYc74akWGGYJ29eB6y8dKp/UWJ5VU21NldfpW5hBap2v1wQpUih7+CcRIZ7fvZaZbONEBU+UyYbT8OASJkvxmLB5eKLTXftz5gQkCPyR8oKacc5n0alU/DMWkKOOQUc2VzIAkJMR7DLwD1fnb+msnx";
 //        String input = "MIICGTCCAQECAQEwH6EdpBswGTEXMBUGAWkEENP3IYWWPU+wgLZwdbugFQygXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTMxMTEyMjE0MDAwWhgPMjAxMzEyMTIyMTQwMDBaMEQwFQYFVQSGFQExDAwKQ291bnRyeT1VUzATBgVVBIYVATEKDAhTdGF0ZT1DQTAWBgVVBIYVATENDAtDaXR5PUZvbHNvbTANBgkqhkiG9w0BAQsFAAOCAQEAY8PvE89R+qxymMSnyH6Tg19x0v6A7BqeliIEingP/NIKTp07McubBo1kJ8UsogmeSZ4UOtxA+0GIjfec6DPNyH/J9u+dLfEFi6EV8Qrigi56SJRGa3VuK4ElZSmyk5lwhORtAW2oISGp/z5prOiItN1JEv4X/FTrJ62OBqK0+nzduRo0fjYizPc1+bI0zPsevBRvvPjtSwKnjq4DLjs7i6/SQMT4Tkq7QF7JM4TJthCbepUimXWXb1QrH9VTs4fzFGSn2JVVCWw/g/aPyQaLCo+Z1VVf4odDCOkVd9sHEAL1cXGIhGmWKuLTPZbz+XYJlHb5qUdi9rBTqVqJ6LQAqQ==";
-        String input = "MIICPTCCASUCAQEwH6EdpBswGTEXMBUGAWkEENJtsZYGpEnmp+ShAWjjyMugOzA5pDcwNTERMA8GA1UEAwwIQXNzZXQgQ0ExEzARBgNVBAsMCkRhdGFjZW50ZXIxCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAggPnqFOJ5mWHDAiGA8yMDEzMTExMjIxNTAxN1oYDzIwMTMxMTE5MjE1MDE3WjCBhDARBgkrBgEEAYaNHwExBAwCVVMwEQYJKwYBBAGGjR8CMQQMAkNBMBUGCSsGAQQBho0fAzEIDAZGb2xzb20wGgYJKwYBBAGGjR8DMQ0MC1NhbnRhIENsYXJhMBMGCSsGAQQBho0fBDEGDARDb2tlMBQGCSsGAQQBho0fBDEHDAVQZXBzaTANBgkqhkiG9w0BAQsFAAOCAQEAuSRvK3Vd1HiNwWKqtuYRPPhS4g8GqIW/10aLYS+Rj/FnPS3VHYIOp79orvECxCOPILUvtsYWFFfq/Gl+YSOp6xKrZxBsjA6pIHLH7x5J5x+33rgbu/2o2sn/DAjfrS87WdPE26Bo0woSjDRJkw948XHRA82kG6SFecK3W0Hq9DEqm8JPUFBu+53t2xh8JvSXKWxAwmVjuAMWytxkAfMS5xTQBe0BliUAwGR/7SOZnWQOxLUHXkIkKiXirU4UJKJ2wih2xmX5aNLsC9aqseAivK0OKobOX72WGpmCQkYjO2SDvMmJH2pzxie6X+BSxqhaGEcgpNllToEtU93GPSGdrA==";
+//        String input = "MIICPTCCASUCAQEwH6EdpBswGTEXMBUGAWkEENJtsZYGpEnmp+ShAWjjyMugOzA5pDcwNTERMA8GA1UEAwwIQXNzZXQgQ0ExEzARBgNVBAsMCkRhdGFjZW50ZXIxCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAggPnqFOJ5mWHDAiGA8yMDEzMTExMjIxNTAxN1oYDzIwMTMxMTE5MjE1MDE3WjCBhDARBgkrBgEEAYaNHwExBAwCVVMwEQYJKwYBBAGGjR8CMQQMAkNBMBUGCSsGAQQBho0fAzEIDAZGb2xzb20wGgYJKwYBBAGGjR8DMQ0MC1NhbnRhIENsYXJhMBMGCSsGAQQBho0fBDEGDARDb2tlMBQGCSsGAQQBho0fBDEHDAVQZXBzaTANBgkqhkiG9w0BAQsFAAOCAQEAuSRvK3Vd1HiNwWKqtuYRPPhS4g8GqIW/10aLYS+Rj/FnPS3VHYIOp79orvECxCOPILUvtsYWFFfq/Gl+YSOp6xKrZxBsjA6pIHLH7x5J5x+33rgbu/2o2sn/DAjfrS87WdPE26Bo0woSjDRJkw948XHRA82kG6SFecK3W0Hq9DEqm8JPUFBu+53t2xh8JvSXKWxAwmVjuAMWytxkAfMS5xTQBe0BliUAwGR/7SOZnWQOxLUHXkIkKiXirU4UJKJ2wih2xmX5aNLsC9aqseAivK0OKobOX72WGpmCQkYjO2SDvMmJH2pzxie6X+BSxqhaGEcgpNllToEtU93GPSGdrA==";
+//        String input = "MIICejCCAWICAQEwH6EdpBswGTEXMBUGAWkEEJtmbrHLIUmviWSB09GTAACgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTQwMzA2MjExMTQ2WhgPMjAxNDA0MDYyMDExNDZaMIGkMBUGBVUEhhUBMQwMCkNvdW50cnk9VVMwEwYFVQSGFQExCgwIU3RhdGU9Q0EwFgYFVQSGFQExDQwLQ2l0eT1Gb2xzb20wGgYFVQSGFQIxETAPDAdDb3VudHJ5MAQMAlVTMBwGBVUEhhUCMRMwEQwFU3RhdGUwCAwCQ0EMAlRYMCQGBVUEhhUCMRswGQwEQ2l0eTARDAZGb2xzb20MB0VsIFBhc28wDQYJKoZIhvcNAQELBQADggEBAJmaQ99TykWSutAXNUwQ+oB+nZ+oYMFehuwbQ/fFDD/Z2wUKqdZflHVo94swOlm69s5xl/x+3hhiCdv8H63AOmjb626nmtOvp4hRb+YBx56F+uOGzb5zTbJwKc5LCEjAFXpHL71uxdQFf20+6rC7IhuKJZwLY89hb8Tk94vg0++9cecthRMWoSmp56rPZ44ZWyClNYHs2H20uO/8GR6t2FZX7L9aLg8xyXipdsCy/NmtxXflaHhTaNVWwGeYBoKcjKB4jsIKp/2cwLA0krGobBfGPUVyVc+On3sow17jFStAHqHQzJmNeFXy8NdTAqvAp6ZEfMkTdz3ccNiygXQxG90=";
+        String input = "MIICejCCAWICAQEwH6EdpBswGTEXMBUGAWkEECnguFrn9ktxowQgi70EeWegXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTQwMzA2MjIyOTE4WhgPMjAxNDA0MDYyMTI5MThaMIGkMBUGBVUEhhUBMQwMCkNvdW50cnk9VVMwEwYFVQSGFQExCgwIU3RhdGU9Q0EwFgYFVQSGFQExDQwLQ2l0eT1Gb2xzb20wGgYFVQSGFQIxETAPDAdDb3VudHJ5MAQMAlVTMBwGBVUEhhUCMRMwEQwFU3RhdGUwCAwCQ0EMAlRYMCQGBVUEhhUCMRswGQwEQ2l0eTARDAZGb2xzb20MB0VsIFBhc28wDQYJKoZIhvcNAQELBQADggEBACeZdTYQdnimdsMfoN5Bk+qCNA2mYdFEpEKekyDhPP0B7+h0on1UHlcsTsNI/P4c4Co8r5lln3hVuWsYvcb2HFseSuREv6O3fNCY8a77OmQWRkH2AVMDXIDDgpEMdAq7ada4V/Fxeh/TILr4VMQf4TuFdn6QBTW7Hqgk9cP55njPv5BG0ukv677L3vODqY/u9KOkMNarx/qgHVcywefwi/zcC6wuG7BQ/6kOX933g31rTZSfI/+dFVS/x6CoWUkU+TbSLUE+RY2fAVkGNeWz5OLkRhKrCrJ91XDDQuXnJzRafKkk7MJqYtG+qk6U8qvVtUf9EjN0g/u3V0aqu1ddB1g=";
         X509AttributeCertificateHolder cert = new X509AttributeCertificateHolder(Base64.decodeBase64(input));
         log.debug("issuer: {}", StringUtils.join(cert.getIssuer().getNames(), ", "));  // calls toString() on each X500Name so we get the default representation; we can do it ourselves for custom display;  output example: CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US
         log.debug("serial number: {}", cert.getSerialNumber().toString()); // output example:   1
@@ -171,8 +183,21 @@ public class AttrCertificateTest {
         Attribute[] attributes = cert.getAttributes();
         for (Attribute attr : attributes) {
             for (ASN1Encodable value : attr.getAttributeValues()) {
-                log.trace("encoded value: {}", Base64.encodeBase64String(value.getEncoded()));
-                log.debug("attribute: {} is {}", attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string
+//                log.trace("encoded value: {}", Base64.encodeBase64String(value.getEncoded()));
+                if( attr.getAttrType().toString().equals(OID_NAMEVALUE_UTF8)) {
+                    log.debug("name-value microformat attribute: {}",  DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string                    
+                    UTF8NameValueMicroformat microformat = new UTF8NameValueMicroformat(DERUTF8String.getInstance(value));
+                    log.debug("name-value microformat attribute (2)  name {} value {}", microformat.getName(), microformat.getValue());
+                }
+                else if( attr.getAttrType().toString().equals(OID_NAMEVALUE_LIST_UTF8)) {
+                    UTF8NameValueSequence sequence = new UTF8NameValueSequence(ASN1Sequence.getInstance(value));
+                    String name = sequence.getName();
+                    List<String> values = sequence.getValues();
+                    log.debug("name-values asn.1 attribute {} values {}",  name, values); 
+                }
+                else {
+                    log.debug("unrecognzied attribute type {}", attr.getAttrType().toString());
+                }
                 /*
                  * output examples:
                  * attribute: 1.3.6.1.4.1.99999.1.1.1.1 is US
@@ -234,8 +259,8 @@ public class AttrCertificateTest {
                 .issuerName(cacert).issuerPrivateKey(cakey.getPrivate())
                 .expires(1, TimeUnit.HOURS)
                 .subjectUuid(new UUID())
-                .attribute(OID_CUSTOMER_ROOT+".1.2.3.4", "value1")
-                .attribute(OID_CUSTOMER_ROOT+".5.6.7.8", "value2")
+                .attribute("Country", "US")
+                .attribute("State", "CA", "TX")
                 .build();
         if( attrCertBytes == null ) {
             List<Fault> faults = builder.getFaults();
@@ -256,6 +281,10 @@ public class AttrCertificateTest {
             if( attrCert.isValid(cacert, future.getTime()) ) {
                 log.debug("Certificate is valid in 5 minutes");
             }        
+            log.debug("cert serial: {}", attrCert.getSerialNumber().longValue() );
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(attrCert.getSerialNumber().longValue());
+            log.debug("cert serial date: {}", c.getTime().toString());
         }
     }
     

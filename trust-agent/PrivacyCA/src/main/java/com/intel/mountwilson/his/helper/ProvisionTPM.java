@@ -68,6 +68,7 @@ public class ProvisionTPM {
 		final String EC_P12_PASSWORD = "EndorsementP12Pass";
 		final String EC_VALIDITY = "EcValidityDays";
 		final String OWNER_AUTH = "TpmOwnerAuth";
+                final String NVRAM_AUTH = "TpmNvramAuth";
 		
 		String TpmEndorsmentP12 = "";
 		String EndorsementP12Pass = "";
@@ -116,6 +117,13 @@ public class ProvisionTPM {
                 tpmOwnerFileOutput.close();
             }
             TpmOwnerAuth = TpmUtils.hexStringToByteArray(tpmOwnerAuthHex);
+            
+            String tpmNvramAuthHex = tpmOwnerProperties.getProperty(NVRAM_AUTH);
+            if (tpmNvramAuthHex == null || tpmNvramAuthHex.trim().isEmpty()) {
+                tpmNvramAuthHex = generateRandomPasswordHex();
+                tpmOwnerProperties.setProperty(OWNER_AUTH, tpmNvramAuthHex);
+            }
+            
 		} catch (FileNotFoundException e) {
 			throw new PrivacyCAException("Error finding HIS Provisioner properties file (HISprovisionier.properties)",e);
 		} catch (IOException e) {

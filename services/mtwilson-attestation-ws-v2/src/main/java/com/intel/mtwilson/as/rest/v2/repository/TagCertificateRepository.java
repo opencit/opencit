@@ -104,7 +104,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
         if (locator == null || locator.id == null) { return; }
         AssetTagCertRevokeRequest obj = new AssetTagCertRevokeRequest();
         try {
-            obj.setSha256OfAssetCert(null);
+            obj.setSha1OfAssetCert(null);
             new AssetTagCertBO().revokeAssetTagCertificate(obj, locator.id.toString());
         } catch (ASException aex) {
             throw aex;            

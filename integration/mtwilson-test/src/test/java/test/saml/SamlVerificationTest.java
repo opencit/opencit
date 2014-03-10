@@ -13,14 +13,12 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.saml.SamlAssertion;
 import com.intel.mtwilson.saml.SamlGenerator;
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.io.File;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.Test;
@@ -67,7 +65,7 @@ public class SamlVerificationTest {
         TxtHost host = new TxtHost(txtHostRecord, hostTrustStatus);
         // generate SAML assertion
         SamlGenerator generator = new SamlGenerator(resource, configuration);
-        SamlAssertion assertion = generator.generateHostAssertion(host, new ArrayList<AttributeOidAndValue>());
+        SamlAssertion assertion = generator.generateHostAssertion(host, null);
         log.debug("assertion: {}", assertion.assertion);
         // verify SAML assertion
         TrustAssertion verifier = new TrustAssertion(new X509Certificate[] { certificate }, assertion.assertion);

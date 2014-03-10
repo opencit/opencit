@@ -13,7 +13,9 @@ import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.mtwilson.atag.dao.jdbi.*;
@@ -23,9 +25,11 @@ import com.intel.mtwilson.atag.model.SelectionTagValue;
 import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -192,9 +196,18 @@ public class CertificateRequestListResource extends ServerResource {
      * object. Then we can insert it to the database.
      */
 //    @Post("json:json")
-    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException {
+    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
+        if(! UUID.isValid(certificateRequest.getSubject())) {
+            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(certificateRequest.getSubject(),true);
+            if(hostList == null || hostList.size() < 1) {
+                log.debug("host uuid didn't return back any results");
+                throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field."));
+            }
+            log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
+            certificateRequest.setSubject(hostList.get(0).Hardware_Uuid);
+        }
         // IMPORTANT: provisioning policy choices:
         // Automatic Server-Based: always use the same pre-configured selection; find it in static config, ignore the requestor's selection
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
@@ -366,15 +379,22 @@ public class CertificateRequestListResource extends ServerResource {
                     X509AttrBuilder builder = X509AttrBuilder.factory()
                             .issuerName(cakeyCert)
                             .issuerPrivateKey(cakey)
-                            .randomSerial()
+                            .dateSerial()
                             .subjectUuid(UUID.valueOf(certificateRequest.getSubject()))
                             .expires(7, TimeUnit.DAYS);
                     for (SelectionTagValue tag : selection.getTags()) {
                         log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
                         if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
-                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+//                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+                        }
+                        else if( tag.getTagOid().equals("2.5.4.789.2") ) { // name-valuesequence with just one value
+                            // XXX TODO   we need to collate these  (all  attribtues with oid 2.5.4.789.2 and same "name" should be combined to one attribute in the cert ...  or fix the UI to send them as a sequence  like { name: "name", value: [value1, value2, ...] }  so we can easily use all the values here
+//                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
                         }
                         else {
+                            // XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
                             builder.attribute(tag.getTagOid(), tag.getTagValue());                            
                         }
                     }
@@ -437,7 +457,7 @@ public class CertificateRequestListResource extends ServerResource {
      * @throws SQLException
      */
     @Post("json:json")
-    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException {
+    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
             results[i] = insertCertificateRequest(certificateRequests[i]);

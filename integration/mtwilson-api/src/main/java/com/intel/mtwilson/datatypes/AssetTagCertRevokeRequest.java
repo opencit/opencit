@@ -16,12 +16,12 @@ public class AssetTagCertRevokeRequest {
     private byte[] sha1OfAssetCert;
 
     @JsonProperty("SHA1Hash")
-    public byte[] getSha1fAssetCert() {
+    public byte[] getSha1OfAssetCert() {
         return sha1OfAssetCert;
     }
 
     @JsonProperty("SHA1Hash")
-    public void setSha256OfAssetCert(byte[] sha1OfAssetCert) {
+    public void setSha1OfAssetCert(byte[] sha1OfAssetCert) {
         this.sha1OfAssetCert = sha1OfAssetCert;
     }
 }

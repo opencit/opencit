@@ -9,7 +9,6 @@ body {
     font-size: 0.9em;
     margin: 0;
     padding: 0;
-    min-height: 768px;
     min-width: 1024px;
 }
 
@@ -35,8 +34,6 @@ a:active
 
 p
 {
-    margin-bottom: 10px;
-    line-height: 1.6em;
 }
 
 a{
@@ -103,7 +100,7 @@ div.menu ul li a:active
 {
     background: #4b6c9e;
     width: 100%;
-    height: 110px;    
+    height: 85px;    
 }
 
 .header h1
@@ -212,7 +209,6 @@ h5, h6
 /* PRIMARY LAYOUT */
 
 .main {
-    min-height: 650px;
     background: white;
     width: 100%;
 }
@@ -221,9 +217,11 @@ h5, h6
     background: none repeat scroll 0 0 #4B6C9E;
     color: #F9F9F9;
     margin: 0 auto;
-    min-height: 90px;
-    padding: 8px 0 0;
     text-align: center;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: 50px;
 }
 
 
@@ -243,9 +241,8 @@ h5, h6
 }
 
 .NameHeader{
-	color: #4B6C9E;
-    font-size: x-large;
-    height: 50px;
+    color: #4B6C9E;
+    font-size: large;
     width: auto;
 }
 
@@ -253,33 +250,36 @@ h5, h6
 	color: #3A4F63;
 	text-align: center;
 	width: 100%;
-        height:500px;
+        height: auto;
             /* Removed the column height so as to allow the resize automatically */
 	/* height: 40px; */
         table-layout: fixed;
 	}
 .tableDisplayScroll_small { 
-    overflow-x: hide; 
-    overflow-y: scroll; 
-    height:250px; 
-    width: 635px;
+    overflow-x: hidden; 
+    overflow-y: auto; 
+    width: 800px;
 }
 
 .tableDisplayScroll_big { 
     overflow-x: hide; 
     overflow-y: scroll; 
-    height:500px; 
-    width: 850px;
 }
 
-.tableDisplayBind thead{
+.tableDisplayBind thead {
 	background-color: #3A4F63;
     color: White;
     font-weight: bold;
 }
 
+.tableDisplayBind thead tr {
+	height: 40px;
+}
+
 .tableDisplayBind tr td{
     border: 1px solid #3A4F63;
+    border-top: none;
+    border-right: none;
     empty-cells: show;
      overflow: hidden;
      word-wrap: break-word;
@@ -299,8 +299,16 @@ h5, h6
     color: White;
     font-weight: bold;
 }
+
+.tableDisplay thead tr {
+    height: 30px;
+}
+
 .tableDisplay tr td{
     border: 1px solid #3A4F63;
+    height: 30px;
+    border-top: none;
+    border-right: none;
     empty-cells: show;
      overflow: hidden;
      word-wrap: break-word;
@@ -414,6 +422,25 @@ h5, h6
 .row11{width: 65px;}
 .row12{width: 210px;}
 .rowHelp{width:50px; }
+
+.col_tag_names {
+	width: 100px;
+	font-style: italic;
+}
+
+.col_del_link {
+	width: 100px;
+	border-right: 1px solid #3A4F63 !important;
+}
+
+.col_auto {
+	width: auto;
+	padding: 3px;
+}
+
+.last_col {	
+	border-right: 1px solid #3A4F63 !important;
+}
 
 /*.row12{width: 50px;}*/
 
@@ -760,6 +787,10 @@ text-align: center;
 	color: black;
 }
 
+#mainContainer {
+	padding-bottom:55px;
+}
+
 .textBox_Border{
 	width: 500px;
 	height: 20px;
@@ -868,3 +899,38 @@ text-align: center;
 .failureReportSubRow2{width: 100px;}
 .failureReportSubRow3{width: 390px;}
 
+.tagOIDDiv {
+	display: none;
+}
+
+#notifications_container {
+	width: 100% !important;
+	text-align: center;
+	font-weight: bold;
+}
+
+#notifications {
+	width: 100%;
+}
+
+.msgError {
+	color: red;
+}
+
+.msgOK {
+	color: #696969;
+}
+
+.msgInfo {
+	color: green;
+}
+
+.msgWarn {
+	color: orange;
+}
+
+.current a {
+	background-color: white !important;
+	color: #4B6C9E !important;
+	font-weight: bold;
+}

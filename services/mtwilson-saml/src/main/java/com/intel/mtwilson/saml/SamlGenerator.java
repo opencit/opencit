@@ -5,9 +5,10 @@
 package com.intel.mtwilson.saml;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
+import com.intel.mtwilson.atag.model.x509.*;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.dcsg.cpg.io.Resource;
+import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -19,6 +20,7 @@ import java.security.cert.CertificateException;
 import java.util.*;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -131,9 +133,9 @@ public class SamlGenerator {
      * @return @SamlAssertion
      * @throws MarshallingException 
      */
-    public SamlAssertion generateHostAssertion(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
+    public SamlAssertion generateHostAssertion(TxtHost host, X509AttributeCertificate tagCertificate) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
         samlAssertion = new SamlAssertion();
-        Assertion assertion = createAssertion(host, atags);
+        Assertion assertion = createAssertion(host, tagCertificate);
 
         AssertionMarshaller marshaller = new AssertionMarshaller();
         Element plaintextElement = marshaller.marshall(assertion);
@@ -352,8 +354,8 @@ public class SamlGenerator {
             return attr;
 	}
 	*/
-        private final String DEFAULT_OID = "2.5.4.789.1";
-        private AttributeStatement createHostAttributes(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws ConfigurationException {
+//        private final String DEFAULT_OID = "2.5.4.789.1";
+        private AttributeStatement createHostAttributes(TxtHost host, X509AttributeCertificate tagCertificate) throws ConfigurationException {
             // Builder Attributes
             SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
             AttributeStatement attrStatement = (AttributeStatement) attrStatementBuilder.buildObject();
@@ -384,44 +386,29 @@ public class SamlGenerator {
             //if( host.isLocationTrusted() ) {
             //    attrStatement.getAttributes().add(createStringAttribute("Location", host.getLocation()));            
             //}
-            
-            // add the asset tag attestation status and if the status is trusted, then add all the attributes. In order to uniquely
-            // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
-            attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
-            if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
-//                AssetTagCertBO certBO = new AssetTagCertBO();
-                for (AttributeOidAndValue atagAttr : atags) {
-                    String tagValue = atagAttr.getValue();
-                    String tagName = "N/A";
-                    log.debug("tag atrr OID = " + atagAttr.getOid() + " default OID = " + DEFAULT_OID);
-                    if (! atagAttr.getOid().equalsIgnoreCase(DEFAULT_OID)) { 
-                        log.error("Unsupported OID {}", atagAttr.getOid());
-                        
-                        // XXX  commenting out this code for now because we're going to limit asset tags
-                        //      to our DEFAULT_OID defined as key/value pairs until we have better general
-                        //      support for X509 OIDs  - and when we do, we won't need to query the 
-                        //      asset tag service for anything because support for additional OIDs would
-                        //      be in the form of plugins, because we will need code to interpret them
-                        //      but all the necessary information will be embedded and we won't need 
-                        //      to look anything up.
-                        /*
-                        // not the default oid that means value == key/value
-                        // so we need to query the service and try and get the mapping from there
-                        try {
-                            TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
-                            log.error("createHostAttributes found tag for oid " + atagAttr.getOid());
-                            tagName = tag.name;
-                        } catch (Exception ex) {
-                          log.error("error getting tag attributes: " + ex.getMessage());
-                          ex.printStackTrace();
-                        }
-                        */
+            if (tagCertificate != null) {
+                // add the asset tag attestation status and if the status is trusted, then add all the attributes. In order to uniquely
+                // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
+                attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
+                if( host.isAssetTagTrusted()) {
+                    // get all microformat attributes
+                    List<UTF8NameValueMicroformat> microformatAttributes = tagCertificate.getAttributes(UTF8NameValueMicroformat.class);
+                    for(UTF8NameValueMicroformat microformatAttribute : microformatAttributes) {
+                        log.debug("microformat attribute OID {} name {} value {}", UTF8NameValueMicroformat.OID, microformatAttribute.getName(), microformatAttribute.getValue());
+                        attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + microformatAttribute.getName() + "]"),microformatAttribute.getValue()));
                     }
-                    // XXX TODO  change String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]")  to something more general wherein we can encode the OIDs as is - 
-                    // probaly string attribute is not the right thing to do here anymore, and the client will need the OID-parsing code too for anything that
-                    // is not a key value pair.   Possibly for our DEFAULT_OID  we can keep the easy string attribute format  like String.format(ATAG_%s, tagName) , tagValue
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]"),tagValue));
+                    // get all name-valuesequence attributes
+                    List<UTF8NameValueSequence> nameValueSequenceAttributes = tagCertificate.getAttributes(UTF8NameValueSequence.class);
+                    for(UTF8NameValueSequence nameValueSequenceAttribute : nameValueSequenceAttributes) {
+                        log.debug("namevaluesequence attribute OID {} name {} values {}", UTF8NameValueSequence.OID, nameValueSequenceAttribute.getName(), nameValueSequenceAttribute.getValues());
+                        // TODO:  should we make one saml attribute for each value... or enter them all in CSV format?    currently using CSV:
+                        attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + nameValueSequenceAttribute.getName() + "]"), StringUtils.join(nameValueSequenceAttribute.getValues(), ",")));
+                    }
+                } else {
+                    log.debug("Since Asset tag is not verified, no attributes would be added");
                 }
+            } else {
+                log.debug("Since asset tag is not provisioned, asset tag attribute will not be added to the assertion.");
             }
 
             if( host.getAikCertificate() != null ) {
@@ -455,7 +442,7 @@ public class SamlGenerator {
          * @param host
          * @return 
          */
-        private Assertion createAssertion(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws ConfigurationException, UnknownHostException {
+        private Assertion createAssertion(TxtHost host, X509AttributeCertificate tagCertificate) throws ConfigurationException, UnknownHostException {
             // Create the assertion
             SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
             Assertion assertion = (Assertion) assertionBuilder.buildObject();
@@ -465,7 +452,7 @@ public class SamlGenerator {
             assertion.setIssueInstant(now);
             assertion.setVersion(SAMLVersion.VERSION_20);
             assertion.setSubject(createSubject(host));
-            assertion.getAttributeStatements().add(createHostAttributes(host, atags));
+            assertion.getAttributeStatements().add(createHostAttributes(host, tagCertificate));
 
             return assertion;
         }
@@ -492,7 +479,7 @@ public class SamlGenerator {
             assertion.setVersion(SAMLVersion.VERSION_20);
 //            assertion.setSubject(createSubject(host));
             for(TxtHostWithAssetTag host : hosts) {
-                assertion.getAttributeStatements().add(createHostAttributes(host.getHost(), host.getAtags()));            
+                assertion.getAttributeStatements().add(createHostAttributes(host.getHost(), host.getTagCertificate()));            
             }
 
             return assertion;
