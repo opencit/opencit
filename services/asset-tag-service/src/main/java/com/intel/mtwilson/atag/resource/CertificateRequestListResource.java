@@ -216,6 +216,10 @@ public class CertificateRequestListResource extends ServerResource {
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
         Selection selection = null;
         // if submitting xml, instead of selection having your UUID, it needs to be set to xml
+        /* 
+         * Per discussion w/ Jonathan/Raghu/Stewart it was decided on 3/10 that /certificate-requests would no longer accept xml in the selection field
+         * Jonathan is creating a seperate api, possibly /certificate-hanlding/{uuid} to which you can post json, xml or encrypted xml
+         * we will use that api instead to support xml in certificate requests
         if (Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty() && certificateRequest.getSelection() != null && certificateRequest.getSelection().equalsIgnoreCase("xml")) {
             log.error("insertCertificateRequest got xml request");
             String xml = certificateRequest.getXml();
@@ -290,6 +294,7 @@ public class CertificateRequestListResource extends ServerResource {
                 certificateRequest.setSelection(mySelection.getUuid().toString());
             }
         }
+        */
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
             log.error("insertCertificateRequest processing request");
             if( UUID.isValid(certificateRequest.getSelection() )) {
