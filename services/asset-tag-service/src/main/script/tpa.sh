@@ -94,10 +94,7 @@ function generatePasswordHex() {
 }
 
 function takeOwnershipTpm() {
- functionReturn=0
- if [ "$mode" == "VMWARE" ]; then
-	$tpmtakeownership -x -t -oownerPass -z > /dev/null 2>&1
- fi
+  $tpmtakeownership -x -t -oownerPass -z > /dev/null 2>&1
 #(
 #$expect << EOD
 #spawn $tpmtakeownership
@@ -116,9 +113,7 @@ function takeOwnershipTpm() {
 }
 
 function clearOwnershipTpm() {
-  if [ "$mode" == "VMWARE" ]; then
-    $tpmclear -t -x -oownerPass > /dev/null 2>&1
-  fi
+  $tpmclear -t -x -oownerPass > /dev/null 2>&1
 }
 
 function releaseNvram() {
@@ -219,23 +214,20 @@ function provisionCert() {
  if [ $resp -eq 0 ]; then
   sha1=`xml2 < $certFile  | grep sha1`
   sha1=`echo "${sha1#*sha1=}"`
-  
-  # Generate passwords for ownership and nvram  
-  if [ "$mode" == "VMWARE" ]; then
-	export nvramPass=`generatePasswordHex 40`
-	export ownerPass=`generatePasswordHex 40`
-	export srkPass=`generatePasswordHex 40`
-  else
-    $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
-	ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
-	export ownerPass="$ownerPass"
-	export nvramPass=`generatePasswordHex 40`
-	export srkPass=`generatePasswordHex 40`
-  fi
-  
-  # Overwrite password if TA, skip taking ownership
 
-  takeOwnershipTpm
+  # Retrieve password if TA, else generate new passwords and take ownership
+  $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
+  ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
+  if [ -z $ownerPass ]; then
+    mode="VMWARE"
+    export ownerPass=`generatePasswordHex 40`
+    export srkPass=`generatePasswordHex 40`
+    takeOwnershipTpm
+  else
+    mode="TA"
+  fi
+  export nvramPass=`generatePasswordHex 40`
+
   releaseNvram
   createIndex4
 
@@ -244,7 +236,12 @@ function provisionCert() {
   echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
   $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
   result=$?
-  clearOwnershipTpm
+
+  # If VMWARE, clear TPM ownership
+  if [ "$mode" == "VMWARE" ]; then
+    clearOwnershipTpm
+  fi
+
   sleep 5;
   if [ $result -eq 0 ]; then
    if [ "$accept" == "yes" ]; then
