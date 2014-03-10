@@ -41,22 +41,26 @@ public class SetAssetTag implements ICommand{
         try {
             
             //String password = "ffffffffffffffffffffffffffffffffffffffff";  //No longer needed, read it from props file in createIndex()
-             
+            String tpmNvramPass = generateRandomPass();
+            
             //create the index if needed
             boolean iExists = indexExists();
             if(iExists){  // if it exists we need to get the password from the service for the nvram
-                log.error("index already exists.");
+                log.debug("Index exists. Releasing index...");
+                releaseIndex();
+                log.debug("Creating new index...");
+                createIndex(tpmNvramPass);
             }else{ // generate random password 
                 // Just use the same password right now for testing
                 // password =  generateRandomPass();
-                log.debug("index does not exist. creating it...");
-                createIndex();
+                log.debug("Index does not exist. creating it...");
+                createIndex(tpmNvramPass);
             }
             //log.debug("using password " + password + " for index");
             //now index is created, write value to it
             writeHashToFile();  // store the hash as a binary file
             
-            if(!writeHashToNvram()) {
+            if(!writeHashToNvram(tpmNvramPass)) {
                 // need some type of exception here
             }
             
@@ -78,13 +82,13 @@ public class SetAssetTag implements ICommand{
         // and associate password with context.getHostUUID()
     }
     
-    private boolean writeHashToNvram() throws TAException, IOException {
+    private boolean writeHashToNvram(String NvramPassword) throws TAException, IOException {
         List<String> result;
         try {
             //String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
-            String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
-            log.debug("running command tpm_nvwrite -x -i " + index + " -p" + tpmNvramPass + " -f /tmp/hash");
-            result = CommandUtil.runCommand("tpm_nvwrite -x -i " + index + " -p" + tpmNvramPass +" -f /tmp/hash");
+            //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
+            log.debug("running command tpm_nvwrite -x -i " + index + " -p" + NvramPassword + " -f /tmp/hash");
+            result = CommandUtil.runCommand("tpm_nvwrite -x -i " + index + " -p" + NvramPassword +" -f /tmp/hash");
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToNvram output: " + response);
         }catch(TAException ex) {
@@ -105,17 +109,32 @@ public class SetAssetTag implements ICommand{
         }        
     }
     
-    private boolean createIndex() throws TAException, IOException {
+    private boolean createIndex(String NvramPassword) throws TAException, IOException {
         List<String> result;
         try {
             String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
-            String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
-            log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -a" + tpmNvramPass + " -o" + tpmOwnerPass +" --permissions=AUTHWRITE");
-            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -a" + tpmNvramPass + " -o" + tpmOwnerPass +" --permissions=AUTHWRITE");
+            //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
+            log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -a" + NvramPassword + " -o" + tpmOwnerPass +" --permissions=AUTHWRITE");
+            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -a" + NvramPassword + " -o" + tpmOwnerPass +" --permissions=AUTHWRITE");
             String response = StringUtils.join(result,"\n");
             log.debug("createIndex output: " + response);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
+                throw ex;
+        }
+        return true;
+    }
+    
+    private boolean releaseIndex() throws TAException, IOException {
+        List<String> result;
+        try {
+            String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            log.debug("running command tpm_nvrelease -x -t -i " + index + " -o" + tpmOwnerPass);
+            result = CommandUtil.runCommand("tpm_nvrelease -x -t -i " + index + " -o" + tpmOwnerPass);
+            String response = StringUtils.join(result,"\n");
+            log.debug("releaseIndex output: " + response);
+        }catch(TAException ex) {
+                log.error("error releasing nvram index, " + ex.getMessage() );
                 throw ex;
         }
         return true;

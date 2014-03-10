@@ -118,11 +118,11 @@ public class ProvisionTPM {
             }
             TpmOwnerAuth = TpmUtils.hexStringToByteArray(tpmOwnerAuthHex);
             
-            String tpmNvramAuthHex = tpmOwnerProperties.getProperty(NVRAM_AUTH);
-            if (tpmNvramAuthHex == null || tpmNvramAuthHex.trim().isEmpty()) {
-                tpmNvramAuthHex = generateRandomPasswordHex();
-                tpmOwnerProperties.setProperty(OWNER_AUTH, tpmNvramAuthHex);
-            }
+//            String tpmNvramAuthHex = tpmOwnerProperties.getProperty(NVRAM_AUTH);
+//            if (tpmNvramAuthHex == null || tpmNvramAuthHex.trim().isEmpty()) {
+//                tpmNvramAuthHex = generateRandomPasswordHex();
+//                tpmOwnerProperties.setProperty(OWNER_AUTH, tpmNvramAuthHex);
+//            }
             
 		} catch (FileNotFoundException e) {
 			throw new PrivacyCAException("Error finding HIS Provisioner properties file (HISprovisionier.properties)",e);
