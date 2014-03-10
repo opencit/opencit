@@ -404,7 +404,7 @@ public class CertificateRequestListResource extends ServerResource {
                         }
                         else {
                             // XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
-                            builder.attribute(tag.getTagOid(), tag.getTagValue());                            
+                            builder.attribute(tag.getTagOid(), tag.getTagValue());  // TODO -  binary/base64/ASN1Encodable                          
                         }
                     }
                     byte[] attributeCertificateBytes = builder.build();
