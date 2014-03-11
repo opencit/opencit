@@ -9,9 +9,11 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
+import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -25,7 +27,8 @@ import org.junit.Test;
 public class SAMLTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SAMLTest.class);
     private String hostname = "10.1.71.175"; // TODO:  use mtwilson-env
-    private boolean forceVerify = false;
+//    private String hostname = "10.1.70.64"; // TODO:  use mtwilson-env
+    private boolean forceVerify = true;
     
     /**
      * sample output using jdk7u13:
@@ -52,6 +55,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
     @Test
     public void testGenerateAndVerifySaml() throws Exception {
         // generate SAML
+//        Extensions.register(VendorHostAgentFactory.class, IntelHostAgentFactory.class); // because 10.1.70.64 is trust agent
         Extensions.register(VendorHostAgentFactory.class, VmwareHostAgentFactory.class); // because 10.1.71.175 is esxi
         HostTrustBO hostTrustBO = ASComponentFactory.getHostTrustBO();
         String saml = hostTrustBO.getTrustWithSaml(hostname, forceVerify);
