@@ -389,7 +389,7 @@ public class CertificateRequestListResource extends ServerResource {
                             .issuerPrivateKey(cakey)
                             .dateSerial()
                             .subjectUuid(UUID.valueOf(certificateRequest.getSubject()))
-                            .expires(7, TimeUnit.DAYS);
+                            .expires(My.configuration().getAssetTagCertificateValidityPeriod(), TimeUnit.DAYS);
                     for (SelectionTagValue tag : selection.getTags()) {
                         log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
                         if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
@@ -469,6 +469,11 @@ public class CertificateRequestListResource extends ServerResource {
     public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
+            if(certificateRequests[i] == null){
+                log.error("certificate request, reqest being sent was null");
+            }else{
+                log.error("certificate request, reqest being sent was not null, sending");
+            }
             results[i] = insertCertificateRequest(certificateRequests[i]);
 //            insertCertificateRequest(certificateRequests[i]);
         }

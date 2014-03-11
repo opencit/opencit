@@ -20,7 +20,9 @@ import java.security.cert.CertificateException;
 import java.util.*;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -42,6 +44,7 @@ import org.opensaml.xml.XMLObjectBuilderFactory;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.schema.XSAny;
+import org.opensaml.xml.schema.XSBase64Binary;
 import org.opensaml.xml.util.XMLHelper;
 import org.w3c.dom.Element;
 import org.slf4j.Logger;
@@ -327,6 +330,26 @@ public class SamlGenerator {
             return attr;
 	}
         
+        /**
+         * Creates a base64-encoded attribute
+         * @param name
+         * @param value
+         * @return
+         * @throws ConfigurationException 
+         */
+	private Attribute createBase64BinaryAttribute(String name, byte[] value) throws ConfigurationException {
+            SAMLObjectBuilder attrBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Attribute.DEFAULT_ELEMENT_NAME);
+            Attribute attr = (Attribute) attrBuilder.buildObject();
+            attr.setName(name);
+
+            XMLObjectBuilder xmlBuilder =  builderFactory.getBuilder(XSBase64Binary.TYPE_NAME);
+            XSBase64Binary attrValue = (XSBase64Binary) xmlBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+            attrValue.setValue(Base64.encodeBase64String(value));
+
+            attr.getAttributeValues().add(attrValue);
+            return attr;
+	}
+    
         /*  works but not needed
         private List<Attribute> createStringAttributes(Map<String,String> attributes) throws ConfigurationException {
             ArrayList<Attribute> list = new ArrayList<Attribute>();
@@ -404,6 +427,8 @@ public class SamlGenerator {
                         // TODO:  should we make one saml attribute for each value... or enter them all in CSV format?    currently using CSV:
                         attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + nameValueSequenceAttribute.getName() + "]"), StringUtils.join(nameValueSequenceAttribute.getValues(), ",")));
                     }
+                    // all attributes including above and any other custom attributes will be available directly via the certificate
+                    attrStatement.getAttributes().add(createBase64BinaryAttribute("TagCertificate", tagCertificate.getEncoded()));
                 } else {
                     log.debug("Since Asset tag is not verified, no attributes would be added");
                 }

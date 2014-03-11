@@ -1499,7 +1499,7 @@ public class HostTrustBO extends BaseBO {
                 String msg = ex.getClass().getSimpleName();
                 // log.debug(msg);
                 // throw new ASException(new Exception("getTrustWithSaml " + msg));
-                throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, msg);
+                throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, msg);
                 //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
             } 
 			// XXX TODO i18n need to use a specific error code
@@ -1507,7 +1507,7 @@ public class HostTrustBO extends BaseBO {
             //log.debug("e.getMessage = "+e.getMessage());
             //throw new ASException(new Exception(e.getMessage()));
             log.error("Error during retrieval of host trust status.", e);
-            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
+            throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
             //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
         }
     }

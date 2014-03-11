@@ -4,18 +4,53 @@
  */
 package test.saml;
 
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
+import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.atag.model.X509AttributeCertificate;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
+import com.intel.mtwilson.datatypes.HostTrustStatus;
+import com.intel.mtwilson.datatypes.TxtHost;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.ms.business.HostBO;
+import com.intel.mtwilson.saml.SamlAssertion;
+import com.intel.mtwilson.saml.SamlConfiguration;
+import com.intel.mtwilson.saml.SamlGenerator;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.configuration.Configuration;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.AttributeCertificateHolder;
+import org.bouncycastle.cert.AttributeCertificateIssuer;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509v2AttributeCertificateBuilder;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.junit.Test;
 
 /**
@@ -25,7 +60,8 @@ import org.junit.Test;
 public class SAMLTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SAMLTest.class);
     private String hostname = "10.1.71.175"; // TODO:  use mtwilson-env
-    private boolean forceVerify = false;
+//    private String hostname = "10.1.70.64"; // TODO:  use mtwilson-env
+    private boolean forceVerify = true;
     
     /**
      * sample output using jdk7u13:
@@ -52,6 +88,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
     @Test
     public void testGenerateAndVerifySaml() throws Exception {
         // generate SAML
+//        Extensions.register(VendorHostAgentFactory.class, IntelHostAgentFactory.class); // because 10.1.70.64 is trust agent
         Extensions.register(VendorHostAgentFactory.class, VmwareHostAgentFactory.class); // because 10.1.71.175 is esxi
         HostTrustBO hostTrustBO = ASComponentFactory.getHostTrustBO();
         String saml = hostTrustBO.getTrustWithSaml(hostname, forceVerify);
@@ -138,5 +175,54 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
         }
         }
         
+    }
+    
+    @Test
+    public void testGenerateSamlWithAssetTags() throws Exception {
+        // equivalent of private SamlGenerator getSamlGenerator() in HostTrustBO:
+        SamlGenerator samlGenerator = new SamlGenerator(new CommonsConfigurationAdapter(My.configuration().getConfiguration()));
+        samlGenerator.setIssuer("junit-test"); // String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
+        // generate assertion
+        HostTrustStatus trust = new HostTrustStatus();
+        trust.asset_tag = true;
+        trust.bios = true;
+        trust.location = true;
+        trust.vmm = true;
+        TxtHostRecord data = new TxtHostRecord();
+        data.BIOS_Name = "Generic BIOS";
+        data.BIOS_Version = "1.0";
+        data.BIOS_Oem = "Generic OEM";
+        data.Hardware_Uuid = new UUID().toString();
+        data.HostName = "localhost";
+        data.IPAddress = "127.0.0.1";
+        data.Location = "here";
+        data.VMM_Name = "Generic VMM";
+        data.VMM_Version = "1.0";
+        data.VMM_OSName = "Generic OS";
+        data.VMM_OSVersion = "1.0";
+        TxtHost host = new TxtHost(data, trust);
+        // generate asset tag cert
+        // first, create the CA key pair and certificate
+        KeyPair cakey = RsaUtil.generateRsaKeyPair(2048);
+        X509Certificate cacert = X509Builder.factory().selfSigned("CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US", cakey).build();
+        // second, create the attribute certificate
+        X509AttrBuilder builder = X509AttrBuilder.factory();
+        byte[] attrCertBytes = builder
+                .issuerName(cacert).issuerPrivateKey(cakey.getPrivate())
+                .expires(1, TimeUnit.HOURS)
+                .subjectUuid(new UUID())
+                .attribute("Country", "US")
+                .attribute("State", "CA", "TX")
+                .build();
+        X509AttributeCertificate cert = X509AttributeCertificate.valueOf(attrCertBytes);
+        // generate the assertion with trutsed host information and trusted tag certificate
+        SamlAssertion samlAssertion = samlGenerator.generateHostAssertion(host, cert);
+        // verify and print the assertion contents
+//        SamlConfiguration samlConfiguration = new SamlConfiguration(new CommonsConfigurationAdapter(My.configuration().getConfiguration()));
+         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
+//        X509Certificate[] trusted = keystore.getTrustedCertificates(SimpleKeystore.SAML); // this works for the api client's keystore
+        X509Certificate[] trusted = new X509Certificate[] { keystore.getX509Certificate(keystore.aliases()[0]) }; // this works for mtwilson's mtwilson-saml.jks keystore
+       TrustAssertion trustAssertion = new TrustAssertion(trusted, samlAssertion.assertion);        
+        print(trustAssertion);
     }
 }
