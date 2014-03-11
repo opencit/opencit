@@ -386,7 +386,7 @@ public class CertificateRequestListResource extends ServerResource {
                             .issuerPrivateKey(cakey)
                             .dateSerial()
                             .subjectUuid(UUID.valueOf(certificateRequest.getSubject()))
-                            .expires(7, TimeUnit.DAYS);
+                            .expires(My.configuration().getAssetTagCertificateValidityPeriod(), TimeUnit.DAYS);
                     for (SelectionTagValue tag : selection.getTags()) {
                         log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
                         if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
