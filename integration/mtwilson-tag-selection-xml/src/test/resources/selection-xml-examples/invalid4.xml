@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <selections xmlns="urn:intel-mtwilson-asset-tag-attribute-selections">
-    <selection>
+<!--
+required oid is missing from the attribute tags
+-->    <selection>
         <attribute>Country=US</attribute>
         <attribute>State=CA</attribute>
         <attribute>State=TX</attribute>
@@ -8,6 +10,3 @@
         <attribute>City=El Paso</attribute>
     </selection>
 </selections>
-<!--
-This XML file demonstrates an invalid selection because oid is missing.
--->

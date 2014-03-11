@@ -165,33 +165,6 @@ our customers.
                     </executions>
             </plugin>-->
             <!-- end jetty plugin  for junit testing -->
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.8.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaIncludes>
-                                <include>jaxb/intel-mtwilson-asset-tag-attribute-selections/*.xsd</include>
-                            </schemaIncludes>
-                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/jaxb-intel-mtwilson-asset-tag-attribute-selections.episode</episodeFile>
-                            <generatePackage>com.intel.mtwilson.atag.xml.attrselect</generatePackage>
-                        </configuration>
-                        <id>jaxb-generate-intel-mtwilson-asset-tag-attribute-selections</id>
-                    </execution>
-                </executions>
-                <configuration>
-                    <catalog>src/main/resources/jaxb/catalog.xml</catalog>
-                    <catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>
-                    <forceRegenerate>true</forceRegenerate>
-                    <generateDirectory>${project.build.directory}/generated-sources/xjc</generateDirectory>
-                    <verbose>true</verbose>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -309,6 +282,11 @@ our customers.
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>asset-tag-dao-jooq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-tag-selection-xml</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -525,11 +503,6 @@ our customers.
             <artifactId>jersey-media-multipart</artifactId>
         </dependency>
         
-        <dependency>
-                    <artifactId>jaxb-impl</artifactId>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <version>2.2.7-b63</version>
-        </dependency>
         
         <dependency>
             <groupId>javax.ws.rs</groupId>
