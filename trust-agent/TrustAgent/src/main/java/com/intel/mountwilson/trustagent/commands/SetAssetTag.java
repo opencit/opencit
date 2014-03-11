@@ -88,7 +88,8 @@ public class SetAssetTag implements ICommand{
             //String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f /tmp/hash");
-            result = CommandUtil.runCommand("NvramPassword=" + NvramPassword + " sh -c 'tpm_nvwrite -x -t -i " + index + " -pNvramPassword -f /tmp/hash'");
+            String[] variables = { "NvramPassword=" + NvramPassword };
+            result = CommandUtil.runCommand("tpm_nvwrite -x -t -i " + index + " -pNvramPassword -f /tmp/hash", variables);
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToNvram output: " + response);
         }catch(TAException ex) {
@@ -115,7 +116,8 @@ public class SetAssetTag implements ICommand{
             String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -aXXXX -oXXXX --permissions=AUTHWRITE");
-            result = CommandUtil.runCommand("NvramPassword=" + NvramPassword + " tpmOwnerPass=" + tpmOwnerPass + " sh -c 'tpm_nvdefine -i " + index + " -s 0x14 -x -t -aNvramPassword -otpmOwnerPass --permissions=AUTHWRITE'");
+            String[] variables = { "tpmOwnerPass=" + tpmOwnerPass, "NvramPassword=" + NvramPassword };
+            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -t -aNvramPassword -otpmOwnerPass --permissions=AUTHWRITE", variables);
             String response = StringUtils.join(result,"\n");
             log.debug("createIndex output: " + response);
         }catch(TAException ex) {
@@ -130,8 +132,8 @@ public class SetAssetTag implements ICommand{
         try {
             String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
             log.debug("running command tpm_nvrelease -x -t -i " + index + " -oXXXX");
-            String cmd = "tpmOwnerPass=" + tpmOwnerPass + " sh -c 'tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass'";
-            result = CommandUtil.runCommand(cmd);
+            String[] variables = { "tpmOwnerPass=" + tpmOwnerPass };
+            result = CommandUtil.runCommand("tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass", variables);
             String response = StringUtils.join(result,"\n");
             log.debug("releaseIndex output: " + response);
         }catch(TAException ex) {
