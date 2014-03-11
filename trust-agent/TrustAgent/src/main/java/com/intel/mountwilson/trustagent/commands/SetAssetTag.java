@@ -130,7 +130,8 @@ public class SetAssetTag implements ICommand{
         try {
             String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
             log.debug("running command tpm_nvrelease -x -t -i " + index + " -oXXXX");
-            result = CommandUtil.runCommand("tpmOwnerPass=" + tpmOwnerPass + " sh -c 'tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass'");
+            String cmd = "tpmOwnerPass=" + tpmOwnerPass + " sh -c 'tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass'";
+            result = CommandUtil.runCommand(cmd);
             String response = StringUtils.join(result,"\n");
             log.debug("releaseIndex output: " + response);
         }catch(TAException ex) {
