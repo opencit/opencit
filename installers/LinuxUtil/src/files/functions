@@ -3577,15 +3577,14 @@ change_db_pass() {
   mysqladmin=`which mysqladmin 2>/dev/null`
   psql=`which psql 2>/dev/null`
   mtwilson=`which mtwilson 2>/dev/null`
-  new_db_pass="$DATABASE_PASSWORD_NEW"
-  sed_escaped_value=$(sed_escape $new_db_pass)
   cryptopass="$MTWILSON_PASSWORD"
   
   #load_default_env 1>/dev/null
   
   # Do not allow a blank password to be specified
   prompt_with_default_password DATABASE_PASSWORD_NEW "New database password: " "$DATABASE_PASSWORD_NEW"
-  
+  new_db_pass="$DATABASE_PASSWORD_NEW"
+  sed_escaped_value=$(sed_escape $new_db_pass)
   
   # Check for encryption, add to array if encrypted
   encrypted_files=()
@@ -3600,6 +3599,9 @@ change_db_pass() {
   for i in ${encrypted_files[@]}; do
     decrypt_file "$i" "$cryptopass"
   done
+
+  load_conf
+  load_defaults
   
   # Test DB connection and change password
   if using_mysql; then #MYSQL
@@ -3624,8 +3626,9 @@ change_db_pass() {
       echo -n "Updating database password value in .pgpass file...."
       temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
       temp="$temp:$new_db_pass"
-      echo $temp > /root/.pgpass; fi
-	  echo_success "Done"
+      echo $temp > /root/.pgpass;
+    fi
+    echo_success "Done"
   fi
 
   # Edit .properties files
