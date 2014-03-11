@@ -68,7 +68,7 @@ public class SelectionResource extends ServerResource {
         }
         StringBuilder str = new StringBuilder();
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
-                     "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n"+
+                     "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"+
                      "<selection id=\"" + selection.getId() + "\" name=\"" + selection.getName() + "\" >");
         if(selection.getTags() != null) {
             for(SelectionTagValue tag : selection.getTags()) {
