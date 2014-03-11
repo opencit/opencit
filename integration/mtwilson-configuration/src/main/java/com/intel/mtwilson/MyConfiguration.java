@@ -640,6 +640,10 @@ public class MyConfiguration {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
     }
     
+    public int getAssetTagCertificateValidityPeriod() {
+        return conf.getInt("mtwilson.atag.certificate.validity.period", 365);
+    }
+    
     ///////////////////////// mtwilson portal  //////////////////////////////////
     
     public String getPortalHtml5Dir() {
