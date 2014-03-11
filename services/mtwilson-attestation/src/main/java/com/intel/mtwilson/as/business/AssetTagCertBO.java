@@ -110,7 +110,7 @@ public class AssetTagCertBO extends BaseBO{
             //atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
             atagCert.setSHA1Hash(Sha1Digest.digestOf(x509AttrCert.getEncoded()).toByteArray());
             log.debug("Certificate creation time is {}", x509AttrCert.getSerialNumber());
-            log.error("Certificate SHA1 is {}", Sha1Digest.digestOf(x509AttrCert.getEncoded()).toHexString());
+            log.debug("Certificate SHA1 is {}", Sha1Digest.digestOf(x509AttrCert.getEncoded()).toHexString());
             atagCert.setCreate_time(x509AttrCert.getSerialNumber());
             //atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
             
