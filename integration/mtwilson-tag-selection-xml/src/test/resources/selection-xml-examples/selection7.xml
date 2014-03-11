@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <selections xmlns="urn:intel-mtwilson-asset-tag-attribute-selections">
     <selection id="8ed9140b-e6a1-41b2-a8d4-258948633153" name="California">
-        <attribute oid="2.5.4.789.1">Country=US</attribute>
-        <attribute oid="2.5.4.789.1">State=CA</attribute>
-        <attribute oid="2.5.4.789.1">City=Folsom</attribute>
+        <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>State=CA</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=Folsom</text></attribute>
     </selection>
     <selection id="24e7d7be-f337-47f7-a1af-9a4dbdaeb69d">
-        <attribute oid="2.5.4.789.1">Country=US</attribute>
-        <attribute oid="2.5.4.789.1">State=TX</attribute>
-        <attribute oid="2.5.4.789.1">City=El Paso</attribute>
+        <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>State=TX</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=El Paso</text></attribute>
     </selection>
     <selection name="Canada">
-        <attribute oid="2.5.4.789.1">Country=CA</attribute>
-        <attribute oid="2.5.4.789.1">Province=Quebec</attribute>
-        <attribute oid="2.5.4.789.1">City=Quebec City</attribute>
+        <attribute oid="2.5.4.789.1"><text>Country=CA</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>Province=Quebec</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=Quebec City</text></attribute>
     </selection>
 </selections>
 <!--

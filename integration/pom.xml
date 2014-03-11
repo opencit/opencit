@@ -35,6 +35,7 @@
     <module>mtwilson-launcher-jetty9</module>
 	<module>mtwilson-launcher-tomcat7</module>
     <module>mtwilson-feature-xml</module>
+	<module>mtwilson-tag-selection-xml</module>
   </modules>
 
 

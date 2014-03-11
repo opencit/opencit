@@ -72,7 +72,13 @@ public class SelectionResource extends ServerResource {
                      "<selection id=\"" + selection.getId() + "\" name=\"" + selection.getName() + "\" >");
         if(selection.getTags() != null) {
             for(SelectionTagValue tag : selection.getTags()) {
-                str.append("<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n");
+                if( tag.getTagOid().equals("2.5.4.789.1") ) {
+                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><text>" + tag.getTagValue() + "</text></attribute>\n");
+                }
+                else {
+                    // expect that value is already base64-encoded here when the oid is 2.5.4.789.2 or any other custom one
+                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><der>" + tag.getTagValue() + "</der></attribute>\n");
+                }
             }
         }
         str.append("</selection>\n</selections>");
