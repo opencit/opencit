@@ -49,6 +49,9 @@ public class ImportConfig implements Command {
             String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         
             PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
+            if( !protection.isAvailable() ) {
+                protection = PasswordProtectionBuilder.factory().aes(128).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
+            }
             FileResource resource = new FileResource(new File(filename));
             PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password, protection);
         
@@ -93,7 +96,7 @@ public class ImportConfig implements Command {
         else {
             password = System.getenv("MTWILSON_PASSWORD");
         }
-        if( password == null ) {
+        if( password == null || password.isEmpty() ) {
             password = Input.getConfirmedPasswordWithPrompt(String.format("You must protect %s with a password.", label)); // throws IOException, or always returns value or expression
         }
         return password;
