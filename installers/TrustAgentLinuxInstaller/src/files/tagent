@@ -148,6 +148,12 @@ function startService {
      return 1
    fi
 
+   # take ownership if not taken
+   tpm_owned=`cat /sys/class/misc/tpm0/device/owned`
+   if [[ "${tpm_owned}" == "0" ]]; then
+     $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd
+   fi
+
    getServicePID
    if [ $? -eq 0 ]; then echo "$serviceName is already running"; RETVAL=0; return 0; fi
    echo -n "Starting $serviceName   "
