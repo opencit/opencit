@@ -469,6 +469,11 @@ public class CertificateRequestListResource extends ServerResource {
     public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
+            if(certificateRequests[i] == null){
+                log.error("certificate request, reqest being sent was null");
+            }else{
+                log.error("certificate request, reqest being sent was not null, sending");
+            }
             results[i] = insertCertificateRequest(certificateRequests[i]);
 //            insertCertificateRequest(certificateRequests[i]);
         }
