@@ -12,6 +12,7 @@ import java.util.Date;
   user_id uuid DEFAULT NULL,
   certificate bytea NOT NULL,
   sha1_hash bytea NOT NULL,
+  sha256_hash bytea NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
   status varchar(128) NOT NULL DEFAULT 'Pending',
@@ -24,6 +25,7 @@ public class UserLoginCertificate {
     private UUID userId;
     private byte[] certificate;
     private byte[] sha1Hash;
+    private byte[] sha256Hash;
     private Date expires;
     private boolean enabled;
     private Status status;
@@ -59,6 +61,16 @@ public class UserLoginCertificate {
 
     public void setSha1Hash(byte[] sha1Hash) {
         this.sha1Hash = sha1Hash;
+    }
+
+    public byte[] getSha256Hash() {
+        return sha256Hash;
+    }
+    
+    
+
+    public void setSha256Hash(byte[] sha256Hash) {
+        this.sha256Hash = sha256Hash;
     }
 
     
