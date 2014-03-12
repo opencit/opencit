@@ -82,6 +82,7 @@ CREATE TABLE mw_user_login_certificate (
   user_id uuid DEFAULT NULL,
   certificate bytea NOT NULL,
   sha1_hash bytea NOT NULL,
+  sha256_hash bytea NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
   status varchar(128) NOT NULL DEFAULT 'Pending',

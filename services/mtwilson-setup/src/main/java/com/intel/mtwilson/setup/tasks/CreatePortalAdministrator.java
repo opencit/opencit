@@ -22,7 +22,7 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
-import com.intel.mtwilson.shiro.PasswordCredentialsMatcher;
+import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.io.FileInputStream;

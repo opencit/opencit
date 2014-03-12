@@ -6,7 +6,6 @@ package com.intel.mtwilson.tag.dao.jdbi;
 
 import com.intel.mtwilson.tag.model.CertificateRequest;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.tag.model.CertificateRequestCollection;
 import java.io.Closeable;
 import java.util.List;
 import org.skife.jdbi.v2.sqlobject.Bind;
@@ -20,7 +19,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 public interface CertificateRequestDAO extends Closeable{
     // Note:  if you change the table definition (for example uuid from binary to char) also check the TagResultMapper class that is used for jdbi queries
 //    @SqlUpdate("create table tag (id bigint primary key generated always as identity, uuid char(16) for bit data, name varchar(100), oid varchar(255))")   // jooq tries to cast char(16) for bit data  into a blob for comparisons... don't know why. and it's not possible to search on blob contents (usually not implemented by rdbms because blobs by definition can be gigabytes long), so using char(36) instead to get the standard uuid format
-    @SqlUpdate("create table certificate_request (id bigint primary key generated always as identity, uuid char(36), subject varchar(255), selectionId bigint, status varchar(255), certificateId bigint)")
+    @SqlUpdate("create table mw_tag_certificate_request (id bigint primary key generated always as identity, uuid char(36), subject varchar(255), selectionId bigint, status varchar(255), certificateId bigint)")
     void create();
 
     @SqlUpdate("insert into mw_tag_certificate_request (id, subject, selectionId, certificateId, authorityName, status) "

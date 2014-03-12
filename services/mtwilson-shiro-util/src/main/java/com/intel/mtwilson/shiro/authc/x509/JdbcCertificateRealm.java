@@ -2,14 +2,18 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.shiro;
+package com.intel.mtwilson.shiro.authc.x509;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.mtwilson.shiro.*;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.RolePermission;
-import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
+import com.intel.mtwilson.shiro.jdbi.model.User;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,7 +25,6 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -37,9 +40,9 @@ import org.apache.shiro.util.JdbcUtils;
  *
  * @author jbuhacoff
  */
-public class JdbcPasswordRealm extends AuthorizingRealm {
+public class JdbcCertificateRealm extends AuthorizingRealm {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcPasswordRealm.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcCertificateRealm.class);
     
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection pc) {
@@ -56,12 +59,12 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         }
         try (LoginDAO dao = MyJdbi.authz()) {
             
-            Collection<LoginPasswordId> loginPasswordIds = pc.byType(LoginPasswordId.class);
-            for (LoginPasswordId loginPasswordId : loginPasswordIds) {
-                log.debug("doGetAuthorizationInfo for login password id: {}", loginPasswordId.getLoginPasswordId());
+            Collection<LoginCertificateId> loginCertificateIds = pc.byType(LoginCertificateId.class);
+            for (LoginCertificateId loginCertificateId : loginCertificateIds) {
+                log.debug("doGetAuthorizationInfo for login password id: {}", loginCertificateId.getLoginCertificateId());
                 
                 
-                List<Role> roles = dao.findRolesByUserLoginPasswordId(loginPasswordId.getLoginPasswordId());
+                List<Role> roles = dao.findRolesByUserLoginCertificateId(loginCertificateId.getLoginCertificateId());
                 ArrayList<UUID> roleIds = new ArrayList<>();
                 for (Role role : roles) {
                     log.debug("doGetAuthorizationInfo found role: {}", role.getRoleName());
@@ -69,7 +72,7 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
                     authzInfo.addRole(role.getRoleName());
                 }
                 if (!roleIds.isEmpty()) {
-                    List<RolePermission> permissions = dao.findRolePermissionsByPasswordRoleIds(roleIds);
+                    List<RolePermission> permissions = dao.findRolePermissionsByCertificateRoleIds(roleIds);
                     for (RolePermission permission : permissions) {
                         log.debug("doGetAuthorizationInfo found permission: {} {} {}", permission.getPermitDomain(), permission.getPermitAction(), permission.getPermitSelection());
                         authzInfo.addStringPermission(String.format("%s:%s:%s", permission.getPermitDomain(), permission.getPermitAction(), permission.getPermitSelection()));
@@ -78,7 +81,7 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
                 
             }
         } catch (Exception e) {
-            log.debug("doGetAuthenticationInfo error", e);
+            log.debug("doGetAuthorizationInfo error", e);
             throw new AuthenticationException("Internal server error", e); // TODO: i18n
         }
 
@@ -87,32 +90,46 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
     
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        UsernamePasswordToken upToken = (UsernamePasswordToken) token;
-        String username = upToken.getUsername();
-        if (username == null) {
-            log.debug("doGetAuthenticationInfo null username");
-            throw new AccountException("Username must be provided");
+        X509AuthenticationToken xToken = (X509AuthenticationToken) token;
+        UserLoginCertificate userLoginCertificate = null;
+        User user = null;
+        if( xToken.getPrincipal() instanceof Fingerprint ) {
+            Fingerprint fingerprint = (Fingerprint)xToken.getPrincipal();
+            log.debug("doGetAuthenticationInfo for fingerprint {}", fingerprint.getHex());
+            try (LoginDAO dao = MyJdbi.authz()) {
+                if( Sha256Digest.isValid(fingerprint.getBytes())) {
+                    userLoginCertificate = dao.findUserLoginCertificateBySha256(fingerprint.getBytes()); 
+                }
+                else if( Sha1Digest.isValid(fingerprint.getBytes())) {
+                    userLoginCertificate = dao.findUserLoginCertificateBySha1(fingerprint.getBytes()); 
+                }
+                else {
+                    log.error("Unsupported digest length {}", fingerprint.getBytes().length);
+                }
+                if(userLoginCertificate != null ) {
+                    user = dao.findUserById(userLoginCertificate.getUserId());
+                }
+    //            xToken.
+    //            userLoginCertificate = dao.findUserLoginCertificateByUsername(username);
+            } catch (Exception e) {
+                log.debug("doGetAuthenticationInfo error", e);
+                throw new AuthenticationException("Internal server error", e); // TODO: i18n
+            }
         }
-        log.debug("doGetAuthenticationInfo for username {}", username);
-        UserLoginPassword userLoginPassword = null;
-        try (LoginDAO dao = MyJdbi.authz()) {
-            userLoginPassword = dao.findUserLoginPasswordByUsername(username);
-        } catch (Exception e) {
-            log.debug("doGetAuthenticationInfo error", e);
-            throw new AuthenticationException("Internal server error", e); // TODO: i18n
-        }
-        if (userLoginPassword == null) {
+        if (userLoginCertificate == null || user == null) {
             return null;
         }
-        log.debug("doGetAuthenticationInfo found user login password id {}", userLoginPassword.getId());
+        
+        
+        log.debug("doGetAuthenticationInfo found user login certificate id {}", userLoginCertificate.getId());
         SimplePrincipalCollection principals = new SimplePrincipalCollection();
-        principals.add(new UserId(userLoginPassword.getUserId()), getName());
-        principals.add(new Username(username), getName());
-        principals.add(new LoginPasswordId(userLoginPassword.getUserId(), userLoginPassword.getId()), getName());
-
-        PasswordAuthenticationInfo info = new PasswordAuthenticationInfo();
+        principals.add(new UserId(userLoginCertificate.getUserId()), getName());
+        principals.add(new Username(user.getUsername()), getName());
+        principals.add(new LoginCertificateId(userLoginCertificate.getUserId(), userLoginCertificate.getId()), getName());
+        // should we add the Fingerprint principal?  or is it enough to use LoginCertificateId ?
+        X509AuthenticationInfo info = new X509AuthenticationInfo();
         info.setPrincipals(principals);
-        info.setCredentials(userLoginPassword);
+        info.setCredentials(userLoginCertificate);
 
         return info;
     }

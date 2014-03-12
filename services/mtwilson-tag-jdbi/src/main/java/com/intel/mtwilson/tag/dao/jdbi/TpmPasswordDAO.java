@@ -31,22 +31,22 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterMapper(TpmPasswordResultMapper.class)
 public interface TpmPasswordDAO extends Closeable {
  
-    @SqlUpdate("create table tpm_password (id bigint primary key generated always as identity, uuid varchar(255), password varchar(255))")
+    @SqlUpdate("create table mw_host_tpm_password (id bigint primary key generated always as identity, uuid varchar(255), password varchar(255))")
     void create();
     
-    @SqlUpdate("insert into mw_tag_tpm_password (id, password) values (:id, :password)")
+    @SqlUpdate("insert into mw_host_tpm_password (id, password) values (:id, :password)")
     void insert(@Bind("id") UUID id, @Bind("password") String password);
        
-    @SqlUpdate("update mw_tag_tpm_password set password=:password where id=:id")
+    @SqlUpdate("update mw_host_tpm_password set password=:password where id=:id")
     void update(@Bind("id") UUID id, @Bind("password") String password);
 
-    @SqlQuery("select id, password from mw_tag_tpm_password where id=:id")
+    @SqlQuery("select id, password from mw_host_tpm_password where id=:id")
     TpmPassword findById(@Bind("id") UUID id);
 
-//    @SqlQuery("select id,uuid,password from mw_tag_tpm_password where uuid=:uuid")
+//    @SqlQuery("select id,uuid,password from mw_host_tpm_password where uuid=:uuid")
 //    TpmPassword findByUuid(@Bind("uuid") String uuid);
     
-    @SqlUpdate("delete from mw_tag_tpm_password where id=:id")
+    @SqlUpdate("delete from mw_host_tpm_password where id=:id")
     void delete(@Bind("id") UUID id);
     
     @Override

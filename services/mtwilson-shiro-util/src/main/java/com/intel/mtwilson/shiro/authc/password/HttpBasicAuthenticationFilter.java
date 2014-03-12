@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.shiro.authc;
+package com.intel.mtwilson.shiro.authc.password;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -40,7 +40,7 @@ public class HttpBasicAuthenticationFilter extends BasicHttpAuthenticationFilter
             log.debug("executeLogin subject login ok");
             return onLoginSuccess(token, subject, request, response);
         } catch (AuthenticationException e) {
-            log.debug("executeLogin subject login failed", e);
+            log.debug("executeLogin subject login failed {}", e.getMessage());
             return onLoginFailure(token, e, request, response);
         }
     }

@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.shiro;
+package com.intel.mtwilson.shiro.authc.password;
 
 import com.intel.dcsg.cpg.io.UUID;
 
