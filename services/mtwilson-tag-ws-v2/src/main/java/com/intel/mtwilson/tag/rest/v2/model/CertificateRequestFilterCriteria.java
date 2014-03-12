@@ -18,9 +18,13 @@ public class CertificateRequestFilterCriteria implements FilterCriteria<Certific
     public UUID id;
     @QueryParam("subjectEqualTo")
     public String subjectEqualTo;
-    @QueryParam("certificateIdEqualTo")
-    public UUID certificateIdEqualTo;
-    @QueryParam("selectionIdEqualTo")
-    public UUID selectionIdEqualTo;
+    @QueryParam("subjectContains")
+    public String subjectContains;
+    @QueryParam("selectionEqualTo")
+    public String selectionEqualTo;
+    @QueryParam("selectionContains")
+    public String selectionContains;
+    @QueryParam("statusEqualTo")
+    public String statusEqualTo;
     
 }

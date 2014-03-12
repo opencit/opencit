@@ -103,7 +103,7 @@ public class AssetTagCertBO extends BaseBO{
             else
                 atagCert.setUuid_hex(new UUID().toString());
             atagCert.setCertificate(atagObj.getCertificate());
-            atagCert.setUuid(x509AttrCert.getSubject());
+            atagCert.setUuid(x509AttrCert.getSubject().toLowerCase());
             atagCert.setNotAfter(x509AttrCert.getNotAfter());
             atagCert.setNotBefore(x509AttrCert.getNotBefore());
             atagCert.setRevoked(false);
@@ -404,7 +404,7 @@ public class AssetTagCertBO extends BaseBO{
             // The below query has been modified to return back the results ordered by the insert date with the latest one first
             // So if the host has been provisioned multiple times, we will pick up the latest one.
             if (uuid != null && !uuid.isEmpty()) {
-                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID(uuid);
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID(uuid.toLowerCase());
                 if (atagCerts.isEmpty()) {
                     log.info("Asset tag certificate has not been provisioned for the host with UUID : {}.", uuid);
                     return null;

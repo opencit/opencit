@@ -1,0 +1,6 @@
+                ------------------------------------
+                Asset Tag Service Data Access - JOOQ
+                ------------------------------------
+
+	An implementation of the asset tag DAO using JOOQ.
+
