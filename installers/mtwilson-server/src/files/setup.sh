@@ -389,7 +389,7 @@ MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
 echo "Configuring Mt Wilson Server Name..."
 echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
 This address will be used in the server SSL certificate and in all Mt Wilson URLs.
-For example, if you enter localhost then the Mt Wilson URL is https://localhost:8181
+For example, if you enter localhost then the Mt Wilson URL is https://localhost:${DATABASE_PORTNUM}
 Detected the following options on this server:"
 #IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
 for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ " `hostname`
