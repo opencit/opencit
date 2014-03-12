@@ -343,7 +343,7 @@ public class SamlGenerator {
             attr.setName(name);
 
             XMLObjectBuilder xmlBuilder =  builderFactory.getBuilder(XSBase64Binary.TYPE_NAME);
-            XSBase64Binary attrValue = (XSBase64Binary) xmlBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+            XSBase64Binary attrValue = (XSBase64Binary) xmlBuilder.buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSBase64Binary.TYPE_NAME);
             attrValue.setValue(Base64.encodeBase64String(value));
 
             attr.getAttributeValues().add(attrValue);

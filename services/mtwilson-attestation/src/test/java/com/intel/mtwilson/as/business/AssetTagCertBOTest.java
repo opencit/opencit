@@ -61,7 +61,8 @@ public class AssetTagCertBOTest {
     
     @Test
     public void testAssetTagCert() throws IOException{
-        List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
+        List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("15ADBCD1-629D-11E0-B625-001E670FEEE4");
+        //List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("15adbcd1-629d-11e0-b625-001e670feee4");
          if (atagCerts.isEmpty()) {
                     System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
          } else {
