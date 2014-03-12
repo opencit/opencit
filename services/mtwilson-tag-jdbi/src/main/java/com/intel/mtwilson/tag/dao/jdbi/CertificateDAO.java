@@ -29,7 +29,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterArgumentFactory(UUIDArgument.class)
 @RegisterMapper(CertificateResultMapper.class)
 public interface CertificateDAO extends Closeable{
-    @SqlUpdate("create table mw_tag_certificate (id bigint primary key generated always as identity, uuid char(36), certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
+    @SqlUpdate("create table mw_tag_certificate (id char(36) primary key, certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
     void create();
     
     @SqlUpdate("insert into mw_tag_certificate (id, certificate, sha1, sha256, subject, issuer, notBefore, notAfter, revoked) "

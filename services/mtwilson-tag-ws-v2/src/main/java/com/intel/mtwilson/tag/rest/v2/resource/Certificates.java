@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.tag.rest.v2.resource;
 
-import com.intel.mtwilson.tag.rest.v2.model.Certificate;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateCollection;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateFilterCriteria;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateLocator;
+import com.intel.mtwilson.tag.model.Certificate;
+import com.intel.mtwilson.tag.model.CertificateCollection;
+import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractCertificateJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;

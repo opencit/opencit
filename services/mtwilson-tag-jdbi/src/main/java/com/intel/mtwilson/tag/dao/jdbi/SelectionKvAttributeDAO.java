@@ -25,7 +25,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  */
 @RegisterMapper(SelectionKvAttributeResultMapper.class)
 public interface SelectionKvAttributeDAO extends Closeable{
-    @SqlUpdate("create table mw_tag_selection_kvattribute (id bigint primary key generated always as identity, selectionId bigint, tagId bigint, tagValueId bigint)")
+    @SqlUpdate("create table mw_tag_selection_kvattribute (id char(36) primary key, selectionId char(36), kvAttributeId char(36))")
     void create();
     
     @SqlUpdate("insert into mw_tag_selection_kvattribute (id, selectionId, kvAttributeId) values (:id, :selectionId, :kvAttributeId)")
