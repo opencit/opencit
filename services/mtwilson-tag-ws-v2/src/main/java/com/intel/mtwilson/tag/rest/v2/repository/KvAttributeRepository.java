@@ -5,15 +5,14 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.TAG;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.TAG_VALUE;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
-import com.intel.mtwilson.tag.rest.v2.model.KvAttribute;
-import com.intel.mtwilson.tag.rest.v2.model.KvAttributeCollection;
-import com.intel.mtwilson.tag.rest.v2.model.KvAttributeFilterCriteria;
-import com.intel.mtwilson.tag.rest.v2.model.KvAttributeLocator;
+import com.intel.mtwilson.tag.model.KvAttribute;
+import com.intel.mtwilson.tag.model.KvAttributeCollection;
+import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
+import com.intel.mtwilson.tag.model.KvAttributeLocator;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -42,49 +41,31 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             dao = TagJdbi.kvAttributeDao();
             jooq = TagJdbi.jooq();
             
-            SelectQuery sql;         
-            if( criteria.valueEqualTo != null || criteria.valueContains != null ) {
-                log.debug("Selecting from tag-value");
-                SelectQuery valueQuery = jooq.select(TAG_VALUE.TAGID).from(TAG_VALUE).getQuery();
-                if( criteria.valueEqualTo != null && criteria.valueEqualTo.length() > 0 ) {
-                    valueQuery.addConditions(TAG_VALUE.VALUE.equal(criteria.valueEqualTo));
-                }
-                if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
-                    valueQuery.addConditions(TAG_VALUE.VALUE.contains(criteria.valueContains));
-                }
-                sql = jooq.select().from(TAG).getQuery();
-                sql.addConditions(TAG.ID.in(valueQuery));
-            }
-            else {
-                log.debug("Selecting from tag");
-             sql = jooq.select().from(TAG).getQuery();
-
-            }
-            log.debug("Adding tag conditions");
+            SelectQuery sql = jooq.select().from(MW_TAG_KVATTRIBUTE).getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(TAG.UUID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(TAG.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(TAG.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.contains(criteria.nameContains));
             }
             if( criteria.valueEqualTo != null  && criteria.valueEqualTo.length() > 0 ) {
-                sql.addConditions(TAG.OID.equal(criteria.valueEqualTo));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.valueEqualTo));
             }
             if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
-                sql.addConditions(TAG.OID.like("%"+criteria.valueContains+"%"));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.valueContains));
             }
             log.debug("Opening tag-value dao");
             log.debug("Fetching records using JOOQ");
             Result<Record> result = sql.fetch();
             for(Record r : result) {
                 KvAttribute obj = new KvAttribute();
-                obj.setId(UUID.valueOf(r.getValue(TAG.UUID)));
-                obj.setName(r.getValue(TAG.NAME));
-                obj.setValue(r.getValue(TAG.OID)); //TODO: Change these after creating new JOOQ tables.
+                obj.setId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
+                obj.setName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
+                obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); //TODO: Change these after creating new JOOQ tables.
             }
             sql.close();
             log.debug("Closing tag-value dao");

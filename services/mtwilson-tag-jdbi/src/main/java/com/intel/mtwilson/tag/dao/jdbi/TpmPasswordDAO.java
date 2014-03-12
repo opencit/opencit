@@ -34,7 +34,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterMapper(TpmPasswordResultMapper.class)
 public interface TpmPasswordDAO extends Closeable {
  
-    @SqlUpdate("create table mw_host_tpm_password (id bigint primary key generated always as identity, uuid varchar(255), password varchar(255))")
+    @SqlUpdate("create table mw_host_tpm_password (id char(36) primary key,password varchar(255))")
     void create();
     
     @SqlUpdate("insert into mw_host_tpm_password (id, password) values (:id, :password)")

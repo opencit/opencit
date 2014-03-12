@@ -4,13 +4,28 @@
  */
 package com.intel.mtwilson.tag.rest.v2.repository;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
+import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
+import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
-import com.intel.mtwilson.tag.rest.v2.model.SelectionKvAttribute;
-import com.intel.mtwilson.tag.rest.v2.model.SelectionKvAttributeCollection;
-import com.intel.mtwilson.tag.rest.v2.model.SelectionKvAttributeFilterCriteria;
-import com.intel.mtwilson.tag.rest.v2.model.SelectionKvAttributeLocator;
+import com.intel.mtwilson.tag.model.SelectionKvAttribute;
+import com.intel.mtwilson.tag.model.SelectionKvAttributeCollection;
+import com.intel.mtwilson.tag.model.SelectionKvAttributeFilterCriteria;
+import com.intel.mtwilson.tag.model.SelectionKvAttributeLocator;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION_KVATTRIBUTE;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
+import com.intel.mtwilson.tag.model.KvAttribute;
+import com.intel.mtwilson.tag.model.Selection;
+import com.intel.mtwilson.tag.model.SelectionCollection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectQuery;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
@@ -27,115 +42,80 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
 
     @Override
     public SelectionKvAttributeCollection search(SelectionKvAttributeFilterCriteria criteria) {
-        return null;
-        /*SelectionCollection objCollection = new SelectionCollection();
-        KvAttributeDAO attrDao = null;
+        SelectionKvAttributeCollection objCollection = new SelectionKvAttributeCollection();
         DSLContext jooq = null;
-        SelectionDAO selectionDao = null;
-        SelectionKvAttributeDAO selectionTagDao = null;
         
-        try {
+        try(KvAttributeDAO attrDao = TagJdbi.kvAttributeDao()) {
                     
             SelectQuery sql = jooq.select()
-                    .from(SELECTION.join(SELECTION_TAG_VALUE)
-                    .on(SELECTION_TAG_VALUE.SELECTIONID.equal(SELECTION.ID))).getQuery();
-            if( criteria.tagValueEqualTo != null || criteria.tagValueContains != null ) {
+                    .from(MW_TAG_SELECTION.join(MW_TAG_SELECTION_KVATTRIBUTE)
+                    .on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID))).getQuery();
+            if( criteria.attrValueEqualTo != null || criteria.attrNameContains != null ) {
                 log.debug("Selecting from tag-value");
-                SelectQuery valueQuery = jooq.select(SELECTION_TAG_VALUE.ID)
-                        .from(SELECTION_TAG_VALUE.join(TAG_VALUE).on(TAG_VALUE.ID.equal(SELECTION_TAG_VALUE.TAGVALUEID)))
+                SelectQuery valueQuery = jooq.select(MW_TAG_SELECTION_KVATTRIBUTE.ID)
+                        .from(MW_TAG_SELECTION_KVATTRIBUTE.join(MW_TAG_KVATTRIBUTE).on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID)))
                         .getQuery();
-                if( criteria.tagValueEqualTo != null && criteria.tagValueEqualTo.length() > 0 ) {
-                    valueQuery.addConditions(TAG_VALUE.VALUE.equal(criteria.tagValueEqualTo));
+                if( criteria.attrValueEqualTo != null && criteria.attrValueEqualTo.length() > 0 ) {
+                    valueQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.attrValueEqualTo));
                 }
-                if( criteria.tagValueContains != null  && criteria.tagValueContains.length() > 0 ) {
-                    valueQuery.addConditions(TAG_VALUE.VALUE.contains(criteria.tagValueContains));
+                if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
+                    valueQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.attrValueContains));
                 }
-                sql.addConditions(SELECTION_TAG_VALUE.ID.in(valueQuery));
+                sql.addConditions(MW_TAG_SELECTION_KVATTRIBUTE.ID.in(valueQuery));
             }
-            if( criteria.tagNameContains != null || criteria.tagNameEqualTo != null || criteria.tagOidContains != null || criteria.tagOidEqualTo != null ) {
+            if( criteria.attrNameContains != null || criteria.attrNameEqualTo != null || criteria.attrValueContains != null || criteria.attrValueEqualTo != null ) {
                 log.debug("Selecting from tag");
-                SelectQuery tagQuery = jooq.select(SELECTION_TAG_VALUE.ID)
-                        .from(SELECTION_TAG_VALUE.join(TAG).on(TAG.ID.equal(SELECTION_TAG_VALUE.TAGID)))
+                SelectQuery tagQuery = jooq.select(MW_TAG_SELECTION_KVATTRIBUTE.ID)
+                        .from(MW_TAG_SELECTION_KVATTRIBUTE.join(MW_TAG_KVATTRIBUTE).on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID)))
                         .getQuery();
-                if( criteria.tagNameEqualTo != null  && criteria.tagNameEqualTo.length() > 0 ) {
-                    tagQuery.addConditions(TAG.NAME.equal(criteria.tagNameEqualTo));
+                if( criteria.attrNameEqualTo != null  && criteria.attrNameEqualTo.length() > 0 ) {
+                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.attrNameEqualTo));
                 }
-                if( criteria.tagNameContains != null  && criteria.tagNameContains.length() > 0 ) {
-                    tagQuery.addConditions(TAG.NAME.contains(criteria.tagNameContains));
+                if( criteria.attrNameContains != null  && criteria.attrNameContains.length() > 0 ) {
+                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.NAME.contains(criteria.attrNameContains));
                 }
-                if( criteria.tagOidEqualTo != null  && criteria.tagOidEqualTo.length() > 0 ) {
-                    tagQuery.addConditions(TAG.OID.equal(criteria.tagOidEqualTo));
+                if( criteria.attrValueEqualTo != null  && criteria.attrValueEqualTo.length() > 0 ) {
+                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.attrValueEqualTo));
                 }
-                if( criteria.tagOidContains != null  && criteria.tagOidContains.length() > 0 ) {
-                    tagQuery.addConditions(TAG.OID.contains(criteria.tagOidContains));
+                if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
+                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.attrValueContains));
                 }
-                sql.addConditions(SELECTION_TAG_VALUE.ID.in(tagQuery));            
+                sql.addConditions(MW_TAG_SELECTION_KVATTRIBUTE.ID.in(tagQuery));            
             }
             if( criteria.id != null ) {
-                sql.addConditions(SELECTION.UUID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_SELECTION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(SELECTION.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_TAG_SELECTION.NAME.equal(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0  ) {
-                sql.addConditions(SELECTION.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_TAG_SELECTION.NAME.contains(criteria.nameContains));
             }
-            sql.addOrderBy(SELECTION.ID);
+            sql.addOrderBy(MW_TAG_SELECTION.ID);
             Result<Record> result = sql.fetch();
-            HashMap<Long,Selection> selections = new HashMap<Long,Selection>();
             log.debug("Got {} selection records", result.size());
             for(Record r : result) {
-                if( selections.get(r.getValue(SELECTION.ID)) == null ) {
-                    Selection selection = new Selection();
-                    selection.setId(r.getValue(SELECTION.ID));
-                    selection.setUuid(UUID.valueOf(r.getValue(SELECTION.UUID)));
-                    selection.setName(r.getValue(SELECTION.NAME));
-                    selection.setTags(new ArrayList<SelectionKvAttribute>());
-                    selections.put(r.getValue(SELECTION.ID), selection);
-                    log.debug("Created new selection object: {}", selection.getId());
+                SelectionKvAttribute sAttr = new SelectionKvAttribute();
+                sAttr.setSelectionId(UUID.valueOf(r.getValue(MW_TAG_SELECTION.ID)));
+                sAttr.setSelectionName(r.getValue(MW_TAG_SELECTION.NAME));
+                sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID)));
+                KvAttribute attr = attrDao.findById(sAttr.getKvAttributeId());
+                if (attr != null) {
+                    sAttr.setKvAttributeName(attr.getName());
+                    sAttr.setKvAttributeValue(attr.getValue());
                 }
-
-                SelectionKvAttribute crtv = new SelectionKvAttribute();
-                crtv.setId(r.getValue(SELECTION_TAG_VALUE.ID));
-                crtv.setSelectionId(r.getValue(SELECTION.ID));
-                crtv.setAttributeId(r.getValue(SELECTION_TAG_VALUE.TAGID));
-                crtv.setAttributeValueId(r.getValue(SELECTION_TAG_VALUE.TAGVALUEID));
                 
-                // XXX TODO inefficient to make two extra queries for the tag name and tag value... probably better to move this up to the big criteria but need to design the join properly
-                KvAttribute attr = attrDao.findById(crtv.getAttributeId());
-                AttributeValue attrValue = attrValueDao.findById(crtv.getAttributeValueId());
-                if( attr != null && attrValue != null ) {
-                    crtv.setAttributeName(attr.getName());
-                    crtv.setAttributeOid(attr.getOid());
-                    crtv.setAttributeValue(attrValue.getValue());
-                    Selection selection = selections.get(r.getValue(SELECTION.ID));
-                    selection.getTags().add(crtv); // XXX inefficient to look up the selection each time in the map but we want to avoid relying on the order of fields in the resultset... we're not assuming that all related records would be grouped together
-                    log.debug("Added tag to selection object: {}", selection.getId());
-                }
-                else {
-                    log.debug("tag is null? {}", attr == null);
-                    log.debug("tag-value is null? {}", attrValue == null);
-                }
+                objCollection.getSelectionTagValues().add(sAttr);
             }
             sql.close();
             log.debug("Closed jooq sql statement");
-            objCollection.getSelections().addAll(selections.values());
         } catch (ResourceException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute search.", ex);
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
-        } finally {
-            if (attrDao != null)
-                attrDao.close();
-            if (attrValueDao != null)
-                attrValueDao.close();
-            if (selectionDao != null)
-                selectionDao.close();
-            if (selectionTagDao != null)
-                selectionTagDao.close();
         }
-        return objCollection;*/
+        return objCollection;
     }
 
     @Override
