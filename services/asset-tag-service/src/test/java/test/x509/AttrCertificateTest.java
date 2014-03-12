@@ -54,6 +54,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Enumeration;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
 //import org.codehaus.jackson.map.ObjectMapper;
@@ -137,6 +138,23 @@ public class AttrCertificateTest {
         assertTrue("certificate signature must be valid", !cert.isSignatureValid(verifierProviderFail));
     }
 
+    @Test
+    public void testDER() throws IOException {
+        // encode
+        UTF8NameValueSequence a0 = new UTF8NameValueSequence("name", "value1");
+        log.debug("der encoded: {}", Base64.encodeBase64String(a0.getEncoded())); // MBAMBG5hbWUwCAwGdmFsdWUx
+        
+        // decode
+//        ASN1Object asn = ASN1Object.fromByteArray(Base64.decodeBase64("MBAMBG5hbWUwCAwGdmFsdWUx")); // works fine
+//        ASN1Object asn = ASN1Object.fromByteArray(Base64.decodeBase64("MAgMADAEDAJDQQ=="));  // missing the name
+        ASN1Object asn = ASN1Object.fromByteArray(Base64.decodeBase64("MBEMBVN0YXRlMAgMAkNBDAJUWA=="));  // missing the name
+        ASN1Sequence seq = (ASN1Sequence)asn;
+        UTF8NameValueSequence a1 = new UTF8NameValueSequence(seq);
+        log.debug("name {}", a1.getName());
+        log.debug("values {}", a1.getValues());
+//        UTFNameValueSequence a1 = UTF8NameValueSequence.
+    }
+    
     /**
      * Example output:
 2013-08-08 15:46:03,908 DEBUG [main] t.x.AttrCertificateTest [AttrCertificateTest.java:108] issuer: CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US
@@ -156,11 +174,14 @@ public class AttrCertificateTest {
      */
     @Test
     public void readAttrCertificate() throws IOException {
-//        String input = "MIICGzCCAQMCAQEwH6EdpBswGTEXMBUGAWkEEDN2amNcVURhioRZNld99FCgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjI0NDI3WhgPMjAxMzA5MDgyMjQ0MjdaMEYwFAYMKwYBBAGGjR8BAQEBMQQMAlVTMBQGDCsGAQQBho0fAgICAjEEDAJDQTAYBgwrBgEEAYaNHwMDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQAIPESDSy8TLMzlhO3kpOSUU2Y063qS4iaSHEaX4CDG1hMD/VMcu0MKIaZnr83RzHIv1Z+01s8HDbW5IMwU3rOE99sR1e4DmP0a4hh3GLL38Rta6FkxSt8vL2ie7irK4BWCgWZd3Oc1xeCyLZ7uK6jerw+Qt6zzMRy74z6+5k2jLsveF1XqJvdTQZZYeyeSLFBYc74akWGGYJ29eB6y8dKp/UWJ5VU21NldfpW5hBap2v1wQpUih7+CcRIZ7fvZaZbONEBU+UyYbT8OASJkvxmLB5eKLTXftz5gQkCPyR8oKacc5n0alU/DMWkKOOQUc2VzIAkJMR7DLwD1fnb+msnx";
+//        String input = "MIICEzCB/AIBATAfoR2kGzAZMRcwFQYBaQQQNLzh4PDBQfi3MpF7mSIT/qBfMF2kWzBZMRAwDgYDVQQDDAdBdHRyIENBMQwwCgYDVQQLDANDUEcxDTALBgNVBAsMBERDU0cxDjAMBgNVBAoMBUludGVsMQswCQYDVQQIDAJDQTELMAkGA1UEBhMCVVMwDQYJKoZIhvcNAQELBQACBgFEt/32JjAiGA8yMDE0MDMxMjIwMzExOFoYDzIwMTQwMzEyMjEzMTE4WjA6MBoGBVUEhhUCMREwDwwHQ291bnRyeTAEDAJVUzAcBgVVBIYVAjETMBEMBVN0YXRlMAgMAkNBDAJUWDANBgkqhkiG9w0BAQsFAAOCAQEAchfMCn4/7FeMU00+Jm2HHSanqYobH5oQ1pND/eEcCH/8k2HQ/qtp54Mge4mNhiGBlC/5MLmNXGDfFWgxbIbyYxJjSHMWJf/Kzv5L/9aituYg1dwHJF5GcL5Ue0WOEbbW7sRQSEMfbLePxaxs/T0pXHphyPKaeFunu8YSx57tvhth6jWDw2/Wk2IQ03FV4W1Lb0tYSLtoGA5CsVvVPXqcIrtvKybKhiGeyeMEyS+9nZwCzmK3i5Y1Zof4HfQJb4MltlbQarAcrwfHKe4ZvYWom64awl5FiPz2IxvtXbx6VhGyso6+E4wo54EiDghLvYvX8AyYE3Z8oTJkSi2FTlKDeQ==";
 //        String input = "MIICGTCCAQECAQEwH6EdpBswGTEXMBUGAWkEENP3IYWWPU+wgLZwdbugFQygXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTMxMTEyMjE0MDAwWhgPMjAxMzEyMTIyMTQwMDBaMEQwFQYFVQSGFQExDAwKQ291bnRyeT1VUzATBgVVBIYVATEKDAhTdGF0ZT1DQTAWBgVVBIYVATENDAtDaXR5PUZvbHNvbTANBgkqhkiG9w0BAQsFAAOCAQEAY8PvE89R+qxymMSnyH6Tg19x0v6A7BqeliIEingP/NIKTp07McubBo1kJ8UsogmeSZ4UOtxA+0GIjfec6DPNyH/J9u+dLfEFi6EV8Qrigi56SJRGa3VuK4ElZSmyk5lwhORtAW2oISGp/z5prOiItN1JEv4X/FTrJ62OBqK0+nzduRo0fjYizPc1+bI0zPsevBRvvPjtSwKnjq4DLjs7i6/SQMT4Tkq7QF7JM4TJthCbepUimXWXb1QrH9VTs4fzFGSn2JVVCWw/g/aPyQaLCo+Z1VVf4odDCOkVd9sHEAL1cXGIhGmWKuLTPZbz+XYJlHb5qUdi9rBTqVqJ6LQAqQ==";
 //        String input = "MIICPTCCASUCAQEwH6EdpBswGTEXMBUGAWkEENJtsZYGpEnmp+ShAWjjyMugOzA5pDcwNTERMA8GA1UEAwwIQXNzZXQgQ0ExEzARBgNVBAsMCkRhdGFjZW50ZXIxCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAggPnqFOJ5mWHDAiGA8yMDEzMTExMjIxNTAxN1oYDzIwMTMxMTE5MjE1MDE3WjCBhDARBgkrBgEEAYaNHwExBAwCVVMwEQYJKwYBBAGGjR8CMQQMAkNBMBUGCSsGAQQBho0fAzEIDAZGb2xzb20wGgYJKwYBBAGGjR8DMQ0MC1NhbnRhIENsYXJhMBMGCSsGAQQBho0fBDEGDARDb2tlMBQGCSsGAQQBho0fBDEHDAVQZXBzaTANBgkqhkiG9w0BAQsFAAOCAQEAuSRvK3Vd1HiNwWKqtuYRPPhS4g8GqIW/10aLYS+Rj/FnPS3VHYIOp79orvECxCOPILUvtsYWFFfq/Gl+YSOp6xKrZxBsjA6pIHLH7x5J5x+33rgbu/2o2sn/DAjfrS87WdPE26Bo0woSjDRJkw948XHRA82kG6SFecK3W0Hq9DEqm8JPUFBu+53t2xh8JvSXKWxAwmVjuAMWytxkAfMS5xTQBe0BliUAwGR/7SOZnWQOxLUHXkIkKiXirU4UJKJ2wih2xmX5aNLsC9aqseAivK0OKobOX72WGpmCQkYjO2SDvMmJH2pzxie6X+BSxqhaGEcgpNllToEtU93GPSGdrA==";
 //        String input = "MIICejCCAWICAQEwH6EdpBswGTEXMBUGAWkEEJtmbrHLIUmviWSB09GTAACgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTQwMzA2MjExMTQ2WhgPMjAxNDA0MDYyMDExNDZaMIGkMBUGBVUEhhUBMQwMCkNvdW50cnk9VVMwEwYFVQSGFQExCgwIU3RhdGU9Q0EwFgYFVQSGFQExDQwLQ2l0eT1Gb2xzb20wGgYFVQSGFQIxETAPDAdDb3VudHJ5MAQMAlVTMBwGBVUEhhUCMRMwEQwFU3RhdGUwCAwCQ0EMAlRYMCQGBVUEhhUCMRswGQwEQ2l0eTARDAZGb2xzb20MB0VsIFBhc28wDQYJKoZIhvcNAQELBQADggEBAJmaQ99TykWSutAXNUwQ+oB+nZ+oYMFehuwbQ/fFDD/Z2wUKqdZflHVo94swOlm69s5xl/x+3hhiCdv8H63AOmjb626nmtOvp4hRb+YBx56F+uOGzb5zTbJwKc5LCEjAFXpHL71uxdQFf20+6rC7IhuKJZwLY89hb8Tk94vg0++9cecthRMWoSmp56rPZ44ZWyClNYHs2H20uO/8GR6t2FZX7L9aLg8xyXipdsCy/NmtxXflaHhTaNVWwGeYBoKcjKB4jsIKp/2cwLA0krGobBfGPUVyVc+On3sow17jFStAHqHQzJmNeFXy8NdTAqvAp6ZEfMkTdz3ccNiygXQxG90=";
-        String input = "MIICejCCAWICAQEwH6EdpBswGTEXMBUGAWkEECnguFrn9ktxowQgi70EeWegXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTQwMzA2MjIyOTE4WhgPMjAxNDA0MDYyMTI5MThaMIGkMBUGBVUEhhUBMQwMCkNvdW50cnk9VVMwEwYFVQSGFQExCgwIU3RhdGU9Q0EwFgYFVQSGFQExDQwLQ2l0eT1Gb2xzb20wGgYFVQSGFQIxETAPDAdDb3VudHJ5MAQMAlVTMBwGBVUEhhUCMRMwEQwFU3RhdGUwCAwCQ0EMAlRYMCQGBVUEhhUCMRswGQwEQ2l0eTARDAZGb2xzb20MB0VsIFBhc28wDQYJKoZIhvcNAQELBQADggEBACeZdTYQdnimdsMfoN5Bk+qCNA2mYdFEpEKekyDhPP0B7+h0on1UHlcsTsNI/P4c4Co8r5lln3hVuWsYvcb2HFseSuREv6O3fNCY8a77OmQWRkH2AVMDXIDDgpEMdAq7ada4V/Fxeh/TILr4VMQf4TuFdn6QBTW7Hqgk9cP55njPv5BG0ukv677L3vODqY/u9KOkMNarx/qgHVcywefwi/zcC6wuG7BQ/6kOX933g31rTZSfI/+dFVS/x6CoWUkU+TbSLUE+RY2fAVkGNeWz5OLkRhKrCrJ91XDDQuXnJzRafKkk7MJqYtG+qk6U8qvVtUf9EjN0g/u3V0aqu1ddB1g=";
+//        String input = "MIICejCCAWICAQEwH6EdpBswGTEXMBUGAWkEECnguFrn9ktxowQgi70EeWegXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTQwMzA2MjIyOTE4WhgPMjAxNDA0MDYyMTI5MThaMIGkMBUGBVUEhhUBMQwMCkNvdW50cnk9VVMwEwYFVQSGFQExCgwIU3RhdGU9Q0EwFgYFVQSGFQExDQwLQ2l0eT1Gb2xzb20wGgYFVQSGFQIxETAPDAdDb3VudHJ5MAQMAlVTMBwGBVUEhhUCMRMwEQwFU3RhdGUwCAwCQ0EMAlRYMCQGBVUEhhUCMRswGQwEQ2l0eTARDAZGb2xzb20MB0VsIFBhc28wDQYJKoZIhvcNAQELBQADggEBACeZdTYQdnimdsMfoN5Bk+qCNA2mYdFEpEKekyDhPP0B7+h0on1UHlcsTsNI/P4c4Co8r5lln3hVuWsYvcb2HFseSuREv6O3fNCY8a77OmQWRkH2AVMDXIDDgpEMdAq7ada4V/Fxeh/TILr4VMQf4TuFdn6QBTW7Hqgk9cP55njPv5BG0ukv677L3vODqY/u9KOkMNarx/qgHVcywefwi/zcC6wuG7BQ/6kOX933g31rTZSfI/+dFVS/x6CoWUkU+TbSLUE+RY2fAVkGNeWz5OLkRhKrCrJ91XDDQuXnJzRafKkk7MJqYtG+qk6U8qvVtUf9EjN0g/u3V0aqu1ddB1g=";
+//        String input = "MIICNjCCAR4CAQEwH6EdpBswGTEXMBUGAWkEEHOlGZWNdeERvR0AHmc+dWOgIDAepBwwGjEYMBYGA1UEAwwPYXNzZXRUYWdTZXJ2aWNlMA0GCSqGSIb3DQEBCwUAAgYBRLfX2PQwIhgPMjAxNDAzMTIxOTQ5NDBaGA8yMDE1MDMxMjE5NDk0MFowgZowHAYFVQSGFQIxEzARDAAwDQwLLTEyMS4xNjM2MTkwHQYFVQSGFQExFAwSTGF0aXR1ZGU9MzguNjQ0Nzg1MBgGBVUEhhUCMQ8wDQwAMAkMB0ZpbmFuY2UwFAYFVQSGFQIxCzAJDAAwBQwDREMxMBMGBVUEhhUCMQowCAwAMAQMAkNBMBYGBVUEhhUBMQ0MC0NvdW50cnk9VVNBMA0GCSqGSIb3DQEBCwUAA4IBAQCx/KPjCqWewCz+7vn2Scm4IFRzcJSCTzSiYy9P+AjwAFBsdxfiq9t7hlIWVXcrvB83EZk7xFYG1tUsKRPq+cWSr74+sXYp1dtaURGWlohNpFW0rBuTdIyO+Fi4DMaYpDmN9Dznq3v8c303rYGVCyoUEBG1piA7DIEIuBjLAJ0IKJ31k9ymPvNlxl0/hWzCOtsL2WIqWHpEf1c4YE6r8oR3hwRMPz6Zu1cMUy7CnRaDctJjPBQUpDyNJfYC/EXPSAfHsa4SovsdrrvMbfZB63JwPEN0t6wSremUrdEjFWvlN9Z1ZsVBA0MflbeSTnDbH1QSL8KHHngF7DQF37whxTxD";
+//        String input = "MIIB1DCBvQIBATAfoR2kGzAZMRcwFQYBaQQQc6UZlY114RG9HQAeZz51Y6AgMB6kHDAaMRgwFgYDVQQDDA9hc3NldFRhZ1NlcnZpY2UwDQYJKoZIhvcNAQELBQACBgFEuA7VWTAiGA8yMDE0MDMxMjIwNDk0M1oYDzIwMTUwMzEyMjA0OTQzWjA6MBkGBVUEhhUBMRAMDkNvdW50cnk9Q2FuYWRhMB0GBVUEhhUBMRQMEkxhdGl0dWRlPTU2LjU0MDY1MjANBgkqhkiG9w0BAQsFAAOCAQEActZ//ZkXtTDQc72i4AW3BqIa9n0vUzcC72lXqO0eFrawDUoMOSwf80F4T8YrGZr1q61QMTWv4GqlSsbKwuGyLcHWal/s9cZzr9oiE5sU60Mvg5eux939MKKr/bVXO3CkrsY7c1iaf+66zCXLNQ9pkAO67djo19sj7KWeDRR7uuuz1Fl+/oHpJEOEyhc6Uz7cTBckg/qL6zd7kavkKNSZyPLLPDNRN7lRdm75Gn8qsrIiqi1dmYXJCouMJSATZ+CuS7Vsop2ulS6Iso4cSlwWPH4f1pCmkxQDZx+YYtOREHIWhSOQWIibyffsgNs10kARYalYeFJxc7G+mPgrp0gIMw==";
+        String input = "MIICLzCCARcCAQEwH6EdpBswGTEXMBUGAWkEEHOlGZWNdeERvR0AHmc+dWOgIDAepBwwGjEYMBYGA1UEAwwPYXNzZXRUYWdTZXJ2aWNlMA0GCSqGSIb3DQEBCwUAAgYBRLgdCXgwIhgPMjAxNDAzMTIyMTA1MTRaGA8yMDE1MDMxMjIxMDUxNFowgZMwGQYFVQSGFQExEAwOQ291bnRyeT1DYW5hZGEwGQYFVQSGFQExEAwORGF0YWNlbnRlcj1EQzUwGgYFVQSGFQExEQwPUmVnaW9uPUJlbmVmaXRzMB0GBVUEhhUBMRQMEkxhdGl0dWRlPTU2LjU0MDY1MjAgBgVVBIYVATEXDBVMb25naXR1ZGU9LTEyNi45NTExNTMwDQYJKoZIhvcNAQELBQADggEBAI/NocY0z4ibw4hYjr1Oxk2PBflor82pcRIJCkMWiooWrx9MXPCvvZEPk6I3YkwmZfsbBgcrCuhi4ZL5ie4SUQbjzT9PU7j1TWGgjjaRQBeb507BWIhKK1lDJt1PLgKo8ZBbTagdAebz5r6VZ3bstbSaIxgUfOo/jnGpRPq0ysaePBrICfb/8O6/LInrhMzOlkqwplzqJmveO+/BLaueg2RGEJ5Gco1eA2zDEPNcaiTEf7HLI2pLIcd517N8tWay9c5Nu3U8N+qZ/qNXGSWlqKTTJqydeR56mzQZ/rXlaJwABRqo9WkpfE+j+W8j3LaCvHaEcw/60ELLurxIxKeb9vY=";
         X509AttributeCertificateHolder cert = new X509AttributeCertificateHolder(Base64.decodeBase64(input));
         log.debug("issuer: {}", StringUtils.join(cert.getIssuer().getNames(), ", "));  // calls toString() on each X500Name so we get the default representation; we can do it ourselves for custom display;  output example: CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US
         log.debug("serial number: {}", cert.getSerialNumber().toString()); // output example:   1
@@ -187,10 +208,12 @@ public class AttrCertificateTest {
                 if( attr.getAttrType().toString().equals(OID_NAMEVALUE_UTF8)) {
                     log.debug("name-value microformat attribute: {}",  DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string                    
                     UTF8NameValueMicroformat microformat = new UTF8NameValueMicroformat(DERUTF8String.getInstance(value));
-                    log.debug("name-value microformat attribute (2)  name {} value {}", microformat.getName(), microformat.getValue());
+                    log.debug("name-value microformat attribute (3)  name {} value {}", microformat.getName(), microformat.getValue());
                 }
                 else if( attr.getAttrType().toString().equals(OID_NAMEVALUE_LIST_UTF8)) {
-                    UTF8NameValueSequence sequence = new UTF8NameValueSequence(ASN1Sequence.getInstance(value));
+                    log.debug(".2  der = {}", Base64.encodeBase64String(value.getEncoded()));
+//                    UTF8NameValueSequence sequence = new UTF8NameValueSequence(ASN1Sequence.getInstance(value));
+                    UTF8NameValueSequence sequence = new UTF8NameValueSequence((ASN1Sequence)value);
                     String name = sequence.getName();
                     List<String> values = sequence.getValues();
                     log.debug("name-values asn.1 attribute {} values {}",  name, values); 

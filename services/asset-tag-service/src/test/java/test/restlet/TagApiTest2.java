@@ -13,6 +13,7 @@ import example.restlet.ObjectBox;
 import example.restlet.Fruit;
 import com.intel.mtwilson.atag.client.At;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.My;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.restlet.representation.Representation;
 
@@ -622,7 +624,8 @@ public class TagApiTest2 {
                     .expires(7, TimeUnit.DAYS);
             for (SelectionTagValue tag : selection.getTags()) {
                 log.debug("Adding attribute: {} = {}", tag.getTagOid(), tag.getTagValue());
-                builder.attribute(tag.getTagOid(), tag.getTagValue());
+//                builder.attribute(tag.getTagOid(), tag.getTagValue());
+                builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(tag.getTagName(), tag.getTagValue()));
             }
             X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(builder.build());
             CertificateRequest approved = At.certificateRequestApproval(recentRequest.getUuid()).post(certificateHolder.getEncoded(), CertificateRequest.class);
