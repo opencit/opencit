@@ -5,15 +5,15 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.CONFIGURATION;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_CONFIGURATION;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
-import com.intel.mtwilson.tag.rest.v2.model.Configuration;
-import com.intel.mtwilson.tag.rest.v2.model.ConfigurationCollection;
-import com.intel.mtwilson.tag.rest.v2.model.ConfigurationFilterCriteria;
-import com.intel.mtwilson.tag.rest.v2.model.ConfigurationLocator;
+import com.intel.mtwilson.tag.model.Configuration;
+import com.intel.mtwilson.tag.model.ConfigurationCollection;
+import com.intel.mtwilson.tag.model.ConfigurationFilterCriteria;
+import com.intel.mtwilson.tag.model.ConfigurationLocator;
 import java.io.IOException;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -35,51 +35,50 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
 
     @Override
     public ConfigurationCollection search(ConfigurationFilterCriteria criteria) {
-//        ConfigurationCollection objCollection = new ConfigurationCollection();
-//        DSLContext jooq = null;
-//        
-//        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
-//            jooq = TagJdbi.jooq();
-//            
-//            SelectQuery sql = jooq.select().from(CONFIGURATION).getQuery();
-//            if( criteria.id != null ) {
-//    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-//                sql.addConditions(CONFIGURATION.UUID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-//            }
-//            if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
-//                sql.addConditions(CONFIGURATION.NAME.equal(criteria.nameEqualTo));
-//            }
-//            if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
-//                sql.addConditions(CONFIGURATION.NAME.contains(criteria.nameContains));
-//            }/*
-//            if( query.contentTypeEqualTo != null && query.contentTypeEqualTo.length() > 0 ) {
-//                sql.addConditions(CONFIGURATION.CONTENTTYPE.equal(query.contentTypeEqualTo));
-//            }*/
-//            Result<Record> result = sql.fetch();
-//            com.intel.mtwilson.atag.model.Configuration[] configurations = new com.intel.mtwilson.atag.model.Configuration[result.size()];
-//            log.debug("Got {} records", configurations.length);
-//            for(Record r : result) {
-//                Configuration configObj = new Configuration();
-//                configObj.setId(r.getValue(CONFIGURATION.ID));
-//                configObj.setName(r.getValue(CONFIGURATION.NAME));
-//                try {
-//                    configObj.setXmlContent(r.getValue(CONFIGURATION.CONTENT));
-//                }
-//                catch(IOException e) {
-//                    log.error("Failed to load configuration content for {}", configObj.getId().toString());
-//                }
-//                objCollection.getConfigurations().add(configObj);
-//            }
-//            sql.close();
-//
-//        } catch (ResourceException aex) {
-//            throw aex;            
-//        } catch (Exception ex) {
-//            log.error("Error during configuration search.", ex);
-//            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
-//        }        
-//        return objCollection;
-        return null;
+        ConfigurationCollection objCollection = new ConfigurationCollection();
+        DSLContext jooq = null;
+        
+        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
+            jooq = TagJdbi.jooq();
+            
+            SelectQuery sql = jooq.select().from(MW_CONFIGURATION).getQuery();
+            if( criteria.id != null ) {
+    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
+                sql.addConditions(MW_CONFIGURATION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+            }
+            if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
+                sql.addConditions(MW_CONFIGURATION.NAME.equal(criteria.nameEqualTo));
+            }
+            if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
+                sql.addConditions(MW_CONFIGURATION.NAME.contains(criteria.nameContains));
+            }/*
+            if( query.contentTypeEqualTo != null && query.contentTypeEqualTo.length() > 0 ) {
+                sql.addConditions(MW_CONFIGURATION.CONTENTTYPE.equal(query.contentTypeEqualTo));
+            }*/
+            Result<Record> result = sql.fetch();
+            com.intel.mtwilson.atag.model.Configuration[] configurations = new com.intel.mtwilson.atag.model.Configuration[result.size()];
+            log.debug("Got {} records", configurations.length);
+            for(Record r : result) {
+                Configuration configObj = new Configuration();
+                configObj.setId(UUID.valueOf(r.getValue(MW_CONFIGURATION.ID)));
+                configObj.setName(r.getValue(MW_CONFIGURATION.NAME));
+                try {
+                    configObj.setXmlContent(r.getValue(MW_CONFIGURATION.CONTENT));
+                }
+                catch(IOException e) {
+                    log.error("Failed to load configuration content for {}", configObj.getId().toString());
+                }
+                objCollection.getConfigurations().add(configObj);
+            }
+            sql.close();
+
+        } catch (ResourceException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during configuration search.", ex);
+            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+        }        
+        return objCollection;
     }
 
     @Override

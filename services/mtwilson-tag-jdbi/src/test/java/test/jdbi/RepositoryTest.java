@@ -4,8 +4,15 @@
  */
 package test.jdbi;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.dao.TagJdbi;
+import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
+import com.intel.mtwilson.tag.model.Selection;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.util.Properties;
 import javax.sql.DataSource;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -41,6 +48,51 @@ public class RepositoryTest {
         String name = dao.findNameById(2);
         assertEquals(name, "Aaron"); 
         dao.close();
+    }
+    
+    public static class QueryManager {
+//        private String queryResourceFilename;
+        private String driverName;
+        private Properties sql;
+        public QueryManager(String sqlResourcePath, String driverName) throws IOException {
+            InputStream in = getClass().getResourceAsStream(sqlResourcePath); // for example  "/tag-jdbi.properties");
+            sql = new Properties();
+            sql.load(in);
+            this.driverName = driverName;
+        }
+        public String getQuery(String queryName) {
+            String query = sql.getProperty(String.format("%s.%s", queryName, driverName));
+            log.debug("query.driver = {}", query);
+            if( query == null ) {
+                query = sql.getProperty(queryName);
+                log.debug("query = {}", query);
+            }
+            return query; // may be null
+        }
+    }
+
+    @Test
+    public void testQueryManager() throws Exception {
+        InputStream in = getClass().getResourceAsStream("/tag-jdbi.properties");
+        Properties jdbiProperties = new Properties();
+        jdbiProperties.load(in);
+        log.debug("create sql for postgresql: {}", jdbiProperties.getProperty("mw_tag_selection.create.postgresql"));
+        log.debug("create sql for mysql: {}", jdbiProperties.getProperty("mw_tag_selection.create.mysql"));
+        QueryManager manager = new QueryManager("/tag-jdbi.properties", "postgresql");
+        log.debug("create sql for postgresql from manager: {}", manager.getQuery("mw_tag_selection.create"));
+    }
+    
+    @Test
+    public void testUuids() throws Exception {
+        QueryManager manager = new QueryManager("/tag-jdbi.properties", "postgresql");
+        log.debug("create sql for postgresql from manager: {}", manager.getQuery("mw_tag_selection.create"));
+        try(SelectionDAO dao = TagJdbi.selectionDao()) {
+//            dao.create();
+            dao.insert(new UUID(), "test", "description");
+            Selection selection = dao.findByName("test");
+            ObjectMapper mapper = new ObjectMapper();
+            log.debug("selection: {}", mapper.writeValueAsString(selection));
+        }
     }
     
     

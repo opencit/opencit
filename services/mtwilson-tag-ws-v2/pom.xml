@@ -24,10 +24,15 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-dao-jooq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-jdbi-mysql</artifactId>
+            <artifactId>mtwilson-tag-jdbi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

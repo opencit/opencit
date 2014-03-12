@@ -34,7 +34,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterArgumentFactory({UUIDArgument.class})
 @RegisterMapper(ConfigurationResultMapper.class)
 public interface ConfigurationDAO extends Closeable{
-    @SqlUpdate("create table mw_configuration (id bigint primary key generated always as identity, uuid char(36), name varchar(255), content clob)")
+    @SqlUpdate("create table mw_configuration (id char(36) primary key, name varchar(255), content clob)")
     void create();
     
     @SqlUpdate("insert into mw_configuration (id,name,content) values (:id, :name, :content)")

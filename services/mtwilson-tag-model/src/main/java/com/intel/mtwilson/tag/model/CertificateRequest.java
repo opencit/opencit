@@ -19,6 +19,7 @@ public class CertificateRequest extends Document{
     private String status;
     private String authorityName;
     private UUID certificateId;
+    private UUID selectionId;
     private String selectionName; // tags to include in the certificate
 
     public String getSubject() {
@@ -53,6 +54,15 @@ public class CertificateRequest extends Document{
         this.certificateId = certificateId;
     }
 
+    public UUID getSelectionId() {
+        return selectionId;
+    }
+
+    public void setSelectionId(UUID selectionId) {
+        this.selectionId = selectionId;
+    }
+
+    
     public String getSelectionName() {
         return selectionName;
     }

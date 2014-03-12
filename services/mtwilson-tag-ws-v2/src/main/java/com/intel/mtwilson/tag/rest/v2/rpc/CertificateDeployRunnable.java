@@ -13,7 +13,7 @@ import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
-import com.intel.mtwilson.tag.rest.v2.model.Certificate;
+import com.intel.mtwilson.tag.model.Certificate;
 import java.util.List;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
