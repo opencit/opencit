@@ -163,8 +163,8 @@ all_status() {
   find_ctl_commands
   if [ -n "$pcactl" ]; then $pcactl status; fi
   if [ -n "$asctl" ]; then $asctl status; fi
-  if [ -n "$msctl" ]; then $msctl status; fi
-  if [ -n "$wlmctl" ]; then $wlmctl status; fi
+  #if [ -n "$msctl" ]; then $msctl status; fi
+  #if [ -n "$wlmctl" ]; then $wlmctl status; fi
   #if [ -n "$mcctl" ]; then $mcctl status; fi
   #if [ -n "$wpctl" ]; then $wpctl status; fi
   #if [ -n "$tdctl" ]; then $tdctl status; fi

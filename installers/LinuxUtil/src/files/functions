@@ -2985,9 +2985,9 @@ webservice_running_report() {
   echo -n "Checking ${webservice_application_name}... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
-    echo "Running"
+    echo_success "Running"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 
