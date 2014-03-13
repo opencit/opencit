@@ -156,7 +156,7 @@ jQuery.extend({
                 }
                 try
                 {
-
+                        // also check here that what was created up above is also still here
                         var form = jQuery('#' + formId);
                         jQuery(form).attr('action', s.url);
                         jQuery(form).attr('method', 'POST');
