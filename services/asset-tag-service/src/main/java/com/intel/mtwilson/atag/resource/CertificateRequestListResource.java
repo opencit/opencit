@@ -207,6 +207,8 @@ public class CertificateRequestListResource extends ServerResource {
     public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
+        String hostName = "";
+        boolean useHostName = false;
         if(! UUID.isValid(certificateRequest.getSubject())) {
             List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(certificateRequest.getSubject(),true);
             if(hostList == null || hostList.size() < 1) {
@@ -214,6 +216,8 @@ public class CertificateRequestListResource extends ServerResource {
                 throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field."));
             }
             log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
+            hostName = certificateRequest.getSubject();
+            useHostName = true;
             certificateRequest.setSubject(hostList.get(0).Hardware_Uuid);
         }
         // IMPORTANT: provisioning policy choices:
@@ -450,9 +454,9 @@ public class CertificateRequestListResource extends ServerResource {
                     }
                     if(My.configuration().getAssetTagAutoDeploy() == true) {
                         //  deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord)
-                        if(! UUID.isValid(certificateRequest.getSubject())) {
+                        if(useHostName) {
                             log.debug("deploying certificate to host");
-                            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(certificateRequest.getSubject(),true);
+                            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(hostName,true);
                             if(!(hostList == null || hostList.size() == 0)) {
                                 TxtHostRecord hostRecord = hostList.get(0);
                                 try {
@@ -465,7 +469,7 @@ public class CertificateRequestListResource extends ServerResource {
                                 log.error("couldn't find record for host, unable to auto deploy certificate");
                             }
                         }else{
-                            log.error("couldn't find record for host, unable to auto deploy certificate");
+                            log.error("UUID provided in request, unable to auto deploy certificate");
                         }
                     }
                 }
