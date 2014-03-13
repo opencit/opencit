@@ -1090,9 +1090,9 @@ mysql_running_report() {
   echo -n "Checking MySQL process... "
   mysql_running
   if [[ "$MYSQL_SERVER_RUNNING" == "yes" ]]; then
-    echo "Running"
+    echo_success "Running"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 mysql_start() {
@@ -1603,9 +1603,9 @@ postgres_running_report() {
   echo -n "Checking Postgres process... "
   postgres_running
   if [[ "$POSTGRES_SERVER_RUNNING" == "yes" ]]; then
-    echo "Running"
+    echo_success "Running"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 postgres_restart() {
@@ -2048,9 +2048,9 @@ glassfish_running() {
 glassfish_running_report() {
   echo -n "Checking Glassfish process... "
   if glassfish_running; then
-    echo "Running (pid $GLASSFISH_PID)"
+    echo_success "Running (pid $GLASSFISH_PID)"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 glassfish_start() {
@@ -2462,9 +2462,9 @@ tomcat_running() {
 tomcat_running_report() {
   echo -n "Checking Tomcat process... "
   if tomcat_running; then
-    echo "Running (pid $TOMCAT_PID)"
+    echo_success "Running (pid $TOMCAT_PID)"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 tomcat_start() {
