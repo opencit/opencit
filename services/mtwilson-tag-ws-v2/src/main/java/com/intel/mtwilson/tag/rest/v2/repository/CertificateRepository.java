@@ -5,20 +5,15 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.iso8601.Iso8601Date;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.CERTIFICATE;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.TAG;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.TAG_VALUE;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
-import com.intel.mtwilson.tag.rest.v2.model.Certificate;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateCollection;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateFilterCriteria;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateLocator;
+import com.intel.mtwilson.tag.model.Certificate;
+import com.intel.mtwilson.tag.model.CertificateCollection;
+import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -39,70 +34,70 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
 
     @Override
     public CertificateCollection search(CertificateFilterCriteria criteria) {
-        /*CertificateCollection objCollection = new CertificateCollection();
+        CertificateCollection objCollection = new CertificateCollection();
         DSLContext jooq = null;
         
         try {
             jooq = TagJdbi.jooq();
             
             SelectQuery sql = jooq.select()
-                    .from(CERTIFICATE) // .join(CERTIFICATE_TAG_VALUE)
+                    .from(MW_TAG_CERTIFICATE) // .join(CERTIFICATE_TAG_VALUE)
                     //.on(CERTIFICATE_TAG_VALUE.CERTIFICATEREQUESTID.equal(CERTIFICATE.ID)))
                     .getQuery();
             if( criteria.id != null ) {
-                sql.addConditions(CERTIFICATE.UUID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-                sql.addConditions(CERTIFICATE.SUBJECT.equal(criteria.subjectEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectEqualTo));
             }
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(CERTIFICATE.SUBJECT.equal(criteria.subjectContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectContains));
             }
             if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
-                sql.addConditions(CERTIFICATE.ISSUER.equal(criteria.issuerEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerEqualTo));
             }
             if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
-                sql.addConditions(CERTIFICATE.ISSUER.equal(criteria.issuerContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerContains));
             }
             if( criteria.sha1 != null  ) {
-                sql.addConditions(CERTIFICATE.SHA1.equal(criteria.sha1.toHexString()));
+                sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equal(criteria.sha1.toHexString()));
             }
             if( criteria.sha256 != null  ) {
-                sql.addConditions(CERTIFICATE.SHA256.equal(criteria.sha256.toHexString()));
+                sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equal(criteria.sha256.toHexString()));
             }
             if( criteria.validOn != null ) {
-                sql.addConditions(CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));
-                sql.addConditions(CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validOn.getTime())));
+                sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));
+                sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validOn.getTime())));
             }
             if( criteria.validBefore != null ) {
-                sql.addConditions(CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validBefore.getTime())));
+                sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validBefore.getTime())));
             }
             if( criteria.validAfter != null ) {
-                sql.addConditions(CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validAfter.getTime())));
+                sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validAfter.getTime())));
             }
             if( criteria.revoked != null   ) {
-                sql.addConditions(CERTIFICATE.REVOKED.equal(criteria.revoked));
+                sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
             }
-            sql.addOrderBy(CERTIFICATE.ID);
+            sql.addOrderBy(MW_TAG_CERTIFICATE.ID);
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
-            UUID c = null; // id of the current certificate request object built, used to detect when it's time to build the next one
+            UUID c = new UUID(); // id of the current certificate request object built, used to detect when it's time to build the next one
             for(Record r : result) {
                 Certificate certObj = new Certificate();
-                if( r.getValue(CERTIFICATE.ID) != c ) {
-                    c = r.getValue(CERTIFICATE.ID);
+                if( UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)) != c ) {
+                    c = UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID));
                     try {
                         log.debug("Creating certificate record at c={}", c);
-                        certObj.setCertificate((byte[])r.getValue(CERTIFICATE.CERTIFICATE_));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
-                        certObj.setId(r.getValue(CERTIFICATE.ID));
-                        if( r.getValue(CERTIFICATE.REVOKED) != null ) {
-                            certObj.setRevoked(r.getValue(CERTIFICATE.REVOKED));
+                        certObj.setCertificate((byte[])r.getValue(MW_TAG_CERTIFICATE.CERTIFICATE));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
+                        certObj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)));
+                        if( r.getValue(MW_TAG_CERTIFICATE.REVOKED) != null ) {
+                            certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
                         }
-                        log.debug("Created certificate record {}", certObj.getUuid());
+                        log.debug("Created certificate record {}", certObj.getId().toString());
                         objCollection.getCertificates().add(certObj);
                     }
                     catch(Exception e) {
-                        log.error("Cannot load certificate #{}", r.getValue(CERTIFICATE.ID), e);
+                        log.error("Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
                     }
                 }
             }
@@ -116,8 +111,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             log.error("Error during certificate search.", ex);
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
         }        
-        return objCollection;*/
-        return null;
+        return objCollection;
     }
 
     @Override

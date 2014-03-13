@@ -5,30 +5,16 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.mtwilson.My;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.CERTIFICATE_REQUEST;
-import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE_REQUEST;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
-import com.intel.mtwilson.tag.common.Global;
-import com.intel.mtwilson.tag.common.X509AttrBuilder;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateRequestDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
-import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
-import com.intel.mtwilson.tag.rest.v2.model.Certificate;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateRequest;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateRequestCollection;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateRequestFilterCriteria;
-import com.intel.mtwilson.tag.rest.v2.model.CertificateRequestLocator;
-import com.intel.mtwilson.tag.rest.v2.model.Selection;
-import com.intel.mtwilson.tag.rest.v2.model.SelectionKvAttribute;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import com.intel.mtwilson.tag.model.CertificateRequest;
+import com.intel.mtwilson.tag.model.CertificateRequestCollection;
+import com.intel.mtwilson.tag.model.CertificateRequestFilterCriteria;
+import com.intel.mtwilson.tag.model.CertificateRequestLocator;
+import com.intel.mtwilson.tag.model.Selection;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -49,52 +35,50 @@ public class CertificateRequestRepository extends ServerResource implements Simp
 
     @Override
     public CertificateRequestCollection search(CertificateRequestFilterCriteria criteria) {
-       /* CertificateRequestCollection objCollection = new CertificateRequestCollection();
+        CertificateRequestCollection objCollection = new CertificateRequestCollection();
         DSLContext jooq = null;
-        SelectionDAO selectionDao = null;
         
-        try {
+        try (SelectionDAO selectionDao = TagJdbi.selectionDao()) {
             jooq = TagJdbi.jooq();
-            selectionDao = TagJdbi.selectionDao();
             
             SelectQuery sql = jooq.select()
-                    .from(CERTIFICATE_REQUEST) // .join(CERTIFICATE_REQUEST_TAG_VALUE)
+                    .from(MW_TAG_CERTIFICATE_REQUEST) // .join(CERTIFICATE_REQUEST_TAG_VALUE)
                     //.on(CERTIFICATE_REQUEST_TAG_VALUE.CERTIFICATEREQUESTID.equal(CERTIFICATE_REQUEST.ID)))
                     .getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(CERTIFICATE_REQUEST.UUID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-                sql.addConditions(CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectEqualTo));
             }
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectContains));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectContains));
             }
             if( criteria.selectionEqualTo != null  && criteria.selectionEqualTo.length() > 0 ) {
-                sql.addConditions(CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionEqualTo));
             }
             if( criteria.selectionContains != null  && criteria.selectionContains.length() > 0  ) {
-                sql.addConditions(CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionContains));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionContains));
             }
             if( criteria.statusEqualTo != null  && criteria.statusEqualTo.length() > 0 ) {
-                sql.addConditions(CERTIFICATE_REQUEST.STATUS.equal(criteria.statusEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equal(criteria.statusEqualTo));
             }
-            sql.addOrderBy(CERTIFICATE_REQUEST.ID);
+            sql.addOrderBy(MW_TAG_CERTIFICATE_REQUEST.ID);
             Result<Record> result = sql.fetch();
             
             log.debug("Got {} records", result.size());
-            long c = -1; // id of the current certificate request object built, used to detect when it's time to build the next one
+            UUID c = new UUID(); // id of the current certificate request object built, used to detect when it's time to build the next one
             for(Record r : result) {
-                if( r.getValue(CERTIFICATE_REQUEST.ID) != c ) {
-                    c = r.getValue(CERTIFICATE_REQUEST.ID);
+                if( UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)) != c ) {
+                    c = UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID));
                     CertificateRequest obj = new CertificateRequest();
-                    obj.setId(r.getValue(CERTIFICATE_REQUEST.ID));
-                    obj.setSubject(r.getValue(CERTIFICATE_REQUEST.SUBJECT));
-                    obj.setSelectionId(r.getValue(CERTIFICATE_REQUEST.SELECTIONID));
-                    obj.setStatus(r.getValue(CERTIFICATE_REQUEST.STATUS));
-                    if( r.getValue(CERTIFICATE_REQUEST.CERTIFICATEID) != null ) { // a Long object, can be null
-                        obj.setCertificateId(r.getValue(CERTIFICATE_REQUEST.CERTIFICATEID)); // a long primitive, cannot set to null
+                    obj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)));
+                    obj.setSubject(r.getValue(MW_TAG_CERTIFICATE_REQUEST.SUBJECT));
+                    obj.setSelectionId(UUID.valueOf((r.getValue(MW_TAG_CERTIFICATE_REQUEST.SELECTIONID))));
+                    obj.setStatus(r.getValue(MW_TAG_CERTIFICATE_REQUEST.STATUS));
+                    if( r.getValue(MW_TAG_CERTIFICATE_REQUEST.CERTIFICATEID) != null ) { // a Long object, can be null
+                        obj.setCertificateId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CERTIFICATEID))); // a long primitive, cannot set to null
                     }
                     objCollection.getCertificates().add(obj);
                 }
@@ -106,8 +90,7 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             log.error("Error during certificate search.", ex);
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
         }        
-        return objCollection;*/
-        return null;
+        return objCollection;
     }
 
     @Override

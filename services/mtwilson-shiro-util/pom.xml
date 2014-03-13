@@ -51,6 +51,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- servlet and jaxrs apis for the exception mapper -->	
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -113,7 +119,18 @@
             <artifactId>xstream</artifactId>
             <version>1.4.5</version>
         </dependency>
-                                
+                              
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
+        </dependency>      
+                              
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <properties />
 </project>

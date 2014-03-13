@@ -25,7 +25,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  */
 @RegisterMapper(SelectionKvAttributeResultMapper.class)
 public interface SelectionKvAttributeDAO extends Closeable{
-    @SqlUpdate("create table selection_tag_value (id bigint primary key generated always as identity, selectionId bigint, tagId bigint, tagValueId bigint)")
+    @SqlUpdate("create table mw_tag_selection_kvattribute (id char(36) primary key, selectionId char(36), kvAttributeId char(36))")
     void create();
     
     @SqlUpdate("insert into mw_tag_selection_kvattribute (id, selectionId, kvAttributeId) values (:id, :selectionId, :kvAttributeId)")
@@ -47,11 +47,10 @@ public interface SelectionKvAttributeDAO extends Closeable{
     @SqlQuery("select mw_tag_selection_kvattribute.id, "
             + "mw_tag_selection_kvattribute.selectionId, "
             + "mw_tag_selection_kvattribute.kvAttributeId, "
-            + "mw_tag_kvattribute.id, "
+//            + "mw_tag_kvattribute.id, " // not needed and will conflict with "id" from mw_tag_selection_kvattribute
             + "mw_tag_kvattribute.name,"
             + "mw_tag_kvattribute.value "
-            + "from mw_tag_selection_kvattribute, "
-            + "mw_tag_kvattribute,"
+            + "from mw_tag_selection_kvattribute, mw_tag_kvattribute "
             + "where mw_tag_selection_kvattribute.selectionId =:selectionId and "
             + "mw_tag_kvattribute.id = mw_tag_selection_kvattribute.kvAttributeId")
     List<SelectionKvAttribute> findBySelectionIdWithValues(@Bind("selectionId") UUID selectionId);

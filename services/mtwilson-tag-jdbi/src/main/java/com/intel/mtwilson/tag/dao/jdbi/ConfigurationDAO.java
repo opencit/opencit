@@ -34,24 +34,24 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterArgumentFactory({UUIDArgument.class})
 @RegisterMapper(ConfigurationResultMapper.class)
 public interface ConfigurationDAO extends Closeable{
-    @SqlUpdate("create table configuration (id bigint primary key generated always as identity, uuid char(36), name varchar(255), content clob)")
+    @SqlUpdate("create table mw_configuration (id char(36) primary key, name varchar(255), content clob)")
     void create();
     
-    @SqlUpdate("insert into configuration (id,name,content) values (:id, :name, :content)")
+    @SqlUpdate("insert into mw_configuration (id,name,content) values (:id, :name, :content)")
 //    @GetGeneratedKeys
     long insert(@Bind("id") UUID id, @Bind("name") String name, @Bind("content") String content);
 
-    @SqlUpdate("update configuration set name=:name, content=:content where id=:id")
+    @SqlUpdate("update mw_configuration set name=:name, content=:content where id=:id")
     void update(@Bind("id") UUID id, @Bind("name") String name, @Bind("content") String content);
 
-    @SqlUpdate("delete from configuration where id=:id")
+    @SqlUpdate("delete from mw_configuration where id=:id")
     void delete(@Bind("id") UUID id);
 
     
-    @SqlQuery("select id, name, content from configuration where id=:id")
+    @SqlQuery("select id, name, content from mw_configuration where id=:id")
     Configuration findById(@Bind("id") UUID id);
     
-    @SqlQuery("select id, name, content from configuration where name=:name")
+    @SqlQuery("select id, name, content from mw_configuration where name=:name")
     Configuration findByName(@Bind("name") String name);
 
     @Override

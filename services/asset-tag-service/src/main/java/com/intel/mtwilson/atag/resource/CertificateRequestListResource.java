@@ -398,14 +398,22 @@ public class CertificateRequestListResource extends ServerResource {
                               builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
                         else if( tag.getTagOid().equals("2.5.4.789.2") ) { // name-valuesequence with just one value
+                            log.error("got .2 tag but encoding as .1 for now");
                             // XXX TODO   we need to collate these  (all  attribtues with oid 2.5.4.789.2 and same "name" should be combined to one attribute in the cert ...  or fix the UI to send them as a sequence  like { name: "name", value: [value1, value2, ...] }  so we can easily use all the values here
 //                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
-                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+//                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+//                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(tag.getTagName(), tag.getTagValue()));
+                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
                         else {
-                            // XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
-                            builder.attribute(tag.getTagOid(), tag.getTagValue());  // TODO -  binary/base64/ASN1Encodable                          
+                            log.error("unsupported tag oid {}", tag.getTagOid());
+                            // pretend it's a .1 microformat
+                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
+//                        else {
+//                             XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
+//                            builder.attribute(tag.getTagOid(), tag.getTagValue());  // TODO -  binary/base64/ASN1Encodable                          
+//                        }
                     }
                     byte[] attributeCertificateBytes = builder.build();
                     if( attributeCertificateBytes == null ) {

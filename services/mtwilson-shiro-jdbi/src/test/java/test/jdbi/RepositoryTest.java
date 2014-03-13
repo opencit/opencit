@@ -87,6 +87,26 @@ public class RepositoryTest {
         dao.close();
     }
     
+    /**
+     * uses  mtwilson.api.username and mtwilson.api.password from your local
+     * mtwilson.properties  as the username and password 
+     * 
+     * @throws Exception 
+     */
+    @Test
+    public void testResetPassword() throws Exception {
+        LoginDAO dao = MyJdbi.authz();
+        UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUsername(My.configuration().getKeystoreUsername());
+        if( userLoginPassword == null ) {
+            throw new IllegalArgumentException("No such user: "+My.configuration().getKeystoreUsername());
+        }
+        userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
+        userLoginPassword.setPasswordHash(passwordHash(userLoginPassword, My.configuration().getKeystorePassword()));
+        userLoginPassword.setEnabled(true);
+        dao.updateUserLoginPassword(userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getId());
+        dao.close();
+    }
+    
     @Test
     public void testGetRolePermissions() throws Exception {
         LoginDAO dao = MyJdbi.authz();
