@@ -154,6 +154,12 @@ Detected the following options on this server:"
 }
 
 all_status() {
+  if using_glassfish; then  
+    glassfish_running_report
+  elif using_tomcat; then
+    tomcat_running_report
+  fi
+  
   find_ctl_commands
   if [ -n "$pcactl" ]; then $pcactl status; fi
   if [ -n "$asctl" ]; then $asctl status; fi
