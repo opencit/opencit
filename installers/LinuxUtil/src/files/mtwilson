@@ -330,10 +330,10 @@ case "$1" in
   localhost-integration)
         mtwilson_localhost_integration $@
         ;;
-  api)
-        shift
-        call_apiclient $@
-        ;;
+  #api)
+  #      shift
+  #      call_apiclient $@
+  #      ;;
   setup)
         if [ $# -gt 1 ]; then
           shift
@@ -435,7 +435,7 @@ case "$1" in
   help)
         ;&
   *)
-        echo -e "Usage: mtwilson {api|change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
+        echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
 				"\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
 				"\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
 				"\t\trestart|setup|start|status|stop|uninstall|version}"
