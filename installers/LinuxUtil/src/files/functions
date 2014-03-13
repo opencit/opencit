@@ -2549,7 +2549,13 @@ tomcat_create_ssl_cert() {
     else
      tmpCN="dns:${serverName}"
     fi
-    $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+
+    ## 2014-03-13:rksavino - Unneccesary as java7 is being used and keytool can be implemented for this
+    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias s1as -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    
     #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
