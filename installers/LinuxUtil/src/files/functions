@@ -2582,14 +2582,14 @@ tomcat_init_manager() {
   TOMCAT_MANAGER_PORT=""
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
 
-  tomcat_manager_xml=`grep roles=\"manager\" $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
+  tomcat_manager_xml=`grep roles=\"manager $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
   tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
      awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
      in_comment{next}
      {gsub(/<!--+([^-]|-[^-])*--+>/,"");
      in_comment=sub(/<!--+.*/,"");
      print}'|
-     grep Connector|grep -v 8443|head -n1`
+     grep "<Connector"|grep "port="|head -n1`
 
   OIFS="$IFS"
   IFS=' '
