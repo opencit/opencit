@@ -644,6 +644,10 @@ public class MyConfiguration {
         return conf.getInt("mtwilson.atag.certificate.validity.period", 365);
     }
     
+    public boolean getAssetTagAutoDeploy() {
+        return conf.getBoolean("mtwilson.atag.certificate.deploy.auto",false);
+    }
+    
     ///////////////////////// mtwilson portal  //////////////////////////////////
     
     public String getPortalHtml5Dir() {
