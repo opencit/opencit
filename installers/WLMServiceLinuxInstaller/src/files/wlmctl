@@ -99,12 +99,13 @@ setup_interactive_install() {
     fi
   fi  
  
-  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-    webservice_start_report "${webservice_application_name}"
-  else
+  #if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+  #  webservice_start_report "${webservice_application_name}"
+  #else
+  if [ -z "$MTWILSON_SETUP_NODEPLOY" ]; then
     webservice_uninstall "${webservice_application_name}"
     #webservice_install "${webservice_application_name}" "${package_dir}"/WLMService.war
-    webservice_running_report "${webservice_application_name}"
+    #webservice_running_report "${webservice_application_name}"
   fi
 
 }
