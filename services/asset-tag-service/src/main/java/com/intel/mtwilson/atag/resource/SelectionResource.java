@@ -10,8 +10,10 @@ import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.atag.dao.jdbi.SelectionTagValueDAO;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
 import java.sql.SQLException;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -68,16 +70,21 @@ public class SelectionResource extends ServerResource {
         }
         StringBuilder str = new StringBuilder();
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
-                     "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n"+
+                     "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"+
                      "<selection id=\"" + selection.getId() + "\" name=\"" + selection.getName() + "\" >");
         if(selection.getTags() != null) {
             for(SelectionTagValue tag : selection.getTags()) {
                 if( tag.getTagOid().equals("2.5.4.789.1") ) {
-                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><text>" + tag.getTagValue() + "</text></attribute>\n");
+                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><text>" + String.format("%s=%s", tag.getTagName(),tag.getTagValue()) + "</text></attribute>\n");
+                }
+                else if( tag.getTagOid().equals("2.5.4.789.2") ) {
+                    UTF8NameValueSequence sequence = new UTF8NameValueSequence(tag.getTagName(),tag.getTagValue());
+                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><der>" + Base64.encodeBase64String(sequence.getDEREncoded()) + "</der></attribute>\n");                    
                 }
                 else {
                     // expect that value is already base64-encoded here when the oid is 2.5.4.789.2 or any other custom one
-                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><der>" + tag.getTagValue() + "</der></attribute>\n");
+//                    str.append("<attribute oid=\""+ tag.getTagOid() +"\"><der>" + tag.getTagValue() + "</der></attribute>\n");
+                    throw new UnsupportedOperationException("Unsupported OID "+tag.getTagOid());
                 }
             }
         }

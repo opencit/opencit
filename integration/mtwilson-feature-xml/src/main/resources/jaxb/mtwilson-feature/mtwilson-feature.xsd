@@ -1,6 +1,6 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-           targetNamespace="urn:intel-mtwilson-asset-tag-attribute-selections"
-           xmlns="urn:intel-mtwilson-asset-tag-attribute-selections"
+           targetNamespace="urn:mtwilson-feature"
+           xmlns="urn:mtwilson-feature"
            elementFormDefault="qualified">
 
     <xs:element name="feature" type="featureType" />

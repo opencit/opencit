@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.tag.rest.v2.model;
+package com.intel.mtwilson.tag.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -18,20 +18,19 @@ import java.util.List;
  *
  * @author ssbangal
  */
-@JacksonXmlRootElement(localName="certificate_request_attribute_collection")
-public class CertificateRequestAttributeCollection extends DocumentCollection<CertificateRequestAttribute>{
-
-    private final ArrayList<CertificateRequestAttribute> certificateRequests = new ArrayList<CertificateRequestAttribute>();
+@JacksonXmlRootElement(localName="tpm_password_collection")
+public class TpmPasswordCollection extends DocumentCollection<TpmPassword> {
+    private final ArrayList<TpmPassword> tpmPasswords = new ArrayList<TpmPassword>();
     
     @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
-    @JacksonXmlElementWrapper(localName="certificate_request_attributes")
-    @JacksonXmlProperty(localName="certificate_request_attribute")    
-    public List<CertificateRequestAttribute> getCertificateRequestAttributes() { return certificateRequests; }
+    @JacksonXmlElementWrapper(localName="tpm_passwords")
+    @JacksonXmlProperty(localName="tpm_password")    
+    public List<TpmPassword> getTpmPasswords() { return tpmPasswords; }
 
     @Override
-    public List<CertificateRequestAttribute> getDocuments() {
-        return getCertificateRequestAttributes();
+    public List<TpmPassword> getDocuments() {
+        return getTpmPasswords();
     }
     
 }

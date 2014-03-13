@@ -17,8 +17,9 @@ public class CertificateRequest extends Document{
         
     private String subject;
     private String status;
+    private String authorityName;
     private UUID certificateId;
-    private UUID selectionId;
+    private String selectionName; // tags to include in the certificate
 
     public String getSubject() {
         return subject;
@@ -36,6 +37,14 @@ public class CertificateRequest extends Document{
         this.status = status;
     }
 
+    public String getAuthorityName() {
+        return authorityName;
+    }
+
+    public void setAuthorityName(String authorityName) {
+        this.authorityName = authorityName;
+    }
+
     public UUID getCertificateId() {
         return certificateId;
     }
@@ -44,13 +53,12 @@ public class CertificateRequest extends Document{
         this.certificateId = certificateId;
     }
 
-    public UUID getSelectionId() {
-        return selectionId;
+    public String getSelectionName() {
+        return selectionName;
     }
 
-    public void setSelectionId(UUID selectionId) {
-        this.selectionId = selectionId;
+    public void setSelectionName(String selectionName) {
+        this.selectionName = selectionName;
     }
-    
     
 }

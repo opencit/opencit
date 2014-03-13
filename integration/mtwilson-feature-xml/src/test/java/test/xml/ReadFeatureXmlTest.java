@@ -161,7 +161,7 @@ public class ReadFeatureXmlTest {
     }
     @Test
     public void testParseFeature() throws ParserConfigurationException, SAXException, IOException {
-        String xml = "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n"
+        String xml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
                 + "<selection id=\"1\" name=\"default\">\n"
                 + "<attribute oid=\"1.3.6.1.4.1.99999.1\">US</attribute>\n"
                 + "<attribute oid=\"1.3.6.1.4.1.99999.2\">CA</attribute>\n"

@@ -23,19 +23,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import org.junit.BeforeClass;
-import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -167,8 +162,9 @@ public class ReadXmlTest {
 //        validateXML("/selection-xml-examples/selection5.xml");
 //        validateXML("/selection-xml-examples/selection6.xml");
 //        validateXML("/selection-xml-examples/selection7.xml");
-        validateXML("/selection-xml-examples/selection8.xml");
+//        validateXML("/selection-xml-examples/selection8.xml");
 //        validateXML("/selection-xml-examples/selection9.xml");
+        validateXML("/selection-xml-examples/selection10.xml");
 
     }
 
@@ -250,7 +246,7 @@ public class ReadXmlTest {
 
     @Test
     public void testParseXmlSelection() throws ParserConfigurationException, SAXException, IOException {
-        String xml = "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n"
+        String xml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
                 + "<selection id=\"1\" name=\"default\">\n"
                 + "<attribute oid=\"1.3.6.1.4.1.99999.1\">US</attribute>\n"
                 + "<attribute oid=\"1.3.6.1.4.1.99999.2\">CA</attribute>\n"

@@ -37,6 +37,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Convenience class that wraps the Bouncy Castle API to walk the ASN1 tree and extract the information that we are
  * interested in.
+ * 
+ * XXX when we are interested in only one or two types of attributes this make sense but
+ * when generalizing it becomes a duplicate effort of Bouncy Castle's X509AttributeCertificateHolder.
+ * Maybe what we need instead is a set of convenience classes for extracting certain types of
+ * attributes, for example the "key-value attribute" class for getting all UTF8NameValueMicroformat or
+ * UTF8NameValueSequence attributes out of the certificate.
  *
  * @author jbuhacoff
  */
@@ -50,6 +56,7 @@ public class X509AttributeCertificate {
 //    private UUID subjectUuid = null;
     private Date notBefore;
     private Date notAfter;
+    private ArrayList<Attribute> attributes = new ArrayList<>();
     private ArrayList<UTF8NameValueMicroformat> tags1 = new ArrayList<>();
     private ArrayList<UTF8NameValueSequence> tags2 = new ArrayList<>();
     private ArrayList<ASN1Encodable> tagsOther = new ArrayList<>();
@@ -82,6 +89,9 @@ public class X509AttributeCertificate {
         return notAfter;
     }
     
+    public List<Attribute> getAttribute() {
+        return attributes;
+    }
     public <T extends ASN1Encodable> List<T> getAttributes(Class<T> clazz) {
         if( clazz.equals(UTF8NameValueMicroformat.class) ) {
             return (List<T>)tags1;
@@ -139,11 +149,11 @@ public class X509AttributeCertificate {
         result.notBefore = cert.getNotBefore();
         result.notAfter = cert.getNotAfter();
         Attribute[] attributes = cert.getAttributes();
-        
         result.tags1 = new ArrayList<>();
         result.tags2 = new ArrayList<>();
         result.tagsOther = new ArrayList<>();
         for (Attribute attr : attributes) {
+            result.attributes.add(attr);
             for (ASN1Encodable value : attr.getAttributeValues()) {
 //                log.trace("encoded value: {}", Base64.encodeBase64String(value.getEncoded())); // throws IOException
 //                log.debug("attribute: {} is {}", attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string
