@@ -222,7 +222,7 @@ function provisionCert() {
 
   # Retrieve password if TA, else generate new passwords and take ownership
   $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
-  ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
+  export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
   if [ -z $ownerPass ]; then
     mode="VMWARE"
     export ownerPass=`generatePasswordHex 40`
