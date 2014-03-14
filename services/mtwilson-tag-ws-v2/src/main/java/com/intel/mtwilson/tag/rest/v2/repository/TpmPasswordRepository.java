@@ -28,26 +28,23 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
     @Override
     public TpmPasswordCollection search(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection objCollection = new TpmPasswordCollection();
-        TpmPasswordDAO dao = null;
         
-        try {
-            dao = TagJdbi.tpmPasswordDao();
-            TpmPassword obj = dao.findById(criteria.id);
-            if (obj != null){
+        try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
+            if (criteria.id == null) {
+                log.error("Search criteria is not specified.");
+                throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Search criteria is not specified.");
+            }
+                
+            TpmPassword obj = dao.findById(criteria.id.toString());
+            if (obj != null)
                 objCollection.getTpmPasswords().add(obj);
-            } else {
-                log.debug("tpm-password did not get any results back for {}.", criteria.id.toString());
-                setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-            }                
+
         } catch (ResourceException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during tpm password search.", ex);
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
-        } finally {
-            if (dao != null)
-                dao.close();
-        }        
+        }       
         return objCollection;
     }
 
@@ -56,7 +53,7 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
         if (locator == null || locator.id == null ) { return null;}
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
-            TpmPassword obj = dao.findById(locator.id);
+            TpmPassword obj = dao.findById(locator.id.toString());
             if (obj != null)
                 return obj;
                                     
@@ -73,9 +70,9 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
     public void store(TpmPassword item) {
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
-            TpmPassword obj = dao.findById(item.getId());
+            TpmPassword obj = dao.findById(item.getId().toString());
             if (obj != null)
-                dao.update(item.getId(), item.getPassword());
+                dao.update(item.getId().toString(), item.getPassword());
             else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object with the specified id does not exist.");
             }
@@ -93,9 +90,9 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
         
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
-            TpmPassword obj = dao.findById(item.getId());
+            TpmPassword obj = dao.findById(item.getId().toString());
             if (obj == null){
-                dao.insert(item.getId(), item.getPassword());
+                dao.insert(item.getId().toString(), item.getPassword());
             } else {
                 throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with specified id already exists.");
             }
@@ -114,7 +111,7 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
         
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
-            dao.delete(locator.id);
+            dao.delete(locator.id.toString());
             
         } catch (ResourceException aex) {
             throw aex;            

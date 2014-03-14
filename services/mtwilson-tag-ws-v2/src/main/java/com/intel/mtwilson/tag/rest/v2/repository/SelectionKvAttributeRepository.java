@@ -23,6 +23,7 @@ import com.intel.mtwilson.tag.model.SelectionCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.jooq.DSLContext;
+import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
@@ -45,42 +46,26 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         SelectionKvAttributeCollection objCollection = new SelectionKvAttributeCollection();
         DSLContext jooq = null;
         
-        try(KvAttributeDAO attrDao = TagJdbi.kvAttributeDao()) {
-                    
-            SelectQuery sql = jooq.select()
-                    .from(MW_TAG_SELECTION.join(MW_TAG_SELECTION_KVATTRIBUTE)
-                    .on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID))).getQuery();
-            if( criteria.attrValueEqualTo != null || criteria.attrNameContains != null ) {
-                log.debug("Selecting from tag-value");
-                SelectQuery valueQuery = jooq.select(MW_TAG_SELECTION_KVATTRIBUTE.ID)
-                        .from(MW_TAG_SELECTION_KVATTRIBUTE.join(MW_TAG_KVATTRIBUTE).on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID)))
-                        .getQuery();
-                if( criteria.attrValueEqualTo != null && criteria.attrValueEqualTo.length() > 0 ) {
-                    valueQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.attrValueEqualTo));
-                }
-                if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
-                    valueQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.attrValueContains));
-                }
-                sql.addConditions(MW_TAG_SELECTION_KVATTRIBUTE.ID.in(valueQuery));
+        try {
+            jooq = TagJdbi.jooq();
+            
+            SelectQuery sql = jooq.select(MW_TAG_SELECTION.ID, MW_TAG_SELECTION.NAME, MW_TAG_SELECTION.DESCRIPTION,
+                    MW_TAG_KVATTRIBUTE.ID, MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE)
+                    .from(MW_TAG_KVATTRIBUTE.join(MW_TAG_SELECTION_KVATTRIBUTE, JoinType.JOIN)
+                    .on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID))
+                    .join(MW_TAG_SELECTION, JoinType.JOIN).on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID)))                    
+                    .getQuery();
+            if( criteria.attrNameEqualTo != null  && criteria.attrNameEqualTo.length() > 0 ) {
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.attrNameEqualTo));
             }
-            if( criteria.attrNameContains != null || criteria.attrNameEqualTo != null || criteria.attrValueContains != null || criteria.attrValueEqualTo != null ) {
-                log.debug("Selecting from tag");
-                SelectQuery tagQuery = jooq.select(MW_TAG_SELECTION_KVATTRIBUTE.ID)
-                        .from(MW_TAG_SELECTION_KVATTRIBUTE.join(MW_TAG_KVATTRIBUTE).on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID)))
-                        .getQuery();
-                if( criteria.attrNameEqualTo != null  && criteria.attrNameEqualTo.length() > 0 ) {
-                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.attrNameEqualTo));
-                }
-                if( criteria.attrNameContains != null  && criteria.attrNameContains.length() > 0 ) {
-                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.NAME.contains(criteria.attrNameContains));
-                }
-                if( criteria.attrValueEqualTo != null  && criteria.attrValueEqualTo.length() > 0 ) {
-                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.attrValueEqualTo));
-                }
-                if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
-                    tagQuery.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.attrValueContains));
-                }
-                sql.addConditions(MW_TAG_SELECTION_KVATTRIBUTE.ID.in(tagQuery));            
+            if( criteria.attrNameContains != null  && criteria.attrNameContains.length() > 0 ) {
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.contains(criteria.attrNameContains));
+            }
+            if( criteria.attrValueEqualTo != null  && criteria.attrValueEqualTo.length() > 0 ) {
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.attrValueEqualTo));
+            }
+            if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.attrValueContains));
             }
             if( criteria.id != null ) {
                 sql.addConditions(MW_TAG_SELECTION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
@@ -98,14 +83,11 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
                 SelectionKvAttribute sAttr = new SelectionKvAttribute();
                 sAttr.setSelectionId(UUID.valueOf(r.getValue(MW_TAG_SELECTION.ID)));
                 sAttr.setSelectionName(r.getValue(MW_TAG_SELECTION.NAME));
-                sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID)));
-                KvAttribute attr = attrDao.findById(sAttr.getKvAttributeId());
-                if (attr != null) {
-                    sAttr.setKvAttributeName(attr.getName());
-                    sAttr.setKvAttributeValue(attr.getValue());
-                }
+                sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
+                sAttr.setKvAttributeName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
+                sAttr.setKvAttributeValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE));
                 
-                objCollection.getSelectionTagValues().add(sAttr);
+                objCollection.getSelectionKvAttributeValues().add(sAttr);
             }
             sql.close();
             log.debug("Closed jooq sql statement");
@@ -123,7 +105,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         if (locator == null || locator.id == null ) { return null;}
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
             
-            SelectionKvAttribute obj = dao.findById(locator.id);
+            SelectionKvAttribute obj = dao.findById(locator.id.toString());
             if (obj != null)
                 return obj;
                                     
@@ -143,9 +125,31 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
 
     @Override
     public void create(SelectionKvAttribute item) {
-        try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
-
-            dao.insert(item.getId(), item.getSelectionId(), item.getKvAttributeId());
+        try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao();
+                SelectionDAO selectionDao = TagJdbi.selectionDao();
+                KvAttributeDAO attrDao = TagJdbi.kvAttributeDao()) {
+            
+            Selection selectionObj = null;
+            SelectionKvAttribute obj = dao.findById(item.getId().toString());
+            if (obj == null) {
+                if (item.getSelectionName() == null || item.getKvAttributeId() == null) {
+                    log.error("Invalid input specified by the user.");
+                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
+                }
+                
+                selectionObj = selectionDao.findByName(item.getSelectionName());
+                if (selectionObj == null) {
+                    log.error("Invalid input specified by the user. Specified selection is not configured.");
+                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified selection is not configured.");                    
+                }
+                
+                KvAttribute attrObj = attrDao.findById(item.getKvAttributeId().toString());
+                if (attrObj == null) {
+                    log.error("Invalid input specified by the user. Specified attribute is not configured.");
+                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified attribute is not configured.");                                        
+                }
+                dao.insert(item.getId().toString(), selectionObj.getId().toString(), item.getKvAttributeId().toString());
+            }
                         
         } catch (ResourceException aex) {
             throw aex;            
@@ -161,7 +165,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
 
-            dao.delete(locator.id);
+            dao.delete(locator.id.toString());
                         
         } catch (ResourceException aex) {
             throw aex;            

@@ -97,7 +97,7 @@ public class CertificateRequestRepository extends ServerResource implements Simp
     public CertificateRequest retrieve(CertificateRequestLocator locator) {
         if (locator == null || locator.id == null) { return null;}
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
-            CertificateRequest obj = certRequestDao.findById(locator.id);
+            CertificateRequest obj = certRequestDao.findById(locator.id.toString());
             if (obj != null) {
                 return obj;
             }
@@ -113,7 +113,7 @@ public class CertificateRequestRepository extends ServerResource implements Simp
     @Override
     public void store(CertificateRequest item) {
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
-            CertificateRequest obj = certRequestDao.findById(item.getId());
+            CertificateRequest obj = certRequestDao.findById(item.getId().toString());
             if (obj == null) {
                 log.error("Object with specified id does not exist in the system.");
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No matching certificate request found in the system.");
@@ -121,13 +121,13 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             
             // Let us check what parameter the user wants to update
             if (item.getAuthorityName() != null && !item.getAuthorityName().isEmpty())
-                certRequestDao.updateAuthority(item.getId(), item.getAuthorityName());
+                certRequestDao.updateAuthority(item.getId().toString(), item.getAuthorityName());
             
             if (item.getCertificateId() != null)
-                certRequestDao.updateApproved(item.getId(), item.getCertificateId());
+                certRequestDao.updateApproved(item.getId().toString(), item.getCertificateId().toString());
             
             if (item.getStatus() != null && !item.getStatus().isEmpty())
-                certRequestDao.updateStatus(item.getId(), item.getStatus());
+                certRequestDao.updateStatus(item.getId().toString(), item.getStatus());
             
         } catch (ResourceException aex) {
             throw aex;            
@@ -152,7 +152,7 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             }
             
             // Since this is the new certificate request, the certificate id would be null.
-            certRequestDao.insert(item.getId(), item.getSubject(), selectionObj.getId(), null, null);
+            certRequestDao.insert(item.getId().toString(), item.getSubject(), selectionObj.getId().toString(), null, null);
             
         } catch (ResourceException aex) {
             throw aex;            
@@ -166,9 +166,9 @@ public class CertificateRequestRepository extends ServerResource implements Simp
     public void delete(CertificateRequestLocator locator) {
         if (locator == null || locator.id == null) { return;}
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
-            CertificateRequest obj = certRequestDao.findById(locator.id);
+            CertificateRequest obj = certRequestDao.findById(locator.id.toString());
             if (obj != null) {
-                certRequestDao.delete(locator.id);
+                certRequestDao.delete(locator.id.toString());
             }
         } catch (ResourceException aex) {
             throw aex;            

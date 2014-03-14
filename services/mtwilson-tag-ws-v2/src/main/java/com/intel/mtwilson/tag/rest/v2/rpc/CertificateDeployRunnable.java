@@ -46,7 +46,7 @@ public class CertificateDeployRunnable implements Runnable{
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(certificateId);
+            Certificate obj = dao.findById(certificateId.toString());
             if (obj != null) 
             {
                 log.debug("Sha1 of the certificate about to be deployed is {}.", obj.getSha1());
