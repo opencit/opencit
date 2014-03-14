@@ -3125,7 +3125,7 @@ webservice_install() {
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then
       if using_glassfish; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-        ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
+        $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
         rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
@@ -3136,7 +3136,7 @@ webservice_install() {
       if using_glassfish; then
         glassfish_require
         echo "Deploying ${webservice_application_name} to Glassfish..."
-        ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
+        $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         #if [ ! tomcat_running ]; then
         #  tomcat_start
@@ -3165,7 +3165,7 @@ webservice_uninstall() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
-      ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
+      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
