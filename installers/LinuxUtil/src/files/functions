@@ -1741,8 +1741,7 @@ glassfish_version() {
 
   if [[ -n "$glassfish" ]]; then
     # extract the version number from a string like: glassfish version "3.0"
-    gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-    local current_glassfish_version=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd version 2>&1 | grep -i glassfish | grep -i version | awk '{ print $8 }'`
+    local current_glassfish_version=`$glassfish version 2>&1 | grep -i glassfish | grep -i version | awk '{ print $8 }'`
     if [ -n "$current_glassfish_version" ]; then
       echo $current_glassfish_version
       return 0
@@ -1789,8 +1788,16 @@ glassfish_detect() {
       if [[ -n "$java" ]]; then    
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        fi
       else
         glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        fi
       fi
     fi
     if [[ -n "$glassfish" ]]; then
@@ -1812,6 +1819,10 @@ glassfish_detect() {
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        fi
         echo "Found Glassfish: $GLASSFISH_HOME"
 #        echo "Found Glassfish: $glassfish"
         GLASSFISH_VERSION=`glassfish_version`
@@ -1885,16 +1896,15 @@ glassfish_permissions() {
 # requires a running glassfish
 glassfish_logback() {
   # see if it's already set
-  gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-  local prev_logback=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-system-properties 2>/dev/null | grep "logback.configurationFile"| head -n 1`
+  local prev_logback=`$glassfish list-system-properties 2>/dev/null | grep "logback.configurationFile"| head -n 1`
   # loop just in case there is more than one defined
 #  while [ -n "${prev_logback}" ]
 #  do
     echo "Deleting existing system property ${prev_logback}"
-    $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd delete-system-property "${prev_logback}" 2>/dev/null >/dev/null
+    $glassfish delete-system-property "${prev_logback}" 2>/dev/null >/dev/null
 #    prev_logback=`$glassfish list-system-properties 2>/dev/null | grep "logback.configurationFile" | head -n 1`
 #  done
-  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd create-system-properties logback.configurationFile=/etc/intel/cloudsecurity/logback.xml
+  $glassfish create-system-properties logback.configurationFile=/etc/intel/cloudsecurity/logback.xml
 }
 
 # set the -Xmx and -XX:MaxPermSize memory parameters for the glassfish JVM
@@ -1904,15 +1914,14 @@ glassfish_memory() {
   # glassfish must be started in order to do this
   
   # first we have to find the current options and remove them
-  gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-  local prev_jvm_memory=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-jvm-options | grep "\-Xmx" | head -n 1`
-  local prev_jvm_maxperm=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-jvm-options | grep "\-XX:MaxPermSize" | head -n 1`
+  local prev_jvm_memory=`$glassfish list-jvm-options | grep "\-Xmx" | head -n 1`
+  local prev_jvm_maxperm=`$glassfish list-jvm-options | grep "\-XX:MaxPermSize" | head -n 1`
   # loop just in case there is more than one defined
   while [ -n "${prev_jvm_memory}" ]
   do
     echo "Deleting existing option ${prev_jvm_memory}"
-    $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd delete-jvm-options "${prev_jvm_memory}"
-    prev_jvm_memory=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-jvm-options | grep "\-Xmx" | head -n 1`
+    $glassfish delete-jvm-options "${prev_jvm_memory}"
+    prev_jvm_memory=`$glassfish list-jvm-options | grep "\-Xmx" | head -n 1`
   done
   # loop just in case there is more than one defined
   while [ -n "${prev_jvm_maxperm}" ]
@@ -1920,10 +1929,10 @@ glassfish_memory() {
     # must escape the colon between XX and MaxPermSize
     prev_jvm_maxperm=`echo ${prev_jvm_maxperm} | sed -re "s/:/\\\\\\\\:/"`
     echo "Deleting existing option ${prev_jvm_maxperm}"
-    $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd delete-jvm-options "${prev_jvm_maxperm}"
-    prev_jvm_maxperm=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-jvm-options | grep "\-XX:MaxPermSize" | head -n 1`
+    $glassfish delete-jvm-options "${prev_jvm_maxperm}"
+    prev_jvm_maxperm=`$glassfish list-jvm-options | grep "\-XX:MaxPermSize" | head -n 1`
   done
-  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd create-jvm-options "-Xmx${jvm_memory}m:-XX\\:MaxPermSize=${jvm_maxperm}m"
+  $glassfish create-jvm-options "-Xmx${jvm_memory}m:-XX\\:MaxPermSize=${jvm_maxperm}m"
 }
 
 # reset glassfish overall logging handler to turn on logging
@@ -1935,7 +1944,7 @@ glassfish_memory() {
 # http://java.net/jira/browse/GLASSFISH-17037
 # http://stackoverflow.com/questions/9373629/glassfish-3-1-1-suddenly-stopped-writing-to-server-log
 glassfish_enable_logging() {
-  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd set-log-levels com.sun.enterprise.server.logging.GFFileHandler=ALL
+  $glassfish set-log-levels com.sun.enterprise.server.logging.GFFileHandler=ALL
 }
 
 # must restart glassfish for enable-secure-admin and memory options to take effect, so call these after calling this function:
@@ -2009,7 +2018,7 @@ glassfish_install() {
   echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
   
   echo "Increasing glassfish max thread pool size to 200..."
-  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+  $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
@@ -2057,8 +2066,9 @@ expect eof
 EOD
 ) > /dev/null 2>&1
 
+  glassfish_detect
   # XXX it asks for the password twice ...  can we script with our known value?
-  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd enable-secure-admin
+  $glassfish enable-secure-admin
 
 }
 
@@ -2090,17 +2100,17 @@ glassfish_running_report() {
 }
 glassfish_start() {
   if [ -n "$glassfish" ]; then
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd start-domain
+      $glassfish start-domain
   fi
 }
 glassfish_stop() {
   if [ -n "$glassfish" ]; then
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd stop-domain
+      $glassfish stop-domain
   fi
 }
 glassfish_restart() {
   if [ -n "$glassfish" ]; then
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd restart-domain
+      $glassfish restart-domain
   fi
 }
 glassfish_shutdown() {
@@ -2119,8 +2129,7 @@ glassfish_start_report() {
 glassfish_sslcert_report() {
   local alias="${1:-s1as}"
   local keystorePassword=changeit
-  gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-  local domain_found=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-domains | head -n 1 | awk '{ print $1 }'`
+  local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }
@@ -2144,8 +2153,8 @@ glassfish_create_domain() {
   local domain_name=${1}
   local domain_dir=${2}
   if [ -n "$glassfish" ]; then
-    $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd create-domain --domaindir "${domain_dir}" "${domain_name}"
-    $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd start-domain --domaindir "${domain_dir}" "${domain_name}"
+    $glassfish create-domain --domaindir "${domain_dir}" "${domain_name}"
+    $glassfish start-domain --domaindir "${domain_dir}" "${domain_name}"
   fi
 }
 
@@ -2158,12 +2167,11 @@ glassfish_create_domain() {
 glassfish_delete_domain() {
   local domain_name=${1}
   local domain_dir=${2}
-  gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
 
   if [ -n "$glassfish" ]; then
-    local domain_found=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-domains --domaindir "${domain_dir}" | grep "${domain_name}"`
+    local domain_found=`$glassfish list-domains --domaindir "${domain_dir}" | grep "${domain_name}"`
     if [ -n "$domain_found" ]; then
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd delete-domain --domaindir "${domain_dir}" "${domain_name}"
+      $glassfish delete-domain --domaindir "${domain_dir}" "${domain_name}"
       # TODO !!! after a domain is running there is a server.log file in the domain directory,
       # and the delete-domain command deletes everything except the log files... and if there is any
       # file still in the domain directory then a subsequent create-domain command will fail. so 
@@ -3006,10 +3014,9 @@ webservice_running() {
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
       # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
-      gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-      WEBSERVICE_DEPLOYED=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-applications | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
+      WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
+        WEBSERVICE_RUNNING=`$glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
       fi
     fi
   elif using_tomcat; then
@@ -3042,7 +3049,7 @@ webservice_start() {
   webservice_running  "${webservice_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd enable $WEBSERVICE_DEPLOYED
+      $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
       wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/start?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
@@ -3059,7 +3066,7 @@ webservice_stop() {
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd disable $WEBSERVICE_DEPLOYED
+      $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
       wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/stop?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
@@ -3132,7 +3139,7 @@ webservice_install() {
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then
       if using_glassfish; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-        $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
+        $glassfish redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
         rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
@@ -3143,7 +3150,7 @@ webservice_install() {
       if using_glassfish; then
         glassfish_require
         echo "Deploying ${webservice_application_name} to Glassfish..."
-        $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd deploy --name ${webservice_application_name} ${WAR_FILE}
+        $glassfish deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         #if [ ! tomcat_running ]; then
         #  tomcat_start
@@ -3172,7 +3179,7 @@ webservice_uninstall() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
-      $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd undeploy ${WEBSERVICE_DEPLOYED}
+      $glassfish undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
