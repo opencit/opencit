@@ -17,9 +17,12 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
  * @author jbuhacoff
  */
 public class SelectionResultMapper implements ResultSetMapper<Selection> {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionResultMapper.class);
+    
     @Override
     public Selection map(int i, ResultSet rs, StatementContext sc) throws SQLException {
+        String driver = (String)sc.getAttribute("driver");
+        log.debug("driver is {}", driver);
 //        UUID uuid = UUID.valueOf(rs.getBytes("uuid")); // use this when uuid is a binary type in database
 //        UUID uuid = UUID.valueOf(rs.getString("uuid")); // use this when uuid is a char type in database
 //        Selection selection = new Selection(rs.getLong("id"), uuid);

@@ -97,7 +97,8 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
                 throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with the specified id already exists.");
             }
             
-            dao.insert(item.getId(), item.getName(), item.getDescription());
+//            dao.insert(item.getId(), item.getName(), item.getDescription());
+            dao.insert(item);
                                     
         } catch (ResourceException aex) {
             throw aex;            
@@ -115,7 +116,7 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
         try(SelectionDAO dao = TagJdbi.selectionDao()) {            
             Selection obj = dao.findById(locator.id);
             if (obj != null)
-                dao.delete(locator.id);
+                dao.deleteById(locator.id);
                                     
         } catch (ResourceException aex) {
             throw aex;            

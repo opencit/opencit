@@ -8,10 +8,12 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.Selection;
 import java.io.Closeable;
 import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.BindBean;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import com.intel.mtwilson.jdbi.util.UUIDArgument;
 
 /**
  * JDBI References:
@@ -45,13 +47,18 @@ public interface SelectionDAO extends Closeable{
 
     @SqlUpdate("insert into mw_tag_selection (id, name, description) values (:id, :name, :description)")
 //    @GetGeneratedKeys
-    void insert(@Bind("id") UUID id, @Bind("name") String name, @Bind("description") String description);
+//    void insert(@Bind("id") UUID id, @Bind("name") String name, @Bind("description") String description);
+    void insert(@BindBean Selection selection); // automatically usess javabean attribute names as query placeholder names
 
     @SqlUpdate("update mw_tag_selection set description=:description where id=:id")
     void update(@Bind("id") UUID uuid, @Bind("description") String description);
 
     @SqlUpdate("delete from mw_tag_selection where id=:id")
-    void delete(@Bind("id") UUID id);
+    void delete(@BindBean Selection selection);
+    @SqlUpdate("delete from mw_tag_selection where id=:id")
+    void deleteById(@Bind("id") UUID id);
+    @SqlUpdate("delete from mw_tag_selection where name=:name")
+    void deleteByName(@Bind String name); // if no paramter is passed to the annotation the parameter name itself is used "name"
 
     @SqlQuery("select id, name, description from mw_tag_selection where id=:id")
     Selection findById(@Bind("id") UUID id);

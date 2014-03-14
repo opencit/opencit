@@ -44,7 +44,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             SelectQuery sql = jooq.select().from(MW_TAG_KVATTRIBUTE).getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
                 sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.nameEqualTo));
