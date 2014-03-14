@@ -181,10 +181,10 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 echo "Installing packages: $LIST"
 
-APICLIENT_YUM_PACKAGES="unzip expect"
-APICLIENT_APT_PACKAGES="unzip expect"
-APICLIENT_YAST_PACKAGES="unzip expect"
-APICLIENT_ZYPPER_PACKAGES="unzip expect"
+APICLIENT_YUM_PACKAGES="unzip"
+APICLIENT_APT_PACKAGES="unzip"
+APICLIENT_YAST_PACKAGES="unzip"
+APICLIENT_ZYPPER_PACKAGES="unzip"
 auto_install "Installer requirements" "APICLIENT"
 
 
