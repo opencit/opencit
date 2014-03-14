@@ -8,6 +8,7 @@ package com.intel.mtwilson.tag.dao.jdbi;
 
 
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,9 +23,10 @@ public class TpmPasswordResultMapper implements ResultSetMapper<TpmPassword>  {
 
     @Override
     public TpmPassword map(int i, ResultSet rs, StatementContext sc) throws SQLException {
-        //return new TagValue(rs.getLong("id"), rs.getLong("tagId"), rs.getString("value"));  
-//        return new TpmPassword(rs.getLong("id"),rs.getString("uuid"),rs.getString("password"));
-        return null;
+        TpmPassword tpm = new TpmPassword();
+        tpm.setId(UUID.valueOf(rs.getString("id")));
+        tpm.setPassword(rs.getString("password"));
+        return tpm;
     }
     
 }

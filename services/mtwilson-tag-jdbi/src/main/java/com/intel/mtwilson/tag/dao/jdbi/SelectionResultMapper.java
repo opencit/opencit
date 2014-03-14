@@ -27,7 +27,9 @@ public class SelectionResultMapper implements ResultSetMapper<Selection> {
 //        UUID uuid = UUID.valueOf(rs.getString("uuid")); // use this when uuid is a char type in database
 //        Selection selection = new Selection(rs.getLong("id"), uuid);
         Selection selection = new Selection();
+        selection.setId(UUID.valueOf(rs.getString("id")));
         selection.setName(rs.getString("name"));
+        selection.setDescription(rs.getString("description"));
         return selection;
     }
     

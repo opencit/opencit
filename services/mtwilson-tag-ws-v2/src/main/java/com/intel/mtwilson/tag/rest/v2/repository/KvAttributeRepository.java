@@ -66,6 +66,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
                 obj.setId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
                 obj.setName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
                 obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); //TODO: Change these after creating new JOOQ tables.
+                objCollection.getKvAttributes().add(obj);
             }
             sql.close();
             log.debug("Closing tag-value dao");
@@ -88,7 +89,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
         if (locator == null || locator.id == null ) { return null;}
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
-            KvAttribute obj = dao.findById(locator.id);
+            KvAttribute obj = dao.findById(locator.id.toString());
             if (obj != null)
                 return obj;
                                     
@@ -106,10 +107,10 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
         
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
-            KvAttribute obj = dao.findById(item.getId());
+            KvAttribute obj = dao.findById(item.getId().toString());
             // Allowing the user to only edit the value.
             if (obj != null)
-                dao.update(item.getId(), obj.getName(), item.getValue());
+                dao.update(item.getId().toString(), obj.getName(), item.getValue());
             else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
             }
@@ -127,11 +128,21 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
 
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
 
-            KvAttribute obj = dao.findById(item.getId());
+            KvAttribute obj = dao.findById(item.getId().toString());
             // Allowing the user to add only if it does not exist.
-            if (obj == null)
-                dao.insert(item.getId(), item.getName(), item.getValue());
-            else {
+            if (obj == null) {
+                if (item.getName() == null || item.getName().isEmpty() || item.getValue() == null || item.getValue().isEmpty()) {
+                    log.error("Invalid input specified by the user.");
+                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
+                }
+                obj = dao.findByNameAndValue(item.getName(), item.getValue());
+                if (obj == null)
+                    dao.insert(item.getId().toString(), item.getName(), item.getValue());   
+                else {
+                    log.error("The key value pair already exists.");
+                    throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "The key value pair already exists.");
+                }
+            } else {
                 throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with specified id already exists.");
             }
                         
@@ -148,7 +159,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
         if( locator == null || locator.id == null ) { return; }
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
-            dao.delete(locator.id);           
+            dao.delete(locator.id.toString());           
             
         } catch (ResourceException aex) {
             throw aex;            

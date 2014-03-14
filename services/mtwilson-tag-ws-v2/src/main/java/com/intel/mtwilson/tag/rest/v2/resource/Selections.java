@@ -21,6 +21,7 @@ import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
 import java.sql.SQLException;
 import java.util.List;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @Path("/selections")
 public class Selections extends AbstractJsonapiResource<Selection, SelectionCollection, SelectionFilterCriteria, NoLinks<Selection>, SelectionLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName()); 
     private SelectionRepository repository;
     
     public Selections() {
@@ -59,7 +60,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})   
-    public Selection retrieveOne(SelectionLocator locator) {
+    public Selection retrieveOne(@BeanParam SelectionLocator locator) {
         return super.retrieveOne(locator); 
     }
         
@@ -68,13 +69,13 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_XML})   
-    public String retrieveOneXml(SelectionLocator locator) throws SQLException {
+    public String retrieveOneXml(@BeanParam SelectionLocator locator) throws SQLException {
         SelectionKvAttributeDAO attrDao = TagJdbi.selectionKvAttributeDao();
         Selection obj = super.retrieveOne(locator); //To change body of generated methods, choose Tools | Templates.
         if( obj == null ) {
             return null;
         }
-        List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(obj.getId());
+        List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(obj.getId().toString());
         if( selectionKvAttributes == null || selectionKvAttributes.isEmpty() ) {
             log.error("No tags in selection");
             return null;

@@ -26,25 +26,25 @@ public interface CertificateRequestDAO extends Closeable{
     @SqlUpdate("insert into mw_tag_certificate_request (id, subject, selectionId, certificateId, authorityName, status) "
             + "values (:id, :subject, :selectionId, :certificateId, :authorityName, 'New')")
 //    @GetGeneratedKeys
-    void insert(@Bind("id") UUID id, @Bind("subject") String subject, @Bind("selectionId") UUID selectionId, 
-        @Bind("certificateId") UUID certificateId, @Bind("authorityName") String authorityName);
+    void insert(@Bind("id") String id, @Bind("subject") String subject, @Bind("selectionId") String selectionId, 
+        @Bind("certificateId") String certificateId, @Bind("authorityName") String authorityName);
 
     @SqlUpdate("update mw_tag_certificate_request set status=:status where id=:id")
-    void updateStatus(@Bind("id") UUID id, @Bind("status") String status);
+    void updateStatus(@Bind("id") String id, @Bind("status") String status);
 
     @SqlUpdate("update mw_tag_certificate_request set certificateId=:certificateId, status='Done' where id=:id")
-    void updateApproved(@Bind("id") UUID id, @Bind("certificateId") UUID certificateId);
+    void updateApproved(@Bind("id") String id, @Bind("certificateId") String certificateId);
 
     @SqlUpdate("update mw_tag_certificate_request set authorityName=:authorityName where id=:id")
-    void updateAuthority(@Bind("id") UUID id, @Bind("authorityName") String authorityName);
+    void updateAuthority(@Bind("id") String id, @Bind("authorityName") String authorityName);
     
     @SqlUpdate("delete from mw_tag_certificate_request where id=:id")
-    void delete(@Bind("id") UUID id);
+    void delete(@Bind("id") String id);
 
-    @SqlQuery("select id, subject, status, selectionId, certificateId from mw_tag_certificate_request where id=:id")
-    CertificateRequest findById(@Bind("id") UUID id);
+    @SqlQuery("select id, subject, status, authorityName, selectionId, certificateId from mw_tag_certificate_request where id=:id")
+    CertificateRequest findById(@Bind("id") String id);
     
-    @SqlQuery("select id, subject, status, selectionId, certificateId from mw_tag_certificate_request where subject=:subject")
+    @SqlQuery("select id, subject, status, authorityName, selectionId, certificateId from mw_tag_certificate_request where subject=:subject")
     List<CertificateRequest> findBySubject(@Bind("subject") String subject);
     
     @Override

@@ -2,7 +2,7 @@
 
 -- This script creates the tables required for integrating asset tag with mt wilson
 
-CREATE  TABLE `mw_as`.`mw_tag_tpm_password` (
+CREATE  TABLE `mw_as`.`mw_host_tpm_password` (
   `id` BINARY(16) NOT NULL ,
   `password` VARCHAR(255) NOT NULL ,
   PRIMARY KEY (`id`) );

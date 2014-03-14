@@ -40,10 +40,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         try {
             jooq = TagJdbi.jooq();
             
-            SelectQuery sql = jooq.select()
-                    .from(MW_TAG_CERTIFICATE) // .join(CERTIFICATE_TAG_VALUE)
-                    //.on(CERTIFICATE_TAG_VALUE.CERTIFICATEREQUESTID.equal(CERTIFICATE.ID)))
-                    .getQuery();
+            SelectQuery sql = jooq.select().from(MW_TAG_CERTIFICATE).getQuery();
             if( criteria.id != null ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
@@ -119,7 +116,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         if (locator == null || locator.id == null) { return null;}
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(locator.id);
+            Certificate obj = dao.findById(locator.id.toString());
             if (obj != null) 
                 return obj;
 
@@ -137,10 +134,10 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             
-            Certificate obj = dao.findById(item.getId());
+            Certificate obj = dao.findById(item.getId().toString());
             // Allowing the user to only edit the revoked field.
             if (obj != null)
-                dao.updateRevoked(item.getId(), item.isRevoked());
+                dao.updateRevoked(item.getId().toString(), item.isRevoked());
             else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
             }
@@ -158,7 +155,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             
-            dao.insert(item.getId(), item.getCertificate(), item.getSha1().toHexString(), 
+            dao.insert(item.getId().toString(), item.getCertificate(), item.getSha1().toHexString(), 
                     item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
 
         } catch (ResourceException aex) {
@@ -175,9 +172,9 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         CertificateDAO dao = null;
         try {            
             dao = TagJdbi.certificateDao();
-            Certificate obj = dao.findById(locator.id);
+            Certificate obj = dao.findById(locator.id.toString());
             if (obj != null) {
-                dao.delete(locator.id);
+                dao.delete(locator.id.toString());
             }else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Certificate not found.");
             }

@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.skife.jdbi.v2.DBI;
@@ -100,7 +101,7 @@ public class TagJdbi {
     public static DSLContext jooq() throws SQLException, IOException {
         // omits the schema name from generated sql ; when we connect to the database we already specify a schema so this settings avoid 
         // redundancy in the sql and allows the administrator to change the database name without breaking the application
-        Settings settings = new Settings().withRenderSchema(false);
+        Settings settings = new Settings().withRenderSchema(false).withRenderNameStyle(RenderNameStyle.LOWER);
         SQLDialect dbDialect = getSqlDialect();
         // throws SQLException; Note that the DSLContext doesn't close the connection. We'll have to do that ourselves.
         DSLContext jooq = DSL.using(TagJdbi.getConnection(), dbDialect, settings);
