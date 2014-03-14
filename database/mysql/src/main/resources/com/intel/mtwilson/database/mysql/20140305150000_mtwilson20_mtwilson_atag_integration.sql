@@ -40,10 +40,12 @@ CREATE  TABLE `mw_as`.`mw_tag_certificate` (
   CREATE  TABLE `mw_as`.`mw_tag_certificate_request` (
   `id` CHAR(36) NOT NULL ,
   `subject` VARCHAR(255) NOT NULL ,
-  `selectionId` CHAR(36) NOT NULL ,
-  `certificateId` CHAR(36) NULL , 
-  `authorityName` VARCHAR(255) NULL ,
+  `selectionId` CHAR(36) NOT NULL , -- TODO: REMOVE
+  `certificateId` CHAR(36) NULL ,  -- TODO: REMOVE
+  `authorityName` VARCHAR(255) NULL , -- TODO: REMOVE
   `status` VARCHAR(255) NULL , 
+  `content` BLOB NOT NULL,
+  `contentType` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`) );
   
   CREATE  TABLE `mw_as`.`mw_tag_configuration` (

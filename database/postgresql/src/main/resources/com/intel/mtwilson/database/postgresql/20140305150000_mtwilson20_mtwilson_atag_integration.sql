@@ -21,8 +21,8 @@ CREATE  TABLE mw_tag_selection (
   
 CREATE  TABLE mw_tag_selection_kvattribute (
   id CHAR(36) NOT NULL,
-  selectionId UUID NOT NULL ,
-  kvAttributeId UUID NOT NULL ,
+  selectionId CHAR(36) NOT NULL ,
+  kvAttributeId CHAR(36) NOT NULL ,
   PRIMARY KEY (id) );
 
 CREATE  TABLE mw_tag_certificate (
@@ -40,10 +40,12 @@ CREATE  TABLE mw_tag_certificate (
 CREATE  TABLE mw_tag_certificate_request (
   id CHAR(36) NOT NULL,
   subject VARCHAR(255) NOT NULL ,
-  selectionId UUID NOT NULL ,
-  certificateId UUID NULL , 
+  selectionId CHAR(36) NOT NULL , -- TODO: remove
+  certificateId CHAR(36) NULL ,  -- TODO: remove
   status VARCHAR(255) NOT NULL ,
-  authorityName VARCHAR(255) NULL ,
+  authorityName VARCHAR(255) NULL , -- TODO: remove
+  content bytea NOT NULL,
+  contentType VARCHAR(255) NOT NULL,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_configuration (

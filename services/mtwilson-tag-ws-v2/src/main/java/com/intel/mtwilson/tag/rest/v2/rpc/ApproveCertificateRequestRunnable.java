@@ -58,7 +58,7 @@ public class ApproveCertificateRequestRunnable implements Runnable{
         try (CertificateRequestDAO certRequestdao = TagJdbi.certificateRequestDao();
                 CertificateDAO certDao = TagJdbi.certificateDao()) {
         
-            CertificateRequest obj = certRequestdao.findById(certificateRequestId.toString());
+            CertificateRequest obj = certRequestdao.findById(certificateRequestId);
             if (obj != null) {
                 
                 X509AttributeCertificate cert = X509AttributeCertificate.valueOf(certificate);

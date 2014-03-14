@@ -15,13 +15,15 @@ import com.intel.mtwilson.jersey.Document;
 @JacksonXmlRootElement(localName="certificate_request")
 public class CertificateRequest extends Document{
         
-    private String subject;
+    private String subject; // from the query parameter   POST /certificate-requests?subject={my-hardware-uuid}   and request body is the selection xml or json 
     private String status;
-    private String authorityName;
-    private UUID certificateId;
-    private UUID selectionId;
-    private String selectionName; // tags to include in the certificate
-
+    private String authorityName; // TODO: remove,  instead of associating old requests to current certs, just mark requests complete.  certs can be searched on the subject to correlate.
+    private UUID certificateId; // TODO: remove,  instead of associating old requests to current certs, just mark requests complete. certs can be searched on the subject to correlate.
+    private UUID selectionId; // TODO: remove, and instead of having a field here we should generate the selection xml and store it.  <selections><selection id="..."/></selections>  so the approver can have a consistent input.
+    private String selectionName; //remove, and instead of having a field here we should generate the selection xml and store it.  <selections><selection name="..."/></selections>  so the approver can have a consistent input.
+    private byte[] content;// the selections xml format;  may be encrypted
+    private String contentType; //   application/xml for plain xml,  message/rfc822 for the encrypted xml with headers,  application/json  for the json request from the UI
+    
     public String getSubject() {
         return subject;
     }
@@ -70,5 +72,22 @@ public class CertificateRequest extends Document{
     public void setSelectionName(String selectionName) {
         this.selectionName = selectionName;
     }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+    
     
 }
