@@ -111,7 +111,7 @@ bootstrap_ms_approve_user() {
   ## XXX technically correct:
   #local encoded_key_alias=`echo "${key_alias}" | mtwilson api EncodeUsername -`
   # XXX there are too many places where filename is just alias and not encoded, so if it exists we just use it:
-  if [ -f "${key_dir}/${key_alias}" ]; then encoded_key_alias="${key_alias}"; else encoded_key_alias=`echo "${key_alias}" | $mtwilson api EncodeUsername -`; fi
+  if [ -f "${key_dir}/${key_alias}" ]; then encoded_key_alias="${key_alias}"; else encoded_key_alias=`echo "${key_alias}" | call_setupcommand EncodeUsername -`; fi
 
   # XXX TODO: unsafe to pass the password on command line, but keytool does not support getting it from environment. maybe add a command to RsaUtil/RsaCommmand in api client for exporting a certificate to replace the keytool here?
   $keytool -export -alias ${key_alias} -keystore ${key_dir}/${encoded_key_alias}.jks  -storepass ${key_password} -file ${key_dir}/${encoded_key_alias}.crt
@@ -154,12 +154,13 @@ setup_interactive_install() {
     fi
   fi
    
-  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-    webservice_start_report "${webservice_application_name}"
-  else
+  #if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+  #  webservice_start_report "${webservice_application_name}"
+  #else
+  if [ -z "$MTWILSON_SETUP_NODEPLOY" ]; then
     webservice_uninstall "${webservice_application_name}"
     #webservice_install "${webservice_application_name}" "${package_dir}"/ManagementService.war
-    webservice_running_report "${webservice_application_name}"
+    #webservice_running_report "${webservice_application_name}"
   fi
   bootstrap_ms_internal_user
 }
@@ -187,25 +188,25 @@ case "$1" in
   echo "Version ${VERSION:-Unknown}"
   echo "Build ${BUILD:-Unknown}"
         ;;
-  start)
-        webservice_start_report "${webservice_application_name}"
-        ;;
-  stop)
-        webservice_stop_report "${webservice_application_name}"
-        ;;
-  status)
-        if using_glassfish; then  
-          glassfish_running_report
-        elif using_tomcat; then
-          tomcat_running_report
-        fi
-        webservice_running_report "${webservice_application_name}"
-        ;;
-  restart)
-        webservice_stop_report "${webservice_application_name}"
-        sleep 2
-        webservice_start_report "${webservice_application_name}"
-        ;;
+  #start)
+  #      webservice_start_report "${webservice_application_name}"
+  #      ;;
+  #stop)
+  #      webservice_stop_report "${webservice_application_name}"
+  #      ;;
+  #status)
+  #      #if using_glassfish; then  
+  #      #  glassfish_running_report
+  #      #elif using_tomcat; then
+  #      #  tomcat_running_report
+  #      #fi
+  #      webservice_running_report "${webservice_application_name}"
+  #      ;;
+  #restart)
+  #      webservice_stop_report "${webservice_application_name}"
+  #      sleep 2
+  #      webservice_start_report "${webservice_application_name}"
+  #      ;;
   glassfish-restart)
         glassfish_restart
         ;;
@@ -234,23 +235,23 @@ case "$1" in
   show)
         read_property_from_file "${2}" "${package_config_filename}"
         ;;
-  uninstall)
-        datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${webservice_application_name}"
-        mkdir -p "${intel_conf_dir}"
-        cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
-        echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
-        # prevent disaster by ensuring that package_dir is inside /opt/intel
-        if [[ "${package_dir}" == /opt/intel/* ]]; then
-          rm -rf "${package_dir}"
-        fi
-  rm /usr/local/bin/${script_name}
-        ;;
+  #uninstall)
+  #      datestr=`date +%Y-%m-%d.%H%M`
+  #      webservice_uninstall "${webservice_application_name}"
+  #      mkdir -p "${intel_conf_dir}"
+  #      cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
+  #      echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
+  #      # prevent disaster by ensuring that package_dir is inside /opt/intel
+  #      if [[ "${package_dir}" == /opt/intel/* ]]; then
+  #        rm -rf "${package_dir}"
+  #      fi
+  #rm /usr/local/bin/${script_name}
+  #      ;;
   help)
-        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        echo "Usage: ${script_name} {setup}"
         ;;
   *)
-        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        echo "Usage: ${script_name} {setup}"
         exit 1
 esac
 
