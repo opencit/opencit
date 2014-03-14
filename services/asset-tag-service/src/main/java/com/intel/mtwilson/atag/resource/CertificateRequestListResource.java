@@ -6,15 +6,19 @@ package com.intel.mtwilson.atag.resource;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.atag.model.CertificateRequestSearchCriteria;
 import com.intel.mtwilson.atag.model.CertificateRequest;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.atag.X509AttrBuilder;
@@ -27,6 +31,7 @@ import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.atag.model.x509.UTF8NameValueMicroformat;
 import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.io.IOException;
 import java.io.StringReader;
@@ -202,6 +207,8 @@ public class CertificateRequestListResource extends ServerResource {
     public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
+        String hostName = "";
+        boolean useHostName = false;
         if(! UUID.isValid(certificateRequest.getSubject())) {
             List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(certificateRequest.getSubject(),true);
             if(hostList == null || hostList.size() < 1) {
@@ -209,6 +216,8 @@ public class CertificateRequestListResource extends ServerResource {
                 throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field."));
             }
             log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
+            hostName = certificateRequest.getSubject();
+            useHostName = true;
             certificateRequest.setSubject(hostList.get(0).Hardware_Uuid);
         }
         // IMPORTANT: provisioning policy choices:
@@ -443,7 +452,28 @@ public class CertificateRequestListResource extends ServerResource {
                             Global.mtwilson().importAssetTagCertificate(request);
                         }
                     }
+                    if(My.configuration().getAssetTagAutoDeploy() == true) {
+                        //  deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord)
+                        if(useHostName) {
+                            log.debug("deploying certificate to host");
+                            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(hostName,true);
+                            if(!(hostList == null || hostList.size() == 0)) {
+                                TxtHostRecord hostRecord = hostList.get(0);
+                                try {
+                                    deployAssetTagToHost(certificate.getSha1(),hostRecord);
+                                }catch(Exception ex) {
+                                    log.debug("Caught exception bug ignoring since it could be host is just unreachable at this time");
+                                    ex.printStackTrace();
+                                }      
+                            }else{
+                                log.error("couldn't find record for host, unable to auto deploy certificate");
+                            }
+                        }else{
+                            log.error("UUID provided in request, unable to auto deploy certificate");
+                        }
+                    }
                 }
+                
                 catch(Exception e) {
                     log.debug("Cannot create attribute certificate", e);
                     setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -476,12 +506,15 @@ public class CertificateRequestListResource extends ServerResource {
     @Post("json:json")
     public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
+        log.debug("insertCertificateRequest total results = " + certificateRequests.length);
+        
         for (int i = 0; i < certificateRequests.length; i++) {
             if(certificateRequests[i] == null){
                 log.error("certificate request, reqest being sent was null");
             }else{
                 log.error("certificate request, reqest being sent was not null, sending");
             }
+            log.debug("sending " + certificateRequests[i].toString());
             results[i] = insertCertificateRequest(certificateRequests[i]);
 //            insertCertificateRequest(certificateRequests[i]);
         }
@@ -572,5 +605,15 @@ public class CertificateRequestListResource extends ServerResource {
         }
         sql.close();
         return certificateRequests;
+    }
+    
+    private void deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord) throws IOException {
+        HostAgentFactory hostAgentFactory = new HostAgentFactory();
+        ByteArrayResource tlsKeystore = new ByteArrayResource();
+//        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
+        ConnectionString connectionString = ConnectionString.from(hostRecord);
+        // XXX TODO use the tls policy factory with the keystore for this host ... from the host tls keystore table
+        HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
+        hostAgent.setAssetTag(tag);
     }
 }
