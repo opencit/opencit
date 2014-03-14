@@ -20,6 +20,8 @@ public class FileFilterCriteria implements FilterCriteria<File> {
     public String nameEqualTo;
     @QueryParam("nameContains")
     public String nameContains;
-    @QueryParam("contentTypeEquals")
-    public String contentTypeEquals;
+    @QueryParam("contentTypeEqualTo")
+    public String contentTypeEqualTo;
+    @QueryParam("contentTypeContains")
+    public String contentTypeContains;
 }
