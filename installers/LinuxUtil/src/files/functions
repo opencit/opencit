@@ -2006,7 +2006,7 @@ glassfish_install() {
   echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
   
   echo "Increasing glassfish max thread pool size to 200..."
-  $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
@@ -2055,7 +2055,7 @@ EOD
 ) > /dev/null 2>&1
 
   # XXX it asks for the password twice ...  can we script with our known value?
-  $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd enable-secure-admin
+  $glassfish --user=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2` --passwordfile=$GLASSFISH_HOME/config/admin.passwd enable-secure-admin
 
 }
 
