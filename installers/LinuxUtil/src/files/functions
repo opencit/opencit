@@ -1997,33 +1997,63 @@ glassfish_install() {
 
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_start
-  #glassfish_admin_user
+  glassfish_admin_user
   glassfish_memory 2048 512
   glassfish_logback
+  
+  # set JAVA_HOME for glassfish
+  asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
+  echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  
+  echo "Increasing glassfish max thread pool size to 200..."
+  $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+}
+
+glassfish_enable_secure_admin() {
+  glassfish
+
+
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
 glassfish_admin_user() {  
-  echo "You must choose an administrator username and password for Glassfish"
+  #echo "You must choose an administrator username and password for Glassfish"
   echo "The Glassfish control panel is at https://${MTWILSON_SERVER:-127.0.0.1}:4848"
-  prompt_with_default AS_ADMIN_USER "Glassfish admin username:"
-  export AS_ADMIN_USER
-  prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:"
-
-  export AS_ADMIN_PASSWORDFILE=/etc/glassfish/admin.passwd
-  mkdir -p /etc/glassfish
-  touch /etc/glassfish/admin.user /etc/glassfish/admin.passwd /etc/glassfish/admin.passwd.old
-  chmod 600 /etc/glassfish/admin.user /etc/glassfish/admin.passwd /etc/glassfish/admin.passwd.old
-  echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > /etc/glassfish/admin.user
-  echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > /etc/glassfish/admin.passwd
-  echo "AS_ADMIN_PASSWORD=" > /etc/glassfish/admin.passwd.old
+  #prompt_with_default AS_ADMIN_USER "Glassfish admin username:" ${WEBSERVICE_USERNAME}
+  #prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:" ${WEBSERVICE_PASSWORD}
+  
+  glassfish_detect
+  GF_CONFIG_PATH="$GLASSFISH_HOME/config"
+  export AS_ADMIN_USER=$WEBSERVICE_USERNAME
+  export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
+  export AS_ADMIN_PASSWORDFILE=$GF_CONFIG_PATH/admin.passwd
+  
+  touch $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
+  chmod 600 $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
+  echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > $GF_CONFIG_PATH/admin.user
+  echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
+  echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd.old
   #echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
 
-  echo "Glassfish will now ask you for the same information:"
+  #echo "Glassfish will now ask you for the same information:"
   # $glassfish is an alias for full path of asadmin
-  $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old change-admin-password
+  
+(
+$expect << EOD
+spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+expect "Enter admin user name [default: admin]>"
+send "$WEBSERVICE_USERNAME\r"
+expect "Enter the new admin password>"
+send "$WEBSERVICE_PASSWORD\r"
+expect "Enter the new admin password again>"
+send "$WEBSERVICE_PASSWORD\r"
+interact
+expect eof
+EOD
+) > /dev/null 2>&1
+
   # XXX it asks for the password twice ...  can we script with our known value?
-  $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd enable-secure-admin
+  $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd enable-secure-admin
 
 }
 
