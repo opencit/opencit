@@ -46,7 +46,7 @@ public interface SelectionDAO extends Closeable{
     void insert(@BindBean Selection selection); // automatically usess javabean attribute names as query placeholder names
 
     @SqlUpdate("update mw_tag_selection set description=:description where id=:id")
-    void update(@Bind("id") String id, @Bind("description") String description);
+    void update(@Bind("id") UUID id, @Bind("description") String description);
 
     @SqlUpdate("delete from mw_tag_selection where id=:id")
     void delete(@BindBean Selection selection);
