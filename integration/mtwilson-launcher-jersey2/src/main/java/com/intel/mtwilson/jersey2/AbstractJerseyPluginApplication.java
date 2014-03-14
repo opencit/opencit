@@ -6,6 +6,7 @@ package com.intel.mtwilson.jersey2;
 
 //import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
 import org.glassfish.jersey.server.ResourceConfig;
 //import com.intel.mtwilson.ws.jersey.util.*;
@@ -47,7 +48,8 @@ public abstract class AbstractJerseyPluginApplication extends ResourceConfig {
     protected abstract Registrar[] getRegistrars();
     
     public AbstractJerseyPluginApplication() {
-        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
+//        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
+        ExtensionCacheLauncher launcher = new ExtensionCacheLauncher();
         launcher.setRegistrars(getRegistrars());
         launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
 //        Util.scanJars(Util.findAllJars(),getRegistrars());

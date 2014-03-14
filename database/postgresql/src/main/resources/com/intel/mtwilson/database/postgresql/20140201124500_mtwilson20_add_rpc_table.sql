@@ -5,7 +5,7 @@
 -- then the mapping would be added. 
 
 CREATE TABLE mw_rpc (
-  ID character varying(36) DEFAULT NULL,
+  ID char(36) DEFAULT NULL,
   Name character varying(200) DEFAULT NULL,
   Input bytea DEFAULT NULL,
   Output bytea DEFAULT NULL,

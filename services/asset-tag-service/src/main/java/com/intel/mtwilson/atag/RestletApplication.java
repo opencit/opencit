@@ -42,7 +42,7 @@ public class RestletApplication extends Application {
     @Override
     public synchronized Restlet createInboundRoot() {
         ImplementationRegistrar runnables = new ImplementationRegistrar(); 
-        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
+        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher(); // or         ExtensionCacheLauncher launcher = new ExtensionCacheLauncher();
         launcher.setRegistrars(new Registrar[] { runnables });
         launcher.run(); // loads application jars, scans extension jars for the plugins 
         

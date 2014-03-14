@@ -105,7 +105,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         if (locator == null || locator.id == null ) { return null;}
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
             
-            SelectionKvAttribute obj = dao.findById(locator.id.toString());
+            SelectionKvAttribute obj = dao.findById(locator.id);
             if (obj != null)
                 return obj;
                                     
@@ -143,7 +143,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
                     throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified selection is not configured.");                    
                 }
                 
-                KvAttribute attrObj = attrDao.findById(item.getKvAttributeId().toString());
+                KvAttribute attrObj = attrDao.findById(item.getKvAttributeId());
                 if (attrObj == null) {
                     log.error("Invalid input specified by the user. Specified attribute is not configured.");
                     throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified attribute is not configured.");                                        

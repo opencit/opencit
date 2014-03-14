@@ -29,9 +29,9 @@ public class UserLoginHmacResultMapper implements ResultSetMapper<UserLoginHmac>
 //        UUID uuid = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         UserLoginHmac userLoginHmac = new UserLoginHmac();
 //        role.setId(UUID.valueOf(rs.getBytes("id"))); // would work for mysql if using binary(16) for uuid field
-        userLoginHmac.setId(UUID.valueOf((java.util.UUID)rs.getObject("id"))); // works for postgresql  when using uuid field
+        userLoginHmac.setId(UUID.valueOf(rs.getString("id"))); // works for postgresql  when using uuid field
 //        role.setUserId(UUID.valueOf(rs.getBytes("user_id"))); // would work for mysql if using binary(16) for uuid field
-        userLoginHmac.setUserId(UUID.valueOf((java.util.UUID)rs.getObject("user_id"))); // works for postgresql  when using uuid field
+        userLoginHmac.setUserId(UUID.valueOf(rs.getString("user_id"))); // works for postgresql  when using uuid field
         userLoginHmac.setHmacKey(rs.getBytes("hmac_key"));
         userLoginHmac.setProtection(rs.getString("protection"));
         userLoginHmac.setExpires(rs.getDate("expires"));

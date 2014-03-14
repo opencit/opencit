@@ -3,14 +3,14 @@
 
 -- example insert: insert into mw_role  (id,role_name,description) values ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11','test_role','just for testing');
 CREATE TABLE mw_role (
-  id uuid NOT NULL,
+  id CHAR(36) NOT NULL,
   role_name character varying(200) NOT NULL,
   description text DEFAULT NULL,
   PRIMARY KEY (id)
 ); 
 
 CREATE TABLE mw_role_permission (
-  role_id uuid NOT NULL,
+  role_id CHAR(36) NOT NULL,
   permit_domain character varying(200) DEFAULT NULL,
   permit_action character varying(200) DEFAULT NULL,
   permit_selection character varying(200) DEFAULT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE mw_role_permission (
 
 -- replaces mw_portal_user 
 CREATE TABLE mw_user (
-  id uuid NOT NULL,
+  id CHAR(36) NOT NULL,
   username character varying(255) NOT NULL,
   locale character varying(8) NULL,
   enabled boolean NOT NULL DEFAULT '0',
@@ -29,8 +29,8 @@ CREATE TABLE mw_user (
 ); 
 
 CREATE TABLE mw_user_keystore (
-  id uuid NOT NULL,
-  user_id uuid NOT NULL,
+  id CHAR(36) NOT NULL,
+  user_id CHAR(36) NOT NULL,
   keystore bytea NOT NULL,
   keystore_format character varying(128) NOT NULL DEFAULT 'jks',
   comment text DEFAULT NULL,
@@ -39,8 +39,8 @@ CREATE TABLE mw_user_keystore (
 
 -- expires may be replaced with notAfter and notBefore
 CREATE TABLE mw_user_login_password (
-  id uuid DEFAULT NULL,
-  user_id uuid DEFAULT NULL,
+  id CHAR(36) DEFAULT NULL,
+  user_id CHAR(36) DEFAULT NULL,
   password_hash bytea NOT NULL,
   salt bytea NOT NULL,
   iterations integer DEFAULT 1,
@@ -51,8 +51,8 @@ CREATE TABLE mw_user_login_password (
 ); 
 
 CREATE TABLE mw_user_login_password_role (
-  login_password_id uuid NOT NULL,
-  role_id uuid NOT NULL
+  login_password_id CHAR(36) NOT NULL,
+  role_id CHAR(36) NOT NULL
 ); 
 
 
@@ -62,8 +62,8 @@ CREATE TABLE mw_user_login_password_role (
 -- implied global key, or we may need to add a field protection_key_id to indicate
 -- which wrapping key was used to protect the hmac_key
 CREATE TABLE mw_user_login_hmac (
-  id uuid DEFAULT NULL,
-  user_id uuid DEFAULT NULL,
+  id CHAR(36) DEFAULT NULL,
+  user_id CHAR(36) DEFAULT NULL,
   hmac_key bytea NOT NULL,
   protection character varying(128) NOT NULL,
   expires timestamp DEFAULT NULL,
@@ -72,14 +72,14 @@ CREATE TABLE mw_user_login_hmac (
 ); 
 
 CREATE TABLE mw_user_login_hmac_role (
-  login_hmac_id uuid NOT NULL,
-  role_id uuid NOT NULL
+  login_hmac_id CHAR(36) NOT NULL,
+  role_id CHAR(36) NOT NULL
 ); 
 
 -- expires may be replaced with notAfter and notBefore
 CREATE TABLE mw_user_login_certificate (
-  id uuid DEFAULT NULL,
-  user_id uuid DEFAULT NULL,
+  id CHAR(36) DEFAULT NULL,
+  user_id CHAR(36) DEFAULT NULL,
   certificate bytea NOT NULL,
   sha1_hash bytea NOT NULL,
   sha256_hash bytea NOT NULL,
@@ -91,8 +91,8 @@ CREATE TABLE mw_user_login_certificate (
 ); 
 
 CREATE TABLE mw_user_login_certificate_role (
-  login_certificate_id uuid NOT NULL,
-  role_id uuid NOT NULL
+  login_certificate_id CHAR(36) NOT NULL,
+  role_id CHAR(36) NOT NULL
 ); 
 
 INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140213235800,NOW(),'Mt Wilson 2.0 - added permission table');

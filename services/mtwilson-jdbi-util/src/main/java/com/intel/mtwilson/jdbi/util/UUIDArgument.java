@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public class UUIDArgument implements ArgumentFactory<UUID> {
 
     private Logger log = LoggerFactory.getLogger(getClass());
+
+    /*
     private String driverName;
 
     public UUIDArgument() {
@@ -45,6 +47,7 @@ public class UUIDArgument implements ArgumentFactory<UUID> {
             driverName = null;
         }
     }
+    */
 
     @Override
     public boolean accepts(Class<?> type, Object value, StatementContext ctx) {
@@ -56,6 +59,8 @@ public class UUIDArgument implements ArgumentFactory<UUID> {
         return new Argument() {
             @Override
             public void apply(int position, PreparedStatement statement, StatementContext ctx) throws SQLException {
+                statement.setString(position, value.toString());
+                /*
                 try {
 //                    log.debug("configured driver name {}", driverName);
                     if( ctx.getAttribute("driver") != null ) {
@@ -64,7 +69,7 @@ public class UUIDArgument implements ArgumentFactory<UUID> {
                     }
                     int parameterType = statement.getParameterMetaData().getParameterType(position);
                     int precision = statement.getParameterMetaData().getPrecision(position);
-                    if ((parameterType == java.sql.Types.BINARY || parameterType == java.sql.Types.VARBINARY) && precision >= 16) {
+                    if ((parameterType == java.sql.Types.BINARY || parameterType == java.sql.Types.VARBINARY) ) {  // && precision >= 16 
                         statement.setBytes(position, value.toByteArray().getBytes()); // mysql  binary(16) or postgresql bytea
                         return;
                     }
@@ -102,6 +107,7 @@ public class UUIDArgument implements ArgumentFactory<UUID> {
                 } else {
                     statement.setString(position, value.toString()); // any database  char(36) which is hex UUID format with hyphens
                 }
+                */
             }
 
             /**

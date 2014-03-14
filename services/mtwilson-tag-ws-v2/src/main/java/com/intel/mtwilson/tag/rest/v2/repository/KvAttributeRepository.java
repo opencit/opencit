@@ -8,11 +8,13 @@ import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.UUIDConverter;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
 import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
 import com.intel.mtwilson.tag.model.KvAttributeLocator;
+import org.jooq.Converter;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -41,10 +43,11 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             dao = TagJdbi.kvAttributeDao();
             jooq = TagJdbi.jooq();
             
-            SelectQuery sql = jooq.select().from(MW_TAG_KVATTRIBUTE).getQuery();
+             SelectQuery sql = jooq.select().from(MW_TAG_KVATTRIBUTE).getQuery();
+//            SelectQuery sql = jooq.select(MW_TAG_KVATTRIBUTE.ID.coerce(byte[].class), MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE).from(MW_TAG_KVATTRIBUTE).getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
                 sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.nameEqualTo));
@@ -61,9 +64,20 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             log.debug("Opening tag-value dao");
             log.debug("Fetching records using JOOQ");
             Result<Record> result = sql.fetch();
+            
+//            ConverterFactory converterFactory = new ConverterFactory();
+//            Converter uuidConverter = converterFactory.getConverter();
+//            UUIDStringConverter uuidConverter = new UUIDStringConverter();
+//            UUIDConverter uuidConverter = new UUIDConverter();
+//            log.debug("coercing uuid field to byte[]");
+//            UUIDByteArrayConverter uuidConverter = new UUIDByteArrayConverter(); // can't use this one when generating with derby  char(36)
+            
             for(Record r : result) {
                 KvAttribute obj = new KvAttribute();
                 obj.setId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
+//                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID.coerce(byte[].class), uuidConverter));
+//                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID, uuidConverter));
+//                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID));
                 obj.setName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
                 obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); //TODO: Change these after creating new JOOQ tables.
                 objCollection.getKvAttributes().add(obj);
@@ -89,7 +103,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
         if (locator == null || locator.id == null ) { return null;}
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
-            KvAttribute obj = dao.findById(locator.id.toString());
+            KvAttribute obj = dao.findById(locator.id);
             if (obj != null)
                 return obj;
                                     
@@ -107,10 +121,10 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
         
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
-            KvAttribute obj = dao.findById(item.getId().toString());
+            KvAttribute obj = dao.findById(item.getId());
             // Allowing the user to only edit the value.
             if (obj != null)
-                dao.update(item.getId().toString(), obj.getName(), item.getValue());
+                dao.update(item.getId(), obj.getName(), item.getValue());
             else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
             }
@@ -128,7 +142,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
 
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
 
-            KvAttribute obj = dao.findById(item.getId().toString());
+            KvAttribute obj = dao.findById(item.getId());
             // Allowing the user to add only if it does not exist.
             if (obj == null) {
                 if (item.getName() == null || item.getName().isEmpty() || item.getValue() == null || item.getValue().isEmpty()) {
@@ -137,7 +151,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
                 }
                 obj = dao.findByNameAndValue(item.getName(), item.getValue());
                 if (obj == null)
-                    dao.insert(item.getId().toString(), item.getName(), item.getValue());   
+                    dao.insert(item.getId(), item.getName(), item.getValue());   
                 else {
                     log.error("The key value pair already exists.");
                     throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "The key value pair already exists.");
@@ -159,7 +173,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
         if( locator == null || locator.id == null ) { return; }
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
-            dao.delete(locator.id.toString());           
+            dao.delete(locator.id);           
             
         } catch (ResourceException aex) {
             throw aex;            

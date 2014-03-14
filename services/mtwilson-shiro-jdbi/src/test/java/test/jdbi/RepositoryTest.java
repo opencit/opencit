@@ -21,6 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * If you are setting up a test environment you should run the unit tests
+ * in this order:
+ * 
+ * testCreateRole
+ * testCreateUser
+ * 
+ * 
  * References:
  * Validation queries: http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most
  * 
