@@ -39,6 +39,9 @@ public interface SelectionKvAttributeDAO extends Closeable{
     @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where id=:id")
     SelectionKvAttribute findById(@Bind("id") String id);
 
+    @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where id=:id")
+    SelectionKvAttribute findById(@Bind("id") UUID id);
+    
     // this one returns the records but they are purely relational... you'd have to make separate queries to find the tags and tag values being referenced
     @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where selectionId=:selectionId")
     List<SelectionKvAttribute> findBySelectionId(@Bind("selectionId") String selectionId);

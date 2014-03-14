@@ -3,7 +3,7 @@
 -- This script creates the file table
 
 CREATE  TABLE mw_file (
-  id UUID NOT NULL ,
+  id CHAR(36) NOT NULL ,
   name VARCHAR(255) NULL ,
   contentType VARCHAR(255) NULL ,
   content BLOB NULL ,

@@ -26,6 +26,16 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jdbi-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jooq-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-dao-jooq</artifactId>
             <version>${project.version}</version>
         </dependency>

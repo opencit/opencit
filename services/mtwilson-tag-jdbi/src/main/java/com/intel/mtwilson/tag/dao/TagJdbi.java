@@ -109,16 +109,16 @@ public class TagJdbi {
     }
     
     public static SQLDialect getSqlDialect() throws IOException {
-        String driver = My.jdbc().driver();
-        if( "mysql".equalsIgnoreCase(driver) ) {
+        String protocol = My.configuration().getDatabaseProtocol(); 
+        if( "mysql".equalsIgnoreCase(protocol) ) {
             return SQLDialect.MYSQL;
         }
-        if( "postgresql".equalsIgnoreCase(driver) || "postgres".equalsIgnoreCase(driver) ) {
+        if( "postgresql".equalsIgnoreCase(protocol) || "postgres".equalsIgnoreCase(protocol) ) {
             return SQLDialect.POSTGRES;
         }
-        if( "derby".equalsIgnoreCase(driver) ) {
+        if( "derby".equalsIgnoreCase(protocol) ) {
             return SQLDialect.DERBY;
         }
-        return SQLDialect.valueOf(driver);
+        return SQLDialect.valueOf(protocol);
     }
 }

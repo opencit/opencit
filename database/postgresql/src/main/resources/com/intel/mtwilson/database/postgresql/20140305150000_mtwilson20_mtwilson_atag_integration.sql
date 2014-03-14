@@ -3,30 +3,30 @@
 -- This script creates the tables required for integrating asset tag with mt wilson
 
 CREATE  TABLE mw_host_tpm_password (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   password VARCHAR(255) NOT NULL ,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_kvattribute (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
   value VARCHAR(255) NOT NULL ,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_selection (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
   description TEXT NULL,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_selection_kvattribute (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   selectionId UUID NOT NULL ,
   kvAttributeId UUID NOT NULL ,
   PRIMARY KEY (id) );
 
 CREATE  TABLE mw_tag_certificate (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   certificate BYTEA NOT NULL ,
   sha1 CHAR(40) NOT NULL ,
   sha256 CHAR(64) NOT NULL ,
@@ -38,7 +38,7 @@ CREATE  TABLE mw_tag_certificate (
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_certificate_request (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   subject VARCHAR(255) NOT NULL ,
   selectionId UUID NOT NULL ,
   certificateId UUID NULL , 
@@ -47,7 +47,7 @@ CREATE  TABLE mw_tag_certificate_request (
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_configuration (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
   content BYTEA DEFAULT NULL ,
   PRIMARY KEY (id) );

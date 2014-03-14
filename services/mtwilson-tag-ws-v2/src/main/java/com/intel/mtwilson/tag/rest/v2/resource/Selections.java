@@ -84,11 +84,13 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
                      "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"+
                      "<selection id=\"" + obj.getId() + "\" name=\"" + obj.getName() + "\" >");
-        if(selectionKvAttributes != null && !selectionKvAttributes.isEmpty()) {
-            for(SelectionKvAttribute kvAttr : selectionKvAttributes) {
-                UTF8NameValueSequence sequence = new UTF8NameValueSequence(kvAttr.getKvAttributeName(),kvAttr.getKvAttributeValue());
-                str.append("<attribute oid=\""+ "2.5.4.789.1" +"\"><der>" + Base64.encodeBase64String(sequence.getDEREncoded()) + "</der></attribute>\n");                    
-            }
+        for(SelectionKvAttribute kvAttr : selectionKvAttributes) {
+            UTF8NameValueSequence sequence = new UTF8NameValueSequence(kvAttr.getKvAttributeName(),kvAttr.getKvAttributeValue());
+            /*
+             *
+            str.append("<attribute oid=\""+ "2.5.4.789.1" +"\"><text>" + String.format("%s=%s",kvAttr.getKvAttributeName(),kvAttr.getKvAttributeValue() ) + "</text></attribute>\n");                    
+            */
+            str.append("<attribute oid=\""+ "2.5.4.789.2" +"\"><der>" + Base64.encodeBase64String(sequence.getDEREncoded()) + "</der></attribute>\n");                    
         }
         str.append("</selection>\n</selections>");
         return str.toString();

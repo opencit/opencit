@@ -144,6 +144,11 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jdbi-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-util</artifactId>
             <version>${project.version}</version>        
         </dependency>
@@ -223,6 +228,21 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-jdbi</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-dao-jooq</artifactId>
+            <version>${project.version}</version>        
         </dependency>
     
         <dependency>
@@ -396,6 +416,10 @@
         </dependency>
 
         <!-- end restlet (for test client) -->
-                                                
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>  
 </project>
