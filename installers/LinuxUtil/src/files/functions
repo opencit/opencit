@@ -2008,7 +2008,7 @@ glassfish_install() {
   fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
-  $glassfish start-domain
+  glassfish_start
   glassfish_admin_user
   glassfish_memory 2048 512
   glassfish_logback
