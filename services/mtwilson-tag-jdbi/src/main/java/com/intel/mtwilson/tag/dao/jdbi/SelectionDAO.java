@@ -34,27 +34,23 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterArgumentFactory(UUIDArgument.class)
 @RegisterMapper(SelectionResultMapper.class)
 public interface SelectionDAO extends Closeable{
-    // char(36)
-    // postgresql:  uuid
-    // mysql:  binary(16)
     // Note:  if you change the table definition (for example uuid from binary to char) also check the TagResultMapper class that is used for jdbi queries
 //    @SqlUpdate("create table tag (id bigint primary key generated always as identity, uuid char(16) for bit data, name varchar(100), oid varchar(255))")   // jooq tries to cast char(16) for bit data  into a blob for comparisons... don't know why. and it's not possible to search on blob contents (usually not implemented by rdbms because blobs by definition can be gigabytes long), so using char(36) instead to get the standard uuid format
-    //@SqlUpdate("create table mw_tag_selection (id char(36), name varchar(255))")
     @SqlUpdate("create table mw_tag_selection (id char(36) primary key, name varchar(255), description varchar(255))")
     void create();
 
     @SqlUpdate("insert into mw_tag_selection (id, name, description) values (:id, :name, :description)")
 //    @GetGeneratedKeys
-    void insert(@Bind("id") UUID id, @Bind("name") String name, @Bind("description") String description);
+    void insert(@Bind("id") String id, @Bind("name") String name, @Bind("description") String description);
 
     @SqlUpdate("update mw_tag_selection set description=:description where id=:id")
-    void update(@Bind("id") UUID uuid, @Bind("description") String description);
+    void update(@Bind("id") String id, @Bind("description") String description);
 
     @SqlUpdate("delete from mw_tag_selection where id=:id")
-    void delete(@Bind("id") UUID id);
+    void delete(@Bind("id") String id);
 
     @SqlQuery("select id, name, description from mw_tag_selection where id=:id")
-    Selection findById(@Bind("id") UUID id);
+    Selection findById(@Bind("id") String id);
     
     //@SqlQuery("select id, uuid, name from selection where uuid=:uuid")
     //Selection findByUuid(@Bind("uuid") UUID uuid);

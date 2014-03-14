@@ -18,10 +18,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 
 /**
- * TODO INSECURE the tpm owner password must be encrypted before storing in the database
- * TODO what is the id? is it the host hardware uuid? host uuid in mtwilson? need to define
- * that better and rename the field
- * 
+ *
  * References:
  * http://www.jdbi.org/five_minute_intro/
  * http://jdbi.org/sql_object_api_argument_binding/
@@ -38,19 +35,19 @@ public interface TpmPasswordDAO extends Closeable {
     void create();
     
     @SqlUpdate("insert into mw_host_tpm_password (id, password) values (:id, :password)")
-    void insert(@Bind("id") UUID id, @Bind("password") String password);
+    void insert(@Bind("id") String id, @Bind("password") String password);
        
     @SqlUpdate("update mw_host_tpm_password set password=:password where id=:id")
-    void update(@Bind("id") UUID id, @Bind("password") String password);
+    void update(@Bind("id") String id, @Bind("password") String password);
 
     @SqlQuery("select id, password from mw_host_tpm_password where id=:id")
-    TpmPassword findById(@Bind("id") UUID id);
+    TpmPassword findById(@Bind("id") String id);
 
 //    @SqlQuery("select id,uuid,password from mw_host_tpm_password where uuid=:uuid")
 //    TpmPassword findByUuid(@Bind("uuid") String uuid);
     
     @SqlUpdate("delete from mw_host_tpm_password where id=:id")
-    void delete(@Bind("id") UUID id);
+    void delete(@Bind("id") String id);
     
     @Override
     void close();
