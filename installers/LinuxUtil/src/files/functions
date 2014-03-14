@@ -1981,7 +1981,6 @@ glassfish_install() {
         fi
     fi
     glassfish_detect
-    glassfish_admin_user
     if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
       echo_failure "Unable to auto-install Glassfish"
       echo "Glassfish download URL:"
@@ -2000,8 +1999,8 @@ glassfish_install() {
   fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
-  glassfish_start
-  #glassfish_admin_user
+  $glassfish start-domain
+  glassfish_admin_user
   glassfish_memory 2048 512
   glassfish_logback
   
@@ -2218,8 +2217,7 @@ glassfish_create_ssl_cert() {
   glassfish_require
   local serverName="${1}"
   local keystorePassword=changeit
-  gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-  local domain_found=`$glassfish --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd list-domains | head -n 1 | awk '{ print $1 }'`
+  local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
   local keytool=${JAVA_HOME}/bin/keytool
