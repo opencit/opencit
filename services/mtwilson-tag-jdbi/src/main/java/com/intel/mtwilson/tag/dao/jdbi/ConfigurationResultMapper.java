@@ -21,11 +21,8 @@ public class ConfigurationResultMapper implements ResultSetMapper<Configuration>
     @Override
     public Configuration map(int i, ResultSet rs, StatementContext sc) throws SQLException {
 //        UUID uuid = UUID.valueOf(rs.getBytes("uuid")); // use this when uuid is a binary type in database
-        UUID uuid = UUID.valueOf(rs.getString("uuid")); // use this when uuid is a char type in database
         Configuration configuration = new Configuration();
-        // todo: rolePermission.setRoleId(UUID.valueOf((java.util.UUID)rs.getObject("role_id"))); // works for postgresql  when using uuid field
         configuration.setId(UUID.valueOf(rs.getString("id")));
-//        configuration.setUuid(uuid);
         configuration.setName(rs.getString("name"));
         if( rs.getString("content") != null ) {
             try {

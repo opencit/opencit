@@ -23,14 +23,12 @@ public class CertificateResultMapper implements ResultSetMapper<Certificate> {
     @Override
     public Certificate map(int i, ResultSet rs, StatementContext sc) throws SQLException {
 //        UUID uuid = UUID.valueOf(rs.getBytes("uuid")); // use this when uuid is a binary type in database
-        UUID uuid = UUID.valueOf(rs.getString("uuid")); // use this when uuid is a char type in database
         byte[] content = rs.getBytes("certificate");
         Sha1Digest sha1 = Sha1Digest.valueOfHex(rs.getString("sha1"));
         Sha256Digest sha256 = Sha256Digest.valueOfHex(rs.getString("sha256"));
 //        Sha1Digest pcrEvent = Sha1Digest.valueOfHex(rs.getString("pcrEvent"));
         Certificate certificate = new Certificate();
-//        certificate.setId(rs.("id"));
-//        certificate.setUuid( uuid);
+        certificate.setId(UUID.valueOf(rs.getString("id")));
         certificate.setCertificate(content);
         certificate.setSha1(sha1);
         certificate.setSha256(sha256);

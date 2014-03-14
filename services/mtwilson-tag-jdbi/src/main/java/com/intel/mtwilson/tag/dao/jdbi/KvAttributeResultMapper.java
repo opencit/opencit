@@ -19,10 +19,8 @@ public class KvAttributeResultMapper implements ResultSetMapper<KvAttribute> {
 
     @Override
     public KvAttribute map(int i, ResultSet rs, StatementContext sc) throws SQLException {
-//        UUID uuid = UUID.valueOf(rs.getBytes("uuid")); // use this when uuid is a binary type in database
-        UUID id = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         KvAttribute obj = new KvAttribute();
-        obj.setId(id);
+        obj.setId(UUID.valueOf(rs.getString("id")));
         obj.setName(rs.getString("name"));
         obj.setValue(rs.getString("value"));
         return obj;

@@ -18,7 +18,10 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 
 /**
- *
+ * TODO INSECURE the tpm owner password must be encrypted before storing in the database
+ * TODO what is the id? is it the host hardware uuid? host uuid in mtwilson? need to define
+ * that better and rename the field
+ * 
  * References:
  * http://www.jdbi.org/five_minute_intro/
  * http://jdbi.org/sql_object_api_argument_binding/

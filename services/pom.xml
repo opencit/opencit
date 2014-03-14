@@ -64,6 +64,10 @@
 	<module>mtwilson-intel-hostagent</module>
 	<module>mtwilson-saml</module>
 	<module>mtwilson-saml-verifier</module>
+	<module>mtwilson-tag-model</module>
+	<module>mtwilson-tag-jdbi</module>
+	<module>mtwilson-tag-dao-jooq</module>
+	<module>mtwilson-tag-ws-v2</module>
   </modules>
 
 </project>

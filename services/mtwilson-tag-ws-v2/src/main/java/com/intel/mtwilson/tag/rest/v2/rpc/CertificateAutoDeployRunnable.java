@@ -110,7 +110,7 @@ public class CertificateAutoDeployRunnable extends ServerResource implements Run
             log.debug("Get tags for selection with id of {}.", selection.getId().toString());
             // This is the location where we need to ensure that all the attributes that needs to be added to the certificated need to be
             // collected. Currently only the KV(Key-Value) attributes are supported. This KV attribute would always map to OID: "2.5.4.789.2"
-            List<SelectionKvAttribute> selectionKvAttributes = selectionKvAttributeDao.findBySelectionIdWithValues(selection.getId());
+            List<SelectionKvAttribute> selectionKvAttributes = selectionKvAttributeDao.findBySelectionIdWithValues(selection.getId().toString());
             if( selectionKvAttributes == null || selectionKvAttributes.isEmpty()) {
                 log.error("No tags in selection");
                 setStatus(Status.CLIENT_ERROR_BAD_REQUEST);  // cannot make a certificate request without a valid selection;  we can't pick one automatically unless the administrator has configured a default selection and in that case we wouldn't even be searching here.
@@ -120,7 +120,7 @@ public class CertificateAutoDeployRunnable extends ServerResource implements Run
             // at this point we have a request for a subject (host uuid) and a specific selection of tags for that subject
             // Since the cert is not created, we will set the certificateID will be null.
             UUID newCertRequestID = new UUID();
-            certRequestDao.insert(newCertRequestID, item.getSubject(), selection.getId(), null, item.getAuthorityName());
+            certRequestDao.insert(newCertRequestID.toString(), item.getSubject(), selection.getId().toString(), null, item.getAuthorityName());
 
             // if sysadmin has configured automatic approvals, we need to check if we have a ca key to use
             if( Global.configuration().isApproveAllCertificateRequests() ) {
@@ -129,7 +129,7 @@ public class CertificateAutoDeployRunnable extends ServerResource implements Run
                 X509Certificate cakeyCert = Global.cakeyCert();
                 if( cakey != null && cakeyCert != null ) {
                     // we will automatically sign the request;  so mark it as pending
-                    certRequestDao.updateStatus(newCertRequestID, "Pending");
+                    certRequestDao.updateStatus(newCertRequestID.toString(), "Pending");
                     item.setStatus("Pending");
                     // sign the cetificate; XXX TODO should be moved to another class and called from here
                     log.debug("Building certificate for request: {}", item.getSubject());
@@ -167,7 +167,7 @@ public class CertificateAutoDeployRunnable extends ServerResource implements Run
                         certRepo.create(certificate);
                                                 
                         // now the certificate has been created so update the certificate request record
-                        certRequestDao.updateApproved(newCertRequestID, newCertId);
+                        certRequestDao.updateApproved(newCertRequestID.toString(), newCertId.toString());
                         item.setCertificateId(newCertId); // XXX of no use to client, maybe remove this
                         item.setStatus("Done"); // done automatically in the database record by updateApproved() but we also need it here to send backto the client
                         

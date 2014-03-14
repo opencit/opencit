@@ -6,7 +6,6 @@ package com.intel.mtwilson.tag.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.jersey.Document;
-import java.util.List;
 
 /**
  *

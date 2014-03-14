@@ -63,17 +63,18 @@ public class CertificateProvisionRunnable extends ServerResource implements Runn
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(certificateId);
+            Certificate obj = dao.findById(certificateId.toString());
             if (obj != null) 
             {
-                    List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString());
-                    if(hostList == null || hostList.size() == 0) {
-                        log.error("No hosts were returned back matching name " + host.toString());
-                        setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-                        throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No hosts were found matching the specified criteria.");
-                    }
-                    TxtHostRecord hostRecord = hostList.get(0);
-                    deployAssetTagToHost(obj.getSha1(), hostRecord);
+                // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
+                List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString());
+                if(hostList == null || hostList.size() == 0) {
+                    log.error("No hosts were returned back matching name " + host.toString());
+                    setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+                    throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No hosts were found matching the specified criteria.");
+                }
+                TxtHostRecord hostRecord = hostList.get(0);
+                deployAssetTagToHost(obj.getSha1(), hostRecord);
             }
 
         } catch (ResourceException aex) {
