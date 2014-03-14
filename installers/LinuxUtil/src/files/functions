@@ -1981,6 +1981,7 @@ glassfish_install() {
         fi
     fi
     glassfish_detect
+    glassfish_admin_user
     if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
       echo_failure "Unable to auto-install Glassfish"
       echo "Glassfish download URL:"
@@ -2000,7 +2001,7 @@ glassfish_install() {
 
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_start
-  glassfish_admin_user
+  #glassfish_admin_user
   glassfish_memory 2048 512
   glassfish_logback
   
