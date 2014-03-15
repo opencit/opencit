@@ -10,7 +10,7 @@ function setTokenInAllForms(token) {
     $("form[method=POST]").each(function(){ 
         var form = $(this);
         // check if there is already an AuthorizationToken hidden input if we have a newer token we should replace it
-        var inputs = $(form).find("input[type=hidden][name=AuthorizationToken");
+        var inputs = $(form).find("input[type=hidden][name=AuthorizationToken]");
         if( inputs.length ) {
             // form already includes an AuthorizationToken field, so replace its value
             inputs.each(function() {
@@ -25,7 +25,7 @@ function setTokenInAllForms(token) {
     });
 }
 function setTokenInHttpEquiv(token) {
-    var meta = $("meta[http-equiv=AuthorizationToken");
+    var meta = $("meta[http-equiv=AuthorizationToken]");
     if( meta.length ) {
         meta.each(function() {
             $(this).attr("value", token);
@@ -38,7 +38,7 @@ function setTokenInHttpEquiv(token) {
 function getAuthorizationToken() {
     // XXX TODO look for expiration header with token and set a timer; if token has expired get a new one, otherwise use existing token
     // first look for an authorization token embedded in the current page
-    var meta = $("meta[http-equiv=AuthorizationToken");
+    var meta = $("meta[http-equiv=AuthorizationToken]");
     if( meta.length ) {
         authorizationToken = $(meta[0]).attr("value");
         //alert("got token from meta: "+authorizationToken);

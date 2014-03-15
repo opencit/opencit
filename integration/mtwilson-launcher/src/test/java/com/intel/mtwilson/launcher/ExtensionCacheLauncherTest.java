@@ -31,7 +31,7 @@ public class ExtensionCacheLauncherTest {
     @Test
     public void testExtensionLauncher() {
        ExtensionCacheLauncher launcher = new ExtensionCacheLauncher();
-       launcher.setRegistrars(new Registrar[] { new ImplementationRegistrar(), new AnnotationRegistrar(V2.class) });
+       launcher.setRegistrars(new Registrar[] { new ImplementationRegistrar(), new AnnotationRegistrar(V2.class),  new AnnotationRegistrar(RPC.class) });
        launcher.run(); // loads and scans the jars
        List<Object> v2s = Extensions.findAll(V2.class.getName());
        for(Object v2 : v2s) {

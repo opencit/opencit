@@ -186,7 +186,7 @@ public class CertificateAutoDeployRunnable extends ServerResource implements Run
                         log.error("Cannot create attribute certificate", e);
                         setStatus(Status.SERVER_ERROR_INTERNAL);
                         // we will return the certificateRequest object with an updated status later normally
-                        item.setStatus("Error"); // to indicate to client that we don't know when this miht be resolved... could be an input issue, or could be a server issue
+                        item.setStatus("Error"); // to indicate to client that we don't know when this might be resolved... could be an input issue, or could be a server issue
                     }
                 } else {
                     log.warn("Automatic approval of requests is enabled but no certificate authority is avaialable");
