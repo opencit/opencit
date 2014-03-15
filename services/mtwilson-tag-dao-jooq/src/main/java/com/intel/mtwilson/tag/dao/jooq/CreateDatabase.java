@@ -113,6 +113,10 @@ public class CreateDatabase {
         if( !Derby.tableExists("mw_configuration") ) { configurationDao.create(); }
         configurationDao.close();
 
+        // file
+        FileDAO fileDao = dbi.open(FileDAO.class);
+        if( !Derby.tableExists("mw_file") ) { fileDao.create(); }
+        fileDao.close();
         
         TpmPasswordDAO tpmPasswordDao = dbi.open(TpmPasswordDAO.class);
         if( !Derby.tableExists("mw_host_tpm_password")) { tpmPasswordDao.create();}
