@@ -165,7 +165,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
 
-            dao.delete(locator.id.toString());
+            dao.delete(locator.id);
                         
         } catch (ResourceException aex) {
             throw aex;            

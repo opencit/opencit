@@ -39,6 +39,16 @@
             <artifactId>mtwilson-tag-dao-jooq</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-tag-selection-xml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-tag-selection-json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -53,6 +63,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -103,7 +118,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -148,12 +162,12 @@
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-        -->
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
             <version>2.5.1-1</version>
         </dependency>
+        -->
         
         <dependency>
             <groupId>org.slf4j</groupId>

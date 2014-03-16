@@ -10,7 +10,6 @@ import org.bouncycastle.asn1.DERUTF8String;
 
 /**
  * OID: 2.5.4.789.1
- * @deprecated use UTFNameValueSequence instead
  * @author jbuhacoff
  */
 public class UTF8NameValueMicroformat extends ASN1Encodable {

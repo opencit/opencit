@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Path("/selection_kv_attributes")
+@Path("/tag-selection-kv-attributes")
 public class SelectionKvAttributes extends AbstractJsonapiResource<SelectionKvAttribute, SelectionKvAttributeCollection, SelectionKvAttributeFilterCriteria, NoLinks<SelectionKvAttribute>, SelectionKvAttributeLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());

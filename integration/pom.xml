@@ -36,6 +36,7 @@
 	<module>mtwilson-launcher-tomcat7</module>
     <module>mtwilson-feature-xml</module>
 	<module>mtwilson-tag-selection-xml</module>
+	<module>mtwilson-tag-selection-json</module>
   </modules>
 
 

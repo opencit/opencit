@@ -62,6 +62,11 @@
             <artifactId>mtwilson-saml</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

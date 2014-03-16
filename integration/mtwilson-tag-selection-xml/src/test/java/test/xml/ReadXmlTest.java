@@ -4,6 +4,7 @@
  */
 package test.xml;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -16,6 +17,8 @@ import org.junit.Test;
 import com.intel.mtwilson.tag.selection.xml.*;
 import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.tag.selection.SelectionBuilder;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -53,35 +56,7 @@ public class ReadXmlTest {
             validator = schema.newValidator();
         }
     }
-
-    // probably should be moved to a new utility module cpg-xml or cpg-jaxb 
-    // this pair is used when root element has @XmlRootEelment annotation when building
-    private <T> T fromRootXML(InputStream in, Class<T> valueType) throws IOException, JAXBException {
-        String document = IOUtils.toString(in, "UTF-8");
-        return fromRootXML(document, valueType);
-    }
-
-    private <T> T fromRootXML(String document, Class<T> valueType) throws IOException, JAXBException {
-        JAXBContext jc = JAXBContext.newInstance(valueType);
-        Unmarshaller u = jc.createUnmarshaller();
-        Object o = u.unmarshal(new StreamSource(new StringReader(document))); // commented otu due to "Expected elements are (none)" error since xjc does not annotate root element <selections> with a tag and maybe timestamp.
-        return (T) o;
-    }
-
-    // probably should be moved to a new utility module cpg-xml or cpg-jaxb 
-    // this pair is used when root element does NOT have @XmlRootEelment annotation when building
-    private <T> T fromXML(InputStream in, Class<T> valueType) throws IOException, JAXBException {
-        String document = IOUtils.toString(in, "UTF-8");
-        return fromXML(document, valueType);
-    }
-
-    private <T> T fromXML(String document, Class<T> valueType) throws IOException, JAXBException {
-        JAXBContext jc = JAXBContext.newInstance(valueType);
-        Unmarshaller u = jc.createUnmarshaller();
-        JAXBElement<T> e = u.unmarshal(new StreamSource(new StringReader(document)), valueType);
-        return e.getValue();
-    }
-
+    
     /**
      *
      * @param xmlfile a classpath resource name for example
@@ -96,9 +71,12 @@ public class ReadXmlTest {
     }
 
     private void mapXmlToJson(String xmlfile) throws Exception {
+        JAXB jaxb = new JAXB();
         try (InputStream in = getClass().getResourceAsStream(xmlfile)) {
-            SelectionsType selections = fromXML(in, SelectionsType.class);
+            String xml = IOUtils.toString(in);
+            SelectionsType selections = jaxb.read(xml, SelectionsType.class);
             ObjectMapper mapper = new ObjectMapper();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY); // omit empty attributes, for example {"selection":[{"subject":[],"attribute":[],"id":"8ed9140b-e6a1-41b2-a8d4-258948633153","name":null,"notBefore":null,"notAfter":null}]}  becomes   {"selection":[{"id":"8ed9140b-e6a1-41b2-a8d4-258948633153"}]}
             log.debug("{}: {}",xmlfile, mapper.writeValueAsString(selections));
         }
     }
@@ -152,6 +130,9 @@ public class ReadXmlTest {
         mapXmlToJson("/selection-xml-examples/selection7.xml");
         mapXmlToJson("/selection-xml-examples/selection8.xml");
         mapXmlToJson("/selection-xml-examples/selection9.xml");
+        mapXmlToJson("/selection-xml-examples/selection10.xml");
+        mapXmlToJson("/selection-xml-examples/selection11.xml");
+        mapXmlToJson("/selection-xml-examples/selection12.xml");
     }
 
     @Test
@@ -257,5 +238,48 @@ public class ReadXmlTest {
 
         TagSelection selection = getTagSelectionFromXml(xml);
         System.out.println("got selection with name " + selection.name + " and id of " + selection.id);
+    }
+    
+    private void printSelections(SelectionsType selections) {
+        List<SelectionType> selectionList = selections.getSelection();
+        for(SelectionType selection : selectionList) {
+            log.debug("selection id {} name {} notBefore {} notAfter {}", selection.getId(), selection.getName(), selection.getNotBefore(), selection.getNotAfter());
+            List<SubjectType> subjectList = selection.getSubject();
+            for(SubjectType subject : subjectList) {
+                log.debug("subject uuid {} name {} ip {}", subject.getUuid(), subject.getName(), subject.getIp()); // only one will appear 
+            }
+            List<AttributeType> attributeList = selection.getAttribute();
+            for(AttributeType attribute : attributeList) {
+                log.debug("attribute oid {} text {}", attribute.getOid(), attribute.getText().getValue());
+            }
+        }
+    }
+    
+    @Test
+    public void testParseJsonSelection() throws Exception {
+        String selection1 = "{\"selection\":[{\"attribute\":[{\"text\":{\"value\":\"Country=US\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"State=CA\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"State=TX\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"City=Folsom\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"City=El Paso\"},\"oid\":\"2.5.4.789.1\"}]}]}";
+        ObjectMapper mapper = new ObjectMapper();
+        SelectionsType selections = mapper.readValue(selection1, SelectionsType.class);
+        printSelections(selections);
+        /*
+15:56:22.291 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection1.xml: {"selection":[{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}]}]}
+15:56:22.331 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection2.xml: {"selection":[{"id":"0b52784b-4588-4c73-900d-a1bac622dde1"}]}
+15:56:22.370 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection3.xml: {"selection":[{"attribute":[{"text":{"value":"US"},"oid":"2.5.4.6"},{"text":{"value":"CA"},"oid":"2.5.4.8"},{"text":{"value":"TX"},"oid":"2.5.4.8"},{"text":{"value":"Folsom"},"oid":"2.5.4.7"},{"text":{"value":"El Paso"},"oid":"2.5.4.7"}]}]}
+15:56:22.435 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection4.xml: {"selection":[{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}],"id":"8ed9140b-e6a1-41b2-a8d4-258948633153","name":"California","notBefore":1385555160000,"notAfter":1388143559000}]}
+15:56:22.476 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection5.xml: {"selection":[{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"}],"id":"0b52784b-4588-4c73-900d-a1bac622dde1"},{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}],"id":"1c22784b-4588-4c73-900d-b1bef279abf7"}]}
+15:56:22.513 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection6.xml: {"selection":[{"id":"0b52784b-4588-4c73-900d-a1bac622dde1"},{"id":"bbbe1c68-4792-454c-9295-1a1234e1aa9f"}]}
+15:56:22.544 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection7.xml: {"selection":[{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"}],"id":"8ed9140b-e6a1-41b2-a8d4-258948633153","name":"California"},{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}],"id":"24e7d7be-f337-47f7-a1af-9a4dbdaeb69d"},{"attribute":[{"text":{"value":"Country=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"Province=Quebec"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Quebec City"},"oid":"2.5.4.789.1"}],"name":"Canada"}]}
+15:56:22.590 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection8.xml: {"selection":[{"subject":[{"ip":{"value":"192.168.1.101"}}],"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"}],"id":"8ed9140b-e6a1-41b2-a8d4-258948633153","name":"California"},{"subject":[{"ip":{"value":"192.168.1.102"}}],"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}],"id":"24e7d7be-f337-47f7-a1af-9a4dbdaeb69d"},{"subject":[{"ip":{"value":"192.168.1.103"}},{"ip":{"value":"192.168.1.104"}},{"ip":{"value":"192.168.1.105"}}],"attribute":[{"text":{"value":"Country=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"Province=Quebec"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Quebec City"},"oid":"2.5.4.789.1"}],"name":"Canada"}]}
+15:56:22.627 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection9.xml: {"selection":[{"subject":[{"uuid":{"value":"f98cabf1-6ab1-47c2-8b5c-e3be3d6865ad"}}],"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"}],"id":"8ed9140b-e6a1-41b2-a8d4-258948633153","name":"California"},{"subject":[{"uuid":{"value":"21c26a6e-5401-41de-a168-d637e1e1b154"}}],"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}],"id":"24e7d7be-f337-47f7-a1af-9a4dbdaeb69d"},{"subject":[{"uuid":{"value":"c6b37600-c05f-4131-afd7-69b1212b24a7"}}],"attribute":[{"text":{"value":"Country=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"Province=Quebec"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Quebec City"},"oid":"2.5.4.789.1"}],"name":"Canada"}]}
+15:56:22.660 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection10.xml: {"selection":[{"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=NY"},"oid":"2.5.4.789.1"},{"text":{"value":"City=New York"},"oid":"2.5.4.789.1"}],"id":"0b52784b-4588-4c73-900d-a1bac622dde1","name":"New York"},{"subject":[{"ip":{"value":"192.168.1.101"}}],"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Santa Clara"},"oid":"2.5.4.789.1"}],"id":"8ed9140b-e6a1-41b2-a8d4-258948633153","name":"California"},{"subject":[{"uuid":{"value":"21c26a6e-5401-41de-a168-d637e1e1b154"}},{"uuid":{"value":"f98cabf1-6ab1-47c2-8b5c-e3be3d6865ad"}}],"attribute":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=TX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}],"id":"24e7d7be-f337-47f7-a1af-9a4dbdaeb69d","name":"Texas"},{"subject":[{"ip":{"value":"192.168.1.103"}},{"ip":{"value":"192.168.1.104"}},{"ip":{"value":"192.168.1.105"}}],"attribute":[{"text":{"value":"Country=MX"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Mexico City"},"oid":"2.5.4.789.1"},{"text":{"value":"Dept=Finance"},"oid":"2.5.4.789.1"}],"id":"c6b37600-c05f-4131-afd7-69b1212b24a7","name":"Mexico"}]}
+15:56:22.686 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection11.xml: {"selection":[{"name":"California"}]}
+15:56:22.712 [main] DEBUG test.xml.ReadXmlTest - /selection-xml-examples/selection12.xml: {"selection":[{"id":"8ed9140b-e6a1-41b2-a8d4-258948633153"}]}
+        */
+    }
+
+    @Test
+    public void testSelectionBuilder() throws Exception {
+        SelectionsType selections = SelectionBuilder.factory().selection().textAttributeKV("Country", "US").build();
+        printSelections(selections);
     }
 }

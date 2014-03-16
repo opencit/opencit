@@ -13,12 +13,16 @@ import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.tag.Util;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRequestRepository;
+import com.intel.mtwilson.tag.selection.xml.SelectionsType;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -37,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Path("/certificate_requests")
+@Path("/tag-certificate-requests")
 public class CertificateRequests extends AbstractJsonapiResource<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, NoLinks<CertificateRequest>, CertificateRequestLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
@@ -57,60 +61,57 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
         return repository;
     }
     
-    @Override
-    @Consumes({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @POST
-    public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest item) {
-        CertificateRequest response = super.createOne(locator, item);
-        // TODO:  this doesn't conform to JSON API,  the non-jsonapi links should go in the meta.links section;   also TODO revise NoLinks in the class declaration
-        response.getLinks().put("status", String.format("/certificate_requests/%s", response.getId().toString()));
-        response.getLinks().put("certificate", String.format("/certificates?certificateRequestIdEqualTo=%s", response.getId().toString()));
-        return response;
-    }
-
     /**
-     * Because the selection xml format (plaintext or encrypted) does not
-     * include the target host's subject uuid, the client must specify
-     * the target host subject uuid either with an HTTP header "Subject" whose
-     * value is the uuid, or with a query parameter "subject" whose value is
-     * the uuid.  If both are present only the HTTP header is used. If neither
-     * is present the server will return a bad request error.
-     * 
-     * Unlike the JSON API, this method does not return the original request
-     * as the response because the clients that send XML or encrypted XML
-     * don't need it echoed back to them.
+     * Same as superclass but adds two links to the response headers (tentative)
      * 
      * @param locator
-     * @param message
-     * @param request 
+     * @param certificateRequest
+     * @return 
      */
-    @Consumes({MediaType.APPLICATION_XML, OtherMediaType.MESSAGE_RFC822})
+    @Override
     @POST
-    public void createOneXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) {
-        CertificateRequest certificateRequest = new CertificateRequest();
-        certificateRequest.setId(new UUID());
-        certificateRequest.setStatus("New");
-        certificateRequest.setSubject(getSubject(request, locator));
-        certificateRequest.setContent(message);
-        certificateRequest.setContentType(request.getContentType()); // either application/xml or message/rfc822
-        getRepository().create(certificateRequest);
-        // TODO:  return certificate request id so client knows where to get updates (in case of external CA) /certificate_requests/{csrId}  and where to get the generated cert   /certificates?certificateRequestIdEqualTo={csrId}
-        response.addHeader("Link", String.format("</certificate_requests/%s>; rel=status", certificateRequest.getId().toString()));
-        response.addHeader("Link", String.format("</certificates?certificateRequestIdEqualTo=%s>; rel=certificate", certificateRequest.getId().toString()));
+    public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest certificateRequest) {
+        certificateRequest = super.createOne(locator, certificateRequest);
+        // TODO:  this doesn't conform to JSON API,  the non-jsonapi links should go in the meta.links section;   also TODO revise NoLinks in the class declaration
+        certificateRequest.getLinks().put("status", String.format("/tag-certificate-requests/%s", certificateRequest.getId().toString()));
+        certificateRequest.getLinks().put("certificate", String.format("/tag-certificates?certificateRequestIdEqualTo=%s", certificateRequest.getId().toString()));
+        certificateRequest.getLinks().put("content", String.format("/tag-certificate-requests/%s/content", certificateRequest.getId().toString()));
+        return certificateRequest;
+    }
+
+    protected SelectionsType getSelection(CertificateRequest certificateRequest) throws IOException {
+        SelectionsType selection;
+        switch(certificateRequest.getContentType()) {
+            case MediaType.APPLICATION_JSON:
+                selection = Util.fromJson(new String(certificateRequest.getContent(), Charset.forName("UTF-8")));
+                break;
+            case MediaType.APPLICATION_XML:
+                selection = Util.fromXml(new String(certificateRequest.getContent(), Charset.forName("UTF-8")));
+                break;
+            default:
+                throw new IOException("Unsupported content type of selection data");
+        }
+        return selection;
     }
     
-    private String getSubject(HttpServletRequest request, CertificateRequestLocator locator) {
-        String subject = request.getHeader("Subject");
-        if( subject != null && !subject.isEmpty()) {
-            return subject; 
-        }
-        else if( locator.subject != null && !locator.subject.isEmpty() ) {
-            return locator.subject; // from query paramter  ?subject={subject}            
-        }
-        else {
-            throw new WebApplicationException(Status.BAD_REQUEST); // TODO:  ErrorCode enum with internationalized message saying subject is required in header or query param
-        }
+    @Path("/{id}/content")
+    @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @GET
+    public String retrieveOneSelectionJson(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
+        CertificateRequest certificateRequest = super.retrieveOne(locator);
+        SelectionsType selection = getSelection(certificateRequest);
+        response.addHeader("Link", String.format("</tag-certificate-requests/%s>; rel=status", certificateRequest.getId().toString()));
+        return Util.toJson(selection);
+    }
+    
+    @Path("/{id}/content")
+    @Produces({MediaType.APPLICATION_XML})
+    @GET
+    public String retrieveOneSelectionXml(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
+        CertificateRequest certificateRequest = super.retrieveOne(locator);
+        SelectionsType selection = getSelection(certificateRequest);
+        response.addHeader("Link", String.format("</tag-certificate-requests/%s>; rel=status", certificateRequest.getId().toString()));
+        return Util.toXml(selection);
     }
     
 }
