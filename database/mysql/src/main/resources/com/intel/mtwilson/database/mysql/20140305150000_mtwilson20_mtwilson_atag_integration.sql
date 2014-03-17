@@ -48,7 +48,7 @@ CREATE  TABLE `mw_as`.`mw_tag_certificate` (
   `contentType` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`) );
   
-  CREATE  TABLE `mw_as`.`mw_tag_configuration` (
+  CREATE  TABLE `mw_as`.`mw_configuration` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `content` BLOB NULL ,

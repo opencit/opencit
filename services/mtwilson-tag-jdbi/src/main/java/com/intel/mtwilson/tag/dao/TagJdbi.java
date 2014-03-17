@@ -12,6 +12,7 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -96,6 +97,11 @@ public class TagJdbi {
     public static TpmPasswordDAO tpmPasswordDao() throws SQLException {
         DBI dbi = new DBI(getDataSource());
         return dbi.open(TpmPasswordDAO.class);
+    }
+
+    public static FileDAO fileDao() throws SQLException {
+        DBI dbi = new DBI(getDataSource());
+        return dbi.open(FileDAO.class);
     }
 
     public static DSLContext jooq() throws SQLException, IOException {

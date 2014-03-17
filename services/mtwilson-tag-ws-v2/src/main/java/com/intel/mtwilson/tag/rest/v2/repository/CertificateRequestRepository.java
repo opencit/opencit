@@ -4,7 +4,12 @@
  */
 package com.intel.mtwilson.tag.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
+import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
+import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE_REQUEST;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
@@ -139,6 +144,41 @@ public class CertificateRequestRepository extends ServerResource implements Simp
         }
     }
 
+    
+    // similar to ImportConfig command in mtwilson-console
+    public PasswordProtection getPasswordProtection() {
+            PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
+            if( !protection.isAvailable() ) {
+                protection = PasswordProtectionBuilder.factory().aes(128).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
+            }
+        return protection;
+    }
+    protected void encrypt(CertificateRequest certificateRequest) throws Exception {
+        byte[] plaintext = certificateRequest.getContent();
+        
+            // NOTE: the base64-encoded value of mtwilson.as.dek is used as the encryption password;  this is different than using the decoded value as the aes-128 key which is currently done for attestation service host connection info
+            ByteArrayResource resource = new ByteArrayResource();
+            PasswordEncryptedFile passwordEncryptedFile = new PasswordEncryptedFile(resource, My.configuration().getDataEncryptionKeyBase64(), getPasswordProtection());
+            passwordEncryptedFile.encrypt(plaintext); // saves it to resource
+            
+            certificateRequest.setContent(resource.toByteArray()); // encrypted xml file wrapped in rfc822-style message format which indicates the encryption settings
+            certificateRequest.setContentType("message/rfc822"); 
+        
+            // TODO:  PasswordEncryptedFile currently doesn't support passing the plaintext content type, but when it does we need ot pass it so it will be mentioned in the encrypted file's headers, so that we can check it when we decrypt later (to ensure it's application/xml before we try to parse it)
+            
+    }
+    protected void decrypt(CertificateRequest certificateRequest) throws Exception {
+            ByteArrayResource resource = new ByteArrayResource(certificateRequest.getContent());
+            PasswordEncryptedFile passwordEncryptedFile = new PasswordEncryptedFile(resource, My.configuration().getDataEncryptionKeyBase64());
+            byte[] plaintext = passwordEncryptedFile.decrypt(); 
+            
+            certificateRequest.setContent(plaintext); 
+            certificateRequest.setContentType("application/xml"); 
+        
+            // TODO:  PasswordEncryptedFile currently doesn't provide us the plaintext content type, but when it does we need to check it after we decrypt  and set it on the request object
+        
+    }
+    
     @Override
     public void create(CertificateRequest item) {
         
@@ -157,6 +197,8 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             if( item.getStatus() == null || item.getStatus().isEmpty() ) { 
                 item.setStatus("New");
             }
+            
+            encrypt(item);
             
 //            certRequestDao.insert(item.getId().toString(), item.getSubject(), selectionObj.getId().toString(), null, null);
             certRequestDao.insert(item);

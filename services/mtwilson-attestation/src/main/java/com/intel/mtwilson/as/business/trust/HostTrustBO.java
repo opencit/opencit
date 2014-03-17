@@ -701,6 +701,7 @@ public class HostTrustBO extends BaseBO {
         log.debug("XXX jonathan performance  get agent manifest: {}", getAgentManifestStop-getAgentManifestStart); // XXX jonathan performance
         
         HostReport hostReport = new HostReport();
+        hostReport.tagCertificate = null; // TODO:  need to load the host's tag certificate (if available) and set it here so it can be validated by the rules
         hostReport.pcrManifest = pcrManifest;
         hostReport.tpmQuote = null; // TODO
         hostReport.variables = new HashMap<String,String>(); // TODO

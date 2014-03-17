@@ -16,7 +16,7 @@ import com.intel.mtwilson.jersey.Document;
 public class File extends Document {
     
     private String name;
-    private String content;    
+    private byte[] content;    
     private String contentType;
 
     public String getName() {
@@ -35,12 +35,12 @@ public class File extends Document {
         this.contentType = contentType;
     }
 
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
-
+    
 }

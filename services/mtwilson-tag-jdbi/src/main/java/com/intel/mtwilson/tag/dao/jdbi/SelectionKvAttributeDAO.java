@@ -44,7 +44,7 @@ public interface SelectionKvAttributeDAO extends Closeable{
     
     // this one returns the records but they are purely relational... you'd have to make separate queries to find the tags and tag values being referenced
     @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where selectionId=:selectionId")
-    List<SelectionKvAttribute> findBySelectionId(@Bind("selectionId") String selectionId);
+    List<SelectionKvAttribute> findBySelectionId(@Bind("selectionId") UUID selectionId);
 
     // this one returns the records WITH associated information (so tag id, but also tag name and oid, and tag value id, but also tag value text)
     @SqlQuery("select mw_tag_selection_kvattribute.id, "
@@ -56,19 +56,19 @@ public interface SelectionKvAttributeDAO extends Closeable{
             + "from mw_tag_selection_kvattribute, mw_tag_kvattribute "
             + "where mw_tag_selection_kvattribute.selectionId =:selectionId and "
             + "mw_tag_kvattribute.id = mw_tag_selection_kvattribute.kvAttributeId")
-    List<SelectionKvAttribute> findBySelectionIdWithValues(@Bind("selectionId") String selectionId);
+    List<SelectionKvAttribute> findBySelectionIdWithValues(@Bind("selectionId") UUID selectionId);
     
     @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where kvAttributeId=:kvAttributeId")
-    List<SelectionKvAttribute> findByTagId(@Bind("kvAttributeId") String kvAttributeId);
+    List<SelectionKvAttribute> findByTagId(@Bind("kvAttributeId") UUID kvAttributeId);
     
 //    @SqlQuery("select id,selectionId,attributeId,attributeValueId from mw_tag_selection_tag_value where attributeValueId=:attributeValueId")
 //    SelectionKvAttribute findByTagValueId(@Bind("attributeValueId") String attributeValueId);
 
     @SqlUpdate("delete from mw_tag_selection_kvattribute where selectionId=:selectionId")
-    void deleteAll(@Bind("selectionId") String selectionId);
+    void deleteAll(@Bind("selectionId") UUID selectionId);
 
     @SqlUpdate("delete from mw_tag_selection_kvattribute where id=:id")
-    void delete(@Bind("id") String id);
+    void delete(@Bind("id") UUID id); // TODO: rename to deleteById
     
     @Override
     void close();

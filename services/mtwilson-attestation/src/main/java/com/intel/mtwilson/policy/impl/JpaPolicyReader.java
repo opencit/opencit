@@ -23,12 +23,17 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.rule.PcrEventLogEqualsExcluding;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import com.intel.mtwilson.policy.rule.TagCertificateTrusted;
+import java.io.FileInputStream;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.EntityManagerFactory;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,9 +174,21 @@ public class JpaPolicyReader {
         // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
         // Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
         //PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
-        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
-        rule.setMarkers(TrustMarker.ASSET_TAG.name());
-        rules.add(rule);
+        PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+        tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
+        rules.add(tagPcrRule);
+        
+        // load the tag cacerts and create the tag trust rule   TODO  load the cacerts once and keep it in memory instead of reloading for every attestation, but need a way for admin to refresh the configuration at runtime without restartnig the server
+        try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
+            String text = IOUtils.toString(in);
+            List<X509Certificate> tagAuthorities = X509Util.decodePemCertificates(text);
+            TagCertificateTrusted tagTrustedRule = new TagCertificateTrusted(tagAuthorities.toArray(new X509Certificate[0]));
+            tagTrustedRule.setMarkers(TrustMarker.ASSET_TAG.name());
+            rules.add(tagTrustedRule);
+        }
+        catch(Exception e) {
+            throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage()); // TODO: i18n
+        }
         return rules;
     }
 

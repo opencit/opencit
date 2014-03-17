@@ -82,6 +82,10 @@ public class ManagementConsoleViewController extends MultiActionController{
 		return "";
 	}
 
+	public ModelAndView getAssetTagPage(HttpServletRequest req,HttpServletResponse res ) {
+		return new ModelAndView("tag/index");
+	}
+    
 	public ModelAndView getRegisterHostPage(HttpServletRequest req,HttpServletResponse res ) {
 		return new ModelAndView("RegisterHost");
 	}

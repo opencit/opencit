@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Path("/host_uuids")
+@Path("/host-uuids")
 public class HostUuids extends AbstractJsonapiResource<HostUuid, HostUuidCollection, HostUuidFilterCriteria, NoLinks<HostUuid>, HostUuidLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
