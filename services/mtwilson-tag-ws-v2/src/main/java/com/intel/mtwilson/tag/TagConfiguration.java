@@ -36,13 +36,14 @@ public class TagConfiguration extends AbstractConfiguration {
 //    public static final String TAG_KEYSTORE_PASSWORD = "tag.keystore.password";
 //    public static final String TAG_KEY_ALIAS = "tag.key.alias";
 //    public static final String TAG_KEY_PASSWORD = "tag.key.password";
-    public static final String TAG_ISSUER = "tag.issuer"; // tag.certificate.dn 
+    public static final String TAG_ISSUER = "tag.issuer.dn"; // tag.certificate.dn 
     public static final String TAG_VALIDITY_SECONDS = "tag.validity.seconds";
     public static final String TAG_ALWAYS_GENERATE_NEW_CERTIFICATE = "tag.provision.nocache";
     public static final String TAG_AUTO_IMPORT_TO_MTWILSON = "tag.provision.autoimport";
     public static final String TAG_PROVISION_EXTERNAL_CA = "tag.provision.external";
     public static final String TAG_PROVISION_SELECTION_DEFAULT = "tag.provision.selection.default";
     public static final String TAG_PROVISION_XML_ENCRYPTION_PASSWORD = "tag.provision.xml.encryption.password"; // TODO:  move this into database and allow one password per user ;  username would be obtained from client authentication or header of encrypted file. 
+    public static final String TAG_PROVISION_XML_ENCRYPTION_REQUIRED = "tag.provision.xml.encryption.required";
     
     public TagConfiguration(Configuration configuration) {
         super();
@@ -70,7 +71,7 @@ public class TagConfiguration extends AbstractConfiguration {
     }
 
     public String getTagIssuer() {
-        return getConfiguration().getString(TAG_ISSUER, "mtwilson-tag-ca");
+        return getConfiguration().getString(TAG_ISSUER, "CN=mtwilson-tag-ca");
     }
 
     public String getTagProvisionSelectionDefault() {
@@ -79,6 +80,10 @@ public class TagConfiguration extends AbstractConfiguration {
     
     public String getTagProvisionXmlEncryptionPassword() {
         return getConfiguration().getString(TAG_PROVISION_XML_ENCRYPTION_PASSWORD);  // intentionally not setting a default value; setup must generate a random password
+    }
+
+    public boolean isTagProvisionXmlEncryptionRequired() {
+        return getConfiguration().getBoolean(TAG_PROVISION_XML_ENCRYPTION_REQUIRED, false);
     }
     
 }

@@ -49,7 +49,7 @@ public class CreateCaKey extends AtagCommand {
             dn = args[0];
         } 
         else {
-            dn = "CN=asset-tag-service,OU=mtwilson";
+            dn = "CN=asset-tag-service,OU=mtwilson"; // TODO:   use  TagConfiguration getTagIssuer()
         }
         
         // create a new key pair

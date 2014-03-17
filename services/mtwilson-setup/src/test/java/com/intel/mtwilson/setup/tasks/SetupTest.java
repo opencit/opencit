@@ -38,6 +38,7 @@ public class SetupTest {
         tasks.add(new CreateAdministrator());
 //        tasks.add(new CreatePortalAdministrator());
 //        tasks.add(new MigrateUsers());
+        tasks.add(new UpdateExtensionCacheFile());
         
         return tasks;
     }
