@@ -99,7 +99,7 @@ Jooq code generation happens in asset-tag-dao.
                                             debug="on"
                                             includeantruntime="false"/>
                                         <mkdir dir="${project.build.testOutputDirectory}"/>
-                                        <javac srcdir="${basedir}/src/test/java"
+                                        <javac srcdir="${basedir}/src/main/java"
           excludes="test/restlet/** test/jooq/**"
           destdir="${project.build.testOutputDirectory}"
           classpath="${test_classpath}"
