@@ -193,6 +193,10 @@ public class ProvisionTagCertificate  {
     @Consumes(MediaType.APPLICATION_JSON)
     @POST
     public byte[] createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
+         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
+         if( configuration.isTagProvisionXmlEncryptionRequired() ) {
+             throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
+         }
         SelectionsType selections = null;
         if( json != null ) {
             selections = Util.fromJson(json);
@@ -220,6 +224,10 @@ public class ProvisionTagCertificate  {
     @Consumes(MediaType.APPLICATION_XML)
     @POST
     public byte[] createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
+         if( configuration.isTagProvisionXmlEncryptionRequired() ) {
+             throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
+         }
         SelectionsType selections = null;
         if( xml != null ) {
             selections = Util.fromXml(xml);
