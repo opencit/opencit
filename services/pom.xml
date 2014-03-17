@@ -71,6 +71,7 @@
 	<module>mtwilson-tag-jdbi</module>
 	<module>mtwilson-tag-dao-jooq</module>
 	<module>mtwilson-tag-ws-v2</module>
+	<module>mtwilson-tag-setup</module>
   </modules>
 
 </project>
