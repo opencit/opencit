@@ -106,7 +106,10 @@ public class CreateMtWilsonClient extends AtagCommand {
         }
         fileDao.close();
         
-        // save configuration 
+        // display configuration so user can copy it to mtwilson.properties 
+        // TODO:  when converting to a setup task this would just be set in the in-memory configuration 
+        // and the application setup manager would write all the properties out to mtwilson.properties
+        // file at the end of setup
         Properties p = new Properties();
         p.setProperty("mtwilson.api.url", mtwilsonUrl);
         p.setProperty("mtwilson.api.username", mtwilsonClientKeystoreUsername);

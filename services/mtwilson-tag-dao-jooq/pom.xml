@@ -130,11 +130,11 @@ Jooq code generation happens in asset-tag-dao.
                                 <artifactId>ant-contrib</artifactId>
                                 <version>1.0b3</version>
                             </dependency>
-                            <!-- required for javac to work -->
+                            <!-- required for javac to work; the version tag on this dependency should match the JDK version being used to compile Mt Wilson;  make sure you set the same version for this maven project in your IDE -->
                             <dependency>
                                 <groupId>com.sun</groupId>
                                 <artifactId>tools</artifactId>
-                                <version>1.6</version> <!-- Mt Wilson builds target Java 1.6, therefore you must use JDK 1.6 to compile this. Make sure you set JDK 1.6 as the specific JDK for this maven project in your IDE in order for this to work.  -->
+                                <version>1.6</version>
                                 <scope>system</scope>
                                 <systemPath>${java.home}/../lib/tools.jar</systemPath>
                             </dependency>

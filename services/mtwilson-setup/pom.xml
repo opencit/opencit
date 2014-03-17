@@ -12,6 +12,11 @@
     </parent>
 
     <dependencies>  
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-setup-ext</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         
         <!-- these dependencies are required for our use of cpg-configuration -->
         <dependency>
