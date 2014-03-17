@@ -784,28 +784,28 @@ check file gf_installed with path \"/usr/share/glassfish4/bin/asadmin\"
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
 	depends on glassfish
-# Management Service
-	check host mtwilson-MS-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/msctl start\"
-	stop program = \"/usr/local/bin/msctl stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish
-# Whitelist Service
-	check host mtwilson-WLM-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/wlmctl start\"
-	stop program = \"/usr/local/bin/wlmctl stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
+## Management Service
+#	check host mtwilson-MS-glassfish with address 127.0.0.1
+#	group gf_server
+#	start program = \"/usr/local/bin/msctl start\"
+#	stop program = \"/usr/local/bin/msctl stop\"
+#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on gf_installed
+#	depends on glassfish
+## Whitelist Service
+#	check host mtwilson-WLM-glassfish with address 127.0.0.1
+#	group gf_server
+#	start program = \"/usr/local/bin/wlmctl start\"
+#	stop program = \"/usr/local/bin/wlmctl stop\"
+#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on gf_installed
+#	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
 fi
 fi
 
@@ -847,27 +847,27 @@ check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina
 	depends on tc_installed
 	depends on tomcat
 # Management Service
-	check host mtwilson-MS-tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/msctl start\"
-	stop program = \"/usr/local/bin/msctl stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat
+#	check host mtwilson-MS-tomcat with address 127.0.0.1
+#	group tc_server
+#	start program = \"/usr/local/bin/msctl start\"
+#	stop program = \"/usr/local/bin/msctl stop\"
+#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on tc_installed
+#	depends on tomcat
 # Whitelist Service
-	check host mtwilson-WLM-tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/wlmctl start\"
-	stop program = \"/usr/local/bin/wlmctl stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
+#	check host mtwilson-WLM-tomcat with address 127.0.0.1
+#	group tc_server
+#	start program = \"/usr/local/bin/wlmctl start\"
+#	stop program = \"/usr/local/bin/wlmctl stop\"
+#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on tc_installed
+#	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
 fi
 fi
 
