@@ -6,15 +6,19 @@ package com.intel.mtwilson.atag.resource;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.atag.model.CertificateRequestSearchCriteria;
 import com.intel.mtwilson.atag.model.CertificateRequest;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.atag.X509AttrBuilder;
@@ -24,7 +28,10 @@ import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
 import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.atag.model.TagValue;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueMicroformat;
+import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.io.IOException;
 import java.io.StringReader;
@@ -51,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
@@ -199,6 +207,8 @@ public class CertificateRequestListResource extends ServerResource {
     public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
+        String hostName = "";
+        boolean useHostName = false;
         if(! UUID.isValid(certificateRequest.getSubject())) {
             List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(certificateRequest.getSubject(),true);
             if(hostList == null || hostList.size() < 1) {
@@ -206,6 +216,8 @@ public class CertificateRequestListResource extends ServerResource {
                 throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field."));
             }
             log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
+            hostName = certificateRequest.getSubject();
+            useHostName = true;
             certificateRequest.setSubject(hostList.get(0).Hardware_Uuid);
         }
         // IMPORTANT: provisioning policy choices:
@@ -213,6 +225,10 @@ public class CertificateRequestListResource extends ServerResource {
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
         Selection selection = null;
         // if submitting xml, instead of selection having your UUID, it needs to be set to xml
+        /* 
+         * Per discussion w/ Jonathan/Raghu/Stewart it was decided on 3/10 that /certificate-requests would no longer accept xml in the selection field
+         * Jonathan is creating a seperate api, possibly /certificate-hanlding/{uuid} to which you can post json, xml or encrypted xml
+         * we will use that api instead to support xml in certificate requests
         if (Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty() && certificateRequest.getSelection() != null && certificateRequest.getSelection().equalsIgnoreCase("xml")) {
             log.error("insertCertificateRequest got xml request");
             String xml = certificateRequest.getXml();
@@ -287,6 +303,7 @@ public class CertificateRequestListResource extends ServerResource {
                 certificateRequest.setSelection(mySelection.getUuid().toString());
             }
         }
+        */
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
             log.error("insertCertificateRequest processing request");
             if( UUID.isValid(certificateRequest.getSelection() )) {
@@ -381,22 +398,31 @@ public class CertificateRequestListResource extends ServerResource {
                             .issuerPrivateKey(cakey)
                             .dateSerial()
                             .subjectUuid(UUID.valueOf(certificateRequest.getSubject()))
-                            .expires(7, TimeUnit.DAYS);
+                            .expires(My.configuration().getAssetTagCertificateValidityPeriod(), TimeUnit.DAYS);
                     for (SelectionTagValue tag : selection.getTags()) {
                         log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
                         if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
 //                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
-                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+//                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
                         else if( tag.getTagOid().equals("2.5.4.789.2") ) { // name-valuesequence with just one value
+                            log.error("got .2 tag but encoding as .1 for now");
                             // XXX TODO   we need to collate these  (all  attribtues with oid 2.5.4.789.2 and same "name" should be combined to one attribute in the cert ...  or fix the UI to send them as a sequence  like { name: "name", value: [value1, value2, ...] }  so we can easily use all the values here
 //                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
-                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+//                            builder.attribute(tag.getTagName(), tag.getTagValue()); // will get encoded as 2.5.4.789.2 since we are migrating to that ;  after we update the UI to default to 2.5.4.789.2 this case will not get triggered
+//                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueSequence.OID), new UTF8NameValueSequence(tag.getTagName(), tag.getTagValue()));
+                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
                         else {
-                            // XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
-                            builder.attribute(tag.getTagOid(), tag.getTagValue());                            
+                            log.error("unsupported tag oid {}", tag.getTagOid());
+                            // pretend it's a .1 microformat
+                              builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(tag.getTagName(), tag.getTagValue()));
                         }
+//                        else {
+//                             XXX  this case should be changed so that the tag value is interpreted as byte array (asn1-encoded value) so we can generate the attribute properly in the certificate
+//                            builder.attribute(tag.getTagOid(), tag.getTagValue());  // TODO -  binary/base64/ASN1Encodable                          
+//                        }
                     }
                     byte[] attributeCertificateBytes = builder.build();
                     if( attributeCertificateBytes == null ) {
@@ -426,7 +452,28 @@ public class CertificateRequestListResource extends ServerResource {
                             Global.mtwilson().importAssetTagCertificate(request);
                         }
                     }
+                    if(My.configuration().getAssetTagAutoDeploy() == true) {
+                        //  deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord)
+                        if(useHostName) {
+                            log.debug("deploying certificate to host");
+                            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(hostName,true);
+                            if(!(hostList == null || hostList.size() == 0)) {
+                                TxtHostRecord hostRecord = hostList.get(0);
+                                try {
+                                    deployAssetTagToHost(certificate.getSha1(),hostRecord);
+                                }catch(Exception ex) {
+                                    log.debug("Caught exception bug ignoring since it could be host is just unreachable at this time");
+                                    ex.printStackTrace();
+                                }      
+                            }else{
+                                log.error("couldn't find record for host, unable to auto deploy certificate");
+                            }
+                        }else{
+                            log.error("UUID provided in request, unable to auto deploy certificate");
+                        }
+                    }
                 }
+                
                 catch(Exception e) {
                     log.debug("Cannot create attribute certificate", e);
                     setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -459,7 +506,15 @@ public class CertificateRequestListResource extends ServerResource {
     @Post("json:json")
     public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException, ApiException, SignatureException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
+        log.debug("insertCertificateRequest total results = " + certificateRequests.length);
+        
         for (int i = 0; i < certificateRequests.length; i++) {
+            if(certificateRequests[i] == null){
+                log.error("certificate request, reqest being sent was null");
+            }else{
+                log.error("certificate request, reqest being sent was not null, sending");
+            }
+            log.debug("sending " + certificateRequests[i].toString());
             results[i] = insertCertificateRequest(certificateRequests[i]);
 //            insertCertificateRequest(certificateRequests[i]);
         }
@@ -550,5 +605,15 @@ public class CertificateRequestListResource extends ServerResource {
         }
         sql.close();
         return certificateRequests;
+    }
+    
+    private void deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord) throws IOException {
+        HostAgentFactory hostAgentFactory = new HostAgentFactory();
+        ByteArrayResource tlsKeystore = new ByteArrayResource();
+//        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
+        ConnectionString connectionString = ConnectionString.from(hostRecord);
+        // XXX TODO use the tls policy factory with the keystore for this host ... from the host tls keystore table
+        HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
+        hostAgent.setAssetTag(tag);
     }
 }

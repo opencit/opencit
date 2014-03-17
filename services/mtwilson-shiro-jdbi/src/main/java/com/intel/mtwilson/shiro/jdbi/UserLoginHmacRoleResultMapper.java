@@ -22,8 +22,8 @@ public class UserLoginHmacRoleResultMapper implements ResultSetMapper<UserLoginH
 //        UUID uuid = UUID.valueOf(rs.getBytes("id")); // use this when uuid is a binary(mysql) or uuid(postgresql) type in database
 //        UUID uuid = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         UserLoginHmacRole role = new UserLoginHmacRole();
-        role.setLoginHmacId(UUID.valueOf(rs.getBytes("login_hmac_id")));
-        role.setRoleId(UUID.valueOf(rs.getBytes("role_id")));
+        role.setLoginHmacId(UUID.valueOf(rs.getString("login_hmac_id")));
+        role.setRoleId(UUID.valueOf(rs.getString("role_id")));
         return role;
     }
     

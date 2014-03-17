@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<selections xmlns="urn:intel-mtwilson-asset-tag-attribute-selections">
-    <selection id="0b52784b-4588-4c73-900d-a1bac622dde1"/>
-    <selection id="bbbe1c68-4792-454c-9295-1a1234e1aa9f"/>
-</selections>
-<!--
-This XML file demonstrates choosing two existing selections using their UUIDs
--->

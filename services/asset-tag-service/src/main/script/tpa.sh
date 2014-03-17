@@ -6,6 +6,7 @@ certSha1=/tmp/certSha1
 nvramPass=ffffffffffffffffffffffffffffffffffffffff
 ownerPass=ffffffffffffffffffffffffffffffffffffffff
 srkPass=ffffffffffffffffffffffffffffffffffffffff
+autoSelect=0
 mode="VMWARE"
 selection=""
 server=""
@@ -94,10 +95,7 @@ function generatePasswordHex() {
 }
 
 function takeOwnershipTpm() {
- functionReturn=0
- if [ "$mode" == "VMWARE" ]; then
-	$tpmtakeownership -x -t -oownerPass -z > /dev/null 2>&1
- fi
+  $tpmtakeownership -x -t -oownerPass -z #> /dev/null 2>&1
 #(
 #$expect << EOD
 #spawn $tpmtakeownership
@@ -116,14 +114,12 @@ function takeOwnershipTpm() {
 }
 
 function clearOwnershipTpm() {
-  if [ "$mode" == "VMWARE" ]; then
-    $tpmclear -t -x -oownerPass > /dev/null 2>&1
-  fi
+  $tpmclear -t -x -oownerPass #> /dev/null 2>&1
 }
 
 function releaseNvram() {
  functionReturn=0
- $tpmnvrelease -x -t -i $INDEX -oownerPass > /dev/null 2>&1
+ $tpmnvrelease -x -t -i $INDEX -oownerPass #> /dev/null 2>&1
 }
 
 
@@ -172,7 +168,7 @@ function getRemoteTag() {
 function getTagOption() {
  functionReturn=0
  if [ -z "$selection" ]; then
-	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
+	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
 	if [ $? -eq 1 ]; then
       exit 0;
 	fi
@@ -188,7 +184,11 @@ function provisionCert() {
  fi
  selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
  if [ $isUsingXml == 0 ]; then
-   json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+   if [ $autoSelect == 1 ]; then
+     json='[{ "subject": "'$UUID'" }]'
+   else
+     json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+   fi
    echo "$WGET --header=Content-Type: application/json --post-data=$json $server/certificate-requests -O $certInfoFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
    clear
@@ -219,23 +219,20 @@ function provisionCert() {
  if [ $resp -eq 0 ]; then
   sha1=`xml2 < $certFile  | grep sha1`
   sha1=`echo "${sha1#*sha1=}"`
-  
-  # Generate passwords for ownership and nvram  
-  if [ "$mode" == "VMWARE" ]; then
-	export nvramPass=`generatePasswordHex 40`
-	export ownerPass=`generatePasswordHex 40`
-	export srkPass=`generatePasswordHex 40`
-  else
-    $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
-	ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
-	export ownerPass="$ownerPass"
-	export nvramPass=`generatePasswordHex 40`
-	export srkPass=`generatePasswordHex 40`
-  fi
-  
-  # Overwrite password if TA, skip taking ownership
 
-  takeOwnershipTpm
+  # Retrieve password if TA, else generate new passwords and take ownership
+  $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
+  export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
+  if [ -z $ownerPass ]; then
+    mode="VMWARE"
+    export ownerPass=`generatePasswordHex 40`
+    export srkPass=`generatePasswordHex 40`
+    takeOwnershipTpm
+  else
+    mode="TA"
+  fi
+  export nvramPass=`generatePasswordHex 40`
+
   releaseNvram
   createIndex4
 
@@ -244,7 +241,12 @@ function provisionCert() {
   echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
   $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
   result=$?
-  clearOwnershipTpm
+
+  # If VMWARE, clear TPM ownership
+  if [ "$mode" == "VMWARE" ]; then
+    clearOwnershipTpm
+  fi
+
   sleep 5;
   if [ $result -eq 0 ]; then
    if [ "$accept" == "yes" ]; then
@@ -273,7 +275,7 @@ function _main() {
     if [ $functionReturn -eq 0 ]; then
      mybreak=1
     else
-      tagChoice=3
+      tagChoice=4
     fi
     ;;
    2)
@@ -281,8 +283,13 @@ function _main() {
     if [ $functionReturn -eq 0 ]; then
      mybreak=1
     else
-      tagChoice=3
+      tagChoice=4
     fi
+    ;;
+   3)
+    mybreak=1
+    autoSelect=1
+    tagChoice=4
     ;;
    *)
     getTagOption

@@ -633,10 +633,16 @@ public class MyConfiguration {
     public boolean getAutoUpdateHosts() {
         return conf.getBoolean("mtwilson.as.autoUpdateHost", false);
     }    
+    
+    // TODO:   there is a TagConfiguration class in mtwilson-tag-ws-v2 ; that one should be used instead of the following methods.
 
     // asset tagging html5 resources (used by the reference implementation)
     public String getAssetTagHtml5Dir() {
         return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
+    }
+    
+    public File getAssetTagCaCertificateFile() {
+        return findConfigurationFile(conf.getString("mtwilson.tag.cacerts.file", "tag-cacerts.pem"));
     }
     
     // asset tag server url
@@ -674,6 +680,14 @@ public class MyConfiguration {
     
     public String getAssetTagMtwilsonBaseUrl() {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
+    }
+    
+    public int getAssetTagCertificateValidityPeriod() {
+        return conf.getInt("mtwilson.atag.certificate.validity.period", 365);
+    }
+    
+    public boolean getAssetTagAutoDeploy() {
+        return conf.getBoolean("mtwilson.atag.certificate.deploy.auto",false);
     }
     
     ///////////////////////// mtwilson portal  //////////////////////////////////

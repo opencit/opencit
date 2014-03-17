@@ -109,6 +109,11 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <artifactId>asset-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jdbi-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
 
 
     <dependency>

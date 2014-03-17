@@ -154,11 +154,17 @@ Detected the following options on this server:"
 }
 
 all_status() {
+  if using_glassfish; then  
+    glassfish_running_report
+  elif using_tomcat; then
+    tomcat_running_report
+  fi
+  
   find_ctl_commands
   if [ -n "$pcactl" ]; then $pcactl status; fi
   if [ -n "$asctl" ]; then $asctl status; fi
-  if [ -n "$msctl" ]; then $msctl status; fi
-  if [ -n "$wlmctl" ]; then $wlmctl status; fi
+  #if [ -n "$msctl" ]; then $msctl status; fi
+  #if [ -n "$wlmctl" ]; then $wlmctl status; fi
   #if [ -n "$mcctl" ]; then $mcctl status; fi
   #if [ -n "$wpctl" ]; then $wpctl status; fi
   #if [ -n "$tdctl" ]; then $tdctl status; fi
@@ -324,10 +330,10 @@ case "$1" in
   localhost-integration)
         mtwilson_localhost_integration $@
         ;;
-  api)
-        shift
-        call_apiclient $@
-        ;;
+  #api)
+  #      shift
+  #      call_apiclient $@
+  #      ;;
   setup)
         if [ $# -gt 1 ]; then
           shift
@@ -429,7 +435,7 @@ case "$1" in
   help)
         ;&
   *)
-        echo -e "Usage: mtwilson {api|change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
+        echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
 				"\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
 				"\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
 				"\t\trestart|setup|start|status|stop|uninstall|version}"

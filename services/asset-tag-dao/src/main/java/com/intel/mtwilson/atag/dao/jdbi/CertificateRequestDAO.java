@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.atag.dao.jdbi;
 
+import com.intel.mtwilson.jdbi.util.UUIDArgument;
 import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.atag.model.CertificateRequest;
 import com.intel.dcsg.cpg.io.UUID;

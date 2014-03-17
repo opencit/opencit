@@ -389,7 +389,7 @@ MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
 echo "Configuring Mt Wilson Server Name..."
 echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
 This address will be used in the server SSL certificate and in all Mt Wilson URLs.
-For example, if you enter localhost then the Mt Wilson URL is https://localhost:8181
+For example, if you enter localhost then the Mt Wilson URL is https://localhost:${DATABASE_PORTNUM}
 Detected the following options on this server:"
 #IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
 for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ " `hostname`
@@ -578,7 +578,7 @@ if using_glassfish; then
 
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
-	$glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+	$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
   else
 	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
 	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"

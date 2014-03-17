@@ -69,18 +69,15 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
 @V2
 //@Stateless
 @Path("/rpc")
-public class BlockingRpc {
+public class BlockingRpc extends AbstractRpc {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BlockingRpc.class);
     private ObjectMapper mapper; // for debug only
-    private RpcRepository repository = new RpcRepository();
 
     public BlockingRpc() {
         mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
     }
-    @Context
-    private MessageBodyWorkers workers;
 
     @Path("/{name}")
     @POST
@@ -88,44 +85,17 @@ public class BlockingRpc {
     @Produces(MediaType.WILDCARD)
     public Object invokeRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
         // make sure we have an extension to handle this rpc
-        RpcAdapter adapter = RpcUtil.findRpcForName(name); // always creates a new instance of the adapter for the rpc
-        if (adapter == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
-
-        XStream xs = new XStream();
-        byte[] inputXml;
-        Object inputObject;
+        RpcAdapter adapter = getAdapter(name);
+        
         // convert the client's input into our internal format
-        try {
-            String inputAccept = RpcUtil.getPreferredTypeFromAccept(request.getHeader(HttpHeaders.ACCEPT));
-            log.debug("Client prefers content type: {}", inputAccept);
-            // XXX TODO  call ValidationUtil with inputAccept and a good regex for that header... should allow letters, digits, hyphens, underscores, commas, semicolons, periods - no quotes or other puncutation
-            MediaType inputMediaType = MediaType.valueOf(inputAccept);
+        Object inputObject = getInput(input, adapter.getInputClass(), request);
+        // now serialize the input object with xstream;  even though we're going to process immediately, we are still going to record the call in the RPC table so we need the xml
+        byte[] inputXml = toXml(inputObject);
 
-            // use jersey classes to find the appropriate message body reader based on request's content type 
-            final MessageBodyReader messageBodyReader =
-                    workers.getMessageBodyReader(adapter.getInputClass(), adapter.getInputClass(),
-                    new Annotation[]{}, inputMediaType);
-            if (messageBodyReader == null) {
-                throw new WebApplicationException(Status.NOT_ACCEPTABLE); // TODO   make a more user friendly message and i18n
-            }
-            javax.ws.rs.core.MultivaluedHashMap jaxrsHeaders = new javax.ws.rs.core.MultivaluedHashMap();
-            MultivaluedHashMap<String, String> headerMap = RpcUtil.convertHeadersToMultivaluedMap(request);
-            jaxrsHeaders.putAll(headerMap.getMap());
 
-            inputObject = messageBodyReader.readFrom(adapter.getInputClass(), adapter.getInputClass(), new Annotation[]{}, inputMediaType, jaxrsHeaders, new ByteArrayInputStream(input));
 
-            // now serialize the input object with xstream;  even though we're going to process immediately, we are still going to record the call in the RPC table so we need the xml
-            String xml = xs.toXML(inputObject);
-            log.debug("input xml: {}", xml);
-
-            inputXml = xml.getBytes(Charset.forName("UTF-8"));
-
-        } catch (IOException e) {
-            throw new WebApplicationException("Invalid input to RPC"); // TODO  i18n mesasge
-        }
-
+//   TODO:  loop on   request.getHeaderNames()  to get list of values for each one,  put it in MultivaluedMap  and serialize with xstream  ...
+        //  TODO: store the query string...
 
         // prepare the rpc task with the input
         RpcPriv rpc = new RpcPriv();
@@ -171,7 +141,7 @@ public class BlockingRpc {
             rpc.setOutputContentType(adapter.getContentType());
             rpc.setOutputContentClass(adapter.getOutputClass().getName());
             */
-            rpc.setOutput( xs.toXML(outputObject).getBytes("UTF-8"));
+            rpc.setOutput( xstream.toXML(outputObject).getBytes("UTF-8"));
             // the OUTPUT status indicates the task has completed and output is avaialble
             rpc.setStatus(Rpc.Status.OUTPUT);
             // update the status

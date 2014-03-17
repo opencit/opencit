@@ -5,4 +5,4 @@
 -- Updates for the Portal User table
 ALTER TABLE mw_portal_user ALTER COLUMN keystore DROP NOT NULL;
 
-INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140214074400,NOW(),'Updated the keystore column to be null');
+INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140214074400,NOW(),'Removed the keystore column');

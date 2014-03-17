@@ -11,6 +11,7 @@ import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import java.util.List;
 import java.util.Map;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 
 /**
  * Note:  The trust-policy module and this HostReport object can only be used
@@ -35,4 +36,5 @@ public class HostReport {
     public TpmQuote tpmQuote; // the original quote from the tpm which should cover the pcr manifest (except for vmware for which we don't get a real quote)
     public Aik aik; // the host's aik certificate that signed the quote (except for vmware for which we don't get an aik)
 //    public Nonce nonce; // the nonce that was used to guarantee freshness (is this the challenge nonce or response nonce ??? hmm maybe not needed because it maybe part of TpmQuote)
+    public X509AttributeCertificate tagCertificate;
 }

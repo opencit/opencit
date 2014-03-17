@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <selection>
+        <!-- must choose only one identifier per subject -->
+        <subject>
+            <uuid>131ce206-d484-4ffd-a9a6-7798f92306e6</uuid>
+            <ip>192.168.1.100</ip>
+        </subject>
+        <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
+    </selection>
+</selections>

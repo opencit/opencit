@@ -144,7 +144,17 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jdbi-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>asset-tag-service</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -217,8 +227,22 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.22</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-model</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-jdbi</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-dao-jooq</artifactId>
+            <version>${project.version}</version>        
         </dependency>
     
         <dependency>
@@ -264,7 +288,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
         <dependency>
@@ -277,7 +300,6 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-multipart</artifactId>
-            <version>2.4.1</version>
         </dependency>
         <!-- unfortunately the jackson library used by jersey is 1.9  so we don't get jackson 2.0 features... -->
         <!--
@@ -290,12 +312,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-xml-provider</artifactId>
-            <version>2.3.0</version>
         </dependency>
 
 
@@ -396,6 +416,10 @@
         </dependency>
 
         <!-- end restlet (for test client) -->
-                                                
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>  
 </project>

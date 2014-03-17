@@ -1090,9 +1090,9 @@ mysql_running_report() {
   echo -n "Checking MySQL process... "
   mysql_running
   if [[ "$MYSQL_SERVER_RUNNING" == "yes" ]]; then
-    echo "Running"
+    echo_success "Running"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 mysql_start() {
@@ -1603,9 +1603,9 @@ postgres_running_report() {
   echo -n "Checking Postgres process... "
   postgres_running
   if [[ "$POSTGRES_SERVER_RUNNING" == "yes" ]]; then
-    echo "Running"
+    echo_success "Running"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 postgres_restart() {
@@ -1788,8 +1788,16 @@ glassfish_detect() {
       if [[ -n "$java" ]]; then    
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        fi
       else
         glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        fi
       fi
     fi
     if [[ -n "$glassfish" ]]; then
@@ -1811,6 +1819,10 @@ glassfish_detect() {
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        fi
         echo "Found Glassfish: $GLASSFISH_HOME"
 #        echo "Found Glassfish: $glassfish"
         GLASSFISH_VERSION=`glassfish_version`
@@ -1943,10 +1955,10 @@ glassfish_enable_logging() {
 # - glassfish_required_version
 glassfish_install() {
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
-  GLASSFISH_YUM_PACKAGES="unzip"
-  GLASSFISH_APT_PACKAGES="unzip"
-  GLASSFISH_YAST_PACKAGES="unzip"
-  GLASSFISH_ZYPPER_PACKAGES="unzip"
+  GLASSFISH_YUM_PACKAGES="unzip expect"
+  GLASSFISH_APT_PACKAGES="unzip expect"
+  GLASSFISH_YAST_PACKAGES="unzip expect"
+  GLASSFISH_ZYPPER_PACKAGES="unzip expect"
   glassfish_detect
 
   if glassfish_running; then glassfish_stop; fi
@@ -1997,33 +2009,66 @@ glassfish_install() {
 
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_start
-  #glassfish_admin_user
+  glassfish_admin_user
   glassfish_memory 2048 512
   glassfish_logback
+  
+  # set JAVA_HOME for glassfish
+  asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
+  echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  
+  echo "Increasing glassfish max thread pool size to 200..."
+  $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
 glassfish_admin_user() {  
-  echo "You must choose an administrator username and password for Glassfish"
+  #echo "You must choose an administrator username and password for Glassfish"
   echo "The Glassfish control panel is at https://${MTWILSON_SERVER:-127.0.0.1}:4848"
-  prompt_with_default AS_ADMIN_USER "Glassfish admin username:"
-  export AS_ADMIN_USER
-  prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:"
+  #prompt_with_default AS_ADMIN_USER "Glassfish admin username:" ${WEBSERVICE_USERNAME}
+  #prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:" ${WEBSERVICE_PASSWORD}
 
-  export AS_ADMIN_PASSWORDFILE=/etc/glassfish/admin.passwd
-  mkdir -p /etc/glassfish
-  touch /etc/glassfish/admin.user /etc/glassfish/admin.passwd /etc/glassfish/admin.passwd.old
-  chmod 600 /etc/glassfish/admin.user /etc/glassfish/admin.passwd /etc/glassfish/admin.passwd.old
-  echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > /etc/glassfish/admin.user
-  echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > /etc/glassfish/admin.passwd
-  echo "AS_ADMIN_PASSWORD=" > /etc/glassfish/admin.passwd.old
+  expect=`which expect`  
+  glassfish_detect
+
+  GF_CONFIG_PATH="$GLASSFISH_HOME/config"
+  export AS_ADMIN_USER=$WEBSERVICE_USERNAME
+  export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
+  export AS_ADMIN_PASSWORDFILE=$GF_CONFIG_PATH/admin.passwd
+  
+  if [ ! -f $GF_CONFIG_PATH/admin.user ]; then
+    echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > $GF_CONFIG_PATH/admin.user
+  fi
+  
+  if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
+    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
+  fi
+
+  if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
+    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd.old
+  fi
+
+  chmod 600 $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
   #echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
 
-  echo "Glassfish will now ask you for the same information:"
+  #echo "Glassfish will now ask you for the same information:"
   # $glassfish is an alias for full path of asadmin
-  $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old change-admin-password
+  
+(
+$expect << EOD
+spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+expect "Enter the new admin password>"
+send "$WEBSERVICE_PASSWORD\r"
+expect "Enter the new admin password again>"
+send "$WEBSERVICE_PASSWORD\r"
+interact
+expect eof
+EOD
+) > /dev/null 2>&1
+
+  glassfish_detect
   # XXX it asks for the password twice ...  can we script with our known value?
-  $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd enable-secure-admin
+  $glassfish enable-secure-admin
 
 }
 
@@ -2048,9 +2093,9 @@ glassfish_running() {
 glassfish_running_report() {
   echo -n "Checking Glassfish process... "
   if glassfish_running; then
-    echo "Running (pid $GLASSFISH_PID)"
+    echo_success "Running (pid $GLASSFISH_PID)"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 glassfish_start() {
@@ -2122,6 +2167,7 @@ glassfish_create_domain() {
 glassfish_delete_domain() {
   local domain_name=${1}
   local domain_dir=${2}
+
   if [ -n "$glassfish" ]; then
     local domain_found=`$glassfish list-domains --domaindir "${domain_dir}" | grep "${domain_name}"`
     if [ -n "$domain_found" ]; then
@@ -2462,9 +2508,9 @@ tomcat_running() {
 tomcat_running_report() {
   echo -n "Checking Tomcat process... "
   if tomcat_running; then
-    echo "Running (pid $TOMCAT_PID)"
+    echo_success "Running (pid $TOMCAT_PID)"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 tomcat_start() {
@@ -2549,7 +2595,13 @@ tomcat_create_ssl_cert() {
     else
      tmpCN="dns:${serverName}"
     fi
-    $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+
+    ## 2014-03-13:rksavino - Unneccesary as java7 is being used and keytool can be implemented for this
+    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias s1as -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    
     #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
@@ -2582,14 +2634,14 @@ tomcat_init_manager() {
   TOMCAT_MANAGER_PORT=""
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
 
-  tomcat_manager_xml=`grep roles=\"manager\" $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
+  tomcat_manager_xml=`grep roles=\"manager $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
   tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
      awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
      in_comment{next}
      {gsub(/<!--+([^-]|-[^-])*--+>/,"");
      in_comment=sub(/<!--+.*/,"");
      print}'|
-     grep Connector|grep -v 8443|head -n1`
+     grep "<Connector"|grep "port="|head -n1`
 
   OIFS="$IFS"
   IFS=' '
@@ -2613,7 +2665,7 @@ tomcat_init_manager() {
     fi
   done
 
-  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
 
   if [ -n "$test" ]; then
     echo_success "Tomcat manger connection success."
@@ -2972,9 +3024,9 @@ webservice_running() {
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
     if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}"`
+      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}"`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
+        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
       fi
     fi
   fi
@@ -2985,9 +3037,9 @@ webservice_running_report() {
   echo -n "Checking ${webservice_application_name}... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
-    echo "Running"
+    echo_success "Running"
   else
-    echo "Not running"
+    echo_failure "Not running"
   fi
 }
 
@@ -3000,7 +3052,7 @@ webservice_start() {
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
-      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/start?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
       #$tomcat start
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
         #rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
@@ -3017,7 +3069,7 @@ webservice_stop() {
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
-      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/stop?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
       #$tomcat stop
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
         #rename $TOMCAT_HOME/webapps/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
@@ -3087,7 +3139,7 @@ webservice_install() {
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then
       if using_glassfish; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-        ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
+        $glassfish redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
         rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
@@ -3098,7 +3150,7 @@ webservice_install() {
       if using_glassfish; then
         glassfish_require
         echo "Deploying ${webservice_application_name} to Glassfish..."
-        ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
+        $glassfish deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         #if [ ! tomcat_running ]; then
         #  tomcat_start
@@ -3127,7 +3179,7 @@ webservice_uninstall() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
-      ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
+      $glassfish undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
@@ -3577,15 +3629,14 @@ change_db_pass() {
   mysqladmin=`which mysqladmin 2>/dev/null`
   psql=`which psql 2>/dev/null`
   mtwilson=`which mtwilson 2>/dev/null`
-  new_db_pass="$DATABASE_PASSWORD_NEW"
-  sed_escaped_value=$(sed_escape $new_db_pass)
   cryptopass="$MTWILSON_PASSWORD"
   
   #load_default_env 1>/dev/null
   
   # Do not allow a blank password to be specified
   prompt_with_default_password DATABASE_PASSWORD_NEW "New database password: " "$DATABASE_PASSWORD_NEW"
-  
+  new_db_pass="$DATABASE_PASSWORD_NEW"
+  sed_escaped_value=$(sed_escape $new_db_pass)
   
   # Check for encryption, add to array if encrypted
   encrypted_files=()
@@ -3600,6 +3651,9 @@ change_db_pass() {
   for i in ${encrypted_files[@]}; do
     decrypt_file "$i" "$cryptopass"
   done
+
+  load_conf
+  load_defaults
   
   # Test DB connection and change password
   if using_mysql; then #MYSQL
@@ -3624,8 +3678,9 @@ change_db_pass() {
       echo -n "Updating database password value in .pgpass file...."
       temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
       temp="$temp:$new_db_pass"
-      echo $temp > /root/.pgpass; fi
-	  echo_success "Done"
+      echo $temp > /root/.pgpass;
+    fi
+    echo_success "Done"
   fi
 
   # Edit .properties files

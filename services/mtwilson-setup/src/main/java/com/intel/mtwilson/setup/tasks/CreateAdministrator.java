@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
-import com.intel.mtwilson.shiro.PasswordCredentialsMatcher;
+import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.shiro.jdbi.model.Role;

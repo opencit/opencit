@@ -6,7 +6,7 @@ package com.intel.mtwilson.shiro.jaxrs;
 
 import com.intel.mtwilson.shiro.EncryptedTokenContent;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.shiro.LoginPasswordId;
+import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.UserId;
 import com.intel.mtwilson.shiro.Username;
 import com.thoughtworks.xstream.XStream;

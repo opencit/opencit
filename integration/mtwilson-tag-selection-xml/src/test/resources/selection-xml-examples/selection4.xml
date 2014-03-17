@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <selection id="8ed9140b-e6a1-41b2-a8d4-258948633153" name="California" notBefore="2013-11-27T12:26:00Z" notAfter="2013-12-27T11:25:59Z">
+        <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>State=CA</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>State=TX</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=Folsom</text></attribute>
+        <attribute oid="2.5.4.789.1"><text>City=El Paso</text></attribute>
+    </selection>
+</selections>
+<!--
+This XML file demonstrates a custom selection with id and name specifying five attribute name-value pairs.
+-->

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+<!--
+required oid is missing from the attribute tags
+-->    <selection>
+        <attribute>Country=US</attribute>
+        <attribute>State=CA</attribute>
+        <attribute>State=TX</attribute>
+        <attribute>City=Folsom</attribute>
+        <attribute>City=El Paso</attribute>
+    </selection>
+</selections>

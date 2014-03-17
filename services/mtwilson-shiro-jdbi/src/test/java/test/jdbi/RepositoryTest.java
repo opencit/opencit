@@ -21,6 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * If you are setting up a test environment you should run the unit tests
+ * in this order:
+ * 
+ * testCreateRole
+ * testCreateUser
+ * 
+ * 
  * References:
  * Validation queries: http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most
  * 
@@ -84,6 +91,26 @@ public class RepositoryTest {
         Role root = dao.findRoleByName("root");
         dao.insertUserLoginPasswordRole(userLoginPassword.getId(), root.getId());
         
+        dao.close();
+    }
+    
+    /**
+     * uses  mtwilson.api.username and mtwilson.api.password from your local
+     * mtwilson.properties  as the username and password 
+     * 
+     * @throws Exception 
+     */
+    @Test
+    public void testResetPassword() throws Exception {
+        LoginDAO dao = MyJdbi.authz();
+        UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUsername(My.configuration().getKeystoreUsername());
+        if( userLoginPassword == null ) {
+            throw new IllegalArgumentException("No such user: "+My.configuration().getKeystoreUsername());
+        }
+        userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
+        userLoginPassword.setPasswordHash(passwordHash(userLoginPassword, My.configuration().getKeystorePassword()));
+        userLoginPassword.setEnabled(true);
+        dao.updateUserLoginPassword(userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getId());
         dao.close();
     }
     
