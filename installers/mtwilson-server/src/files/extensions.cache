@@ -365,3 +365,10 @@ com.intel.mtwilson.as.rest.BulkHostTrust
 com.intel.mtwilson.client.cmd.CreateUser
 com.intel.mtwilson.as.rest.v2.model.OsLocator
 com.intel.mtwilson.shiro.jdbi.UserLoginPasswordRoleResultMapper
+com.intel.mtwilson.ms.rest.APIClient
+com.intel.mtwilson.ms.rest.CA
+com.intel.mtwilson.ms.rest.Host
+com.intel.mtwilson.ms.rest.MsStatus
+com.intel.mtwilson.ms.rest.SamlCertificate
+com.intel.mtwilson.ms.rest.i18n
+
