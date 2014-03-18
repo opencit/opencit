@@ -265,6 +265,12 @@ if [[ ! -h "/opt/mtwilson/configuration" ]]; then
   ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
 fi
 
+# copy extensions.cache file
+if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
+  chmod 700 extensions.cache
+  cp extensions.cache /opt/mtwilson/configuration
+fi
+
 
 find_installer() {
   local installer="${1}"
@@ -707,6 +713,23 @@ if [ ! -z "$opt_mtwportal" ]; then
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
+
+##tag service installation
+#prompt_with_default MTWILSON_PRIVATE_SERVER "Mtwilson Private Server: " $MTWILSON_SERVER
+#prompt_with_default MTWILSON_TAG_API_URL "Mtwilson Tag API URL: " "https://$meow/mtwilson-portal"
+
+
+#echo "mtwilson.atag.url=https://$MTWILSON_PRIVATE_SERVER:9999" >> /etc/intel/cloudsecurity/mtwilson.properties
+#echo "mtwilson.api.username=ATDemo" >> /etc/intel/cloudsecurity/mtwilson.properties
+#echo "mtwilson.api.password=ATP@ssw0rd" >> /etc/intel/cloudsecurity/mtwilson.properties   > generate random password
+#echo "mtwilson.atag.keystore=/root/AT-demo/serverAtag.jks" >> /etc/intel/cloudsecurity/mtwilson.properties
+#echo "mtwilson.atag.keystore.password=password" >> /etc/intel/cloudsecurity/mtwilson.properties
+#echo "mtwilson.atag.key.password=password" >> /etc/intel/cloudsecurity/mtwilson.properties
+
+#echo "mtwilson.atag.html5.dir=file:///root/AT-demo/html5/" >> /etc/intel/cloudsecurity/mtwilson.properties
+#echo "mtwilson.atag.certificate.import.auto=true" >> /etc/intel/cloudsecurity/mtwilson.properties
+#echo "mtwilson.atag.mtwilson.baseurl=https://$MTWILSON_IP:8443/mtwilson/v1" >> /etc/intel/cloudsecurity/mtwilson.properties
+
 
 if [ ! -z "$opt_logrotate" ]; then
   echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
