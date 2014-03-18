@@ -693,7 +693,7 @@ public class MyConfiguration {
     ///////////////////////// mtwilson portal  //////////////////////////////////
     
     public String getPortalHtml5Dir() {
-        return conf.getString("mtwilson.portal.html5.dir");
+            return conf.getString("mtwilson.portal.html5.dir");
     }
     
     ///////////////////////// filesystem locations  //////////////////////////////////
