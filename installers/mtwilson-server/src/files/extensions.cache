@@ -371,4 +371,7 @@ com.intel.mtwilson.ms.rest.Host
 com.intel.mtwilson.ms.rest.MsStatus
 com.intel.mtwilson.ms.rest.SamlCertificate
 com.intel.mtwilson.ms.rest.i18n
-
+com.intel.mtwilson.wlm.rest.Mle
+com.intel.mtwilson.wlm.rest.Oem
+com.intel.mtwilson.wlm.rest.Os
+com.intel.mtwilson.wlm.rest.WlmStatus
