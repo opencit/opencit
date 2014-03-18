@@ -31,7 +31,7 @@ import javax.ws.rs.core.Response;
  */
 @V2
 //@Stateless
-@Path("/files")
+@Path("/host-files")
 public class Files extends AbstractJsonapiResource<File,FileCollection,FileFilterCriteria,NoLinks<File>,FileLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Files.class);
     
