@@ -149,6 +149,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
                     log.error("Invalid input specified by the user.");
                     throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
                 }
+                //TODO: Create the unique name value pair mapping in the DB.
                 obj = dao.findByNameAndValue(item.getName(), item.getValue());
                 if (obj == null)
                     dao.insert(item.getId(), item.getName(), item.getValue());   
@@ -172,7 +173,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
     public void delete(KvAttributeLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
-            
+            // TODO: Catch the SQLException -- see how JDBI returns the # of rows affected.
             dao.delete(locator.id);           
             
         } catch (ResourceException aex) {
