@@ -201,11 +201,6 @@ rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
 #cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 cp mtwilson-console*.jar /opt/intel/cloudsecurity/setup-console
 
-# tag setup console: create folder and copy the executable jar
-mkdir -p /opt/intel/cloudsecurity/mtwilson-tag-setup
-rm -rf /opt/intel/cloudsecurity/mtwilson-tag-setup/mtwilson-tag-setup*.jar
-cp mtwilson-tag-setup*.jar /opt/intel/cloudsecurity/mtwilson-tag-setup
-
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
