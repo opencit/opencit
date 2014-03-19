@@ -6,6 +6,7 @@
 # CONFIGURATION:
 
 setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+tag_setupconsole_dir=/opt/intel/cloudsecurity/mtwilson-tag-setup
 conf_dir=/etc/intel/cloudsecurity
 
 # TERM_DISPLAY_MODE can be "plain" or "color"
@@ -3332,6 +3333,13 @@ call_setupcommand() {
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
   $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+}
+
+call_tag_setupcommand() {
+  if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  TAG_SETUP_CONSOLE_JARS=$(JARS=(${tag_setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.setup.TextConsole
+  $java -cp "$TAG_SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
 }
 
 file_encrypted() {

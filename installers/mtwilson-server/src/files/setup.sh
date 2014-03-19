@@ -181,10 +181,10 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 echo "Installing packages: $LIST"
 
-APICLIENT_YUM_PACKAGES="unzip"
-APICLIENT_APT_PACKAGES="unzip"
-APICLIENT_YAST_PACKAGES="unzip"
-APICLIENT_ZYPPER_PACKAGES="unzip"
+APICLIENT_YUM_PACKAGES="unzip openssl"
+APICLIENT_APT_PACKAGES="unzip openssl"
+APICLIENT_YAST_PACKAGES="unzip openssl"
+APICLIENT_ZYPPER_PACKAGES="unzip openssl"
 auto_install "Installer requirements" "APICLIENT"
 
 
@@ -200,6 +200,11 @@ mkdir -p /opt/intel/cloudsecurity/setup-console
 rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
 #cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 cp mtwilson-console*.jar /opt/intel/cloudsecurity/setup-console
+
+# tag setup console: create folder and copy the executable jar
+mkdir -p /opt/intel/cloudsecurity/mtwilson-tag-setup
+rm -rf /opt/intel/cloudsecurity/mtwilson-tag-setup/mtwilson-tag-setup*.jar
+cp mtwilson-tag-setup*.jar /opt/intel/cloudsecurity/mtwilson-tag-setup
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
@@ -714,21 +719,51 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
+##############################################################################################################################################################################
 ##tag service installation
-#prompt_with_default MTWILSON_PRIVATE_SERVER "Mtwilson Private Server: " $MTWILSON_SERVER
-#prompt_with_default MTWILSON_TAG_API_URL "Mtwilson Tag API URL: " "https://$meow/mtwilson-portal"
+CONFIG_DIR=/opt/mtwilson/configuration
+prompt_with_default MTWILSON_TAG_SERVER_PRIVATE "Mtwilson Tag Private Server: " $MTWILSON_SERVER
+WEBSERVER_PREFIX=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $1}'`
+WEBSERVER_PORT=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $3}' | awk -F: '{print $2}'`
+MTWILSON_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER_PORT/mtwilson/v2"
+MTWILSON_API_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER_PORT/mtwilson/v1/AttestationService/resources/assetTagCert"
+update_property_in_file "mtwilson.atag.url" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_URL"
+update_property_in_file "mtwilson.atag.mtwilson.baseurl" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_API_TAG_URL"
 
+prompt_with_default MTWILSON_TAG_API_USER "Mtwilson Tag API User: " ${MTWILSON_TAG_API_USER:-ATDemo}
+prompt_with_default_password MTWILSON_TAG_API_PASS "Mtwilson Tag API Password: " $MTWILSON_TAG_API_PASS
+update_property_in_file "mtwilson.api.username" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_API_USER"
+update_property_in_file "mtwilson.api.password" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_API_PASS"
 
-#echo "mtwilson.atag.url=https://$MTWILSON_PRIVATE_SERVER:9999" >> /etc/intel/cloudsecurity/mtwilson.properties
-#echo "mtwilson.api.username=ATDemo" >> /etc/intel/cloudsecurity/mtwilson.properties
-#echo "mtwilson.api.password=ATP@ssw0rd" >> /etc/intel/cloudsecurity/mtwilson.properties   > generate random password
-#echo "mtwilson.atag.keystore=/root/AT-demo/serverAtag.jks" >> /etc/intel/cloudsecurity/mtwilson.properties
-#echo "mtwilson.atag.keystore.password=password" >> /etc/intel/cloudsecurity/mtwilson.properties
-#echo "mtwilson.atag.key.password=password" >> /etc/intel/cloudsecurity/mtwilson.properties
+prompt_with_default MTWILSON_TAG_KEYSTORE "Mtwilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
+prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mtwilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
+prompt_with_default_password MTWILSON_TAG_KEY_PASS "Mtwilson Tag Key Password: " $MTWILSON_TAG_KEY_PASS
+update_property_in_file "mtwilson.atag.keystore" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
+update_property_in_file "mtwilson.atag.keystore.password" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASS"
+update_property_in_file "mtwilson.atag.key.password" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_KEY_PASS"
 
-#echo "mtwilson.atag.html5.dir=file:///root/AT-demo/html5/" >> /etc/intel/cloudsecurity/mtwilson.properties
-#echo "mtwilson.atag.certificate.import.auto=true" >> /etc/intel/cloudsecurity/mtwilson.properties
-#echo "mtwilson.atag.mtwilson.baseurl=https://$MTWILSON_IP:8443/mtwilson/v1" >> /etc/intel/cloudsecurity/mtwilson.properties
+MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
+prompt_with_default MTWILSON_TAG_HTML5_DIR "Mtwilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+prompt_with_default MTWILSON_TAG_CERT_IMPORT_AUTO "Mtwilson Tag Certificate Auto Import: " ${MTWILSON_TAG_CERT_IMPORT_AUTO:-true}
+update_property_in_file "mtwilson.atag.html5.dir" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_HTML5_DIR"
+update_property_in_file "mtwilson.atag.certificate.import.auto" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_CERT_IMPORT_AUTO"
+
+if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  keytool=${JAVA_HOME}/bin/keytool
+  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASS -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
+  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS
+  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -out $CONFIG_DIR/serverAtag.pem
+fi
+
+#call_tag_setupcommand create-database
+call_tag_setupcommand init-database
+call_tag_setupcommand create-ca-key "CN=assetTagService"
+call_tag_setupcommand ExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
+call_tag_setupcommand CreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+#mtwilson setup BootstrapUser --mtwilson.api.baseurl="${mtwilson_api_baseurl}" "${ms_key_alias}" env:ms_key_password >> $INSTALL_LOG_FILE
+
+##############################################################################################################################################################################
 
 
 if [ ! -z "$opt_logrotate" ]; then
