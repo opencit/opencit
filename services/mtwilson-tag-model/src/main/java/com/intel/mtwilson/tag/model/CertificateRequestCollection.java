@@ -27,11 +27,11 @@ public class CertificateRequestCollection extends DocumentCollection<Certificate
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="certificate_requests")
     @JacksonXmlProperty(localName="certificate_request")    
-    public List<CertificateRequest> getCertificates() { return certificateRequests; }
+    public List<CertificateRequest> getCertificateRequests() { return certificateRequests; }
 
     @Override
     public List<CertificateRequest> getDocuments() {
-        return getCertificates();
+        return getCertificateRequests();
     }
     
 }

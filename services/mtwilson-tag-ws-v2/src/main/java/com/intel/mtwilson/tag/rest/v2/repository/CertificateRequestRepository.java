@@ -60,12 +60,6 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
                 sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectContains));
             }
-            if( criteria.selectionEqualTo != null  && criteria.selectionEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionEqualTo)); // TODO: REMOVE
-            }
-            if( criteria.selectionContains != null  && criteria.selectionContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionContains));
-            }
             if( criteria.statusEqualTo != null  && criteria.statusEqualTo.length() > 0 ) {
                 sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equal(criteria.statusEqualTo));
             }
@@ -80,14 +74,10 @@ public class CertificateRequestRepository extends ServerResource implements Simp
                     CertificateRequest obj = new CertificateRequest();
                     obj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)));
                     obj.setSubject(r.getValue(MW_TAG_CERTIFICATE_REQUEST.SUBJECT));
-                    obj.setSelectionId(UUID.valueOf((r.getValue(MW_TAG_CERTIFICATE_REQUEST.SELECTIONID)))); // TODO: remove
                     obj.setStatus(r.getValue(MW_TAG_CERTIFICATE_REQUEST.STATUS));
-                    if( r.getValue(MW_TAG_CERTIFICATE_REQUEST.CERTIFICATEID) != null ) { // a Long object, can be null
-                        obj.setCertificateId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CERTIFICATEID))); // a long primitive, cannot set to null;   TODO:  remove
-                    }
                     obj.setContent(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CONTENT));
                     obj.setContentType(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CONTENTTYPE));
-                    objCollection.getCertificates().add(obj);
+                    objCollection.getCertificateRequests().add(obj);
                 }
             }
             sql.close();
@@ -125,16 +115,9 @@ public class CertificateRequestRepository extends ServerResource implements Simp
                 log.error("Object with specified id does not exist in the system.");
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No matching certificate request found in the system.");
             }
-            
-            // Let us check what parameter the user wants to update
-            if (item.getAuthorityName() != null && !item.getAuthorityName().isEmpty())
-                certRequestDao.updateAuthority(item.getId().toString(), item.getAuthorityName());
-            
-            if (item.getCertificateId() != null)
-                certRequestDao.updateApproved(item.getId().toString(), item.getCertificateId().toString()); // TODO: REMOVE,  approval update should be status only (already done below)
-            
+                        
             if (item.getStatus() != null && !item.getStatus().isEmpty())
-                certRequestDao.updateStatus(item.getId().toString(), item.getStatus());
+                certRequestDao.updateStatus(item.getId(), item.getStatus());
             
         } catch (ResourceException aex) {
             throw aex;            
@@ -184,15 +167,7 @@ public class CertificateRequestRepository extends ServerResource implements Simp
         
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao(); 
                 SelectionDAO selectionDao = TagJdbi.selectionDao()) {
-            
-            // Since the user would have specified the selectin name, we need to get the selection id first
-            Selection selectionObj = selectionDao.findByName(item.getSelectionName());
-            if( selectionObj == null) {
-                log.error("Selection {} is not available.", item.getSelectionName());
-                setStatus(Status.SERVER_ERROR_INTERNAL);  // cannot make a certificate request without a valid selection
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Specified selection does not exist in the system.");
-            }
-            
+                        
             // Since this is the new certificate request, the certificate id would be null.
             if( item.getStatus() == null || item.getStatus().isEmpty() ) { 
                 item.setStatus("New");

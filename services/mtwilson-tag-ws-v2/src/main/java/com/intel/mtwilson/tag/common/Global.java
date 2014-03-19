@@ -10,14 +10,15 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.ApiClientFactory;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.MtWilson;
-import com.intel.mtwilson.atag.dao.jdbi.*;
-import com.intel.mtwilson.atag.model.*;
+import com.intel.mtwilson.tag.dao.jdbi.*;
+import com.intel.mtwilson.tag.model.*;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 //import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class Global {
             log.debug("Loading global configuration...");
             ConfigurationDAO configurationDao = null;
             try {
-                configurationDao = Derby.configurationDao();
+                configurationDao = TagJdbi.configurationDao();
                 currentConfiguration = configurationDao.findByName("main");
                 if( currentConfiguration == null ) {
                     log.debug("Cannot find 'main' configuration, using default");
@@ -75,7 +76,7 @@ public class Global {
             log.debug("Loading CA key...");
             FileDAO fileDao = null;
             try {
-                fileDao = Derby.fileDao();
+                fileDao = TagJdbi.fileDao();
                 File cakeyFile = fileDao.findByName("cakey");
                 if( cakeyFile == null ) {
                     log.debug("Cannot find 'cakey' file");
@@ -108,7 +109,7 @@ public class Global {
             log.debug("Loading CA cert...");
             FileDAO fileDao = null;
             try {
-                fileDao = Derby.fileDao();
+                fileDao = TagJdbi.fileDao();
                 File cacertFile = fileDao.findByName("cacerts");
                 if( cacertFile == null ) {
                     log.debug("Cannot find 'cacert' file");
@@ -135,7 +136,7 @@ public class Global {
             FileDAO fileDao = null;
             ByteArrayResource keystoreResource = null;
             try {
-                fileDao = Derby.fileDao();
+                fileDao = TagJdbi.fileDao();
                 File mtwilsonKeystoreFile = fileDao.findByName("mtwilson-client-keystore");
                 if( mtwilsonKeystoreFile == null ) {
                     log.debug("Cannot find 'mtwilson-client-keystore' file");
