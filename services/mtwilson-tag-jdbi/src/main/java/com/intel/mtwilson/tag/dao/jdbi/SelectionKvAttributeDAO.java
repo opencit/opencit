@@ -5,12 +5,14 @@
 package com.intel.mtwilson.tag.dao.jdbi;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.UUIDArgument;
 import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import java.io.Closeable;
 import java.util.List;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 /**
@@ -23,6 +25,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  * 
  * @author jbuhacoff
  */
+@RegisterArgumentFactory(UUIDArgument.class)
 @RegisterMapper(SelectionKvAttributeResultMapper.class)
 public interface SelectionKvAttributeDAO extends Closeable{
     @SqlUpdate("create table mw_tag_selection_kvattribute (id char(36) primary key, selectionId char(36), kvAttributeId char(36))")
@@ -30,17 +33,17 @@ public interface SelectionKvAttributeDAO extends Closeable{
     
     @SqlUpdate("insert into mw_tag_selection_kvattribute (id, selectionId, kvAttributeId) values (:id, :selectionId, :kvAttributeId)")
 //    @GetGeneratedKeys
-    void insert(@Bind("id") String id, @Bind("selectionId") String selectionId, @Bind("kvAttributeId") String kvAttributeId);
+    void insert(@Bind("id") UUID id, @Bind("selectionId") UUID selectionId, @Bind("kvAttributeId") UUID kvAttributeId);
 
 //    @SqlBatch("insert into mw_tag_selection_kvattribute (selectionId, kvAttributeId) values (:selectionId, :kvAttributeId)")
 //    @BatchChunkSize(1000)
 //    SelectionKvAttribute insert(@Bind("selectionId") UUID selectionId, @Bind("attributeId") List<UUID> attributeId, @Bind("attributeValueId") List<UUID> attributeValueId); // return value is same size as input list;  each element in the int[] array is the number of rows modified by the corresponding insert.. which would either be 1 or 0.   so you can just tally up the 1s to see if all the rows were inserted or not.   unfortunately, the api does not have a mechanism for us to get the auto-generated id's for the batch-inserted rows. 
     
     @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where id=:id")
-    SelectionKvAttribute findById(@Bind("id") String id);
-
-    @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where id=:id")
     SelectionKvAttribute findById(@Bind("id") UUID id);
+
+//    @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where id=:id")
+//    SelectionKvAttribute findById(@Bind("id") UUID id);
     
     // this one returns the records but they are purely relational... you'd have to make separate queries to find the tags and tag values being referenced
     @SqlQuery("select id, selectionId, kvAttributeId from mw_tag_selection_kvattribute where selectionId=:selectionId")

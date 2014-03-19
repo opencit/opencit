@@ -31,12 +31,11 @@ public class Configuration extends Document{
     public String getName() {
         return name;
     }
-/*
-    public String getContentType() {
-        return contentType;
-    }
-*/
 
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     public Properties getContent() {
         return content;
     }
@@ -57,14 +56,6 @@ public class Configuration extends Document{
         return out.toString();
     }
     
-    public void setName(String name) {
-        this.name = name;
-    }
-/*
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-*/
     @JsonIgnore
     public void setJsonContent(JsonNode content) throws IOException {
         if( content != null && content.isObject() ) {

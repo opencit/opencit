@@ -9,11 +9,13 @@ package com.intel.mtwilson.tag.dao.jdbi;
 
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.UUIDArgument;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import java.io.Closeable;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 
@@ -29,6 +31,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  * @author stdalex
  */
 @RegisterMapper(TpmPasswordResultMapper.class)
+@RegisterArgumentFactory(UUIDArgument.class)
 public interface TpmPasswordDAO extends Closeable {
  
     @SqlUpdate("create table mw_host_tpm_password (id char(36) primary key,password varchar(255))")
