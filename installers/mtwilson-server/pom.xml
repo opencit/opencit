@@ -88,14 +88,6 @@
                     <classifier>with-dependencies</classifier>
                 </dependency>
                 
-                <!-- this is the tag setup console -->
-                <dependency>
-                    <groupId>com.intel.mtwilson.services</groupId>
-                    <artifactId>mtwilson-tag-setup</artifactId>
-                    <version>${project.version}</version>
-                    <type>jar</type>
-                </dependency>
-    
                 <!-- Web Services -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
@@ -223,13 +215,6 @@
                                             <version>${project.version}</version>
                                             <type>jar</type>
                                         </artifactItem>
-                                        <!-- tag setup console --> 
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.services</groupId>
-                                            <artifactId>mtwilson-tag-setup</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>jar</type>
-                                        </artifactItem>
                                         <!-- api client -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.dist</groupId>
@@ -345,13 +330,6 @@
                                             <groupId>com.intel.mtwilson.desktop</groupId>
                                             <artifactId>mtwilson-console</artifactId>
                                             <classifier>with-dependencies</classifier>
-                                            <version>${project.version}</version>
-                                            <type>jar</type>
-                                        </artifactItem>
-                                        <!-- tag setup console --> 
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.services</groupId>
-                                            <artifactId>mtwilson-tag-setup</artifactId>
                                             <version>${project.version}</version>
                                             <type>jar</type>
                                         </artifactItem>

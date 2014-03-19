@@ -2,8 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tag.setup;
+package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
@@ -24,9 +25,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
-public class InitDatabase extends TagCommand {
+public class TagInitDatabase extends TagCommand {
 
-    private static Logger log = LoggerFactory.getLogger(InitDatabase.class);
+    private static Logger log = LoggerFactory.getLogger(TagInitDatabase.class);
 
     @Override
     public void execute(String[] args) throws Exception {
@@ -128,7 +129,7 @@ public class InitDatabase extends TagCommand {
     }
 
     public static void main(String args[]) throws Exception {
-        InitDatabase cmd = new InitDatabase();
+        TagInitDatabase cmd = new TagInitDatabase();
         cmd.setOptions(new MapConfiguration(new Properties()));
         cmd.execute(new String[0]);
 

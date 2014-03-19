@@ -5,7 +5,7 @@
 package test.database;
 
 import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.setup.cmd.InitDatabase;
+import com.intel.mtwilson.setup.cmd.TagInitDatabase;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class DatabaseInitTest {
         Properties p = new Properties();
         p.setProperty("check", "true");
         p.setProperty("verbose", "true");
-        InitDatabase cmd = new InitDatabase();
+        TagInitDatabase cmd = new TagInitDatabase();
         cmd.setOptions(new MapConfiguration(p));
         cmd.execute(new String[] { "mysql" });
     }

@@ -751,12 +751,14 @@ if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
   openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -out $CONFIG_DIR/serverAtag.pem
 fi
 
-#call_tag_setupcommand create-database
-call_tag_setupcommand init-database
-call_tag_setupcommand create-ca-key "CN=assetTagService"
-call_tag_setupcommand ExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
-call_tag_setupcommand CreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
-#mtwilson setup BootstrapUser --mtwilson.api.baseurl="${mtwilson_api_baseurl}" "${ms_key_alias}" env:ms_key_password >> $INSTALL_LOG_FILE
+#call_setupcommand create-database
+call_setupcommand TagInitDatabase
+call_setupcommand TagCreateCaKey "CN=assetTagService"
+call_setupcommand TagExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
+call_setupcommand TagCreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+
+fingerprint=`openssl dgst -sha1 serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
+call_setupcommand ApproveMtwilsonClient --fingerprint="$fingerprint"
 
 ##############################################################################################################################################################################
 

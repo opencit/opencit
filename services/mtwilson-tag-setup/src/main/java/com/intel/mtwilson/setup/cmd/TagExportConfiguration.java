@@ -2,8 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tag.setup;
+package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.Configuration;
 import com.intel.mtwilson.tag.model.File;
@@ -15,8 +16,8 @@ import org.slf4j.LoggerFactory;
  * This command exports a file from the database to the filesystem
  * @author jbuhacoff
  */
-public class ExportConfiguration extends TagCommand {
-    private static Logger log = LoggerFactory.getLogger(ExportConfiguration.class);
+public class TagExportConfiguration extends TagCommand {
+    private static Logger log = LoggerFactory.getLogger(TagExportConfiguration.class);
     
     @Override
     public void execute(String[] args) throws Exception {

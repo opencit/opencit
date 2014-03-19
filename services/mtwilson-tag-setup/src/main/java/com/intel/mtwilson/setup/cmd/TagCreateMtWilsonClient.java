@@ -2,8 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tag.setup;
+package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.ApiClientFactory;
 import com.intel.mtwilson.My;
@@ -24,8 +25,8 @@ import org.slf4j.LoggerFactory;
  * This command exports a file from the database to the filesystem
  * @author jbuhacoff
  */
-public class CreateMtWilsonClient extends TagCommand {
-    private static Logger log = LoggerFactory.getLogger(CreateMtWilsonClient.class);
+public class TagCreateMtWilsonClient extends TagCommand {
+    private static Logger log = LoggerFactory.getLogger(TagCreateMtWilsonClient.class);
     public static final String KEYSTORE_FILE = "mtwilson-client-keystore";
     
     @Override
@@ -103,7 +104,7 @@ public class CreateMtWilsonClient extends TagCommand {
     
     
     public static void main(String args[]) throws Exception {
-        CreateMtWilsonClient cmd = new CreateMtWilsonClient();
+        TagCreateMtWilsonClient cmd = new TagCreateMtWilsonClient();
         cmd.setOptions(new MapConfiguration(new Properties()));
         cmd.execute(new String[] { });
         
