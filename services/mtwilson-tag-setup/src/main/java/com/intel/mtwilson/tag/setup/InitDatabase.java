@@ -69,7 +69,7 @@ public class InitDatabase extends TagCommand {
                 UUID defaultSelectionUuid = new UUID();
                 UUID otherSelectionUuid = new UUID();
                 selectionDao.insert(defaultSelectionUuid, "default", "default selections");
-                selectionDao.insert(new UUID(), "other", "second selection option");
+                selectionDao.insert(otherSelectionUuid, "other", "second selection option");
 
                 KvAttribute countryAttr1 = kvAttrDao.findByNameAndValue("country", "US");
                 KvAttribute stateAttr1 = kvAttrDao.findByNameAndValue("state", "CA");
