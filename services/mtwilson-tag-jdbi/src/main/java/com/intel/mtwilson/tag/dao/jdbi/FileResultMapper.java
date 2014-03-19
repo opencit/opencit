@@ -20,9 +20,9 @@ public class FileResultMapper implements ResultSetMapper<File> {
     @Override
     public File map(int i, ResultSet rs, StatementContext sc) throws SQLException {
         File file = new File();
-        file.setId(UUID.valueOf(rs.getString("uuid")));
+        file.setId(UUID.valueOf(rs.getString("id")));
         file.setName(rs.getString("name"));
-        //file.setContent(rs.getBytes("content"));
+        file.setContent(rs.getBytes("content"));
         file.setContentType(rs.getString("contentType")); 
         return file;
     }

@@ -49,9 +49,9 @@ public interface FileDAO extends Closeable {
     void delete(@Bind("id") UUID id);
 
     @SqlQuery("select id, name, contentType, content from mw_file where id=:id")
-    File findById(@Bind("id") UUID uuid);
+    File findById(@Bind("id") UUID id);
     
-    @SqlQuery("select id, uuid, name, contentType, content from mw_file where name=:name")
+    @SqlQuery("select id, name, contentType, content from mw_file where name=:name")
     File findByName(@Bind("name") String name);
 
     @Override
