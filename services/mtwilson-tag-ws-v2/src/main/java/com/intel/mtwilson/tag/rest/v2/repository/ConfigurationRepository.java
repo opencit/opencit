@@ -55,8 +55,7 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
                 sql.addConditions(MW_CONFIGURATION.CONTENT.equal(criteria.contentTypeEqualTo));
             }
             Result<Record> result = sql.fetch();
-            com.intel.mtwilson.atag.model.Configuration[] configurations = new com.intel.mtwilson.atag.model.Configuration[result.size()];
-            log.debug("Got {} records", configurations.length);
+            log.debug("Got {} records", result.size());
             for(Record r : result) {
                 Configuration configObj = new Configuration();
                 configObj.setId(UUID.valueOf(r.getValue(MW_CONFIGURATION.ID)));
