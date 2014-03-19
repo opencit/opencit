@@ -48,13 +48,13 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
                 sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectEqualTo));
             }
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.contains(criteria.subjectContains));
             }
             if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerEqualTo));
             }
             if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.contains(criteria.issuerContains));
             }
             if( criteria.sha1 != null  ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equal(criteria.sha1.toHexString()));
@@ -75,7 +75,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if( criteria.revoked != null   ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
             }
-            sql.addOrderBy(MW_TAG_CERTIFICATE.ID);
+            sql.addOrderBy(MW_TAG_CERTIFICATE.SUBJECT);
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
             UUID c = new UUID(); // id of the current certificate request object built, used to detect when it's time to build the next one
@@ -155,6 +155,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             
+            // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
             dao.insert(item.getId().toString(), item.getCertificate(), item.getSha1().toHexString(), 
                     item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
 
