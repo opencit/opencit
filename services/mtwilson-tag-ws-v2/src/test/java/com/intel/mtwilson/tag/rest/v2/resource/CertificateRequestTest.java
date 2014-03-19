@@ -55,6 +55,14 @@ public class CertificateRequestTest {
     }
 
     @Test
+    public void testProvisionTagCert() throws Exception{
+        String selection1 = "{\"selections\":[{\"attributes\":[{\"text\":{\"value\":\"Country=US\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"State=CA\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"State=TX\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"City=Folsom\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"City=El Paso\"},\"oid\":\"2.5.4.789.1\"}]}]}";
+        SelectionsType selections = Util.fromJson(selection1);
+        ProvisionTagCertificate repo = new ProvisionTagCertificate();
+        byte[] createOne = repo.createOne(new UUID().toString(), selections, null, null);
+    }
+    
+    @Test
     public void testCreateCertRequest() throws Exception{
         CertificateRequestRepository repo = new CertificateRequestRepository();
         

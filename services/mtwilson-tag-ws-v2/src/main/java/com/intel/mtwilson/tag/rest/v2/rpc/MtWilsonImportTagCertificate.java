@@ -46,7 +46,7 @@ public class MtWilsonImportTagCertificate implements Runnable{
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(certificateId.toString());
+            Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
                 log.debug("Sha1 of the certificate about to be deployed is {}.", obj.getSha1());

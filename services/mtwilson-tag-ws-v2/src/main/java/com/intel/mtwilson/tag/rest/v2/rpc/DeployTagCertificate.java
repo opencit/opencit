@@ -63,7 +63,7 @@ public class DeployTagCertificate extends ServerResource implements Runnable{
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(certificateId.toString());
+            Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.

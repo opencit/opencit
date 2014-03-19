@@ -37,6 +37,8 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         CertificateCollection objCollection = new CertificateCollection();
         DSLContext jooq = null;
         
+        // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
+        
         try {
             jooq = TagJdbi.jooq();
             
@@ -116,7 +118,7 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         if (locator == null || locator.id == null) { return null;}
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(locator.id.toString());
+            Certificate obj = dao.findById(locator.id);
             if (obj != null) 
                 return obj;
 
@@ -134,10 +136,10 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             
-            Certificate obj = dao.findById(item.getId().toString());
+            Certificate obj = dao.findById(item.getId());
             // Allowing the user to only edit the revoked field.
             if (obj != null)
-                dao.updateRevoked(item.getId().toString(), item.isRevoked());
+                dao.updateRevoked(item.getId(), item.isRevoked());
             else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
             }
@@ -154,9 +156,8 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
     public void create(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-            
-            // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
-            dao.insert(item.getId().toString(), item.getCertificate(), item.getSha1().toHexString(), 
+                        
+            dao.insert(item.getId(), item.getCertificate(), item.getSha1().toHexString(), 
                     item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
 
         } catch (ResourceException aex) {
@@ -173,9 +174,9 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         CertificateDAO dao = null;
         try {            
             dao = TagJdbi.certificateDao();
-            Certificate obj = dao.findById(locator.id.toString());
+            Certificate obj = dao.findById(locator.id);
             if (obj != null) {
-                dao.delete(locator.id.toString());
+                dao.delete(locator.id);
             }else {
                 throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Certificate not found.");
             }
