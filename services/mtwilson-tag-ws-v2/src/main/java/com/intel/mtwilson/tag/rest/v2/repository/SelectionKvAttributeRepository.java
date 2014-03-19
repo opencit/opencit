@@ -76,7 +76,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0  ) {
                 sql.addConditions(MW_TAG_SELECTION.NAME.contains(criteria.nameContains));
             }
-            sql.addOrderBy(MW_TAG_SELECTION.ID);
+            sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
             log.debug("Got {} selection records", result.size());
             for(Record r : result) {

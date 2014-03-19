@@ -61,6 +61,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
                 sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.valueContains));
             }
+            sql.addOrderBy(MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE);
             log.debug("Opening tag-value dao");
             log.debug("Fetching records using JOOQ");
             Result<Record> result = sql.fetch();

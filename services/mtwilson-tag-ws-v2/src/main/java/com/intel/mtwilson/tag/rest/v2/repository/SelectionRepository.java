@@ -56,7 +56,7 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
             if( criteria.descriptionContains != null  && criteria.descriptionContains.length() > 0 ) {
                 sql.addConditions(MW_TAG_SELECTION.DESCRIPTION.contains(criteria.descriptionContains));
             }
-            sql.addOrderBy(MW_TAG_SELECTION.ID);
+            sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
             log.debug("Got {} selection records", result.size());
             for(Record r : result) {
