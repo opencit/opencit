@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tag.setup.cmd;
 
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.ApiClientFactory;
@@ -14,7 +15,6 @@ import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
-import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.setup.SetupException;
@@ -105,7 +105,17 @@ public class TagCreateMtWilsonClient extends TagCommand {
         p.setProperty("mtwilson.api.password", mtwilsonClientKeystorePassword);
         p.store(System.out, "mtwilson.properties"); // user is responsible for copying this into mtwilson.properties (and it might be encrypted etc)
 
-        ApproveMtWilsonClient(X509Util.sha256fingerprint(keystore.getX509Certificate(mtwilsonClientKeystoreUsername)));
+        RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
+        
+        try {
+            ApproveMtWilsonClient(rsaCredentialX509.identity());
+            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
+         }
+         catch(Exception e) {
+             System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
+         }
+        
+        
     }
     
     private void ApproveMtWilsonClient(byte[] fingerprint) {
