@@ -49,8 +49,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         try {
             jooq = TagJdbi.jooq();
             
-            SelectQuery sql = jooq.select(MW_TAG_SELECTION.ID, MW_TAG_SELECTION.NAME, MW_TAG_SELECTION.DESCRIPTION,
-                    MW_TAG_KVATTRIBUTE.ID, MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE)
+            SelectQuery sql = jooq.select()
                     .from(MW_TAG_KVATTRIBUTE.join(MW_TAG_SELECTION_KVATTRIBUTE, JoinType.JOIN)
                     .on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID))
                     .join(MW_TAG_SELECTION, JoinType.JOIN).on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID)))                    
@@ -81,6 +80,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
             log.debug("Got {} selection records", result.size());
             for(Record r : result) {
                 SelectionKvAttribute sAttr = new SelectionKvAttribute();
+                sAttr.setId(UUID.valueOf(r.getValue(MW_TAG_SELECTION_KVATTRIBUTE.ID)));
                 sAttr.setSelectionId(UUID.valueOf(r.getValue(MW_TAG_SELECTION.ID)));
                 sAttr.setSelectionName(r.getValue(MW_TAG_SELECTION.NAME));
                 sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
