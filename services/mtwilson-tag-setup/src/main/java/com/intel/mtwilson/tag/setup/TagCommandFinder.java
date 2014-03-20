@@ -19,7 +19,7 @@ public class TagCommandFinder implements CommandFinder {
     public TagCommandFinder() {
         HashMap<String,String> map = new HashMap<String,String>();
         map.put("mtwilson", "MtWilson");
-        finder = new HyphenatedCommandFinder("com.intel.mtwilson.atag.cmd", map);
+        finder = new HyphenatedCommandFinder("com.intel.mtwilson.tag.setup.cmd", map);
     }
     
     @Override
