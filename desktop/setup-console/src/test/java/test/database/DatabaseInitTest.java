@@ -5,7 +5,7 @@
 package test.database;
 
 import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.setup.cmd.TagInitDatabase;
+import com.intel.mtwilson.tag.setup.cmd.TagInitDatabase;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.Test;

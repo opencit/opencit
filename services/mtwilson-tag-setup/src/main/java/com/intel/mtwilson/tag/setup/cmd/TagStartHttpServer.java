@@ -1,4 +1,4 @@
-package com.intel.mtwilson.setup.cmd;
+package com.intel.mtwilson.tag.setup.cmd;
 
 ///*
 // * Copyright (C) 2013 Intel Corporation

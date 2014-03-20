@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.setup.cmd;
+package com.intel.mtwilson.tag.setup.cmd;
 
 import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.dcsg.cpg.io.UUID;

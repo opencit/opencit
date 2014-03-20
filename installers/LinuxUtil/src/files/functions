@@ -3334,6 +3334,13 @@ call_setupcommand() {
   $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
 }
 
+call_tag_setupcommand() {
+  if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.dcsg.cpg.console.Main
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+}
+
 file_encrypted() {
   local filename="${1}"
   if grep -q "ENCRYPTED DATA" "$filename"; then

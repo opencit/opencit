@@ -4,10 +4,10 @@
  */
 package test.cmd;
 
+import com.intel.mtwilson.tag.setup.cmd.TagInitDatabase;
 import com.intel.mtwilson.setup.TextConsole;
 import com.intel.mtwilson.setup.SetupException;
 import org.junit.Test;
-import com.intel.mtwilson.setup.cmd.*;
 
 /**
  *
