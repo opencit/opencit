@@ -44,7 +44,9 @@ CREATE  TABLE mw_tag_certificate_request (
   content bytea NOT NULL,
   contentType VARCHAR(255) NOT NULL,
   PRIMARY KEY (id) );
-  
+
+-- need to drop earlier version of table mw_configuration from 20120920085200
+DROP TABLE mw_configuration;
 CREATE  TABLE mw_configuration (
   id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,

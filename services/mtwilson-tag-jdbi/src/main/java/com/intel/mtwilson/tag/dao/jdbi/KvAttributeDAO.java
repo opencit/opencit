@@ -19,7 +19,7 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
 @RegisterArgumentFactory(UUIDArgument.class)
 @RegisterMapper(KvAttributeResultMapper.class)
 public interface KvAttributeDAO extends Closeable {
-    @SqlUpdate("create table mw_tag_kvattribute (id char(36) primary key, name varchar(100), value varchar(255))")
+    @SqlUpdate("create table mw_tag_kvattribute (id char(36) primary key, name varchar(255), value varchar(255))")
 //    @SqlUpdate("create table mw_tag_kvattribute (id char(16) for bit data primary key, name varchar(100), value varchar(255))")
     void create();
     
