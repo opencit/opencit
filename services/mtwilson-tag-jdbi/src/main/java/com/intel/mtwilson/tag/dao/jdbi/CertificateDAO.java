@@ -40,7 +40,7 @@ public interface CertificateDAO extends Closeable{
     @Bind("sha256") String sha256, @Bind("subject") String subject, @Bind("issuer") String issuer, @Bind("notBefore") Date notBefore, @Bind("notAfter") Date notAfter);
 
     @SqlUpdate("update mw_tag_certificate set revoked=:revoked where id=:id")
-    Certificate updateRevoked(@Bind("id") UUID id, @Bind("revoked") boolean revoked);
+    void updateRevoked(@Bind("id") UUID id, @Bind("revoked") boolean revoked);
     
     @SqlQuery("select id,certificate,sha1,sha256,subject,issuer,notBefore,notAfter,revoked from mw_tag_certificate where id=:id")
     Certificate findById(@Bind("id") UUID id);
