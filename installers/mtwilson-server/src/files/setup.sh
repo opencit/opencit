@@ -758,7 +758,7 @@ call_tag_setupcommand TagExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTag
 call_tag_setupcommand TagCreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
 
 fingerprint=`openssl dgst -sha1 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
-call_tag_setupcommand ApproveMtwilsonClient --fingerprint="$fingerprint"
+call_tag_setupcommand ApproveMtWilsonClient --fingerprint="$fingerprint"
 
 ##############################################################################################################################################################################
 
