@@ -54,10 +54,6 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-console</artifactId>
-        </dependency>
 
 
         <!-- bouncycastle is required to create x509 attribute certificates; sun built-in classes only support x509 public key certificates -->

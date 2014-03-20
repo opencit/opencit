@@ -1,3 +1,4 @@
 # Asset Tag server commands
-com.intel.mtwilson.atag.AtagCommandFinder
+#com.intel.mtwilson.atag.AtagCommandFinder
+com.intel.mtwilson.tag.setup.TagCommandFinder
 com.intel.mtwilson.tag.setup.cmd
