@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.tag.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
@@ -80,24 +82,23 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             sql.addOrderBy(MW_TAG_CERTIFICATE.SUBJECT);
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
-            UUID c = new UUID(); // id of the current certificate request object built, used to detect when it's time to build the next one
             for(Record r : result) {
                 Certificate certObj = new Certificate();
-                if( UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)) != c ) {
-                    c = UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID));
-                    try {
-                        log.debug("Creating certificate record at c={}", c);
-                        certObj.setCertificate((byte[])r.getValue(MW_TAG_CERTIFICATE.CERTIFICATE));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
-                        certObj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)));
-                        if( r.getValue(MW_TAG_CERTIFICATE.REVOKED) != null ) {
-                            certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
-                        }
-                        log.debug("Created certificate record {}", certObj.getId().toString());
-                        objCollection.getCertificates().add(certObj);
-                    }
-                    catch(Exception e) {
-                        log.error("Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
-                    }
+                try {
+                    certObj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)));
+                    certObj.setCertificate((byte[])r.getValue(MW_TAG_CERTIFICATE.CERTIFICATE));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
+                    certObj.setIssuer(r.getValue(MW_TAG_CERTIFICATE.ISSUER));
+                    certObj.setSubject(r.getValue(MW_TAG_CERTIFICATE.SUBJECT));
+                    certObj.setNotBefore(r.getValue(MW_TAG_CERTIFICATE.NOTBEFORE));
+                    certObj.setNotAfter(r.getValue(MW_TAG_CERTIFICATE.NOTAFTER));
+                    certObj.setSha1(Sha1Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA1)));
+                    certObj.setSha256(Sha256Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA256)));
+                    certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
+                    log.debug("Created certificate record {}", certObj.getId().toString());
+                    objCollection.getCertificates().add(certObj);
+                }
+                catch(Exception e) {
+                    log.error("Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
                 }
             }
             log.debug("Closing sql");

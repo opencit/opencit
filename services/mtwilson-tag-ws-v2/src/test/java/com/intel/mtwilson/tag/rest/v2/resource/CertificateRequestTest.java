@@ -18,6 +18,11 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.tag.TagCertificateAuthority;
 import com.intel.mtwilson.tag.TagConfiguration;
 import com.intel.mtwilson.tag.Util;
+import com.intel.mtwilson.tag.model.Certificate;
+import com.intel.mtwilson.tag.model.CertificateCollection;
+import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
+import com.intel.mtwilson.tag.model.CertificateLocator;
+import com.intel.mtwilson.tag.rest.v2.repository.CertificateRepository;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRequestRepository;
 import com.intel.mtwilson.tag.rest.v2.rpc.ProvisionTagCertificate;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
@@ -34,16 +39,15 @@ public class CertificateRequestTest {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRequestTest.class);
     
-//    @Test
-//    public void testSearchAttr() throws Exception{
-//        KvAttributeRepository repo = new KvAttributeRepository();        
-//        KvAttributeFilterCriteria fc = new KvAttributeFilterCriteria();
-//        fc.nameEqualTo = "Country";
-//        fc.valueContains = "U";
-//        KvAttributeCollection search = repo.search(fc);
-//        for(KvAttribute obj : search.getKvAttributes())
-//            System.out.println(obj.getName() + "::" + obj.getValue());
-//    }
+    @Test
+    public void testSearchCertificates() throws Exception{
+        CertificateRepository repo = new CertificateRepository();        
+        CertificateFilterCriteria fc = new CertificateFilterCriteria();
+//        fc.issuerContains = "asset";
+        CertificateCollection search = repo.search(fc);
+        for(Certificate obj : search.getCertificates())
+            System.out.println(obj.getSubject()+ "::" + obj.getIssuer());
+    }
     
     @Test
     public void testCreateCertRequestFromJson() throws Exception{
@@ -92,14 +96,14 @@ public class CertificateRequestTest {
     }
 
     
-//    @Test
-//    public void testRetrieveAttr() throws Exception{
-//        KvAttributeRepository repo = new KvAttributeRepository();        
-//        KvAttributeLocator locator = new KvAttributeLocator();
-//        locator.id = UUID.valueOf("449aa4e2-7621-402e-988e-1234f3f1d59a");
-//        KvAttribute retrieve = repo.retrieve(locator);
-//        System.out.println(retrieve.getName() + "::" + retrieve.getValue());
-//    }
+    @Test
+    public void testRetrieveCertificate() throws Exception{
+        CertificateRepository repo = new CertificateRepository();        
+        CertificateLocator locator = new CertificateLocator();
+        locator.id = UUID.valueOf("f53c05a2-c2ed-423d-ac46-3ccf03b4be67");
+        Certificate retrieve = repo.retrieve(locator);
+        System.out.println(retrieve.getIssuer()+ "::" + retrieve.getSubject());
+    }
     
     // example json serialization: {"subject":"449aa4e2-7621-402e-988e-1234f3f1d59a","selections":[{"attributes":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"State=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"City=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"City=El Paso"},"oid":"2.5.4.789.1"}]}]}
     @JacksonXmlRootElement(localName="tag_certificate_request")
