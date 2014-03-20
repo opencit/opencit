@@ -14,8 +14,13 @@ import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.data.ApiClientX509;
+import com.intel.mtwilson.setup.SetupException;
 import java.net.URL;
 import java.util.Properties;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
@@ -100,7 +105,27 @@ public class TagCreateMtWilsonClient extends TagCommand {
         p.setProperty("mtwilson.api.password", mtwilsonClientKeystorePassword);
         p.store(System.out, "mtwilson.properties"); // user is responsible for copying this into mtwilson.properties (and it might be encrypted etc)
 
+        ApproveMtWilsonClient(X509Util.sha256fingerprint(keystore.getX509Certificate(mtwilsonClientKeystoreUsername)));
     }
+    
+    private void ApproveMtWilsonClient(byte[] fingerprint) {
+        try {
+            System.out.println(String.format("Searching for client by fingerprint: %s", Hex.encodeHexString(fingerprint)));
+            ApiClientX509JpaController x509jpaController = My.jpa().mwApiClientX509();
+            ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
+            if( client == null ) {
+                log.error("Cannot find client record with fingerprint {}", Hex.encodeHexString(fingerprint));
+                throw new IllegalStateException("Cannot find client record with fingerprint "+Hex.encodeHexString(fingerprint));
+            }
+            client.setStatus("Approved");
+            client.setEnabled(true);
+            x509jpaController.edit(client);
+        }
+        catch(Exception e) {
+            throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
+        }
+    }
+            
     
     
     public static void main(String args[]) throws Exception {
