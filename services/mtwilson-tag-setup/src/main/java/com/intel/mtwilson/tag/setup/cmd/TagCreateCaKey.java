@@ -2,8 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tag.setup;
+package com.intel.mtwilson.tag.setup.cmd;
 
+import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.util.ByteArray;
@@ -34,8 +35,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jbuhacoff
  */
-public class CreateCaKey extends TagCommand {
-    private static Logger log = LoggerFactory.getLogger(CreateCaKey.class);
+public class TagCreateCaKey extends TagCommand {
+    private static Logger log = LoggerFactory.getLogger(TagCreateCaKey.class);
     public static final String PRIVATEKEY_FILE = "cakey";
     public static final String CACERTS_FILE = "cacerts";
     
@@ -104,7 +105,7 @@ public class CreateCaKey extends TagCommand {
     
     
     public static void main(String args[]) throws Exception {
-        CreateCaKey cmd = new CreateCaKey();
+        TagCreateCaKey cmd = new TagCreateCaKey();
         cmd.setOptions(new MapConfiguration(new Properties()));
         cmd.execute(new String[] { "CN=Asset CA,OU=Datacenter,C=US" });
         

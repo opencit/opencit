@@ -2,8 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tag.setup;
+package com.intel.mtwilson.tag.setup.cmd;
 
+import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.validation.Fault;
@@ -29,8 +30,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jbuhacoff
  */
-public class CreateTlsKeystore extends TagCommand {
-    private static Logger log = LoggerFactory.getLogger(CreateTlsKeystore.class);
+public class TagCreateTlsKeystore extends TagCommand {
+    private static Logger log = LoggerFactory.getLogger(TagCreateTlsKeystore.class);
     
     @Override
     public void execute(String[] args) throws Exception {
@@ -107,7 +108,7 @@ SubjectAlternativeName [
      */
     
     public static void main(String args[]) throws Exception {
-        CreateTlsKeystore cmd = new CreateTlsKeystore();
+        TagCreateTlsKeystore cmd = new TagCreateTlsKeystore();
         Properties options = new Properties();
         options.setProperty("ip", "127.0.0.1"); // corresponds to  --ip=127.0.0.1   on command line
         options.setProperty("dns", "localhost"); // corresponds to  --dns=localhost   on command line

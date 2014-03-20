@@ -2,13 +2,15 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tag.setup;
+package com.intel.mtwilson.tag.setup.cmd;
+
+import com.intel.mtwilson.tag.setup.TagCommand;
 
 /**
  *
  * @author jbuhacoff
  */
-public class Version extends TagCommand {
+public class TagVersion extends TagCommand {
 
     @Override
     public void execute(String[] args) throws Exception {
