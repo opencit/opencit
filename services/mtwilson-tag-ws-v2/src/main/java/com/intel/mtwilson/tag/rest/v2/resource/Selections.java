@@ -64,23 +64,56 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Override
     @Path("/{id}")
     @GET
-    @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})   
+    @Produces({OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})   
     public Selection retrieveOne(@BeanParam SelectionLocator locator) {
         return super.retrieveOne(locator); 
     }
         
     
+    @Path("/{id}")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})   
+    public String retrieveOneJson(@BeanParam SelectionLocator locator) throws SQLException, IOException {
+        Selection obj = super.retrieveOne(locator); 
+        SelectionsType selectionsType = getSelectionData(obj);
+        String jsonStr = Util.toJson(selectionsType);
+        log.debug("Generated tag selection json: {}", jsonStr);
+        return jsonStr;
+        
+    }
             
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_XML})   
     public String retrieveOneXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
-        SelectionKvAttributeDAO attrDao = TagJdbi.selectionKvAttributeDao();
         Selection obj = super.retrieveOne(locator); //To change body of generated methods, choose Tools | Templates.
-        if( obj == null ) {
+//        if( obj == null ) {
+//            return null;
+//        }
+//        List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(obj.getId());
+//        if( selectionKvAttributes == null || selectionKvAttributes.isEmpty() ) {
+//            log.error("No tags in selection");
+//            return null;
+//        }
+//        SelectionBuilder builder = SelectionBuilder.factory().selection();
+//        for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
+//            builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
+//        } 
+//        // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
+//        SelectionsType selectionsType = builder.build();
+        SelectionsType selectionsType = getSelectionData(obj);
+        String xml = Util.toXml(selectionsType);
+        log.debug("Generated tag selection xml: {}", xml);
+        return xml;
+    }
+    
+    private SelectionsType getSelectionData(Selection selectionObj) throws SQLException{
+        SelectionKvAttributeDAO attrDao = TagJdbi.selectionKvAttributeDao();
+
+        if( selectionObj == null ) {
             return null;
         }
-        List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(obj.getId());
+        List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(selectionObj.getId());
         if( selectionKvAttributes == null || selectionKvAttributes.isEmpty() ) {
             log.error("No tags in selection");
             return null;
@@ -91,9 +124,9 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
         } 
         // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
         SelectionsType selectionsType = builder.build();
-        String xml = Util.toXml(selectionsType);
-        log.debug("Generated tag selection xml: {}", xml);
-        return xml;
+        
+        return selectionsType;
+        
     }
             
 }
