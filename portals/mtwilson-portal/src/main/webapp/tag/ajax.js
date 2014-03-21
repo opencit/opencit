@@ -141,20 +141,34 @@ ajax.text = {
 
 ajax.json = {
     'enctype': 'text/plain',
-    'post': function(resourceName, postObject, opt) {
+    'post': function(resourceName, postObject, opt, params) {
         var info = ajax.resources[resourceName] || {};
         // if( ajax.resources[resourceName] === undefined ) { use ajax.apistyles.resourceCollectionWithId(resourceName) to create a default }
         var my = info.clone().merge(opt).merge({name: resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
-        var request = new Ajax.Request(my.uri, {
+        var req_uri = my.uri;
+        if (typeof params !== 'undefined') {
+            var flag = 0;
+            for (key in params) {
+                if (flag == 0) {
+                    req_uri += '?'+ key + '=' + params[key];
+                    flag = 1;
+                } else {
+                    req_uri += '&' + key + '=' + params[key];
+                }
+            }
+        }
+        var request = new Ajax.Request(req_uri, {
             method: 'post',
             contentType: 'application/json',
-            accepts: 'application/json',
+            accept: 'application/json',
             headers: { "AuthorizationToken": authorizationToken, 'Accept': 'application/json' },
+            requestHeaders: { 'Accept': 'application/json' },
             postBody: Object.toJSON(postObject),
             onSuccess: function(transport) {
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
+                ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
                 if (transport.responseText) {
                     var json = transport.responseJSON;
                     var ptr = json;
@@ -174,7 +188,7 @@ ajax.json = {
                         ajax.data.setx(keyPath, existingData);
                     }*/
 					
-                    ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
+                    //ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
                 }
                 else {
                     ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: null});
@@ -243,7 +257,7 @@ ajax.json = {
                         log.debug("calling setx with keypath: " + keyPath + " and data: " + Object.toJSON(existingData));
                         ajax.data.setx(keyPath, existingData);
                     }
-                    ajax.event.fire("httpGetSuccess", {resource: my, params: params, response: json});
+                    ajax.event.fire("httpGetSuccess", {resource: my, params: params, response: ptr});
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(json);
                     }

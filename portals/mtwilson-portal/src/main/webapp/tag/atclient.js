@@ -133,19 +133,20 @@ mtwilson.atag = mtwilson.atag || {};
 
     // configure the ajax framework
     ajax.resources.notices = {uri: '/notices', datapath: 'notices', idkey: 'uuid'}; // TODO: not implemented on server yet, and when it is imlemented it should be a plugin API like configuration API
-    ajax.resources.tags = {uri: '/mtwilson/v2/kv_attributes', datapath: 'tags', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
-    ajax.resources.tags_json = {uri: '/mtwilson/v2/kv_attributes.json', datapath: 'tags', elementsName: 'kv_attributes', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
-    ajax.resources.unfiltered_tags = {uri: '/mtwilson/v2/kv_attributes.json', datapath: 'unfiltered_tags', idkey: 'id', elementsName: 'kv_attributes'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.tags = {uri: '/mtwilson/v2/tag-kv-attributes', datapath: 'tags', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.tags_json = {uri: '/mtwilson/v2/tag-kv-attributes.json', datapath: 'tags', elementsName: 'kv_attributes', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.unfiltered_tags = {uri: '/mtwilson/v2/tag-kv-attributes.json', datapath: 'unfiltered_tags', idkey: 'id', elementsName: 'kv_attributes'}; // configurations can also use idkey:'oid' and idkey:'name' 
     //ajax.resources.unfiltered_tags = {uri: '/tags', datapath: 'tags', idkey: 'uuid'}; // configurations can also use idkey:'oid' and idkey:'name' 
     ajax.resources.rdfTriples = {uri: '/rdf-triples', datapath: 'rdfTriples', idkey: 'uuid'};
     //ajax.resources.certificates = {uri: '/certificates', datapath: 'certificates', idkey: 'uuid'};
-    ajax.resources.certificates = {uri: '/mtwilson/v2/certificates.json', datapath: 'certificates', elementsName: 'certificates', idkey: 'uuid'};
-    ajax.resources.certificateRequests = {uri: '/certificate-requests', datapath: 'certificateRequests', idkey: 'uuid'};
-    ajax.resources.selections_json = {uri: '/mtwilson/v2/selections.json', datapath: 'selections', elementsName: 'selections',  idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.selections = {uri: '/mtwilson/v2/selections', idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.unfiltered_sels = {uri: '/mtwilson/v2/selections.json', datapath: 'unfiltered_sels', idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.selection_kv_attributes = {uri: '/mtwilson/v2/selection_kv_attributes.json', datapath: 'selection_details', idkey: 'id', elementsName: 'selection_kv_attribute_values'}; // selections can also use idkey:'name'
-    ajax.resources.configurations = {uri: '/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
+    ajax.resources.certificates_json = {uri: '/mtwilson/v2/tag-certificates.json', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
+    ajax.resources.certificates = {uri: '/mtwilson/v2/tag-certificates', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
+    ajax.resources.certificateRequests = {uri: '/mtwilson/v2/tag-certificate-requests-rpc/provision', datapath: 'certificateRequests', idkey: 'uuid'};
+    ajax.resources.selections_json = {uri: '/mtwilson/v2/tag-selections.json', datapath: 'selections', elementsName: 'selections',  idkey: 'id'}; // selections can also use idkey:'name'
+    ajax.resources.selections = {uri: '/mtwilson/v2/tag-selections', idkey: 'id'}; // selections can also use idkey:'name'
+    ajax.resources.unfiltered_sels = {uri: '/mtwilson/v2/tag-selections.json', datapath: 'unfiltered_sels', idkey: 'id', elementsName: 'selections'}; // selections can also use idkey:'name'
+    ajax.resources.selection_kv_attributes = {uri: '/mtwilson/v2/tag-selection-kv-attributes.json', datapath: 'selection_details', idkey: 'id', elementsName: 'selection_kv_attribute_values'}; // selections can also use idkey:'name'
+    ajax.resources.configurations = {uri: '/mtwilson/v2/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.files = {uri: '/files', datapath: 'files', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.uuid = {uri: '/host-uuids', datapath: 'uuid', idkey: null};
 //    mtwilson.atag.data = data; 
@@ -583,7 +584,7 @@ mtwilson.atag = mtwilson.atag || {};
                         iter++;
                     }
                 }
-                console.log(data.rearranged_tags);
+                //console.log(data.rearranged_tags);
                 //data.rearranged_tags = [{name: 'select', tagValues: []}, {name: 'state', tagValues: [{uui: '123', value: 'CA'}]}, {name: 'country', tagValues: [{id: '123', value: 'US'}]}];
                 break;
             case 'rdfTriples':
@@ -704,10 +705,25 @@ mtwilson.atag = mtwilson.atag || {};
 
     mtwilson.atag.createCertificateRequest = function(input) {
         var report = validate(input); // subject and selection
+        subject_id = $F("uuid-populate-host");
+        selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-            var requestObject = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
-            log.debug("Certificate request: " + Object.toJSON(requestObject));
-            ajax.json.post('certificateRequests', [requestObject], {app: report}); // pass {app:report} so it will be passed to the event handler after the request is complete
+            var requestObject = "";
+            console.log("Certificate request: " + Object.toJSON(requestObject));
+
+            // Get the Selection details
+            xmlhttp=new XMLHttpRequest();
+            xmlhttp.onreadystatechange=function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                requestObject = xmlhttp.responseJSON;
+                alert(requestObject);
+                ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+            }
+        }
+        xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id + ".json",true);
+        xmlhttp.send();
+
+//	    requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
         }
     };
     
@@ -852,7 +868,7 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.deleteCertificate = function(uuid) {
         var i;
         for (i = data.certificates.length - 1; i >= 0; i--) {
-            if (('uuid' in data.certificates[i]) && data.certificates[i].uuid == uuid) {
+            if (('id' in data.certificates[i]) && data.certificates[i].id == uuid) {
                 ajax.json.delete('certificates', data.certificates[i]);
                 data.certificates.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
                 //					return;
@@ -865,12 +881,12 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.revokeCertificate = function(uuid) {
         var i;
         for (i = data.certificates.length - 1; i >= 0; i--) {
-            if (('uuid' in data.certificates[i]) && data.certificates[i].uuid == uuid) {
+            if (('id' in data.certificates[i]) && data.certificates[i].id == uuid) {
                 // optional argument:  "effective" date
                 //ajax.json.post('certificates', data.certificates[i]); // XXX TODO NEED A POST /certificates/{uuid}  with action=revoke.
                 log.debug("Sending provision-certificate request");
                 // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
-                ajax.json.post('revoke-certificate', {'revoke': {}}, {'uri': '/certificates/' + uuid, datapath: 'revokeCertificates', idkey: 'uuid'});
+                ajax.json.post('revoke-certificate', {'certificate_id': uuid}, {'uri': '/mtwilson/v2/rpc/revoke_tag_certificate', datapath: 'revokeCertificates', idkey: 'uuid'});
             }
         }
         //view.sync();
@@ -879,12 +895,12 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.deployCertificate = function(uuid) {
         var i;
         for (i = data.certificates.length - 1; i >= 0; i--) {
-            if (('uuid' in data.certificates[i]) && data.certificates[i].uuid == uuid) {
+            if (('id' in data.certificates[i]) && data.certificates[i].id == uuid) {
                 // optional argument:  "effective" date
                 //ajax.json.post('certificates', data.certificates[i]); // XXX TODO NEED A POST /certificates/{uuid}  with action=revoke.
                 log.debug("Sending deploy-certificate request");
                 // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
-                ajax.json.post('deploy-certificate', {'deploy': {}}, {'uri': '/certificates/' + uuid, datapath: 'deployCertificates', idkey: 'uuid'});
+                ajax.json.post('deploy-certificate', {'certificate_id': uuid}, {'uri': '/mtwilson/v2/rpc/mtwilson_import_tag_certificate', datapath: 'deployCertificates', idkey: 'id'});
                 //alert("Certificate deployed to Mt. Wilson");
             }
         }
@@ -899,20 +915,22 @@ mtwilson.atag = mtwilson.atag || {};
         log.debug("provisionCertificate"); //  input: " + Object.toJSON(input));
 //            log.debug("provisionCertificate  report: "+Object.toJSON(report));
 //            var provisionObject = report.input.clone(); //Object.toJSON(report.input).evalJSON();
+        var certificateUuid = $('certificate-provision-uuid').value; // provisionObject.certificateUuid;
         var provisionObject = {
             host: $('certificate-provision-host').value,
+            certificate_id: certificateUuid
             //port: $('certificate-provision-port').value,
             //username: $('certificate-provision-username').value,
             //password: $('certificate-provision-password').value
         };
         log.debug("provisionCertificate  object: " + Object.toJSON(provisionObject)); // should have subject, host address, username, password
-        var certificateUuid = $('certificate-provision-uuid').value; // provisionObject.certificateUuid;
+        //var certificateUuid = $('certificate-provision-uuid').value; // provisionObject.certificateUuid;
 //            delete provisionObject['certificateUuid'];
         var wrappedProvisionObject = {'provision': provisionObject};
         // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
         //var pass = false;
-        ajax.json.post('provision-certificate', wrappedProvisionObject,
-                {'uri': '/certificates/' + certificateUuid,
+        ajax.json.post('provision-certificate', provisionObject,
+                {'uri': '/mtwilson/v2/rpc/deploy_tag_certificate',
                     'datapath': null // prevent result from being stored in global data model
                     /*'onSuccess': function(result) {
                         log.debug("provisionCertificate success! " + Object.toJSON(result));
@@ -1066,7 +1084,7 @@ mtwilson.atag = mtwilson.atag || {};
         // first clear search results (otherwise the results we get from server will be appended to them)
         data.certificates.clear();
 //        ajax.json.get('tags', {uri:'/tags?' + $(report.formId).serialize()}); // XXX TODO  serialize the search form controls into url parameters...
-        ajax.json.get('certificates', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
+        ajax.json.get('certificates_json', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
 //    apiwait("Searching tags...");
     };
 
