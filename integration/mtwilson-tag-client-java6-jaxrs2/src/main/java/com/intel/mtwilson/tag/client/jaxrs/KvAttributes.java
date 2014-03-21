@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.client.jaxrs.*;
+//import com.intel.mtwilson.client.jaxrs.*;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
 import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
