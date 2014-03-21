@@ -17,6 +17,8 @@ import org.apache.commons.configuration.SystemConfiguration;
  * @author jbuhacoff
  */
 public abstract class AbstractFilesystem implements ApplicationFilesystem {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractFilesystem.class);
+
     private String applicationPath = null;
     private String configurationPath = null;
     private String environmentExtPath = null;
@@ -36,10 +38,12 @@ public abstract class AbstractFilesystem implements ApplicationFilesystem {
             if (Platform.isUnix()) {
                 platformFilesystem = new UnixFilesystem();
             }
-            if (Platform.isWindows()) {
+            else if (Platform.isWindows()) {
                 platformFilesystem = new WindowsFilesystem();
             }
-            platformFilesystem = new RelativeFilesystem();
+            else {
+                platformFilesystem = new RelativeFilesystem();
+            }
         }
         return platformFilesystem;
     }

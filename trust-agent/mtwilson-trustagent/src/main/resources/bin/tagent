@@ -18,7 +18,10 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 
 # load environment variables (these may override the defaults set above)
 if [ -d $TRUSTAGENT_ENV ]; then
-  . $TRUSTAGENT_ENV/*
+  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
+  for env_file in $TRUSTAGENT_ENV_FILES; do
+    . $env_file
+  done
 fi
 
 ###################################################################################################
@@ -36,8 +39,11 @@ case "$1" in
     echo "Usage: $0 setup|authorize|start-http-server|register"
     ;;
   *)
-    echo "args: $*"
-    java -cp $CLASSPATH com.intel.dcsg.cpg.console.Main $*
+    #echo "args: $*"
+    # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
+    #       acceptable; requires the functions file / linux utilities which
+    #       isn't integrated into the new trustagent installer yet.
+    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
     ;;
 esac
 

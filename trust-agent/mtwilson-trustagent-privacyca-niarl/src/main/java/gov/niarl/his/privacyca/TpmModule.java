@@ -13,6 +13,7 @@
 
 package gov.niarl.his.privacyca;
 
+import com.intel.mtwilson.MyFilesystem;
 import gov.niarl.his.privacyca.TpmUtils.TpmBytestreamResouceException;
 import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
 
@@ -122,14 +123,15 @@ public class TpmModule {
 	 */
 	private static commandLineResult executeVer2Command(int mode, String args, int returnCount, boolean useTrousersMode)
 			throws IOException {
+        
 		int returnCode = 0;
-		final String new_TPM_MODULE_EXE_PATH = "TpmModuleExePath";
-		final String new_EXE_NAME = "ExeName";
+//		final String new_TPM_MODULE_EXE_PATH = "TpmModuleExePath";
+//		final String new_EXE_NAME = "ExeName";
 		final String new_TROUSERS_MODE = "TrousersMode";
 		final String DEBUG_MODE = "DebugMode";
 		FileInputStream PropertyFile = null;
-		String newTpmModuleExePath = "./exe";
-		String newExeName = "NIARL_TPM_Module";
+		final String newTpmModuleExePath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath(); // "./exe";
+		final String newExeName = "NIARL_TPM_Module";
 		String newTrousersMode = "False";
 		String debugMode = "False";
 		String propertiesFileName = ResourceFinder.getLocation("TPMModule.properties");
@@ -138,8 +140,8 @@ public class TpmModule {
 			PropertyFile = new FileInputStream(ResourceFinder.getFile("TPMModule.properties"));
 			Properties TpmModuleProperties = new Properties();
 			TpmModuleProperties.load(PropertyFile);
-			newTpmModuleExePath = TpmModuleProperties.getProperty(new_TPM_MODULE_EXE_PATH, ".\\exe");
-			newExeName = TpmModuleProperties.getProperty(new_EXE_NAME, "NIARL_TPM_Module");
+//			newTpmModuleExePath = TpmModuleProperties.getProperty(new_TPM_MODULE_EXE_PATH, ".\\exe");
+//			newExeName = TpmModuleProperties.getProperty(new_EXE_NAME, "NIARL_TPM_Module");
 			newTrousersMode = TpmModuleProperties.getProperty(new_TROUSERS_MODE, "False");
 			debugMode = TpmModuleProperties.getProperty(DEBUG_MODE, "False");
 		} catch (FileNotFoundException e) {
@@ -162,7 +164,7 @@ public class TpmModule {
 		boolean DebugMode = false;
 		if (debugMode.toLowerCase().equals("true"))
 			DebugMode = true;
-		String commandLine = newTpmModuleExePath + newExeName + " -mode " + mode + " " + args;
+		String commandLine = newTpmModuleExePath + File.separator + newExeName + " -mode " + mode + " " + args;
 		if (TrousersMode && useTrousersMode)
 			commandLine += " -trousers";
 		if (DebugMode) System.out.println("\"" + commandLine + "\"");

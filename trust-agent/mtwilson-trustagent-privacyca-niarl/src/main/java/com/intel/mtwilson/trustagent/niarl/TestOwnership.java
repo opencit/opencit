@@ -22,10 +22,9 @@ import java.io.IOException;
 public class TestOwnership {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestOwnership.class);
     
-    public boolean isOwner() {
+    public boolean isOwner(byte[] secret) {
         try {
-            TrustagentConfiguration config = new TrustagentConfiguration(My.configuration().getConfiguration());
-            TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+            TpmModule.getCredential(secret, "EC");
             return true;
         }
         catch(IOException | TpmModule.TpmModuleException e) {

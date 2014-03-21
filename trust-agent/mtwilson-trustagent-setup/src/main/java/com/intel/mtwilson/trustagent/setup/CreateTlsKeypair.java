@@ -51,7 +51,11 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
         RsaCredentialX509 credential = keystore.getRsaCredentialX509(TLS_ALIAS, keystorePassword);
-        log.debug("Keystore contains TLS keypair: ", Sha1Digest.valueOf(credential.getCertificate().getEncoded()).toHexString());
+//        log.debug("credential {}", credential);
+//        log.debug("credential certificate {}", credential.getCertificate());
+//        log.debug("credential certificate encoded {}", credential.getCertificate().getEncoded());
+//        log.debug("credential certificate encoded sha1 {}", Sha1Digest.digestOf(credential.getCertificate().getEncoded()));
+//        log.debug("Keystore contains TLS keypair: ", Sha1Digest.digestOf(credential.getCertificate().getEncoded()).toHexString());
         if( !dn.equals(credential.getCertificate().getSubjectX500Principal().getName()) ) {
             log.debug("Certificate DN not the same as configured DN; should recreate certificate");
             validation("Configured DN does not match certificate DN; should recreate certificate");

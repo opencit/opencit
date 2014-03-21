@@ -11,8 +11,10 @@ import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.file.LoginDAO;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
+import com.intel.mtwilson.shiro.file.model.UserPermission;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -52,7 +54,16 @@ public class CreateAdminUser extends LocalSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // ensure we have an admin user created 
+        LoginDAO loginDAO = new LoginDAO(userFile, permissionFile);
+        UserPassword userPassword = loginDAO.findUserByName(username);
+        if( userPassword == null ) {
+            validation("User does not exist: %s", username);
+        }
+        List<UserPermission> userPermissionList = loginDAO.getPermissions(username);
+        if( userPermissionList == null ||  userPermissionList.isEmpty() ) {
+            validation("User does not have permissions assigned: %s", username);
+        }
     }
 
     @Override

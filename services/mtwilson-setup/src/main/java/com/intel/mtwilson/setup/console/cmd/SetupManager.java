@@ -113,6 +113,7 @@ public class SetupManager implements Command {
     
     protected void execute(List<SetupTask> tasks) throws IOException {
         PropertiesConfiguration configuration = loadConfiguration();
+        try {
         for (SetupTask setupTask : tasks) {
             String taskName = setupTask.getClass().getSimpleName();
             setupTask.setConfiguration(configuration);
@@ -134,6 +135,11 @@ public class SetupManager implements Command {
                     System.err.println(fault.toString());
                 }
             }
+        }
+        }
+        catch(Exception e) {
+            log.debug("Setup error: {}", e);
+            System.err.println("Setup error: "+e.getMessage());
         }
         storeConfiguration(configuration);
     }

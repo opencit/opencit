@@ -15,44 +15,46 @@ import gov.niarl.his.privacyca.TpmUtils;
  * @author jbuhacoff
  */
 public class TakeOwnership extends AbstractSetupTask {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TakeOwnership.class);
     private TrustagentConfiguration config;
     private String tpmOwnerSecret;
-    
+
     @Override
     protected void configure() throws Exception {
         // tpm owner password must have already been generated
         config = new TrustagentConfiguration(getConfiguration());
         tpmOwnerSecret = config.getTpmOwnerSecretHex();
-        if( tpmOwnerSecret == null || tpmOwnerSecret.isEmpty() ) {
+        if (tpmOwnerSecret == null || tpmOwnerSecret.isEmpty()) {
             configuration("TPM owner secret must be configured to take ownership");
         }
     }
 
     @Override
     protected void validate() throws Exception {
-        // TODO test that we have ownership by attempting to change the srk password and then change it back
-        //      see also com.intel.mtwilson.trustagent.niarl.TestOwnership
-//        validation("TPM ownership test not implemented; assuming no ownership");
-        TestOwnership test = new TestOwnership();
-        if( !test.isOwner() ) {
-            validation("Trust Agent is not the TPM owner");
+        try {
+            TestOwnership test = new TestOwnership();
+            if (!test.isOwner(config.getTpmOwnerSecret())) {
+                validation("Trust Agent is not the TPM owner");
+            }
+        } catch (Exception e) {
+            log.error("TPM ownership test failed: {}", e);
+            validation(e, "TPM ownership test failed");
         }
     }
 
     @Override
     protected void execute() throws Exception {
-		// Take Ownership
-		byte [] nonce1 = TpmUtils.createRandomBytes(20);
-		try {
-			TpmModule.takeOwnership(config.getTpmOwnerSecret(), nonce1);
-		} catch (TpmModule.TpmModuleException e){
-			if(e.toString().contains(".takeOwnership returned nonzero error: 4")){
-				log.info("Ownership is already taken");
-			}
-			else
-				throw e;
-		}
+        // Take Ownership
+        byte[] nonce1 = TpmUtils.createRandomBytes(20);
+        try {
+            TpmModule.takeOwnership(config.getTpmOwnerSecret(), nonce1);
+        } catch (TpmModule.TpmModuleException e) {
+            if (e.toString().contains(".takeOwnership returned nonzero error: 4")) {
+                log.info("Ownership is already taken");
+            } else {
+                throw e;
+            }
+        }
     }
-    
 }
