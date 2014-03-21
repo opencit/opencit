@@ -103,7 +103,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         p.setProperty("mtwilson.api.url", mtwilsonUrl);
         p.setProperty("mtwilson.api.username", mtwilsonClientKeystoreUsername);
         p.setProperty("mtwilson.api.password", mtwilsonClientKeystorePassword);
-        p.store(System.out, "mtwilson.properties"); // user is responsible for copying this into mtwilson.properties (and it might be encrypted etc)
+        //p.store(System.out, "mtwilson.properties"); // user is responsible for copying this into mtwilson.properties (and it might be encrypted etc)
 
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
         
