@@ -296,7 +296,8 @@ mtwilson.atag = mtwilson.atag || {};
             case 'tags_json':
                 mtwilson.atag.notify({text: 'Created tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
-		tag_create_form_removeValue();
+                tag_create_form_removeValue();
+                mtwilson.atag.searchTags('tag-search-form');
                 break;
             case 'rdfTriples':
                 mtwilson.atag.notify({text: 'Created RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -315,10 +316,12 @@ mtwilson.atag = mtwilson.atag || {};
                     console.log(attr_object);
                 }
                 selection_create_form_removeAllValues();
+                mtwilson.atag.searchSelections('selection-search-form');
                 break;
             case 'certificateRequests':
                 mtwilson.atag.notify({text: 'Created certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
+                mtwilson.atag.searchCertificates($('searchCertButton'))
                 break;
             case 'certificates':
                 mtwilson.atag.notify({text: 'Created certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -407,6 +410,7 @@ mtwilson.atag = mtwilson.atag || {};
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Deleted tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.searchTags('tag-search-form');
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
@@ -417,11 +421,13 @@ mtwilson.atag = mtwilson.atag || {};
                 log.debug("deleted selection notification...");
                 mtwilson.atag.notify({text: 'Deleted selection SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("deleted selection input merge...");
+                mtwilson.atag.searchSelections('selection-search-form');
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
                 mtwilson.atag.notify({text: 'Deleted certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
+                mtwilson.atag.searchCertificates($('searchCertButton'))
                 break;
             case 'certificates':
                 mtwilson.atag.notify({text: 'Deleted certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -477,6 +483,8 @@ mtwilson.atag = mtwilson.atag || {};
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Updated tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                tag_create_form_removeValue();
+                mtwilson.atag.searchTags('tag-search-form');
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
@@ -651,7 +659,7 @@ mtwilson.atag = mtwilson.atag || {};
         //log.debug("HTTP GET OK: " + event.memo.resource.name);
         switch (event.memo.resource.name) {
             case 'resources':
-                mtwilson.atag.notify({text: 'Retrieve resource FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                //mtwilson.atag.notify({text: 'Retrieve resource FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'tags':
                 mtwilson.atag.notify({text: 'Retrieve tags FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
@@ -715,8 +723,8 @@ mtwilson.atag = mtwilson.atag || {};
             xmlhttp=new XMLHttpRequest();
             xmlhttp.onreadystatechange=function() {
             if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                requestObject = xmlhttp.responseJSON;
-                alert(requestObject);
+                var requestObject = xmlhttp.responseText.evalJSON();
+                //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
                 ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
             }
         }
@@ -815,11 +823,13 @@ mtwilson.atag = mtwilson.atag || {};
 
     // Get the selection details
     mtwilson.atag.getSelectionDetails = function(uuid) {
-        ajax.json.get('selection_kv_attributes', {'id':uuid});      
+    data.selection_details = [];
+    ajax.json.get('selection_kv_attributes', {'id':uuid});      
+    $('table_view_sel_details').show();
+    $('tableDisplayScroll_small').hide();
     }
     // removes all tags with this oid
     mtwilson.atag.removeSelection = function(uuid) {
-    alert(uuid);
         log.debug("removeSelection: " + uuid);
         var i;
         for (i = data.selections.length - 1; i >= 0; i--) {
@@ -845,7 +855,7 @@ mtwilson.atag = mtwilson.atag || {};
      // removes all tags with this oid
     mtwilson.atag.exportXmlSelection = function(uuid) {
         log.debug("exportXmlSelection: " + uuid);
-        var url = document.URL + "selections/" + uuid;
+        var url = "/mtwilson/v2/tag-selections/" + uuid;
         window.open(url,'open_window' , 'menubar, toolbar, location, directories, status, scrollbars, resizable, dependent, width=640, height=480, left=0, top=0');
     };
     
@@ -917,8 +927,8 @@ mtwilson.atag = mtwilson.atag || {};
 //            var provisionObject = report.input.clone(); //Object.toJSON(report.input).evalJSON();
         var certificateUuid = $('certificate-provision-uuid').value; // provisionObject.certificateUuid;
         var provisionObject = {
-            host: $('certificate-provision-host').value,
-            certificate_id: certificateUuid
+            certificate_id: certificateUuid,
+            host: $('certificate-provision-host').value
             //port: $('certificate-provision-port').value,
             //username: $('certificate-provision-username').value,
             //password: $('certificate-provision-password').value
@@ -1164,6 +1174,7 @@ mtwilson.atag = mtwilson.atag || {};
 
 
     mtwilson.atag.loadCaCerts = function(input) {
+        return;
         ajax.json.get('files', {nameEqualTo: 'cacerts'}, {callback: function(eventMemo) {
                 var i = data.files.length;
                 var current = null;

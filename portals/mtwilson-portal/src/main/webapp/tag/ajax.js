@@ -168,10 +168,10 @@ ajax.json = {
             onSuccess: function(transport) {
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
-                ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
                 if (transport.responseText) {
                     var json = transport.responseJSON;
                     var ptr = json;
+                    ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if ((typeof json === 'object') && json.data) {
                         _log.debug("Detected data object in response");
@@ -329,6 +329,7 @@ ajax.json = {
                     //log.debug("ptrUuid: " + ptrUuid);
 
                     // some apis return metadata in an outer object and the content inside a 'data' field
+                    ajax.event.fire("httpPutSuccess", {resource: my, content: putObject, response: json});
                     if ((typeof json === 'object') && json.data) {
                         _log.debug("Detected data object in response");
                         ptr = json.data;
@@ -353,7 +354,7 @@ ajax.json = {
                         log.debug("calling setx with keypath: " + keyPath + " and data: " + Object.toJSON(existingData));
                         ajax.data.setx(keyPath, existingData);
                     }
-                    ajax.event.fire("httpPutSuccess", {resource: my, content: putObject, response: json});
+                    //ajax.event.fire("httpPutSuccess", {resource: my, content: putObject, response: json});
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(json);
                     }
