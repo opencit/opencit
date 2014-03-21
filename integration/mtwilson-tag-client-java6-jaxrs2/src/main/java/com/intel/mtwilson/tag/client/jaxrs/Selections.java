@@ -5,7 +5,6 @@
 package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.client.jaxrs.*;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -56,7 +55,9 @@ public class Selections extends MtWilsonClient {
     
     /**
      * Retrieves the details of the selection with the specified ID. Note
-     * that the ID should be a valid UUID.
+     * that the ID should be a valid UUID. This function retrieves the details
+     * of all the associated mappings with the key-value pairs as well. This can
+     * be used to export the selection as an XML/JSON.
      * <p>
      * <i><u>Roles Needed:</u></i> AssetManagement
      * <p>
