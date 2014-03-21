@@ -151,7 +151,7 @@ function getAssetCertificatePage() {
 function getAssetSettingsPage() {
 	$('#mainContainer').html('<div id="AssetSettingsPage"></div>');
         //$('#AssetSettingsPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/settings.html" + '" width="100%" height="1500" > </iframe>');
-        $('#AssetSettingsPage').html('<iframe  scrolling="no" frameborder="0" src="tag/index.html5?tab=settings" width="100%" height="1000" > </iframe>');
+        $('#AssetSettingsPage').html('<iframe  scrolling="no" frameborder="0" src="tag/index.html5?tab=configure" width="100%" height="1000" > </iframe>');
 }
 
 function getAssetLogPage() {
