@@ -41,6 +41,7 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -97,21 +98,14 @@ public class ProvisionTagCertificate  {
             response.setStatus(Response.Status.ACCEPTED.getStatusCode());        
     }
     
-    protected void storeTagCertificate(String subject, byte[] attributeCertificateBytes) throws IOException {
+    protected Certificate storeTagCertificate(String subject, byte[] attributeCertificateBytes) throws IOException {
         X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(attributeCertificateBytes);
         Certificate certificate = Certificate.valueOf(certificateHolder.getEncoded());
         certificate.setId(new UUID());
 
         // Call into the certificate repository to create the new certificate entry in the database.
         certificateRepository.create(certificate);
-        /*
-
-        // now the certificate has been created so update the certificate request record
-        certRequestDao.updateApproved(newCertRequestID.toString(), newCertId.toString());
-        certificateRequest.setCertificateId(newCertId); // XXX of no use to client, maybe remove this
-        certificateRequest.setStatus("Done"); // done automatically in the database record by updateApproved() but we also need it here to send backto the client
-         * 
-         */
+        return certificate;
     }
     
     /**
@@ -124,7 +118,7 @@ public class ProvisionTagCertificate  {
      * @return
      * @throws IOException
      */
-    public byte[] createOne(String subject, SelectionsType selections, HttpServletRequest request, HttpServletResponse response) throws Exception {        
+    public Certificate createOne(String subject, SelectionsType selections, HttpServletRequest request, HttpServletResponse response) throws Exception {        
         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         TagCertificateAuthority ca = new TagCertificateAuthority(configuration);
         // if the subject is an ip address or hostname, resolve it to a hardware uuid with mtwilson - if the host isn't registered in mtwilson we can't get the hardware uuid so we have to reject the request
@@ -143,8 +137,8 @@ public class ProvisionTagCertificate  {
         // if always generate ca is enabled then generate it right now and return it - no need to check database for existing certs etc. 
         if( configuration.isTagProvisionNoCache() ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
-            storeTagCertificate(subject, certificateBytes);
-            return certificateBytes;
+            Certificate certificate = storeTagCertificate(subject, certificateBytes);
+            return certificate;
         }
         // if there is an existing currently valid certificate we return it
         CertificateFilterCriteria criteria = new CertificateFilterCriteria();
@@ -159,13 +153,13 @@ public class ProvisionTagCertificate  {
                 if( today.after(certificate.getNotAfter())) {
                     continue;
                 }
-                return certificate.getCertificate();  // we return the first certificate (most recent, see TODO above) that is currently valid
+                return certificate;  // we return the first certificate (most recent, see TODO above) that is currently valid
             }
         }
         // no cached certificate so generate a new certificate
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
-            storeTagCertificate(subject, certificateBytes);
-            return certificateBytes;
+            Certificate certificate = storeTagCertificate(subject, certificateBytes);
+            return certificate;
         
     }
     
@@ -190,9 +184,17 @@ public class ProvisionTagCertificate  {
      * @param message
      * @param request 
      */
-    @Consumes(MediaType.APPLICATION_JSON)
     @POST
-    public byte[] createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
+        Certificate certificate = createOneJson(locator, json, request, response);
+        return certificate.getCertificate();
+    }
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Certificate createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
              throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
@@ -202,7 +204,6 @@ public class ProvisionTagCertificate  {
             selections = Util.fromJson(json);
         }
         return createOne(getSubject(request, locator), selections, request, response);
-        
     }
     
     /**
@@ -221,9 +222,17 @@ public class ProvisionTagCertificate  {
      * @param message
      * @param request 
      */
-    @Consumes(MediaType.APPLICATION_XML)
     @POST
-    public byte[] createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+        Certificate certificate = createOneXml(locator, xml, request, response);
+        return certificate.getCertificate();
+    }
+    @POST
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public Certificate createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
              throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
@@ -251,8 +260,9 @@ public class ProvisionTagCertificate  {
      * @param message
      * @param request 
      */
-    @Consumes(OtherMediaType.MESSAGE_RFC822)
     @POST
+    @Consumes(OtherMediaType.MESSAGE_RFC822)
+    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
     public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         
@@ -280,7 +290,7 @@ public class ProvisionTagCertificate  {
             // process only the first file we find.  TODO:  what if there are multiple selection files in the zip ?
             try(FileInputStream in = new FileInputStream(selectionFiles[0])) {
                 String xml = IOUtils.toString(in);
-                return createOneXml(locator, xml, request, response);
+                return createOneFromXmlToBytes(locator, xml, request, response);
             }
             finally {
                 // TODO: delete all the temporary files - won't be necessary when the decryption moves to java and it's all in memory
