@@ -76,6 +76,7 @@ public class AbstractRpc {
             inputObject = messageBodyReader.readFrom(inputClass, inputClass, new Annotation[]{}, inputMediaType, jaxrsHeaders, new ByteArrayInputStream(input));
 
         } catch (IOException e) {
+            log.error ("IOException.", e);
             throw new WebApplicationException("Invalid input to RPC", e); // TODO  i18n mesasge
         }
         return inputObject;
