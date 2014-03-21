@@ -12,6 +12,10 @@ import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
+import com.intel.mtwilson.tag.model.SelectionKvAttribute;
+import com.intel.mtwilson.tag.model.SelectionKvAttributeCollection;
+import com.intel.mtwilson.tag.model.SelectionKvAttributeFilterCriteria;
+import com.intel.mtwilson.tag.model.SelectionKvAttributeLocator;
 import com.intel.mtwilson.tag.model.SelectionLocator;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -56,7 +60,7 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
             if( criteria.descriptionContains != null  && criteria.descriptionContains.length() > 0 ) {
                 sql.addConditions(MW_TAG_SELECTION.DESCRIPTION.contains(criteria.descriptionContains));
             }
-            sql.addOrderBy(MW_TAG_SELECTION.ID);
+            sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
             log.debug("Got {} selection records", result.size());
             for(Record r : result) {
@@ -157,9 +161,21 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
         
         try(SelectionDAO dao = TagJdbi.selectionDao()) {            
             Selection obj = dao.findById(locator.id);
-            if (obj != null)
+            if (obj != null) {
+                // First we need to retrieve all the entries from the selection_kv_attribute table
+                // pertaining to this selection and delete them first so that they don't become orphan
+                // entries.
+                SelectionKvAttributeRepository repo = new SelectionKvAttributeRepository();
+                SelectionKvAttributeFilterCriteria fc = new SelectionKvAttributeFilterCriteria();
+                fc.nameEqualTo = obj.getName();
+                SelectionKvAttributeCollection coll = repo.search(fc);
+                for (SelectionKvAttribute skvObj : coll.getSelectionKvAttributeValues()) {
+                    SelectionKvAttributeLocator kvlocator = new SelectionKvAttributeLocator();
+                    kvlocator.id = skvObj.getId();
+                    repo.delete(kvlocator);
+                }
                 dao.deleteById(locator.id);
-                //dao.delete(locator.id.toString());
+            }
                                     
         } catch (ResourceException aex) {
             throw aex;            

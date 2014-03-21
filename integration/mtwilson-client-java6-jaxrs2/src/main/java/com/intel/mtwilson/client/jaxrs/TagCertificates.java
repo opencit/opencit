@@ -34,7 +34,7 @@ public class TagCertificates extends MtWilsonClient {
     
     public TagCertificateCollection searchTagCertificates(TagCertificateFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        TagCertificateCollection objCollection = getTargetPathWithQueryParams("tag-certificates", criteria).request(MediaType.APPLICATION_JSON).get(TagCertificateCollection.class);
+        TagCertificateCollection objCollection = getTargetPathWithQueryParams("host-tag-certificates", criteria).request(MediaType.APPLICATION_JSON).get(TagCertificateCollection.class);
         return objCollection;
     }
     
@@ -42,13 +42,13 @@ public class TagCertificates extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", uuid);
-        TagCertificate obj = getTarget().path("tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(TagCertificate.class);
+        TagCertificate obj = getTarget().path("host-tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(TagCertificate.class);
         return obj;
     }
 
     public TagCertificate createTagCertificate(TagCertificate obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        TagCertificate newObj = getTarget().path("tag-certificates").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), TagCertificate.class);
+        TagCertificate newObj = getTarget().path("host-tag-certificates").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), TagCertificate.class);
         return newObj;
     }
 
@@ -56,7 +56,7 @@ public class TagCertificates extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", obj.getId().toString());
-        TagCertificate newObj = getTarget().path("tag-certificates/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), TagCertificate.class);
+        TagCertificate newObj = getTarget().path("host-tag-certificates/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), TagCertificate.class);
         return newObj;
     }
 
@@ -64,7 +64,7 @@ public class TagCertificates extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", uuid);
-        Response obj = getTarget().path("tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        Response obj = getTarget().path("host-tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         log.debug(obj.toString());
     }
     

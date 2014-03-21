@@ -181,10 +181,10 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 echo "Installing packages: $LIST"
 
-APICLIENT_YUM_PACKAGES="unzip"
-APICLIENT_APT_PACKAGES="unzip"
-APICLIENT_YAST_PACKAGES="unzip"
-APICLIENT_ZYPPER_PACKAGES="unzip"
+APICLIENT_YUM_PACKAGES="unzip openssl"
+APICLIENT_APT_PACKAGES="unzip openssl"
+APICLIENT_YAST_PACKAGES="unzip openssl"
+APICLIENT_ZYPPER_PACKAGES="unzip openssl"
 auto_install "Installer requirements" "APICLIENT"
 
 
@@ -263,6 +263,12 @@ echo "Adding symlink for /opt/mtwilson/configuration..."
 if [[ ! -h "/opt/mtwilson/configuration" ]]; then
   mkdir -p /opt/mtwilson
   ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
+fi
+
+# copy extensions.cache file
+if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
+  chmod 700 extensions.cache
+  cp extensions.cache /opt/mtwilson/configuration
 fi
 
 
@@ -708,6 +714,56 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
+##############################################################################################################################################################################
+##tag service installation
+CONFIG_DIR=/opt/mtwilson/configuration
+prompt_with_default MTWILSON_TAG_SERVER_PRIVATE "Mtwilson Tag Private Server: " $MTWILSON_SERVER
+WEBSERVER_PREFIX=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $1}'`
+WEBSERVER_PORT=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $3}' | awk -F: '{print $2}'`
+MTWILSON_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER_PORT/mtwilson/v2"
+MTWILSON_API_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER_PORT/mtwilson/v1/AttestationService/resources/assetTagCert"
+update_property_in_file "mtwilson.atag.url" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_URL"
+update_property_in_file "mtwilson.atag.mtwilson.baseurl" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_API_TAG_URL"
+
+prompt_with_default MTWILSON_TAG_API_USER "Mtwilson Tag API User: " ${MTWILSON_TAG_API_USER:-ATDemo}
+prompt_with_default_password MTWILSON_TAG_API_PASS "Mtwilson Tag API Password: " $MTWILSON_TAG_API_PASS
+update_property_in_file "mtwilson.api.username" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_API_USER"
+update_property_in_file "mtwilson.api.password" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_API_PASS"
+
+prompt_with_default MTWILSON_TAG_KEYSTORE "Mtwilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
+prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mtwilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
+prompt_with_default_password MTWILSON_TAG_KEY_PASS "Mtwilson Tag Key Password: " $MTWILSON_TAG_KEY_PASS
+update_property_in_file "mtwilson.atag.keystore" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
+update_property_in_file "mtwilson.atag.keystore.password" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASS"
+update_property_in_file "mtwilson.atag.key.password" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_KEY_PASS"
+
+MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
+prompt_with_default MTWILSON_TAG_HTML5_DIR "Mtwilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+prompt_with_default MTWILSON_TAG_CERT_IMPORT_AUTO "Mtwilson Tag Certificate Auto Import: " ${MTWILSON_TAG_CERT_IMPORT_AUTO:-true}
+update_property_in_file "mtwilson.atag.html5.dir" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_HTML5_DIR"
+update_property_in_file "mtwilson.atag.certificate.import.auto" /opt/mtwilson/configuration/mtwilson.properties "$MTWILSON_TAG_CERT_IMPORT_AUTO"
+
+if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  keytool=${JAVA_HOME}/bin/keytool
+  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASS -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
+  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS
+  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -out $CONFIG_DIR/serverAtag.pem
+fi
+
+#call_setupcommand create-database
+call_tag_setupcommand TagInitDatabase
+call_tag_setupcommand TagCreateCaKey "CN=assetTagService"
+call_tag_setupcommand TagExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
+call_tag_setupcommand TagCreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+
+#user is approved directly in TagCreateMtWilsonClient now
+#fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
+#call_tag_setupcommand ApproveMtWilsonClient --fingerprint="$fingerprint"
+
+##############################################################################################################################################################################
+
+
 if [ ! -z "$opt_logrotate" ]; then
   echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
   ./$logrotate_installer
@@ -784,28 +840,28 @@ check file gf_installed with path \"/usr/share/glassfish4/bin/asadmin\"
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
 	depends on glassfish
-# Management Service
-	check host mtwilson-MS-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/msctl start\"
-	stop program = \"/usr/local/bin/msctl stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish
-# Whitelist Service
-	check host mtwilson-WLM-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/wlmctl start\"
-	stop program = \"/usr/local/bin/wlmctl stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
+## Management Service
+#	check host mtwilson-MS-glassfish with address 127.0.0.1
+#	group gf_server
+#	start program = \"/usr/local/bin/msctl start\"
+#	stop program = \"/usr/local/bin/msctl stop\"
+#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on gf_installed
+#	depends on glassfish
+## Whitelist Service
+#	check host mtwilson-WLM-glassfish with address 127.0.0.1
+#	group gf_server
+#	start program = \"/usr/local/bin/wlmctl start\"
+#	stop program = \"/usr/local/bin/wlmctl stop\"
+#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on gf_installed
+#	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
 fi
 fi
 
@@ -847,27 +903,27 @@ check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina
 	depends on tc_installed
 	depends on tomcat
 # Management Service
-	check host mtwilson-MS-tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/msctl start\"
-	stop program = \"/usr/local/bin/msctl stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat
+#	check host mtwilson-MS-tomcat with address 127.0.0.1
+#	group tc_server
+#	start program = \"/usr/local/bin/msctl start\"
+#	stop program = \"/usr/local/bin/msctl stop\"
+#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on tc_installed
+#	depends on tomcat
 # Whitelist Service
-	check host mtwilson-WLM-tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/wlmctl start\"
-	stop program = \"/usr/local/bin/wlmctl stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
+#	check host mtwilson-WLM-tomcat with address 127.0.0.1
+#	group tc_server
+#	start program = \"/usr/local/bin/wlmctl start\"
+#	stop program = \"/usr/local/bin/wlmctl stop\"
+#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
+#	then restart
+#	if 3 restarts within 10 cycles then timeout
+#	depends on tc_installed
+#	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
 fi
 fi
 

@@ -49,8 +49,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
         try {
             jooq = TagJdbi.jooq();
             
-            SelectQuery sql = jooq.select(MW_TAG_SELECTION.ID, MW_TAG_SELECTION.NAME, MW_TAG_SELECTION.DESCRIPTION,
-                    MW_TAG_KVATTRIBUTE.ID, MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE)
+            SelectQuery sql = jooq.select()
                     .from(MW_TAG_KVATTRIBUTE.join(MW_TAG_SELECTION_KVATTRIBUTE, JoinType.JOIN)
                     .on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID))
                     .join(MW_TAG_SELECTION, JoinType.JOIN).on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID)))                    
@@ -76,11 +75,12 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0  ) {
                 sql.addConditions(MW_TAG_SELECTION.NAME.contains(criteria.nameContains));
             }
-            sql.addOrderBy(MW_TAG_SELECTION.ID);
+            sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
             log.debug("Got {} selection records", result.size());
             for(Record r : result) {
                 SelectionKvAttribute sAttr = new SelectionKvAttribute();
+                sAttr.setId(UUID.valueOf(r.getValue(MW_TAG_SELECTION_KVATTRIBUTE.ID)));
                 sAttr.setSelectionId(UUID.valueOf(r.getValue(MW_TAG_SELECTION.ID)));
                 sAttr.setSelectionName(r.getValue(MW_TAG_SELECTION.NAME));
                 sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
@@ -130,7 +130,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
                 KvAttributeDAO attrDao = TagJdbi.kvAttributeDao()) {
             
             Selection selectionObj = null;
-            SelectionKvAttribute obj = dao.findById(item.getId().toString());
+            SelectionKvAttribute obj = dao.findById(item.getId());
             if (obj == null) {
                 if (item.getSelectionName() == null || item.getKvAttributeId() == null) {
                     log.error("Invalid input specified by the user.");
@@ -148,7 +148,7 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
                     log.error("Invalid input specified by the user. Specified attribute is not configured.");
                     throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified attribute is not configured.");                                        
                 }
-                dao.insert(item.getId().toString(), selectionObj.getId().toString(), item.getKvAttributeId().toString());
+                dao.insert(item.getId(), selectionObj.getId(), item.getKvAttributeId());
             }
                         
         } catch (ResourceException aex) {

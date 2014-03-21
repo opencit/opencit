@@ -55,41 +55,41 @@ public class CA {
         return ""; // note:  we are not doing anything here, this function exists only to work around this error: SEVERE: Conflicting URI templates. The URI template /ca for root resource class com.intel.mtwilson.ms.rest.CA and the URI template /ca transform to the same regular expression /ca(/.*)?
     }
 
-    @POST @Path("/enable")
-    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
-    @Consumes("application/json")
-    @Produces({MediaType.TEXT_PLAIN})
-    public String enableCa(String newSaltedPasswordString) {
-        try {
-            ValidationUtil.validate(newSaltedPasswordString);
-            PasswordHash newPassword = PasswordHash.valueOf(newSaltedPasswordString);
-            dao.enableCaWithPassword(newPassword);
-            return Boolean.TRUE.toString();
-        } catch (MSException ex) {
-            throw ex;
-        } catch (Exception e) {
-            log.error("Error during enabling CA. ", e);
-            throw new MSException(ErrorCode.MS_CA_ENABLE_ERROR, e.getClass().getSimpleName());
-        }
-        
-    }
-
-    @POST @Path("/disable")
-    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
-    @Produces({MediaType.TEXT_PLAIN})
-    public String disableCa() {
-        try {
-            dao.disableCa();
-            return Boolean.TRUE.toString();
-        } catch (MSException ex) {
-            throw ex;
-        } catch (Exception e) {
-            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
-            log.error("Error during disabling CA. ", e);
-            throw new MSException(ErrorCode.MS_CA_DISABLE_ERROR, e.getClass().getSimpleName());
-        }
-        
-    }
+//    @POST @Path("/enable")
+//    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
+//    @Consumes("application/json")
+//    @Produces({MediaType.TEXT_PLAIN})
+//    public String enableCa(String newSaltedPasswordString) {
+//        try {
+//            ValidationUtil.validate(newSaltedPasswordString);
+//            PasswordHash newPassword = PasswordHash.valueOf(newSaltedPasswordString);
+//            dao.enableCaWithPassword(newPassword);
+//            return Boolean.TRUE.toString();
+//        } catch (MSException ex) {
+//            throw ex;
+//        } catch (Exception e) {
+//            log.error("Error during enabling CA. ", e);
+//            throw new MSException(ErrorCode.MS_CA_ENABLE_ERROR, e.getClass().getSimpleName());
+//        }
+//        
+//    }
+//
+//    @POST @Path("/disable")
+//    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
+//    @Produces({MediaType.TEXT_PLAIN})
+//    public String disableCa() {
+//        try {
+//            dao.disableCa();
+//            return Boolean.TRUE.toString();
+//        } catch (MSException ex) {
+//            throw ex;
+//        } catch (Exception e) {
+//            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+//            log.error("Error during disabling CA. ", e);
+//            throw new MSException(ErrorCode.MS_CA_DISABLE_ERROR, e.getClass().getSimpleName());
+//        }
+//        
+//    }
 
     /*
     @GET @Path("/certificate/current")

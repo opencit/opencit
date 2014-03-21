@@ -87,7 +87,7 @@
                     <type>jar</type>
                     <classifier>with-dependencies</classifier>
                 </dependency>
-    
+                
                 <!-- Web Services -->
                 <!--
                 <dependency>

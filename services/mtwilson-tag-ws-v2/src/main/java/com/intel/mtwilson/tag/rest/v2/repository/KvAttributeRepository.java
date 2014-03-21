@@ -61,6 +61,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
                 sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.valueContains));
             }
+            sql.addOrderBy(MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE);
             log.debug("Opening tag-value dao");
             log.debug("Fetching records using JOOQ");
             Result<Record> result = sql.fetch();
@@ -149,6 +150,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
                     log.error("Invalid input specified by the user.");
                     throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
                 }
+                //TODO: Create the unique name value pair mapping in the DB.
                 obj = dao.findByNameAndValue(item.getName(), item.getValue());
                 if (obj == null)
                     dao.insert(item.getId(), item.getName(), item.getValue());   
@@ -172,7 +174,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
     public void delete(KvAttributeLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
-            
+            // TODO: Catch the SQLException -- see how JDBI returns the # of rows affected.
             dao.delete(locator.id);           
             
         } catch (ResourceException aex) {

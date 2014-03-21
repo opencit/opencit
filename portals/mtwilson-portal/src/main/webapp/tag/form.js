@@ -40,3 +40,13 @@
 			return value;
 		}
 		
+        function getSelectOptionText(select_id) {
+            var value = "";
+            $(select_id).childElements().each( function(e) {  // or $$('#'+select_id+' options').each(...)
+                if( e.selected ) {
+                    var valueAttr = (""+e.readAttribute('value')).strip();
+                    var innerText = (""+e.innerHTML).strip();
+                    value = innerText;
+                } } ); 
+            return value;
+        }

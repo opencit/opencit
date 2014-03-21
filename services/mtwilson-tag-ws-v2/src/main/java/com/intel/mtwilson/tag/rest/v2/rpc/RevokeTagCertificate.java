@@ -45,11 +45,11 @@ public class RevokeTagCertificate implements Runnable{
         log.debug("Got request to revocation of certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
-            Certificate obj = dao.findById(certificateId.toString());
+            Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
                 log.debug("Sha1 of the certificate about to be revoked is {}.", obj.getSha1());
-                dao.updateRevoked(certificateId.toString(), true);                
+                dao.updateRevoked(certificateId, true);                
                 AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
                 request.setSha1OfAssetCert(obj.getSha1().toByteArray());
                 Global.mtwilson().revokeAssetTagCertificate(request);

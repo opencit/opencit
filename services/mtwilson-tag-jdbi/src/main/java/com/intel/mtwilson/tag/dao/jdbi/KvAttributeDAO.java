@@ -19,7 +19,7 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
 @RegisterArgumentFactory(UUIDArgument.class)
 @RegisterMapper(KvAttributeResultMapper.class)
 public interface KvAttributeDAO extends Closeable {
-    @SqlUpdate("create table mw_tag_kvattribute (id char(36) primary key, name varchar(100), value varchar(255))")
+    @SqlUpdate("create table mw_tag_kvattribute (id char(36) primary key, name varchar(255), value varchar(255))")
 //    @SqlUpdate("create table mw_tag_kvattribute (id char(16) for bit data primary key, name varchar(100), value varchar(255))")
     void create();
     
@@ -49,8 +49,8 @@ public interface KvAttributeDAO extends Closeable {
     @SqlQuery("select id, name, value from mw_tag_kvattribute where name=:name")
     KvAttribute findByName(@Bind("name") String name);
     
-    @SqlQuery("select id, name, value from mw_tag_kvattribute where value=:value")
-    KvAttribute findByOid(@Bind("value") String value);
+//    @SqlQuery("select id, name, value from mw_tag_kvattribute where value=:value")
+//    KvAttribute findByOid(@Bind("value") String value);
     
 //    @SqlQuery("select id, name, oid from mw_tag_attribute where oid=:oid or name=:name")
 //    KvAttribute findByOidOrName(@Bind("oid") String oid, @Bind("name") String name);

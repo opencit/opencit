@@ -149,7 +149,8 @@ ajax.json = {
         var request = new Ajax.Request(my.uri, {
             method: 'post',
             contentType: 'application/json',
-			headers: { "AuthorizationToken": authorizationToken },
+            accepts: 'application/json',
+            headers: { "AuthorizationToken": authorizationToken, 'Accept': 'application/json' },
             postBody: Object.toJSON(postObject),
             onSuccess: function(transport) {
                 var response = transport.responseText || "no response text";
@@ -162,7 +163,7 @@ ajax.json = {
                         _log.debug("Detected data object in response");
                         ptr = json.data;
                     }
-                    if (keyPath !== null) {
+                    /*if (keyPath !== null) {
                         var existingData = ajax.data.getx(keyPath);
                         if (existingData) {
                             existingData.merge(ptr);
@@ -171,7 +172,8 @@ ajax.json = {
                             existingData = ptr;
                         }
                         ajax.data.setx(keyPath, existingData);
-                    }
+                    }*/
+					
                     ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
                 }
                 else {
@@ -203,6 +205,7 @@ ajax.json = {
         var my = info.clone().merge(opt).merge({name: resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         _log.debug("get resource: " + my.uri + "  into: " + keyPath);
+        console.log("get resource: " + my.uri + "  into: " + keyPath);
         var request = new Ajax.Request(my.uri, {
             method: 'get',
 			headers: { "AuthorizationToken": authorizationToken },
@@ -213,6 +216,9 @@ ajax.json = {
                 if (transport.responseText) {
                     var json = transport.responseJSON;
                     var ptr = json;
+                    if(my.elementsName != undefined && my.elementsName != "") {
+                        ptr = json[my.elementsName];
+                    }
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if ((typeof json === 'object') && json.data) {
                         _log.debug("Detected data object in response");

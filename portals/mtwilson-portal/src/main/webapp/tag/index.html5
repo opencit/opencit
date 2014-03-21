@@ -206,15 +206,16 @@ function isNumber(n) {
                             <script>
 
                                 function tag_create_form_addValue() {
-                                    mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({values:[]}); // sets the values to empty array if it's not already defined (applies first time this function is called)
+                                    mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({value:""}); // sets the values to empty string if it's not already defined (applies first time this function is called)
                                     var value = (""+$F('tag-create-values')).strip();
-                                    if( value.empty() || !verify_for_value_duplicates(value)) { return; }
+                                    //if( value.empty() || !verify_for_value_duplicates(value)) { return; }
                                     //        alert("add value: "+value);
                                     log.debug("uh? "+Object.toJSON(mtwilson.rivets.forms['tag-create-form']));
-                                    mtwilson.rivets.forms['tag-create-form'].input.values.push($F('tag-create-values')); 
+                                    //mtwilson.rivets.forms['tag-create-form'].input.values.push($F('tag-create-values')); 
+                                    mtwilson.rivets.forms['tag-create-form'].input.value = $F('tag-create-values'); 
                                     $('tag-create-values').focus(); 
                                     $('tag-create-values').clear();
-                                    $('tag-create-name').disable();
+                                    //$('tag-create-name').disable();
                                 }
 			
 				// Verifies if the Tag values are duplicate for the new tag that is being created.
@@ -229,19 +230,28 @@ function isNumber(n) {
 					return true;
 				}
 
-                                function tag_create_form_removeValue(tagValue) {
-                                    mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
-                                    mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
-				    if(mtwilson.rivets.forms['tag-create-form'].input.values.length== 0) {
-                                	$('tag-create-name').enable();
-                                    	$('tag-create-name').focus(); 
-					$('tag-create-name').clear();
-				    }
-                                }
-                                // called when submitting the form... checks that at least one value was added
-                                function tag_create_form_validateValues() {
-                                    return mtwilson.rivets.forms['tag-create-form'].input.values.length > 0;
-                                }
+                function tag_create_form_removeValue(tagValue) {
+//                    mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
+                    mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
+//				      if(mtwilson.rivets.forms['tag-create-form'].input.values.length== 0) {
+                        $('tag-create-name').enable();
+                        $('tag-create-name').focus(); 
+                        $('tag-create-name').clear();
+//                    }
+                }
+
+				// called when submitting the form... checks that at least one value was added
+                function tag_create_form_validateValues() {
+                    return mtwilson.rivets.forms['tag-create-form'].input.values.length > 0;
+                }
+
+				function tag_create_edit_tag(id, name, value) {
+                    $('tag-create-values').focus(); 
+                    $('tag-create-name').disable(); 
+                    $('tag-create-id').value = id;
+                    $('tag-create-name').value = name;
+                    $('tag-create-values').value = value;
+                }
                             </script>
                             
                             <div class="nagPanel">Asset Tag Management &gt;</div>
@@ -260,7 +270,7 @@ function isNumber(n) {
                                     <div class="singleDiv tagOIDDiv">
                                     <div class="labelDiv">Tag OID(optional)</div>    
                                     <div class="valueDiv">
-                                        <input type="text" class="textBox_Border" id="tag-create-oid" data-bind-value="input.oid" placeholder="2.5.4.789.1">
+                                        <input type="text" class="textBox_Border" id="tag-create-oid" data-bind-value="input.id" placeholder="2.5.4.789.1">
                                     </div>
                                     </div>
 
@@ -271,9 +281,9 @@ function isNumber(n) {
                                             <input type="text" class="textBox_Border" id="tag-create-values" placeholder="Value"  data-validator="tag_create_form_validateValues">
                                         </div>
                                         <div class="valueDiv">
-                                            <input type="button" class="uploadButton" value="Add" onclick="tag_create_form_addValue();">
-                                            <input type="button" class="uploadButton" value="Save" onclick="ws.createTag(this); return false;">
-
+                                            <!--input type="button" class="uploadButton" value="Add" onclick="tag_create_form_addValue();"-->
+                                            <input type="button" class="uploadButton" value="Save" onclick="tag_create_form_addValue(); ws.createTag(this); return false;">
+                                            <input type="text" class="textBox_Border" id="tag-create-id" data-bind-value="input.id" placeholder="2.5.4.789.1" size="1" style="display:none">
                                             <span style="display: none;" class="validation-advice" id="advice-tag-create-values">You must add at least one value.</span>
                                             <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
                                                 <li style="display: inline-block; border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="input.values"><span data-bind-text="item"></span> <a data-bind-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:tag_create_form_removeValue(this.getAttribute('tagValue'));">X</a></li>
@@ -351,10 +361,13 @@ function isNumber(n) {
                                         <td align="center" class="row2 tagOIDDiv" data-bind-text="item.oid"></td>
                                         <td align="center" class="col_auto" style="max-width: 400px; padding: 5px;">
                                             <ul style="margin-left: 0px; padding-left: 0px; list-style: none; display: inline;">
-                                                <li style="display: inline-block; list-style-type: inline; border: none; padding: 1px; margin: 3px;" data-bind-each-item="item.values"><span style="text-decoration: underline;" data-bind-text="item"></span></li>
+                                                <li style="border: none; " data-bind-each-item="item.value"><span data-bind-text="item"></span></li>
                                             </ul>
                                         </td>
-                                        <td align="center" class="col_del_link"><a data-bind-oid="item.oid" data-bind-uuid="item.uuid"  href="#" onclick="javascript:ws.removeTag(this.getAttribute('uuid')); return false;">delete</a></td>
+                                        <td align="center" class="col_del_link">
+                                            <a data-bind-oid="item.oid" data-bind-id="item.id" data-bind-name="item.name" data-bind-tagValue="item.value" href="#" onclick="javascript:tag_create_edit_tag(this.getAttribute('id'), this.getAttribute('name'), this.getAttribute('tagValue')); return false;">Edit</a>
+                                            <a data-bind-oid="item.oid" data-bind-id="item.id"  href="#" onclick="javascript:ws.removeTag(this.getAttribute('id')); return false;">delete</a>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -383,29 +396,35 @@ function isNumber(n) {
                                         selection_create_form_onSelectTag( getSelectOptionValue('selection-create-tags-select') );
     //                                }                                
                                 }
-                                function selection_create_form_onSelectTag(tagId) {
-                                    log.debug("selection_create_form_onSelectTag: selected tag id: "+tagId);
-                                    var tag = ws.findTagByOid(tagId);
-                                    var tag = ws.findTagByUuid(tagId);
+                                function selection_create_form_onSelectTag(tagName) {
+                                    if(tagName == '') { return; }
+                                    var tag = ws.findTagByName(tagName);
+//                                    log.debug("selection_create_form_onSelectTag: selected tag id: "+tagId);
+//                                    var tag = ws.findTagByOid(tagId);
+//                                    var tag = ws.findTagByUuid(tagId);
                                     log.debug("selection_create_form_onSelectTag: found tag: "+Object.toJSON(tag));
-    //                                log.debug("selection_create_form_onSelectTag: rivets forms: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form']));
-                                    mtwilson.rivets.forms['selection-create-form'].tagValues.clear().merge(tag.values); 
+//                                    log.debug("selection_create_form_onSelectTag: rivets forms: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form']));
+                                    mtwilson.rivets.forms['selection-create-form'].tagValues.clear().merge(tag.tagValues); 
                                 }
 
-                                function selection_create_form_addValue() {
+                function selection_create_form_addValue() {
 				    if($("selection-create-name").value.trim() == "") {
-					return false;
+					    return false;
 				    }
-				    $('selection-create-name').disable();
-                                    var tag = ws.findTagByUuid(getSelectOptionValue('selection-create-tags-select'));
-                                    var tagValue = $F('selection-create-tags-values');
-				    if(!verify_selections_for_duplicates(tag, tagValue)) {
-					return false;
+                    var tag_obj = {};
+                    var tagName = $F('selection-create-tags-select');
+				    tag_obj.name = $F('selection-create-tags-select');
+                    tag_obj.id = $F('selection-create-tags-values');
+                    var tagValue = getSelectOptionText('selection-create-tags-values');
+				    if(tagValue == "") { return; }
+                    tag_obj.value = tagValue;
+				    if(!verify_selections_for_duplicates(tag_obj, tagValue)) {
+					    return false;
 				    }
 				    $('tableDisplayScroll_small').show();
-                                    mtwilson.rivets.forms['selection-create-form'].input.selection.push({ tag:tag, value: tagValue});  // XXX tag should be uuid? oid? name? just need an id, not the whole object. maybe put the whole object here to make it easy and just pick out what we need to send to the server when it's time to submit the selection.
-                                    log.debug("added tag ("+tag.oid+","+tagValue+") to selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
-                                }
+					    mtwilson.rivets.forms['selection-create-form'].input.selection.push({ tag:tag_obj, value: tagValue});  // XXX tag should be uuid? oid? name? just need an id, not the whole object. maybe put the whole object here to make it easy and just pick out what we need to send to the server when it's time to submit the selection.
+//                        log.debug("added tag ("+tag.oid+","+tagValue+") to selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
+                }
 
 				function verify_selections_for_duplicates(tag, val) {
 					var sel_elements = mtwilson.rivets.forms['selection-create-form'].input.selection;
@@ -440,6 +459,7 @@ function isNumber(n) {
                                             mtwilson.rivets.forms['selection-create-form'].input.selection.splice(i,1);
                                     }
 				    $('tableDisplayScroll_small').hide();
+                    $('selection-create-desc').clear();
 				    $('selection-create-name').enable();
 				}
 
@@ -461,13 +481,20 @@ function isNumber(n) {
                                 </div>
 
                                 <div class="singleDiv">
+                                    <div class="labelDiv">Description : </div>
+                                    <div class="valueDiv">
+                                        <input type="text" class="textBox_Border" id="selection-create-desc" name="desc" data-bind-value="input.desc" placeholder="Selection description">
+                                    </div>
+                                </div>
+								
+                                <div class="singleDiv">
                                     <div class="labelDiv">Tags: </div> <!-- was: "Host Provided By" -->
                                     <div class="valueDiv">
                                         <select class="ddlBox_small_Border" id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
-                                            <option data-bind-each-item="global.unfiltered_tags" data-bind-text="item.name" data-bind-value="item.uuid"></option>
+                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name" data-bind-text="item.name"></option>
                                         </select>
                                         <select class="ddlBox_small_Border" id="selection-create-tags-values" data-validator="selection_create_form_validateValues">
-                                            <option data-bind-each-item="tagValues" data-bind-text="item"></option>
+                                            <option data-bind-each-item="tagValues" data-bind-value="item.id" data-bind-text="item.value"></option>
                                         </select>
 
                                         <input type="button" class="uploadButton" value="Add" id="selection-create-tags-select-add" onclick="selection_create_form_addValue(); return false;"/>
@@ -481,8 +508,8 @@ function isNumber(n) {
                                         <thead>
                                             <tr>
                                                 <th class="col_tag_names">Tag name</th>
-                                                <th class="row9 tagOIDDiv">Tag OID</th>
                                                 <th class="col_auto">Tag Value</th>
+                                                <th class="col_auto">Tag ID</th>
                                                 <th class="col_del_link"></th>
                                             </tr>
                                         </thead>
@@ -490,13 +517,31 @@ function isNumber(n) {
                                         <tbody>
                                             <tr class="evenRow" data-bind-each-item="input.selection">
                                                 <td align="center" class="col_tag_names" data-bind-text="item.tag.name"></td>
-                                                <td align="center" class="row2 tagOIDDiv" data-bind-text="item.tag.oid"></td>
                                                 <td align="center" class="col_auto" data-bind-text="item.value"></td>
+                                                <td align="center" class="col_auto" data-bind-text="item.tag.id"></td>
                                                 <td align="center" style='border-right: 1px solid #3A4F63' class="col_del_link"> <a data-bind-tagOid="item.tag.oid" data-bind-tagValue="item.value" href="#" onclick="javascript:selection_create_form_removeValue(this.getAttribute('tagOid'),this.getAttribute('tagValue'));">remove</a></td>
                                             </tr>
                                         </tbody>
                                     </table>
                                     <div class="singleDiv" style="height: 10px;"></div>                                
+
+									<table id="selection-edit-tags-table" class="tableDisplay" style="width: 800px; display: block" cellspacing=0 cellpadding=0>
+                                        <thead>
+                                            <tr>
+                                                <th class="col_tag_names">Tag name</th>
+                                                <th class="col_auto">Tag Value</th>
+                                                <th class="col_auto">Tag ID</th>
+                                            </tr>
+                                        </thead>
+                               
+                                        <tbody>
+                                            <tr class="evenRow" data-bind-each-item="global.selection_details">
+                                                <td align="center" class="col_tag_names" data-bind-text="item.name"></td>
+                                                <td align="center" class="col_auto" data-bind-text="item.value"></td>
+                                                <td align="center" class="col_auto" data-bind-text="item.id"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                     <input type="submit" value="Save" onclick="ws.createSelection(this); return false;"/>
                                     </div>
 
@@ -573,14 +618,15 @@ function isNumber(n) {
                                 <thead>
                                     <tr>
                                         <th class="col_tag_names">Selection Name</th>
-                                        <th class="col_auto" style="width: 175px;">Tags</th>
+                                        <th class="col_auto" style="width: 175px;">Description</th>
                                         <th class="col_del_link"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr class="evenRow" data-bind-each-item="selections">
                                         <td align="center" class="col_tag_names" data-bind-text="item.name"></td>
-                                        <td align="center" class="col_auto">
+                                        <td align="center" class="last_col col_auto" data-bind-text="item.description"></td>
+                                        <!--td align="center" class="col_auto">
                                             <table cellspacing=0 cellpadding=0>
                                                 <thead>
                                                     <tr>
@@ -590,15 +636,17 @@ function isNumber(n) {
                                                 </thead>
                                                 <tbody>
                                                     <tr class="evenRow" data-bind-each-item="item.tags">
-                                                        <td align="center" class="col_auto col_tag_names" data-bind-text="item.tagName"></td>
-                                                        <td align="center" class="last_col col_auto" data-bind-text="item.tagValue"></td>
+                                                        <td align="center" class="col_auto col_tag_names" data-bind-text="item.name"></td>
+                                                        <td align="center" class="last_col col_auto" data-bind-text="item.description"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                        </td>
+                                        </td-->
+										
                                         <td align="center" class="col_del_link">
-                                            <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a><br>
-                                            <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a>
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.getSelectionDetails(this.getAttribute('uuid')); return false;">View/Edit</a>&nbsp;&nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a><br />
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a>
                                         </td>
                                     </tr>
                                 </tbody>

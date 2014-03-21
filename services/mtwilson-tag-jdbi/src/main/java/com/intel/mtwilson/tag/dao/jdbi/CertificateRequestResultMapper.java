@@ -19,14 +19,12 @@ public class CertificateRequestResultMapper implements ResultSetMapper<Certifica
 
     @Override
     public CertificateRequest map(int i, ResultSet rs, StatementContext sc) throws SQLException {
-//        UUID uuid = UUID.valueOf(rs.getBytes("uuid")); // use this when uuid is a binary type in database
-        UUID uuid = UUID.valueOf(rs.getString("uuid")); // use this when uuid is a char type in database
         CertificateRequest certificateRequest = new CertificateRequest();
         certificateRequest.setId(UUID.valueOf(rs.getString("id")));
         certificateRequest.setSubject(rs.getString("subject"));
-        certificateRequest.setAuthorityName(rs.getString("authorityName"));
-        certificateRequest.setCertificateId(UUID.valueOf(rs.getString("certificateId")));
-        certificateRequest.setSelectionId(UUID.valueOf(rs.getString("selectionId")));
+        certificateRequest.setContentType(rs.getString("contentType"));
+        certificateRequest.setStatus(rs.getString("status"));
+        certificateRequest.setContent(rs.getBytes("content"));
         return certificateRequest;
     }
     

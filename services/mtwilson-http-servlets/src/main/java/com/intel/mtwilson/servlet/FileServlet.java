@@ -70,6 +70,10 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     if( file.isDirectory() ) {
         file = new File(target, "index.html"); 
     }
+    
+    if (!file.exists()) {
+        file = new File(target, "index.html5");
+    }
 
     // Get and set the type of the file; relies on the mime types defined in web.xml
     String contentType = getServletContext().getMimeType(file.getName());

@@ -43,7 +43,6 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
             
             SelectQuery sql = jooq.select().from(MW_CONFIGURATION).getQuery();
             if( criteria.id != null ) {
-    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
                 sql.addConditions(MW_CONFIGURATION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
@@ -51,12 +50,11 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
             }
             if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
                 sql.addConditions(MW_CONFIGURATION.NAME.contains(criteria.nameContains));
-            }/*
-            if( query.contentTypeEqualTo != null && query.contentTypeEqualTo.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.CONTENTTYPE.equal(query.contentTypeEqualTo));
-            }*/
+            }
+            if( criteria.contentTypeEqualTo != null && criteria.contentTypeEqualTo.length() > 0 ) {
+                sql.addConditions(MW_CONFIGURATION.CONTENT.equal(criteria.contentTypeEqualTo));
+            }
             Result<Record> result = sql.fetch();
-//            Configuration[] configurations = new Configuration[result.size()];
             log.debug("Got {} records", result.size());
             for(Record r : result) {
                 Configuration configObj = new Configuration();
@@ -83,7 +81,20 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
 
     @Override
     public Configuration retrieve(ConfigurationLocator locator) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if( locator == null || locator.id == null ) { return null; }
+        
+        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {            
+            Configuration obj = dao.findById(locator.id);
+            if (obj != null) {
+                return obj;
+            }
+        } catch (ResourceException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during configuration deletion.", ex);
+            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+        }        
+        return null;
     }
 
     @Override
@@ -112,8 +123,10 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
     public void create(Configuration item) {
         
         try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
-
-            dao.insert(item.getId(), item.getName(), item.getXmlContent());                        
+            Configuration obj = dao.findById(item.getId());
+            if (obj == null) {
+                dao.insert(item.getId(), item.getName(), item.getXmlContent());                        
+            }
             
         } catch (ResourceException aex) {
             throw aex;            
@@ -126,19 +139,17 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
     @Override
     public void delete(ConfigurationLocator locator) {
         if( locator == null || locator.id == null ) { return; }
-        ConfigurationDAO dao = null;
         
-        try {
-            dao = TagJdbi.configurationDao();
-            dao.delete(locator.id);
+        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {            
+            Configuration obj = dao.findById(locator.id);
+            if (obj != null) {
+                dao.delete(locator.id);
+            }
         } catch (ResourceException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during configuration deletion.", ex);
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
-        } finally {
-            if (dao != null)
-                dao.close();
         }        
     }
     

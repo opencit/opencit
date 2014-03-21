@@ -25,6 +25,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.5</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jdbi-util</artifactId>
             <version>${project.version}</version>

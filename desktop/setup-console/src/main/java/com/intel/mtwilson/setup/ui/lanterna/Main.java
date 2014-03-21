@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.setup.ui.lanterna;
 
-import com.intel.mtwilson.setup.cmd.*;
 import com.googlecode.lanterna.TerminalFacade;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.dcsg.cpg.console.Command;
