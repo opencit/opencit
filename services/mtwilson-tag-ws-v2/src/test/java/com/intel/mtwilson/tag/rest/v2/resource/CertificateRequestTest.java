@@ -63,7 +63,8 @@ public class CertificateRequestTest {
         String selection1 = "{\"selections\":[{\"attributes\":[{\"text\":{\"value\":\"Country=US\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"State=CA\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"State=TX\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"City=Folsom\"},\"oid\":\"2.5.4.789.1\"},{\"text\":{\"value\":\"City=El Paso\"},\"oid\":\"2.5.4.789.1\"}]}]}";
         SelectionsType selections = Util.fromJson(selection1);
         ProvisionTagCertificate repo = new ProvisionTagCertificate();
-        byte[] createOne = repo.createOne(new UUID().toString(), selections, null, null);
+        Certificate certificate = repo.createOne(new UUID().toString(), selections, null, null);
+        log.debug("tag {}", certificate.getSha1().toHexString());
     }
     
     @Test
