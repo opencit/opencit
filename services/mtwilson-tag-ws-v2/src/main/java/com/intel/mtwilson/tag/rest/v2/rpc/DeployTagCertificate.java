@@ -74,6 +74,12 @@ public class DeployTagCertificate extends ServerResource implements Runnable{
                     throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No hosts were found matching the specified criteria.");
                 }
                 TxtHostRecord hostRecord = hostList.get(0);
+                
+                if (hostRecord.Hardware_Uuid != obj.getSubject()) {
+                    log.error("The certificate provided does not map to the host specified. Certificate will not be deployed on the host.");
+                    throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "The certificate provided does not map to the host specified. Certificate will not be deployed on the host.");
+                }
+                
                 deployAssetTagToHost(obj.getSha1(), hostRecord);
             }
 
