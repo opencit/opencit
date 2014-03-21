@@ -16,10 +16,6 @@
 	</parent>
   
   <modules>
-	<module>asset-tag-model</module>
-	<module>asset-tag-dao</module>
-	<module>asset-tag-dao-jooq</module>
-	<module>asset-tag-service</module>
 	<module>mtwilson-trust-policy</module>
     <module>mtwilson-webservice-util</module>
     <module>mtwilson-http-security</module>
@@ -38,11 +34,11 @@
 	<module>mtwilson-jdbi-util</module>
 	<module>mtwilson-jooq-util</module>
 	<module>mtwilson-jersey-util</module>
-        <module>mtwilson-shiro-jdbi</module>
+	<module>mtwilson-shiro-file</module>
+	<module>mtwilson-shiro-jdbi</module>
 	<module>mtwilson-shiro-util</module>
-        <module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-shiro-ws-v2</module>
     <module>mtwilson-http-security-server</module>
-    <module>mtwilson-trust-utils</module>
     <module>mtwilson-whitelist</module>
     <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-management</module>
@@ -52,7 +48,7 @@
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
 	<module>mtwilson-test-ws-v1</module>
-        <module>mtwilson-test-ws-v2</module>
+	<module>mtwilson-test-ws-v2</module>
 	<module>mtwilson-version-ws-v2</module>
 	<module>mtwilson-setup-ext</module>
 	<module>mtwilson-setup</module>
@@ -75,6 +71,7 @@
 	<module>mtwilson-privacyca-niarl</module>
 	<module>mtwilson-privacyca-ws-v2</module>
 	<module>mtwilson-privacyca-model</module>
+	<module>mtwilson-privacyca-setup</module>
   </modules>
 
 </project>

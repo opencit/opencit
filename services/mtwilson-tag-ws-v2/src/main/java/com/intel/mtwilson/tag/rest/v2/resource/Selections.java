@@ -5,8 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.atag.model.SelectionTagValue;
-import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
+import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -21,7 +20,6 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
-import com.intel.mtwilson.tag.selection.xml.SelectionType;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,9 +28,7 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import org.apache.commons.codec.binary.Base64;
 import javax.ws.rs.core.MediaType;
-import org.restlet.data.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

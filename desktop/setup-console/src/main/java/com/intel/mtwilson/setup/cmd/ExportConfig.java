@@ -7,7 +7,7 @@ package com.intel.mtwilson.setup.cmd;
 import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,12 +20,7 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 public class ExportConfig implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
+  
 
     private Configuration options = null;
     @Override

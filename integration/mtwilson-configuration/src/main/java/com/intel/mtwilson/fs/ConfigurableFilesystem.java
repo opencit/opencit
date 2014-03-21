@@ -4,11 +4,15 @@
  */
 package com.intel.mtwilson.fs;
 
+import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Properties;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
+import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 
@@ -16,66 +20,85 @@ import org.apache.commons.configuration.MapConfiguration;
  *
  * @author jbuhacoff
  */
-public class ConfigurableFilesystem implements ApplicationFilesystem {
+public class ConfigurableFilesystem extends AbstractFilesystem {
+    public final String FILESYSTEM_NAME = "fs.name"; //  to change filesystem root from /opt/mtwilson to /opt/trustagent, run java -Dfs.name=trustagent   or export FS_NAME=trustagent before running java
+    public final String FILESYSTEM_ROOT_PATH = "fs.root"; //  to change filesystem root from /opt/mtwilson to /usr/share/mtwilson, run java -Dfs.root=/usr/share 
+    public final String FILESYSTEM_APPLICATION_PATH = "fs.home"; //  to change filesystem root from /opt/mtwilson to /opt/trustagent, run java -Dfs.root=/opt/trustagent 
+    public final String FILESYSTEM_CONFIGURATION_PATH = "fs.conf"; //  to change configuration folder from /opt/mtwilson/configuration to /opt/trustagent/configuration, just set -Dfs.name (above); but to set it to /etc/mtwilson  run java -Dfs.conf=/etc/mtwilson  or to /etc/trustagent  -Dfs.conf=/etc/trustagent  
+    public final String FILESYSTEM_ENVIRONMENT_PATH = "fs.env"; //  to change configuration folder from /opt/mtwilson/env.d to /etc/sysconfig/mtwilson, just set -Dfs.env=/etc/sysconfig/mtwilson 
 
-    private ApplicationFilesystem defaultFilesystem;
     private Configuration configuration;
+    private PlatformFilesystem platformFilesystem;
+    
     public ConfigurableFilesystem() { 
         this(new MapConfiguration(new Properties()));
     }
+    /**
+     * First priority is the configuration that is passed in.
+     * Second is the java system properties specified on command line like -Dfs.name
+     * Third is exported environment variables like FS_NAME
+     * 
+     * @param configuration 
+     */
     public ConfigurableFilesystem(Configuration configuration) {
-        this.configuration = configuration;
-        this.defaultFilesystem = pickDefaultFilesystem();
-    }
-    
-    private ApplicationFilesystem pickDefaultFilesystem() {
-        if (Platform.isUnix()) {
-            return new UnixFilesystem();
-        }
-        if (Platform.isWindows()) {
-            return new WindowsFilesystem();
-        }
-        return new RelativeFilesystem();
-    }
-    
-    public ApplicationFilesystem getDefaultFilesystem() {
-        return defaultFilesystem;
-    }
-    public void setDefaultFilesystem(ApplicationFilesystem defaultFilesystem) {
-        this.defaultFilesystem = defaultFilesystem;
-    }
-    
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
-    public Configuration getConfiguration( ){ return configuration; }
-    
-    @Override
-    public String getConfigurationPath() {
-        return configuration.getString("mtwilson.fs.configuration", defaultFilesystem.getConfigurationPath());
+        CompositeConfiguration composite = new CompositeConfiguration();
+        composite.addConfiguration(configuration);
+        SystemConfiguration system = new SystemConfiguration();
+        composite.addConfiguration(system);
+        EnvironmentConfiguration env = new EnvironmentConfiguration();
+        composite.addConfiguration(env);
+        AllCapsEnvironmentConfiguration envAllCaps = new AllCapsEnvironmentConfiguration();
+        composite.addConfiguration(envAllCaps);
+        this.configuration = composite;
     }
 
     @Override
+    protected String getApplicationName() {
+        return configuration.getString(FILESYSTEM_NAME, "mtwilson");
+    }
+
+    @Override
+    protected PlatformFilesystem getPlatformFilesystem() {
+        if( platformFilesystem == null ) {
+            String root = configuration.getString(FILESYSTEM_ROOT_PATH);
+            if( root != null ) {
+                platformFilesystem = new RelativeFilesystem(root);
+            }
+            else {
+                platformFilesystem = super.getPlatformFilesystem();
+            }
+        }
+        return platformFilesystem;
+    }
+    
+    
+    
+    @Override
     public String getApplicationPath() {
-        return configuration.getString("mtwilson.fs.application", defaultFilesystem.getApplicationPath());
+        return configuration.getString(FILESYSTEM_APPLICATION_PATH, super.getApplicationPath());
+    }
+    
+    @Override
+    public String getConfigurationPath() {
+         return configuration.getString(FILESYSTEM_CONFIGURATION_PATH, super.getConfigurationPath());
     }
 
     @Override
     public String getEnvironmentExtPath() {
-        return configuration.getString("mtwilson.fs.env", defaultFilesystem.getEnvironmentExtPath());
+        return configuration.getString(FILESYSTEM_ENVIRONMENT_PATH, super.getEnvironmentExtPath());
     }
 
     @Override
     public FeatureFilesystem getBootstrapFilesystem() {
 //        return new BasicFeatureFilesystem(getApplicationPath());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mtwilson.fs.feature.root", getApplicationPath());
-        map.put("mtwilson.fs.feature.java", configuration.getString("mtwilson.fs.java"));
-        map.put("mtwilson.fs.feature.hypertext", configuration.getString("mtwilson.fs.hypertext"));
-        map.put("mtwilson.fs.feature.license_d", configuration.getString("mtwilson.fs.license_d"));
-        map.put("mtwilson.fs.feature.sql", configuration.getString("mtwilson.fs.sql"));
-        map.put("mtwilson.fs.feature.bin", configuration.getString("mtwilson.fs.bin"));
-        map.put("mtwilson.fs.feature.var", configuration.getString("mtwilson.fs.var"));
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("fs.feature.root", getApplicationPath());
+        map.put("fs.feature.java", configuration.getString("fs.java", getApplicationPath() + File.separator + "java"));
+        map.put("fs.feature.hypertext", configuration.getString("fs.hypertext", getApplicationPath() + File.separator + "hypertext"));
+        map.put("fs.feature.license_d", configuration.getString("fs.license_d", getApplicationPath() + File.separator + "license.d"));
+        map.put("fs.feature.sql", configuration.getString("fs.sql", getApplicationPath() + File.separator + "sql"));
+        map.put("fs.feature.bin", configuration.getString("fs.bin", getApplicationPath() + File.separator + "bin"));
+        map.put("fs.feature.var", configuration.getString("fs.var", getApplicationPath() + File.separator + "var"));
         ConfigurableFeatureFilesystem featureFilesystem = new ConfigurableFeatureFilesystem(new MapConfiguration(map));
         return featureFilesystem;
     }

@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.tag.common;
 
-import com.intel.mtwilson.atag.model.OID;
-import com.intel.mtwilson.atag.model.x509.*;
+import com.intel.mtwilson.tag.model.OID;
+import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.BuilderModel;

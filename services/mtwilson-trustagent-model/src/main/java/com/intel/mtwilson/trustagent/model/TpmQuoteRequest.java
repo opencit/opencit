@@ -1,0 +1,47 @@
+/*
+ * Copyright (C) 2014 Intel Corporation
+ * All rights reserved.
+ */
+package com.intel.mtwilson.trustagent.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import org.apache.commons.lang.StringUtils;
+
+/**
+ *
+ * @author jbuhacoff
+ */
+@JacksonXmlRootElement(localName="tpmQuoteRequest")
+public class TpmQuoteRequest {
+    private byte[] nonce; // must be 20 bytes
+    private int[] pcrs; // variable-length array of pcr index numbers, each one 0-23 
+    
+    public TpmQuoteRequest() {
+        this.nonce = null;
+        this.pcrs = null;
+    }
+    
+    public TpmQuoteRequest(byte[] nonce, int[] pcrs) {
+        this.nonce = nonce;
+        this.pcrs = pcrs;
+    }
+
+    public void setNonce(byte[] nonce) {
+        this.nonce = nonce;
+    }
+
+    public void setPcrs(int[] pcrs) {
+        this.pcrs = pcrs;
+    }
+
+    public byte[] getNonce() {
+        return nonce;
+    }
+
+    public int[] getPcrs() {
+        return pcrs;
+    }
+    
+}

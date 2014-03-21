@@ -64,7 +64,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
             <scope>provided</scope>
         </dependency> 
         <dependency>
@@ -72,7 +71,7 @@
             <artifactId>cpg-crypto</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trustagent-model</artifactId>
             <version>${project.version}</version>
         </dependency>

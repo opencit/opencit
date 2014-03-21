@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.setup;
 
+import com.intel.dcsg.cpg.console.ExtendedOptions;
+import com.intel.dcsg.cpg.console.Command;
 import java.io.Console;
 import java.io.IOException;
 import java.util.Arrays;
@@ -19,7 +21,6 @@ import org.slf4j.LoggerFactory;
 public class TextConsole {
     private static Logger log = LoggerFactory.getLogger(TextConsole.class);
     public static final Console console = System.console();
-    public static final SetupContext ctx = new SetupContext();
     public static void main(String[] args) {
         if( args.length == 0 ) {
             System.err.println("Usage: <command> [args]");
@@ -39,7 +40,6 @@ public class TextConsole {
                 ExtendedOptions getopt = new ExtendedOptions(subargs);
                 Configuration options = getopt.getOptions();
                 subargs = getopt.getArguments();
-                command.setContext(ctx);
                 command.setOptions(options);
                 log.debug("Number of args: {}", args.length);
                 for(String arg : args) { log.debug("Arg: {}", arg); }

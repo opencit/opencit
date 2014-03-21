@@ -48,7 +48,8 @@ if [ -f "$tagent" ]; then
 fi
 
 # packages to install must be in current directory
-JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
+ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
+#JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 
@@ -136,7 +137,16 @@ mkdir -p "${package_dir}"/lib
 chmod -R 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
-cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
+#cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
+
+useradd --home /opt/trustagent --system --shell /bin/false --user-group trustagent
+mkdir -p /opt/trustagent
+unzip -o $ZIP_PACKAGE -d /opt/trustagent
+chown -R trustagent:trustagent /opt/trustagent
+chown -R root /opt/trustagent/java
+mkdir -p /var/log/trustagent
+chown trustagent:trustagent /var/log/trustagent
+chmod -R 770 /opt/trustagent/bin
 
 # copy default logging settings to /etc, but do not change it if it's already there (someone may have modified it)
 if [ ! -f "${intel_conf_dir}/logback.xml" ]; then

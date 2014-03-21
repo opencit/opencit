@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.intel.mtwilson.trustagent</groupId>
-  <artifactId>trust-agent-parent</artifactId>
+  <artifactId>mtwilson-trustagent-parent</artifactId>
   <packaging>pom</packaging>
 
   <name>Mount Wilson Trust Agent</name>
@@ -16,8 +16,12 @@
 
   <modules>
     <module>mtwilson-privacyca-client-jaxrs2</module>
+    <module>mtwilson-trustagent-console</module>
+    <module>mtwilson-trustagent-configuration</module>
     <module>mtwilson-trustagent-privacyca-niarl</module>
-    <module>mtwilson-trustagent</module>
+	<module>mtwilson-trustagent-setup</module>
+	<module>mtwilson-trustagent-ws-v2</module>
+	<module>mtwilson-trustagent</module>
   </modules>
 
 

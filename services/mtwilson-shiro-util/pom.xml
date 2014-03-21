@@ -38,13 +38,6 @@
             <version>1.2.2</version>
         </dependency>		
 
-
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-jdbi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-webservice-util</artifactId>

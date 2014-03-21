@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
@@ -75,32 +77,45 @@ public class MtWilsonClient {
      * @throws GeneralSecurityException 
      */
     public MtWilsonClient(Properties properties) throws KeyManagementException, IOException, CryptographyException, GeneralSecurityException {
+        this(new PropertiesConfiguration(properties));
+    }
+    
+    /**
+     * TODO:  tls policy
+     * 
+     * @param configuration
+     * @throws KeyManagementException
+     * @throws IOException
+     * @throws CryptographyException
+     * @throws GeneralSecurityException 
+     */
+    public MtWilsonClient(Configuration configuration) throws KeyManagementException, IOException, CryptographyException, GeneralSecurityException {
         this();
-        baseurl = properties.getProperty("mtwilson.api.url", properties.getProperty("mtwilson.api.baseurl")); // example: "http://localhost:8080/v2";
+        baseurl = configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl")); // example: "http://localhost:8080/v2";
         // X509 authorization 
         SimpleKeystore keystore = null;
-        if (properties.containsKey("mtwilson.api.keystore") && properties.containsKey("mtwilson.api.keystore.password")) {
-            FileResource resource = new FileResource(new File(properties.getProperty("mtwilson.api.keystore")));
-            keystore = new SimpleKeystore(resource, properties.getProperty("mtwilson.api.keystore.password"));
+        if (configuration.getString("mtwilson.api.keystore") != null && configuration.getString("mtwilson.api.keystore.password") != null ) {
+            FileResource resource = new FileResource(new File(configuration.getString("mtwilson.api.keystore")));
+            keystore = new SimpleKeystore(resource, configuration.getString("mtwilson.api.keystore.password"));
         }
-        if (keystore != null && properties.containsKey("mtwilson.api.key.alias") && properties.containsKey("mtwilson.api.key.password")) {
-            log.debug("Loading key {} from keystore {}", properties.getProperty("mtwilson.api.key.alias"), properties.getProperty("mtwilson.api.keystore"));
-            RsaCredentialX509 credential = keystore.getRsaCredentialX509(properties.getProperty("mtwilson.api.key.alias"), properties.getProperty("mtwilson.api.key.password"));
+        if (keystore != null && configuration.getString("mtwilson.api.key.alias") != null && configuration.getString("mtwilson.api.key.password") != null ) {
+            log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
+            RsaCredentialX509 credential = keystore.getRsaCredentialX509(configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.key.password"));
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
         // HMAC authorization
-        if( properties.containsKey("mtwilson.api.clientId") && properties.containsKey("mtwilson.api.secretKey")) {
-            log.debug("Registering HMAC credentials for {}", properties.getProperty("mtwilson.api.clientId"));
-            clientConfig.register( new HmacAuthorizationFilter(properties.getProperty("mtwilson.api.clientId"), properties.getProperty("mtwilson.api.secretKey")));
+        if( configuration.getString("mtwilson.api.clientId") != null && configuration.getString("mtwilson.api.secretKey") != null) {
+            log.debug("Registering HMAC credentials for {}", configuration.getString("mtwilson.api.clientId"));
+            clientConfig.register( new HmacAuthorizationFilter(configuration.getString("mtwilson.api.clientId"), configuration.getString("mtwilson.api.secretKey")));
         }
         // BASIC authorization will only be registered if configuration is present but also the feature itself will only add an Authorization header if there isn't already one present
-        if( properties.containsKey("mtwilson.api.username") && properties.containsKey("mtwilson.api.password") ) {
-            log.debug("Registering BASIC credentials for {}", properties.getProperty("mtwilson.api.username"));
-//            clientConfig.register( new BasicPasswordAuthorizationFilter(properties.getProperty("mtwilson.api.username"), properties.getProperty("mtwilson.api.password")));
-//            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(properties.getProperty("mtwilson.api.username"), properties.getProperty("mtwilson.api.password"));
+        if( configuration.getString("mtwilson.api.username") != null && configuration.getString("mtwilson.api.password") != null ) {
+            log.debug("Registering BASIC credentials for {}", configuration.getString("mtwilson.api.username"));
+//            clientConfig.register( new BasicPasswordAuthorizationFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
+//            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"));
 //            clientConfig.register(feature);
             
-            clientConfig.register( new HttpBasicAuthFilter(properties.getProperty("mtwilson.api.username"), properties.getProperty("mtwilson.api.password")));
+            clientConfig.register( new HttpBasicAuthFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
         }
         client = ClientBuilder.newClient(clientConfig);
         client.register(new LoggingFilter());

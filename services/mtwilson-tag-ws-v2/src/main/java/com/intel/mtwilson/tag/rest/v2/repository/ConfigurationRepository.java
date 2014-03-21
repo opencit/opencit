@@ -56,8 +56,8 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
                 sql.addConditions(MW_CONFIGURATION.CONTENTTYPE.equal(query.contentTypeEqualTo));
             }*/
             Result<Record> result = sql.fetch();
-            com.intel.mtwilson.atag.model.Configuration[] configurations = new com.intel.mtwilson.atag.model.Configuration[result.size()];
-            log.debug("Got {} records", configurations.length);
+//            Configuration[] configurations = new Configuration[result.size()];
+            log.debug("Got {} records", result.size());
             for(Record r : result) {
                 Configuration configObj = new Configuration();
                 configObj.setId(UUID.valueOf(r.getValue(MW_CONFIGURATION.ID)));
@@ -66,7 +66,7 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
                     configObj.setXmlContent(r.getValue(MW_CONFIGURATION.CONTENT));
                 }
                 catch(IOException e) {
-                    log.error("Failed to load configuration content for {}", configObj.getId().toString());
+                    log.error("Failed to load configuration content for {}: {}", configObj.getId().toString(), e.getMessage());
                 }
                 objCollection.getConfigurations().add(configObj);
             }

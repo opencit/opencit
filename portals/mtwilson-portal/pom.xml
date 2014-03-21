@@ -190,11 +190,7 @@
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>	
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>         
-        </dependency>        
+            
         <!-- TODO for plugin architecture and html5 portal rewrite, the vmware-specific GUI features need to be moved to a plugin -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>

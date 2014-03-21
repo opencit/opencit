@@ -8,15 +8,10 @@ package com.intel.mtwilson.fs;
  *
  * @author jbuhacoff
  */
-public class WindowsFilesystem extends AbstractFilesystem {
+public class WindowsFilesystem implements PlatformFilesystem {
 
     @Override
-    protected String getDefaultConfigurationPath() {
-        return "C:\\mtwilson\\configuration";
-    }
-
-    @Override
-    protected String getDefaultApplicationPath() {
-        return "C:\\mtwilson";
-    }
+    public String getApplicationRoot() {
+        return "C:\\";
+    }    
 }

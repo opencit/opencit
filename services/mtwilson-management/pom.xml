@@ -176,12 +176,7 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
+       
         
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

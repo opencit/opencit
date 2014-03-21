@@ -142,8 +142,23 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tag-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup-ext</artifactId>
             <version>${project.version}</version>
         </dependency>
                 
@@ -179,12 +194,6 @@
             <artifactId>postgresql</artifactId>
         </dependency>
     
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
@@ -243,6 +252,10 @@
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-crypto-key</artifactId>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-extensions</artifactId>
 </dependency>
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>

@@ -7,7 +7,7 @@ package com.intel.mtwilson.setup.ui.lanterna;
 import com.intel.mtwilson.setup.cmd.*;
 import com.googlecode.lanterna.TerminalFacade;
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import org.apache.commons.configuration.Configuration;

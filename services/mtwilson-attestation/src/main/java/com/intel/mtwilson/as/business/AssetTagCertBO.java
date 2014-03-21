@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.as.business;
 
-import com.intel.mtwilson.atag.model.X509AttributeCertificate;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
@@ -56,7 +56,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.mtwilson.atag.model.Certificate;
+import com.intel.mtwilson.tag.model.Certificate;
 import java.util.ArrayList;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;

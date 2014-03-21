@@ -105,12 +105,6 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>asset-tag-model</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
@@ -315,19 +309,10 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>asset-tag-model</artifactId>
+            <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>asset-tag-dao</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>asset-tag-dao-jooq</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -549,13 +534,7 @@
             <artifactId>derby</artifactId>
             <version>10.10.1.1</version>
         </dependency>
-    
 
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

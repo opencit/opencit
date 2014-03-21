@@ -22,7 +22,7 @@ import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.ASPersistenceManager;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.util.Collection;
 import java.util.List;
@@ -34,14 +34,10 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class EraseWhitelistData implements Command {
-    private SetupContext ctx = null;
+   
     private ASPersistenceManager pm;
     private EntityManagerFactory em;
     
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
 
     private Configuration options = null;
     @Override

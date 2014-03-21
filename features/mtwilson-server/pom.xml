@@ -255,11 +255,7 @@
       <artifactId>mtwilson-trust-policy</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-trust-utils</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-util</artifactId>

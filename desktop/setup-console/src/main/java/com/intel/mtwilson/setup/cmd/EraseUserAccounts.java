@@ -13,7 +13,7 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.MSPersistenceManager;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,14 +32,10 @@ import org.slf4j.LoggerFactory;
 public class EraseUserAccounts implements Command {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    private SetupContext ctx = null;
+  
     private MSPersistenceManager pm;
     private EntityManagerFactory em;
 
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
     private Configuration options = null;
 
     @Override

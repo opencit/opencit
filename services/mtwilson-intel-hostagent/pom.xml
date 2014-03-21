@@ -34,6 +34,11 @@
             <version>${project.version}</version>
         </dependency>                
         <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java6-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>                
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -75,11 +80,10 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trustagent-model</artifactId>
             <version>${project.version}</version>
         </dependency>

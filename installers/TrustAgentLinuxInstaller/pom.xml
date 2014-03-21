@@ -36,26 +36,18 @@
     <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
-                        <version>1.6.4</version>
                 </dependency>
 
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
         </dependency>
 
-        <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.0.9</version>
-        </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.trustagent</groupId>
       <artifactId>mtwilson-trustagent</artifactId>
       <version>${project.version}</version>
-      <classifier>jar-with-dependencies</classifier>
-      <type>jar</type>
+      <type>zip</type>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
@@ -92,10 +84,9 @@
                   <groupId>com.intel.mtwilson.trustagent</groupId>
                   <artifactId>mtwilson-trustagent</artifactId>
                   <version>${project.version}</version>
-                  <classifier>jar-with-dependencies</classifier>
-                  <type>jar</type>
+                  <type>zip</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>TrustAgent.jar</destFileName>
+                  <destFileName>trustagent-${project.version}.zip</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>

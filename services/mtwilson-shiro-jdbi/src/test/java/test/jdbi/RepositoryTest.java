@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.*;
 import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.nio.charset.Charset;
@@ -84,7 +85,7 @@ public class RepositoryTest {
         userLoginPassword.setIterations(1000);
         userLoginPassword.setAlgorithm("SHA256");
         userLoginPassword.setEnabled(true);
-        userLoginPassword.setPasswordHash(passwordHash(userLoginPassword, My.configuration().getKeystorePassword()));
+        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
         
         // add a role for the user
@@ -108,7 +109,7 @@ public class RepositoryTest {
             throw new IllegalArgumentException("No such user: "+My.configuration().getKeystoreUsername());
         }
         userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-        userLoginPassword.setPasswordHash(passwordHash(userLoginPassword, My.configuration().getKeystorePassword()));
+        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         userLoginPassword.setEnabled(true);
         dao.updateUserLoginPassword(userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getId());
         dao.close();
@@ -131,16 +132,4 @@ public class RepositoryTest {
         dao.close();
     }
     
-    private byte[] passwordHash(UserLoginPassword userLoginPassword, String password) {
-        if( "SHA256".equalsIgnoreCase(userLoginPassword.getAlgorithm())) {
-            // first iteration is mandatory
-            Sha256Digest digest = Sha256Digest.digestOf(ByteArray.concat(userLoginPassword.getSalt(), password.getBytes(Charset.forName("UTF-8"))));
-            int max = userLoginPassword.getIterations() - 1; // -1 because we just completed the first iteration
-            for(int i=0; i<max; i++) {
-                digest = Sha256Digest.digestOf(digest.toByteArray());
-            }
-            return digest.toByteArray();
-        }
-        return null;
-    }
 }

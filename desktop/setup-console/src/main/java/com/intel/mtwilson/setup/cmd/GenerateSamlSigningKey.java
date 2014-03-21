@@ -14,7 +14,7 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.CopyResource;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -58,12 +58,7 @@ public class GenerateSamlSigningKey implements Command {
     private ByteArrayResource keystoreResource;
     private SimpleKeystore keystore = null;
 
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
+ 
     
     private Configuration options = null;
     @Override

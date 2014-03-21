@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.RemoteSetup;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.Timeout;
@@ -18,12 +18,7 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class ConfigureLocal implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
+  
 
     private Configuration options = null;
     @Override
@@ -34,7 +29,7 @@ public class ConfigureLocal implements Command {
     @Override
     public void execute(String[] args) throws Exception {
 
-        ctx.target = SetupTarget.LOCAL;
+//        ctx.target = SetupTarget.LOCAL;
         
 
     }

@@ -29,7 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * The "deploy" link next to each certificate in the UI calls this RPC
+ * 
  * @author ssbangal
  */
 @RPC("deploy_tag_certificate")
@@ -68,7 +69,7 @@ public class DeployTagCertificate extends ServerResource implements Runnable{
             {
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
                 List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString());
-                if(hostList == null || hostList.size() == 0) {
+                if(hostList == null || hostList.isEmpty() ) {
                     log.error("No hosts were returned back matching name " + host.toString());
                     setStatus(Status.CLIENT_ERROR_NOT_FOUND);
                     throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No hosts were found matching the specified criteria.");

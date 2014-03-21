@@ -27,4 +27,6 @@ The "name" attribute in the <selection> tag is optional, but helps users when
 reviewing selections.
 Each selection is associated with a specific host by ip address so when that
 host requests an asset tag the associated selection will be used automatically.
+
+This is the expected typical case for encrypted XML files.
 -->

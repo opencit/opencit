@@ -89,6 +89,7 @@
                 </dependency>
     
                 <!-- Web Services -->
+                <!--
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>PrivacyCAService</artifactId>
@@ -113,6 +114,7 @@
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
+                -->
     
                 <!-- UI Portals -->
                 <dependency>
@@ -156,6 +158,7 @@
                                 <configuration>
                                     <artifactItems>
                                         <!-- Web services -->
+                                        <!--
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>PrivacyCAService</artifactId>
@@ -180,6 +183,7 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
+                                        -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>logrotate</artifactId>
@@ -265,6 +269,7 @@
                                             <type>bin</type>
                                         </artifactItem>
                                         <!-- Web services -->
+                                        <!--
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>PrivacyCAService</artifactId>
@@ -289,6 +294,7 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
+                                        -->
                                         <!-- other -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>

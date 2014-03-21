@@ -154,7 +154,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>asset-tag-service</artifactId>
+            <artifactId>mtwilson-tag-ws-v2</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -416,10 +416,5 @@
         </dependency>
 
         <!-- end restlet (for test client) -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>  
 </project>

@@ -132,7 +132,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>asset-tag-model</artifactId>
+            <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
@@ -161,11 +161,7 @@
             <artifactId>mtwilson-http-security-server</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+      
         <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>

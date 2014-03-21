@@ -4,12 +4,9 @@
  */
 package com.intel.mtwilson.shiro.authc.password;
 
-import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword;
 import java.util.Objects;
 import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.util.ByteSource;
 
 /**
  * The SaltedAuthenticationInfo is not implemented because it isn't
@@ -22,7 +19,7 @@ import org.apache.shiro.util.ByteSource;
  */
 public class PasswordAuthenticationInfo implements AuthenticationInfo /*, SaltedAuthenticationInfo*/ {
     private PrincipalCollection principals;
-    private UserLoginPassword credentials;
+    private HashedPassword credentials;
             
     public void setPrincipals(PrincipalCollection principals) {
         this.principals = principals;
@@ -34,11 +31,11 @@ public class PasswordAuthenticationInfo implements AuthenticationInfo /*, Salted
     }
 
     @Override
-    public UserLoginPassword getCredentials() {
+    public HashedPassword getCredentials() {
         return credentials;
     }
     
-    public void setCredentials(UserLoginPassword credentials) {
+    public void setCredentials(HashedPassword credentials) {
         this.credentials = credentials;
     }
     

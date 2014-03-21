@@ -4,7 +4,7 @@
  */
 package test.console;
 
-import com.intel.mtwilson.setup.ExtendedOptions;
+import com.intel.dcsg.cpg.console.ExtendedOptions;
 import java.util.HashMap;
 import java.util.Set;
 import org.apache.commons.configuration.Configuration;

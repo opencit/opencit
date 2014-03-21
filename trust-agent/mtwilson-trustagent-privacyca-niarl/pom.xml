@@ -7,7 +7,7 @@
 
     <parent>
         <groupId>com.intel.mtwilson.trustagent</groupId>
-        <artifactId>trust-agent-parent</artifactId>
+        <artifactId>mtwilson-trustagent-parent</artifactId>
         <version>1.2.3-SNAPSHOT</version>
     </parent>
     <build>
@@ -19,6 +19,16 @@
 		</plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-privacyca-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-privacyca-niarl</artifactId>
@@ -73,39 +83,5 @@
         </dependency>
 
     </dependencies>
-    
-    <profiles>
-        <profile>
-            <activation>
-                <property>
-                    <name>release</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.8.1</version>
-                        <executions>
-                            <execution>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <!--                    <goal>jar</goal> -->
-                                    <goal>javadoc</goal>
-                                </goals>        
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <show>public</show>
-                            <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
-                            <encoding>utf-8</encoding>
-                        </configuration>
-                    </plugin>
-                    
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     
 </project>

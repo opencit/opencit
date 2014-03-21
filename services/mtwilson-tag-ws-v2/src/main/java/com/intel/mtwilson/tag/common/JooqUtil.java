@@ -6,7 +6,7 @@ package com.intel.mtwilson.tag.common;
 
 import org.jooq.Record;
 import org.jooq.Result;
-import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
+import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.*;
 
 /**
  *
@@ -48,7 +48,7 @@ public class JooqUtil {
     public static class SelectionResultMapper<Selection> implements ResultMapper {
         @Override
         public boolean isRelated(Record one, Record two) {
-            return one != null && two != null && one.getValue(SELECTION.ID) == two.getValue(SELECTION.ID);
+            return one != null && two != null && one.getValue(MW_TAG_SELECTION.ID) == two.getValue(MW_TAG_SELECTION.ID);
         }
 
         @Override

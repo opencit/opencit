@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.model.SetupTarget;
 import java.io.File;
@@ -26,12 +26,6 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 public class ImportConfig implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
 
     private Configuration options = null;
     @Override

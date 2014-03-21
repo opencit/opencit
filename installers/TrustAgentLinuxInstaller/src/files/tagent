@@ -44,7 +44,7 @@ function read_local_config() {
     pidFile="/var/run/$serviceNameLo.pid"                      # name of PID file (PID = process ID number)
     storePass="$TRUSTAGENT_KEYSTORE_PASS"   #`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
     export TaKeyStorePassword=$storePass
-    javaVMArgs="-Djavax.net.ssl.trustStore=$intel_conf_dir/trustagent.jks -Djavax.net.ssl.keyStore=$intel_conf_dir/trustagent.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
+    javaVMArgs="-Dfs.root=/opt/trustagent -Dfs.conf=/opt/trustagent/configuration -Djavax.net.ssl.trustStore=$intel_conf_dir/trustagent.jks -Djavax.net.ssl.keyStore=$intel_conf_dir/trustagent.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
     javaArgs="-classpath $CLASSPATH com.intel.mountwilson.trustagent.TASecureServer"  # arguments for Java launcher
     javaCommandLine="$java $javaVMArgs  $javaArgs"                       # command line to start the Java service application
     javaCommandLineKeyword="TrustAgent.jar"                   # a keyword that occurs on the commandline, used to detect an already running service process and to distinguish it from others

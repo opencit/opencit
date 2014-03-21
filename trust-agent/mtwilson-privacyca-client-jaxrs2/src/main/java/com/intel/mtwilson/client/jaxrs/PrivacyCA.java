@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.privacyca.v2.model.*;
@@ -32,6 +33,9 @@ public class PrivacyCA extends MtWilsonClient {
     public PrivacyCA(Properties properties) throws Exception {
         super(properties);
     }
+    public PrivacyCA(Configuration configuration) throws Exception {
+        super(configuration);
+    }
     
     public X509Certificate endorseTpm(byte[] ekModulus) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -46,7 +50,7 @@ public class PrivacyCA extends MtWilsonClient {
     public byte[] identityChallengeRequest(IdentityChallengeRequest request) {
         log.debug("target: {}", getTarget().getUri().toString());
         byte[] challenge = getTarget()
-                .path("privacyca/identity-challenge-request")
+                .path("/privacyca/identity-challenge-request")
                 .request()
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .post(Entity.json(request), byte[].class);
@@ -56,7 +60,7 @@ public class PrivacyCA extends MtWilsonClient {
     public byte[] identityChallengeResponse(byte[] encrypted) {
         log.debug("target: {}", getTarget().getUri().toString());
         byte[] identity = getTarget()
-                .path("privacyca/identity-challenge-response")
+                .path("/privacyca/identity-challenge-response")
                 .request()
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .post(Entity.entity(encrypted, MediaType.APPLICATION_OCTET_STREAM), byte[].class);

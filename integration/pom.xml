@@ -37,6 +37,7 @@
     <module>mtwilson-feature-xml</module>
 	<module>mtwilson-tag-selection-xml</module>
 	<module>mtwilson-tag-selection-json</module>
+	<module>mtwilson-jetty9-util</module>
   </modules>
 
 

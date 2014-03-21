@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.resource.*;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificate;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
@@ -96,7 +97,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
             }      
         } else if ("privacy".equals(id)) {
             try {
-                String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
+                String certFile = My.configuration().getPrivacyCaIdentityCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
                  if( certFile != null && !certFile.startsWith(File.separator) ) {
                     certFile = "/etc/intel/cloudsecurity/" + certFile; 
                 }
@@ -121,6 +122,34 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
                 log.error("Error during retrieval of Privacy CA certificate chain.", e);
                 throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
             }
+        } else if ("endorsement".equals(id)) {
+            try {
+                String certFile = My.configuration().getPrivacyCaEndorsementCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
+                 if( certFile != null && !certFile.startsWith(File.separator) ) {
+                    certFile = "/etc/intel/cloudsecurity/" + certFile; 
+                }
+                if(certFile != null) {
+                    File privacyCaPemFile = new File(certFile); 
+                    FileInputStream in = new FileInputStream(privacyCaPemFile);
+                    caCert.setCertificate(IOUtils.toByteArray(in));
+                    IOUtils.closeQuietly(in);
+                } else  { 
+                    throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
+                }
+            }
+            catch (FileNotFoundException e) {
+                log.error("Privacy CA certificate file is not found.", e);
+                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
+            }
+            catch (IOException e) {
+                log.error("Failed to read Privacy CA certificate file.", e);
+                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_READ_ERROR, e.getClass().getSimpleName());
+            }
+            catch (Exception e) {
+                log.error("Error during retrieval of Privacy CA certificate chain.", e);
+                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
+            }
+            
             
         } else if ("tls".equals(id)) {
             try {

@@ -23,7 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * For use by an external CA if one is configured. The external CA would
+ * use the /tag-certificate-requests search API to find pending requests,
+ * generate the certificates, and then post the certificates back using
+ * this RPC.
+ * 
  * @author ssbangal
  */
 @RPC("approve_tag_certificate_request")

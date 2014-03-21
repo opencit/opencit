@@ -10,25 +10,20 @@ import java.io.File;
  *
  * @author jbuhacoff
  */
-public class RelativeFilesystem extends AbstractFilesystem {
+public class RelativeFilesystem implements PlatformFilesystem {
 
     private String root;
-    public RelativeFilesystem() { root = "."; }
-    public RelativeFilesystem(String root ) {
-        this.root = root;
+
+    public RelativeFilesystem() {
+        root = ".";
     }
-    public void setRootPath(String root) {
+
+    public RelativeFilesystem(String root) {
         this.root = root;
-    }
-    public String getRootPath() { return root; }
-    
-    @Override
-    protected String getDefaultConfigurationPath() {
-        return root + File.separator + "configuration";
     }
 
     @Override
-    protected String getDefaultApplicationPath() {
+    public String getApplicationRoot() {
         return root;
     }
 }

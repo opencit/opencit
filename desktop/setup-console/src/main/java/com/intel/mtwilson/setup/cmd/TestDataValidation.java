@@ -5,7 +5,7 @@
 package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.InvalidModelException;
@@ -19,13 +19,7 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class TestDataValidation implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
-    
+ 
     private Configuration options = null;
     @Override
     public void setOptions(Configuration options) {

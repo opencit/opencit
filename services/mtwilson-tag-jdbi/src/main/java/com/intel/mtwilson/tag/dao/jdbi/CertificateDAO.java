@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.tag.dao.jdbi;
 
-//import com.intel.mtwilson.atag.model.Certificate;
-//import com.intel.mtwilson.atag.model.CertificateRequestApproval;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.dcsg.cpg.io.UUID;
 import java.io.Closeable;
