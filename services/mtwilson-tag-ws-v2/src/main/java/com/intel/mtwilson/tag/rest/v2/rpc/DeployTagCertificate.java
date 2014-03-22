@@ -77,7 +77,7 @@ public class DeployTagCertificate implements Runnable{
                 }
                 TxtHostRecord hostRecord = hostList.get(0);
                 
-                if (hostRecord.Hardware_Uuid != obj.getSubject()) {
+                if (!hostRecord.Hardware_Uuid.equals(obj.getSubject())) {
                     log.error("The certificate provided [{}] does not map to the host specified [{}]. Certificate will not be deployed on the host.", obj.getSubject(), hostRecord.Hardware_Uuid);
                     throw new WebApplicationException("The certificate provided does not map to the host specified. Certificate will not be deployed on the host.", Response.Status.CONFLICT);
                 }
