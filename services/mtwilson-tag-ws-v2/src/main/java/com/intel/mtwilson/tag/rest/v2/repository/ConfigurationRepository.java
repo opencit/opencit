@@ -53,9 +53,6 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
             if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
                 sql.addConditions(MW_CONFIGURATION.NAME.contains(criteria.nameContains));
             }
-            if( criteria.contentTypeEqualTo != null && criteria.contentTypeEqualTo.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.CONTENT.equal(criteria.contentTypeEqualTo));
-            }
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
             for(Record r : result) {
