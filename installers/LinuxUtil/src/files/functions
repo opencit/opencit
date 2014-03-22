@@ -2493,6 +2493,9 @@ tomcat_permissions() {
 
 tomcat_running() {  
   TOMCAT_RUNNING=''
+  if [ -z "$TOMCAT_HOME" ]; then
+    tomcat_detect
+  fi
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
     echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
