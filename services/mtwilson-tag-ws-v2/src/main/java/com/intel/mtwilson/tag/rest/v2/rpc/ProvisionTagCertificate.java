@@ -274,12 +274,13 @@ public class ProvisionTagCertificate  {
         */
         UUID uuid = new UUID();
         // TODO:  setup should create this path
-        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() /* TODO: move to feature filesystem */ + File.separator + uuid.toString() + ".enc";
+        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
         File encryptedFile = new File(encryptedFilePath);
         try(FileOutputStream out = new FileOutputStream(encryptedFile)) {
             IOUtils.write(message, out);
         }
-        Process process = Runtime.getRuntime().exec("decrypt.sh -e PASSWORD -a PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
+        String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"decrypt.sh -e PASSWORD -a PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         if( process.exitValue() != 0 ) {
             throw new IOException("Failed to decrypt file or integrity check failed");
         }
