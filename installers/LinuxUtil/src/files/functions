@@ -2103,12 +2103,20 @@ glassfish_running_report() {
 }
 glassfish_start() {
   if [ -n "$glassfish" ]; then
-      $glassfish start-domain
+      $glassfish start-domain &
+      echo "Waiting for Glassfish services to startup..."
+      while !glassfish_running; do
+        sleep 1
+      done
   fi
 }
 glassfish_stop() {
   if [ -n "$glassfish" ]; then
-      $glassfish stop-domain
+      $glassfish stop-domain &
+      echo "Waiting for Glassfish services to shutdown..."
+      while glassfish_running; do
+        sleep 1
+      done
   fi
 }
 glassfish_restart() {
@@ -2521,12 +2529,20 @@ tomcat_running_report() {
 }
 tomcat_start() {
   if [ -n "$tomcat" ]; then
-      $tomcat start
+      $tomcat start &
+      echo "Waiting for Tomcat services to startup..."
+      while !tomcat_running; do
+        sleep 1
+      done
   fi
 }
 tomcat_stop() {
   if [ -n "$tomcat" ]; then
-      $tomcat stop
+      $tomcat stop &
+      echo "Waiting for Tomcat services to shutdown..."
+      while tomcat_running; do
+        sleep 1
+      done
   fi
 }
 tomcat_restart() {
@@ -2535,7 +2551,7 @@ tomcat_restart() {
 	
     if tomcat_running; then
       $tomcat stop
-      sleep 5
+      #sleep 5
     fi  
   
     tomcat_running_report
