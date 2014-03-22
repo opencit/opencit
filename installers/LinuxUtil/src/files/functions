@@ -2080,6 +2080,9 @@ EOD
 # and after that also   if [ "$GLASSFISH_RUNNING" == "yes" ]; then echo "ok"; fi
 glassfish_running() {  
   GLASSFISH_RUNNING=''
+  if [ -z "$GLASSFISH_HOME" ]; then
+    glassfish_detect
+  fi
   if [ -n "$GLASSFISH_HOME" ]; then
     GLASSFISH_PID=`ps gauwxx | grep java | grep -v grep | grep "$GLASSFISH_HOME" | awk '{ print $2 }'`
     if [ -n "$GLASSFISH_PID" ]; then
