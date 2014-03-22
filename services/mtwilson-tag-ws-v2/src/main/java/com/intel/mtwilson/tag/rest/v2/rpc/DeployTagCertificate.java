@@ -69,7 +69,7 @@ public class DeployTagCertificate implements Runnable{
             if (obj != null) 
             {
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
-                List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString());
+                List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
                 if(hostList == null || hostList.size() == 0) {
                     log.error("No hosts were returned back matching name " + host.toString());
                     Response.status(Response.Status.NOT_FOUND);
