@@ -359,6 +359,8 @@ if [ ! -f /etc/monit/conf.d/ta.monit ]; then
  cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
+#XXX TODO: remove this auto REGISTER_TPM_PASSWORD being set once shiro authentication is fixed
+REGISTER_TPM_PASSWORD=n
 prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
 	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://a.b.c.d:9999)" ${ASSET_TAG_URL}
