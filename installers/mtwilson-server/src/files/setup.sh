@@ -777,6 +777,14 @@ call_tag_setupcommand TagCreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --us
 #fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
 #call_tag_setupcommand ApproveMtWilsonClient --fingerprint="$fingerprint"
 
+#for tag encryption
+mkdir -p /opt/mtwilson/features/tag/var
+mkdir -p /opt/mtwilson/features/tag/bin
+cp encrypt.sh /opt/mtwilson/features/tag/bin
+cp decrypt.sh /opt/mtwilson/features/tag/bin
+chmod 755 /opt/mtwilson/features/tag/bin/encrypt.sh
+chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
+
 ##############################################################################################################################################################################
 
 
