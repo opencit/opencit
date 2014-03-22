@@ -21,9 +21,11 @@ import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
 import java.io.IOException;
 import java.util.List;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 @RPC("deploy_tag_certificate")
 @JacksonXmlRootElement(localName="deploy_tag_certificate")
-public class DeployTagCertificate extends ServerResource implements Runnable{
+public class DeployTagCertificate implements Runnable{
     
     private Logger log = LoggerFactory.getLogger(getClass().getName());
        
@@ -68,27 +70,27 @@ public class DeployTagCertificate extends ServerResource implements Runnable{
             if (obj != null) 
             {
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
-                List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString());
+                List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
                 if(hostList == null || hostList.isEmpty() ) {
                     log.error("No hosts were returned back matching name " + host.toString());
-                    setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-                    throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No hosts were found matching the specified criteria.");
+                    Response.status(Response.Status.NOT_FOUND);
+                    throw new WebApplicationException("No hosts were found matching the specified criteria.", Response.Status.NOT_FOUND);
                 }
                 TxtHostRecord hostRecord = hostList.get(0);
                 
-                if (hostRecord.Hardware_Uuid != obj.getSubject()) {
-                    log.error("The certificate provided does not map to the host specified. Certificate will not be deployed on the host.");
-                    throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "The certificate provided does not map to the host specified. Certificate will not be deployed on the host.");
+                if (!hostRecord.Hardware_Uuid.equals(obj.getSubject())) {
+                    log.error("The certificate provided [{}] does not map to the host specified [{}]. Certificate will not be deployed on the host.", obj.getSubject(), hostRecord.Hardware_Uuid);
+                    throw new WebApplicationException("The certificate provided does not map to the host specified. Certificate will not be deployed on the host.", Response.Status.CONFLICT);
                 }
                 
                 deployAssetTagToHost(obj.getSha1(), hostRecord);
             }
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deployment.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } 
         
     }

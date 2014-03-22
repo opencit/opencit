@@ -15,9 +15,11 @@ import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateRequestDAO;
 import com.intel.mtwilson.tag.model.CertificateRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,14 +83,14 @@ public class ApproveTagCertificateRequest implements Runnable{
                 certRequestdao.updateStatus(certificateRequestId, "Done");
             } else {
                 log.error("Certificate request id {} specified for auto approval is not valid.", certificateRequestId);
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Certificate request id specified for auto approval is not valid.");                
+                throw new WebApplicationException("Certificate request id specified for auto approval is not valid.", Response.Status.NOT_FOUND);
             }
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during auto approve of certificate.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } 
         
     }

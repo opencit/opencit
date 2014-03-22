@@ -22,14 +22,16 @@ import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class SelectionKvAttributeRepository extends ServerResource implements SimpleRepository<SelectionKvAttribute, SelectionKvAttributeCollection, SelectionKvAttributeFilterCriteria, SelectionKvAttributeLocator> {
+public class SelectionKvAttributeRepository implements SimpleRepository<SelectionKvAttribute, SelectionKvAttributeCollection, SelectionKvAttributeFilterCriteria, SelectionKvAttributeLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -91,11 +93,11 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
             }
             sql.close();
             log.debug("Closed jooq sql statement");
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }
         return objCollection;
     }
@@ -109,11 +111,11 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
             if (obj != null)
                 return obj;
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during Selection search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return null;
     }
@@ -134,28 +136,28 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
             if (obj == null) {
                 if (item.getSelectionName() == null || item.getKvAttributeId() == null) {
                     log.error("Invalid input specified by the user.");
-                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
+                    throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
                 }
                 
                 selectionObj = selectionDao.findByName(item.getSelectionName());
                 if (selectionObj == null) {
                     log.error("Invalid input specified by the user. Specified selection is not configured.");
-                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified selection is not configured.");                    
+                    throw new WebApplicationException("Invalid input specified by the user. Specified selection is not configured.", Response.Status.PRECONDITION_FAILED);                    
                 }
                 
                 KvAttribute attrObj = attrDao.findById(item.getKvAttributeId());
                 if (attrObj == null) {
                     log.error("Invalid input specified by the user. Specified attribute is not configured.");
-                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user. Specified attribute is not configured.");                                        
+                    throw new WebApplicationException("Invalid input specified by the user. Specified attribute is not configured.", Response.Status.PRECONDITION_FAILED);                                        
                 }
                 dao.insert(item.getId(), selectionObj.getId(), item.getKvAttributeId());
             }
                         
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during selection attribute creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }         
     }
 
@@ -167,11 +169,11 @@ public class SelectionKvAttributeRepository extends ServerResource implements Si
 
             dao.delete(locator.id);
                         
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during selection attribute deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }         
     }
     

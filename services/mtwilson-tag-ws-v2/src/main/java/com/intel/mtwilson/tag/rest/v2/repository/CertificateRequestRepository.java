@@ -20,13 +20,15 @@ import com.intel.mtwilson.tag.model.CertificateRequestCollection;
 import com.intel.mtwilson.tag.model.CertificateRequestFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateRequestLocator;
 import com.intel.mtwilson.tag.model.Selection;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CertificateRequestRepository extends ServerResource implements SimpleRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
+public class CertificateRequestRepository implements SimpleRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -81,11 +83,11 @@ public class CertificateRequestRepository extends ServerResource implements Simp
                 }
             }
             sql.close();
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }
@@ -98,11 +100,11 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             if (obj != null) {
                 return obj;
             }
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }
         return null;
     }
@@ -113,17 +115,17 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             CertificateRequest obj = certRequestDao.findById(item.getId());
             if (obj == null) {
                 log.error("Object with specified id does not exist in the system.");
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No matching certificate request found in the system.");
+                throw new WebApplicationException("No matching certificate request found in the system.", Response.Status.NOT_FOUND);
             }
                         
             if (item.getStatus() != null && !item.getStatus().isEmpty())
                 certRequestDao.updateStatus(item.getId(), item.getStatus());
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -178,11 +180,11 @@ public class CertificateRequestRepository extends ServerResource implements Simp
 //            certRequestDao.insert(item.getId().toString(), item.getSubject(), selectionObj.getId().toString(), null, null);
             certRequestDao.insert(item);
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate request creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }       
     }
 
@@ -194,11 +196,11 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             if (obj != null) {
                 certRequestDao.deleteById(locator.id);
             }
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }       
     }
     

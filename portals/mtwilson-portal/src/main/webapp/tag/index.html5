@@ -170,7 +170,7 @@ function isNumber(n) {
                                     <li><a href="#tags">Tag Creation</a></li> 
                                     <li><a href="#selections">Tag Selection</a></li>
                                     <li><a href="#certificates">Certificate Management</a></li>
-                                    <li><a href="#configure">Settings</a></li>
+                                    <!--<li><a href="#configure">Settings</a></li>-->
                                     <li><a href="#log">Log</a></li>
 
                                 </ul>
@@ -182,7 +182,7 @@ function isNumber(n) {
                                 <li ><a href="#tags">Tag Creation</a></li>  
                                 <li ><a href="#selections">Tag Selection</a></li>
                                 <li ><a href="#certificates">Certificate Management</a></li>			
-                                <li ><a href="#configure">Settings</a></li>
+                                <!--<li ><a href="#configure">Settings</a></li>-->
                                 <li ><a href="#log">Log</a></li>
                             </ul>
                         </nav>		
@@ -449,18 +449,21 @@ function isNumber(n) {
 				    if(mtwilson.rivets.forms['selection-create-form'].input.selection.length == 0) {
 				    	$('tableDisplayScroll_small').hide();
 				        $('selection-create-name').enable();
+                        $('selection-create-name').clear();
+                        $('selection-create-desc').clear();
 				    }
 
                                 }
 
 				function selection_create_form_removeAllValues() {
-                                    var i = mtwilson.rivets.forms['selection-create-form'].input.selection.length;
-                                    while(i--) {
-                                            mtwilson.rivets.forms['selection-create-form'].input.selection.splice(i,1);
-                                    }
-				    $('tableDisplayScroll_small').hide();
+                    var i = mtwilson.rivets.forms['selection-create-form'].input.selection.length;
+                    while(i--) {
+                        mtwilson.rivets.forms['selection-create-form'].input.selection.splice(i,1);
+                    }
+                    $('tableDisplayScroll_small').hide();
+                    $('selection-create-name').enable();
+                    $('selection-create-name').clear();
                     $('selection-create-desc').clear();
-				    $('selection-create-name').enable();
 				}
 
                                 // called when submitting the form... checks that at least one value was added
@@ -523,26 +526,29 @@ function isNumber(n) {
                                             </tr>
                                         </tbody>
                                     </table>
+                                    <input type="submit" value="Save" onclick="ws.createSelection(this); return false;"/>
+                                </div>
+                                <div id="table_view_sel_details" class="tableDisplayScroll_small" style="display: none">
                                     <div class="singleDiv" style="height: 10px;"></div>                                
 
 									<table id="selection-edit-tags-table" class="tableDisplay" style="width: 800px; display: block" cellspacing=0 cellpadding=0>
-                                        <thead>
+                                        <thead style="width: 100%">
                                             <tr>
-                                                <th class="col_tag_names">Tag name</th>
-                                                <th class="col_auto">Tag Value</th>
-                                                <th class="col_auto">Tag ID</th>
+                                                <th class="col_tag_names" style="width: 200px">Tag name</th>
+                                                <th class="col_auto" style="width: 200px">Tag Value</th>
+                                                <th class="col_auto" style="width: 400px">Tag ID</th>
                                             </tr>
                                         </thead>
                                
-                                        <tbody>
+                                        <tbody style="width: 100%">
                                             <tr class="evenRow" data-bind-each-item="global.selection_details">
-                                                <td align="center" class="col_tag_names" data-bind-text="item.name"></td>
-                                                <td align="center" class="col_auto" data-bind-text="item.value"></td>
+                                                <td align="center" class="col_tag_names" data-bind-text="item.kv_attribute_name"></td>
+                                                <td align="center" class="col_auto" data-bind-text="item.kv_attribute_value"></td>
                                                 <td align="center" class="col_auto" data-bind-text="item.id"></td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <input type="submit" value="Save" onclick="ws.createSelection(this); return false;"/>
+                                    <input type="submit" value="Cancel" onclick="toggleElementVisibility('table_view_sel_details');showSelectionInputValues();return false;"/>
                                     </div>
 
                             </form>
@@ -642,9 +648,27 @@ function isNumber(n) {
                                                 </tbody>
                                             </table>
                                         </td-->
+<script type='text/javascript'>
+	function getSelDetails(uuid, name, desc) {
+		$('selection-create-name').disable();
+		$('selection-create-desc').disable();
+ 		mtwilson.rivets.forms['selection-create-form'].input.name = name;
+ 		mtwilson.rivets.forms['selection-create-form'].input.desc = desc;
+		ws.getSelectionDetails(uuid);
+	}
+
+	function showSelectionInputValues() {
+		$('selection-create-name').enable();
+		$('selection-create-desc').enable();
+		$('selection-create-name').value = "";
+		$('selection-create-desc').value = "";
+ 		mtwilson.rivets.forms['selection-create-form'].input.name = "";
+ 		mtwilson.rivets.forms['selection-create-form'].input.desc = "";
+	}
+</script>
 										
                                         <td align="center" class="col_del_link">
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.getSelectionDetails(this.getAttribute('uuid')); return false;">View/Edit</a>&nbsp;&nbsp;
+                                            <a data-bind-uuid="item.id" data-bind-name="item.name" data-bind-desc="item.description" href="#" onclick="javascript:getSelDetails(this.getAttribute('uuid'), this.getAttribute('name'), this.getAttribute('desc')); return false;">View Tags</a>&nbsp;&nbsp;
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a><br />
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a>
                                         </td>
@@ -667,24 +691,24 @@ function isNumber(n) {
                                     
                                     <div class="labelDiv">Hostname: </div>
                                     <div class="valueDiv">
-                                        <input type="text" id="uuid-populate-host" name="uuidHost" size="40" placeholder="Hostname or IP Address"/>
-                                        <input type="button" value="Populate Subject Box" onclick="ws.autoPopulateUUID(this); return false;"/> 
+                                        <input type="text" id="uuid-populate-host" name="uuidHost" size="40" placeholder="Hostname or IP Address or Host UUID"/>
+                                        <!--input type="button" value="Populate Subject Box" onclick="ws.autoPopulateUUID(this); return false;"/--> 
                                     </div>
                                 </div>
-                                <div class="singleDiv">
+                                <!--div class="singleDiv">
                                     
                                     <div class="labelDiv">Subject : </div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="certificate-request-create-subject" name="subject" data-bind-value="input.subject" placeholder="Host UUID">
                                         <span class="requiredField">*</span>
                                     </div>
-                                </div>
+                                </div-->
 
                                 <div class="singleDiv">
                                     <div class="labelDiv">Tag Selection: </div> 
                                     <div class="valueDiv">
                                         <select class="ddlBox_small_Border" id="certificate-request-create-tag-selection" data-bind-value="input.selection"> <!-- this is required -->
-                                            <option data-bind-each-item="global.unfiltered_sels" data-bind-value="item.uuid" data-bind-text="item.name"></option>
+                                            <option data-bind-each-item="global.unfiltered_sels" data-bind-value="item.id" data-bind-text="item.name"></option>
                                         </select>
 
                                         <input type="submit" class="uploadButton" value="Save" onclick="ws.createCertificateRequest(this); return false;"/>
@@ -881,17 +905,17 @@ function isNumber(n) {
                                     <tr class="evenRow" data-bind-each-item="certificates">
                                         <td align="center" data-bind-text="item.subject"></td>
                                         <td align="center" data-bind-text="item.issuer"></td>
-                                        <td align="center" data-bind-text="item.notBefore | date"></td>
-                                        <td align="center" data-bind-text="item.notAfter | date"></td>
+                                        <td align="center" data-bind-text="item.not_before | date"></td>
+                                        <td align="center" data-bind-text="item.not_after | date"></td>
                                         <td align="center" data-bind-text="item.revoked | yesno Revoked Active"></td>
                                         <td align="center" data-bind-text="item.sha1 | wrap 16"></td>
                                         <td align="center" data-bind-text="item.sha256 | wrap 16"></td>
                                         <td align="center">
-                                            <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
-                                            <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> &nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> &nbsp;
                                             <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
-                                            <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
-                                            <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -926,7 +950,7 @@ function isNumber(n) {
 
                         </div> <!-- end certificates tab -->
                    
-                        <div id="configure">
+                        <div id="configure" style="display: none;">
 
                             <form id="configuration-search-form" style="display: none;" onsubmit="return false;">
                                 <ul>
@@ -1080,7 +1104,7 @@ function isNumber(n) {
 
                     <div id="log">
                         <h1>Application Log</h1>
-                        <div id="logwindow" style="height: 250px; max-height: 250px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
+                        <div id="logwindow" style="height: 400px; max-height: 400px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
                         </div>
                         <!-- end log tab -->
                     </div>

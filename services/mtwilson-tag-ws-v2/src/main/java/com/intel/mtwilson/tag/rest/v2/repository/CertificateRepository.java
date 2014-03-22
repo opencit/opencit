@@ -16,13 +16,15 @@ import com.intel.mtwilson.tag.model.CertificateCollection;
 import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateLocator;
 import java.sql.Timestamp;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CertificateRepository extends ServerResource implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
+public class CertificateRepository implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -105,11 +107,11 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             sql.close();
             log.debug("Returning {} certificates", objCollection.getCertificates().size());
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }
@@ -123,11 +125,11 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if (obj != null) 
                 return obj;
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } 
         return null;
     }
@@ -142,14 +144,14 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if (obj != null)
                 dao.updateRevoked(item.getId(), item.isRevoked());
             else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
+                throw new WebApplicationException("Object not found.", Response.Status.NOT_FOUND);
             }
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -161,11 +163,11 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             dao.insert(item.getId(), item.getCertificate(), item.getSha1().toHexString(), 
                     item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -179,13 +181,13 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if (obj != null) {
                 dao.delete(locator.id);
             }else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Certificate not found.");
+                throw new WebApplicationException("Certificate not found.", Response.Status.NOT_FOUND);
             }
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } finally {
             if (dao != null)
                 dao.close();

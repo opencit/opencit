@@ -17,13 +17,15 @@ import com.intel.mtwilson.tag.model.SelectionKvAttributeCollection;
 import com.intel.mtwilson.tag.model.SelectionKvAttributeFilterCriteria;
 import com.intel.mtwilson.tag.model.SelectionKvAttributeLocator;
 import com.intel.mtwilson.tag.model.SelectionLocator;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class SelectionRepository extends ServerResource implements SimpleRepository<Selection, SelectionCollection, SelectionFilterCriteria, SelectionLocator> {
+public class SelectionRepository implements SimpleRepository<Selection, SelectionCollection, SelectionFilterCriteria, SelectionLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -73,11 +75,11 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
             }
             sql.close();
             log.debug("Closed jooq sql statement");
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during selection search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }
         return objCollection;
     }
@@ -91,11 +93,11 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
             if (obj != null)
                 return obj;
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during Selection search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return null;
     }
@@ -109,16 +111,16 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
             obj = dao.findById(item.getId());
             
             if (obj == null) {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object with the specified id does not exist.");
+                throw new WebApplicationException("Object with the specified id does not exist.", Response.Status.NOT_FOUND);
             }
             
             dao.update(item.getId(), item.getDescription());
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during Selection update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -129,28 +131,28 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
             Selection obj = null;
             obj = dao.findById(item.getId());
             if (obj != null) {
-                throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with the specified id already exists.");
+                throw new WebApplicationException("Object with the specified id already exists.", Response.Status.CONFLICT);
             }
             
             if (item.getName() == null || item.getName().isEmpty()) {
                 log.error("Invalid input specified by the user.");
-                throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");                
+                throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);                
             }
             
             obj = dao.findByName(item.getName());
             if (obj != null) {
-                throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with the specified name already exists.");
+                throw new WebApplicationException("Object with the specified name already exists.", Response.Status.CONFLICT);
             }
             
 //            dao.insert(item.getId().toString(), item.getName(), item.getDescription());
 //            dao.insert(item.getId(), item.getName(), item.getDescription());
             dao.insert(item);
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during Selection creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         
     }
@@ -177,11 +179,11 @@ public class SelectionRepository extends ServerResource implements SimpleReposit
                 dao.deleteById(locator.id);
             }
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during Selection deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
     
