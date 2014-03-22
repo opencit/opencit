@@ -280,6 +280,7 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!--
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet</artifactId>  
@@ -300,18 +301,17 @@
             <artifactId>org.restlet.ext.jetty</artifactId>  
             <version>2.2-M4</version>
         </dependency>
-        <!--
         <dependency>  
           <groupId>org.restlet.jse</groupId>  
           <artifactId>org.restlet.ext.simple</artifactId>  
           <version>2.2-M4</version>
         </dependency>
-        -->
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet.ext.ssl</artifactId>  
             <version>2.2-M4</version>
         </dependency>
+        -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>

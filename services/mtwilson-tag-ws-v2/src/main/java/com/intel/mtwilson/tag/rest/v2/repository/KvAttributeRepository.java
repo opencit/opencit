@@ -14,14 +14,16 @@ import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
 import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
 import com.intel.mtwilson.tag.model.KvAttributeLocator;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.Converter;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class KvAttributeRepository extends ServerResource implements SimpleRepository<KvAttribute, KvAttributeCollection, KvAttributeFilterCriteria, KvAttributeLocator> {
+public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAttributeCollection, KvAttributeFilterCriteria, KvAttributeLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -87,11 +89,11 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             log.debug("Closing tag-value dao");
             log.debug("Returning {} tags", objCollection.getKvAttributes().size());
             //return tags;
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } finally {
             if (dao != null)
                 dao.close();
@@ -108,11 +110,11 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             if (obj != null)
                 return obj;
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return null;
     }
@@ -127,14 +129,14 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             if (obj != null)
                 dao.update(item.getId(), obj.getName(), item.getValue());
             else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
+                throw new WebApplicationException("Object not found.", Response.Status.NOT_FOUND);
             }
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -148,7 +150,7 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             if (obj == null) {
                 if (item.getName() == null || item.getName().isEmpty() || item.getValue() == null || item.getValue().isEmpty()) {
                     log.error("Invalid input specified by the user.");
-                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
+                    throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
                 }
                 //TODO: Create the unique name value pair mapping in the DB.
                 obj = dao.findByNameAndValue(item.getName(), item.getValue());
@@ -156,17 +158,17 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
                     dao.insert(item.getId(), item.getName(), item.getValue());   
                 else {
                     log.error("The key value pair already exists.");
-                    throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "The key value pair already exists.");
+                    throw new WebApplicationException("The key value pair already exists.", Response.Status.CONFLICT);
                 }
             } else {
-                throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with specified id already exists.");
+                throw new WebApplicationException("Object with specified id already exists.", Response.Status.CONFLICT);
             }
                         
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }         
     }
 
@@ -177,11 +179,11 @@ public class KvAttributeRepository extends ServerResource implements SimpleRepos
             // TODO: Catch the SQLException -- see how JDBI returns the # of rows affected.
             dao.delete(locator.id);           
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
     

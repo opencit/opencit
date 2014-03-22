@@ -32,7 +32,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import org.apache.commons.codec.binary.Base64;
 import javax.ws.rs.core.MediaType;
-import org.restlet.data.Status;
+//import org.restlet.data.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

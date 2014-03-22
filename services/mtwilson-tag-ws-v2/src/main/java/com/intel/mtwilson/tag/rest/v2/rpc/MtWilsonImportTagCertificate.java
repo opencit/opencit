@@ -15,8 +15,10 @@ import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
 import java.util.List;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +58,11 @@ public class MtWilsonImportTagCertificate implements Runnable{
                 log.info("Certificate with id {} has been deployed successfully.");
             }
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deployment.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } 
         
     }

@@ -12,8 +12,10 @@ import com.intel.mtwilson.tag.model.HostUuidCollection;
 import com.intel.mtwilson.tag.model.HostUuidFilterCriteria;
 import com.intel.mtwilson.tag.model.HostUuidLocator;
 import java.util.List;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +44,11 @@ public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCo
             HostUuid obj = new HostUuid();
             obj.setHardwareUuid(hostList.get(0).Hardware_Uuid);
             objCollection.getHostUuids().add(obj);
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during search for host hardware uuid.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }

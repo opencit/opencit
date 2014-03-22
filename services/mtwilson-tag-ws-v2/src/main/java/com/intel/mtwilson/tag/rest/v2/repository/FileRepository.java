@@ -13,13 +13,15 @@ import com.intel.mtwilson.tag.model.File;
 import com.intel.mtwilson.tag.model.FileCollection;
 import com.intel.mtwilson.tag.model.FileFilterCriteria;
 import com.intel.mtwilson.tag.model.FileLocator;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,11 +69,11 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
                 obj.setContent(r.getValue(MW_FILE.CONTENT));
             }
             sql.close();
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during file search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }
@@ -86,11 +88,11 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
             if (obj != null)
                 return obj;
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during file search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return null;
     }
@@ -104,14 +106,14 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
             if (obj != null)
                 dao.update(item.getId(), item.getName(), item.getContentType(), item.getContent());
             else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
+                throw new WebApplicationException("Object not found.", Response.Status.NOT_FOUND);
             }
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during file update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -125,24 +127,24 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
                 if (item.getName() == null || item.getName().isEmpty() || item.getContentType()== null 
                         || item.getContentType().isEmpty() || item.getContent().length == 0) {
                     log.error("Invalid input specified by the user.");
-                    throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "Invalid input specified by the user.");
+                    throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
                 }
                 obj = dao.findByName(item.getName());
                 if (obj == null)
                     dao.insert(item.getId(), item.getName(), item.getContentType(), item.getContent());   
                 else {
                     log.error("The file name already exists.");
-                    throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "The file name is already used.");
+                    throw new WebApplicationException("The file name is already used.", Response.Status.CONFLICT);
                 }
             } else {
-                throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with specified id already exists.");
+                throw new WebApplicationException("Object with specified id already exists.", Response.Status.CONFLICT);
             }
                         
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during file creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }         
     }
 
@@ -155,11 +157,11 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
             if (obj != null)
                 dao.delete(locator.id);           
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
     
