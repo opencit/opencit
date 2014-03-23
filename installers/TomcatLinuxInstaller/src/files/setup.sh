@@ -20,8 +20,8 @@ fi
 cp *.jar ${TOMCAT_HOME}/endorsed/
 cp setenv.sh ${TOMCAT_HOME}/bin/
 chmod +x $TOMCAT_HOME/bin/setenv.sh
-#Create SSL cert
-tomcat_create_ssl_cert $MTWILSON_SERVER
+#Create SSL cert ###NOW DONE IN tomcat_install
+#tomcat_create_ssl_cert $MTWILSON_SERVER
 
 
 # on installations configured to use mysql, the customer is responsible for 
