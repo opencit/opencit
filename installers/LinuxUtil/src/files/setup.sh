@@ -5,7 +5,7 @@
 
 mkdir -p /usr/local/share/mtwilson/util
 chmod 700 /usr/local/share/mtwilson/util
-cp functions.sh /usr/local/share/mtwilson/util/functions.sh
+cp functions.sh /usr/local/share/mtwilson/util/functions
 cp version /usr/local/share/mtwilson/util
 
 mkdir -p /usr/local/bin
