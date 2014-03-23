@@ -38,9 +38,10 @@
 	<module>mtwilson-jdbi-util</module>
 	<module>mtwilson-jooq-util</module>
 	<module>mtwilson-jersey-util</module>
-        <module>mtwilson-shiro-jdbi</module>
+	<module>mtwilson-shiro-jdbi</module>
 	<module>mtwilson-shiro-util</module>
-        <module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-shiro-setup</module>
     <module>mtwilson-http-security-server</module>
     <module>mtwilson-trust-utils</module>
     <module>mtwilson-whitelist</module>
@@ -52,7 +53,7 @@
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
 	<module>mtwilson-test-ws-v1</module>
-        <module>mtwilson-test-ws-v2</module>
+	<module>mtwilson-test-ws-v2</module>
 	<module>mtwilson-version-ws-v2</module>
 	<module>mtwilson-setup-ext</module>
 	<module>mtwilson-setup</module>
