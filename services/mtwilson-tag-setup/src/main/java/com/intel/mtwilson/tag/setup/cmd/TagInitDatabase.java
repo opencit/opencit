@@ -107,15 +107,16 @@ public class TagInitDatabase extends TagCommand {
                 selectionKvAttrDao.insert(new UUID(), otherSelectionUuid, custAttr2.getId());
 
                 
-                tpmPasswordDao.insert(UUID.valueOf("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"), "TPMPASSWORD");
+//                tpmPasswordDao.insert(UUID.valueOf("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"), "TPMPASSWORD");
 
                 // configuration to allow automatic tag selection & approval
                 log.debug("Inserting default configuration");
                 Properties p = new Properties();
-                p.setProperty("allowTagsInCertificateRequests", "true");
-                p.setProperty("allowAutomaticTagSelection", "true");
-                p.setProperty("automaticTagSelectionName", defaultSelectionUuid.toString());
-                p.setProperty("approveAllCertificateRequests", "true");
+                // 2014-03-22 after integration with mtwilson the properties are currently being set in mtwilson.properties so commenting out from here to prevent confusion
+//                p.setProperty("allowTagsInCertificateRequests", "true");
+//                p.setProperty("allowAutomaticTagSelection", "true");
+//                p.setProperty("automaticTagSelectionName", defaultSelectionUuid.toString());
+//                p.setProperty("approveAllCertificateRequests", "true");
 
                 Configuration configuration = new Configuration();
                 configuration.setName("main");

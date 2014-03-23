@@ -440,6 +440,7 @@ ajax.json = {
     }
 };
 
+
 /*
  Content-Type: application/x-www-form-urlencoded
  
@@ -472,7 +473,69 @@ ajax.xml = {
 ajax.file = {
     'enctype': 'multipart/form-data'
             /* UNSUPPORTED OPERATION - TODO: FILE UPLOAD */
-}
+};
+
+ajax.custom = {
+    //'enctype': 'text/plain',
+    // the postObject here must be a string with the raw data to send.
+    // the opt object must include a contentType attribute to describe the postObject ,for example  'message/rfc822'
+    'post': function(resourceName, postObject, opt, params) {
+        var info = ajax.resources[resourceName] || {};
+        // if( ajax.resources[resourceName] === undefined ) { use ajax.apistyles.resourceCollectionWithId(resourceName) to create a default }
+        var my = info.clone().merge(opt).merge({name: resourceName}); // make a copy of the resource config and override it with passed-in options
+        var req_uri = my.uri;
+        if (typeof params !== 'undefined') {
+            var flag = 0;
+            // TODO:  we already have a function to serialize javascript object to query string parameters, use that one.
+            for (key in params) {
+                if (flag == 0) {
+                    req_uri += '?'+ key + '=' + params[key];
+                    flag = 1;
+                } else {
+                    req_uri += '&' + key + '=' + params[key];
+                }
+            }
+        }
+        var request = new Ajax.Request(req_uri, {
+            method: 'post',
+            contentType: my.contentType,
+            //accept: 'application/json',
+            headers: { "AuthorizationToken": authorizationToken, /*'Accept': 'application/json'*/ },
+            requestHeaders: { /*'Accept': 'application/json'*/ },
+            postBody: Object.toJSON(postObject),
+            onSuccess: function(transport) {
+                var response = transport.responseText || "no response text";
+                _log.debug("Success! \n\n" + response);
+                if (transport.responseText) {
+                    var custom = transport.responseText;
+                    ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: custom});
+                }
+                else {
+                    ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: null});
+                }
+                ajax.view.sync();
+            },
+            onFailure: function(transport) {
+                var response = transport.responseText || "no response text";
+                _log.debug("Failure! \n\n" + response);
+                if (transport.responseText) {
+                    var json = transport.responseJSON;
+                    // some apis return metadata in an outer object and the content inside a 'data' field
+                    if (typeof json === 'object' && json != null) {  //check if object
+                        _log.debug("ERROR: Detected json response: " + json.error_message);
+                        ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: json, message: json.error_message});
+                    }
+                    else {
+                        _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
+                        ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
+                    }
+                }
+            }
+        });
+        ajax.requests.push(request);
+    }
+
+};
 
 
 /*

@@ -50,7 +50,7 @@ CREATE  TABLE `mw_as`.`mw_tag_certificate` (
   CREATE  TABLE `mw_as`.`mw_configuration` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
-  `content` BLOB NULL ,
+  `content` TEXT NULL ,
   PRIMARY KEY (`id`) );
   
 INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20140305150000,NOW(),'Patch for creating the tables for migrating asset tag to mtwilson database.');

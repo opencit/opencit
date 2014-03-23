@@ -85,9 +85,9 @@ if using_mysql; then
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x wpctl
 mkdir -p /usr/local/bin
-cp wpctl /usr/local/bin
+cp wpctl.sh /usr/local/bin/wpctl
+chmod +x /usr/local/bin/wpctl
 /usr/local/bin/wpctl setup
 register_startup_script /usr/local/bin/wpctl wpctl
 

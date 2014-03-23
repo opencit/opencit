@@ -768,10 +768,10 @@ if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
 fi
 
 #call_setupcommand create-database
-call_tag_setupcommand TagInitDatabase
-call_tag_setupcommand TagCreateCaKey "CN=assetTagService"
-call_tag_setupcommand TagExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
-call_tag_setupcommand TagCreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+call_tag_setupcommand tag-init-database
+call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
+call_tag_setupcommand tag-export-file cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
+call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
 
 #user is approved directly in TagCreateMtWilsonClient now
 #fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`

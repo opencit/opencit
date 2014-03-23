@@ -145,9 +145,10 @@ if [ ! -f "${intel_conf_dir}/logback.xml" ]; then
 fi
 
 # copy control scripts to /usr/local/bin
-chmod 700 tagent pcakey
 mkdir -p /usr/local/bin
-cp tagent pcakey /usr/local/bin
+cp tagent.sh /usr/local/bin/tagent
+cp pcakey.sh /usr/local/bin/pcakey
+chmod 700 /usr/local/bin/tagent /usr/local/bin/pcakey
 
 #module attestation script
 chmod 755 module_analysis.sh
