@@ -716,21 +716,42 @@ mtwilson.atag = mtwilson.atag || {};
         subject_id = $F("uuid-populate-host");
         selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-            var requestObject = "";
-            console.log("Certificate request: " + Object.toJSON(requestObject));
+            if( false ) { // data.currentConfiguration['tag.encrypted.xml.required'] == 'true') {
+                var requestObject = "";
+                console.log("Certificate request: " + Object.toJSON(requestObject));
 
-            // Get the Selection details
-            xmlhttp=new XMLHttpRequest();
-            xmlhttp.onreadystatechange=function() {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                var requestObject = xmlhttp.responseText.evalJSON();
-                //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
-                ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                // Get the Selection details
+                xmlhttp=new XMLHttpRequest();
+                xmlhttp.onreadystatechange=function() {
+                    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                        var requestObject = xmlhttp.responseText.evalJSON();
+                        // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
+                        //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
+                        ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                    }
+                };
+                xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id,true);
+                xmlhttp.setRequestHeader("Accept", "message/rfc822"); // indicates we want the encrypted xml, which is currently delivered as a message/rfc822 document
+                xmlhttp.send();
             }
-        }
-        xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id + ".json",true);
-        xmlhttp.send();
+            else {
+                var requestObject = "";
+                console.log("Certificate request: " + Object.toJSON(requestObject));
 
+                // Get the Selection details
+                xmlhttp=new XMLHttpRequest();
+                xmlhttp.onreadystatechange=function() {
+                    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                        var requestObject = xmlhttp.responseText.evalJSON();
+                        // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
+                        //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
+                        ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                    }
+                };
+                xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id + ".json",true);
+                xmlhttp.send();            
+            } // if report.isvalid
+        
 //	    requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
         }
     };

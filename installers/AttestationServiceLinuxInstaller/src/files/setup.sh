@@ -79,9 +79,9 @@ fi
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x asctl
 mkdir -p /usr/local/bin
-cp asctl /usr/local/bin
+cp asctl.sh /usr/local/bin/asctl
+chmod +x /usr/local/bin/asctl
 /usr/local/bin/asctl setup
 register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
 

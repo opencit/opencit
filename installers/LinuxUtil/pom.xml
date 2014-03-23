@@ -141,7 +141,7 @@
                                 <type>bin</type>
                             </artifact>
                             <artifact>
-                                <file>${makeself.directory}/functions</file>
+                                <file>${makeself.directory}/functions.sh</file>
                                 <type>sh</type>
                             </artifact>
                         </artifacts>

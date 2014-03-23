@@ -50,7 +50,7 @@ DROP TABLE mw_configuration;
 CREATE  TABLE mw_configuration (
   id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
-  content BYTEA DEFAULT NULL ,
+  content TEXT DEFAULT NULL ,
   PRIMARY KEY (id) );
   
 INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140305150000,NOW(),'Patch for creating the tables for migrating asset tag to mtwilson database.');
