@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 4.0//EN"
+        "http://www.tuckey.org/res/dtds/urlrewrite4.0.dtd">
+<!--
+    Configuration file for UrlRewriteFilter
+    http://www.tuckey.org/urlrewrite/
+
+-->
+<urlrewrite>
+
+    <rule>
+        <note>
+Facilitates integration of tag management UI into mtwilson-portal by
+allowing it to access mtwilson APIs using the credentials of the 
+portal user.
+See also com.intel.mountwilson.util.ProxyApiClient and V2Proxy.jsp
+When forwarding to /V2Proxy.jsp below, the context path /mtwilson-portal
+is automatically prepended so it becomes /mtwilson-portal/V2Proxy.jsp
+        </note>
+        <from>/v2proxy/(.+)</from>
+        <to>/V2Proxy.jsp?proxyUrl=$1&amp;%{query-string}</to>
+    </rule>
+
+</urlrewrite>
