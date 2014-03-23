@@ -2080,6 +2080,9 @@ EOD
 # and after that also   if [ "$GLASSFISH_RUNNING" == "yes" ]; then echo "ok"; fi
 glassfish_running() {  
   GLASSFISH_RUNNING=''
+  if [ -z "$GLASSFISH_HOME" ]; then
+    glassfish_detect
+  fi
   if [ -n "$GLASSFISH_HOME" ]; then
     GLASSFISH_PID=`ps gauwxx | grep java | grep -v grep | grep "$GLASSFISH_HOME" | awk '{ print $2 }'`
     if [ -n "$GLASSFISH_PID" ]; then
@@ -2100,12 +2103,20 @@ glassfish_running_report() {
 }
 glassfish_start() {
   if [ -n "$glassfish" ]; then
-      $glassfish start-domain
+      $glassfish start-domain &
+      echo "Waiting for Glassfish services to startup..."
+      while !glassfish_running; do
+        sleep 1
+      done
   fi
 }
 glassfish_stop() {
   if [ -n "$glassfish" ]; then
-      $glassfish stop-domain
+      $glassfish stop-domain &
+      echo "Waiting for Glassfish services to shutdown..."
+      while glassfish_running; do
+        sleep 1
+      done
   fi
 }
 glassfish_restart() {
@@ -2493,6 +2504,9 @@ tomcat_permissions() {
 
 tomcat_running() {  
   TOMCAT_RUNNING=''
+  if [ -z "$TOMCAT_HOME" ]; then
+    tomcat_detect
+  fi
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
     echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
@@ -2515,12 +2529,20 @@ tomcat_running_report() {
 }
 tomcat_start() {
   if [ -n "$tomcat" ]; then
-      $tomcat start
+      $tomcat start &
+      echo "Waiting for Tomcat services to startup..."
+      while !tomcat_running; do
+        sleep 1
+      done
   fi
 }
 tomcat_stop() {
   if [ -n "$tomcat" ]; then
-      $tomcat stop
+      $tomcat stop &
+      echo "Waiting for Tomcat services to shutdown..."
+      while tomcat_running; do
+        sleep 1
+      done
   fi
 }
 tomcat_restart() {
@@ -2529,7 +2551,7 @@ tomcat_restart() {
 	
     if tomcat_running; then
       $tomcat stop
-      sleep 5
+      #sleep 5
     fi  
   
     tomcat_running_report
@@ -3746,7 +3768,7 @@ function erase_data() {
     decrypt_file "$i" "$cryptopass"
   done
   
-  arr=(mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem)
+  arr=(mw_file mw_tag_certificate mw_tag_certificate_request mw_configuration mw_tag_selection_kvattribute mw_tag_selection mw_tag_kvattribute mw_host_tpm_password mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem)
 
   # Test DB connection and change password
   if using_mysql; then #MYSQL
