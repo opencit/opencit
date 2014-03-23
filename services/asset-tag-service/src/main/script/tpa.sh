@@ -200,7 +200,7 @@ function provisionCert() {
  else
    #here we need to read the xml from the file, escape the " with \ then build our string to send via wget
    encrypted=`head -n 1 $tagFile | grep "Content-Type: encrypted"`
-   if [ -z $encrypted ]   # NOT encrypted
+   if [ -z $encrypted ]; then   # NOT encrypted
      xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
      json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
      echo "$WGET --header=Content-Type: application/json --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certInfoFile" >> $cmdFile
