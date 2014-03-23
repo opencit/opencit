@@ -151,7 +151,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
         }
         String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
-        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -e PASSWORD -a PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
+        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -p PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 
             int exitValue = process.waitFor();
             if( exitValue != 0 ) { // same as exitValue but waits for process to end first; prevents java.lang.IllegalThreadStateException: process hasn't exited        at java.lang.UNIXProcess.exitValue(UNIXProcess.java:217)

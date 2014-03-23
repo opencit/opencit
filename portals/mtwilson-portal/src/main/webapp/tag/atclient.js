@@ -717,7 +717,7 @@ mtwilson.atag = mtwilson.atag || {};
         subject_id = $F("uuid-populate-host");
         selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-            if( false ) { // data.currentConfiguration['tag.encrypted.xml.required'] == 'true') {
+            if( false ) { // TODO:  find out if encrypted xmls are required by checking something like  data.currentConfiguration['tag.encrypted.xml.required'] == 'true'  after the configuration is available via the API again
                 var requestObject = "";
                 console.log("Certificate request: " + Object.toJSON(requestObject));
 
@@ -725,13 +725,13 @@ mtwilson.atag = mtwilson.atag || {};
                 xmlhttp=new XMLHttpRequest();
                 xmlhttp.onreadystatechange=function() {
                     if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                        var requestObject = xmlhttp.responseText.evalJSON();
+                        var requestObject = xmlhttp.responseText;
                         // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
                         //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
-                        ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                        ajax.custom.post('certificateRequests', requestObject, {app: report, contentType: 'message/rfc822'}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
                     }
                 };
-                xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id,true);
+                xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id+".enc",true);
                 xmlhttp.setRequestHeader("Accept", "message/rfc822"); // indicates we want the encrypted xml, which is currently delivered as a message/rfc822 document
                 xmlhttp.send();
             }
