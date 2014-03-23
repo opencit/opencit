@@ -284,12 +284,15 @@ function _main() {
  while [ $mybreak -ne 1 ]; do
   case "$tagChoice" in 
    1)
-    getRemoteTag
-    if [ $functionReturn -eq 0 ]; then
-     mybreak=1
-    else
-      tagChoice=4
-    fi
+    #getRemoteTag
+    #if [ $functionReturn -eq 0 ]; then
+    # mybreak=1
+    #else
+    #  tagChoice=4
+    #fi
+    mybreak=1
+    autoSelect=0
+    tagChoice=4
     ;;
    2)
     getLocalTag
