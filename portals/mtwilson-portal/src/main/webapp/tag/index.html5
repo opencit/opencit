@@ -534,17 +534,17 @@ function isNumber(n) {
 									<table id="selection-edit-tags-table" class="tableDisplay" style="width: 800px; display: block" cellspacing=0 cellpadding=0>
                                         <thead style="width: 100%">
                                             <tr>
-                                                <th class="col_tag_names" style="width: 200px">Tag name</th>
+                                                <th class="col_tag_names" style="width: 200px; border-right: 1px solid #3A4F63">Tag name</th>
                                                 <th class="col_auto" style="width: 200px">Tag Value</th>
-                                                <th class="col_auto" style="width: 400px">Tag ID</th>
+                                                <th class="col_auto tagOIDDiv" style="width: 400px">Tag ID</th>
                                             </tr>
                                         </thead>
                                
                                         <tbody style="width: 100%">
                                             <tr class="evenRow" data-bind-each-item="global.selection_details">
                                                 <td align="center" class="col_tag_names" data-bind-text="item.kv_attribute_name"></td>
-                                                <td align="center" class="col_auto" data-bind-text="item.kv_attribute_value"></td>
-                                                <td align="center" class="col_auto" data-bind-text="item.id"></td>
+                                                <td align="center" class="col_auto" data-bind-text="item.kv_attribute_value" style='border-right: 1px solid #3A4F63'></td>
+                                                <td align="center" class="col_auto tagOIDDiv" data-bind-text="item.id"></td>
                                             </tr>
                                         </tbody>
                                     </table>

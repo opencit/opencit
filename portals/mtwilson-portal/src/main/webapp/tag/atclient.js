@@ -296,7 +296,7 @@ mtwilson.atag = mtwilson.atag || {};
         switch (event.memo.resource.name) {
             case 'tags_json':
                 mtwilson.atag.notify({text: 'Created tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
-                event.memo.resource.app.input.merge({name: '', oid: '', values: []});
+                event.memo.resource.app.input.merge({name: '', value: ''});
                 tag_create_form_removeValue();
                 mtwilson.atag.searchTags('tag-search-form');
                 break;
@@ -369,13 +369,13 @@ mtwilson.atag = mtwilson.atag || {};
     document.observe("ajax:httpPostFailure", function(event) {
         log.debug("httpPostFailure: " + event.memo.message);
         switch (event.memo.resource.name) {
-            case 'tags':
+            case 'tags_json':
                 mtwilson.atag.notify({text: 'Create tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
                 mtwilson.atag.notify({text: 'Create RDF triple FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
-            case 'selections':
+            case 'selections_json':
                 mtwilson.atag.notify({text: 'Create selection FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
@@ -1103,6 +1103,9 @@ mtwilson.atag = mtwilson.atag || {};
         // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
         // we form parameters like nameEqualTo=argument  or nameContains=argument
         var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+	if ($('certificate-search-valid').value.trim() == '') {
+        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+	}
         var i;
         for (i = 0; i < fields.length; i++) {
             if (document.getElementById('certificate-search-' + fields[i] + '-criteria')) {
