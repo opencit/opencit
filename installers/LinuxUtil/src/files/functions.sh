@@ -2601,21 +2601,21 @@ tomcat_create_ssl_cert() {
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
-  if [ ! -f $keystore ]; then
-    mkdir -p ${TOMCAT_HOME}/ssl
-    $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
-  fi
+  #if [ ! -f $keystore ]; then
+  #  mkdir -p ${TOMCAT_HOME}/ssl
+  #  $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
+  #fi
   
   #if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
-    local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
+    local has_cert=`$keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
   #fi
 
   if [ -n "$has_cert" ]; then
     echo "SSL Certificate for ${serverName} already exists"
   else
     echo "Creating SSL Certificate for ${serverName}..."
-    #$keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
+    #$keytool -delete -alias tomcat  -keystore $keystore -storepass $keystorePassword
     local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
     local tmpCN
     if valid_ip "${tmpHost}"; then 
@@ -2625,21 +2625,21 @@ tomcat_create_ssl_cert() {
     fi
 
     ## 2014-03-13:rksavino - Unneccesary as java7 is being used and keytool can be implemented for this
-    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore tomcat "$keystorePassword"
 
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias s1as -keystore $keystore -storepass $keystorePassword
+    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword
 
     # Update keystore.jks
-    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
     
-    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
-    $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
-    $keytool -import -trustcacerts -alias s1as -file ssl.${tmpHost}.crt -keystore $keytool -storepass ${keystorePassword}
+    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
+    $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
+    #$keytool -import -trustcacerts -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass ${keystorePassword}
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
     cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
-    cp ${keystore} /root/
+    #cp ${keystore} /root/
     #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
   fi
 }
@@ -2651,9 +2651,9 @@ tomcat_env_report(){
 
 # Must call java_require before calling this.
 # Parameters:
-# - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
+# - certificate alias to report on (default is tomcat, the tomcat default ssl cert alias)
 tomcat_sslcert_report() {
-  local alias="${1:-s1as}"
+  local alias="${1:-tomcat}"
   local keystorePassword=changeit
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
