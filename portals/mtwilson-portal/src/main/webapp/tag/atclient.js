@@ -1313,7 +1313,7 @@ mtwilson.atag = mtwilson.atag || {};
 document.observe("dom:loaded", function() {
 
 	// get the authorization token
-	
+	getAuthorizationToken();
 
     // look for a "resources" link to automatically load available server resources; 
     // if not provided then the application should have configured resources via javacript
