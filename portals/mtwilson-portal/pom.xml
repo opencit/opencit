@@ -115,7 +115,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
@@ -219,6 +219,13 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-jpa</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>org.tuckey</groupId>
+            <artifactId>urlrewritefilter</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+        
     </dependencies>
 
     <build>

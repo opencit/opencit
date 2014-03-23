@@ -132,21 +132,22 @@ mtwilson.atag = mtwilson.atag || {};
 
 
     // configure the ajax framework
+    // NOTE:   /mtwilson-portal/v2proxy  gets translated to /mtwilson/v2  but with the logged-in portal user's credentials (otherwise service would respond with 401 unauthorized)
     ajax.resources.notices = {uri: '/notices', datapath: 'notices', idkey: 'uuid'}; // TODO: not implemented on server yet, and when it is imlemented it should be a plugin API like configuration API
-    ajax.resources.tags = {uri: '/mtwilson/v2/tag-kv-attributes', datapath: 'tags', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
-    ajax.resources.tags_json = {uri: '/mtwilson/v2/tag-kv-attributes.json', datapath: 'tags', elementsName: 'kv_attributes', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
-    ajax.resources.unfiltered_tags = {uri: '/mtwilson/v2/tag-kv-attributes.json', datapath: 'unfiltered_tags', idkey: 'id', elementsName: 'kv_attributes'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.tags = {uri: '/mtwilson-portal/v2proxy/tag-kv-attributes', datapath: 'tags', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.tags_json = {uri: '/mtwilson-portal/v2proxy/tag-kv-attributes.json', datapath: 'tags', elementsName: 'kv_attributes', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.unfiltered_tags = {uri: '/mtwilson-portal/v2proxy/tag-kv-attributes.json', datapath: 'unfiltered_tags', idkey: 'id', elementsName: 'kv_attributes'}; // configurations can also use idkey:'oid' and idkey:'name' 
     //ajax.resources.unfiltered_tags = {uri: '/tags', datapath: 'tags', idkey: 'uuid'}; // configurations can also use idkey:'oid' and idkey:'name' 
     ajax.resources.rdfTriples = {uri: '/rdf-triples', datapath: 'rdfTriples', idkey: 'uuid'};
     //ajax.resources.certificates = {uri: '/certificates', datapath: 'certificates', idkey: 'uuid'};
-    ajax.resources.certificates_json = {uri: '/mtwilson/v2/tag-certificates.json', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
-    ajax.resources.certificates = {uri: '/mtwilson/v2/tag-certificates', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
-    ajax.resources.certificateRequests = {uri: '/mtwilson/v2/tag-certificate-requests-rpc/provision', datapath: 'certificateRequests', idkey: 'uuid'};
-    ajax.resources.selections_json = {uri: '/mtwilson/v2/tag-selections.json', datapath: 'selections', elementsName: 'selections',  idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.selections = {uri: '/mtwilson/v2/tag-selections', idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.unfiltered_sels = {uri: '/mtwilson/v2/tag-selections.json', datapath: 'unfiltered_sels', idkey: 'id', elementsName: 'selections'}; // selections can also use idkey:'name'
-    ajax.resources.selection_kv_attributes = {uri: '/mtwilson/v2/tag-selection-kv-attributes.json', datapath: 'selection_details', idkey: 'id', elementsName: 'selection_kv_attribute_values'}; // selections can also use idkey:'name'
-    ajax.resources.configurations = {uri: '/mtwilson/v2/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
+    ajax.resources.certificates_json = {uri: '/mtwilson-portal/v2proxy/tag-certificates.json', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
+    ajax.resources.certificates = {uri: '/mtwilson-portal/v2proxy/tag-certificates', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
+    ajax.resources.certificateRequests = {uri: '/mtwilson-portal/v2proxy/tag-certificate-requests-rpc/provision', datapath: 'certificateRequests', idkey: 'uuid'};
+    ajax.resources.selections_json = {uri: '/mtwilson-portal/v2proxy/tag-selections.json', datapath: 'selections', elementsName: 'selections',  idkey: 'id'}; // selections can also use idkey:'name'
+    ajax.resources.selections = {uri: '/mtwilson-portal/v2proxy/tag-selections', idkey: 'id'}; // selections can also use idkey:'name'
+    ajax.resources.unfiltered_sels = {uri: '/mtwilson-portal/v2proxy/tag-selections.json', datapath: 'unfiltered_sels', idkey: 'id', elementsName: 'selections'}; // selections can also use idkey:'name'
+    ajax.resources.selection_kv_attributes = {uri: '/mtwilson-portal/v2proxy/tag-selection-kv-attributes.json', datapath: 'selection_details', idkey: 'id', elementsName: 'selection_kv_attribute_values'}; // selections can also use idkey:'name'
+    ajax.resources.configurations = {uri: '/mtwilson-portal/v2proxy/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.files = {uri: '/files', datapath: 'files', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.uuid = {uri: '/host-uuids', datapath: 'uuid', idkey: null};
 //    mtwilson.atag.data = data; 
@@ -730,7 +731,7 @@ mtwilson.atag = mtwilson.atag || {};
                         ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
                     }
                 };
-                xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id,true);
+                xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id,true);
                 xmlhttp.setRequestHeader("Accept", "message/rfc822"); // indicates we want the encrypted xml, which is currently delivered as a message/rfc822 document
                 xmlhttp.send();
             }
@@ -748,7 +749,7 @@ mtwilson.atag = mtwilson.atag || {};
                         ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
                     }
                 };
-                xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id + ".json",true);
+                xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".json",true);
                 xmlhttp.send();            
             } // if report.isvalid
         
@@ -876,7 +877,7 @@ mtwilson.atag = mtwilson.atag || {};
      // removes all tags with this oid
     mtwilson.atag.exportXmlSelection = function(uuid) {
         log.debug("exportXmlSelection: " + uuid);
-        var url = "/mtwilson/v2/tag-selections/" + uuid;
+        var url = "/mtwilson-portal/v2proxy/tag-selections/" + uuid;
         window.open(url,'open_window' , 'menubar, toolbar, location, directories, status, scrollbars, resizable, dependent, width=640, height=480, left=0, top=0');
     };
     

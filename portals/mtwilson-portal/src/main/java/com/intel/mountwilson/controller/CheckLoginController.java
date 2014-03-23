@@ -12,6 +12,7 @@ import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.mountwilson.util.ProxyApiClient;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
@@ -113,13 +114,13 @@ public class CheckLoginController extends AbstractController {
                 p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", My.configuration().getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
                 p.setProperty("mtwilson.api.ssl.verifyHostname",My.configuration().getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
 
-                ApiClient rsaApiClient = null;
+                ProxyApiClient rsaApiClient = null;
                 // Instantiate the API Client object and store it in the session. Otherwise either we need
                 // to store the password in the session or the decrypted RSA key
                 try {
                     // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
-                    rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
+                    rsaApiClient = new ProxyApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
