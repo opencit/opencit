@@ -280,9 +280,16 @@ public class ProvisionTagCertificate  {
             IOUtils.write(message, out);
         }
         String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"decrypt.sh -e PASSWORD -a PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
-        if( process.exitValue() != 0 ) {
-            throw new IOException("Failed to decrypt file or integrity check failed");
+        try { 
+            int exitValue = process.waitFor();
+            if( exitValue != 0 ) { // same as exitValue but waits for process to end first; prevents java.lang.IllegalThreadStateException: process hasn't exited        at java.lang.UNIXProcess.exitValue(UNIXProcess.java:217)
+                throw new IOException("Failed to decrypt file or integrity check failed (error "+exitValue+")");
+            }
+        }
+        catch(InterruptedException e) {
+                throw new IOException("Failed to decrypt file (interrupted)", e);
         }
         // now search for the original file inside the archive, ignoring the .sig file (which was already used for integrity check)
         File encryptedFileContentFolder = new File(encryptedFilePath+".d");

@@ -150,9 +150,16 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
             IOUtils.write(xml, out);
         }
         String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
-        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -e PASSWORD -a PASSWORD "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
-        if( process.exitValue() != 0 ) {
-            throw new IOException("Failed to encrypt file");
+        log.debug("Tag command path: {}", tagCmdPath);
+        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -e PASSWORD -a PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
+        try { 
+            int exitValue = process.waitFor();
+            if( exitValue != 0 ) { // same as exitValue but waits for process to end first; prevents java.lang.IllegalThreadStateException: process hasn't exited        at java.lang.UNIXProcess.exitValue(UNIXProcess.java:217)
+                throw new IOException("Failed to encrypt file (error "+exitValue+")");
+            }
+        }
+        catch(InterruptedException e) {
+                throw new IOException("Failed to encrypt file (interrupted)", e);
         }
         File encryptedFile = new File(encryptedFilePath);
         try(FileInputStream in = new FileInputStream(encryptedFile)) {
