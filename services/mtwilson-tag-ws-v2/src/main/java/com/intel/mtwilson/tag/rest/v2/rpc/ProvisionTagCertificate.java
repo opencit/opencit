@@ -274,14 +274,22 @@ public class ProvisionTagCertificate  {
         */
         UUID uuid = new UUID();
         // TODO:  setup should create this path
-        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() /* TODO: move to feature filesystem */ + File.separator + uuid.toString() + ".enc";
+        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
         File encryptedFile = new File(encryptedFilePath);
         try(FileOutputStream out = new FileOutputStream(encryptedFile)) {
             IOUtils.write(message, out);
         }
-        Process process = Runtime.getRuntime().exec("decrypt.sh -e PASSWORD -a PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
-        if( process.exitValue() != 0 ) {
-            throw new IOException("Failed to decrypt file or integrity check failed");
+        String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        log.debug("Tag command path: {}", tagCmdPath);
+        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"decrypt.sh -p PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
+        try { 
+            int exitValue = process.waitFor();
+            if( exitValue != 0 ) { // same as exitValue but waits for process to end first; prevents java.lang.IllegalThreadStateException: process hasn't exited        at java.lang.UNIXProcess.exitValue(UNIXProcess.java:217)
+                throw new IOException("Failed to decrypt file or integrity check failed (error "+exitValue+")");
+            }
+        }
+        catch(InterruptedException e) {
+                throw new IOException("Failed to decrypt file (interrupted)", e);
         }
         // now search for the original file inside the archive, ignoring the .sig file (which was already used for integrity check)
         File encryptedFileContentFolder = new File(encryptedFilePath+".d");

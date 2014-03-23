@@ -5,6 +5,8 @@
 package com.intel.mtwilson.tag.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
@@ -14,6 +16,7 @@ import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.tag.TagConfiguration;
 import com.intel.mtwilson.tag.Util;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
@@ -21,6 +24,9 @@ import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -29,6 +35,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.io.IOUtils;
+//import org.restlet.data.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,5 +132,37 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
         return selectionsType;
         
     }
-            
+
+    @GET
+    @Path("/{id}")
+    @Produces(OtherMediaType.MESSAGE_RFC822)   
+    public String retrieveOneEncryptedXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
+        String xml = retrieveOneXml(locator);
+        TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
+        UUID uuid = new UUID();
+        String plaintextFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".xml";
+        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
+        File plaintextFile = new File(plaintextFilePath);
+        try(FileOutputStream out = new FileOutputStream(plaintextFile)) {
+            IOUtils.write(xml, out);
+        }
+        String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        log.debug("Tag command path: {}", tagCmdPath);
+        Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -p PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
+        try { 
+            int exitValue = process.waitFor();
+            if( exitValue != 0 ) { // same as exitValue but waits for process to end first; prevents java.lang.IllegalThreadStateException: process hasn't exited        at java.lang.UNIXProcess.exitValue(UNIXProcess.java:217)
+                throw new IOException("Failed to encrypt file (error "+exitValue+")");
+            }
+        }
+        catch(InterruptedException e) {
+                throw new IOException("Failed to encrypt file (interrupted)", e);
+        }
+        File encryptedFile = new File(encryptedFilePath);
+        try(FileInputStream in = new FileInputStream(encryptedFile)) {
+            String encryptedXml = IOUtils.toString(in);
+            return encryptedXml;
+        }
+    }
+    
 }

@@ -181,10 +181,10 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 echo "Installing packages: $LIST"
 
-APICLIENT_YUM_PACKAGES="unzip openssl"
-APICLIENT_APT_PACKAGES="unzip openssl"
-APICLIENT_YAST_PACKAGES="unzip openssl"
-APICLIENT_ZYPPER_PACKAGES="unzip openssl"
+APICLIENT_YUM_PACKAGES="zip unzip openssl"
+APICLIENT_APT_PACKAGES="zip unzip openssl"
+APICLIENT_YAST_PACKAGES="zip unzip openssl"
+APICLIENT_ZYPPER_PACKAGES="zip unzip openssl"
 auto_install "Installer requirements" "APICLIENT"
 
 
@@ -573,7 +573,7 @@ if using_glassfish; then
 	
     echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
     # glassfish install here
-    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    ./$glassfish_installer  #>> $INSTALL_LOG_FILE
     echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
     # end glassfish installer
   else
@@ -620,7 +620,7 @@ elif using_tomcat; then
     # tomcat install here
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
-    ./$tomcat_installer  >> $INSTALL_LOG_FILE
+    ./$tomcat_installer  #>> $INSTALL_LOG_FILE
        
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end tomcat install
@@ -768,14 +768,22 @@ if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
 fi
 
 #call_setupcommand create-database
-call_tag_setupcommand TagInitDatabase
-call_tag_setupcommand TagCreateCaKey "CN=assetTagService"
-call_tag_setupcommand TagExportFile cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
-call_tag_setupcommand TagCreateMtWilsonClient --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+call_tag_setupcommand tag-init-database
+call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
+call_tag_setupcommand tag-export-file cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
+call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
 
 #user is approved directly in TagCreateMtWilsonClient now
 #fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
 #call_tag_setupcommand ApproveMtWilsonClient --fingerprint="$fingerprint"
+
+#for tag encryption
+mkdir -p /opt/mtwilson/features/tag/var
+mkdir -p /opt/mtwilson/features/tag/bin
+cp encrypt.sh /opt/mtwilson/features/tag/bin
+cp decrypt.sh /opt/mtwilson/features/tag/bin
+chmod 755 /opt/mtwilson/features/tag/bin/encrypt.sh
+chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
 
 ##############################################################################################################################################################################
 

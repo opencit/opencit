@@ -2001,11 +2001,11 @@ glassfish_install() {
   fi
 
   # TODO this functionality is moving to the java tool ; completely remove it from here
-  if [ -n "${MTWILSON_SERVER}" ]; then
-    glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-  else
+  #if [ -n "${MTWILSON_SERVER}" ]; then
+  #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+  #else
     glassfish_create_ssl_cert_prompt
-  fi
+  #fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_start
@@ -2080,6 +2080,9 @@ EOD
 # and after that also   if [ "$GLASSFISH_RUNNING" == "yes" ]; then echo "ok"; fi
 glassfish_running() {  
   GLASSFISH_RUNNING=''
+  if [ -z "$GLASSFISH_HOME" ]; then
+    glassfish_detect
+  fi
   if [ -n "$GLASSFISH_HOME" ]; then
     GLASSFISH_PID=`ps gauwxx | grep java | grep -v grep | grep "$GLASSFISH_HOME" | awk '{ print $2 }'`
     if [ -n "$GLASSFISH_PID" ]; then
@@ -2100,12 +2103,20 @@ glassfish_running_report() {
 }
 glassfish_start() {
   if [ -n "$glassfish" ]; then
-      $glassfish start-domain
+      $glassfish start-domain &
+      echo "Waiting for Glassfish services to startup..."
+      while !glassfish_running; do
+        sleep 1
+      done
   fi
 }
 glassfish_stop() {
   if [ -n "$glassfish" ]; then
-      $glassfish stop-domain
+      $glassfish stop-domain &
+      echo "Waiting for Glassfish services to shutdown..."
+      while glassfish_running; do
+        sleep 1
+      done
   fi
 }
 glassfish_restart() {
@@ -2194,7 +2205,8 @@ glassfish_create_ssl_cert_prompt() {
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       glassfish_require
-      prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
+      DEFAULT_GLASSFISH_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_GLASSFISH_SSL_CERT_CN:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     fi
 }
@@ -2224,6 +2236,7 @@ glassfish_create_ssl_cert() {
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"
+  cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
   local keystorePassword=changeit
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
@@ -2236,7 +2249,7 @@ glassfish_create_ssl_cert() {
   #if [ -f "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" ]; then
   #  echo "SSL Certificate for ${serverName} already exists"
   # Check if there is already a certificate for this serverName in the Glassfish keystore
-  local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "CN=${serverName}"`
+  local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
   if [ -n "$has_cert" ]; then
     echo "SSL Certificate for ${serverName} already exists"
   else
@@ -2252,31 +2265,32 @@ glassfish_create_ssl_cert() {
     # Java 7 supports -ext san=ip:1.2.3.4    to add the extension.  Java 6 does not.  So we use the mtwilson command to generate it. 
     #$keytool -genkey -alias s1as -keysize 2048 -keyalg RSA -dname "CN=${serverName}, OU=Mt Wilson, C=US" -keystore $keystore -storepass $keystorePassword -keypass $keystorePassword -validity 3650
     #$mtwilson api CreateSSLCertificate "CN=${serverName}, OU=Mt Wilson, C=US" "ip:${serverName}" $keystore s1as "$keystorePassword"
+    local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
     local tmpCN
-    if valid_ip "${serverName}"; then 
-     tmpCN="ip:${serverName}"
+    if valid_ip "${tmpHost}"; then 
+     tmpCN="ip:${tmpHost}"
     else
-     tmpCN="dns:${serverName}"
+     tmpCN="dns:${tmpHost}"
     fi
     
     ## 2014-02-05:rksavinx - Unneccesary as java7 is being used and keytool can be implemented for this
     #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
 
     # Update keystore.jks
-    $keytool -genkeypair -alias s1as -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
-    $keytool -genkeypair -alias glassfish-instance -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpHost -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpHost -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
 
     # Export certificates from keystore.jks
-    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
-    $keytool -export -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
+    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
+    $keytool -export -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
 
     # Update cacerts.jks
-    $keytool -importcert -noprompt -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${serverName}.crt" -keystore $cacerts -storepass $keystorePassword
-    $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${serverName}.crt" -keystore $cacerts -storepass $keystorePassword
+    $keytool -importcert -noprompt -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
+    $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
 
-    #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -out /tmp/mycert.der -outform DER
+    #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${tmpHost}.crt" -out /tmp/mycert.der -outform DER
     #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
@@ -2466,6 +2480,8 @@ tomcat_install() {
     echo "  http://tomcat.apache.org/"
   fi
 
+  tomcat_create_ssl_cert_prompt
+
 }
 
 # Run this AFTER tomcat_install
@@ -2493,6 +2509,9 @@ tomcat_permissions() {
 
 tomcat_running() {  
   TOMCAT_RUNNING=''
+  if [ -z "$TOMCAT_HOME" ]; then
+    tomcat_detect
+  fi
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
     echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
@@ -2515,12 +2534,20 @@ tomcat_running_report() {
 }
 tomcat_start() {
   if [ -n "$tomcat" ]; then
-      $tomcat start
+      $tomcat start &
+      echo "Waiting for Tomcat services to startup..."
+      while !tomcat_running; do
+        sleep 1
+      done
   fi
 }
 tomcat_stop() {
   if [ -n "$tomcat" ]; then
-      $tomcat stop
+      $tomcat stop &
+      echo "Waiting for Tomcat services to shutdown..."
+      while tomcat_running; do
+        sleep 1
+      done
   fi
 }
 tomcat_restart() {
@@ -2529,7 +2556,7 @@ tomcat_restart() {
 	
     if tomcat_running; then
       $tomcat stop
-      sleep 5
+      #sleep 5
     fi  
   
     tomcat_running_report
@@ -2553,7 +2580,8 @@ tomcat_create_ssl_cert_prompt() {
     if [ "${TOMCAT_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       tomcat_require
-      prompt_with_default TOMCAT_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
+      DEFAULT_TOMCAT_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      prompt_with_default TOMCAT_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_TOMCAT_SSL_CERT_CN:-127.0.0.1}
       tomcat_create_ssl_cert "${TOMCAT_SSL_CERT_CN}"
     fi
 }
@@ -2566,49 +2594,52 @@ tomcat_create_ssl_cert() {
 #  return
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   tomcat_require
-  
-
   local serverName="${1}"
+  cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
   local keystorePassword=changeit
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
-  local has_cert
-  if [ ! -f $keystore ]; then
-    mkdir -p ${TOMCAT_HOME}/ssl
-    $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
-  fi
+  #local has_cert
+  #if [ ! -f $keystore ]; then
+  #  mkdir -p ${TOMCAT_HOME}/ssl
+  #  $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
+  #fi
   
-  if [ -f $keystore ]; then
+  #if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
-    has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "CN=${serverName}"`
-  fi
+    local has_cert=`$keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
+  #fi
 
   if [ -n "$has_cert" ]; then
     echo "SSL Certificate for ${serverName} already exists"
   else
     echo "Creating SSL Certificate for ${serverName}..."
-    #$keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
+    #$keytool -delete -alias tomcat  -keystore $keystore -storepass $keystorePassword
+    local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
     local tmpCN
-    if valid_ip "${serverName}"; then 
-     tmpCN="ip:${serverName}"
+    if valid_ip "${tmpHost}"; then 
+     tmpCN="ip:${tmpHost}"
     else
-     tmpCN="dns:${serverName}"
+     tmpCN="dns:${tmpHost}"
     fi
 
     ## 2014-03-13:rksavino - Unneccesary as java7 is being used and keytool can be implemented for this
-    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore tomcat "$keystorePassword"
+
+    # Delete public insecure certs within keystore.jks and cacerts.jks
+    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword
 
     # Update keystore.jks
-    $keytool -genkeypair -alias s1as -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
     
-    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
-    $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
-    $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
-    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
-    cp "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
+    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
+    $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
+    #$keytool -import -trustcacerts -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass ${keystorePassword}
+    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
+    cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
-    cp ${keystore} /root/
+    #cp ${keystore} /root/
     #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
   fi
 }
@@ -2620,9 +2651,9 @@ tomcat_env_report(){
 
 # Must call java_require before calling this.
 # Parameters:
-# - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
+# - certificate alias to report on (default is tomcat, the tomcat default ssl cert alias)
 tomcat_sslcert_report() {
-  local alias="${1:-s1as}"
+  local alias="${1:-tomcat}"
   local keystorePassword=changeit
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
@@ -3746,7 +3777,7 @@ function erase_data() {
     decrypt_file "$i" "$cryptopass"
   done
   
-  arr=(mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem)
+  arr=(mw_file mw_tag_certificate mw_tag_certificate_request mw_configuration mw_tag_selection_kvattribute mw_tag_selection mw_tag_kvattribute mw_host_tpm_password mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem)
 
   # Test DB connection and change password
   if using_mysql; then #MYSQL

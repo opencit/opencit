@@ -7,8 +7,9 @@
 // cross-site request forgery protection
 var authorizationToken = null;
 function setTokenInAllForms(token) {
-    $$("form[method=POST]").each(function(){ 
-        var form = $(this);
+    $$("form[method=POST]").each(function(e){ 
+        if( !e.id ) { return; }
+        var form = $(e.id);
         // check if there is already an AuthorizationToken hidden input if we have a newer token we should replace it
         var inputs = form.select("input[type=hidden][name=AuthorizationToken]");
         if( inputs.length ) {
@@ -45,19 +46,15 @@ function getAuthorizationToken() {
         setTokenInAllForms(authorizationToken);
         return;
     }
-    // if we didn't find it in the meta tags then make an ajax request to get a new token
-	// TODO:
-	/*
-    $.ajax({
-        type: "GET",
-        url: "AuthorizationToken.jsp",
-        success: function(data, status, xhr) {
-            authorizationToken = xhr.getResponseHeader("AuthorizationToken");
-            //alert("got token from ajax: "+authorizationToken);
-            setTokenInAllForms(authorizationToken);
-            setTokenInHttpEquiv(authorizationToken);
+    var request = new Ajax.Request("/mtwilson-portal/AuthorizationToken.jsp", {
+        method: "get",
+        onSuccess: function(response) {
+            authorizationToken = response.getHeader('AuthorizationToken');
+            if( authorizationToken ) {
+                setTokenInAllForms(authorizationToken);
+                setTokenInHttpEquiv(authorizationToken);
+            }
         }
     });
-	*/
 }
 

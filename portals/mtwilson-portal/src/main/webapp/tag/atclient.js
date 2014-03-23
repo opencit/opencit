@@ -132,21 +132,22 @@ mtwilson.atag = mtwilson.atag || {};
 
 
     // configure the ajax framework
+    // NOTE:   /mtwilson-portal/v2proxy  gets translated to /mtwilson/v2  but with the logged-in portal user's credentials (otherwise service would respond with 401 unauthorized)
     ajax.resources.notices = {uri: '/notices', datapath: 'notices', idkey: 'uuid'}; // TODO: not implemented on server yet, and when it is imlemented it should be a plugin API like configuration API
-    ajax.resources.tags = {uri: '/mtwilson/v2/tag-kv-attributes', datapath: 'tags', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
-    ajax.resources.tags_json = {uri: '/mtwilson/v2/tag-kv-attributes.json', datapath: 'tags', elementsName: 'kv_attributes', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
-    ajax.resources.unfiltered_tags = {uri: '/mtwilson/v2/tag-kv-attributes.json', datapath: 'unfiltered_tags', idkey: 'id', elementsName: 'kv_attributes'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.tags = {uri: '/mtwilson-portal/v2proxy/tag-kv-attributes', datapath: 'tags', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.tags_json = {uri: '/mtwilson-portal/v2proxy/tag-kv-attributes.json', datapath: 'tags', elementsName: 'kv_attributes', idkey: 'id'}; // configurations can also use idkey:'oid' and idkey:'name' 
+    ajax.resources.unfiltered_tags = {uri: '/mtwilson-portal/v2proxy/tag-kv-attributes.json', datapath: 'unfiltered_tags', idkey: 'id', elementsName: 'kv_attributes'}; // configurations can also use idkey:'oid' and idkey:'name' 
     //ajax.resources.unfiltered_tags = {uri: '/tags', datapath: 'tags', idkey: 'uuid'}; // configurations can also use idkey:'oid' and idkey:'name' 
     ajax.resources.rdfTriples = {uri: '/rdf-triples', datapath: 'rdfTriples', idkey: 'uuid'};
     //ajax.resources.certificates = {uri: '/certificates', datapath: 'certificates', idkey: 'uuid'};
-    ajax.resources.certificates_json = {uri: '/mtwilson/v2/tag-certificates.json', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
-    ajax.resources.certificates = {uri: '/mtwilson/v2/tag-certificates', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
-    ajax.resources.certificateRequests = {uri: '/mtwilson/v2/tag-certificate-requests-rpc/provision', datapath: 'certificateRequests', idkey: 'uuid'};
-    ajax.resources.selections_json = {uri: '/mtwilson/v2/tag-selections.json', datapath: 'selections', elementsName: 'selections',  idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.selections = {uri: '/mtwilson/v2/tag-selections', idkey: 'id'}; // selections can also use idkey:'name'
-    ajax.resources.unfiltered_sels = {uri: '/mtwilson/v2/tag-selections.json', datapath: 'unfiltered_sels', idkey: 'id', elementsName: 'selections'}; // selections can also use idkey:'name'
-    ajax.resources.selection_kv_attributes = {uri: '/mtwilson/v2/tag-selection-kv-attributes.json', datapath: 'selection_details', idkey: 'id', elementsName: 'selection_kv_attribute_values'}; // selections can also use idkey:'name'
-    ajax.resources.configurations = {uri: '/mtwilson/v2/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
+    ajax.resources.certificates_json = {uri: '/mtwilson-portal/v2proxy/tag-certificates.json', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
+    ajax.resources.certificates = {uri: '/mtwilson-portal/v2proxy/tag-certificates', datapath: 'certificates', elementsName: 'certificates', idkey: 'id'};
+    ajax.resources.certificateRequests = {uri: '/mtwilson-portal/v2proxy/tag-certificate-requests-rpc/provision', datapath: 'certificateRequests', idkey: 'uuid'};
+    ajax.resources.selections_json = {uri: '/mtwilson-portal/v2proxy/tag-selections.json', datapath: 'selections', elementsName: 'selections',  idkey: 'id'}; // selections can also use idkey:'name'
+    ajax.resources.selections = {uri: '/mtwilson-portal/v2proxy/tag-selections', idkey: 'id'}; // selections can also use idkey:'name'
+    ajax.resources.unfiltered_sels = {uri: '/mtwilson-portal/v2proxy/tag-selections.json', datapath: 'unfiltered_sels', idkey: 'id', elementsName: 'selections'}; // selections can also use idkey:'name'
+    ajax.resources.selection_kv_attributes = {uri: '/mtwilson-portal/v2proxy/tag-selection-kv-attributes.json', datapath: 'selection_details', idkey: 'id', elementsName: 'selection_kv_attribute_values'}; // selections can also use idkey:'name'
+    ajax.resources.configurations = {uri: '/mtwilson-portal/v2proxy/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.files = {uri: '/files', datapath: 'files', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.uuid = {uri: '/host-uuids', datapath: 'uuid', idkey: null};
 //    mtwilson.atag.data = data; 
@@ -295,7 +296,7 @@ mtwilson.atag = mtwilson.atag || {};
         switch (event.memo.resource.name) {
             case 'tags_json':
                 mtwilson.atag.notify({text: 'Created tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
-                event.memo.resource.app.input.merge({name: '', oid: '', values: []});
+                event.memo.resource.app.input.merge({name: '', value: ''});
                 tag_create_form_removeValue();
                 mtwilson.atag.searchTags('tag-search-form');
                 break;
@@ -368,13 +369,13 @@ mtwilson.atag = mtwilson.atag || {};
     document.observe("ajax:httpPostFailure", function(event) {
         log.debug("httpPostFailure: " + event.memo.message);
         switch (event.memo.resource.name) {
-            case 'tags':
+            case 'tags_json':
                 mtwilson.atag.notify({text: 'Create tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
                 mtwilson.atag.notify({text: 'Create RDF triple FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
-            case 'selections':
+            case 'selections_json':
                 mtwilson.atag.notify({text: 'Create selection FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
@@ -716,21 +717,42 @@ mtwilson.atag = mtwilson.atag || {};
         subject_id = $F("uuid-populate-host");
         selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-            var requestObject = "";
-            console.log("Certificate request: " + Object.toJSON(requestObject));
+            if( false ) { // TODO:  find out if encrypted xmls are required by checking something like  data.currentConfiguration['tag.encrypted.xml.required'] == 'true'  after the configuration is available via the API again
+                var requestObject = "";
+                console.log("Certificate request: " + Object.toJSON(requestObject));
 
-            // Get the Selection details
-            xmlhttp=new XMLHttpRequest();
-            xmlhttp.onreadystatechange=function() {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                var requestObject = xmlhttp.responseText.evalJSON();
-                //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
-                ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                // Get the Selection details
+                xmlhttp=new XMLHttpRequest();
+                xmlhttp.onreadystatechange=function() {
+                    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                        var requestObject = xmlhttp.responseText;
+                        // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
+                        //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
+                        ajax.custom.post('certificateRequests', requestObject, {app: report, contentType: 'message/rfc822'}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                    }
+                };
+                xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id+".enc",true);
+                xmlhttp.setRequestHeader("Accept", "message/rfc822"); // indicates we want the encrypted xml, which is currently delivered as a message/rfc822 document
+                xmlhttp.send();
             }
-        }
-        xmlhttp.open("GET","/mtwilson/v2/tag-selections/" + selection_id + ".json",true);
-        xmlhttp.send();
+            else {
+                var requestObject = "";
+                console.log("Certificate request: " + Object.toJSON(requestObject));
 
+                // Get the Selection details
+                xmlhttp=new XMLHttpRequest();
+                xmlhttp.onreadystatechange=function() {
+                    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                        var requestObject = xmlhttp.responseText.evalJSON();
+                        // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
+                        //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
+                        ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                    }
+                };
+                xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".json",true);
+                xmlhttp.send();            
+            } // if report.isvalid
+        
 //	    requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
         }
     };
@@ -855,7 +877,7 @@ mtwilson.atag = mtwilson.atag || {};
      // removes all tags with this oid
     mtwilson.atag.exportXmlSelection = function(uuid) {
         log.debug("exportXmlSelection: " + uuid);
-        var url = "/mtwilson/v2/tag-selections/" + uuid;
+        var url = "/mtwilson-portal/v2proxy/tag-selections/" + uuid;
         window.open(url,'open_window' , 'menubar, toolbar, location, directories, status, scrollbars, resizable, dependent, width=640, height=480, left=0, top=0');
     };
     
@@ -1081,6 +1103,9 @@ mtwilson.atag = mtwilson.atag || {};
         // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
         // we form parameters like nameEqualTo=argument  or nameContains=argument
         var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+	if ($('certificate-search-valid').value.trim() == '') {
+        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+	}
         var i;
         for (i = 0; i < fields.length; i++) {
             if (document.getElementById('certificate-search-' + fields[i] + '-criteria')) {
@@ -1292,7 +1317,7 @@ mtwilson.atag = mtwilson.atag || {};
 document.observe("dom:loaded", function() {
 
 	// get the authorization token
-	
+	getAuthorizationToken();
 
     // look for a "resources" link to automatically load available server resources; 
     // if not provided then the application should have configured resources via javacript

@@ -74,9 +74,9 @@ fi
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x mcctl
 mkdir -p /usr/local/bin
-cp mcctl /usr/local/bin
+cp mcctl.sh /usr/local/bin/mcctl
+chmod +x /usr/local/bin/mcctl
 /usr/local/bin/mcctl setup
 register_startup_script /usr/local/bin/mcctl mcctl >> $INSTALL_LOG_FILE
 
