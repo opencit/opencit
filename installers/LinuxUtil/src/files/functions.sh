@@ -2256,10 +2256,10 @@ glassfish_create_ssl_cert() {
     echo "Creating SSL Certificate for ${serverName}..."
     
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
-    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword
-    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword
-    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword
+    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
 
     # NIARL code in Trust Agent uses Bouncy Castle APIs which require a Subject Alternative Name in the Server's SSL certificate in order to validate a certificate with an IP address in the subject.
     # Java 7 supports -ext san=ip:1.2.3.4    to add the extension.  Java 6 does not.  So we use the mtwilson command to generate it. 
@@ -2601,10 +2601,10 @@ tomcat_create_ssl_cert() {
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
-  if [ ! -f $keystore ]; then
-    mkdir -p ${TOMCAT_HOME}/ssl
-    $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
-  fi
+  #if [ ! -f $keystore ]; then
+  #  mkdir -p ${TOMCAT_HOME}/ssl
+  #  $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
+  #fi
   
   #if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
@@ -2628,7 +2628,7 @@ tomcat_create_ssl_cert() {
     #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore tomcat "$keystorePassword"
 
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword
+    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
 
     # Update keystore.jks
     $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
