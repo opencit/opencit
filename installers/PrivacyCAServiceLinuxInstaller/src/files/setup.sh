@@ -116,7 +116,7 @@ glassfish_privacyca_install() {
 #glassfish_install $GLASSFISH_PACKAGE
 
 # copy control script to /usr/local/bin and finish setup
-chmod 700 pcactl
+chmod 700 pcactl.sh
 mkdir -p /usr/local/bin
 cp pcactl.sh /usr/local/bin/pcactl
 chmod +x /usr/local/bin/pcactl
