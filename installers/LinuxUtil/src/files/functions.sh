@@ -2004,7 +2004,7 @@ glassfish_install() {
   #if [ -n "${MTWILSON_SERVER}" ]; then
   #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
   #else
-    glassfish_create_ssl_cert_prompt
+  #  glassfish_create_ssl_cert_prompt
   #fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
@@ -2498,9 +2498,6 @@ tomcat_install() {
     echo "  Tomcat download URL:"
     echo "  http://tomcat.apache.org/"
   fi
-
-  tomcat_create_ssl_cert_prompt
-
 }
 
 # Run this AFTER tomcat_install
@@ -2645,13 +2642,13 @@ tomcat_create_ssl_cert() {
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
   #if [ ! -f $keystore ]; then
-  #  mkdir -p ${TOMCAT_HOME}/ssl
+  mkdir -p ${TOMCAT_HOME}/ssl
   #  $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
   #fi
   
   #if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
-    local has_cert=`$keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
+  local has_cert=`$keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
   #fi
 
   if [ -n "$has_cert" ]; then
