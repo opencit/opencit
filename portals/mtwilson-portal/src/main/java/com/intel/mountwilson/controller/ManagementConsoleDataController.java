@@ -113,20 +113,24 @@ public class ManagementConsoleDataController extends MultiActionController {
      * @return
      */
     public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req, HttpServletResponse res) {
-        //log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
+        log.debug("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
         req.getSession().removeAttribute("hostVO");
         ModelAndView responseView = new ModelAndView(new JSONView());
         List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
 
+        log.debug("Action is :{}", req.getMethod());
+        log.debug("Content type is {}", req.getContentType());
+        
+        
         // Check that we have a file upload request
         boolean isRequestMultiType = ServletFileUpload.isMultipartContent(req);
-        System.out.println(isRequestMultiType);
+        log.debug("Is data multipart {} ", isRequestMultiType);        
         if (!isRequestMultiType) {
             responseView.addObject("result", false);
             //log.warn("File Upload is not MultiPart. Please check you File Uploaded Plugin.");
             return responseView;
         }
-
+        
         // Create a factory for disk-based file items
         FileItemFactory factory = new DiskFileItemFactory();
 
@@ -137,15 +141,17 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             @SuppressWarnings("unchecked")
             List<FileItem> items = upload.parseRequest(req);
-
+            
             // Process the uploaded items
             Iterator<FileItem> iter = items.iterator();
             while (iter.hasNext()) {
                 FileItem item = (FileItem) iter.next();
-
+                log.debug ("File is {}", item.getName());
+                
                 if (!item.isFormField()) {
                     String lines[] = item.getString().split("\\r?\\n");
                     for (String values : lines) {
+                        log.debug("Parsing entry {}", values);
                         //Split host name and host value with Separator e.g. |
                         if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) >= 0) {
                             String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
