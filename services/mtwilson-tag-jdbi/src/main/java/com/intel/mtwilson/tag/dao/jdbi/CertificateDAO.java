@@ -8,6 +8,7 @@ package com.intel.mtwilson.tag.dao.jdbi;
 //import com.intel.mtwilson.atag.model.CertificateRequestApproval;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
 import java.util.Date;
 import org.skife.jdbi.v2.sqlobject.Bind;
@@ -27,7 +28,7 @@ import com.intel.mtwilson.jdbi.util.UUIDArgument;
  * 
  * @author jbuhacoff
  */
-@RegisterArgumentFactory(UUIDArgument.class)
+@RegisterArgumentFactory({UUIDArgument.class,DateArgument.class})
 @RegisterMapper(CertificateResultMapper.class)
 public interface CertificateDAO extends Closeable{
     @SqlUpdate("create table mw_tag_certificate (id char(36) primary key, certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")

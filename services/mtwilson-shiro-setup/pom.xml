@@ -75,5 +75,13 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <!-- for integration into mwportaluser -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-management-jpa</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        
+
     </dependencies>  
 </project>
