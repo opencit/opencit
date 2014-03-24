@@ -27,9 +27,11 @@ import org.apache.shiro.authc.credential.CredentialsMatcher;
  * @author jbuhacoff
  */
 public class PasswordCredentialsMatcher implements CredentialsMatcher {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PasswordCredentialsMatcher.class);
+    
     @Override
     public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
+        log.debug("doCredentialsMatch with token {} and info {}", token, info);
         if( token.getCredentials() == null ) { return false; }
         if( !(info.getCredentials() instanceof UserLoginPassword)) { return false; }
         UserLoginPassword userLoginPasswordHash = (UserLoginPassword)info.getCredentials();
@@ -74,8 +76,9 @@ public class PasswordCredentialsMatcher implements CredentialsMatcher {
             return (byte[])credentials;
         }
         if( credentials instanceof char[]) {
-            ByteBuffer bytebuffer = Charset.forName("UTF-8").encode(CharBuffer.wrap((char[])credentials));
-            return bytebuffer.array();
+            //ByteBuffer bytebuffer = Charset.forName("UTF-8").encode(CharBuffer.wrap((char[])credentials));  // this is wrong because the Charset encode() method appends a null terminator which will cause the resulting hash to be wrong
+//            return bytebuffer.array();
+            return String.valueOf((char[])credentials).getBytes(Charset.forName("UTF-8"));
         }
         if( credentials instanceof String ) {
             return ((String)credentials).getBytes(Charset.forName("UTF-8"));

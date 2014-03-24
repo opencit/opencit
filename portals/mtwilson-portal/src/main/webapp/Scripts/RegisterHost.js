@@ -30,22 +30,20 @@ function fnUploadFlatFile() {
     $('#successMessage').html('');
     $('#registerHostTableContent').html('');
     $('#registerHostTable').hide();
+    document.getElementById('AuthorizationToken').value = authorizationToken;
     $.ajaxFileUpload({
         url: 'getData/uploadFlatFileRegisterHost.html',
         secureuri: false,
         fileElementId: 'fileToUpload',
         dataType: 'jsonp',
-        data: {
+        headers: {
             "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
         },
         success: function(data, status) {
             fnuploadSuccess(data);
         },
         error: function(data, status, e) {
-            alert("data = " + data);
-            alert("status = " + status);
-            alert("e = " + e);
-            $('#successMessage').html('<div class="errorMessage">* File is not processed properly. Please check file format. Use help button to know more.</div>');
+            $('#successMessage').html('<div class="errorMessage">* Error authenticating the user.</div>');
         }
     });
 }

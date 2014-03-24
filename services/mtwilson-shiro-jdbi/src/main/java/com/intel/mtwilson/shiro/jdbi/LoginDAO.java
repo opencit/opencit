@@ -21,6 +21,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
+import org.skife.jdbi.v2.sqlobject.BindBean;
 
 /**
  * References:
@@ -54,6 +55,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user (id, username, locale, enabled, status, comment) values (:id, :username, :locale, :enabled, :status, :comment)")
     void insertUser(@Bind("id") UUID id, @Bind("username") String username, @Bind("locale") Locale locale, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
 
+    @SqlUpdate("insert into mw_user (id, username, locale, enabled, status, comment) values (:id, :username, :locale, :enabled, :status, :comment)")
+    void insertUser(@BindBean User user);
+    
     @SqlUpdate("update mw_user set locale=:locale, comment=:comment WHERE id=:id")
     void updateUser(@Bind("id") UUID id, @Bind("locale") Locale locale, @Bind("comment") String comment);
 

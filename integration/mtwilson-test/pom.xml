@@ -154,6 +154,11 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-setup</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>asset-tag-service</artifactId>
             <version>${project.version}</version>        
         </dependency>

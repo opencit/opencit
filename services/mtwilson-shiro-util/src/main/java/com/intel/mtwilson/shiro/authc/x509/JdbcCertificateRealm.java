@@ -45,6 +45,11 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcCertificateRealm.class);
     
     @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof X509AuthenticationToken;
+    }
+    
+    @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection pc) {
         if (pc == null) {
             throw new AuthorizationException("Principal must be provided");
