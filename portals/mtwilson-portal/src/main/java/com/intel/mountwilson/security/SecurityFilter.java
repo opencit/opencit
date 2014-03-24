@@ -5,14 +5,12 @@ import com.intel.dcsg.cpg.authz.token.Token;
 import com.intel.dcsg.cpg.authz.token.TokenFactory;
 import com.intel.dcsg.cpg.authz.token.TokenValidator;
 import com.intel.dcsg.cpg.authz.token.UnsupportedTokenVersionException;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.key.KeyNotFoundException;
 import com.intel.mountwilson.as.common.ASConfig;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,22 +58,51 @@ public class SecurityFilter implements Filter {
             return false;
         }
     }
-
+  
     private String getExistingToken(HttpServletRequest request) {
         // second part of fix for issue #1038 is to use a secure token to deter attackers who are able to forge the referer header by exploiting the client's insecure software stack
         // the idea is that without the help of a cross-site scripting exploit, the attacker will not be able to predict the token and therefore the CSRF attack will fail
         // it's important to note that this does NOT prevent an attacker from hijacking the user's session using a cross-site scripting attack - in such an attack the attacker can smiply replay the token for as long as its valid just as a legitimate request does.
         // we defend against cross-site scripting elsewhere by validating input parameters and escaping the output in a way appropriate for its context
         String existingToken = request.getHeader("AuthorizationToken"); // we don't use the Authorization header by itself like in oath 2.0 "Bearer" authorization type because we don't want the browser to submit ti automatically!   should be submitted by javascript running in our html app.    that also prevents simple form submissions that attempt to bypass our client-side javascript.
-        if (existingToken == null) {
-            // if it's not in the header, check if it's a form post parameter
-            String[] formParams = request.getParameterValues("AuthorizationToken");
-            if (formParams != null && formParams.length == 1) {
-                existingToken = request.getParameterValues("AuthorizationToken")[0];
-            } else {
-                log.debug("getExistingToken: Form does not include AuthorizationToken");
-            }
-        }
+        log.debug("Query String is: {}", request.getQueryString());
+        
+        if ((existingToken == null) && !request.getQueryString().isEmpty())
+            existingToken = request.getQueryString();
+            
+//        if (existingToken == null) {
+//            log.debug("Did not get the authorization token from the header");
+//            // if it's not in the header, check if it's a form post parameter
+//            String[] formParams = request.getParameterValues("AuthorizationToken");
+//            if (formParams != null && formParams.length == 1) {
+//                log.debug("Got the authorization token from the form params");
+//                existingToken = request.getParameterValues("AuthorizationToken")[0];
+//            } else {
+//                
+//                log.debug("getExistingToken Content type is {}", request.getContentType());
+//
+//                try {
+//                    StringBuilder stringBuilder = new StringBuilder(2000);
+//                    Scanner scanner = new Scanner(request.getInputStream());
+//                    while (scanner.hasNextLine()) {
+//                        stringBuilder.append(scanner.nextLine());
+//                    }
+//
+//                    String body = stringBuilder.toString();
+//                    log.debug("Payload data is {}", body);
+//                    
+//                    if (body.contains("AuthorizationToken")) {
+//                    
+//                        existingToken = getAuthTokenFromPayload(request.getContentType(), body);
+//                        log.debug ("Retrieved the auth token from pay load {}.", existingToken);
+//                    } else {
+//                        log.error("getExistingToken: Form does not include AuthorizationToken");
+//                    }
+//                } catch (Exception exception) {
+//                    log.error("Exception while reading payload.", exception);
+//                }                
+//            }
+//        }
         if( existingToken != null && existingToken.equalsIgnoreCase("null") ) {
             existingToken = null; // fix for misbehaving clients that send AuthorizationToken: null   instead of not sending the header at all;  if we don't do this then we'll get an exception like "UnsupportedTokenVersionException: Unsupported token version 9e"
         }
