@@ -195,7 +195,7 @@ function provisionCert() {
      tagSelectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
      json='{"selections":[{"name":"'$tagSelectionName'"}]}'
    fi
-   echo "$WGET --header=Content-Type: application/json --header=Accept: application/pkix-cert --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certInfoFile" >> $cmdFile
+   echo "$WGET --header=Content-Type: application/json --header=Accept: application/pkix-cert --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
  else
    #here we need to read the xml from the file, escape the " with \ then build our string to send via wget
@@ -203,12 +203,12 @@ function provisionCert() {
    if [ -z $encrypted ]; then   # NOT encrypted
      xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
      json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-     echo "$WGET --header=Content-Type: application/json --header=Accept: application/pkix-cert --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certInfoFile" >> $cmdFile
+     echo "$WGET --header=Content-Type: application/json --header=Accept: application/pkix-cert --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
      $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
    else   #encrypted
      xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
      json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-     echo "$WGET --header=Content-Type: application/json --header=Accept: application/pkix-cert --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certInfoFile" >> $cmdFile
+     echo "$WGET --header=Content-Type: application/json --header=Accept: application/pkix-cert --post-data=$json $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
      $WGET --header="Content-Type: message/rfc822" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
    fi
  fi
@@ -217,9 +217,11 @@ function provisionCert() {
 	acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
 	if [ $? -eq 0 ]; then
 		#xml2 < $certFile > $certFileValues
-                openssl x509 -in $certFile -text -noout > $certFileValues
                 #dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
-                less $certFileValues
+                
+                #XXX TODO: convert binary cert data to hex and display
+                #openssl x509 -in $certFile -text -noout > $certFileValues
+                less $certFile
 	fi
  fi
  if [ ! "$accept" == "yes" ]; then
@@ -229,10 +231,6 @@ function provisionCert() {
     resp=0;
  fi
  if [ $resp -eq 0 ]; then
-  #sha1=`xml2 < $certFile  | grep sha1`
-  #sha1=`echo "${sha1#*sha1=}"`
-  sha1=`openssl dgst -sha1 -binary $certFile | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
-
   # Retrieve password if TA, else generate new passwords and take ownership
   $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
   export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
@@ -249,8 +247,13 @@ function provisionCert() {
   releaseNvram
   createIndex4
 
-  echo "$sha1" | hex2bin > $certSha1
+  #sha1=`xml2 < $certFile  | grep sha1`
+  #sha1=`echo "${sha1#*sha1=}"`
+  #sha1=`openssl dgst -sha1 $certFile`
+  #echo "$sha1" | hex2bin > $certSha1
   # hex2bin "$sha1" $certSha1
+  openssl dgst -sha1 -binary $certFile > $certSha1
+
   echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
   $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
   result=$?
