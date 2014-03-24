@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.jdbi.util;
 
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.My;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -27,7 +25,7 @@ public class DateArgument implements ArgumentFactory<Date> {
 
     @Override
     public boolean accepts(Class<?> type, Object value, StatementContext ctx) {
-        return value != null && value instanceof UUID;  //type.isAssignableFrom(UUID.class);
+        return value != null && value instanceof Date; 
     }
 
     @Override
