@@ -2236,6 +2236,31 @@ glassfish_create_ssl_cert() {
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"
+
+  # Create an array of host ips and dns names from csv list passed into function
+  serverName=`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//'`
+  OIFS="$IFS"
+  IFS=','
+  read -a hostArray <<< "${serverName}"
+  IFS="$OIFS"
+  
+  # create common names and sans strings by parsing array
+  local cert_cns=""
+  local cert_sans=""
+  for i in "${hostArray[@]}"; do
+    cert_cns+="CN=$i,"
+   
+    tmpCN=""
+    if valid_ip "$i"; then 
+     tmpCN="ip:$i"
+    else
+     tmpCN="dns:$i"
+    fi
+    cert_sans+="$tmpCN,"
+  done
+  cert_cns=`echo $cert_cns | sed -e 's/,$//'`
+  cert_sans=`echo $cert_sans | sed -e 's/,$//'`
+
   cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
   local keystorePassword=changeit
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
@@ -2256,29 +2281,23 @@ glassfish_create_ssl_cert() {
     echo "Creating SSL Certificate for ${serverName}..."
     
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
-    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword
-    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword
-    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword
+    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
 
     # NIARL code in Trust Agent uses Bouncy Castle APIs which require a Subject Alternative Name in the Server's SSL certificate in order to validate a certificate with an IP address in the subject.
     # Java 7 supports -ext san=ip:1.2.3.4    to add the extension.  Java 6 does not.  So we use the mtwilson command to generate it. 
     #$keytool -genkey -alias s1as -keysize 2048 -keyalg RSA -dname "CN=${serverName}, OU=Mt Wilson, C=US" -keystore $keystore -storepass $keystorePassword -keypass $keystorePassword -validity 3650
     #$mtwilson api CreateSSLCertificate "CN=${serverName}, OU=Mt Wilson, C=US" "ip:${serverName}" $keystore s1as "$keystorePassword"
     local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
-    local tmpCN
-    if valid_ip "${tmpHost}"; then 
-     tmpCN="ip:${tmpHost}"
-    else
-     tmpCN="dns:${tmpHost}"
-    fi
-    
+        
     ## 2014-02-05:rksavinx - Unneccesary as java7 is being used and keytool can be implemented for this
     #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
 
     # Update keystore.jks
-    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpHost -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
-    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpHost -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
 
     # Export certificates from keystore.jks
     $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
@@ -2595,16 +2614,40 @@ tomcat_create_ssl_cert() {
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   tomcat_require
   local serverName="${1}"
-  cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
+  
+  # Create an array of host ips and dns names from csv list passed into function
+  serverName=`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//'`
+  OIFS="$IFS"
+  IFS=','
+  read -a hostArray <<< "${serverName}"
+  IFS="$OIFS"
+  
+  # create common names and sans strings by parsing array
+  local cert_cns=""
+  local cert_sans=""
+  for i in "${hostArray[@]}"; do
+    cert_cns+="CN=$i,"
+   
+    tmpCN=""
+    if valid_ip "$i"; then 
+     tmpCN="ip:$i"
+    else
+     tmpCN="dns:$i"
+    fi
+    cert_sans+="$tmpCN,"
+  done
+  cert_cns=`echo $cert_cns | sed -e 's/,$//'`
+  cert_sans=`echo $cert_sans | sed -e 's/,$//'`
+
   local keystorePassword=changeit
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
-  if [ ! -f $keystore ]; then
-    mkdir -p ${TOMCAT_HOME}/ssl
-    $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
-  fi
+  #if [ ! -f $keystore ]; then
+  #  mkdir -p ${TOMCAT_HOME}/ssl
+  #  $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
+  #fi
   
   #if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
@@ -2617,21 +2660,15 @@ tomcat_create_ssl_cert() {
     echo "Creating SSL Certificate for ${serverName}..."
     #$keytool -delete -alias tomcat  -keystore $keystore -storepass $keystorePassword
     local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
-    local tmpCN
-    if valid_ip "${tmpHost}"; then 
-     tmpCN="ip:${tmpHost}"
-    else
-     tmpCN="dns:${tmpHost}"
-    fi
-
+    
     ## 2014-03-13:rksavino - Unneccesary as java7 is being used and keytool can be implemented for this
     #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore tomcat "$keystorePassword"
 
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword
+    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
 
     # Update keystore.jks
-    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
     
     #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
     $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
