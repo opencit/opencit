@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.jdbi.util;
 
-import java.sql.Date;
+import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.skife.jdbi.v2.StatementContext;
@@ -25,7 +25,7 @@ public class DateArgument implements ArgumentFactory<Date> {
 
     @Override
     public boolean accepts(Class<?> type, Object value, StatementContext ctx) {
-        return value != null && value instanceof Date; 
+        return value != null && Date.class.isAssignableFrom(value.getClass());
     }
 
     @Override

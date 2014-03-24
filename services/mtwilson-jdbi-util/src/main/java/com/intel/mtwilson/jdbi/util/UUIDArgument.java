@@ -51,7 +51,7 @@ public class UUIDArgument implements ArgumentFactory<UUID> {
 
     @Override
     public boolean accepts(Class<?> type, Object value, StatementContext ctx) {
-        return value != null && value instanceof UUID;  //type.isAssignableFrom(UUID.class);
+        return value != null && UUID.class.isAssignableFrom(value.getClass());
     }
 
     @Override
