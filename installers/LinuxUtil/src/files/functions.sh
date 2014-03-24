@@ -2105,7 +2105,7 @@ glassfish_start() {
   if [ -n "$glassfish" ]; then
       $glassfish start-domain &
       echo "Waiting for Glassfish services to startup..."
-      while !glassfish_running; do
+      while ! glassfish_running; do
         sleep 1
       done
   fi
@@ -2555,7 +2555,7 @@ tomcat_start() {
   if [ -n "$tomcat" ]; then
       $tomcat start &
       echo "Waiting for Tomcat services to startup..."
-      while !tomcat_running; do
+      while ! tomcat_running; do
         sleep 1
       done
   fi
