@@ -2601,10 +2601,10 @@ tomcat_create_ssl_cert() {
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
-  #if [ ! -f $keystore ]; then
-  #  mkdir -p ${TOMCAT_HOME}/ssl
-  #  $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
-  #fi
+  if [ ! -f $keystore ]; then
+    mkdir -p ${TOMCAT_HOME}/ssl
+    $keytool -genkey -alias tomcat -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
+  fi
   
   #if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
