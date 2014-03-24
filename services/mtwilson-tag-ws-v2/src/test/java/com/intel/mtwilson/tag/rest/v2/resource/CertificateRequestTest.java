@@ -13,11 +13,15 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.tag.TagCertificateAuthority;
 import com.intel.mtwilson.tag.TagConfiguration;
 import com.intel.mtwilson.tag.Util;
+import com.intel.mtwilson.tag.dao.TagJdbi;
+import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.tag.model.CertificateCollection;
 import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
@@ -30,6 +34,7 @@ import com.intel.mtwilson.tag.selection.json.TagSelectionModule;
 import java.nio.charset.Charset;
 import org.junit.Test;
 import com.intel.mtwilson.tag.selection.xml.*;
+import java.util.Date;
 
 /**
  *
@@ -56,6 +61,9 @@ public class CertificateRequestTest {
         TagCertificateAuthority ca = new TagCertificateAuthority(new TagConfiguration(My.configuration().getConfiguration()));
         byte[] tagCertificate = ca.createTagCertificate(UUID.valueOf("76df5add-a808-4e62-916d-e53adadc166b"), selections);
         log.debug("tag certificate {}", tagCertificate);
+        // now store it in database...
+        CertificateDAO dao = TagJdbi.certificateDao();
+        dao.insert(new UUID(), tagCertificate, Sha1Digest.digestOf(tagCertificate).toString(), Sha256Digest.digestOf(tagCertificate).toString(), "76df5add-a808-4e62-916d-e53adadc166b", "mtwilson-tag-ca", new Date(), new Date());
     }
 
     @Test

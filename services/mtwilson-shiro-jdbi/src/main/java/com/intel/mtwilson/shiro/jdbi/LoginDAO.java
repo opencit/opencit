@@ -182,13 +182,13 @@ public interface LoginDAO extends Closeable {
   comment text,
      * 
      */
-    @SqlQuery("select id, user_id, certificate, sha1_hash, expires, enabled, status, comment from mw_user_login_password where id=:id")
+    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_password where id=:id")
     UserLoginCertificate findUserLoginCertificateById(@Bind("id") UUID id);
 
-    @SqlQuery("select id, user_id, certificate, sha1_hash, expires, enabled, status, comment from mw_user_login_password where user_id=:user_id")
+    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_password where user_id=:user_id")
     UserLoginCertificate findUserLoginCertificateByUserId(@Bind("user_id") UUID userId);
     
-    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.username=:username")
+    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled,  mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.username=:username")
     UserLoginCertificate findUserLoginCertificateByUsername(@Bind("username") String username);
 
     @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha1_hash=:fingerprint")
@@ -197,8 +197,8 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha256_hash=:fingerprint")
     UserLoginCertificate findUserLoginCertificateBySha256(@Bind("fingerprint") byte[] fingerprint);    
     
-    @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :expires, :enabled, :status, :comment)")
-    void insertUserLoginCertificate(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("certificate") byte[] certificate, @Bind("sha1_hash") byte[] sha1Hash, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
+    @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :sha256_hash, :expires, :enabled, :status, :comment)")
+    void insertUserLoginCertificate(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("certificate") byte[] certificate, @Bind("sha1_hash") byte[] sha1Hash, @Bind("sha256_hash") byte[] sha256Hash, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
     
     @SqlUpdate("insert into mw_user_login_certificate_role (login_certificate_id, role_id) values (:login_certificate_id, :role_id)")
     void insertUserLoginCertificateRole(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);
