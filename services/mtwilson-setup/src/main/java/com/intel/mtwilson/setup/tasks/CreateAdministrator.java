@@ -19,7 +19,9 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 
 /**
- *
+ * TODO:  this class has been replaced by CreateAdminUser in mtwilson-shiro-setup
+ * 
+ * @deprecated
  * @author jbuhacoff
  */
 public class CreateAdministrator extends DatabaseSetupTask {

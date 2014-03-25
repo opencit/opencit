@@ -56,9 +56,13 @@ public class PasswordLoginTest {
         // encode
         log.debug("charset {}", Charset.forName("UTF-8").encode(text).array());
     }
-    
+
     @Test
     public void verifyAuthorizationHeader()throws Exception {
+    }
+    
+    @Test
+    public void testHashFunction()throws Exception {
 //        char[] password = "fpAnUAvE6qM_".toCharArray();
         // to bytes:
 //        ByteBuffer bytebuffer = Charset.forName("UTF-8").encode(CharBuffer.wrap(password));

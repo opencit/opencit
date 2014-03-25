@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
+import com.intel.dcsg.cpg.util.PascalCaseNamingStrategy;
 
 /**
  * This setup command is a bridge between mtwilson-console and the new
@@ -28,6 +29,8 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 public class V2 implements Command {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(V2.class);
+
     private SetupContext ctx = null;
 
     @Override
@@ -48,11 +51,26 @@ public class V2 implements Command {
 //        String password = getExistingPassword("the PrivacyCA private key download", "env-password");
         String hyphenatedTaskName = args[0];
         
-        HyphenatedCommandFinder finder = new HyphenatedCommandFinder("com.intel.mtwilson.setup.tasks");
-        String className = finder.toCamelCase(hyphenatedTaskName); // setup-task simple class name conversion from "migrate-users" to "MigrateUsers"
-        Class setupTaskClass = Class.forName("com.intel.mtwilson.setup.tasks."+className);
+        PascalCaseNamingStrategy name = new PascalCaseNamingStrategy();
+        String className = name.toPascalCase(hyphenatedTaskName);
+        String[] packageNames = new String[] { "com.intel.mtwilson.setup.tasks", "com.intel.mtwilson.tag.setup", "com.intel.mtwilson.shiro.setup" };
+        SetupTask setupTask = null;
+        for(String packageName : packageNames) {
+            try {
+                Class setupTaskClass = Class.forName(packageName+"."+className);
                 Object setupTaskInstance = setupTaskClass.newInstance();
-                SetupTask setupTask = (SetupTask)setupTaskInstance;
+                setupTask = (SetupTask)setupTaskInstance;
+                break;
+            }
+            catch(Exception e) {
+                // didn't find the class in this package or it's not the right interface
+            }
+        }
+        if( setupTask == null ) {
+            System.err.println("Setup task not found: "+className+" ("+hyphenatedTaskName+")");
+            return;
+        }
+                
 //                String[] subargs = Arrays.copyOfRange(args, 1, args.length);
         if( setupTask.isConfigured() ) {
             setupTask.run();
