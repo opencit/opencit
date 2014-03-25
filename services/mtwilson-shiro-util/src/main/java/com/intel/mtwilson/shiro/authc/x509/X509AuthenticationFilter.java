@@ -31,6 +31,7 @@ import com.intel.mtwilson.security.http.RsaSignatureInput;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.HashMap;
+import java.util.Map;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -93,44 +94,59 @@ public class X509AuthenticationFilter extends AuthenticatingFilter {
     @Override
     protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) throws Exception {
         HttpServletRequest httpRequest = WebUtils.toHttp(request);
-        InputStream in = httpRequest.getInputStream();
-        if( !in.markSupported() ) {
-            throw new AuthenticationException("Request input stream is not repeatable; evaluating X509 authorization would prevent further processing of request");
-        }
-        String requestBody = IOUtils.toString(in);
-        in.reset(); // to allow other filters or servlets to process the request
-        
-        String authorizationText = httpRequest.getHeader(AUTHORIZATION_HEADER);
-        log.debug("Parsing authorization header: {}", authorizationText);
-        Authorization a = parseAuthorization(authorizationText);
-        log.info("X509CertificateAuthorization: Request timestamp ok");
-        RsaSignatureInput signatureBlock = new RsaSignatureInput();
-
-        signatureBlock.httpMethod = httpRequest.getMethod();
-        signatureBlock.url = httpRequest.getRequestURI();
-
-        signatureBlock.realm = a.realm;
-        signatureBlock.fingerprintBase64 = a.fingerprintBase64;
-        signatureBlock.signatureAlgorithm = a.signatureAlgorithm;
-        signatureBlock.headerNames = a.headerNames;
-        HashMap<String,String> headerValues = new HashMap<>();
-        for(String headerName : a.headerNames) {
-            headerValues.put(headerName, httpRequest.getHeader(headerName));
-        }
-        signatureBlock.headers = headerValues;
-        signatureBlock.body = requestBody;
-        String content = signatureBlock.toString(); // may throw IllegalArgumentException if any required field is null or invalid
-        // locate the public key or x509 certificate that can verify the signature
-        // XXX TODO: need to also load the roles from the database (in case we're successful, so we don't do 2 queries) and also in future versions the roles may be in the x509 certificate so we need to get it directly and save it so we can examine after verifying
+        Authorization authorization = getAuthorization(httpRequest);
+        RsaSignatureInput signatureInput = getSignatureInputFromHttpRequest(httpRequest, authorization);
+        String content = signatureInput.toString(); // may throw IllegalArgumentException if any required field is null or invalid
         byte[] document = content.getBytes("UTF-8");
-        byte[] signature = Base64.decodeBase64(a.signatureBase64);
-        String signatureAlgorithm = signatureAlgorithm(a.signatureAlgorithm);
-        byte[] fingerprint = Base64.decodeBase64(a.fingerprintBase64);
+        byte[] signature = Base64.decodeBase64(authorization.signatureBase64);
+        String signatureAlgorithm = signatureAlgorithm(authorization.signatureAlgorithm);
+        byte[] fingerprint = Base64.decodeBase64(authorization.fingerprintBase64);
         
         byte[] digest = getDigest(document, signatureAlgorithm);
         X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), request.getRemoteAddr());
         log.debug("Created X509AuthenticationToken");
         return token;
+    }
+    
+    private String getRequestBody(HttpServletRequest httpRequest) throws IOException {
+        // get the request body (even if empty) - the input stream must be repeatable
+        // so the endpoint will be able to read it again for processing the request
+        InputStream in = httpRequest.getInputStream();
+        if( !in.markSupported() ) {
+            throw new IOException("Request input stream is not repeatable; evaluating X509 authorization would prevent further processing of request");
+        }
+        String requestBody = IOUtils.toString(in);
+        in.reset(); // to allow other filters or servlets to process the request
+        return requestBody;
+    }
+    
+    private Map<String,String> getRequestHeaders(HttpServletRequest httpRequest, String[] headerNames) {
+        HashMap<String,String> headerValues = new HashMap<>();
+        for(String headerName : headerNames) {
+            headerValues.put(headerName, httpRequest.getHeader(headerName));
+        }
+        return headerValues;
+    }
+    
+    private Authorization getAuthorization(HttpServletRequest httpRequest) {
+        String authorizationText = httpRequest.getHeader(AUTHORIZATION_HEADER);
+        log.debug("Parsing authorization header: {}", authorizationText);
+        Authorization authorization = parseAuthorization(authorizationText);
+        log.info("X509CertificateAuthorization: Request timestamp ok");
+        return authorization;
+    }
+    
+    private RsaSignatureInput getSignatureInputFromHttpRequest(HttpServletRequest httpRequest, Authorization a) throws IOException {
+        RsaSignatureInput signatureInput = new RsaSignatureInput();
+        signatureInput.httpMethod = httpRequest.getMethod();
+        signatureInput.url = httpRequest.getRequestURI();
+        signatureInput.realm = a.realm;
+        signatureInput.fingerprintBase64 = a.fingerprintBase64;
+        signatureInput.signatureAlgorithm = a.signatureAlgorithm;
+        signatureInput.headerNames = a.headerNames;
+        signatureInput.headers = getRequestHeaders(httpRequest, a.headerNames);
+        signatureInput.body = getRequestBody(httpRequest); // throws IOException if error on read or if InputStream is not repeatable;
+        return signatureInput;
     }
 
     @Override

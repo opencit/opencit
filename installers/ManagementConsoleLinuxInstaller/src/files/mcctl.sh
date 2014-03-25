@@ -72,6 +72,9 @@ bootstrap_first_user() {
   fi
   local datestr=`date +%Y-%m-%d.%H%M`
 
+  # bootstrap administrator user with all privileges
+  mtwilson setup V2 create-admin-user
+
   # XXX as implemented, the BootstrapUser command only works when Management Console is on same server as Management Service... TODO need to add ssh for remote access, or ask for adtabase connection details and just go and approve it oursevels (well, from the java code)
 #  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
   prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
