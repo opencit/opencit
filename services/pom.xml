@@ -16,10 +16,6 @@
 	</parent>
   
   <modules>
-	<module>asset-tag-model</module>
-	<module>asset-tag-dao</module>
-	<module>asset-tag-dao-jooq</module>
-	<module>asset-tag-service</module>
 	<module>mtwilson-trust-policy</module>
     <module>mtwilson-webservice-util</module>
     <module>mtwilson-http-security</module>
