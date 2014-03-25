@@ -6,6 +6,7 @@ package com.intel.mtwilson.shiro.jdbi;
 
 import com.intel.mtwilson.shiro.jdbi.model.*;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +35,7 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
  * @author jbuhacoff
  */
 @UseStringTemplate3StatementLocator
-@RegisterArgumentFactory({UUIDArgument.class, LocaleArgument.class, StatusArgument.class})
+@RegisterArgumentFactory({UUIDArgument.class, DateArgument.class, LocaleArgument.class, StatusArgument.class})
 @RegisterMapper({UserResultMapper.class,UserKeystoreResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
 public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
