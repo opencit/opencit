@@ -362,7 +362,7 @@ fi
 
 prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
-	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://a.b.c.d:9999)" ${ASSET_TAG_URL}
+	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
 	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
 	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
 	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
