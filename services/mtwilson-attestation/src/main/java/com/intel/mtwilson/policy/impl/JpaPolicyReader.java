@@ -32,6 +32,7 @@ import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.policy.rule.TagCertificateTrusted;
+import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -177,9 +178,9 @@ public class JpaPolicyReader {
         PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
         tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(tagPcrRule);
-        
+        /*
         // load the tag cacerts and create the tag trust rule   TODO  load the cacerts once and keep it in memory instead of reloading for every attestation, but need a way for admin to refresh the configuration at runtime without restartnig the server
-        try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
+        try(FileInputStream in = new FileInputStream(ResourceFinder.getFile("AssetTagCA.pem"))) { //My.configuration().getAssetTagCaCertificateFile())) {
             String text = IOUtils.toString(in);
             List<X509Certificate> tagAuthorities = X509Util.decodePemCertificates(text);
             TagCertificateTrusted tagTrustedRule = new TagCertificateTrusted(tagAuthorities.toArray(new X509Certificate[0]));
@@ -188,7 +189,7 @@ public class JpaPolicyReader {
         }
         catch(Exception e) {
             throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage()); // TODO: i18n
-        }
+        }*/
         return rules;
     }
 
