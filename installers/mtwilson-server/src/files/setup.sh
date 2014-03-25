@@ -730,12 +730,12 @@ prompt_with_default_password MTWILSON_TAG_API_PASS "Mtwilson Tag API Password: "
 update_property_in_file "mtwilson.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USER"
 update_property_in_file "mtwilson.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASS"
 
-prompt_with_default MTWILSON_TAG_KEYSTORE "Mtwilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
-prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mtwilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
-prompt_with_default_password MTWILSON_TAG_KEY_PASS "Mtwilson Tag Key Password: " $MTWILSON_TAG_KEY_PASS
-update_property_in_file "mtwilson.atag.keystore" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
-update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASS"
-update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASS"
+#prompt_with_default MTWILSON_TAG_KEYSTORE "Mtwilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
+#prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mtwilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
+#prompt_with_default_password MTWILSON_TAG_KEY_PASS "Mtwilson Tag Key Password: " $MTWILSON_TAG_KEY_PASS
+#update_property_in_file "mtwilson.atag.keystore" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
+#update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASS"
+#update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASS"
 
 MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
 prompt_with_default MTWILSON_TAG_HTML5_DIR "Mtwilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
@@ -759,18 +759,18 @@ update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.p
 update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "$TAG_VALIDITY_SECONDS"
 update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_ISSUER_DN"
 
-if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
-  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-  keytool=${JAVA_HOME}/bin/keytool
-  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASS -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
-  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS
-  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -out $CONFIG_DIR/serverAtag.pem
-fi
+#if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
+#  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+#  keytool=${JAVA_HOME}/bin/keytool
+#  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASS -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
+#  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS
+#  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -outform pem >> $CONFIG_DIR/tag-cacerts.pem
+#fi
 
 #call_setupcommand create-database
 call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
-call_tag_setupcommand tag-export-file cacerts | grep -v ":" > $CONFIG_DIR/AssetTagCA.pem
+call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
 
 #user is approved directly in TagCreateMtWilsonClient now
