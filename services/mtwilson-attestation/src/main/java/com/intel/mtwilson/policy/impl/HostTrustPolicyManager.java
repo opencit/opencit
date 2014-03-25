@@ -132,6 +132,7 @@ public class HostTrustPolicyManager {
                 log.info("Asset tag certificate not present for host {}.", host.getName());
             }
         } catch (Exception ex) {
+            log.error("Exception when looking up the asset tag whitelist.", ex);
             // We cannot do anything ... just log the error and proceed
             log.info("Error during look up of asset tag certificates for the host {}", host.getName());
         }

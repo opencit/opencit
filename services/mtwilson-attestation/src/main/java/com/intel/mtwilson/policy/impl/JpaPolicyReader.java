@@ -176,7 +176,7 @@ public class JpaPolicyReader {
         //PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
         PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
         tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
-        rules.add(tagPcrRule);
+        rules.add(tagPcrRule);   
         
         // load the tag cacerts and create the tag trust rule   TODO  load the cacerts once and keep it in memory instead of reloading for every attestation, but need a way for admin to refresh the configuration at runtime without restartnig the server
         try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {

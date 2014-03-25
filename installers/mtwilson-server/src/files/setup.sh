@@ -573,7 +573,8 @@ if using_glassfish; then
 	
     echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
     # glassfish install here
-    ./$glassfish_installer  #>> $INSTALL_LOG_FILE
+    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    glassfish_create_ssl_cert_prompt
     echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
     # end glassfish installer
   else
@@ -619,9 +620,8 @@ elif using_tomcat; then
 
     # tomcat install here
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-
-    ./$tomcat_installer  #>> $INSTALL_LOG_FILE
-       
+    ./$tomcat_installer  >> $INSTALL_LOG_FILE
+    tomcat_create_ssl_cert_prompt
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end tomcat install
   else

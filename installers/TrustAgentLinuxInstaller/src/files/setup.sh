@@ -370,7 +370,7 @@ if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; the
 	TPM_PASSWORD=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
 	UUID=`dmidecode |grep UUID | awk '{print $2}'`
 	echo "registering $TPM_PASSWORD to $UUID"
-	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data="" "$ASSET_TAG_URL/tpm-passwords?uuid=$UUID&password=$TPM_PASSWORD"
+	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
 fi
 
 
