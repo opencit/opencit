@@ -31,6 +31,23 @@
     <url-pattern>*.jsp</url-pattern>
   </filter-mapping>
   
+  <filter>
+      <filter-name>UrlRewriteFilter</filter-name>
+      <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+      <init-param>
+          <param-name>confPath</param-name>
+          <param-value>/WEB-INF/urlrewrite.xml</param-value>
+      </init-param>
+      <init-param>
+          <param-name>logLevel</param-name>
+          <param-value>DEBUG</param-value>
+      </init-param>
+  </filter>
+  <filter-mapping>
+      <filter-name>UrlRewriteFilter</filter-name>
+      <url-pattern>/v2proxy/*</url-pattern>
+  </filter-mapping>
+  
   <welcome-file-list>
   	<welcome-file>Login.jsp</welcome-file>
   </welcome-file-list>
