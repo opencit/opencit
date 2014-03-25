@@ -19,12 +19,12 @@
 								<th class="row2" data-i18n="table.host_name">Host Name</th>
 								<th class="row3">&nbsp;</th>
 								<th class="row4">&nbsp;</th>
-								<th class="row5" data-i18n="table.asset_tag">Asset Tag</th>
+								<th class="row5" data-i18n="table.asset_tag">Asset Tag Trust</th>
 								<!-- Soni_Begin_03/10/2012_added one nbsp in below line for bug 455 -->
-								<th class="row6">&nbsp;<span data-i18n="table.bios_trust_status">BIOS Trust Status</span></th>
+								<th class="row6">&nbsp;<span data-i18n="table.bios_trust_status">BIOS Trust</span></th>
 								<!--/* Soni_End_03/10/2012_added one nbsp in below line for bug 455 -->
-								<th class="row7" data-i18n="table.vmm_trust_status">VMM Trust Status</th>
-								<th class="row8" data-i18n="table.overall_trust_status">Overall Trust Status</th>								
+								<th class="row7" data-i18n="table.vmm_trust_status">VMM Trust</th>
+								<th class="row8" data-i18n="table.overall_trust_status">Platform Trust</th>								
 								<th class="row9" data-i18n="table.updated">Updated On</th>
 								<th class="row10" data-i18n="table.trust_status">Trust Status</th>
 								<th class="row11" data-i18n="table.trust_assertion">Trust Assertion</th>
