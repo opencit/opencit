@@ -493,7 +493,7 @@ public class AssetTagCertBO extends BaseBO{
             
             List<X509Certificate> atagCaCerts = null;
             try {
-                InputStream atagCaIn = new FileInputStream(ResourceFinder.getFile("AssetTagCA.pem")); 
+                InputStream atagCaIn = new FileInputStream(My.configuration().getAssetTagCaCertificateFile()); //ResourceFinder.getFile("AssetTagCA.pem")); 
                 //InputStream atagCaIn = new FileInputStream(new File("c:/development/AssetTagCA.pem")); 
                 atagCaCerts = X509Util.decodePemCertificates(IOUtils.toString(atagCaIn));
                 IOUtils.closeQuietly(atagCaIn);
