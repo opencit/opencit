@@ -4,27 +4,12 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author ssbangal
  */
-public class ApproveTagCertificateRequest extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public ApproveTagCertificateRequest(URL url) {
-        //super(url);
-    }
-
-    public ApproveTagCertificateRequest(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class ApproveTagCertificateRequest {
+        
     /**
      * This function provided the certificate request ID, and the certificate associated to it (provided
      * by an external CA), stores the certificate details in the database and updates the request status to

@@ -4,27 +4,12 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author ssbangal
  */
-public class ProvisionTagCertificate extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public ProvisionTagCertificate(URL url) {
-        //super(url);
-    }
-
-    public ProvisionTagCertificate(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class ProvisionTagCertificate {
+        
     /**
      * This function creates a new certificate with the provided key(attribute)-value pairs for the
      * specified host. Host can be provided either as a IP address or as the hardware UUID, which can
@@ -50,24 +35,19 @@ public class ProvisionTagCertificate extends MtWilsonClient {
      * https://192.168.1.101:8181/mtwilson/v2/tag-certificate-requests-rpc/provision?subject=2676ee69-e42f-461b-824f-a6ec3d2c08f4
      * <p>
      * <i>Sample XML Input</i><br>
-     * <selections xmlns="urn:mtwilson-tag-selection"><selection>
+     * {@code <selections xmlns="urn:mtwilson-tag-selection"><selection>
      * <attribute oid="2.5.4.789.1"><text>country=US</text></attribute>
      * <attribute oid="2.5.4.789.1"><text>state=CA</text></attribute>
      * <attribute oid="2.5.4.789.1"><text>city=Folsom</text></attribute>
      * <attribute oid="2.5.4.789.1"><text>city=Santa Clara</text></attribute>
      * <attribute oid="2.5.4.789.1"><text>customer=Coke</text></attribute>
      * <attribute oid="2.5.4.789.1"><text>customer=Pepsi</text></attribute>
-     * </selection></selections>
+     * </selection></selections> }
      * <p>
      * <i>Sample JSON Input</i><br>
-     * <selections xmlns="urn:mtwilson-tag-selection"><selection>
-     * <attribute oid="2.5.4.789.1"><text>country=US</text></attribute>
-     * <attribute oid="2.5.4.789.1"><text>state=CA</text></attribute>
-     * <attribute oid="2.5.4.789.1"><text>city=Folsom</text></attribute>
-     * <attribute oid="2.5.4.789.1"><text>city=Santa Clara</text></attribute>
-     * <attribute oid="2.5.4.789.1"><text>customer=Coke</text></attribute>
-     * <attribute oid="2.5.4.789.1"><text>customer=Pepsi</text></attribute>
-     * </selection></selections>
+     * {"selections":[{"attributes":[{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"customer=Coke"},"oid":"2.5.4.789.1"},
+     * {"text":{"value":"country=US"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"customer=Pepsi"},
+     * "oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
      * <p>
      * <i><u>Sample Output:</u></i><br>
      * The byte array of the certificate created.
