@@ -201,15 +201,15 @@ function provisionCert() {
    #here we need to read the xml from the file, escape the " with \ then build our string to send via wget
    encrypted=`head -n 1 $tagFile | grep "Content-Type: encrypted"`
    if [ -z $encrypted ]; then   # NOT encrypted
-     xmlData=`cat $tagFile | tr -d '\n'`
+     #xmlData=`cat $tagFile | tr -d '\n'`
      #json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-     echo "$WGET --header=\"Content-Type: application/xml\" --header=\"Accept: application/pkix-cert\" --post-data=\"$xmlData\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
-     $WGET --header="Content-Type: application/xml" --header="Accept: application/pkix-cert" --post-data="$xmlData" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
+     echo "$WGET --header=\"Content-Type: application/xml\" --header=\"Accept: application/pkix-cert\" --post-file=\"$tagFile\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
+     $WGET --header="Content-Type: application/xml" --header="Accept: application/pkix-cert" --post-file="$tagFile" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
    else   #encrypted
-     xmlData=`cat $tagFile | tr -d '\n'`
+     #xmlData=`cat $tagFile | tr -d '\n'`
      #json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-     echo "$WGET --header=\"Content-Type: message/rfc822\" --header=\"Accept: application/pkix-cert\" --post-data=\"$xmlData\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
-     $WGET --header="Content-Type: message/rfc822" --header="Accept: application/pkix-cert" --post-data="$xmlData" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
+     echo "$WGET --header=\"Content-Type: message/rfc822\" --header=\"Accept: application/pkix-cert\" --post-file=\"$tagFile\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
+     $WGET --header="Content-Type: message/rfc822" --header="Accept: application/pkix-cert" --post-file="$tagFile" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
    fi
  fi
 
