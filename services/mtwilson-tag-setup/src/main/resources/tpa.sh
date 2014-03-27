@@ -141,10 +141,14 @@ function createIndex4() {
 
 function getLocalTag() {
  functionReturn=0
- tagFile=$(dialog --stdout --backtitle "$TITLE" --stdout --title "Please choose a file" --fselect ~ 14 48)
- if [ $? -eq 1 ]; then 
-  functionReturn=1
-  return
+ if [ -f "$XML_FILE_LOCATION" ]; then
+   tagFile=$XML_FILE_LOCATION
+ else
+   tagFile=$(dialog --stdout --backtitle "$TITLE" --stdout --title "Please choose a file" --fselect ~ 14 48)
+   if [ $? -eq 1 ]; then 
+     functionReturn=1
+     return
+   fi
  fi
  isUsingXml=1
 }
@@ -192,8 +196,10 @@ function provisionCert() {
  fi
  if [ $isUsingXml == 0 ]; then
    if [ $autoSelect != 1 ]; then
-     tagSelectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
-     json='{"selections":[{"name":"'$tagSelectionName'"}]}'
+     if [ -z "$selectionName" ]; then
+       selectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
+     fi
+     json='{"selections":[{"name":"'$selectionName'"}]}'
    fi
    echo "$WGET --header=\"Content-Type: application/json\" --header=\"Accept: application/pkix-cert\" --post-data=\"$json\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
