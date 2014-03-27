@@ -6,7 +6,7 @@ package com.intel.mtwilson.tag.model;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.FilterCriteria;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 /**
  *
@@ -14,7 +14,7 @@ import javax.ws.rs.PathParam;
  */
 public class TpmPasswordFilterCriteria implements FilterCriteria<TpmPassword>{
     
-    @PathParam("id")
+    @QueryParam("id")
     public UUID id;
     
 }

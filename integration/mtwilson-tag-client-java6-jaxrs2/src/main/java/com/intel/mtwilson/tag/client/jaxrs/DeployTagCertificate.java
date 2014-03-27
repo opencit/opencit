@@ -4,27 +4,12 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author ssbangal
  */
-public class DeployTagCertificate extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public DeployTagCertificate(URL url) {
-        //super(url);
-    }
-
-    public DeployTagCertificate(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class DeployTagCertificate {
+        
     /**
      * This function verifies whether the certificate was created for the specified host and deploy the
      * certificate on the host if there is a match. 
