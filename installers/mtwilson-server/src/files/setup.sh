@@ -754,7 +754,7 @@ prompt_with_default TAG_ISSUER_DN "Tag issuer distinguished name: " ${TAG_ISSUER
 update_property_in_file "tag.provision.external" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_EXTERNAL"
 update_property_in_file "tag.provision.nocache" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_NOCACHE"
 update_property_in_file "tag.provision.xml.encryption.required" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_REQUIRED"
-update_property_in_file "tag.provision.xml.encryption.pasword" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_PASSWORD"
+update_property_in_file "tag.provision.xml.encryption.password" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_PASSWORD"
 update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_SELECTION_DEFAULT"
 update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "$TAG_VALIDITY_SECONDS"
 update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_ISSUER_DN"
