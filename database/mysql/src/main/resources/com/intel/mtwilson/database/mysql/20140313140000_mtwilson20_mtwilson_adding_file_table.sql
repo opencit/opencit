@@ -3,7 +3,7 @@
 -- This script creates the file table
 
 CREATE  TABLE `mw_as`.`mw_file` (
-  `id` BINARY(16) NOT NULL ,
+  `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NULL ,
   `contentType` VARCHAR(255) NULL ,
   `content` BLOB NULL ,

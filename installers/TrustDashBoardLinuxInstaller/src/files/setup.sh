@@ -85,9 +85,9 @@ chmod 700 "${package_var_dir}"
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x tdctl
 mkdir -p /usr/local/bin
-cp tdctl /usr/local/bin
+cp tdctl.sh /usr/local/bin/tdctl
+chmod +x /usr/local/bin/tdctl
 /usr/local/bin/tdctl setup
 register_startup_script /usr/local/bin/tdctl tdctl
 

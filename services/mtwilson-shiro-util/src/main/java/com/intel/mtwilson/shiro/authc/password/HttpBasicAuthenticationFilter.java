@@ -24,23 +24,20 @@ public class HttpBasicAuthenticationFilter extends BasicHttpAuthenticationFilter
     
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
-        log.debug("executeLogin");
         AuthenticationToken token = createToken(request, response);
         if (token == null) {
-            log.debug("executeLogin token is null");
             String msg = "createToken method implementation returned null. A valid non-null AuthenticationToken "
                     + "must be created in order to execute a login attempt.";
             throw new IllegalStateException(msg);
         }
-        log.debug("executeLogin authentication token {}", token.getClass().getName());
         try {
             Subject subject = getSubject(request, response);
             log.debug("executeLogin subject {}", subject.getClass().getName());
             subject.login(token);
-            log.debug("executeLogin subject login ok");
             return onLoginSuccess(token, subject, request, response);
         } catch (AuthenticationException e) {
-            log.debug("executeLogin subject login failed {}", e.getMessage());
+            log.debug("executeLogin subject login failed: {}", e.getMessage());
+            e.printStackTrace();
             return onLoginFailure(token, e, request, response);
         }
     }

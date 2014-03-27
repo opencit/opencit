@@ -128,7 +128,7 @@ public class BootstrapUser implements Command {
         // stdalex 1/16 jks2db!disk
         // load the new key
          ByteArrayResource certResource = new ByteArrayResource();
-         SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
+         SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString(),Role.AssetTagManagement.toString()});
          // Feb 12, 2014: Sudhir: Since the portal user would be created by the above call, we just need to update with the keystore.
          MwPortalUser pUser = portalUserJpa.findMwPortalUserByUserName(username);
          if(pUser != null){

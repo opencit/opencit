@@ -29,27 +29,27 @@ public class Files extends MtWilsonClient {
     
     public FileCollection searchFiles(FileFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        FileCollection files = getTargetPathWithQueryParams("files", criteria).request().accept(MediaType.APPLICATION_JSON).get(FileCollection.class);
+        FileCollection files = getTargetPathWithQueryParams("host-files", criteria).request().accept(MediaType.APPLICATION_JSON).get(FileCollection.class);
         return files;
     }
     public File retrieveFile(String id) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", id);
-        File file = getTarget().path("files/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).get(File.class);
+        File file = getTarget().path("host-files/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).get(File.class);
         return file;
     }
     public File createFile(File file) {
         log.debug("target: {}", getTarget().getUri().toString());
         /*
-        Response response = getTarget().path("files").request().post(Entity.entity(file, MediaType.APPLICATION_JSON));
+        Response response = getTarget().path("host-files").request().post(Entity.entity(file, MediaType.APPLICATION_JSON));
         if( response.hasEntity()) {
             log.debug("response has an entity");
             String test = response.readEntity(String.class); log.debug("Response = {}", test);
         }
         return null;
         */
-        File responseFile = getTarget().path("files").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(file)).readEntity(File.class);
+        File responseFile = getTarget().path("host-files").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(file)).readEntity(File.class);
         return responseFile;
     }
     

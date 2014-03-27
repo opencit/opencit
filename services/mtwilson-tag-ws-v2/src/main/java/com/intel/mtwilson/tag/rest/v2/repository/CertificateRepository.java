@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.tag.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
@@ -14,13 +16,15 @@ import com.intel.mtwilson.tag.model.CertificateCollection;
 import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateLocator;
 import java.sql.Timestamp;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CertificateRepository extends ServerResource implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
+public class CertificateRepository implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -37,13 +41,12 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
         CertificateCollection objCollection = new CertificateCollection();
         DSLContext jooq = null;
         
+        // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
+        
         try {
             jooq = TagJdbi.jooq();
             
-            SelectQuery sql = jooq.select()
-                    .from(MW_TAG_CERTIFICATE) // .join(CERTIFICATE_TAG_VALUE)
-                    //.on(CERTIFICATE_TAG_VALUE.CERTIFICATEREQUESTID.equal(CERTIFICATE.ID)))
-                    .getQuery();
+            SelectQuery sql = jooq.select().from(MW_TAG_CERTIFICATE).getQuery();
             if( criteria.id != null ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
@@ -51,13 +54,13 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
                 sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectEqualTo));
             }
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.contains(criteria.subjectContains));
             }
             if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerEqualTo));
             }
             if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.contains(criteria.issuerContains));
             }
             if( criteria.sha1 != null  ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equal(criteria.sha1.toHexString()));
@@ -78,38 +81,37 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if( criteria.revoked != null   ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
             }
-            sql.addOrderBy(MW_TAG_CERTIFICATE.ID);
+            sql.addOrderBy(MW_TAG_CERTIFICATE.SUBJECT);
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
-            UUID c = new UUID(); // id of the current certificate request object built, used to detect when it's time to build the next one
             for(Record r : result) {
                 Certificate certObj = new Certificate();
-                if( UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)) != c ) {
-                    c = UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID));
-                    try {
-                        log.debug("Creating certificate record at c={}", c);
-                        certObj.setCertificate((byte[])r.getValue(MW_TAG_CERTIFICATE.CERTIFICATE));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
-                        certObj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)));
-                        if( r.getValue(MW_TAG_CERTIFICATE.REVOKED) != null ) {
-                            certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
-                        }
-                        log.debug("Created certificate record {}", certObj.getId().toString());
-                        objCollection.getCertificates().add(certObj);
-                    }
-                    catch(Exception e) {
-                        log.error("Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
-                    }
+                try {
+                    certObj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE.ID)));
+                    certObj.setCertificate((byte[])r.getValue(MW_TAG_CERTIFICATE.CERTIFICATE));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
+                    certObj.setIssuer(r.getValue(MW_TAG_CERTIFICATE.ISSUER));
+                    certObj.setSubject(r.getValue(MW_TAG_CERTIFICATE.SUBJECT));
+                    certObj.setNotBefore(r.getValue(MW_TAG_CERTIFICATE.NOTBEFORE));
+                    certObj.setNotAfter(r.getValue(MW_TAG_CERTIFICATE.NOTAFTER));
+                    certObj.setSha1(Sha1Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA1)));
+                    certObj.setSha256(Sha256Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA256)));
+                    certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
+                    log.debug("Created certificate record {}", certObj.getId().toString());
+                    objCollection.getCertificates().add(certObj);
+                }
+                catch(Exception e) {
+                    log.error("Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
                 }
             }
             log.debug("Closing sql");
             sql.close();
             log.debug("Returning {} certificates", objCollection.getCertificates().size());
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }
@@ -123,11 +125,11 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if (obj != null) 
                 return obj;
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } 
         return null;
     }
@@ -142,14 +144,14 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if (obj != null)
                 dao.updateRevoked(item.getId(), item.isRevoked());
             else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object not found.");
+                throw new WebApplicationException("Object not found.", Response.Status.NOT_FOUND);
             }
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -157,15 +159,15 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
     public void create(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-            
+                        
             dao.insert(item.getId(), item.getCertificate(), item.getSha1().toHexString(), 
                     item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -179,13 +181,13 @@ public class CertificateRepository extends ServerResource implements SimpleRepos
             if (obj != null) {
                 dao.delete(locator.id);
             }else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Certificate not found.");
+                throw new WebApplicationException("Certificate not found.", Response.Status.NOT_FOUND);
             }
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         } finally {
             if (dao != null)
                 dao.close();

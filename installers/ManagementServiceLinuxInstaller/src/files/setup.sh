@@ -76,9 +76,9 @@ $mtwilson erase-users --user="$username" > /dev/null 2>&1
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x msctl
 mkdir -p /usr/local/bin
-cp msctl /usr/local/bin
+cp msctl.sh /usr/local/bin/msctl
+chmod +x /usr/local/bin/msctl
 /usr/local/bin/msctl setup
 register_startup_script /usr/local/bin/msctl msctl >> $INSTALL_LOG_FILE
 

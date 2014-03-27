@@ -12,6 +12,7 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,6 +20,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.skife.jdbi.v2.DBI;
@@ -97,10 +99,15 @@ public class TagJdbi {
         return dbi.open(TpmPasswordDAO.class);
     }
 
+    public static FileDAO fileDao() throws SQLException {
+        DBI dbi = new DBI(getDataSource());
+        return dbi.open(FileDAO.class);
+    }
+
     public static DSLContext jooq() throws SQLException, IOException {
         // omits the schema name from generated sql ; when we connect to the database we already specify a schema so this settings avoid 
         // redundancy in the sql and allows the administrator to change the database name without breaking the application
-        Settings settings = new Settings().withRenderSchema(false);
+        Settings settings = new Settings().withRenderSchema(false).withRenderNameStyle(RenderNameStyle.LOWER);
         SQLDialect dbDialect = getSqlDialect();
         // throws SQLException; Note that the DSLContext doesn't close the connection. We'll have to do that ourselves.
         DSLContext jooq = DSL.using(TagJdbi.getConnection(), dbDialect, settings);
@@ -108,16 +115,16 @@ public class TagJdbi {
     }
     
     public static SQLDialect getSqlDialect() throws IOException {
-        String driver = My.jdbc().driver();
-        if( "mysql".equalsIgnoreCase(driver) ) {
+        String protocol = My.configuration().getDatabaseProtocol(); 
+        if( "mysql".equalsIgnoreCase(protocol) ) {
             return SQLDialect.MYSQL;
         }
-        if( "postgresql".equalsIgnoreCase(driver) || "postgres".equalsIgnoreCase(driver) ) {
+        if( "postgresql".equalsIgnoreCase(protocol) || "postgres".equalsIgnoreCase(protocol) ) {
             return SQLDialect.POSTGRES;
         }
-        if( "derby".equalsIgnoreCase(driver) ) {
+        if( "derby".equalsIgnoreCase(protocol) ) {
             return SQLDialect.DERBY;
         }
-        return SQLDialect.valueOf(driver);
+        return SQLDialect.valueOf(protocol);
     }
 }

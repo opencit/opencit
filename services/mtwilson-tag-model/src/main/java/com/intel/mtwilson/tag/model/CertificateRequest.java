@@ -15,13 +15,11 @@ import com.intel.mtwilson.jersey.Document;
 @JacksonXmlRootElement(localName="certificate_request")
 public class CertificateRequest extends Document{
         
-    private String subject;
+    private String subject; // from the query parameter   POST /certificate-requests?subject={my-hardware-uuid}   and request body is the selection xml or json 
     private String status;
-    private String authorityName;
-    private UUID certificateId;
-    private UUID selectionId;
-    private String selectionName; // tags to include in the certificate
-
+    private byte[] content;// the selections xml format;  may be encrypted
+    private String contentType; //   application/xml for plain xml,  message/rfc822 for the encrypted xml with headers,  application/json  for the json request from the UI
+    
     public String getSubject() {
         return subject;
     }
@@ -38,37 +36,21 @@ public class CertificateRequest extends Document{
         this.status = status;
     }
 
-    public String getAuthorityName() {
-        return authorityName;
+    public byte[] getContent() {
+        return content;
     }
 
-    public void setAuthorityName(String authorityName) {
-        this.authorityName = authorityName;
+    public void setContent(byte[] content) {
+        this.content = content;
     }
 
-    public UUID getCertificateId() {
-        return certificateId;
+    public String getContentType() {
+        return contentType;
     }
 
-    public void setCertificateId(UUID certificateId) {
-        this.certificateId = certificateId;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
-
-    public UUID getSelectionId() {
-        return selectionId;
-    }
-
-    public void setSelectionId(UUID selectionId) {
-        this.selectionId = selectionId;
-    }
-
     
-    public String getSelectionName() {
-        return selectionName;
-    }
-
-    public void setSelectionName(String selectionName) {
-        this.selectionName = selectionName;
-    }
     
 }

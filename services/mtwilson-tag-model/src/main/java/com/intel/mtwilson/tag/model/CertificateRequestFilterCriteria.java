@@ -20,11 +20,9 @@ public class CertificateRequestFilterCriteria implements FilterCriteria<Certific
     public String subjectEqualTo;
     @QueryParam("subjectContains")
     public String subjectContains;
-    @QueryParam("selectionEqualTo")
-    public String selectionEqualTo;
-    @QueryParam("selectionContains")
-    public String selectionContains;
     @QueryParam("statusEqualTo")
-    public String statusEqualTo;
+    public String statusEqualTo;    
+    @QueryParam("contentTypeEqualTo")
+    public String contentTypeEqualTo;
     
 }

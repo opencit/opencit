@@ -25,8 +25,33 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jdbi-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jooq-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-dao-jooq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-tag-selection-xml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-tag-selection-json</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -43,6 +68,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -93,7 +123,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -138,12 +167,12 @@
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-        -->
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
             <version>2.5.1-1</version>
         </dependency>
+        -->
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -189,13 +218,11 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
-            <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
             <scope>provided</scope>
         </dependency>
         <!--
@@ -251,6 +278,7 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!--
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet</artifactId>  
@@ -271,18 +299,17 @@
             <artifactId>org.restlet.ext.jetty</artifactId>  
             <version>2.2-M4</version>
         </dependency>
-        <!--
         <dependency>  
           <groupId>org.restlet.jse</groupId>  
           <artifactId>org.restlet.ext.simple</artifactId>  
           <version>2.2-M4</version>
         </dependency>
-        -->
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet.ext.ssl</artifactId>  
             <version>2.2-M4</version>
         </dependency>
+        -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -497,11 +524,13 @@
         
         
         <!-- grizzly embedded webserver -->
+        <!--
         <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-servlet-webserver</artifactId>
             <version>1.9.56</version>
         </dependency>
+        -->
         <!-- end grizzly -->        
 
         <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->

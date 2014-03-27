@@ -26,11 +26,11 @@ public class SelectionKvAttributeCollection extends DocumentCollection<Selection
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="selection_kv_attributes")
     @JacksonXmlProperty(localName="selection_kv_attribute")    
-    public List<SelectionKvAttribute> getSelectionTagValues() { return selectionKvAttributes; }
+    public List<SelectionKvAttribute> getSelectionKvAttributeValues() { return selectionKvAttributes; }
 
     @Override
     public List<SelectionKvAttribute> getDocuments() {
-        return getSelectionTagValues();
+        return getSelectionKvAttributeValues();
     }
     
 }

@@ -30,12 +30,15 @@ public class UserLoginCertificateResultMapper implements ResultSetMapper<UserLog
 //        UUID uuid = UUID.valueOf(rs.getBytes("id")); // use this when uuid is a binary(mysql) or uuid(postgresql) type in database
 //        UUID uuid = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
+        userLoginCertificate.setId(UUID.valueOf(rs.getString("id")));
 //        role.setId(UUID.valueOf(rs.getBytes("id"))); // would work for mysql if using binary(16) for uuid field
-        userLoginCertificate.setId(UUID.valueOf((java.util.UUID)rs.getObject("id"))); // works for postgresql  when using uuid field
+//        userLoginCertificate.setId(UUID.valueOf((java.util.UUID)rs.getObject("id"))); // works for postgresql  when using uuid field
 //        role.setUserId(UUID.valueOf(rs.getBytes("user_id"))); // would work for mysql if using binary(16) for uuid field
-        userLoginCertificate.setUserId(UUID.valueOf((java.util.UUID)rs.getObject("user_id"))); // works for postgresql  when using uuid field
+//        userLoginCertificate.setUserId(UUID.valueOf((java.util.UUID)rs.getObject("user_id"))); // works for postgresql  when using uuid field
+        userLoginCertificate.setUserId(UUID.valueOf(rs.getString("user_id")));
         userLoginCertificate.setCertificate(rs.getBytes("certificate"));
         userLoginCertificate.setSha1Hash(rs.getBytes("sha1_hash"));
+        userLoginCertificate.setSha256Hash(rs.getBytes("sha256_hash"));
         userLoginCertificate.setExpires(rs.getDate("expires"));
         userLoginCertificate.setEnabled(rs.getBoolean("enabled"));
         userLoginCertificate.setStatus(Status.valueOf(rs.getString("status")));

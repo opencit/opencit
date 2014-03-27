@@ -6,6 +6,7 @@ package com.intel.mtwilson.shiro.jdbi;
 
 import com.intel.mtwilson.shiro.jdbi.model.*;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,8 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
+import com.intel.mtwilson.jdbi.util.UUIDArgument;
+import org.skife.jdbi.v2.sqlobject.BindBean;
 
 /**
  * References:
@@ -32,7 +35,7 @@ import org.skife.jdbi.v2.unstable.BindIn;
  * @author jbuhacoff
  */
 @UseStringTemplate3StatementLocator
-@RegisterArgumentFactory({UUIDArgument.class, LocaleArgument.class, StatusArgument.class})
+@RegisterArgumentFactory({UUIDArgument.class, DateArgument.class, LocaleArgument.class, StatusArgument.class})
 @RegisterMapper({UserResultMapper.class,UserKeystoreResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
 public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
@@ -53,6 +56,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user (id, username, locale, enabled, status, comment) values (:id, :username, :locale, :enabled, :status, :comment)")
     void insertUser(@Bind("id") UUID id, @Bind("username") String username, @Bind("locale") Locale locale, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
 
+    @SqlUpdate("insert into mw_user (id, username, locale, enabled, status, comment) values (:id, :username, :locale, :enabled, :status, :comment)")
+    void insertUser(@BindBean User user);
+    
     @SqlUpdate("update mw_user set locale=:locale, comment=:comment WHERE id=:id")
     void updateUser(@Bind("id") UUID id, @Bind("locale") Locale locale, @Bind("comment") String comment);
 
@@ -177,13 +183,13 @@ public interface LoginDAO extends Closeable {
   comment text,
      * 
      */
-    @SqlQuery("select id, user_id, certificate, sha1_hash, expires, enabled, status, comment from mw_user_login_password where id=:id")
+    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_password where id=:id")
     UserLoginCertificate findUserLoginCertificateById(@Bind("id") UUID id);
 
-    @SqlQuery("select id, user_id, certificate, sha1_hash, expires, enabled, status, comment from mw_user_login_password where user_id=:user_id")
+    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_password where user_id=:user_id")
     UserLoginCertificate findUserLoginCertificateByUserId(@Bind("user_id") UUID userId);
     
-    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.username=:username")
+    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled,  mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.username=:username")
     UserLoginCertificate findUserLoginCertificateByUsername(@Bind("username") String username);
 
     @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha1_hash=:fingerprint")
@@ -192,8 +198,8 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha256_hash=:fingerprint")
     UserLoginCertificate findUserLoginCertificateBySha256(@Bind("fingerprint") byte[] fingerprint);    
     
-    @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :expires, :enabled, :status, :comment)")
-    void insertUserLoginCertificate(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("certificate") byte[] certificate, @Bind("sha1_hash") byte[] sha1Hash, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
+    @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :sha256_hash, :expires, :enabled, :status, :comment)")
+    void insertUserLoginCertificate(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("certificate") byte[] certificate, @Bind("sha1_hash") byte[] sha1Hash, @Bind("sha256_hash") byte[] sha256Hash, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
     
     @SqlUpdate("insert into mw_user_login_certificate_role (login_certificate_id, role_id) values (:login_certificate_id, :role_id)")
     void insertUserLoginCertificateRole(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);

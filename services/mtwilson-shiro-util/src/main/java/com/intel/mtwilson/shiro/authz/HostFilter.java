@@ -89,6 +89,7 @@ public class HostFilter extends AuthorizationFilter {
         if (StringUtils.hasText(getUnauthorizedUrl())) {
             WebUtils.issueRedirect(request, response, getUnauthorizedUrl());
         } else {
+            log.info("Access denied to unauthorized client {}", request.getRemoteAddr());
             WebUtils.toHttp(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
         }

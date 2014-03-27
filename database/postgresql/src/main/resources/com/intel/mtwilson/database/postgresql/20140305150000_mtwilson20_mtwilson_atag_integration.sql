@@ -2,31 +2,31 @@
 
 -- This script creates the tables required for integrating asset tag with mt wilson
 
-CREATE  TABLE mw_tag_tpm_password (
-  id UUID NOT NULL,
+CREATE  TABLE mw_host_tpm_password (
+  id CHAR(36) NOT NULL,
   password VARCHAR(255) NOT NULL ,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_kvattribute (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
   value VARCHAR(255) NOT NULL ,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_selection (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
   description TEXT NULL,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_selection_kvattribute (
-  id UUID NOT NULL,
-  selectionId UUID NOT NULL ,
-  kvAttributeId UUID NOT NULL ,
+  id CHAR(36) NOT NULL,
+  selectionId CHAR(36) NOT NULL ,
+  kvAttributeId CHAR(36) NOT NULL ,
   PRIMARY KEY (id) );
 
 CREATE  TABLE mw_tag_certificate (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   certificate BYTEA NOT NULL ,
   sha1 CHAR(40) NOT NULL ,
   sha256 CHAR(64) NOT NULL ,
@@ -38,18 +38,19 @@ CREATE  TABLE mw_tag_certificate (
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_certificate_request (
-  id UUID NOT NULL,
+  id CHAR(36) NOT NULL,
   subject VARCHAR(255) NOT NULL ,
-  selectionId UUID NOT NULL ,
-  certificateId UUID NULL , 
   status VARCHAR(255) NOT NULL ,
-  authorityName VARCHAR(255) NULL ,
+  content bytea NOT NULL,
+  contentType VARCHAR(255) NOT NULL,
   PRIMARY KEY (id) );
-  
-CREATE  TABLE mw_tag_configuration (
-  id UUID NOT NULL,
+
+-- need to drop earlier version of table mw_configuration from 20120920085200
+DROP TABLE mw_configuration;
+CREATE  TABLE mw_configuration (
+  id CHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL ,
-  content BYTEA DEFAULT NULL ,
+  content TEXT DEFAULT NULL ,
   PRIMARY KEY (id) );
   
 INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140305150000,NOW(),'Patch for creating the tables for migrating asset tag to mtwilson database.');

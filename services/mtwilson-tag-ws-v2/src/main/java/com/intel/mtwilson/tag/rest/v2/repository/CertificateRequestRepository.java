@@ -4,7 +4,12 @@
  */
 package com.intel.mtwilson.tag.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
+import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
+import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE_REQUEST;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
@@ -15,13 +20,15 @@ import com.intel.mtwilson.tag.model.CertificateRequestCollection;
 import com.intel.mtwilson.tag.model.CertificateRequestFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateRequestLocator;
 import com.intel.mtwilson.tag.model.Selection;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CertificateRequestRepository extends ServerResource implements SimpleRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
+public class CertificateRequestRepository implements SimpleRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -55,12 +62,6 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
                 sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectContains));
             }
-            if( criteria.selectionEqualTo != null  && criteria.selectionEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionEqualTo));
-            }
-            if( criteria.selectionContains != null  && criteria.selectionContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.selectionContains));
-            }
             if( criteria.statusEqualTo != null  && criteria.statusEqualTo.length() > 0 ) {
                 sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equal(criteria.statusEqualTo));
             }
@@ -75,20 +76,18 @@ public class CertificateRequestRepository extends ServerResource implements Simp
                     CertificateRequest obj = new CertificateRequest();
                     obj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)));
                     obj.setSubject(r.getValue(MW_TAG_CERTIFICATE_REQUEST.SUBJECT));
-                    obj.setSelectionId(UUID.valueOf((r.getValue(MW_TAG_CERTIFICATE_REQUEST.SELECTIONID))));
                     obj.setStatus(r.getValue(MW_TAG_CERTIFICATE_REQUEST.STATUS));
-                    if( r.getValue(MW_TAG_CERTIFICATE_REQUEST.CERTIFICATEID) != null ) { // a Long object, can be null
-                        obj.setCertificateId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CERTIFICATEID))); // a long primitive, cannot set to null
-                    }
-                    objCollection.getCertificates().add(obj);
+                    obj.setContent(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CONTENT));
+                    obj.setContentType(r.getValue(MW_TAG_CERTIFICATE_REQUEST.CONTENTTYPE));
+                    objCollection.getCertificateRequests().add(obj);
                 }
             }
             sql.close();
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }
@@ -101,11 +100,11 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             if (obj != null) {
                 return obj;
             }
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }
         return null;
     }
@@ -116,49 +115,76 @@ public class CertificateRequestRepository extends ServerResource implements Simp
             CertificateRequest obj = certRequestDao.findById(item.getId());
             if (obj == null) {
                 log.error("Object with specified id does not exist in the system.");
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "No matching certificate request found in the system.");
+                throw new WebApplicationException("No matching certificate request found in the system.", Response.Status.NOT_FOUND);
             }
-            
-            // Let us check what parameter the user wants to update
-            if (item.getAuthorityName() != null && !item.getAuthorityName().isEmpty())
-                certRequestDao.updateAuthority(item.getId(), item.getAuthorityName());
-            
-            if (item.getCertificateId() != null)
-                certRequestDao.updateApproved(item.getId(), item.getCertificateId());
-            
+                        
             if (item.getStatus() != null && !item.getStatus().isEmpty())
                 certRequestDao.updateStatus(item.getId(), item.getStatus());
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
+    
+    // similar to ImportConfig command in mtwilson-console
+    public PasswordProtection getPasswordProtection() {
+            PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
+            if( !protection.isAvailable() ) {
+                protection = PasswordProtectionBuilder.factory().aes(128).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
+            }
+        return protection;
+    }
+    protected void encrypt(CertificateRequest certificateRequest) throws Exception {
+        byte[] plaintext = certificateRequest.getContent();
+        
+            // NOTE: the base64-encoded value of mtwilson.as.dek is used as the encryption password;  this is different than using the decoded value as the aes-128 key which is currently done for attestation service host connection info
+            ByteArrayResource resource = new ByteArrayResource();
+            PasswordEncryptedFile passwordEncryptedFile = new PasswordEncryptedFile(resource, My.configuration().getDataEncryptionKeyBase64(), getPasswordProtection());
+            passwordEncryptedFile.encrypt(plaintext); // saves it to resource
+            
+            certificateRequest.setContent(resource.toByteArray()); // encrypted xml file wrapped in rfc822-style message format which indicates the encryption settings
+            certificateRequest.setContentType("message/rfc822"); 
+        
+            // TODO:  PasswordEncryptedFile currently doesn't support passing the plaintext content type, but when it does we need ot pass it so it will be mentioned in the encrypted file's headers, so that we can check it when we decrypt later (to ensure it's application/xml before we try to parse it)
+            
+    }
+    protected void decrypt(CertificateRequest certificateRequest) throws Exception {
+            ByteArrayResource resource = new ByteArrayResource(certificateRequest.getContent());
+            PasswordEncryptedFile passwordEncryptedFile = new PasswordEncryptedFile(resource, My.configuration().getDataEncryptionKeyBase64());
+            byte[] plaintext = passwordEncryptedFile.decrypt(); 
+            
+            certificateRequest.setContent(plaintext); 
+            certificateRequest.setContentType("application/xml"); 
+        
+            // TODO:  PasswordEncryptedFile currently doesn't provide us the plaintext content type, but when it does we need to check it after we decrypt  and set it on the request object
+        
+    }
+    
     @Override
     public void create(CertificateRequest item) {
         
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao(); 
                 SelectionDAO selectionDao = TagJdbi.selectionDao()) {
-            
-            // Since the user would have specified the selectin name, we need to get the selection id first
-            Selection selectionObj = selectionDao.findByName(item.getSelectionName());
-            if( selectionObj == null) {
-                log.error("Selection {} is not available.", item.getSelectionName());
-                setStatus(Status.SERVER_ERROR_INTERNAL);  // cannot make a certificate request without a valid selection
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Specified selection does not exist in the system.");
+                        
+            // Since this is the new certificate request, the certificate id would be null.
+            if( item.getStatus() == null || item.getStatus().isEmpty() ) { 
+                item.setStatus("New");
             }
             
-            // Since this is the new certificate request, the certificate id would be null.
-            certRequestDao.insert(item.getId(), item.getSubject(), selectionObj.getId(), null, null);
+            encrypt(item);
             
-        } catch (ResourceException aex) {
+//            certRequestDao.insert(item.getId().toString(), item.getSubject(), selectionObj.getId().toString(), null, null);
+            certRequestDao.insert(item);
+            
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate request creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }       
     }
 
@@ -168,13 +194,13 @@ public class CertificateRequestRepository extends ServerResource implements Simp
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
             CertificateRequest obj = certRequestDao.findById(locator.id);
             if (obj != null) {
-                certRequestDao.delete(locator.id);
+                certRequestDao.deleteById(locator.id);
             }
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }       
     }
     

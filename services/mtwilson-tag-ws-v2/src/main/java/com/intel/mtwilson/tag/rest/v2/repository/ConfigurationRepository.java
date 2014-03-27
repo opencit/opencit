@@ -15,13 +15,15 @@ import com.intel.mtwilson.tag.model.ConfigurationCollection;
 import com.intel.mtwilson.tag.model.ConfigurationFilterCriteria;
 import com.intel.mtwilson.tag.model.ConfigurationLocator;
 import java.io.IOException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class ConfigurationRepository extends ServerResource implements SimpleRepository<Configuration, ConfigurationCollection, ConfigurationFilterCriteria, ConfigurationLocator> {
+public class ConfigurationRepository implements SimpleRepository<Configuration, ConfigurationCollection, ConfigurationFilterCriteria, ConfigurationLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
@@ -43,7 +45,6 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
             
             SelectQuery sql = jooq.select().from(MW_CONFIGURATION).getQuery();
             if( criteria.id != null ) {
-    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
                 sql.addConditions(MW_CONFIGURATION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
@@ -51,13 +52,9 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
             }
             if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
                 sql.addConditions(MW_CONFIGURATION.NAME.contains(criteria.nameContains));
-            }/*
-            if( query.contentTypeEqualTo != null && query.contentTypeEqualTo.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.CONTENTTYPE.equal(query.contentTypeEqualTo));
-            }*/
+            }
             Result<Record> result = sql.fetch();
-            com.intel.mtwilson.atag.model.Configuration[] configurations = new com.intel.mtwilson.atag.model.Configuration[result.size()];
-            log.debug("Got {} records", configurations.length);
+            log.debug("Got {} records", result.size());
             for(Record r : result) {
                 Configuration configObj = new Configuration();
                 configObj.setId(UUID.valueOf(r.getValue(MW_CONFIGURATION.ID)));
@@ -72,18 +69,31 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
             }
             sql.close();
 
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during configuration search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return objCollection;
     }
 
     @Override
     public Configuration retrieve(ConfigurationLocator locator) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if( locator == null || locator.id == null ) { return null; }
+        
+        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {            
+            Configuration obj = dao.findById(locator.id);
+            if (obj != null) {
+                return obj;
+            }
+        } catch (WebApplicationException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during configuration deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }        
+        return null;
     }
 
     @Override
@@ -93,18 +103,18 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
 
             Configuration existingConfiguration = dao.findById(item.getId());
             if( existingConfiguration == null ) {
-                setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Specified configuration does not exist in the system.");                
+                Response.status(Response.Status.NOT_FOUND);
+                throw new WebApplicationException("Specified configuration does not exist in the system.", Response.Status.NOT_FOUND);
             }
             
             dao.update(item.getId(), item.getName(), item.getXmlContent());
             Global.reset(); // new configuration will take effect next time it is needed (if it's the active one)
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during configuration update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }       
     }
 
@@ -112,33 +122,33 @@ public class ConfigurationRepository extends ServerResource implements SimpleRep
     public void create(Configuration item) {
         
         try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
-
-            dao.insert(item.getId(), item.getName(), item.getXmlContent());                        
+            Configuration obj = dao.findById(item.getId());
+            if (obj == null) {
+                dao.insert(item.getId(), item.getName(), item.getXmlContent());                        
+            }
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during configuration creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
     @Override
     public void delete(ConfigurationLocator locator) {
         if( locator == null || locator.id == null ) { return; }
-        ConfigurationDAO dao = null;
         
-        try {
-            dao = TagJdbi.configurationDao();
-            dao.delete(locator.id);
-        } catch (ResourceException aex) {
+        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {            
+            Configuration obj = dao.findById(locator.id);
+            if (obj != null) {
+                dao.delete(locator.id);
+            }
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during configuration deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
-        } finally {
-            if (dao != null)
-                dao.close();
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
     

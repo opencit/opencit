@@ -10,6 +10,7 @@ response.setHeader("Content-Disposition",
 <html>
 <head>
     <meta http-equiv="Content-Type" content="application/octet-stream; charset=ISO-8859-1">
+    <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
     <title data-i18n="title.cert_download">Download Certificate</title>
 </head>
 <body onload="fnLookforRootCACertificate()">

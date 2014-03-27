@@ -22,8 +22,8 @@ public class UserLoginCertificateRoleResultMapper implements ResultSetMapper<Use
 //        UUID uuid = UUID.valueOf(rs.getBytes("id")); // use this when uuid is a binary(mysql) or uuid(postgresql) type in database
 //        UUID uuid = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         UserLoginCertificateRole role = new UserLoginCertificateRole();
-        role.setLoginCertificateId(UUID.valueOf(rs.getBytes("login_certificate_id")));
-        role.setRoleId(UUID.valueOf(rs.getBytes("role_id")));
+        role.setLoginCertificateId(UUID.valueOf(rs.getString("login_certificate_id")));
+        role.setRoleId(UUID.valueOf(rs.getString("role_id")));
         return role;
     }
     

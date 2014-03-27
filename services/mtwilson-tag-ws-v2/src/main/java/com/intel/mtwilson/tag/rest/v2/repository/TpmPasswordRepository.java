@@ -11,9 +11,11 @@ import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.tag.model.TpmPasswordCollection;
 import com.intel.mtwilson.tag.model.TpmPasswordFilterCriteria;
 import com.intel.mtwilson.tag.model.TpmPasswordLocator;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-import org.restlet.resource.ServerResource;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+//import org.restlet.data.Status;
+//import org.restlet.resource.ResourceException;
+//import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,33 +23,30 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class TpmPasswordRepository extends ServerResource implements SimpleRepository<TpmPassword, TpmPasswordCollection, TpmPasswordFilterCriteria, TpmPasswordLocator> {
+public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmPasswordCollection, TpmPasswordFilterCriteria, TpmPasswordLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
     public TpmPasswordCollection search(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection objCollection = new TpmPasswordCollection();
-        TpmPasswordDAO dao = null;
         
-        try {
-            dao = TagJdbi.tpmPasswordDao();
+        try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
+            if (criteria.id == null) {
+                log.error("Search criteria is not specified.");
+                throw new WebApplicationException("Search criteria is not specified.", Response.Status.BAD_REQUEST);
+            }
+                
             TpmPassword obj = dao.findById(criteria.id);
-            if (obj != null){
+            if (obj != null)
                 objCollection.getTpmPasswords().add(obj);
-            } else {
-                log.debug("tpm-password did not get any results back for {}.", criteria.id.toString());
-                setStatus(Status.CLIENT_ERROR_NOT_FOUND);
-            }                
-        } catch (ResourceException aex) {
+
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during tpm password search.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
-        } finally {
-            if (dao != null)
-                dao.close();
-        }        
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }       
         return objCollection;
     }
 
@@ -60,11 +59,11 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
             if (obj != null)
                 return obj;
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
         return null;
     }
@@ -77,14 +76,14 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
             if (obj != null)
                 dao.update(item.getId(), item.getPassword());
             else {
-                throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Object with the specified id does not exist.");
+                throw new WebApplicationException("Object with the specified id does not exist.", Response.Status.NOT_FOUND);
             }
                                     
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute update.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -97,14 +96,14 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
             if (obj == null){
                 dao.insert(item.getId(), item.getPassword());
             } else {
-                throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Object with specified id already exists.");
+                throw new WebApplicationException("Object with specified id already exists.", Response.Status.CONFLICT);
             }
                         
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute creation.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
 
@@ -116,11 +115,11 @@ public class TpmPasswordRepository extends ServerResource implements SimpleRepos
             
             dao.delete(locator.id);
             
-        } catch (ResourceException aex) {
+        } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute deletion.", ex);
-            throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Please see the server log for more details.");
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
     

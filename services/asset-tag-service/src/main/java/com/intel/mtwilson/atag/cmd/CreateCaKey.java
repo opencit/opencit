@@ -10,15 +10,18 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.atag.AtagCommand;
 import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.model.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,7 @@ public class CreateCaKey extends AtagCommand {
             dn = args[0];
         } 
         else {
-            dn = "CN=asset-tag-service,OU=mtwilson";
+            dn = "CN=asset-tag-service,OU=mtwilson"; // TODO:   use  TagConfiguration getTagIssuer()
         }
         
         // create a new key pair
@@ -92,8 +95,13 @@ public class CreateCaKey extends AtagCommand {
             Derby.fileDao().insert(new UUID(), CACERTS_FILE, "text/plain", cacertPemContent);
         }
         else {
-            // append new cacert to existing file
-            Derby.fileDao().update(cacertsFile.getId(), CACERTS_FILE, "text/plain", ByteArray.concat(cacertsFile.getContent(), cacertPemContent));
+            // append new cacert to existing file in database
+            byte[] content = ByteArray.concat(cacertsFile.getContent(), cacertPemContent);
+            Derby.fileDao().update(cacertsFile.getId(), CACERTS_FILE, "text/plain", content);
+            // and write to disk also for easy sharing with mtwilson: tag-cacerts.pem
+            try(FileOutputStream out = new FileOutputStream(My.configuration().getAssetTagCaCertificateFile())) {
+                IOUtils.write(content, out);
+            }
         }
         
         Derby.stopDatabase();

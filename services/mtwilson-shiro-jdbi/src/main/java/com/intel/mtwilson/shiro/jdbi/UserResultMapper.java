@@ -24,7 +24,7 @@ public class UserResultMapper implements ResultSetMapper<User> {
 //        UUID uuid = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         User user = new User();
 //        role.setId(UUID.valueOf(rs.getBytes("id"))); // would work for mysql if using binary(16) for uuid field
-        user.setId(UUID.valueOf((java.util.UUID)rs.getObject("id"))); // works for postgresql  when using uuid field
+        user.setId(UUID.valueOf(rs.getString("id"))); // works for postgresql  when using uuid field
         user.setUsername(rs.getString("username"));
         user.setComment(rs.getString("comment"));
         if( rs.getString("locale") != null ) {

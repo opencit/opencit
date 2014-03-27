@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 @V2
 //@Stateless
-@Path("/configurations") 
+@Path("/configurations_unused") 
 public class ConfigurationResource extends AbstractResource<Configuration,ConfigurationCollection,ConfigurationFilterCriteria,NoLinks<Configuration>> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationResource.class);
     private static final Pattern xmlTagName = Pattern.compile("(?:^[a-z].*)");

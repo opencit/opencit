@@ -145,9 +145,10 @@ if [ ! -f "${intel_conf_dir}/logback.xml" ]; then
 fi
 
 # copy control scripts to /usr/local/bin
-chmod 700 tagent pcakey
 mkdir -p /usr/local/bin
-cp tagent pcakey /usr/local/bin
+cp tagent.sh /usr/local/bin/tagent
+cp pcakey.sh /usr/local/bin/pcakey
+chmod 700 /usr/local/bin/tagent /usr/local/bin/pcakey
 
 #module attestation script
 chmod 755 module_analysis.sh
@@ -361,7 +362,7 @@ fi
 
 prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
-	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://a.b.c.d:9999)" ${ASSET_TAG_URL}
+	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
 	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
 	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
 	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
@@ -369,7 +370,7 @@ if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; the
 	TPM_PASSWORD=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
 	UUID=`dmidecode |grep UUID | awk '{print $2}'`
 	echo "registering $TPM_PASSWORD to $UUID"
-	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data="" "$ASSET_TAG_URL/tpm-passwords?uuid=$UUID&password=$TPM_PASSWORD"
+	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
 fi
 
 

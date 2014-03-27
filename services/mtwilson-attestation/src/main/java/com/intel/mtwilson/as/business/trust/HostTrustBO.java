@@ -624,7 +624,15 @@ public class HostTrustBO extends BaseBO {
         log.debug( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
         TrustReport trustReport = getTrustReportForHost(tblHosts, hostId);
-        
+        List<RuleResult> results = trustReport.getResults();
+        for (RuleResult res : results) {
+            log.debug("Trust Report Rule Name: {}", res.getRuleName());
+            if (!res.isTrusted()) {
+                for (Fault f : res.getFaults()) {
+                    log.debug("Trust report|Fault Name: {} | Fault Cause: {}", f.getFaultName(), f.getCause().getMessage());
+                }
+            }
+        }
         // XXX TODO whenw e move to complete policy model implementation this check will need to be deleted since we will be able to handle missing information better
         if( trustReport.getHostReport() == null || trustReport.getHostReport().pcrManifest == null ) {
             throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
@@ -701,6 +709,7 @@ public class HostTrustBO extends BaseBO {
         log.debug("XXX jonathan performance  get agent manifest: {}", getAgentManifestStop-getAgentManifestStart); // XXX jonathan performance
         
         HostReport hostReport = new HostReport();
+        hostReport.tagCertificate = null; // TODO:  need to load the host's tag certificate (if available) and set it here so it can be validated by the rules
         hostReport.pcrManifest = pcrManifest;
         hostReport.tpmQuote = null; // TODO
         hostReport.variables = new HashMap<String,String>(); // TODO

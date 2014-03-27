@@ -20,8 +20,8 @@ fi
 cp *.jar ${TOMCAT_HOME}/endorsed/
 cp setenv.sh ${TOMCAT_HOME}/bin/
 chmod +x $TOMCAT_HOME/bin/setenv.sh
-#Create SSL cert
-tomcat_create_ssl_cert $MTWILSON_SERVER
+#Create SSL cert ###NOW DONE IN tomcat_install
+#tomcat_create_ssl_cert $MTWILSON_SERVER
 
 
 # on installations configured to use mysql, the customer is responsible for 
@@ -43,7 +43,8 @@ fi
 
 cd $TOMCAT_CONF
 mv tomcat-users.xml tomcat-users.xml.old
-sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+# XXX TODO: cleanup tomcat users, admin user should not be assigned both manager-gui and manager-sript roles
+sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
 rm  -f tomcat-users.xml.old
 
 

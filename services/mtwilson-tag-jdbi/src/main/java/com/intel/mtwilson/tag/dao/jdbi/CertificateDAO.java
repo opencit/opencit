@@ -8,6 +8,7 @@ package com.intel.mtwilson.tag.dao.jdbi;
 //import com.intel.mtwilson.atag.model.CertificateRequestApproval;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
 import java.util.Date;
 import org.skife.jdbi.v2.sqlobject.Bind;
@@ -15,6 +16,7 @@ import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import com.intel.mtwilson.jdbi.util.UUIDArgument;
 
 /**
  * References:
@@ -26,7 +28,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  * 
  * @author jbuhacoff
  */
-@RegisterArgumentFactory(UUIDArgument.class)
+@RegisterArgumentFactory({UUIDArgument.class,DateArgument.class})
 @RegisterMapper(CertificateResultMapper.class)
 public interface CertificateDAO extends Closeable{
     @SqlUpdate("create table mw_tag_certificate (id char(36) primary key, certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
@@ -35,11 +37,11 @@ public interface CertificateDAO extends Closeable{
     @SqlUpdate("insert into mw_tag_certificate (id, certificate, sha1, sha256, subject, issuer, notBefore, notAfter, revoked) "
             + "values (:id, :certificate, :sha1, :sha256, :subject, :issuer, :notBefore, :notAfter, false)")
 //    @GetGeneratedKeys
-    Certificate insert(@Bind("id") UUID id, @Bind("certificate") byte[] certificate, @Bind("sha1") String sha1, 
+    void insert(@Bind("id") UUID id, @Bind("certificate") byte[] certificate, @Bind("sha1") String sha1, 
     @Bind("sha256") String sha256, @Bind("subject") String subject, @Bind("issuer") String issuer, @Bind("notBefore") Date notBefore, @Bind("notAfter") Date notAfter);
 
     @SqlUpdate("update mw_tag_certificate set revoked=:revoked where id=:id")
-    Certificate updateRevoked(@Bind("id") UUID id, @Bind("revoked") boolean revoked);
+    void updateRevoked(@Bind("id") UUID id, @Bind("revoked") boolean revoked);
     
     @SqlQuery("select id,certificate,sha1,sha256,subject,issuer,notBefore,notAfter,revoked from mw_tag_certificate where id=:id")
     Certificate findById(@Bind("id") UUID id);

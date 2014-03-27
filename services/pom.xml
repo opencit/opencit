@@ -16,10 +16,6 @@
 	</parent>
   
   <modules>
-	<module>asset-tag-model</module>
-	<module>asset-tag-dao</module>
-	<module>asset-tag-dao-jooq</module>
-	<module>asset-tag-service</module>
 	<module>mtwilson-trust-policy</module>
     <module>mtwilson-webservice-util</module>
     <module>mtwilson-http-security</module>
@@ -35,10 +31,13 @@
     <module>mtwilson-attestation-ws-v1</module>
     <module>mtwilson-attestation-ws-v2</module>
     <module>mtwilson-tls-policy</module>
+	<module>mtwilson-jdbi-util</module>
+	<module>mtwilson-jooq-util</module>
 	<module>mtwilson-jersey-util</module>
-        <module>mtwilson-shiro-jdbi</module>
+	<module>mtwilson-shiro-jdbi</module>
 	<module>mtwilson-shiro-util</module>
-        <module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-shiro-setup</module>
     <module>mtwilson-http-security-server</module>
     <module>mtwilson-trust-utils</module>
     <module>mtwilson-whitelist</module>
@@ -50,8 +49,9 @@
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
 	<module>mtwilson-test-ws-v1</module>
-        <module>mtwilson-test-ws-v2</module>
+	<module>mtwilson-test-ws-v2</module>
 	<module>mtwilson-version-ws-v2</module>
+	<module>mtwilson-setup-ext</module>
 	<module>mtwilson-setup</module>
 	<module>mtwilson-setup-ws-v2</module>
 	<module>mtwilson-trustagent-model</module>
@@ -64,6 +64,11 @@
 	<module>mtwilson-intel-hostagent</module>
 	<module>mtwilson-saml</module>
 	<module>mtwilson-saml-verifier</module>
+	<module>mtwilson-tag-model</module>
+	<module>mtwilson-tag-jdbi</module>
+	<module>mtwilson-tag-dao-jooq</module>
+	<module>mtwilson-tag-ws-v2</module>
+	<module>mtwilson-tag-setup</module>
   </modules>
 
 </project>

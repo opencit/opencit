@@ -5,6 +5,7 @@
 package com.intel.mtwilson.setup.tasks;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
@@ -282,6 +283,7 @@ public class MigrateUsers extends DatabaseSetupTask {
             userLoginCertificate.setEnabled(apiClient.getEnabled());
 //                userLoginCertificate.setExpires(null); // we don't use this right now, but we need to implement the notBefore and notAfter for all login types anyway, and wwhen we do that we can copy those from the certificate here
             userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(apiClient.getCertificate()).toByteArray());
+            userLoginCertificate.setSha256Hash(Sha256Digest.digestOf(apiClient.getCertificate()).toByteArray());
             try {
                 userLoginCertificate.setStatus(Status.valueOf(apiClient.getStatus()));
             } catch (IllegalArgumentException e) {
@@ -289,7 +291,7 @@ public class MigrateUsers extends DatabaseSetupTask {
                 userLoginCertificate.setStatus(Status.PENDING);
             }
 
-            loginDAO.insertUserLoginCertificate(userLoginCertificate.getId(), userLoginCertificate.getUserId(), userLoginCertificate.getCertificate(), userLoginCertificate.getSha1Hash(), userLoginCertificate.getExpires(), userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
+            loginDAO.insertUserLoginCertificate(userLoginCertificate.getId(), userLoginCertificate.getUserId(), userLoginCertificate.getCertificate(), userLoginCertificate.getSha1Hash(), userLoginCertificate.getSha256Hash(), userLoginCertificate.getExpires(), userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
 
 
             // migrate the user's permissions to  certificate login 
