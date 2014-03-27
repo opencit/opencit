@@ -7,6 +7,7 @@ package com.intel.mountwilson.util;
 import com.intel.dcsg.cpg.crypto.HmacCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.rfc822.Headers;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.ApiRequest;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,6 +62,22 @@ public class ProxyApiClient extends ApiClient {
         super(baseURL, credential, keystore, tlsPolicy);
     }
 
+    private Headers copyRequestHeaders(HttpServletRequest request) {
+        Headers headers = new Headers();
+        Enumeration headerNames = request.getHeaderNames();
+        if( headerNames == null ) { return headers; }
+        while(headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            Enumeration headerValues = request.getHeaders(headerName);
+            if( headerValues == null ) { continue; }
+            while(headerValues.hasMoreElements()) {
+                String headerValue = (String)headerValues.nextElement();
+                headers.add(headerName, headerValue);
+            }
+        }
+        return headers;
+    }
+    
     /**
      * Facilitates integration of tag management UI into mtwilson-portal by
      * allowing it to access mtwilson APIs using the credentials of the 
@@ -91,24 +109,25 @@ public class ProxyApiClient extends ApiClient {
             }
         }
         String content = null;
+        Headers headers = copyRequestHeaders(request);
         ApiRequest proxyRequest = null;
         ApiResponse proxyResponse = null;
         switch (request.getMethod()) {
             case "GET":
-                proxyResponse = httpGet(urltext);
+                proxyResponse = httpGet(urltext, headers);
                 break;
             case "DELETE":
-                proxyResponse = httpDelete(urltext);
+                proxyResponse = httpDelete(urltext, headers);
                 break;
             case "PUT":
                 content = IOUtils.toString(request.getInputStream());
                 proxyRequest = new ApiRequest(MediaType.valueOf(contentType), content);
-                proxyResponse = httpPut(urltext, proxyRequest);
+                proxyResponse = httpPut(urltext, proxyRequest, headers);
                 break;
             case "POST":
                 content = IOUtils.toString(request.getInputStream());
                 proxyRequest = new ApiRequest(MediaType.valueOf(contentType), content);
-                proxyResponse = httpPost(urltext, proxyRequest);
+                proxyResponse = httpPost(urltext, proxyRequest, headers);
                 break;
             default:
                 throw new UnsupportedOperationException("Method not supported by proxy: " + request.getMethod());
