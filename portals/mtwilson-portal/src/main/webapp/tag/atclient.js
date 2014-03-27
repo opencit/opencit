@@ -918,7 +918,7 @@ mtwilson.atag = mtwilson.atag || {};
                 //ajax.json.post('certificates', data.certificates[i]); // XXX TODO NEED A POST /certificates/{uuid}  with action=revoke.
                 log.debug("Sending provision-certificate request");
                 // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
-                ajax.json.post('revoke-certificate', {'certificate_id': uuid}, {'uri': '/mtwilson/v2proxy/rpc/revoke_tag_certificate', datapath: 'revokeCertificates', idkey: 'uuid'});
+                ajax.json.post('revoke-certificate', {'certificate_id': uuid}, {'uri': '/mtwilson-portal/v2proxy/rpc/revoke_tag_certificate', datapath: 'revokeCertificates', idkey: 'uuid'});
             }
         }
         //view.sync();
@@ -932,7 +932,7 @@ mtwilson.atag = mtwilson.atag || {};
                 //ajax.json.post('certificates', data.certificates[i]); // XXX TODO NEED A POST /certificates/{uuid}  with action=revoke.
                 log.debug("Sending deploy-certificate request");
                 // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
-                ajax.json.post('deploy-certificate', {'certificate_id': uuid}, {'uri': '/mtwilson/v2proxy/rpc/mtwilson_import_tag_certificate', datapath: 'deployCertificates', idkey: 'id'});
+                ajax.json.post('deploy-certificate', {'certificate_id': uuid}, {'uri': '/mtwilson-portal/v2proxy/rpc/mtwilson_import_tag_certificate', datapath: 'deployCertificates', idkey: 'id'});
                 //alert("Certificate deployed to Mt. Wilson");
             }
         }
@@ -962,7 +962,7 @@ mtwilson.atag = mtwilson.atag || {};
         // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
         //var pass = false;
         ajax.json.post('provision-certificate', provisionObject,
-                {'uri': '/mtwilson/v2proxy/rpc/deploy_tag_certificate',
+                {'uri': '/mtwilson-portal/v2proxy/rpc/deploy_tag_certificate',
                     'datapath': null // prevent result from being stored in global data model
                     /*'onSuccess': function(result) {
                         log.debug("provisionCertificate success! " + Object.toJSON(result));
