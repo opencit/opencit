@@ -51,7 +51,11 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.rfc822.Headers;
+import com.intel.dcsg.cpg.util.MultivaluedHashMap;
 import java.nio.charset.Charset;
+import java.util.Map;
+import org.apache.http.client.methods.HttpRequestBase;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -402,11 +406,25 @@ public class ApacheHttpClient implements java.io.Closeable {
         return new ApiResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), contentType, content);
     }
     
+    private void addHeaders(HttpRequestBase request, Headers headers) {
+        for(String name : headers.names()) {
+            for(String value : headers.getAll(name)) {
+                request.addHeader(name, value);
+            }
+        }
+    }
+    
     public ApiResponse get(String requestURL) throws IOException, ApiException, SignatureException {
+        return get(requestURL, null);
+    }
+    public ApiResponse get(String requestURL, Headers headers) throws IOException, ApiException, SignatureException {
         //log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
+        if( headers != null ) {
+            addHeaders(request, headers);
         }
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
@@ -417,12 +435,19 @@ public class ApacheHttpClient implements java.io.Closeable {
         request.releaseConnection();
         return apiResponse;
     }
+    
 
     public ApiResponse delete(String requestURL) throws IOException, SignatureException {
+        return delete(requestURL, null);
+    }
+    public ApiResponse delete(String requestURL, Headers headers) throws IOException, SignatureException {
         //log.debug("DELETE url: {}", requestURL);
         HttpDelete request = new HttpDelete(requestURL);
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
+        if( headers != null ) {
+            addHeaders(request, headers);
         }
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
@@ -435,6 +460,9 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
     
     public ApiResponse put(String requestURL, ApiRequest message) throws IOException, SignatureException {
+        return put(requestURL, message, null);
+    }
+    public ApiResponse put(String requestURL, ApiRequest message, Headers headers) throws IOException, SignatureException {
         //log.debug("PUT url: {}", requestURL);
         //log.debug("PUT content: {}", message == null ? "(empty)" : message.content);
         HttpPut request = new HttpPut(requestURL);
@@ -443,6 +471,9 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
+        if( headers != null ) {
+            addHeaders(request, headers);
         }
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
@@ -454,6 +485,9 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
     
     public ApiResponse post(String requestURL, ApiRequest message) throws IOException, SignatureException {
+        return post(requestURL, message, null);
+    }
+    public ApiResponse post(String requestURL, ApiRequest message, Headers headers) throws IOException, SignatureException {
         //log.debug("POST url: {}", requestURL);
         //log.debug("POST content-type: {}", message == null ? "(empty)" : message.content.toString());
         //log.debug("POST content: {}", message == null ? "(empty)" : message.content);
@@ -465,6 +499,9 @@ public class ApacheHttpClient implements java.io.Closeable {
         
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
+        if( headers != null ) {
+            addHeaders(request, headers);
         }
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header

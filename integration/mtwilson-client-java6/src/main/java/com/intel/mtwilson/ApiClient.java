@@ -56,6 +56,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.rfc822.Headers;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -413,14 +414,26 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     protected ApiResponse httpGet(String path) throws IOException, ApiException, SignatureException {
         return httpClient.get(path);
     }
+    protected ApiResponse httpGet(String path, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.get(path, headers);
+    }
     protected ApiResponse httpDelete(String path) throws IOException, ApiException, SignatureException {
         return httpClient.delete(path);
+    }
+    protected ApiResponse httpDelete(String path, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.delete(path, headers);
     }
     protected ApiResponse httpPut(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
         return httpClient.put(path, body);
     }
+    protected ApiResponse httpPut(String path, ApiRequest body, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.put(path, body, headers);
+    }
     protected ApiResponse httpPost(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
         return httpClient.post(path, body);
+    }
+    protected ApiResponse httpPost(String path, ApiRequest body, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.post(path, body, headers);
     }
     
     // only call this if the Http Status is NOT OK in order to convert the response to an ApiException
