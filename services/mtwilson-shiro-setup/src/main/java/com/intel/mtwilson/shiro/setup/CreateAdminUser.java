@@ -30,6 +30,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import com.intel.mtwilson.setup.tasks.CreatePortalAdministrator;
 
 /**
  *
@@ -195,7 +196,14 @@ public class CreateAdminUser extends LocalSetupTask {
 
     private MwPortalUser createMwPortalUser(PrivateKey privateKey, X509Certificate certificate) throws Exception {
         MwPortalUser portalUser = My.jpa().mwPortalUser().findMwPortalUserByUserName(username);
+        
         if (portalUser == null) {
+            CreatePortalAdministrator createPortalAdministratorTask = new CreatePortalAdministrator();
+            createPortalAdministratorTask.setAdminUsername(username);
+            createPortalAdministratorTask.setAdminPassword(password);
+            createPortalAdministratorTask.run();
+        }
+            /*
             log.debug("Creating new mw_portal_user entry with keystore");
             ByteArrayResource resource = new ByteArrayResource();
             SimpleKeystore keystore = new SimpleKeystore(resource, password);
@@ -226,6 +234,7 @@ public class CreateAdminUser extends LocalSetupTask {
             portalUser.setEnabled(true);
             My.jpa().mwPortalUser().edit(portalUser);
         }
+        */
         return portalUser;
     }
 
