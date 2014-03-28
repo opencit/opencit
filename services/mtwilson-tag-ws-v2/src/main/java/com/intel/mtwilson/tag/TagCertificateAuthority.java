@@ -92,7 +92,9 @@ public class TagCertificateAuthority {
         List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip, true);
         if (hostList == null || hostList.size() < 1) {
             log.debug("host uuid didn't return back any results");
-            throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.")); // TODO: i18n  similar to  ErrorCode.AS_HOST_NOT_FOUND but with this custom message
+            //throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.")); // TODO: i18n  similar to  ErrorCode.AS_HOST_NOT_FOUND but with this custom message
+            log.warn("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.");
+            return null;
         }
         log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
         return hostList.get(0).Hardware_Uuid;
@@ -171,6 +173,7 @@ public class TagCertificateAuthority {
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
                 if (subject.getUuid() != null) {
+                    log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),subject.getUuid().getValue().toLowerCase());
                     if (targetSubject.toString().equalsIgnoreCase(subject.getUuid().getValue().toLowerCase())) {
                         // found a selection with the target subject uuid
                         return getInlineOrLookupSelection(selection);
@@ -181,9 +184,9 @@ public class TagCertificateAuthority {
         // second search by ip or name
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
-                if (subject.getIp() != null) {
-                    String ip = subject.getIp().getValue();
-                    String uuid = findSubjectHardwareUuid(ip);
+                String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
+                if (uuid != null) {
+                    log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),subject.getIp().getValue());
                     if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
                         // found a selection with the target subject uuid
                         return getInlineOrLookupSelection(selection);
