@@ -408,8 +408,11 @@ public class ApacheHttpClient implements java.io.Closeable {
     
     private void addHeaders(HttpRequestBase request, Headers headers) {
         for(String name : headers.names()) {
-            for(String value : headers.getAll(name)) {
-                request.addHeader(name, value);
+            // Cannot add header with name "content-length" as org.apache.http.client.HttpClient.execute method already defines the "content-length" header and will cause an error
+            if(!name.equalsIgnoreCase("content-length")) {
+                for (String value : headers.getAll(name)) {
+                    request.addHeader(name, value);
+                }
             }
         }
     }
@@ -520,6 +523,5 @@ public class ApacheHttpClient implements java.io.Closeable {
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
-    
     
 }
