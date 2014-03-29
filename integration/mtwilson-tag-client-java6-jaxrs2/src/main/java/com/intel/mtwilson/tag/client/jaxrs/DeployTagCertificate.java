@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
+import com.intel.dcsg.cpg.io.UUID;
+
 /**
  *
  * @author ssbangal
@@ -30,7 +32,7 @@ public class DeployTagCertificate {
      * <p>
      * @since Mt.Wilson 2.0
      */
-    public void deployTagCertificate(String host, String selections) {
+    public void deployTagCertificate(UUID certificateId, String host) {
         return;
     }
         
