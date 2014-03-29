@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
+import com.intel.dcsg.cpg.io.UUID;
+
 /**
  *
  * @author ssbangal
@@ -25,15 +27,15 @@ public class ApproveTagCertificateRequest {
      * https://192.168.1.101:8181/mtwilson/v2/approve_tag_certificate_request
      * <p>
      * <i>Sample Input</i><br>
-     * 
+     * {"certificate_request_id":"187ec902-c6c6-4dfb-adb4-f240099aa4b0","certificate":"MIIO....ic="}
      * </selection></selections>
      * <p>
      * <i><u>Sample Output:</u></i><br>
-     * 
+     * NA
      * <p>
      * @since Mt.Wilson 2.0
      */
-    public byte[] provisionTagCertificate(String host, String selections) {
+    public byte[] provisionTagCertificate(UUID certificateRequestId, byte[] certificate) {
         return null;
     }
         
