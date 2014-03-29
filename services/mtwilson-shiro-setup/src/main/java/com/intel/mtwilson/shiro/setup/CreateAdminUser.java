@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.shiro.setup;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
@@ -12,7 +14,7 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.MyFilesystem;
-import com.intel.mtwilson.setup.LocalSetupTask;
+import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
@@ -21,7 +23,9 @@ import java.io.File;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
@@ -31,19 +35,30 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import com.intel.mtwilson.setup.tasks.CreatePortalAdministrator;
+import java.io.FileInputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
+import java.sql.Connection;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 /**
- *
+ * we do not store the admin username or password in configuration - the application
+ * must display them to the administrator
+ * 
  * @author jbuhacoff
  */
-public class CreateAdminUser extends LocalSetupTask {
+public class CreateAdminUser extends DatabaseSetupTask {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateAdminUser.class);
     public static final String ADMINISTRATOR_ROLE = "administrator"; // TODO: move this to mtwilson-shiro-util ?
+    public static final String APPROVED = "APPROVED";
     private String username;
     private String password;
-    private LoginDAO loginDAO;
-//    private boolean isNewPassword = false;
+    private List<Fault> certificateBuilderFaults = null; // only populated if during execution the certificate builder fails; then if application calls validation afterwards we can copy these faults to our validation faults to inform the user; if not, the faults get logged to the error log anyway
 
     private String getUsername() {
         if (System.getenv("MC_FIRST_USERNAME") != null) {
@@ -56,14 +71,29 @@ public class CreateAdminUser extends LocalSetupTask {
         if (System.getenv("MC_FIRST_PASSWORD") != null) {
             return System.getenv("MC_FIRST_PASSWORD");
         }
-//        isNewPassword = true;
-        return RandomUtil.randomBase64String(8).replace("=", "_"); // TODO INSECURE: use a larger alphabet with more special characters
+        return RandomStringUtils.randomAscii(16);
     }
 
     @Override
     protected void configure() throws Exception {
         username = getUsername();
         password = getPassword();
+        // check that the mtwilson CA key is present
+        if (!My.configuration().getCaKeystoreFile().exists()) {
+            configuration("Mt Wilson CA is required to create the portal administrator");
+        }        
+        // check for the required database tables to be present
+        try (Connection c = My.jdbc().connection()) {
+            requireTable(c, "mw_role");
+            requireTable(c, "mw_role_permission");
+            requireTable(c, "mw_user");
+            requireTable(c, "mw_user_login_password");
+            requireTable(c, "mw_user_login_password_role");
+            requireTable(c, "mw_user_login_certificate");
+            requireTable(c, "mw_user_login_certificate_role");
+            requireTable(c, "mw_portal_user");
+        }
+        
     }
 
     List<UUID> getRoleUuidList(List<Role> roles) {
@@ -76,47 +106,87 @@ public class CreateAdminUser extends LocalSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        // ensure we have an admin user created with permissions assigned
+        // ensure we have an admin user created with permissions assigned - at least one assigned login method must have them
+        boolean isAdminPermissionAssigned = false;
         try (LoginDAO loginDAO = MyJdbi.authz()) {
             UserLoginPassword userLoginPassword = loginDAO.findUserLoginPasswordByUsername(username);
             if (userLoginPassword == null) {
                 validation("User does not exist or does not have a password: %s", username);
-                return;
             }
-            List<Role> passwordRoles = loginDAO.findRolesByUserLoginPasswordId(userLoginPassword.getId());
-            List<UUID> passwordRoleIds = getRoleUuidList(passwordRoles);
-            List<RolePermission> passwordRolePermissions = loginDAO.findRolePermissionsByPasswordRoleIds(passwordRoleIds);
-            if (passwordRolePermissions == null || passwordRolePermissions.isEmpty()) {
-                validation("User does not have password permissions assigned: %s", username);
+            else {
+                List<Role> passwordRoles = loginDAO.findRolesByUserLoginPasswordId(userLoginPassword.getId());
+                List<UUID> passwordRoleIds = getRoleUuidList(passwordRoles);
+                List<RolePermission> passwordRolePermissions = loginDAO.findRolePermissionsByPasswordRoleIds(passwordRoleIds);
+                if (passwordRolePermissions == null || passwordRolePermissions.isEmpty()) {
+                    validation("User does not have password permissions assigned: %s", username);
+                }
+                else {
+                    for (RolePermission rolePermission : passwordRolePermissions) {
+                        if (rolePermission.getPermitDomain().equals("*") && rolePermission.getPermitAction().equals("*") && rolePermission.getPermitSelection().equals("*")) {
+                            isAdminPermissionAssigned = true;
+                        }
+                    }
+                }
             }
             // now check for the admin user's x509 login
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
             if (userLoginCertificate == null) {
                 validation("User does not exist or does not have a certificate");
-                return;
             }
-            List<Role> certificateRoles = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
-            List<UUID> certificateRoleIds = getRoleUuidList(certificateRoles);
-            List<RolePermission> certificateRolePermissions = loginDAO.findRolePermissionsByCertificateRoleIds(certificateRoleIds);
-            if (certificateRolePermissions == null || certificateRolePermissions.isEmpty()) {
-                validation("User does not have certificate permissions assigned: %s", username);
-            }
-            // now check for admin permissions - at least one login method must have them  (password, hmac, and/or certificate) 
-            boolean isAdminPermissionAssigned = false;
-            for (RolePermission rolePermission : passwordRolePermissions) {
-                if (rolePermission.getPermitDomain().equals("*") && rolePermission.getPermitAction().equals("*") && rolePermission.getPermitSelection().equals("*")) {
-                    isAdminPermissionAssigned = true;
+            else {
+                List<Role> certificateRoles = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+                List<UUID> certificateRoleIds = getRoleUuidList(certificateRoles);
+                List<RolePermission> certificateRolePermissions = loginDAO.findRolePermissionsByCertificateRoleIds(certificateRoleIds);
+                if (certificateRolePermissions == null || certificateRolePermissions.isEmpty()) {
+                    validation("User does not have certificate permissions assigned: %s", username);
                 }
-            }
-            for (RolePermission rolePermission : certificateRolePermissions) {
-                if (rolePermission.getPermitDomain().equals("*") && rolePermission.getPermitAction().equals("*") && rolePermission.getPermitSelection().equals("*")) {
-                    isAdminPermissionAssigned = true;
+                else {
+                    for (RolePermission rolePermission : certificateRolePermissions) {
+                        if (rolePermission.getPermitDomain().equals("*") && rolePermission.getPermitAction().equals("*") && rolePermission.getPermitSelection().equals("*")) {
+                            isAdminPermissionAssigned = true;
+                        }
+                    }
                 }
             }
             if (!isAdminPermissionAssigned) {
                 validation("User does not have admin permissions assigned: %s", username); // eithe rpassword or certificate
             }
-
+            // now check the portal user exists and that we can unlock the keystore with the new password
+            MwPortalUser portalUser = My.jpa().mwPortalUser().findMwPortalUserByUserName(username);
+            if( portalUser == null ) {
+                validation("Portal User was not created");
+            }
+            else {
+                if( !portalUser.getEnabled() ) {
+                    validation("Portal User is not enabled");
+                }
+                if( !APPROVED.equalsIgnoreCase(portalUser.getStatus()) ) {
+                    validation("Portal User status is not approved");
+                }
+                byte[] keystoreBytes =  portalUser.getKeystore();
+                if( keystoreBytes == null || keystoreBytes.length == 0 ) {
+                    validation("Portal User keystore is missing");
+                }
+                else {
+                    try {
+                        SimpleKeystore keystore = new SimpleKeystore(new ByteArrayResource(keystoreBytes), password);
+                        X509Certificate certificate = keystore.getX509Certificate(username);
+                        if( certificate == null ) {
+                            validation("Portal User keystore does not contain user certificate");
+                        }
+                    }
+                    catch(KeyManagementException | NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+                        log.error("Cannot open user keystore: {}", e.getMessage());
+                        validation("Portal User keystore cannot be opened");
+                    }
+                }
+            }
+        }
+        // now if the validation is happening immediately after execution and there was a problem building the certificate, we will have some faults here to share with the user
+        if( certificateBuilderFaults != null ) {
+            for(Fault fault : certificateBuilderFaults) {
+                validation(fault);
+            }            
         }
     }
 
@@ -194,28 +264,36 @@ public class CreateAdminUser extends LocalSetupTask {
         return adminPasswordRolePermissions;
     }
 
-    private MwPortalUser createMwPortalUser(PrivateKey privateKey, X509Certificate certificate) throws Exception {
+    private MwPortalUser createMwPortalUser(PrivateKey privateKey, X509Certificate certificate, X509Certificate... cacerts) throws Exception {
         MwPortalUser portalUser = My.jpa().mwPortalUser().findMwPortalUserByUserName(username);
         
         if (portalUser == null) {
-            CreatePortalAdministrator createPortalAdministratorTask = new CreatePortalAdministrator();
-            createPortalAdministratorTask.setAdminUsername(username);
-            createPortalAdministratorTask.setAdminPassword(password);
-            createPortalAdministratorTask.run();
-        }
-            /*
             log.debug("Creating new mw_portal_user entry with keystore");
             ByteArrayResource resource = new ByteArrayResource();
             SimpleKeystore keystore = new SimpleKeystore(resource, password);
-            keystore.addKeyPairX509(privateKey, certificate, username, password);
+            keystore.addKeyPairX509(privateKey, certificate, username, password, cacerts);
+            // add the CA cert itself to the keystore
+            for(X509Certificate cacert : cacerts) {
+                keystore.addTrustedCaCertificate(cacert, "mtwilson-cacert");
+            }
+            // add the mtwilson  saml and tls certs to the keystore
+            X509Certificate saml = getSamlCertificate();
+            if (saml != null) {
+                keystore.addTrustedSamlCertificate(saml, "mtwilson-saml");
+            }
+            X509Certificate tls = getTlsCertificate();
+            if (tls != null) {
+                keystore.addTrustedSslCertificate(tls, "mtwilson-tls");
+            }
             keystore.save();
             portalUser = new MwPortalUser();
             portalUser.setComment("created automatically by setup");
             portalUser.setUsername(username);
             portalUser.setUuid_hex(new UUID().toString());
-            portalUser.setStatus("APPROVED");
+            portalUser.setStatus(APPROVED);
             portalUser.setEnabled(true);
             portalUser.setKeystore(resource.toByteArray());
+            log.debug("Created keystore size {} bytes", portalUser.getKeystore().length);
             My.jpa().mwPortalUser().create(portalUser);
         } else {
             log.debug("Updating existing mw_portal_user entry");
@@ -230,19 +308,57 @@ public class CreateAdminUser extends LocalSetupTask {
             keystore.addKeyPairX509(privateKey, certificate, username, password);
             keystore.save(); // saves into portalUser keystore field
             portalUser.setComment("updated automatically by setup");
-            portalUser.setStatus("APPROVED");
+            portalUser.setStatus(APPROVED);
             portalUser.setEnabled(true);
             My.jpa().mwPortalUser().edit(portalUser);
         }
-        */
         return portalUser;
     }
 
     private UserLoginCertificate createUserLoginCertificate(LoginDAO loginDAO, User user) throws Exception {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         if (userLoginCertificate == null) {
+            
+            // first load the ca key
+            // XXX TODO  this code is duplicated from CreateCertificateAuthorityKey  validate()  -  needs to be refactored to a CA repository layer so they can both just say getCAPrivateKey() etc
+            byte[] combinedPrivateKeyAndCertPemBytes;
+            try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
+                combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
+            }
+            PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
+            X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
+            
+            // now create the user certificate
+            
             KeyPair keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
-            X509Certificate certificate = X509Builder.factory().selfSigned(String.format("CN=%s", username), keyPair).expires(365, TimeUnit.DAYS).build();
+            /*
+            X509Certificate certificate = X509Builder.factory()
+                    .selfSigned(String.format("CN=%s", username), keyPair)
+                    .expires(365, TimeUnit.DAYS)
+                    .build();
+            */
+            X509Builder builder = X509Builder.factory();
+            X509Certificate certificate = builder
+                    .commonName(username)
+                    .subjectPublicKey(keyPair.getPublic())
+                    .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
+                    .issuerPrivateKey(cakey)
+                    .issuerName(cacert)
+                    .keyUsageDigitalSignature()
+                    .keyUsageNonRepudiation()
+                    .keyUsageKeyEncipherment()
+                    .extKeyUsageIsCritical()
+                    .randomSerial()
+                    .build();
+            if( certificate == null ) {
+    //            validation("Failed to create certificate");
+                certificateBuilderFaults = builder.getFaults();
+                for(Fault fault : certificateBuilderFaults) {
+                    log.error(fault.toString());
+                }
+                throw new Exception("Cannot generate certificate");
+            }
+            
             userLoginCertificate = new UserLoginCertificate();
             userLoginCertificate.setId(new UUID());
             userLoginCertificate.setCertificate(certificate.getEncoded());
@@ -254,8 +370,9 @@ public class CreateAdminUser extends LocalSetupTask {
             userLoginCertificate.setStatus(Status.APPROVED);
             userLoginCertificate.setUserId(user.getId());
             loginDAO.insertUserLoginCertificate(userLoginCertificate.getId(), userLoginCertificate.getUserId(), userLoginCertificate.getCertificate(), userLoginCertificate.getSha1Hash(), userLoginCertificate.getSha256Hash(), userLoginCertificate.getExpires(), userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
+            log.debug("Created user login certificate with sha256 {}", Sha256Digest.valueOf(userLoginCertificate.getSha256Hash()).toHexString());
             // now we have to store the private key somewhere.... for now we will create a portal user keystore so the admin user can use these privileges when logged in to portal
-            MwPortalUser portalUser = createMwPortalUser(keyPair.getPrivate(), certificate);
+            MwPortalUser portalUser = createMwPortalUser(keyPair.getPrivate(), certificate, cacert);
         }
         return userLoginCertificate;
     }
@@ -324,4 +441,42 @@ public class CreateAdminUser extends LocalSetupTask {
         }
         FileUtils.writeStringToFile(passwordFile, String.format("%s\n", password));
     }
+    
+    // TODO:  duplicated code from setup task CreateSamlCertificate , should be 
+    // refactored to a SAML repository or business layer
+    private X509Certificate getSamlCertificate() throws Exception {
+        SimpleKeystore samlKeystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
+        for (String alias : samlKeystore.aliases()) {
+            log.debug("SAML Keystore alias: {}", alias);
+            // make sure it has a SAML private key and certificate inside
+            try {
+                RsaCredentialX509 credential = samlKeystore.getRsaCredentialX509(alias, My.configuration().getSamlKeystorePassword());
+                log.debug("SAML certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
+                return credential.getCertificate();
+            } catch (IOException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
+                log.debug("Cannot read SAML key from keystore", e);
+//                validation("Cannot read SAML key from keystore"); // we are assuming the keystore only has one private key entry ... 
+            }
+        }
+        return null;
+    }
+    // TODO:  duplicated code from setup task CreateTlsCertificate , should be 
+    // refactored to a TLS repository or business layer
+    private X509Certificate getTlsCertificate() throws Exception {
+        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), My.configuration().getTlsKeystorePassword());
+        for (String alias : tlsKeystore.aliases()) {
+            log.debug("TLS Keystore alias: {}", alias);
+            // make sure it has a SAML private key and certificate inside
+            try {
+                RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, My.configuration().getTlsKeystorePassword());
+                log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
+                return credential.getCertificate();
+            } catch (IOException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
+                log.debug("Cannot read TLS key from keystore", e);
+//                validation("Cannot read SAML key from keystore"); // we are assuming the keystore only has one private key entry ... 
+            }
+        }
+        return null;
+    }
+    
 }
