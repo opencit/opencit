@@ -11,7 +11,8 @@ CREATE  TABLE `mw_as`.`mw_tag_kvattribute` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `value` VARCHAR(255) NOT NULL ,
-  PRIMARY KEY (`id`) );
+  PRIMARY KEY (`id`), 
+  UNIQUE KEY (`name`, `value`));
  
 CREATE  TABLE `mw_as`.`mw_tag_selection` (
   `id` CHAR(36) NOT NULL ,

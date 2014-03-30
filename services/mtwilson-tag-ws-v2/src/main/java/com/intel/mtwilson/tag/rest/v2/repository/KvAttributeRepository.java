@@ -145,7 +145,9 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
 
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
 
-            KvAttribute obj = dao.findById(item.getId());
+            dao.insert(item.getId(), item.getName(), item.getValue());
+            
+            /*KvAttribute obj = dao.findById(item.getId());
             // Allowing the user to add only if it does not exist.
             if (obj == null) {
                 if (item.getName() == null || item.getName().isEmpty() || item.getValue() == null || item.getValue().isEmpty()) {
@@ -153,8 +155,11 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
                     throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
                 }
                 //TODO: Create the unique name value pair mapping in the DB.
-                obj = dao.findByNameAndValue(item.getName(), item.getValue());
-                if (obj == null)
+                KvAttributeFilterCriteria fc = new KvAttributeFilterCriteria();
+                fc.nameEqualTo = item.getName();
+                fc.valueEqualTo = item.getValue();
+                KvAttributeCollection objCollection = search(fc);
+                if (objCollection.getKvAttributes().size() == 0)
                     dao.insert(item.getId(), item.getName(), item.getValue());   
                 else {
                     log.error("The key value pair already exists.");
@@ -162,7 +167,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
                 }
             } else {
                 throw new WebApplicationException("Object with specified id already exists.", Response.Status.CONFLICT);
-            }
+            } */
                         
         } catch (WebApplicationException aex) {
             throw aex;            
