@@ -34,7 +34,6 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import com.intel.mtwilson.setup.tasks.CreatePortalAdministrator;
 import java.io.FileInputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;

@@ -61,7 +61,9 @@ import com.intel.dcsg.cpg.rfc822.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
 import java.util.Locale;
+import org.apache.http.auth.UsernamePasswordCredentials;
 /**
  * This class has many constructors to provide convenience for developers. 
  * However, too many options may be confusing.
@@ -107,6 +109,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public ApiClient(File configurationFile) throws ClientException, IOException {
         this(ConfigurationUtil.fromPropertiesFile(configurationFile));
         log.debug("Initialized with configuration file: "+configurationFile.getAbsolutePath());
+    }
+    
+    public ApiClient(Properties properties) throws ClientException {
+        this(new MapConfiguration(properties));
     }
     
     /**
@@ -295,6 +301,14 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(hmacCredential), keystore, config);
             httpClient.setLocale(locale);
             log.debug("HMAC-256 Identity: "+new String(hmacCredential.identity(), "UTF-8"));
+        }
+        else if( config.containsKey("mtwilson.api.username") && config.containsKey("mtwilson.api.password") ) {
+            UsernamePasswordCredentials passwordCredential = new UsernamePasswordCredentials(config.getString("mtwilson.api.username"), config.getString("mtwilson.api.password"));
+            setKeystore(config);
+            setLocale(config);
+            httpClient = new ApacheHttpClient(baseURL, new ApacheBasicHttpAuthorization(passwordCredential), keystore, config);
+            httpClient.setLocale(locale);
+            log.debug("HTTP BASIC Identity: {}", config.getString("mtwilson.api.username"));
         }
         else {
             // no authentication
