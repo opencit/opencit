@@ -219,6 +219,10 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-http</artifactId>
+        </dependency>
         
         <dependency>
             <groupId>org.tuckey</groupId>

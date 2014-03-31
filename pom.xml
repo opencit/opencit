@@ -630,6 +630,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
 	</dependency>
 	<dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-http</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-i18n</artifactId>
 		<version>0.2-SNAPSHOT</version>
 	</dependency>
