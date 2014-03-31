@@ -11,6 +11,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.datatypes.OemData;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.File;
 import java.net.URL;
@@ -58,7 +59,10 @@ public class CertificateLoginTest {
     
     @Test
     public void testCertificateLogin() throws Exception {
-        List<OemData> oems = client.listAllOEM();
-        log.debug("oems: {}", oems);
+//        List<OemData> oems = client.listAllOEM();
+//        log.debug("oems: {}", oems);
+        // now something with a query string
+        List<TxtHostRecord> hosts = client.queryForHosts("");
+        log.debug("hosts: {}", hosts);
     }
 }

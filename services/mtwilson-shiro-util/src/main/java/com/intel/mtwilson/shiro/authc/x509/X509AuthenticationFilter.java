@@ -139,7 +139,7 @@ Date: Sat, 29 Mar 2014 12:24:33 PDT
     private RsaSignatureInput getSignatureInputFromHttpRequest(HttpServletRequest httpRequest, Authorization a) throws IOException {
         RsaSignatureInput signatureInput = new RsaSignatureInput();
         signatureInput.httpMethod = httpRequest.getMethod();
-        signatureInput.url = httpRequest.getRequestURL().toString(); // protocol, host, port, path, and query string as sent by client
+        signatureInput.url = getURL(httpRequest); // protocol, host, port, path, and query string as sent by client
         signatureInput.realm = a.realm;
         signatureInput.fingerprintBase64 = a.fingerprintBase64;
         signatureInput.signatureAlgorithm = a.signatureAlgorithm;
@@ -150,7 +150,14 @@ Date: Sat, 29 Mar 2014 12:24:33 PDT
         return signatureInput;
     }
 
-
+    private String getURL(HttpServletRequest httpRequest) {
+        String url = httpRequest.getRequestURL().toString();
+        String query = httpRequest.getQueryString();
+        if( query == null ) { query = ""; }
+        log.debug("request URL is {} with query string {}", url, query);
+        String queryDelimiter = query.isEmpty() ? "" : "?";
+        return url + queryDelimiter + query;
+    }
     
     private byte[] getDigest(byte[] document, String signatureAlgorithm) throws NoSuchAlgorithmException, IOException {
         log.debug("Signature algorithm {}", signatureAlgorithm);
