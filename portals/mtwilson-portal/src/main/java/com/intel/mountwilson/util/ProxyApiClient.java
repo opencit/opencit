@@ -159,7 +159,7 @@ public class ProxyApiClient extends ApiClient {
     
     private void removeDuplicateParameters(MutableQuery query) {
         HashSet<String> keys = new HashSet<String>();
-        keys.addAll(query.keySet()); // allows us to iterate on this instead of on the actual keySet so we don't get ConcurrentModificationException when we remove keys inside the loop
+        keys.addAll(query.keySet()); // iterate on this copy instead of on the query's keySet so we don't get ConcurrentModificationException when we remove keys inside the loop
         for(String key : keys) {
             List<String> values = query.getAll(key);
             HashSet<String> uniqueValues = new HashSet<String>();

@@ -169,6 +169,18 @@ public class JpaPolicyReader {
 
     public Set<Rule> loadPcrMatchesConstantRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts tblHosts) {
         HashSet<Rule> rules = new HashSet<Rule>();
+        // load the tag cacerts and create the tag trust rule   TODO  load the cacerts once and keep it in memory instead of reloading for every attestation, but need a way for admin to refresh the configuration at runtime without restartnig the server
+        try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
+            String text = IOUtils.toString(in);
+            List<X509Certificate> tagAuthorities = X509Util.decodePemCertificates(text);
+            TagCertificateTrusted tagTrustedRule = new TagCertificateTrusted(tagAuthorities.toArray(new X509Certificate[0]));
+            tagTrustedRule.setMarkers(TrustMarker.ASSET_TAG.name());
+            rules.add(tagTrustedRule);
+        }
+        catch(Exception e) {
+            throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage()); // TODO: i18n
+        }
+
         log.debug("Adding the asset tag rule for host {} with asset tag ID {}", tblHosts.getName(), atagCert.getId());
         log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", Sha1Digest.valueOf(atagCert.getPCREvent()).toString());
         // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
@@ -178,17 +190,6 @@ public class JpaPolicyReader {
         tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(tagPcrRule);   
         
-        // load the tag cacerts and create the tag trust rule   TODO  load the cacerts once and keep it in memory instead of reloading for every attestation, but need a way for admin to refresh the configuration at runtime without restartnig the server
-        /*try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
-            String text = IOUtils.toString(in);
-            List<X509Certificate> tagAuthorities = X509Util.decodePemCertificates(text);
-            TagCertificateTrusted tagTrustedRule = new TagCertificateTrusted(tagAuthorities.toArray(new X509Certificate[0]));
-            tagTrustedRule.setMarkers(TrustMarker.ASSET_TAG.name());
-            rules.add(tagTrustedRule);
-        }
-        catch(Exception e) {
-            throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage()); // TODO: i18n
-        }*/
         return rules;
     }
 
