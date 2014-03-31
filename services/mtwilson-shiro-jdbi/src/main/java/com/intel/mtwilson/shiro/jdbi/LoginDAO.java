@@ -65,6 +65,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("update mw_user set enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
     void enableUser(@Bind("id") UUID id, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
 
+    @SqlQuery("select id,username,locale,enabled,status,comment from mw_user")
+    List<User> findAllUsers();
+    
     @SqlQuery("select id,username,locale,enabled,status,comment from mw_user where id=:id")
     User findUserById(@Bind("id") UUID id);
     
@@ -88,6 +91,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("update mw_user_keystore set keystore=:keystore, keystore_format=:keystore_format, comment=:comment WHERE id=:id")
     void updateUser(@Bind("id") UUID id, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat,  @Bind("comment") String comment);
     
+    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore")
+    List<UserKeystore> findAllUserKeystores();
+    
     @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore where id=:id")
     UserKeystore findUserKeystoreById(@Bind("id") UUID id);
     
@@ -95,7 +101,7 @@ public interface LoginDAO extends Closeable {
     UserKeystore findUserKeystoreByUserId(@Bind("user_id") UUID userId);
     
     @SqlUpdate("delete from mw_user_keystore where id=:id")
-    void deleteUserKeystore(@Bind("id") UUID id);
+    void deleteUserKeystoreById(@Bind("id") UUID id);
     
     /**
      * 
@@ -109,6 +115,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("update mw_role set role_name=:role_name, description=:description where id=:id")
     void updateRole(@Bind("id") UUID id, @Bind("role_name") String roleName, @Bind("description") String description);
 
+    @SqlQuery("select id,role_name,description from mw_role")
+    List<Role> findAllRoles();
+    
     @SqlQuery("select id,role_name,description from mw_role where id=:id")
     Role findRoleById(@Bind("id") UUID id);
     
@@ -158,6 +167,9 @@ public interface LoginDAO extends Closeable {
 
     @SqlUpdate("update mw_user_login_password set password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled where id=:id")
     void updateUserLoginPassword(@Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("id") UUID id);
+
+    @SqlUpdate("delete from mw_user_login_password where id=:id")
+    void deleteUserLoginPasswordById(@Bind("id") UUID id);
     
     @SqlUpdate("insert into mw_user_login_password_role (login_password_id, role_id) values (:login_password_id, :role_id)")
     void insertUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
@@ -183,23 +195,27 @@ public interface LoginDAO extends Closeable {
   comment text,
      * 
      */
-    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_password where id=:id")
+    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_certificate where id=:id")
     UserLoginCertificate findUserLoginCertificateById(@Bind("id") UUID id);
 
-    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_password where user_id=:user_id")
+    @SqlQuery("select id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment from mw_user_login_certificate where user_id=:user_id")
     UserLoginCertificate findUserLoginCertificateByUserId(@Bind("user_id") UUID userId);
     
     @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled,  mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.username=:username")
     UserLoginCertificate findUserLoginCertificateByUsername(@Bind("username") String username);
 
-    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha1_hash=:fingerprint")
+    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user_login_certificate.sha1_hash=:fingerprint")
     UserLoginCertificate findUserLoginCertificateBySha1(@Bind("fingerprint") byte[] fingerprint);
     
-    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha256_hash=:fingerprint")
+    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user_login_certificate.sha256_hash=:fingerprint")
     UserLoginCertificate findUserLoginCertificateBySha256(@Bind("fingerprint") byte[] fingerprint);    
     
     @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :sha256_hash, :expires, :enabled, :status, :comment)")
     void insertUserLoginCertificate(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("certificate") byte[] certificate, @Bind("sha1_hash") byte[] sha1Hash, @Bind("sha256_hash") byte[] sha256Hash, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
+    
+    @SqlUpdate("delete from mw_user_login_certificate where id=:id")
+    void deleteUserLoginCertificateById(@Bind("id") UUID id);
+        
     
     @SqlUpdate("insert into mw_user_login_certificate_role (login_certificate_id, role_id) values (:login_certificate_id, :role_id)")
     void insertUserLoginCertificateRole(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);

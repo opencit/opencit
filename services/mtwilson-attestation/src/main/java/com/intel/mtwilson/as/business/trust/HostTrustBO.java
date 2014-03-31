@@ -971,10 +971,16 @@ public class HostTrustBO extends BaseBO {
                         //log.warn("MLE Type is VMM");
                         pcr.setMleId(host.getVmmMleId().getId());
                     }
+                    else if ( markerList.contains("ASSET_TAG")) {
+                        log.debug ("MLE type is ASSET_TAG");
+                        pcr.setMleId(host.getVmmMleId().getId());
+                    }
                     else {
                         //log.warn("MLE Type is unknown, markers are: {}", StringUtils.join(markers, ","));
                     }
                     pcr.setHostID(host.getId());
+                    pcr.setHost_uuid_hex(host.getUuid_hex());
+                    pcr.setUuid_hex(new UUID().toString());
                     pcr.setUpdatedOn(today);
                     pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
                     pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());

@@ -117,7 +117,7 @@ do
 done
 
 # create the encrypted zip file
-zip $OUTFILE.zip $INFILES $SIGFILES
+zip -j $OUTFILE.zip $INFILES $SIGFILES
 encrypt_zipfile $OUTFILE.zip
 mv $OUTFILE.zip.enc $OUTFILE
 #rm $OUTFILE.zip

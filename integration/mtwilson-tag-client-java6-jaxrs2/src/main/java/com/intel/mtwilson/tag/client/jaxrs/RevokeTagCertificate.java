@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
+import com.intel.dcsg.cpg.io.UUID;
+
 
 /**
  *
@@ -31,7 +33,7 @@ public class RevokeTagCertificate {
      * <p>
      * @since Mt.Wilson 2.0
      */
-    public void revokeTagCertificate(String host, String selections) {
+    public void revokeTagCertificate(UUID certificateId) {
         return;
     }
         

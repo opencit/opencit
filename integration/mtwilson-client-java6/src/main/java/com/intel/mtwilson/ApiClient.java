@@ -56,11 +56,14 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.rfc822.Headers;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
 import java.util.Locale;
+import org.apache.http.auth.UsernamePasswordCredentials;
 /**
  * This class has many constructors to provide convenience for developers. 
  * However, too many options may be confusing.
@@ -106,6 +109,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public ApiClient(File configurationFile) throws ClientException, IOException {
         this(ConfigurationUtil.fromPropertiesFile(configurationFile));
         log.debug("Initialized with configuration file: "+configurationFile.getAbsolutePath());
+    }
+    
+    public ApiClient(Properties properties) throws ClientException {
+        this(new MapConfiguration(properties));
     }
     
     /**
@@ -295,6 +302,14 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             httpClient.setLocale(locale);
             log.debug("HMAC-256 Identity: "+new String(hmacCredential.identity(), "UTF-8"));
         }
+        else if( config.containsKey("mtwilson.api.username") && config.containsKey("mtwilson.api.password") ) {
+            UsernamePasswordCredentials passwordCredential = new UsernamePasswordCredentials(config.getString("mtwilson.api.username"), config.getString("mtwilson.api.password"));
+            setKeystore(config);
+            setLocale(config);
+            httpClient = new ApacheHttpClient(baseURL, new ApacheBasicHttpAuthorization(passwordCredential), keystore, config);
+            httpClient.setLocale(locale);
+            log.debug("HTTP BASIC Identity: {}", config.getString("mtwilson.api.username"));
+        }
         else {
             // no authentication
             setKeystore(config);
@@ -413,14 +428,26 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     protected ApiResponse httpGet(String path) throws IOException, ApiException, SignatureException {
         return httpClient.get(path);
     }
+    protected ApiResponse httpGet(String path, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.get(path, headers);
+    }
     protected ApiResponse httpDelete(String path) throws IOException, ApiException, SignatureException {
         return httpClient.delete(path);
+    }
+    protected ApiResponse httpDelete(String path, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.delete(path, headers);
     }
     protected ApiResponse httpPut(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
         return httpClient.put(path, body);
     }
+    protected ApiResponse httpPut(String path, ApiRequest body, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.put(path, body, headers);
+    }
     protected ApiResponse httpPost(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
         return httpClient.post(path, body);
+    }
+    protected ApiResponse httpPost(String path, ApiRequest body, Headers headers) throws IOException, ApiException, SignatureException {
+        return httpClient.post(path, body, headers);
     }
     
     // only call this if the Http Status is NOT OK in order to convert the response to an ApiException

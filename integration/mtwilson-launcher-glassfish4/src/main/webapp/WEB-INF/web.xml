@@ -3,11 +3,6 @@
          xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-    <context-param>
-        <param-name>shiroEnvironmentClass</param-name>
-        <param-value>com.intel.mtwilson.shiro.env.LocalIniWebEnvironment</param-value>
-    </context-param>
-
 <!--
     <filter>
         <filter-name>AuthorizationExceptionFilter</filter-name>
@@ -19,28 +14,54 @@
     </filter-mapping>
 -->
 
-<!--
+<!--  TODO:  mtwilson-launcher-xyz  should have a listener that uses Extensions.findAll(Shutdown.class) and calls all components that need to be informed of web server shutdown
     <listener>
         <description>Cleans up Persistence factory.</description>
         <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
     </listener>
 -->
+
+<!--
+LocalIniWebEnvironment tries to load from MTWILSON_CONF/shiro.ini first and then
+from the classpath defaults if it's not found.
+    reference: https://shiro.apache.org/static/1.2.2/apidocs/org/apache/shiro/web/env/EnvironmentLoader.html 
+    -->
+<context-param>
+    <param-name>shiroEnvironmentClass</param-name>
+    <param-value>com.intel.mtwilson.shiro.env.LocalIniWebEnvironment</param-value>
+</context-param>
+
     <listener>
         <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
     </listener>
     <listener>
         <listener-class>com.intel.mtwilson.jersey2.BackgroundTaskRunner</listener-class>
     </listener>
+    
+    <filter>
+        <filter-name>RepeatableRequestFilter</filter-name>
+        <filter-class>com.intel.mtwilson.servlet.RepeatableRequestFilter</filter-class>
+    </filter>
+    
     <filter>
         <filter-name>ShiroFilter</filter-name>
         <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
     </filter>
+    
+    <filter-mapping>
+        <filter-name>RepeatableRequestFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
     <!-- Filter all web requests.  This filter mapping is typically declared
         before all others to ensure any other filters are secured as well: -->
     <filter-mapping>
         <filter-name>ShiroFilter</filter-name>
         <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
     </filter-mapping>
     <!--
     Jersey reference: https://jersey.java.net/documentation/latest/deployment.html
@@ -179,6 +200,7 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
     </servlet-mapping>
 
     
+    <!--
     <servlet>
         <servlet-name>Html5</servlet-name>
         <servlet-class>com.intel.mtwilson.servlet.FileServlet</servlet-class>
@@ -188,6 +210,7 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <servlet-name>Html5</servlet-name>
         <url-pattern>/static/*</url-pattern>
     </servlet-mapping>
+    -->
     
     <!--
     <servlet>
@@ -248,10 +271,11 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <extension>yaml</extension>
         <mime-type>application/yaml</mime-type>
     </mime-mapping>
-    
-    <!-- NOT WORKING RIGHT NOW
+
+<!--
     <error-page>
         <location>/static/error.html</location>
-    </error-page>-->
+    </error-page>    
+-->
 
 </web-app>

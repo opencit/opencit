@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReportsBO extends BaseBO {
     Logger logger = LoggerFactory.getLogger(getClass().getName());
+    private static String ASSET_TAG_PCR = "22";
     
 
     public ReportsBO() {
@@ -222,6 +223,7 @@ public class ReportsBO extends BaseBO {
     public AttestationReport getAttestationReport(Hostname hostName, Boolean failureOnly)  {
 
         try {
+            logger.debug("getAttestationReport - Received request to generate attestation report for {} with failuresOnly set to {}.", hostName.toString(), failureOnly);
         AttestationReport attestationReport = new AttestationReport();
 
         /*
@@ -247,16 +249,21 @@ public class ReportsBO extends BaseBO {
             hostType.setName(hostName.toString()); // datatype.Hostname
             if (logs != null) {
                 for (TblTaLog log : logs) {
+                    logger.debug("getAttestationReport - Processing the PCR {} with trust status {}.", log.getManifestName(), log.getTrustStatus());
                     boolean value = (failureOnly && log.getTrustStatus() == false);
                     if (!failureOnly || value) {
-                        attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
+                        if (log.getManifestName().equalsIgnoreCase(ASSET_TAG_PCR)) {
+                            attestationReport.getPcrLogs().add(getPcrLogReportForAssetTag(log, tblHosts.getId()));
+                        } else {
+                            attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
+                        }
                     }
                 }
             }
         }
         
         // temp fix to get pcr showing up in trust report
-        HostAgentFactory factory = new HostAgentFactory();
+        /*HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
         if(agent != null) {
             String hostUUID;
@@ -286,7 +293,7 @@ public class ReportsBO extends BaseBO {
             } else {
                logger.debug("assetTag trustVerfication could not find UUID for " + tblHosts.getName());
             }
-        }
+        }*/
         return attestationReport;
         }
         catch(Exception ex) {
@@ -299,6 +306,7 @@ public class ReportsBO extends BaseBO {
     
     public PcrLogReport getPcrManifestLog(TblHosts tblHosts, TblTaLog log, Boolean failureOnly) throws NumberFormatException, IOException {
         TblPcrManifest tblPcrManifest = getPcrModuleManifest(tblHosts,log.getMleId(),log.getManifestName());
+        logger.debug("getPcrManifestLog - Got data from mw_pcr_manifest table with pcr name {} and value {}.", tblPcrManifest.getName(), tblPcrManifest.getValue());
         PcrLogReport manifest = new PcrLogReport();
         manifest.setName(Integer.parseInt(log.getManifestName()));
         manifest.setValue(log.getManifestValue());
@@ -337,6 +345,7 @@ public class ReportsBO extends BaseBO {
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<String, ModuleLogReport>();
         
         if(log.getTblModuleManifestLogCollection() != null){
+            logger.debug("addManifestLogs - This is module based attestation with {} of modules.", log.getTblModuleManifestLogCollection().size());
             for (TblModuleManifestLog moduleManifestLog : log.getTblModuleManifestLogCollection()) {
                 moduleReports.put(moduleManifestLog.getName(), new ModuleLogReport(moduleManifestLog.getName(),
                         moduleManifestLog.getValue(), moduleManifestLog.getWhitelistValue(),0));
@@ -386,5 +395,26 @@ public class ReportsBO extends BaseBO {
         }
         throw new ASException(ErrorCode.AS_PCR_MANIFEST_MISSING,manifestName,mleId,tblHosts.getName());
         
+    }
+    
+    private PcrLogReport getPcrLogReportForAssetTag(TblTaLog taLog, Integer hostId) {
+        logger.debug("getPcrLogReportForAssetTag : Creating pcr log report for asset tag verification for host with uuid {}.", hostId);
+        AssetTagCertBO atagCertBO = new AssetTagCertBO();
+        MwAssetTagCertificate atagCert = atagCertBO.findValidAssetTagCertForHost(hostId);
+        if (atagCert != null) {  
+            logger.debug("getPcrLogReportForAssetTag : Found a valid asset tag certificate for the host with white list value {}", atagCert.getPCREvent().toString());
+            PcrLogReport manifest = new PcrLogReport();
+            manifest.setName(Integer.parseInt(ASSET_TAG_PCR));
+            manifest.setValue(taLog.getManifestValue());
+            manifest.setWhiteListValue(new  Sha1Digest(atagCert.getPCREvent()).toString());
+            if(manifest.getValue().equals(manifest.getWhiteListValue())) {
+                manifest.setTrustStatus(1);
+            }else{
+                manifest.setTrustStatus(0);
+            }
+            manifest.setVerifiedOn(new Date());
+            return manifest;
+        }
+        return null;
     }
 }
