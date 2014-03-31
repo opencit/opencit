@@ -5,10 +5,10 @@
 package com.intel.mtwilson.saml;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
-import com.intel.mtwilson.atag.model.x509.*;
+import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.dcsg.cpg.io.Resource;
-import com.intel.mtwilson.atag.model.X509AttributeCertificate;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

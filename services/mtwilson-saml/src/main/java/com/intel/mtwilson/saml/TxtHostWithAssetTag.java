@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.saml;
 
-import com.intel.mtwilson.atag.model.X509AttributeCertificate;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.TxtHost;
 
 /**
