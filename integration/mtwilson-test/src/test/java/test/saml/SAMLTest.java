@@ -7,7 +7,7 @@ package test.saml;
 import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.tag.X509AttrBuilder;
+import com.intel.mtwilson.tag.common.X509AttrBuilder;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
