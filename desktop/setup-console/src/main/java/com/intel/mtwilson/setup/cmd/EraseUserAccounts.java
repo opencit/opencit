@@ -101,6 +101,7 @@ public class EraseUserAccounts implements Command {
             if( userLoginCertificate != null ) {
                 dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
             }
+            dao.deleteUser(user.getId());
         }
     }
     
