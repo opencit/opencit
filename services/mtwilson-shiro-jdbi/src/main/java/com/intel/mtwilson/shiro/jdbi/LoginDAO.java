@@ -177,6 +177,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id, role_id=:role_id")
     void deleteUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
 
+    @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id")
+    void deleteUserLoginPasswordRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
+    
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_password_role on mw_role.id = mw_user_login_password_role.role_id where mw_user_login_password_role.login_password_id=:login_password_id")
     List<Role> findRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
 
@@ -222,6 +225,9 @@ public interface LoginDAO extends Closeable {
 
     @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id, role_id=:role_id")
     void deleteUserLoginCertificateRole(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);
+
+    @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
+    void deleteUserLoginCertificateRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
 
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_certificate_role on mw_role.id = mw_user_login_certificate_role.role_id where mw_user_login_certificate_role.login_certificate_id=:login_certificate_id")
     List<Role> findRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);

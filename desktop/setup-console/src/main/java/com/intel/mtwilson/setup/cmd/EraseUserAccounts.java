@@ -95,10 +95,12 @@ public class EraseUserAccounts implements Command {
             }
             UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUserId(user.getId());
             if( userLoginPassword != null ) {
+                dao.deleteUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
                 dao.deleteUserLoginPasswordById(userLoginPassword.getId());
             }
             UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateByUserId(user.getId());
             if( userLoginCertificate != null ) {
+                dao.deleteUserLoginCertificateRolesByUserLoginCertificateId(userLoginCertificate.getId());
                 dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
             }
             dao.deleteUser(user.getId());
