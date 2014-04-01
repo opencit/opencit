@@ -951,17 +951,21 @@ public class ManagementConsoleDataController extends MultiActionController {
         responseView.addObject("wlVMMList", wlVMM);
         responseView.addObject("SpecificHostValue", HostWhiteListTarget.VMM_HOST.getValue());
         
+        // Get list of selections here and add them to responseView
+     
         //List<String> selectionList = new ArrayList<String>();
         //String requestURL = My.configuration().getAssetTagServerURL() + "/selections";
-        
         // XXX TODO  1) during setup need to save asset tag service ssl cert so we can use the secure tls policy;  2) add the asset tag apis to the java client 
         //1.3.6.1.4.1.99999.3"; 
         //ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
-
         //ApiRequest request = new ApiRequest(MediaType., "");
         //ApiResponse response = client.get(requestURL);    
 
-        //String str = new String(response.content);
+        // TODO-stdale 
+        // Need to talk to ryan about the best way to get the list of selections here 
+        List<String> selectionList = new ArrayList<String>();
+        selectionList.add("N/A");
+        responseView.addObject("selectionList",selectionList);
         
         return responseView;
     }

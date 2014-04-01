@@ -26,7 +26,7 @@ com.intel.my.app.MyClientFactory
  */
 public class ClientFactory {
     private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
-    // XXX TODO  add TlsPolicy as a second parameter... after we transition to using cpg-tls-policy with the new factory classes and repositories
+
     public static SimpleKeystore createUserInResource(Resource keystore, String username, String password, URL webserviceUrl, TlsPolicy tlsPolicy, String[] roles) {
         Iterator<ClientFactorySpi> factories = ServiceLoader.load(ClientFactorySpi.class).iterator();
         while(factories.hasNext()) {
@@ -45,6 +45,7 @@ public class ClientFactory {
         log.error("No implementation available for: "+ClientFactorySpi.class.getName());
         return null;
     }
+    
     public static MtWilson clientForUserInResource(Resource keystore, String username, String password, URL webserviceUrl, TlsPolicy tlsPolicy) {
         Iterator<ClientFactorySpi> factories = ServiceLoader.load(ClientFactorySpi.class).iterator();
         while(factories.hasNext()) {

@@ -35,8 +35,8 @@ public class SetupTest {
         tasks.add(new ConfigureDatabase());
         tasks.add(new InitDatabase());
         
-        tasks.add(new CreateAdministrator());
-//        tasks.add(new CreatePortalAdministrator());
+        // see also CreateAdminUser in mtwilson-shiro-setup
+        
 //        tasks.add(new MigrateUsers());
         tasks.add(new UpdateExtensionCacheFile());
         

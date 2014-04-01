@@ -19,6 +19,7 @@ import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class TagCreateCaKey extends TagCommand {
         // create a new key pair
         KeyPair cakey = RsaUtil.generateRsaKeyPair(2048);
         X509Builder builder = X509Builder.factory();
-        X509Certificate cacert = builder.selfSigned(dn, cakey).build();
+        X509Certificate cacert = builder.selfSigned(dn, cakey).expires(3650, TimeUnit.DAYS).build();
         if( cacert == null ) {
 //            log.error("Failed to create certificate"); // no need to print this, if the build failed there are guaranteed to be faults to print...
             List<Fault> faults = builder.getFaults();

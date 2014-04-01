@@ -24,8 +24,8 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.saml.SamlAssertion;
 import com.intel.mtwilson.saml.SamlGenerator;
-import com.intel.mtwilson.atag.model.x509.*;
-import com.intel.mtwilson.atag.model.X509AttributeCertificate;
+//import com.intel.mtwilson.atag.model.x509.*;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 //import com.intel.mtwilson.as.premium.PremiumHostBO;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
@@ -629,7 +629,8 @@ public class HostTrustBO extends BaseBO {
             log.debug("Trust Report Rule Name: {}", res.getRuleName());
             if (!res.isTrusted()) {
                 for (Fault f : res.getFaults()) {
-                    log.debug("Trust report|Fault Name: {} | Fault Cause: {}", f.getFaultName(), f.getCause().getMessage());
+                    if (f != null && f.getFaultName() != null && f.getCause() != null)
+                        log.debug("Trust report|Fault Name: {} | Fault Cause: {}", f.getFaultName(), f.getCause().getMessage());
                 }
             }
         }
@@ -725,6 +726,22 @@ public class HostTrustBO extends BaseBO {
         
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
 
+        try {
+            log.debug("Checking if there are any asset tag certificates mapped to host with ID : {}", tblHosts.getId());
+            List<MwAssetTagCertificate> atagCertsForHost = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(tblHosts.getId());
+            // There should be only one valid asset tag certificate for the host.
+            if (atagCertsForHost != null && atagCertsForHost.size() == 1) {
+                hostReport.tagCertificate = X509AttributeCertificate.valueOf(atagCertsForHost.get(0).getCertificate());
+            }
+            else {
+                log.info("Asset tag certificate not present for host {}.", tblHosts.getName());
+            }
+        } catch (Exception ex) {
+            log.error("Exception when looking up the asset tag whitelist.", ex);
+            // We cannot do anything ... just log the error and proceed
+            log.info("Error during look up of asset tag certificates for the host {}", tblHosts.getName());
+        }
+        
         
         long getTrustPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies
@@ -971,10 +988,16 @@ public class HostTrustBO extends BaseBO {
                         //log.warn("MLE Type is VMM");
                         pcr.setMleId(host.getVmmMleId().getId());
                     }
+                    else if ( markerList.contains("ASSET_TAG")) {
+                        log.debug ("MLE type is ASSET_TAG");
+                        pcr.setMleId(host.getVmmMleId().getId());
+                    }
                     else {
                         //log.warn("MLE Type is unknown, markers are: {}", StringUtils.join(markers, ","));
                     }
                     pcr.setHostID(host.getId());
+                    pcr.setHost_uuid_hex(host.getUuid_hex());
+                    pcr.setUuid_hex(new UUID().toString());
                     pcr.setUpdatedOn(today);
                     pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
                     pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());

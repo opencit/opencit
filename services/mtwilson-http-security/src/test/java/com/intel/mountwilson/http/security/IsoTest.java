@@ -22,24 +22,25 @@ public class IsoTest {
     @Test
     public void testIso8601Format() {
         log.debug(new Iso8601Date(new Date(System.currentTimeMillis())).toString());
+        log.debug(new Iso8601Date(System.currentTimeMillis()).toString());
         assertTrue(true);
     }
     
     @Test
     public void testIso8601ParseWithTimezoneOffsetWithColon() throws ParseException {
-        log.debug(new Iso8601Date("2012-03-05T14:04:48-08:00").toString());
+        log.debug(Iso8601Date.valueOf("2012-03-05T14:04:48-08:00").toString());
         assertTrue(true);
     }
 
     @Test
     public void testIso8601ParseWithTimezoneOffsetWithoutColon() throws ParseException {
-        log.debug(new Iso8601Date("2012-03-05T14:04:48-0800").toString());
+        log.debug(Iso8601Date.valueOf("2012-03-05T14:04:48-0800").toString());
         assertTrue(true);
     }
 
     @Test
     public void testIso8601ParseWithoutTimezoneOffset() throws ParseException {
-        log.debug(new Iso8601Date("2012-03-05T14:04:48").toString());
+        log.debug(Iso8601Date.valueOf("2012-03-05T14:04:48").toString());
         assertTrue(true);
     }
     

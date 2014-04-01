@@ -204,10 +204,10 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled,  mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.username=:username")
     UserLoginCertificate findUserLoginCertificateByUsername(@Bind("username") String username);
 
-    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha1_hash=:fingerprint")
+    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user_login_certificate.sha1_hash=:fingerprint")
     UserLoginCertificate findUserLoginCertificateBySha1(@Bind("fingerprint") byte[] fingerprint);
     
-    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.status as status, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user.sha256_hash=:fingerprint")
+    @SqlQuery("select mw_user_login_certificate.id as id, user_id, certificate, sha1_hash, sha256_hash, mw_user_login_certificate.status as status, expires, mw_user_login_certificate.enabled as enabled, mw_user_login_certificate.comment as comment from mw_user join mw_user_login_certificate on mw_user.id=mw_user_login_certificate.user_id where mw_user_login_certificate.sha256_hash=:fingerprint")
     UserLoginCertificate findUserLoginCertificateBySha256(@Bind("fingerprint") byte[] fingerprint);    
     
     @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :sha256_hash, :expires, :enabled, :status, :comment)")

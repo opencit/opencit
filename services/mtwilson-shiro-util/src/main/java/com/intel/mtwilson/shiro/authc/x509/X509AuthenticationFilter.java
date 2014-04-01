@@ -5,14 +5,9 @@
 package com.intel.mtwilson.shiro.authc.x509;
 
 import java.io.InputStream;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletRequest;
@@ -25,13 +20,18 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
+//import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
 import org.apache.shiro.web.util.WebUtils;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
+import com.intel.mtwilson.shiro.AuthenticationFilter;
+import com.intel.mtwilson.shiro.HttpAuthenticationFilter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.FilterChain;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.shiro.subject.Subject;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -39,44 +39,19 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
  *
  * @author jbuhacoff
  */
-public class X509AuthenticationFilter extends AuthenticatingFilter {
+public class X509AuthenticationFilter extends HttpAuthenticationFilter {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(X509AuthenticationFilter.class);
 
-    protected static final String AUTHORIZATION_HEADER = "Authorization";
-    protected static final String AUTHENTICATE_HEADER = "WWW-Authenticate";    
-    private String authcScheme = "X509";
-    private String applicationName = "Mt Wilson";
     private int expiresAfter = 60 * 60 * 1000; // 1 hour, in milliseconds, max is Integer.MAX_VALUE
     private final String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+)=\"([^\"]+)\"";
     private final Pattern headerAttributeNameValuePairPattern = Pattern.compile(headerAttributeNameValuePair);
     
+    public X509AuthenticationFilter() {
+        super();
+        setAuthenticationScheme("X509");
+    }
     
-    
-    public String getAuthcScheme() {
-        return authcScheme;
-    }
-
-    /**
-     * Override the authentication scheme name. The default
-     * value is "X509"
-     * @param authcScheme 
-     */
-    public void setAuthcScheme(String authcScheme) {
-        this.authcScheme = authcScheme;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
-    }
-
-    /**
-     * Override the application name. The default is "Mt Wilson"
-     * @param applicationName 
-     */
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
+ 
     /**
      * Override the expiration window. Default is 1 hour.
      * @param expiresAfter 
@@ -92,23 +67,32 @@ public class X509AuthenticationFilter extends AuthenticatingFilter {
     
     
     @Override
-    protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) throws Exception {
+    protected AuthenticationToken createToken(ServletRequest request) throws Exception {
+        log.debug("createToken");
+        try {
         HttpServletRequest httpRequest = WebUtils.toHttp(request);
         Authorization authorization = getAuthorization(httpRequest);
         RsaSignatureInput signatureInput = getSignatureInputFromHttpRequest(httpRequest, authorization);
         String content = signatureInput.toString(); // may throw IllegalArgumentException if any required field is null or invalid
+        log.debug("Document content (signature input):\n'{}'\n", content);
         byte[] document = content.getBytes("UTF-8");
         byte[] signature = Base64.decodeBase64(authorization.signatureBase64);
         String signatureAlgorithm = signatureAlgorithm(authorization.signatureAlgorithm);
         byte[] fingerprint = Base64.decodeBase64(authorization.fingerprintBase64);
         
-        byte[] digest = getDigest(document, signatureAlgorithm);
+        byte[] digest = getDigest(document, signatureAlgorithm); // example: 3031300d060960864801650304020105000420 8373ed7ae4a499534f3eb02fb898a0eafea48a334e2f0a5703e7dc474360786a   the space between the two hex parts shows where the alg id ends and the sha256 digest of the document itself begins
+        log.debug("Digest with alg id included is: {}", Hex.encodeHexString(digest));
         X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), request.getRemoteAddr());
-        log.debug("Created X509AuthenticationToken");
+        log.debug("createToken: returning X509AuthenticationToken");
         return token;
+        }
+        catch(NoSuchAlgorithmException e) {
+            throw new AuthenticationException("Cannot authenticate request: "+e.getMessage(), e);
+        }
     }
     
     private String getRequestBody(HttpServletRequest httpRequest) throws IOException {
+        log.debug("Reading request body");
         // get the request body (even if empty) - the input stream must be repeatable
         // so the endpoint will be able to read it again for processing the request
         InputStream in = httpRequest.getInputStream();
@@ -129,33 +113,50 @@ public class X509AuthenticationFilter extends AuthenticatingFilter {
     }
     
     private Authorization getAuthorization(HttpServletRequest httpRequest) {
-        String authorizationText = httpRequest.getHeader(AUTHORIZATION_HEADER);
+        String authorizationText = httpRequest.getHeader(getAuthorizationHeaderName());
         log.debug("Parsing authorization header: {}", authorizationText);
         Authorization authorization = parseAuthorization(authorizationText);
         log.info("X509CertificateAuthorization: Request timestamp ok");
         return authorization;
     }
     
+    /**
+     * Example signature document:
+Request: GET https://10.1.71.56:8443/mtwilson/v2/WLMService/resources/oem
+Realm: 
+From: Ca0ES/b4gqW6aExUoCvSOxb68fOIqrN9dPhYUmZImFM=
+Signature-Algorithm: SHA256withRSA
+X-Nonce: AAABRQ9M90Y56zLFR/0hc8B6LDB+qO3r
+Date: Sat, 29 Mar 2014 12:24:33 PDT
+
+     * 
+     * 
+     * @param httpRequest
+     * @param a
+     * @return
+     * @throws IOException 
+     */
     private RsaSignatureInput getSignatureInputFromHttpRequest(HttpServletRequest httpRequest, Authorization a) throws IOException {
         RsaSignatureInput signatureInput = new RsaSignatureInput();
         signatureInput.httpMethod = httpRequest.getMethod();
-        signatureInput.url = httpRequest.getRequestURI();
+        signatureInput.url = getURL(httpRequest); // protocol, host, port, path, and query string as sent by client
         signatureInput.realm = a.realm;
         signatureInput.fingerprintBase64 = a.fingerprintBase64;
         signatureInput.signatureAlgorithm = a.signatureAlgorithm;
         signatureInput.headerNames = a.headerNames;
         signatureInput.headers = getRequestHeaders(httpRequest, a.headerNames);
         signatureInput.body = getRequestBody(httpRequest); // throws IOException if error on read or if InputStream is not repeatable;
+        log.debug("signature input body is {} bytes:\n'{}'\n", signatureInput.body.length(), signatureInput.body);
         return signatureInput;
     }
 
-    @Override
-    protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-        HttpServletResponse httpResponse = WebUtils.toHttp(response);
-        httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        String authcHeader = getAuthcScheme() + " realm=\"" + getApplicationName() + "\"";
-        httpResponse.setHeader(AUTHENTICATE_HEADER, authcHeader);
-        return false;
+    private String getURL(HttpServletRequest httpRequest) {
+        String url = httpRequest.getRequestURL().toString();
+        String query = httpRequest.getQueryString();
+        if( query == null ) { query = ""; }
+        log.debug("request URL is {} with query string {}", url, query);
+        String queryDelimiter = query.isEmpty() ? "" : "?";
+        return url + queryDelimiter + query;
     }
     
     private byte[] getDigest(byte[] document, String signatureAlgorithm) throws NoSuchAlgorithmException, IOException {
@@ -168,6 +169,7 @@ public class X509AuthenticationFilter extends AuthenticatingFilter {
         // compute the digest of the document using the digest algorithm
         MessageDigest md = MessageDigest.getInstance(digestAlgorithm); // like SHA1; throws NoSuchAlgorithmException
         byte[] digest = md.digest(document);
+        log.debug("Document digest is {}", Hex.encodeHexString(digest));
         
         // java format for the digest is algorithm oid followed by the hash
         AlgorithmIdentifier algId = new AlgorithmIdentifier(new DERObjectIdentifier(oid), null);
@@ -175,18 +177,19 @@ public class X509AuthenticationFilter extends AuthenticatingFilter {
         return digestInfo.getEncoded(); // throws IOException
     }
 
+    // reference: http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
     private String getDigestAlgorithm(String signatureAlgorithm) {
         if( "SHA1withRSA".equals(signatureAlgorithm) ) {
-            return "SHA1";
+            return "SHA-1";
         }
         if( "SHA256withRSA".equals(signatureAlgorithm) ) {
-            return "SHA256";
+            return "SHA-256";
         }
         if( "SHA384withRSA".equals(signatureAlgorithm) ) {
-            return "SHA384";
+            return "SHA-384";
         }
         if( "SHA512withRSA".equals(signatureAlgorithm) ) {
-            return "SHA512";
+            return "SHA-512";
         }
         throw new IllegalArgumentException("Unknown signature algorithm "+signatureAlgorithm);
     }
@@ -195,19 +198,19 @@ public class X509AuthenticationFilter extends AuthenticatingFilter {
 //        if( "MD5".equalsIgnoreCase(algorithm) ) {
 //            return "1.2.840.113549.2.5";
 //        }
-        if( "SHA1".equalsIgnoreCase(digestAlgorithm) ) {
+        if( "SHA-1".equalsIgnoreCase(digestAlgorithm) || "SHA1".equalsIgnoreCase(digestAlgorithm) ) {
             return "1.3.14.3.2.26";
         }
 //        if( "SHA1withRSA".equalsIgnoreCase(algorithm) ) {
 //            return "1.3.14.3.2.29";
 //        }
-        if( "SHA256".equalsIgnoreCase(digestAlgorithm) ) {
+        if( "SHA-256".equalsIgnoreCase(digestAlgorithm)  || "SHA256".equalsIgnoreCase(digestAlgorithm) ) {
             return "2.16.840.1.101.3.4.2.1";
         }
-        if( "SHA384".equalsIgnoreCase(digestAlgorithm) ) {
+        if( "SHA-384".equalsIgnoreCase(digestAlgorithm) || "SHA384".equalsIgnoreCase(digestAlgorithm) ) {
             return "2.16.840.1.101.3.4.2.2";
         }
-        if( "SHA512".equalsIgnoreCase(digestAlgorithm) ) {
+        if(  "SHA-512".equalsIgnoreCase(digestAlgorithm) || "SHA512".equalsIgnoreCase(digestAlgorithm) ) {
             return "2.16.840.1.101.3.4.2.3";
         }
         throw new IllegalArgumentException("Unknown OID for algorithm "+digestAlgorithm);
@@ -323,5 +326,8 @@ Authorization: X509
         public String signatureAlgorithm;
         public String signatureBase64;
     }
+
+
+    
     
 }
