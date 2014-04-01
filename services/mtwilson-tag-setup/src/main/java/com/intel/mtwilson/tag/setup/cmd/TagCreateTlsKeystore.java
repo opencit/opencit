@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * 
  * If a distinguished name is not provided, a default name will be used
  * 
+ * @deprecated now using mtwilson ssl keystore - ASSET TAG SERVICE NO LONGER HAS A SEPARATE SSL KEYSTORE
  * @author jbuhacoff
  */
 public class TagCreateTlsKeystore extends TagCommand {
@@ -76,9 +77,11 @@ public class TagCreateTlsKeystore extends TagCommand {
             
         }
         
+        /*  ASSET TAG SERVICE NO LONGER HAS A SEPARATE SSL KEYSTORE
         SimpleKeystore keystore = new SimpleKeystore(new File(filename), My.configuration().getAssetTagKeyStorePassword());
         keystore.addKeyPairX509(cakey.getPrivate(), cacert, dn, My.configuration().getAssetTagKeyPassword());
         keystore.save();
+        */
     }
     
     /**

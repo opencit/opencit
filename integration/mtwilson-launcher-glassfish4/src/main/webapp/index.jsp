@@ -1,7 +1,7 @@
 <html>
 <body>
 <h1>Mt Wilson</h1>
-<p><a href="static/">html5 portal (in progress)</a>
-<p><a href="v2/application.wadl">application.wadl</a>
+<p>This is the API entry point.</p>
+<p><a href="/mtwilson-portal/">Login to Mt Wilson</a></p>
 </body>
 </html>

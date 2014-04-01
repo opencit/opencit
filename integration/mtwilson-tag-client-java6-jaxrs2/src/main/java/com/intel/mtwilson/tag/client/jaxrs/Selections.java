@@ -8,27 +8,13 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class Selections extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public Selections(URL url) {
-        //super(url);
-    }
-
-    public Selections(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class Selections {
+        
     /**
      * Retrieves the list of selections based on the search criteria specified. If none
      * of the search criteria is specified, then search would return back an empty result set. The 

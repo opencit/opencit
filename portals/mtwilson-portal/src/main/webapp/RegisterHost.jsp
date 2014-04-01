@@ -3,6 +3,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
         <title data-i18n="title.register_host">Host Registration Page</title>
     </head>
     <body>
@@ -26,6 +27,7 @@
                         <div class="labelDiv" data-i18n="input.host_import_file">Host(s) File:</div>
                         <div class="valueDiv">
                             <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="AuthorizationToken" id="AuthorizationToken" />
                                 <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" data-i18n="[value]button.choose_file"/>
                                 <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()" data-i18n="[value]button.retrieve_hosts">
                             </form>

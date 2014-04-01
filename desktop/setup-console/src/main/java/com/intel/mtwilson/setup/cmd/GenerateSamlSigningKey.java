@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * @deprecated see CreateSamlCertificate 
  * @author jbuhacoff
  */
 public class GenerateSamlSigningKey implements Command {

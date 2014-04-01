@@ -15,6 +15,9 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
+import com.intel.mtwilson.shiro.jdbi.LoginDAO;
+import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -63,6 +66,7 @@ public class EraseUserAccounts implements Command {
         }else {
             deletePortalUsers();
             deleteApiClients();
+            deleteUsers();
         }
     }
 
@@ -74,6 +78,28 @@ public class EraseUserAccounts implements Command {
 //             System.out.println("Deleted " + portalUser.getUsername());
         }catch (Exception ex) {
             System.err.println("Exception occured: \r\n\r\n" + ex.getMessage());
+        }
+    }
+    
+    private void deleteUsers() throws Exception {
+        LoginDAO dao = MyJdbi.authz();
+        List<User> users = dao.findAllUsers();
+        for(User user : users) {
+            UserKeystore userKeystore = dao.findUserKeystoreByUserId(user.getId());
+            if( userKeystore != null ) {
+                dao.deleteUserKeystoreById(userKeystore.getId());
+            }
+            UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUserId(user.getId());
+            if( userLoginPassword != null ) {
+                dao.deleteUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
+                dao.deleteUserLoginPasswordById(userLoginPassword.getId());
+            }
+            UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateByUserId(user.getId());
+            if( userLoginCertificate != null ) {
+                dao.deleteUserLoginCertificateRolesByUserLoginCertificateId(userLoginCertificate.getId());
+                dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
+            }
+            dao.deleteUser(user.getId());
         }
     }
     

@@ -45,6 +45,13 @@ import org.apache.shiro.util.JdbcUtils;
 public class JdbcPasswordRealm extends AuthorizingRealm {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcPasswordRealm.class);
+
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof UsernamePasswordToken;
+    }
+    
+    
     
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection pc) {

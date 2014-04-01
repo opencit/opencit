@@ -19,28 +19,18 @@ import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.RolePermission;
 import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
 import com.intel.mtwilson.shiro.jdbi.model.User;
-import java.security.cert.CertificateException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.shiro.authc.AccountException;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.realm.AuthenticatingRealm;
 import org.apache.shiro.realm.AuthorizingRealm;
-import org.apache.shiro.realm.jdbc.JdbcRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
-import org.apache.shiro.util.ByteSource;
-import org.apache.shiro.util.JdbcUtils;
 
 /**
  *
@@ -49,6 +39,11 @@ import org.apache.shiro.util.JdbcUtils;
 public class JdbcCertificateRealm extends AuthorizingRealm {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JdbcCertificateRealm.class);
+    
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof X509AuthenticationToken;
+    }
     
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection pc) {
@@ -67,7 +62,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
             
             Collection<LoginCertificateId> loginCertificateIds = pc.byType(LoginCertificateId.class);
             for (LoginCertificateId loginCertificateId : loginCertificateIds) {
-                log.debug("doGetAuthorizationInfo for login password id: {}", loginCertificateId.getLoginCertificateId());
+                log.debug("doGetAuthorizationInfo for login certificate id: {}", loginCertificateId.getLoginCertificateId());
                 
                 
                 List<Role> roles = dao.findRolesByUserLoginCertificateId(loginCertificateId.getLoginCertificateId());

@@ -74,6 +74,7 @@ UUID=`dmidecode |grep UUID | awk '{print $2}'`
 tagChoice=""
 tagFile=""
 tagServer=""
+tagSelectionName=""
 certAuthority=""
 certFile=""
 selectionFile=/tmp/selection
@@ -92,6 +93,13 @@ isUsingXml=0
 
 function generatePasswordHex() {
   < /dev/urandom tr -dc a-f0-9 | head -c${1:-32}
+}
+
+function jsonval() {
+  json_string=$1
+  json_property=$2
+  temp=echo $json_string | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"\:\"/\|/g' | sed 's/[\,]/ /g' | sed 's/\"//g' | grep -w $json_property| cut -d":" -f2| sed -e 's/^ *//g' -e 's/ *$//g'
+  echo ${temp##*|}
 }
 
 function takeOwnershipTpm() {
@@ -133,10 +141,14 @@ function createIndex4() {
 
 function getLocalTag() {
  functionReturn=0
- tagFile=$(dialog --stdout --backtitle "$TITLE" --stdout --title "Please choose a file" --fselect ~ 14 48)
- if [ $? -eq 1 ]; then 
-  functionReturn=1
-  return
+ if [ -f "$XML_FILE_LOCATION" ]; then
+   tagFile=$XML_FILE_LOCATION
+ else
+   tagFile=$(dialog --stdout --backtitle "$TITLE" --stdout --title "Please choose a file" --fselect ~ 14 48)
+   if [ $? -eq 1 ]; then 
+     functionReturn=1
+     return
+   fi
  fi
  isUsingXml=1
 }
@@ -182,32 +194,40 @@ function provisionCert() {
  if [ -z "$server" ]; then 
 	server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  fi
- selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
  if [ $isUsingXml == 0 ]; then
-   if [ $autoSelect == 1 ]; then
-     json='[{ "subject": "'$UUID'" }]'
-   else
-     json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+   if [ $autoSelect != 1 ]; then
+     if [ -z "$selectionName" ]; then
+       selectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
+     fi
+     json='{"selections":[{"name":"'$selectionName'"}]}'
    fi
-   echo "$WGET --header=Content-Type: application/json --post-data=$json $server/certificate-requests -O $certInfoFile" >> $cmdFile
-   $WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
-   clear
+   echo "$WGET --header=\"Content-Type: application/json\" --header=\"Accept: application/pkix-cert\" --post-data=\"$json\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
+   $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
  else
-	#here we need to read the xml from the file, escape the " with \ then build our string to send via wget
-	xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
-	json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-	echo "$WGET --header=\"Content-Type: application/json\" --post-data=\"$json\" $server/certificate-requests -O $certInfoFile" >> $cmdFile
-	$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
+   #here we need to read the xml from the file, escape the " with \ then build our string to send via wget
+   encrypted=`head -n 1 $tagFile | grep "Content-Type: encrypted"`
+   if [ -z $encrypted ]; then   # NOT encrypted
+     #xmlData=`cat $tagFile | tr -d '\n'`
+     #json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
+     echo "$WGET --header=\"Content-Type: application/xml\" --header=\"Accept: application/pkix-cert\" --post-file=\"$tagFile\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
+     $WGET --header="Content-Type: application/xml" --header="Accept: application/pkix-cert" --post-file="$tagFile" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
+   else   #encrypted
+     #xmlData=`cat $tagFile | tr -d '\n'`
+     #json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
+     echo "$WGET --header=\"Content-Type: message/rfc822\" --header=\"Accept: application/pkix-cert\" --post-file=\"$tagFile\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
+     $WGET --header="Content-Type: message/rfc822" --header="Accept: application/pkix-cert" --post-file="$tagFile" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
+   fi
  fi
- certUUID=`cat $certInfoFile | jshon -e 0 -e certificate | sed -e 's/\"//g'`
- echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" >> $cmdFile
- $WGET  --header="Accept: application/xml" $server/certificates/$certUUID -O $certFile  2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading Asset Tag certificate from $server" 10 60 0
- clear
+
  if [ ! "$accept" == "yes" ]; then
 	acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
 	if [ $? -eq 0 ]; then
-		xml2 < $certFile > $certFileValues
-		dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
+		#xml2 < $certFile > $certFileValues
+                #dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
+                
+                #XXX TODO: convert binary cert data to hex and display
+                #openssl x509 -in $certFile -text -noout > $certFileValues
+                less $certFile
 	fi
  fi
  if [ ! "$accept" == "yes" ]; then
@@ -217,12 +237,10 @@ function provisionCert() {
     resp=0;
  fi
  if [ $resp -eq 0 ]; then
-  sha1=`xml2 < $certFile  | grep sha1`
-  sha1=`echo "${sha1#*sha1=}"`
-
   # Retrieve password if TA, else generate new passwords and take ownership
-  $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
-  export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
+  $WGET $server/host-tpm-passwords/$UUID.json -O /tmp/tpmPassword
+  #export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
+  export ownerPass=`cat /tmp/tpmPassword | awk -F'"password":' '{print $2}' | awk -F'"' '{print $2}'`
   if [ -z $ownerPass ]; then
     mode="VMWARE"
     export ownerPass=`generatePasswordHex 40`
@@ -236,8 +254,13 @@ function provisionCert() {
   releaseNvram
   createIndex4
 
-  echo "$sha1" | hex2bin > $certSha1
+  #sha1=`xml2 < $certFile  | grep sha1`
+  #sha1=`echo "${sha1#*sha1=}"`
+  #sha1=`openssl dgst -sha1 $certFile`
+  #echo "$sha1" | hex2bin > $certSha1
   # hex2bin "$sha1" $certSha1
+  openssl dgst -sha1 -binary $certFile > $certSha1
+
   echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
   $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
   result=$?
@@ -271,12 +294,15 @@ function _main() {
  while [ $mybreak -ne 1 ]; do
   case "$tagChoice" in 
    1)
-    getRemoteTag
-    if [ $functionReturn -eq 0 ]; then
-     mybreak=1
-    else
-      tagChoice=4
-    fi
+    #getRemoteTag
+    #if [ $functionReturn -eq 0 ]; then
+    # mybreak=1
+    #else
+    #  tagChoice=4
+    #fi
+    mybreak=1
+    autoSelect=0
+    tagChoice=4
     ;;
    2)
     getLocalTag

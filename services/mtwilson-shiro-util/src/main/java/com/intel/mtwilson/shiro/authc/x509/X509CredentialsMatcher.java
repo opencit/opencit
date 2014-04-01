@@ -24,6 +24,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -69,6 +70,9 @@ public class X509CredentialsMatcher implements CredentialsMatcher {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, certificate);
             byte[] digest = cipher.doFinal(credential.getSignature());
+            log.debug("Digest (input): {}", Hex.encodeHexString(credential.getDigest()));
+            log.debug("Signature (input): {}", Hex.encodeHexString(credential.getSignature()));
+            log.debug("Digest (signature decrypted with known public key): {}", Hex.encodeHexString(digest));
             if (Arrays.equals(digest, credential.getDigest())) {
                 log.debug("Verified signature");
                 // known public key from certificate verified the signature on the incoming token

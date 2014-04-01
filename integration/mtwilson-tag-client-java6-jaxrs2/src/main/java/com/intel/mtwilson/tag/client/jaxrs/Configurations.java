@@ -8,27 +8,13 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.Configuration;
 import com.intel.mtwilson.tag.model.ConfigurationCollection;
 import com.intel.mtwilson.tag.model.ConfigurationFilterCriteria;
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class Configurations extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public Configurations(URL url) {
-        //super(url);
-    }
-
-    public Configurations(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class Configurations {
+        
     /**
      * Retrieves the details of the configuration based on the search criteria specified. If none
      * of the search criteria is specified, then search would return back and empty result set. The 

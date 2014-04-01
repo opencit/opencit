@@ -173,7 +173,7 @@ public class HmacRequestVerifier {
     private boolean isRequestExpired(String timestamp) throws ParseException {
         // request expiration policy
         Calendar expirationTime = Calendar.getInstance();
-        expirationTime.setTime(new Iso8601Date(timestamp).toDate());
+        expirationTime.setTime(Iso8601Date.valueOf(timestamp));
         expirationTime.add(Calendar.MILLISECOND, requestsExpireAfterMs);
         Calendar currentTime = Calendar.getInstance();
         

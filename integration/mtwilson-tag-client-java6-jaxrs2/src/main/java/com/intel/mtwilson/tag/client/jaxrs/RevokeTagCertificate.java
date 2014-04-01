@@ -4,27 +4,15 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intel.dcsg.cpg.io.UUID;
+
 
 /**
  *
  * @author ssbangal
  */
-public class RevokeTagCertificate extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public RevokeTagCertificate(URL url) {
-        //super(url);
-    }
-
-    public RevokeTagCertificate(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class RevokeTagCertificate {
+        
     /**
      * This function revokes the specified certificate and sends the revocation information to
      * Mt.Wilson. 
@@ -45,7 +33,7 @@ public class RevokeTagCertificate extends MtWilsonClient {
      * <p>
      * @since Mt.Wilson 2.0
      */
-    public void revokeTagCertificate(String host, String selections) {
+    public void revokeTagCertificate(UUID certificateId) {
         return;
     }
         

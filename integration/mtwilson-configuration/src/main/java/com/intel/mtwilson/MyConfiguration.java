@@ -654,6 +654,7 @@ public class MyConfiguration {
         return conf.getString("mtwilson.atag.url", "https://localhost:9999");
     }
     
+    /*
     public String getAssetTagKeyStorePath() {
         return conf.getString("mtwilson.atag.keystore", "serverAtag.jks");
     }
@@ -665,6 +666,7 @@ public class MyConfiguration {
     public String getAssetTagKeyPassword() {
         return conf.getString("mtwilson.atag.key.password");// must not have default password; run setup
     }
+    */
     
     public String getAssetTagApiUsername() {
         return conf.getString("mtwilson.atag.api.username", "admin");

@@ -8,27 +8,13 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import com.intel.mtwilson.tag.model.SelectionKvAttributeCollection;
 import com.intel.mtwilson.tag.model.SelectionKvAttributeFilterCriteria;
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class SelectionKvAttributes extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public SelectionKvAttributes(URL url) {
-        //super(url);
-    }
-
-    public SelectionKvAttributes(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class SelectionKvAttributes {
+        
     /**
      * Retrieves the list of mappings between the selection and the associated key-value pairs based on the 
      * search criteria specified. If none of the search criteria is specified, then search would return back 

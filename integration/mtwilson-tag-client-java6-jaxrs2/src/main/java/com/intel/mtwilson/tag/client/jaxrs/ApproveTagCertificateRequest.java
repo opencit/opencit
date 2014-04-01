@@ -4,27 +4,14 @@
  */
 package com.intel.mtwilson.tag.client.jaxrs;
 
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.intel.dcsg.cpg.io.UUID;
 
 /**
  *
  * @author ssbangal
  */
-public class ApproveTagCertificateRequest extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public ApproveTagCertificateRequest(URL url) {
-        //super(url);
-    }
-
-    public ApproveTagCertificateRequest(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class ApproveTagCertificateRequest {
+        
     /**
      * This function provided the certificate request ID, and the certificate associated to it (provided
      * by an external CA), stores the certificate details in the database and updates the request status to
@@ -40,15 +27,15 @@ public class ApproveTagCertificateRequest extends MtWilsonClient {
      * https://192.168.1.101:8181/mtwilson/v2/approve_tag_certificate_request
      * <p>
      * <i>Sample Input</i><br>
-     * 
+     * {"certificate_request_id":"187ec902-c6c6-4dfb-adb4-f240099aa4b0","certificate":"MIIO....ic="}
      * </selection></selections>
      * <p>
      * <i><u>Sample Output:</u></i><br>
-     * 
+     * NA
      * <p>
      * @since Mt.Wilson 2.0
      */
-    public byte[] provisionTagCertificate(String host, String selections) {
+    public byte[] provisionTagCertificate(UUID certificateRequestId, byte[] certificate) {
         return null;
     }
         

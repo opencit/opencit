@@ -40,7 +40,7 @@ public class Iso8601DateTest {
     
     private void parse(String text) {
         log.debug("Trying to parse: "+text);
-        Iso8601Date date = new Iso8601Date(text);
+        Iso8601Date date = Iso8601Date.valueOf(text);
         log.debug("Parse result: "+date.toString());
     }
     

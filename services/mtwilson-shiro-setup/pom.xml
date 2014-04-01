@@ -34,6 +34,12 @@
             <artifactId>mtwilson-setup-ext</artifactId>
 			<version>${project.version}</version>
         </dependency>
+        <!-- including mtwilson-setup only for the CreatePortalAdministrator  task -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-util</artifactId>
@@ -74,6 +80,14 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
+
+        <!-- for integration into mwportaluser -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-management-jpa</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        
 
     </dependencies>  
 </project>

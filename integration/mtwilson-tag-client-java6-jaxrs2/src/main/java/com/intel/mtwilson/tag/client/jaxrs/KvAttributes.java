@@ -5,31 +5,16 @@
 package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
-//import com.intel.mtwilson.client.jaxrs.*;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
 import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
-import java.net.URL;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class KvAttributes extends MtWilsonClient {
-    
-    Logger log = LoggerFactory.getLogger(getClass().getName());
-
-    public KvAttributes(URL url) {
-        //super(url);
-    }
-
-    public KvAttributes(Properties properties) throws Exception {
-        super(properties);
-    }
-    
+public class KvAttributes {
+        
     /**
      * Retrieves the keys/attribtes and its corresponding values based on the search criteria specified. If none
      * of the search criteria is specified, then search would return back and empty result set. The 

@@ -42,6 +42,8 @@ import java.util.List;
  * @author jbuhacoff
  */
 public abstract class AbstractSetupTask implements SetupTask {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractSetupTask.class);
+
 //    private transient Integer lastHashCode = null;
     private transient MutableConfiguration configuration = new PropertiesConfiguration();
     private transient ArrayList<Fault> configurationFaults = new ArrayList<>();
@@ -142,7 +144,9 @@ public abstract class AbstractSetupTask implements SetupTask {
             execute();
         }
         catch(Exception e) {
-            throw new SetupException("Setup error", e);
+            log.error("Setup task error: {}", e.getMessage());
+            log.debug("Setup task error", e);
+            throw new SetupException("Setup error"); // TODO:  add exception as second argument here
         }
         if( !isValidated() ) {
             throw new ValidationException("Validation failed: "+getClass().getName());
