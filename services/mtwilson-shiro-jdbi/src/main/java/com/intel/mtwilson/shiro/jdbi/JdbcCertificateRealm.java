@@ -19,6 +19,7 @@ import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.RolePermission;
 import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
 import com.intel.mtwilson.shiro.jdbi.model.User;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;
@@ -14,12 +13,10 @@ import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.configuration.Configuration;

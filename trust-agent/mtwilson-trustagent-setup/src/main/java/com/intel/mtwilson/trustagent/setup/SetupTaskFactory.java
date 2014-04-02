@@ -16,6 +16,7 @@ import java.util.List;
 public class SetupTaskFactory {
     public static List<SetupTask> getTasks() {
         ArrayList<SetupTask> list = new ArrayList<>();
+        list.add(new ConfigureFromEnvironment());
         list.add(new CreateKeystorePassword());
         list.add(new CreateTlsKeypair());
         list.add(new CreateAdminUser());

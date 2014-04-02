@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +36,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
     private File keystoreFile;
     private String keystorePassword;
     private SimpleKeystore keystore;
+    private List<String> approved;
     
     @Override
     protected void configure() throws Exception {
@@ -59,7 +61,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
         if( keystorePassword == null || keystorePassword.isEmpty() ) {
             configuration("Trust Agent keystore password is not set");
         }
-        List<String> approved = trustagentConfiguration.getMtWilsonTlsCertificateFingerprints();
+        approved = trustagentConfiguration.getMtWilsonTlsCertificateFingerprints();
         if( approved.isEmpty() ) {
             configuration("One or more approved TLS certificate fingerprints must be set in MTWILSON_TLS_CERT_SHA1; comma-separated values ok");
         }
@@ -73,20 +75,46 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
             if( certificates.length == 0 ) {
                 validation("Mt Wilson TLS certificate is not configured");
             }
+            else {
+                // check to see if any pre-approved certificates are NOT already in our keystore
+                // that's not necessarily an error condition (the approved certs list may be for multiple servers)
+                // but it's an indicator that we should execute this task to ensure that we have the most
+                // current certs
+                ArrayList<String> present = new ArrayList<>();
+                for(X509Certificate certificate : certificates) {
+                    String fingerprint = Sha1Digest.digestOf(certificate.getEncoded()).toHexString();
+                    present.add(fingerprint);
+                }
+                if( !containsAny(present, approved) ) {
+                    validation("Keystore does not contain any approved certificates");
+                }
+            }
         }
         catch(NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
             validation("Cannot load certificates from keystore");
         }
     }
+    
+    private boolean containsAny(List<String> list, List<String> any) {
+        for(String item : any) {
+            if( list.contains(item) ) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     protected void execute() throws Exception {
         X509Certificate[] certificates = TlsUtil.getServerCertificates(new URL(url), new AnyProtocolSelector());
-        List<String> approved = trustagentConfiguration.getMtWilsonTlsCertificateFingerprints();
         for(X509Certificate certificate : certificates) {
             String fingerprint = Sha1Digest.digestOf(certificate.getEncoded()).toHexString();
             if( approved.contains(fingerprint)) {
+                log.debug("Server certificate {} is approved", fingerprint);
                 keystore.addTrustedSslCertificate(certificate, fingerprint);
+            }
+            else {
+                log.debug("Server certificate {} is rejected", fingerprint);
             }
         }
         keystore.save();

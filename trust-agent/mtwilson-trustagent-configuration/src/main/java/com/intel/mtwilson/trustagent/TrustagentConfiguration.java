@@ -27,6 +27,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     // provide the username and password when connecting to Trust Agent.
     
     public final static String MTWILSON_API_URL = "mtwilson.api.url";
+    public final static String MTWILSON_TLS_CERT_SHA1 = "mtwilson.tls.cert.sha1";
     public final static String MTWILSON_API_USERNAME = "mtwilson.api.username";
     public final static String MTWILSON_API_PASSWORD = "mtwilson.api.password";
 //    public final static String MTWILSON_SSL_SHA1 = "mtwilson.ssl.sha1"; // only during setup... after setup we have our ssl keystore

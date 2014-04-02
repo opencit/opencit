@@ -146,7 +146,7 @@ public abstract class AbstractSetupTask implements SetupTask {
         catch(Exception e) {
             log.error("Setup task error: {}", e.getMessage());
             log.debug("Setup task error", e);
-            throw new SetupException("Setup error"); // TODO:  add exception as second argument here
+            throw new SetupException("Setup error", e);
         }
         if( !isValidated() ) {
             throw new ValidationException("Validation failed: "+getClass().getName());

@@ -4,39 +4,23 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.dcsg.cpg.console.HyphenatedCommandFinder;
-import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.dcsg.cpg.console.input.Input;
-import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
-import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.mtwilson.setup.Command;
-import com.intel.mtwilson.setup.SetupContext;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupTask;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.io.IOUtils;
 import com.intel.dcsg.cpg.util.PascalCaseNamingStrategy;
 
 /**
  * This setup command is a bridge between mtwilson-console and the new
  * mtwilson-setup tasks
- * 
+ * @deprecated use the SetupManager command in mwilson-setup instead
  * @author jbuhacoff
  */
 public class V2 implements Command {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(V2.class);
-
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
 
     private Configuration options = null;
     @Override

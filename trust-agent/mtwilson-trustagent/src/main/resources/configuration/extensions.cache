@@ -5,6 +5,7 @@ com.intel.mtwilson.trustagent.ws.v2.Daa
 com.intel.mtwilson.trustagent.ws.v2.Host
 com.intel.mtwilson.trustagent.ws.v2.Tag
 com.intel.mtwilson.trustagent.ws.v2.Tpm
+com.intel.mtwilson.trustagent.setup.ConfigureFromEnvironment
 com.intel.mtwilson.trustagent.setup.CreateAdminUser
 com.intel.mtwilson.trustagent.setup.CreateAikSecret
 com.intel.mtwilson.trustagent.setup.CreateKeystorePassword
