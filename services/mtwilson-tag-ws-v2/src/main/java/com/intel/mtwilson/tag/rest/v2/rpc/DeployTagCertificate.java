@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@RPC("deploy_tag_certificate")
+@RPC("deploy-tag-certificate")
 @JacksonXmlRootElement(localName="deploy_tag_certificate")
 public class DeployTagCertificate implements Runnable{
     
