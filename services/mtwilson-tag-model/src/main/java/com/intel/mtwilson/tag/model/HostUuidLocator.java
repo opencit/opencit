@@ -19,7 +19,9 @@ public class HostUuidLocator implements Locator<HostUuid> {
 
     @Override
     public void copyTo(HostUuid item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
     }
     
 }
