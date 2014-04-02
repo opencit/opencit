@@ -82,6 +82,11 @@ public class VMWare51Esxi51   {
 					info.put("PackageName", componentEventDetails.getVibName());
 					info.put("PackageVendor", componentEventDetails.getVibVendor());
 					info.put("PackageVersion", componentEventDetails.getVibVersion());
+                                        if (logEntry.pcrIndex == 19) {
+                                            String fullCompName = "componentName." + componentEventDetails.getComponentName().substring(0, componentEventDetails.getComponentName().lastIndexOf("."));
+                                            fullCompName = fullCompName + "-" + componentEventDetails.getVibName()+ "-" +componentEventDetails.getVibVersion();
+                                            info.put("FullComponentName",fullCompName);
+                                        }
 //                    label = String.format("%s: %s-%s-%s", info.get("EventType"), componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() );
                     
                     // There are usually 3 components that are filenames like imgdb.tgz, state.tgz, and onetime.tgz, where the filename is listed as ComponentName and there is no PackageVendor, PackageName, or PackageVersion defined.
