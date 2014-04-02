@@ -88,6 +88,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
                 sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
                 sAttr.setKvAttributeName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
                 sAttr.setKvAttributeValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE));
+                sAttr.setSelectionDescription(r.getValue(MW_TAG_SELECTION.DESCRIPTION));
                 
                 objCollection.getSelectionKvAttributeValues().add(sAttr);
             }
