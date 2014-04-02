@@ -155,6 +155,10 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 			fnToggelManifestList(true);
 			$('#mainfestGKVSCheck').find('input:checkbox').attr("disabled","disabled");
                         listOfmanifest = response.manifestList;
+                        // Since we do not want the module to be updated, we will disabe it.
+                        $('#MainContent_check_gkvs18').attr('disabled','disabled');
+                        $('#MainContent_check_gkvs19').attr('disabled','disabled');
+                        $('#MainContent_check_gkvs20').attr('disabled','disabled');
 			for ( var pcr in response.manifestList) {
 				$('#MainContent_check_gkvs'+response.manifestList[pcr].Name).attr('checked','checked');
                                 //Bug:434 - Module manifests should not be allowed to change in this screen.
