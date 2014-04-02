@@ -16,6 +16,7 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 
 /**
  *
@@ -151,6 +152,24 @@ public class TblModuleManifestLogJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
+        } finally {
+            em.close();
+        }
+    }
+    
+    public TblModuleManifestLog findByTaLogIdAndName(TblTaLog tblTaLog, String componentName){
+    
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblModuleManifestLog.findByTaLogIdAndName");
+            query.setParameter("taLogId", tblTaLog);
+            query.setParameter("name", componentName);   
+            
+            TblModuleManifestLog singleResult = (TblModuleManifestLog) query.getSingleResult();
+            return singleResult;
+            
+        } catch(NoResultException e){
+        	return null;
         } finally {
             em.close();
         }
