@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * XXX not sure if we should use this one, or just use a list of PcrEventLogContainsMeasurement
@@ -30,6 +32,8 @@ import java.util.Set;
  * @author jbuhacoff
  */
 public class PcrEventLogEquals extends BaseRule {
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     private PcrEventLog expected;
     public PcrEventLogEquals(PcrEventLog expected) {
         this.expected = expected;
@@ -43,15 +47,18 @@ public class PcrEventLogEquals extends BaseRule {
 //        report.check(this);        
 //        report.check(getClass().getSimpleName()); // the minimum... show that the host was evaluated by this policy
         if( hostReport.pcrManifest == null ) {
+            log.debug("PcrManifest null fault is being raised.");
             report.fault(new PcrEventLogMissing());
         }
         else {
             PcrEventLog pcrEventLog = getPcrEventLog(hostReport); 
             if( pcrEventLog == null ) {
+                log.debug("PcrEventLog missing fault is being raised.");
                 report.fault(new PcrEventLogMissing(expected.getPcrIndex()));
             }
             else {
                 List<Measurement> moduleManifest = pcrEventLog.getEventLog();
+                log.debug("About to apply the PcrEventLogEquals policy for {} entries.", moduleManifest.size());
                 if( moduleManifest == null || moduleManifest.isEmpty() ) {
                     report.fault(new PcrEventLogMissing(expected.getPcrIndex()));
                 }
@@ -60,12 +67,14 @@ public class PcrEventLogEquals extends BaseRule {
                     ArrayList<Measurement> hostActualUnexpected = new ArrayList<Measurement>(moduleManifest);
                     hostActualUnexpected.removeAll(expected.getEventLog()); //  hostActualUnexpected = actual modules - expected modules = only extra modules that shouldn't be there;  comparison is done BY HASH VALUE,  not by name or any "other info"
                     if( !hostActualUnexpected.isEmpty() ) {
+                        log.debug("PcrEventLogEquals : Host is having #{} additional modules compared to the white list.", hostActualUnexpected.size());
                         report.fault(new PcrEventLogContainsUnexpectedEntries(expected.getPcrIndex(), hostActualUnexpected));
                     }
-                    HashSet<Measurement> hostActualMissing = new HashSet<Measurement>(expected.getEventLog());
+                    ArrayList<Measurement> hostActualMissing = new ArrayList<Measurement>(expected.getEventLog());
                     hostActualMissing.removeAll(moduleManifest); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
                     if( !hostActualMissing.isEmpty() ) {
-                        report.fault(new PcrEventLogMissingExpectedEntries(expected.getPcrIndex(), hostActualMissing));
+                        log.debug("PcrEventLogEquals : Host is missing #{} modules compared to the white list.", hostActualMissing.size());
+                        report.fault(new PcrEventLogMissingExpectedEntries(expected.getPcrIndex(), new HashSet<Measurement>(hostActualMissing)));
                     }   
                 }
             }
