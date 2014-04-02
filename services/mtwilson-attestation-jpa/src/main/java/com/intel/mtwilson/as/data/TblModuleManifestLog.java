@@ -20,7 +20,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "TblModuleManifestLog.findById", query = "SELECT t FROM TblModuleManifestLog t WHERE t.id = :id"),
     @NamedQuery(name = "TblModuleManifestLog.findByName", query = "SELECT t FROM TblModuleManifestLog t WHERE t.name = :name"),
     @NamedQuery(name = "TblModuleManifestLog.findByValue", query = "SELECT t FROM TblModuleManifestLog t WHERE t.value = :value"),
-    @NamedQuery(name = "TblModuleManifestLog.findByWhitelistValue", query = "SELECT t FROM TblModuleManifestLog t WHERE t.whitelistValue = :whitelistValue")})
+    @NamedQuery(name = "TblModuleManifestLog.findByWhitelistValue", query = "SELECT t FROM TblModuleManifestLog t WHERE t.whitelistValue = :whitelistValue"),
+    @NamedQuery(name = "TblModuleManifestLog.findByTaLogIdAndName", query = "SELECT t FROM TblModuleManifestLog t WHERE t.taLogId=:taLogId AND t.name = :name"),})
 public class TblModuleManifestLog implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
