@@ -49,19 +49,19 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
 //            SelectQuery sql = jooq.select(MW_TAG_KVATTRIBUTE.ID.coerce(byte[].class), MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE).from(MW_TAG_KVATTRIBUTE).getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equalIgnoreCase(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.lower().contains(criteria.nameContains.toLowerCase()));
             }
             if( criteria.valueEqualTo != null  && criteria.valueEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.valueEqualTo));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equalIgnoreCase(criteria.valueEqualTo));
             }
             if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.valueContains));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.lower().contains(criteria.valueContains.toLowerCase()));
             }
             sql.addOrderBy(MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE);
             log.debug("Opening tag-value dao");

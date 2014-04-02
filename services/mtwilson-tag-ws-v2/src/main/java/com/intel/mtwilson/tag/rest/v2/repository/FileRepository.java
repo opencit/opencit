@@ -44,19 +44,19 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
             SelectQuery sql = jooq.select().from(MW_FILE).getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_FILE.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_FILE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_FILE.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_FILE.NAME.equalIgnoreCase(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_FILE.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_FILE.NAME.lower().contains(criteria.nameContains.toLowerCase()));
             }
             if( criteria.contentTypeEqualTo != null && criteria.contentTypeEqualTo.length() > 0 ) {
-                sql.addConditions(MW_FILE.CONTENTTYPE.equal(criteria.contentTypeEqualTo));
+                sql.addConditions(MW_FILE.CONTENTTYPE.equalIgnoreCase(criteria.contentTypeEqualTo));
             }
             if( criteria.contentTypeContains != null && criteria.contentTypeContains.length() > 0 ) {
-                sql.addConditions(MW_FILE.CONTENTTYPE.startsWith(criteria.contentTypeContains));
+                sql.addConditions(MW_FILE.CONTENTTYPE.lower().startsWith(criteria.contentTypeContains.toLowerCase()));
             }
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
