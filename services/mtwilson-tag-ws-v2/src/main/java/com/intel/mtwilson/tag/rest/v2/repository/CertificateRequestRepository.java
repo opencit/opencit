@@ -54,16 +54,16 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
                     .getQuery();
             if( criteria.id != null ) {
     //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
             }
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equal(criteria.subjectContains));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
             }
             if( criteria.statusEqualTo != null  && criteria.statusEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equal(criteria.statusEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equalIgnoreCase(criteria.statusEqualTo));
             }
             sql.addOrderBy(MW_TAG_CERTIFICATE_REQUEST.ID);
             Result<Record> result = sql.fetch();

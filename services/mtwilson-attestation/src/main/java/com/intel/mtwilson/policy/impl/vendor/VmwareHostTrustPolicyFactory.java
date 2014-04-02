@@ -120,7 +120,8 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
         // we will replace it with module/eventlog checks. 
         if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
             //Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host  /*  NEW FLAG to exclude dynamic and host specific modules , default false here  and true in the new function getComparisonRulesForVmm */);
-            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogEqualExcludingVmm(vmm, host, false  /*  NEW FLAG to exclude dynamic and host specific modules , default false here  and true in the new function getComparisonRulesForVmm */);            rules.addAll(pcrEventLogRules);
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogEqualExcludingVmm(vmm, host, false  /*  NEW FLAG to exclude dynamic and host specific modules , default false here  and true in the new function getComparisonRulesForVmm */);            
+            //rules.addAll(pcrEventLogRules);
             rules.addAll(pcrEventLogRules);
         }
         return rules;
