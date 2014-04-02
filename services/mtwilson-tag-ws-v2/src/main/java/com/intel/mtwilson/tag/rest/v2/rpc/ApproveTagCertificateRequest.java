@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author ssbangal
  */
-@RPC("approve_tag_certificate_request")
+@RPC("approve-tag-certificate-request")
 @JacksonXmlRootElement(localName="approve_tag_certificate_request")
 public class ApproveTagCertificateRequest implements Runnable{
     

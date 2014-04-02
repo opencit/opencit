@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author ssbangal
  */
-@RPC("revoke_tag_certificate")
+@RPC("revoke-tag-certificate")
 @JacksonXmlRootElement(localName="revoke_tag_certificate")
 public class RevokeTagCertificate implements Runnable{
     

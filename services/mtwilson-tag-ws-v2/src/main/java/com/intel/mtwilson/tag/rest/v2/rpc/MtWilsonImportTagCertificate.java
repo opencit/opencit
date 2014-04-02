@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author ssbangal
  */
-@RPC("mtwilson_import_tag_certificate")
+@RPC("mtwilson-import-tag-certificate")
 @JacksonXmlRootElement(localName="mtwilson_import_tag_certificate")
 public class MtWilsonImportTagCertificate implements Runnable{
     
