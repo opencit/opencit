@@ -33,6 +33,11 @@ load_defaults 2>&1 >/dev/null
 function read_local_config() {
     shell_include_files "${package_env_filename}" "${package_install_filename}"
 
+#looks like the env:TRUSTAGENT_KEYSTORE_PASSWORD isn't working - it used to? java complains it can't open the keystore; but when passing the password itself on the command line it works
+#export JVMARGS="-Djavax.net.ssl.trustStore=/opt/trustagent/configuration/trustagent.jks -Djavax.net.ssl.trustStorePassword=env:TRUSTAGENT_KEYSTORE_PASSWORD -Djavax.net.ssl.keyStore=/opt/trustagent/configuration/trustagent.jks -Djavax.net.ssl.keyStorePassword=env:TRUSTAGENT_KEYSTORE_PASSWORD"
+#export JVMARGS="-Djavax.net.ssl.trustStore=/opt/trustagent/configuration/trustagent.jks -Djavax.net.ssl.trustStorePassword=password -Djavax.net.ssl.keyStore=/opt/trustagent/configuration/trustagent.jks -Djavax.net.ssl.keyStorePassword=password"
+#TODO: these properties should be read and set by the java program itself without being passed on the command line
+
     serviceNameLo="tagent"                                  # service name with the first letter in lowercase
     serviceName="Trust Agent"                                    # service name
     serviceUser="root"                                      # OS user name for the service

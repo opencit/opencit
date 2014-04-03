@@ -36,6 +36,7 @@ import org.apache.commons.io.IOUtils;
  */
 @RPC("aik_request_submit_response")
 public class IdentityRequestSubmitResponse implements Callable<byte[]> {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdentityRequestSubmitResponse.class);
     private byte[] identityRequestResponseToChallenge;
 
     public void setChallengeResponse(byte[] identityRequestResponseToChallenge) {
@@ -55,7 +56,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
 
 			//decrypt response
 			TpmIdentityRequest returnedIR = new TpmIdentityRequest(identityRequestResponseToChallenge);
-			byte[] returned = returnedIR.decryptRaw(caPrivKey);
+			byte[] decryptedIdentityRequestChallenge = returnedIR.decryptRaw(caPrivKey); // should be the same 32 bytes that we sent as the encrypted challenge
             
             TpmIdentityProof idProof;
             X509Certificate ekCert;
@@ -64,7 +65,8 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
             // the filename is the challenge (in hex) and the content is the idproof
             File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); // TODO:  put this in a privacyca configuration class
             if( !datadir.exists() ) { datadir.mkdirs(); }
-            String filename = TpmUtils.byteArrayToHexString(returned); //Hex.encodeHexString(identityRequestChallenge)
+            String filename = TpmUtils.byteArrayToHexString(decryptedIdentityRequestChallenge); //Hex.encodeHexString(identityRequestChallenge)
+            log.debug("Filename: {}", filename);
             File challengeFile = datadir.toPath().resolve(filename).toFile();
             if( !challengeFile.exists() ) {
                 throw new RuntimeException("Invalid challenge response");

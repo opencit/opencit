@@ -33,8 +33,8 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author jbuhacoff
  */
-public class UpdateExtensionCacheFile extends LocalSetupTask {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UpdateExtensionCacheFile.class);
+public class UpdateExtensionsCacheFile extends LocalSetupTask {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UpdateExtensionsCacheFile.class);
     
     private String getCacheFilePath() {
         return MyFilesystem.getApplicationFilesystem().getConfigurationPath()+File.separator+"extensions.cache";

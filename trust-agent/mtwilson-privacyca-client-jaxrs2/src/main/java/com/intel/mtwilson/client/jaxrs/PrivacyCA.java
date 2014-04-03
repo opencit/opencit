@@ -5,16 +5,13 @@
 package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.privacyca.v2.model.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,27 +40,27 @@ public class PrivacyCA extends MtWilsonClient {
                 .path("/privacyca/tpm-endorsement")
                 .request()
                 .accept(OtherMediaType.APPLICATION_PKIX_CERT)
-                .post(Entity.json(ekModulus), X509Certificate.class);
+                .post(Entity.entity(ekModulus, MediaType.APPLICATION_OCTET_STREAM), X509Certificate.class);
         return ec;
     }
     
-    public byte[] identityChallengeRequest(IdentityChallengeRequest request) {
+    public IdentityChallenge identityChallengeRequest(IdentityChallengeRequest challengeRequest) {
         log.debug("target: {}", getTarget().getUri().toString());
-        byte[] challenge = getTarget()
+        IdentityChallenge challenge = getTarget()
                 .path("/privacyca/identity-challenge-request")
                 .request()
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
-                .post(Entity.json(request), byte[].class);
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(challengeRequest), IdentityChallenge.class);
         return challenge;
     }
 
-    public byte[] identityChallengeResponse(byte[] encrypted) {
+    public IdentityBlob identityChallengeResponse(IdentityChallengeResponse challengeResponse) {
         log.debug("target: {}", getTarget().getUri().toString());
-        byte[] identity = getTarget()
+        IdentityBlob identity = getTarget()
                 .path("/privacyca/identity-challenge-response")
                 .request()
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
-                .post(Entity.entity(encrypted, MediaType.APPLICATION_OCTET_STREAM), byte[].class);
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(challengeResponse), IdentityBlob.class);
         return identity;
     }
 

@@ -6,6 +6,8 @@ package com.intel.mtwilson.privacyca.v2.resource;
 
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
+import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeResponse;
 import com.intel.mtwilson.privacyca.v2.rpc.IdentityRequestSubmitResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -20,12 +22,26 @@ import javax.ws.rs.core.MediaType;
 @V2
 @Path("/privacyca/identity-challenge-response")
 public class IdentityRequestSubmitChallengeResponseResource {
+    
     @POST
-    @Consumes({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public byte[] identityChallengeResponse(byte[] challengeResponse) throws Exception {
         IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
         rpc.setChallengeResponse(challengeResponse);
         return rpc.call();
     }
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    public IdentityBlob identityChallengeResponse(IdentityChallengeResponse challengeResponse) throws Exception {
+        IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
+        rpc.setChallengeResponse(challengeResponse.getChallengeResponse());
+        byte[] encryptedAik = rpc.call();
+        IdentityBlob identityBlob = new IdentityBlob();
+        identityBlob.setIdentityBlob(encryptedAik);
+        return identityBlob;
+    }
+
 }

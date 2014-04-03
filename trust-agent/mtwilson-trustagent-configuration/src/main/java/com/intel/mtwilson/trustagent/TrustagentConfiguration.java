@@ -30,12 +30,11 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public final static String MTWILSON_TLS_CERT_SHA1 = "mtwilson.tls.cert.sha1";
     public final static String MTWILSON_API_USERNAME = "mtwilson.api.username";
     public final static String MTWILSON_API_PASSWORD = "mtwilson.api.password";
-//    public final static String MTWILSON_SSL_SHA1 = "mtwilson.ssl.sha1"; // only during setup... after setup we have our ssl keystore
     public final static String TPM_OWNER_SECRET = "tpm.owner.secret"; // 20 bytes hex (40 hex digits)
     public final static String TPM_SRK_SECRET = "tpm.srk.secret"; // 20 bytes hex (40 hex digits)
     public final static String AIK_SECRET = "aik.secret"; // 20 bytes hex (40 hex digits)
     public final static String AIK_INDEX = "aik.index"; // integer, default 1  but original HIS code from NIARL defaulted to zero
-    public final static String TRUSTAGENT_HTTP_PORT = "trustagent.http.port"; // default 9999
+    public final static String TRUSTAGENT_HTTP_TLS_PORT = "trustagent.http.tls.port"; // default 1443 
     public final static String TRUSTAGENT_TLS_CERT_DN = "trustagent.tls.cert.dn"; // default CN=trustagent
     public final static String TRUSTAGENT_TLS_CERT_IP = "trustagent.tls.cert.ip"; // default 127.0.0.1  , can be comma-separated list of values
     public final static String TRUSTAGENT_TLS_CERT_DNS = "trustagent.tls.cert.dns";// default localhost  , can be comma-separated list of values
@@ -130,8 +129,8 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "aik.blob");        
     }
     
-    public int getTrustagentHttpPort() {
-        return getConfiguration().getInteger(TRUSTAGENT_HTTP_PORT, 19443); // TODO:  choose another default port; 9999 is the old v1 port
+    public int getTrustagentHttpTlsPort() {
+        return getConfiguration().getInteger(TRUSTAGENT_HTTP_TLS_PORT, 1443); // TODO:  choose another default port; 9999 is the old v1 port
     }
     public String getTrustagentTlsCertDn() {
         return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");

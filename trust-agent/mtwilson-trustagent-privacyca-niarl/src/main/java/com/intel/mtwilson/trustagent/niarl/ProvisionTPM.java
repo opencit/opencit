@@ -4,8 +4,11 @@
  */
 package com.intel.mtwilson.trustagent.niarl;
 
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
+import com.intel.mtwilson.configuration.Configurable;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
@@ -27,13 +30,20 @@ import java.security.cert.X509Certificate;
  * 
  * @author jbuhacoff
  */
-public class ProvisionTPM implements Runnable {
+public class ProvisionTPM implements Configurable, Runnable {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProvisionTPM.class);
+    
+    private Configuration configuration = null;
+    
+    @Override
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
     
     @Override
     public void run() {
         try {
-            TrustagentConfiguration config = new TrustagentConfiguration(My.configuration().getConfiguration());
+            TrustagentConfiguration config = new TrustagentConfiguration(configuration);
 		/*
 		 * The following actions must be performed during the TPM Provisioning process:
 		 * 1. Take ownership of the TPM
@@ -52,22 +62,27 @@ public class ProvisionTPM implements Runnable {
 		} catch (TpmModule.TpmModuleException e){
 			if(e.toString().contains(".takeOwnership returned nonzero error: 4")){
 				log.info("Ownership is already taken");
+                /*
                                 if( !System.getProperty("forceCreateEk", "false").equals("true") ) { // feature to help with bug #554 and allow admin to force creating an ek (in case it failed the first time due to a non-tpm error such as java missing classes exception
                                     return;
                                 }
+                */
 			}
-			else
+            else {
 				throw e;
+            }
 		}
 		// Create Endorsement Certificate
 		byte[] nonce2 = TpmUtils.createRandomBytes(20);
+        log.debug("Nonce: {}", TpmUtils.byteArrayToHexString(nonce2));
 		try {
 			byte [] pubEkMod = TpmModule.getEndorsementKeyModulus(config.getTpmOwnerSecret(), nonce2);
-            
+            log.debug("Public EK Modulus: {}", TpmUtils.byteArrayToHexString(pubEkMod));
+            log.debug("Requesting TPM endorsement from Privacy CA");
             // send the public endorsement key modulus to the privacy ca and receive the endorsement certificate
-            PrivacyCA pcaClient = new PrivacyCA(config.getConfiguration());
+            PrivacyCA pcaClient = new PrivacyCA(configuration);
             X509Certificate ekCert = pcaClient.endorseTpm(pubEkMod);
-            
+            log.debug("Received EC {}", Sha1Digest.digestOf(ekCert.getEncoded()).toHexString());
             // write the EC to the TPM NVRAM
 			TpmModule.setCredential(config.getTpmOwnerSecret(), "EC", ekCert.getEncoded());
 		} catch (TpmModule.TpmModuleException e){

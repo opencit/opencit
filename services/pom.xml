@@ -16,64 +16,64 @@
 	</parent>
   
   <modules>
-	<module>mtwilson-trust-policy</module>
-    <module>mtwilson-webservice-util</module>
-    <module>mtwilson-http-security</module>
-    <module>mtwilson-audit-api</module>
 	<module>mtwilson-audit-data</module>
-    <module>mtwilson-audit-handler</module>
+	<module>mtwilson-citrix-hostagent</module>
+	<module>mtwilson-configuration-ws-v2</module>
+	<module>mtwilson-hostagent-ext</module>
+	<module>mtwilson-http-servlets</module>
+	<module>mtwilson-intel-hostagent</module>
+	<module>mtwilson-jackson-util</module>
+	<module>mtwilson-jdbi-util</module>
+	<module>mtwilson-jersey-util</module>
+	<module>mtwilson-jooq-util</module>
+	<module>mtwilson-logback-util</module>
+	<module>mtwilson-privacyca-model</module>
+	<module>mtwilson-privacyca-niarl</module>
+	<module>mtwilson-privacyca-setup</module>
+	<module>mtwilson-privacyca-ws-v2</module>
+	<module>mtwilson-saml-verifier</module>
+	<module>mtwilson-saml</module>
+	<module>mtwilson-setup-ext</module>
+	<module>mtwilson-setup-ws-v2</module>
+	<module>mtwilson-setup</module>
+	<module>mtwilson-shiro-file</module>
+	<module>mtwilson-shiro-jdbi</module>
+	<module>mtwilson-shiro-setup</module>
+	<module>mtwilson-shiro-util</module>
+	<module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-tag-dao-jooq</module>
+	<module>mtwilson-tag-jdbi</module>
+	<module>mtwilson-tag-model</module>
+	<module>mtwilson-tag-setup</module>
+	<module>mtwilson-tag-ws-v2</module>
+	<module>mtwilson-test-ws-v1</module>
+	<module>mtwilson-test-ws-v2</module>
+	<module>mtwilson-trust-policy</module>
+	<module>mtwilson-trustagent-model</module>
+	<module>mtwilson-version-ws-v2</module>
+	<module>mtwilson-vm-attestation-ws-v2</module>
+	<module>mtwilson-vmware-hostagent</module>
     <module>mtwilson-attestation-jpa</module>
-    <module>mtwilson-management-jpa</module>
-    <module>mtwilson-util</module>
-    <module>mtwilson-localization</module>
-    <module>mtwilson-attestation</module>
     <module>mtwilson-attestation-model</module>
     <module>mtwilson-attestation-ws-v1</module>
     <module>mtwilson-attestation-ws-v2</module>
-    <module>mtwilson-tls-policy</module>
-	<module>mtwilson-jdbi-util</module>
-	<module>mtwilson-jooq-util</module>
-	<module>mtwilson-jersey-util</module>
-
-	<module>mtwilson-shiro-file</module>
-	<module>mtwilson-shiro-jdbi</module>
-	<module>mtwilson-shiro-util</module>
-	<module>mtwilson-shiro-setup</module>
-	<module>mtwilson-shiro-ws-v2</module>
+    <module>mtwilson-attestation</module>
+    <module>mtwilson-audit-api</module>
+    <module>mtwilson-audit-handler</module>
     <module>mtwilson-http-security-server</module>
-    <module>mtwilson-whitelist</module>
-    <module>mtwilson-whitelist-ws-v1</module>
-    <module>mtwilson-management</module>
+    <module>mtwilson-http-security</module>
+    <module>mtwilson-localization</module>
+    <module>mtwilson-management-jpa</module>
     <module>mtwilson-management-ws-v1</module>
-	<module>mtwilson-jackson-util</module>
+    <module>mtwilson-management</module>
     <module>mtwilson-rpc-jdbi</module>
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
-	<module>mtwilson-test-ws-v1</module>
-	<module>mtwilson-test-ws-v2</module>
-	<module>mtwilson-version-ws-v2</module>
-	<module>mtwilson-setup-ext</module>
-	<module>mtwilson-setup</module>
-	<module>mtwilson-setup-ws-v2</module>
-	<module>mtwilson-trustagent-model</module>
-	<module>mtwilson-configuration-ws-v2</module>
-	<module>mtwilson-http-servlets</module>
-	<module>mtwilson-vm-attestation-ws-v2</module>
-	<module>mtwilson-hostagent-ext</module>
-	<module>mtwilson-vmware-hostagent</module>
-	<module>mtwilson-citrix-hostagent</module>
-	<module>mtwilson-intel-hostagent</module>
-	<module>mtwilson-saml</module>
-	<module>mtwilson-saml-verifier</module>
-	<module>mtwilson-tag-model</module>
-	<module>mtwilson-tag-jdbi</module>
-	<module>mtwilson-tag-dao-jooq</module>
-	<module>mtwilson-tag-ws-v2</module>
-	<module>mtwilson-tag-setup</module>
-	<module>mtwilson-privacyca-niarl</module>
-	<module>mtwilson-privacyca-ws-v2</module>
-	<module>mtwilson-privacyca-model</module>
-	<module>mtwilson-privacyca-setup</module>
+    <module>mtwilson-tls-policy</module>
+    <module>mtwilson-util</module>
+    <module>mtwilson-webservice-util</module>
+    <module>mtwilson-whitelist-ws-v1</module>
+    <module>mtwilson-whitelist</module>
   </modules>
 
 </project>

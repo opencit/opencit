@@ -81,6 +81,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
     // TODO:   fix the implementation... apparently  HisPrivacyCAWebService2Impl  was using member variables to store info between two requests steps, but we are stateless so need to address that somehow.
     @Override
     public byte[] call() throws Exception {
+        log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
 	 RSAPrivateKey caPrivKey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
 	 X509Certificate caPubCert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
 	 
@@ -108,7 +109,8 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
             // the filename is the challenge (in hex) and the content is the idproof
             File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); // TODO:  put this in a privacyca configuration class
             if( !datadir.exists() ) { datadir.mkdirs(); }
-            String filename = TpmUtils.byteArrayToHexString(identityRequest); //Hex.encodeHexString(identityRequestChallenge)
+            String filename = TpmUtils.byteArrayToHexString(identityRequestChallenge); //Hex.encodeHexString(identityRequestChallenge)
+            log.debug("Filename: {}", filename);
             try(FileOutputStream out = new FileOutputStream(datadir.toPath().resolve(filename).toFile())) {
                 IOUtils.write(idProof.toByteArray(), out);
             }

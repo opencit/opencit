@@ -6,6 +6,7 @@ package com.intel.mtwilson.privacyca.v2.resource;
 
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.privacyca.v2.model.EndorseTpmRequest;
 import com.intel.mtwilson.privacyca.v2.rpc.EndorseTpm;
 import java.security.cert.X509Certificate;
 import javax.ws.rs.Consumes;
@@ -30,4 +31,14 @@ public class EndorseTpmResource {
         rpc.setEkModulus(ekModulus);
         return rpc.call();
     }
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({OtherMediaType.APPLICATION_PKIX_CERT, MediaType.APPLICATION_OCTET_STREAM, OtherMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
+    public X509Certificate endorseTpm(EndorseTpmRequest endorseTpmRequest) throws Exception {
+        EndorseTpm rpc = new EndorseTpm();
+        rpc.setEkModulus(endorseTpmRequest.getEkModulus());
+        return rpc.call();
+    }
+
 }

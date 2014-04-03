@@ -43,7 +43,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             TrustagentConfiguration.TPM_QUOTE_IPV4,
             TrustagentConfiguration.TPM_OWNER_SECRET,
             TrustagentConfiguration.TPM_SRK_SECRET,
-            TrustagentConfiguration.TRUSTAGENT_HTTP_PORT,
+            TrustagentConfiguration.TRUSTAGENT_HTTP_TLS_PORT,
             TrustagentConfiguration.TRUSTAGENT_KEYSTORE_PASSWORD,
             TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DN,
             TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DNS,

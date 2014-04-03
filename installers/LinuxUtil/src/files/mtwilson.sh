@@ -337,7 +337,10 @@ case "$1" in
   setup)
         if [ $# -gt 1 ]; then
           shift
-          call_setupcommand $@
+          # try the new setup commands first,  if there's an error (probably command not found)
+          # then try the older setup commands
+          call_tag_setupcommand $@          
+          if [ ! $? ]; then call_setupcommand $@; fi
         else
           if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup

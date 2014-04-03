@@ -18,6 +18,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import com.intel.mtwilson.security.http.jaxrs.HmacAuthorizationFilter;
 import com.intel.mtwilson.security.http.jaxrs.X509AuthorizationFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
@@ -39,8 +40,11 @@ public class MtWilsonClient {
     
     protected MtWilsonClient() {
         clientConfig = new ClientConfig();
-        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
         clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);        
+        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
+        clientConfig.register(com.intel.mtwilson.jersey.provider.X509CertificateArrayPemProvider.class);
+        clientConfig.register(com.intel.mtwilson.jersey.provider.X509CertificateDerProvider.class);
+        clientConfig.register(com.intel.mtwilson.jersey.provider.X509CertificatePemProvider.class);
         log.debug("configured client in empty constructor");
     }
 
@@ -99,7 +103,8 @@ public class MtWilsonClient {
             keystore = new SimpleKeystore(resource, configuration.getString("mtwilson.api.keystore.password"));
         }
         if (keystore != null && configuration.getString("mtwilson.api.key.alias") != null && configuration.getString("mtwilson.api.key.password") != null ) {
-            log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
+            log.debug("Registering X509 credentials for {}", configuration.getString("mtwilson.api.key.alias"));
+//            log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.key.password"));
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
@@ -177,7 +182,7 @@ public class MtWilsonClient {
 //                log.debug("queryParam {} = {}", queryParam.getKey(), queryParam.getValue()); // for example: queryParam nameContains = test
                 target = target.queryParam(queryParam.getKey(), queryParam.getValue());
             }
-        } catch (Exception e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("Cannot generate query parameters", e);
         }
 //        log.debug("with query params: {}", target.getUri().toString()); // for example: with query params: http://localhost:8080/v2/files?nameContains=test

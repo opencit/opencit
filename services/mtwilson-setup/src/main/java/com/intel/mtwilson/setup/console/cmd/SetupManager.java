@@ -42,6 +42,19 @@ import org.apache.commons.lang3.StringUtils;
  * This setup command is a bridge between mtwilson-console and the new
  * mtwilson-setup tasks
  *
+ * Usage:  setup [--force] [task1 task2 ... taskN]
+ * 
+ * Specifying task names is optional; you can specify one or more tasks 
+ * as individual arguments to be run. If you don't specify tasks then all
+ * tasks will be run.
+ * 
+ * If a task is already configured and validated it will be skipped, 
+ * unless you provide the --force option which will run tasks even if
+ * they are already validated.
+ * 
+ * If you want only to validate the configuration but not execute any of 
+ * the tasks,  use the --noexec option.
+ * 
  * @author jbuhacoff
  */
 public class SetupManager implements Command {
@@ -52,6 +65,13 @@ public class SetupManager implements Command {
     @Override
     public void setOptions(org.apache.commons.configuration.Configuration options) {
         this.options = options;
+    }
+    
+    protected boolean isForceEnabled() {
+        return options.getBoolean("force", false);
+    }
+    protected boolean isNoExecEnabled() {
+        return options.getBoolean("noexec", false);
     }
 
     protected File getConfigurationFile() {
@@ -128,7 +148,7 @@ public class SetupManager implements Command {
     protected Map<String, String> getConversionMap() {
         HashMap<String, String> map = new HashMap<>();
         map.put("mtwilson", "MtWilson"); // so a name like download-mtwilson-tls-certificate will be translated to DownloadMtWilsonTlsCertificate instead of DownloadMtwilsonTlsCertificate (notice the 'w' in MtWilson)
-        map.put("privacyca", "PrivacyCA");
+        map.put("ca", "CA"); // privacy-ca becomes PrivacyCA, endorsement-ca becomes EndorsementCA, etc.
         return map;
     }
 
@@ -158,19 +178,43 @@ public class SetupManager implements Command {
                 String taskName = setupTask.getClass().getSimpleName();
                 setupTask.setConfiguration(configuration);
                 try {
-                    setupTask.run(); // calls isConfigured and isValidated automatically and throws ConfigurationException, SetupException, or ValidationException on error
+                    if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
+                        log.debug("Skipping {}", taskName);
+                    }
+                    else if( isNoExecEnabled() ) {
+                        // only show validation errors, don't run the task
+                        List<Fault> configurationFaults = setupTask.getConfigurationFaults();
+                        for (Fault fault : configurationFaults) {
+                            log.debug("Configuration: {}", fault.toString());
+                            System.err.println(fault.toString());
+                        }
+                        List<Fault> validationFaults = setupTask.getValidationFaults();
+                        for (Fault fault : validationFaults) {
+                            log.debug("Validation: {}", fault.toString());
+                            System.err.println(fault.toString());
+                        }
+                        
+                    }
+                    else {
+                        log.debug("Running {}", taskName);
+                        setupTask.run(); // calls isConfigured and isValidated automatically and throws ConfigurationException, SetupException, or ValidationException on error
+                    }
                 } catch (ConfigurationException e) {
-                    log.error("Configuration error for {}: {}", taskName, e.getMessage());
+                    log.error("Configuration error {}", taskName, e.getMessage());
+                    log.debug("Configuration error", e);
                     System.err.println("Configuration error for " + taskName);
                     List<Fault> configurationFaults = setupTask.getConfigurationFaults();
                     for (Fault fault : configurationFaults) {
+                        log.debug("Configuration: {}", fault.toString());
                         System.err.println(fault.toString());
                     }
                 } catch (ValidationException e) {
                     log.error("Validation error for {}: {}", taskName, e.getMessage());
+                    log.debug("Validation error", e);
                     System.err.println("Validation error for " + taskName);
                     List<Fault> validationFaults = setupTask.getValidationFaults();
                     for (Fault fault : validationFaults) {
+                        log.debug("Validation: {}", fault.toString());
                         System.err.println(fault.toString());
                     }
                 } catch (SetupException e) {

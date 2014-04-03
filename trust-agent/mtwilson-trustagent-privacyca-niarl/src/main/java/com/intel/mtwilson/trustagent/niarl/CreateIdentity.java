@@ -4,13 +4,18 @@
  */
 package com.intel.mtwilson.trustagent.niarl;
 
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
+import com.intel.mtwilson.configuration.Configurable;
+import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
+import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeRequest;
+import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeResponse;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmIdentity;
@@ -37,14 +42,21 @@ import org.apache.commons.io.IOUtils;
  * 
  * @author jbuhacoff
  */
-public class CreateIdentity implements Runnable {
+public class CreateIdentity implements Configurable, Runnable {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateIdentity.class);
+    
+    private Configuration configuration = null;
+    
+    @Override
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
     
     @Override
     public void run() {
         try {
             // load the PCA certificate
-            TrustagentConfiguration config = new TrustagentConfiguration(My.configuration().getConfiguration());
+            TrustagentConfiguration config = new TrustagentConfiguration(configuration);
             SimpleKeystore keystore = new SimpleKeystore(new FileResource(config.getTrustagentKeystoreFile()), config.getTrustagentKeystorePassword());
             X509Certificate privacy = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
             
@@ -66,7 +78,8 @@ public class CreateIdentity implements Runnable {
             IdentityChallengeRequest request = new IdentityChallengeRequest();
             request.setEndorsementCertificate(encryptedEkCert.toByteArray());
             request.setIdentityRequest(newId.getIdentityRequest());
-            byte[] challenge = client.identityChallengeRequest(request);
+            IdentityChallenge identityChallenge = client.identityChallengeRequest(request);
+            byte[] challenge = identityChallenge.getIdentityChallenge();
             
             // answer the challenge
             int os = IdentityOS.osType();//return os type. win:0; linux:1; other:-1
@@ -88,7 +101,11 @@ public class CreateIdentity implements Runnable {
             // send the answer and receive the AIK certificate
             TpmIdentityRequest encryptedChallenge = new TpmIdentityRequest(decrypted1, (RSAPublicKey) privacy.getPublicKey(), false);
             System.err.println("Create Identity... Calling into HisPriv second time, size of msg = " + encryptedChallenge.toByteArray().length);
-            byte[] encrypted2 = client.identityChallengeResponse(encryptedChallenge.toByteArray());
+            
+            IdentityChallengeResponse identityChallengeResponse = new IdentityChallengeResponse();
+            identityChallengeResponse.setChallengeResponse(encryptedChallenge.toByteArray());
+            IdentityBlob identityBlob = client.identityChallengeResponse(identityChallengeResponse);
+            byte[] encrypted2 = identityBlob.getIdentityBlob();
 
             // decode and store the aik certificate
             byte[] asym2 = new byte[256];

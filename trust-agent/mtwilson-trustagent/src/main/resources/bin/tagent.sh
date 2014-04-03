@@ -11,8 +11,17 @@
 TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
 TRUSTAGENT_CONF=${TRUSTAGENT_CONF:-/opt/trustagent/configuration}
 TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-/opt/trustagent/java}
+TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
 TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
+TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
+TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
+JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
+
+# TODO: since we are setting TRUSTAGENT_HOME and TRUSTAGENT_CONF environment
+#       variables,  we should NOT be passing -Dfs.name to the application 
+#       since our environment variables should be adequate for pointing the
+#       application to the correct locations
 
 ###################################################################################################
 
@@ -27,7 +36,9 @@ fi
 ###################################################################################################
 
 # generated variables
-CLASSPATH=$(ls -1 $TRUSTAGENT_JAVA/*.jar | tr '\n' ':' | sed -e 's/:$//')
+#CLASSPATH=$(ls -1 $TRUSTAGENT_JAVA/*.jar | tr '\n' ':' | sed -e 's/:$//')
+JARS=$(ls -1 $TRUSTAGENT_JAVA/*.jar)
+CLASSPATH=$(echo $JARS | tr ' ' ':')
 
 ###################################################################################################
 
@@ -36,16 +47,59 @@ CLASSPATH=$(ls -1 $TRUSTAGENT_JAVA/*.jar | tr '\n' ':' | sed -e 's/:$//')
 
 case "$1" in
   help)
-    echo "Usage: $0 setup|authorize|start-http-server|register"
+    print_help
+    ;;
+  start)
+    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup
+    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &
+    echo $! > $TRUSTAGENT_PID_FILE
+    ;;
+  stop)
+    if [ -f $TRUSTAGENT_PID_FILE ]; then
+      TRUSTAGENT_PID=$(cat $TRUSTAGENT_PID_FILE)
+      if [ -n "$TRUSTAGENT_PID" ]; then
+        kill -9 $TRUSTAGENT_PID
+      else
+        echo "Empty PID file: $TRUSTAGENT_PID_FILE"
+      fi
+    else
+      echo "Missing PID file: $TRUSTAGENT_PID_FILE"
+    fi
+    ;;
+  setup)
+    shift
+    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $*
     ;;
   *)
-    #echo "args: $*"
-    # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
-    #       acceptable; requires the functions file / linux utilities which
-    #       isn't integrated into the new trustagent installer yet.
-    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
+    if [ -z "$*" ]; then
+      print_help
+    else
+      #echo "args: $*"
+      # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
+      #       acceptable; requires the functions file / linux utilities which
+      #       isn't integrated into the new trustagent installer yet.
+      java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
+    fi
     ;;
 esac
+
+function print_help() {
+    echo "Usage: $0 start|stop|authorize|start-http-server"
+    # TODO:  add the "register" command when it's implemented
+    echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
+    echo "Available setup tasks:"
+    echo "configure-from-environment"
+    echo "create-keystore-password"
+    echo "create-tls-keypair"
+    echo "create-admin-user"
+    echo "create-tpm-owner-secret"
+    echo "create-aik-secret"
+    echo "take-ownership"
+    echo "download-mtwilson-tls-certificate"
+    echo "download-mtwilson-privacy-ca-certificate"
+    echo "request-endorsement-certificate"
+    echo "request-aik-certificate"
+}
 
 exit
 

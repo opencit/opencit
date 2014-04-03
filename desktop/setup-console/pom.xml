@@ -156,8 +156,11 @@
             <artifactId>mtwilson-shiro-setup</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-privacyca-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-setup</artifactId>

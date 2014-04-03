@@ -66,28 +66,35 @@ public class DownloadMtWilsonPrivacyCACertificate extends AbstractSetupTask {
     @Override
     protected void validate() throws Exception {
         try {
-            X509Certificate certificate = keystore.getX509Certificate("privacy");
+            X509Certificate certificate = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
             if( certificate == null ) {
                 validation("Missing Privacy CA certificate");
             }
             if( certificate != null ) {
-                log.debug("Found Privacy CA certificate {}", Sha1Digest.valueOf(certificate.getEncoded()).toHexString());
+                log.debug("Found Privacy CA certificate {}", Sha1Digest.digestOf(certificate.getEncoded()).toHexString());
             }
-            X509Certificate endorsementCertificate = keystore.getX509Certificate("endorsement");
+            X509Certificate endorsementCertificate = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
             if( endorsementCertificate == null ) {
                 validation("Missing Endorsement CA certificate");
             }
             if( endorsementCertificate != null ) {
-                log.debug("Found Endorsement CA certificate {}", Sha1Digest.valueOf(endorsementCertificate.getEncoded()).toHexString());
+                log.debug("Found Endorsement CA certificate {}", Sha1Digest.digestOf(endorsementCertificate.getEncoded()).toHexString());
             }
         }
         catch(NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+            log.error("Cannot load Privacy CA certificate", e);
             validation("Cannot load Privacy CA certificate", e);
         }
     }
 
     @Override
     protected void execute() throws Exception {
+        // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
+        System.setProperty("javax.net.ssl.trustStore", trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath());
+        System.setProperty("javax.net.ssl.trustStorePassword", trustagentConfiguration.getTrustagentKeystorePassword());
+        System.setProperty("javax.net.ssl.keyStore", trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath());
+        System.setProperty("javax.net.ssl.keyStorePassword", trustagentConfiguration.getTrustagentKeystorePassword());
+        
         CaCertificates client = new CaCertificates(trustagentConfiguration.getConfiguration());
         X509Certificate certificate = client.retrieveCaCertificate("privacy");
         keystore.addTrustedCaCertificate(certificate, "privacy");

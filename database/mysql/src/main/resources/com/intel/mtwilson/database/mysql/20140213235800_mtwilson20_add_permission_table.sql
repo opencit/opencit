@@ -14,7 +14,7 @@ CREATE TABLE mw_role_permission (
   permit_domain varchar(200) DEFAULT NULL,
   permit_action varchar(200) DEFAULT NULL,
   permit_selection varchar(200) DEFAULT NULL,
-  PRIMARY KEY (role_id)
+  PRIMARY KEY (role_id,permit_domain,permit_action,permit_selection)
 ); 
 
 -- replaces mw_portal_user 

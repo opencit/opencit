@@ -49,6 +49,7 @@ public class CreateEndorsementCA extends LocalSetupTask {
 
     @Override
     protected void execute() throws Exception {
+        // TODO: touch the endorsementP12 file first and chmod 700 before writing to it ; that should be a method in the LocalSetupTask super class
         TpmUtils.createCaP12(2048, endorsementIssuer, endorsementPassword, endorsementP12.getAbsolutePath(), endorsementCertificateValidityDays);
         X509Certificate pcaCert = TpmUtils.certFromP12(endorsementP12.getAbsolutePath(), endorsementPassword);
         FileUtils.writeStringToFile(endorsementPemFile, X509Util.encodePemCertificate(pcaCert)); // XXX should we check if it already exists and APPEND to it instead of overwriting?

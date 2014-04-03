@@ -6,6 +6,7 @@ package com.intel.mtwilson.privacyca.v2.resource;
 
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeRequest;
 import com.intel.mtwilson.privacyca.v2.rpc.IdentityRequestGetChallenge;
 import javax.ws.rs.Consumes;
@@ -21,13 +22,35 @@ import javax.ws.rs.core.MediaType;
 @V2
 @Path("/privacyca/identity-challenge-request")
 public class IdentityRequestGetChallengeResource {
+    
+    /**
+     * 
+     * @param derEncodedIdentityChallengeRequest is an ASN.1 structure  SEQUENCE ( DEROCTETSTREAM identityRequest , DEROCTETSTREAM endorsementCertificate )
+     * @return encrypted identity challenge
+     * @throws Exception 
+     */
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_OCTET_STREAM})
-    public byte[] identityChallengeRequest(IdentityChallengeRequest request) throws Exception {
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public byte[] identityChallengeRequest(byte[] derEncodedIdentityChallengeRequest) throws Exception {
+        IdentityChallengeRequest identityChallengeRequest = IdentityChallengeRequest.valueOf(derEncodedIdentityChallengeRequest);
         IdentityRequestGetChallenge rpc = new IdentityRequestGetChallenge();
-        rpc.setIdentityRequest(request.getIdentityRequest());
-        rpc.setEndorsementCertificate(request.getEndorsementCertificate());
+        rpc.setIdentityRequest(identityChallengeRequest.getIdentityRequest());
+        rpc.setEndorsementCertificate(identityChallengeRequest.getEndorsementCertificate());
         return rpc.call();
     }
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    public IdentityChallenge identityChallengeRequest(IdentityChallengeRequest identityChallengeRequest) throws Exception {
+        IdentityRequestGetChallenge rpc = new IdentityRequestGetChallenge();
+        rpc.setIdentityRequest(identityChallengeRequest.getIdentityRequest());
+        rpc.setEndorsementCertificate(identityChallengeRequest.getEndorsementCertificate());
+        byte[] encryptedChallenge = rpc.call();
+        IdentityChallenge identityChallenge = new IdentityChallenge();
+        identityChallenge.setIdentityChallenge(encryptedChallenge);
+        return identityChallenge;
+    }
+
 }

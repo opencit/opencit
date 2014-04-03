@@ -44,7 +44,7 @@ public class CaCertificates extends MtWilsonClient {
     public X509Certificate retrieveCaCertificate(String type) {
         //  {id} can be:  "root", "saml", "tls", "privacy"
         HashMap<String,Object> map = new HashMap<>();
-        map.put("id", "privacy");
+        map.put("id", type);
         X509Certificate certificate = getTargetPath("ca-certificates/{id}").resolveTemplates(map).request(OtherMediaType.APPLICATION_PKIX_CERT).get(X509Certificate.class);
         return certificate;
     }

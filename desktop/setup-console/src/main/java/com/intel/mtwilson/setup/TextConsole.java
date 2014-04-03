@@ -48,19 +48,24 @@ public class TextConsole {
         }
         catch(ClassNotFoundException e) {
             System.err.println("Unrecognized command");
+            System.exit(2);
         }
         catch(java.lang.SecurityException e){
             System.err.println("security exception: " + e.getMessage());
+            System.exit(3);
         }
         catch(SetupException e) {
             e.printStackTrace(System.err);
+            System.exit(4);
         }
         catch(IOException e){
             System.err.println("No console.");
             e.printStackTrace();   
+            System.exit(5);
         }
         catch(Exception e) {
             e.printStackTrace(System.err);
+            System.exit(127);
         }
     }
     

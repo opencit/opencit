@@ -38,7 +38,7 @@ public class SetupTest {
         // see also CreateAdminUser in mtwilson-shiro-setup
         
 //        tasks.add(new MigrateUsers());
-        tasks.add(new UpdateExtensionCacheFile());
+        tasks.add(new UpdateExtensionsCacheFile());
         
         return tasks;
     }

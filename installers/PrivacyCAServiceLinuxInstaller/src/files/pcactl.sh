@@ -148,24 +148,26 @@ replace_random_until_exists() {
 }
 
 create_privacyca_keys() {
-  # if we already have keys, do not create new ones! because that will invalidate all registered trust agents
-  if [ ! -f "${intel_conf_dir}/PrivacyCA.p12" ]; then
-    # workaround for bug #568 - privacy ca takes 10-15 minutes to start first time, which is caused by key generation blocked due to not enough entropy in /dev/random
-    # for production, you just need to wait the 10-15 minutes because you want secure keys. but for automated testing we benefit by getting this done in 1 second instead of 900 seconds
-    if [[ "$PRIVACYCA_KEYGEN_URANDOM" == "yes" ]]; then
-      replace_random_until_exists "${intel_conf_dir}/PrivacyCA.p12" &
-    fi
-    # creates PrivacyCA.p12 and endorsement.p12  (also creates the cacerts and clientfiles dirs)
-    local oldpwd=`pwd`
-    cd "${intel_conf_dir}"
-    $java -jar ${package_dir}/HisPrivacyCAWebServices2-setup.jar
-    cd "${oldpwd}"  
-  fi
+  mtwilson setup SetupManager create-endorsement-ca create-privacy-ca
+#  mtwilson setup V2 create-endorsement-ca create-privacy-ca
+#  # if we already have keys, do not create new ones! because that will invalidate all registered trust agents
+#  if [ ! -f "${intel_conf_dir}/PrivacyCA.p12" ]; then
+#    # workaround for bug #568 - privacy ca takes 10-15 minutes to start first time, which is caused by key generation blocked due to not enough entropy in /dev/random
+#    # for production, you just need to wait the 10-15 minutes because you want secure keys. but for automated testing we benefit by getting this done in 1 second instead of 900 seconds
+#    if [[ "$PRIVACYCA_KEYGEN_URANDOM" == "yes" ]]; then
+#      replace_random_until_exists "${intel_conf_dir}/PrivacyCA.p12" &
+#    fi
+#    # creates PrivacyCA.p12 and endorsement.p12  (also creates the cacerts and clientfiles dirs)
+#    local oldpwd=`pwd`
+#    cd "${intel_conf_dir}"
+#    $java -jar ${package_dir}/HisPrivacyCAWebServices2-setup.jar
+#    cd "${oldpwd}"  
+#  fi
 }
 
 # The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
 protect_privacyca_files() {
-  local PRIVACYCA_FILES="${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/PrivacyCA.properties ${intel_conf_dir}/clientfiles ${intel_conf_dir}/clientfiles.zip ${intel_conf_dir}/cacerts"
+  local PRIVACYCA_FILES="${intel_conf_dir}/EndorsementCA.p12 ${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/PrivacyCA.properties ${intel_conf_dir}/clientfiles ${intel_conf_dir}/clientfiles.zip ${intel_conf_dir}/cacerts"
   chmod 600 $PRIVACYCA_FILES
   if using_glassfish; then
     glassfish_permissions $PRIVACYCA_FILES
