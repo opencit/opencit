@@ -4,7 +4,12 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyJpa;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -21,13 +26,25 @@ import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509PK;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.BaseBO;
+import com.intel.mtwilson.shiro.jdbi.LoginDAO;
+import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.shiro.jdbi.model.Status;
+import com.intel.mtwilson.shiro.jdbi.model.User;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
+import java.io.FileInputStream;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -161,7 +178,7 @@ public class ApiClientBO extends BaseBO {
                 // portal user table with the new keystore.
                 pUser.setStatus(ApiClientStatus.PENDING.toString());
                 pUser.setUsername(getSimpleNameFromCert(x509Certificate));
-                My.jpa().mwPortalUser().create(pUser);
+                My.jpa().mwPortalUser().create(pUser);                
             }
 
             ApiClientX509 apiClientX509 = new ApiClientX509();
@@ -190,11 +207,111 @@ public class ApiClientBO extends BaseBO {
 
             setRolesForApiClient(apiClientX509, apiClientRequest.getRoles());
             
+            populateShiroUserTables(apiClientRequest, x509Certificate);
+            
         } catch (Exception ex) {
             log.error("Error during API Client registration. ", ex);
             throw new MSException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
             // throw new MSException(ex,ErrorCode.MS_API_CLIENT_CREATE_ERROR);
         }
+    }
+    
+    // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
+    // we are populating all the tables now.
+    private void populateShiroUserTables(ApiClientCreateRequest apiClientRequest, X509Certificate x509Certificate) {
+        try {
+            LoginDAO loginDAO = MyJdbi.authz();
+            User user = loginDAO.findUserByName(getSimpleNameFromCert(x509Certificate));
+            if (user == null) {
+                user = new User();
+                user.setId(new UUID());
+                user.setComment("");
+                user.setEnabled(false);
+                user.setStatus(Status.PENDING);
+                user.setUsername(getSimpleNameFromCert(x509Certificate));
+                loginDAO.insertUser(user);
+            }
+            
+            UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
+            if (userLoginCertificate == null) {                        
+                userLoginCertificate = new UserLoginCertificate();
+                userLoginCertificate.setId(new UUID());
+                userLoginCertificate.setCertificate(apiClientRequest.getCertificate());
+                userLoginCertificate.setComment("");
+                userLoginCertificate.setEnabled(false);
+                userLoginCertificate.setExpires(x509Certificate.getNotAfter());
+                userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(apiClientRequest.getCertificate()).toByteArray());
+                // we are going to use the same fingerprint as currently being used so that it is easy for us to do the lookup
+                userLoginCertificate.setSha256Hash(getFingerPrint(x509Certificate));//Sha256Digest.digestOf(apiClientRequest.getCertificate()).toByteArray());
+                userLoginCertificate.setStatus(Status.PENDING);
+                userLoginCertificate.setUserId(user.getId());
+                loginDAO.insertUserLoginCertificate(userLoginCertificate.getId(), userLoginCertificate.getUserId(), userLoginCertificate.getCertificate(), 
+                        userLoginCertificate.getSha1Hash(), userLoginCertificate.getSha256Hash(), userLoginCertificate.getExpires(), 
+                        userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
+                log.debug("Created user login certificate with sha256 {}", Sha256Digest.valueOf(userLoginCertificate.getSha256Hash()).toHexString());
+            }
+            
+            String[] roles = apiClientRequest.getRoles();
+            for (String role : roles) {
+                com.intel.mtwilson.shiro.jdbi.model.Role findRoleByName = loginDAO.findRoleByName(role);
+                if (findRoleByName != null) {
+                    loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());
+                }
+            }
+            
+        } catch (Exception ex) {
+            log.error("Error while populating Shiro tables during API Client registration. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+        }
+
+    }
+
+    // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
+    // we are populating all the tables now.
+    private void updateShiroUserTables(ApiClientUpdateRequest apiClientUpdateRequest, String userName) {
+        try {
+            LoginDAO loginDAO = MyJdbi.authz();
+            UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(apiClientUpdateRequest.fingerprint);
+            if (userLoginCertificate != null) {
+                userLoginCertificate.setEnabled(apiClientUpdateRequest.enabled);
+                userLoginCertificate.setStatus(Status.valueOf(apiClientUpdateRequest.status));
+                if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
+                    userLoginCertificate.setComment(apiClientUpdateRequest.comment);
+                loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), userLoginCertificate.isEnabled(), 
+                        userLoginCertificate.getStatus(), userLoginCertificate.getComment());
+            }
+            
+            User user = loginDAO.findUserByName(userName);
+            if (user != null) {
+                user.setEnabled(apiClientUpdateRequest.enabled);
+                user.setStatus(Status.valueOf(apiClientUpdateRequest.status));
+                if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
+                    user.setComment(apiClientUpdateRequest.comment);
+                loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
+            }
+            
+            // Clear the existing roles and update it with the new ones only if specified by the user
+            if (apiClientUpdateRequest.roles != null && apiClientUpdateRequest.roles.length > 0) {
+                // Let us first delete the existing roles
+                List<com.intel.mtwilson.shiro.jdbi.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+                for (com.intel.mtwilson.shiro.jdbi.model.Role roleMapping : rolesByUserLoginCertificateId) {
+                    loginDAO.deleteUserLoginCertificateRole(userLoginCertificate.getId(), roleMapping.getId());
+                }
+                
+                // Let us add the new roles
+                for (String role : apiClientUpdateRequest.roles) {
+                    com.intel.mtwilson.shiro.jdbi.model.Role findRoleByName = loginDAO.findRoleByName(role);
+                    if (findRoleByName != null) {
+                        loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());
+                    }
+                }
+                
+            }            
+        } catch (Exception ex) {
+            log.error("Error while populating Shiro tables during API Client registration. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+        }
+
     }
     
     /**
@@ -304,6 +421,7 @@ public class ApiClientBO extends BaseBO {
                 mwPortalUserJpaController.edit(portalUser);
             }
             
+            updateShiroUserTables(apiClientRequest, apiClientX509.getUserNameFromName());
             
             // Capture the change in the syslog
             Object[] paramArray = {Arrays.toString(apiClientX509.getFingerprint()), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};

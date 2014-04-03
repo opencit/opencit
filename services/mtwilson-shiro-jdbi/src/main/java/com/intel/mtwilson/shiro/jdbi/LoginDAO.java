@@ -216,6 +216,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user_login_certificate (id, user_id, certificate, sha1_hash, sha256_hash, expires, enabled, status, comment) values (:id, :user_id, :certificate, :sha1_hash, :sha256_hash, :expires, :enabled, :status, :comment)")
     void insertUserLoginCertificate(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("certificate") byte[] certificate, @Bind("sha1_hash") byte[] sha1Hash, @Bind("sha256_hash") byte[] sha256Hash, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
     
+    @SqlUpdate("update mw_user_login_certificate set status=:status, enabled=:enabled, comment=:comment where id=:id")
+    void updateUserLoginCertificateById(@Bind("id") UUID id, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
+    
     @SqlUpdate("delete from mw_user_login_certificate where id=:id")
     void deleteUserLoginCertificateById(@Bind("id") UUID id);
         
