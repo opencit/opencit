@@ -596,8 +596,9 @@ function logoutUser() {
 	sendHTMLAjaxRequest(false, 'getData/logOutUser.html', null, displayLogingPage, null);
 }
 
-function displayLogingPage(responseHTML) {
-	$('#mainContainer').parent().html(responseHTML);
+function displayLogingPage() { //responseHTML) {
+        //$('#mainContainer').parent().html(responseHTML);
+        window.location.replace("Login.jsp");
 }
 
 function openPreferences() {

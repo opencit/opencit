@@ -170,6 +170,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    //Call to success function by passing response and other extra parameter.
 				callbackSuccessFunction.apply(null,args);
 			}
+                        i18nInit();
 		},
 		error: function(errorMessage){
                         //alert(JSON.stringify(errorMessage));
@@ -185,6 +186,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 				fnSessionExpireLoginAgain();
 				//alert("Error While Serving request. Please try again later.");
 			}
+                        i18nInit();
 		}
 	});
 }
@@ -228,6 +230,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 				alert("Response from Server is null.");
 				fnSessionExpireLoginAgain();
 			}
+                        i18nInit();
 		},
 		error: function(errorMessage){
                         //alert(JSON.stringify(errorMessage));
@@ -243,6 +246,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 				alert("Error While Serving request. Please try again later.");
 				fnSessionExpireLoginAgain();
 			}
+                        i18nInit();
 		}
 	});
 }
