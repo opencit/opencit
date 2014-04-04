@@ -470,6 +470,7 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
 			    //Call to success function by passing response and other extra parameter.
 				callbackSuccessFunction.apply(null,args);
 			}
+                        i18nInit();
 		},
 		error: function(errorMessage){
 			if(callbackErrorFunction != null){
@@ -484,6 +485,7 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
 				fnSessionExpireLoginAgain();
 				//alert("Error While Serving request. Please try again later.");
 			}
+                        i18nInit();
 		}
 	});
 }
