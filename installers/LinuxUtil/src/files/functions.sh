@@ -2104,7 +2104,7 @@ glassfish_running_report() {
 glassfish_start() {
   glassfish_require 2>&1 > /dev/null
   if glassfish_running; then
-    echo_warning "Glassfish already running [PID: $TOMCAT_PID]."
+    echo_warning "Glassfish already running [PID: $GLASSFISH_PID]."
   elif [ -n "$glassfish" ]; then
     $glassfish start-domain & 2>&1 > /dev/null
     echo -n "Waiting for Glassfish services to startup..."
@@ -2127,9 +2127,10 @@ glassfish_stop() {
   elif [ -n "$glassfish" ]; then
     $glassfish stop-domain & 2>&1 > /dev/null
     echo -n "Waiting for Glassfish services to shutdown..."
+    sleep 5
     while glassfish_running; do
       glassfish_shutdown 2>&1 > /dev/null
-      sleep 1
+      sleep 3
     done
     echo_success " Done"
   fi
@@ -2139,7 +2140,6 @@ glassfish_restart() {
   #    $glassfish restart-domain
   #fi
   glassfish_stop
-  sleep 3
   glassfish_start
   glassfish_running_report
 }
@@ -2588,16 +2588,16 @@ tomcat_stop() {
   elif [ -n "$tomcat" ]; then
     $tomcat stop & 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to shutdown..."
+    sleep 5
     while tomcat_running; do
       tomcat_shutdown 2>&1 > /dev/null
-      sleep 1
+      sleep 3
     done
     echo_success " Done"
   fi
 }
 tomcat_restart() {
   tomcat_stop
-  sleep 3
   tomcat_start
   tomcat_running_report
 }
@@ -2745,7 +2745,7 @@ tomcat_init_manager() {
     fi
   done
 
-  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@127.0.0.1:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
 
   if [ -n "$test" ]; then
     echo_success "Tomcat manger connection success."
