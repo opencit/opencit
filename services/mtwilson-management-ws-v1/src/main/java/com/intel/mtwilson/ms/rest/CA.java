@@ -114,14 +114,14 @@ public class CA {
      * @return 
      */
     @GET @Path("/certificate/rootca/current/mtwilson-ca.pem")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getRootCaCertificateChainFilename() {
         return getRootCaCertificateChain();
     }
     
     @GET @Path("/certificate/rootca/current")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getRootCaCertificateChain() {
         try {
@@ -157,7 +157,7 @@ public class CA {
      * Same as getSamlCertificateChain but with a suggested filename
      */
     @GET @Path("/certificate/saml/current/mtwilson-saml.pem")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getSamlCertificateChainFilename() {
         return getSamlCertificateChain();
@@ -165,7 +165,7 @@ public class CA {
     
     
     @GET @Path("/certificate/saml/current")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getSamlCertificateChain() {
         try {
@@ -204,14 +204,14 @@ public class CA {
      * Same as getPrivacyCaCertificateChain() but with suggested filename
      */
     @GET @Path("/certificate/privacyca/current/mtwilson-privacyca.pem")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChainFilename() {
         return getPrivacyCaCertificateChain();
     }
     
     @GET @Path("/certificate/privacyca/current")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChain() {
         try {
@@ -246,7 +246,7 @@ public class CA {
     }
 
     @GET @Path("/certificate/tls/current/mtwilson-tls.crt")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
     public byte[] getTlsCertificateFilename() {
         try {
@@ -297,14 +297,14 @@ public class CA {
     }
 
     @GET @Path("/certificate/tls/current/mtwilson-tls.pem")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getTlsCertificateChainFilename() {
         return getTlsCertificateChain();
     }
     
     @GET @Path("/certificate/tls/current")
-    @PermitAll
+    //@PermitAll
     @Produces({MediaType.TEXT_PLAIN})
     public String getTlsCertificateChain() {
         try {

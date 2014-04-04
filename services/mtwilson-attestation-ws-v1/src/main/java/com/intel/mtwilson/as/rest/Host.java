@@ -28,6 +28,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,8 @@ public class Host {
          * @param inputHostname unique name of the host to query
          * @return the host location
          */
-        @RolesAllowed({"Attestation", "Report"})
+        //@RolesAllowed({"Attestation", "Report"})
+        @RequiresPermissions("hosts:retrieve")        
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/location")
@@ -62,7 +64,8 @@ public class Host {
             else return ASComponentFactory.getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
         }
 
-        @RolesAllowed({"Attestation", "Security"})
+        //@RolesAllowed({"Attestation", "Security"})
+        @RequiresPermissions("hosts:store")        
         @POST
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/location")
@@ -72,7 +75,8 @@ public class Host {
                 return Boolean.toString(result);
         }
 
-    @RolesAllowed({"Attestation","Report"})
+    //@RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("host_attestations:create,retrieve")            
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("/aik-{aik}/trust.json")
@@ -99,7 +103,8 @@ public class Host {
         }
     }
     
-    @RolesAllowed({"Attestation","Report"})
+    //@RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("host_attestations:create,retrieve")            
     @GET
     @Produces({"application/samlassertion+xml"})
     @Path("/aik-{aik}/trust.saml")
@@ -135,7 +140,8 @@ public class Host {
      * @param aikFingerprint
      * @return 
      */
-    @RolesAllowed({"Attestation","Report"})
+    //@RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("host_aik_certificates:retrieve")            
     @GET
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
     @Path("/aik-{aik}/trustcert.x509")
@@ -204,7 +210,8 @@ public class Host {
      * Response:
      * {"error_code":"",error_message:""}
      */
-    @RolesAllowed({"Attestation"})
+    //@RolesAllowed({"Attestation"})
+    @RequiresPermissions("hosts:create") 
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -241,7 +248,8 @@ public class Host {
      * @param host a form containing the above parameters
      * @return error status
      */
-    @RolesAllowed({"Attestation"})
+    //@RolesAllowed({"Attestation"})
+    @RequiresPermissions("hosts:store") 
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -265,7 +273,8 @@ public class Host {
          * @param forceVerify
          * @return a string like BIOS:0,VMM:0 representing the trust status
          */
-        @RolesAllowed({"Attestation", "Report"})
+        //@RolesAllowed({"Attestation", "Report"})
+        @RequiresPermissions({"host_attestations:retrieve"})            
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/trust")
@@ -303,7 +312,8 @@ public class Host {
          * @param hostName the unique host name of the host to delete
          * @return error status
          */
-        @RolesAllowed({"Attestation"})
+        //@RolesAllowed({"Attestation"})
+        @RequiresPermissions("hosts:delete") 
         @DELETE
 //    @Consumes({"text/html"})
         @Produces({MediaType.APPLICATION_JSON})
@@ -317,7 +327,8 @@ public class Host {
          * @param searchCriteria optional, a string that would be contained in the host name;  if not specified you will get a list of all the hosts
          * @return list of hosts whose hostname contains the value specified by searchCriteria;  in SQL terms, WHERE hostname LIKE '%searchCriteria%'
          */
-        @RolesAllowed({"Attestation", "Report", "Security"})
+        //@RolesAllowed({"Attestation", "Report", "Security"})
+        @RequiresPermissions("hosts:search") 
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria,@QueryParam("includeHardwareUuid")  @DefaultValue("false") boolean includeHardwareUuid) {
@@ -332,7 +343,8 @@ public class Host {
             }
         }
 
-        @RolesAllowed({"Attestation"})
+        //@RolesAllowed({"Attestation"})
+        @RequiresPermissions({"hosts:create","mles:search"}) 
         @POST
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
@@ -342,7 +354,8 @@ public class Host {
                 return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
         }
 
-        @RolesAllowed({"Attestation"})
+        //@RolesAllowed({"Attestation"})
+        @RequiresPermissions({"hosts:create","mles:search"}) 
         @POST
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})

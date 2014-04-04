@@ -17,6 +17,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 
 /**
@@ -89,8 +90,9 @@ public class SAML {
      * @param ID unique name of the host to query
      * @return a SAML assertion document for the host
      */
-    @RolesAllowed({"Attestation", "Report"})
+    //@RolesAllowed({"Attestation", "Report"})
     //@RequiresRoles({"Attestation","Report"})
+    @RequiresPermissions("host_attestations:create,retrieve")            
     @GET
     @Produces({"application/samlassertion+xml"})
     @Path("/assertions/host")

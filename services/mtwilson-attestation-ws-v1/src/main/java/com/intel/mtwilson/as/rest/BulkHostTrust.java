@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,8 @@ public class BulkHostTrust {
         @GET
         @Produces({MediaType.APPLICATION_XML})
         @Path("/trust/saml")
-        @RolesAllowed({"Attestation", "Report"})
+        //@RolesAllowed({"Attestation", "Report"})
+        @RequiresPermissions("host_attestations:create,retrieve")
         public String getTrustSaml(
                 @QueryParam("hosts") String hosts,
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
@@ -108,7 +110,8 @@ public class BulkHostTrust {
         @Path("/trust")
         @GET
         @Produces({MediaType.APPLICATION_JSON})
-        @RolesAllowed({"Attestation", "Report"})
+        //@RolesAllowed({"Attestation", "Report"})
+        @RequiresPermissions("host_attestations:create,retrieve")        
         public BulkHostTrustResponse getTrustJson(
                 @QueryParam("hosts") String hosts,
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
@@ -133,10 +136,11 @@ public class BulkHostTrust {
          * @param hostRecords
          * @return
          */
-        @RolesAllowed({"Attestation"})
+        //@RolesAllowed({"Attestation"})
         @POST
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
+        @RequiresPermissions("hosts:create")        
         public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) {
             
             ValidationUtil.validate(hostRecords);
@@ -163,10 +167,11 @@ public class BulkHostTrust {
          * @param hostRecords
          * @return
          */
-        @RolesAllowed({"Attestation"})
+        //@RolesAllowed({"Attestation"})
         @PUT
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
+        @RequiresPermissions("hosts:store")        
         public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) {
             
             ValidationUtil.validate(hostRecords);

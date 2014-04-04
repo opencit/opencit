@@ -78,7 +78,7 @@ public class CA {
      * 
      * TODO: change this from PermitAll to permit only requests authenticated using our HMAC scheme (proving user knows CA password, without actually sending the password in the request...);  or require user to use an Api Client with RSA private key in order to make this request. which means sysetm admin needs to copy his .jks file to each host when installing trust agent...
      */
-    @PermitAll  // or should we require the "Security" role? Or a new "CA" role??  and do we need an annotation to indicate that authentication should be done with HMAC ???   so we could maintain an hmac users table too, and define a "ca" user that way admin can easily set the password for this via website
+    //@PermitAll  // or should we require the "Security" role? Or a new "CA" role??  and do we need an annotation to indicate that authentication should be done with HMAC ???   so we could maintain an hmac users table too, and define a "ca" user that way admin can easily set the password for this via website
     @POST
     @Consumes({MediaType.TEXT_PLAIN})
     @Produces({MediaType.TEXT_PLAIN})

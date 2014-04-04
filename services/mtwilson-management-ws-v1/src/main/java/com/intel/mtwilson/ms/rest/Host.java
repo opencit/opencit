@@ -21,6 +21,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +51,13 @@ public class Host {
      *
      * @return an instance of java.lang.String
      */
-    @RolesAllowed({"Attestation"})
-    @GET
-    @Produces("application/json")
-    public String getJson() {
-        //TODO return proper representation object
-        throw new UnsupportedOperationException();
-    }
+//    @RolesAllowed({"Attestation"})
+//    @GET
+//    @Produces("application/json")
+//    public String getJson() {
+//        //TODO return proper representation object
+//        throw new UnsupportedOperationException();
+//    }
 
     /**
      * PUT method for updating or creating an instance of Host
@@ -64,13 +65,14 @@ public class Host {
      * @param content representation for the resource
      * @return an HTTP response with content of the updated or created resource.
      */
-    @RolesAllowed({"Attestation"})
-    @PUT
-    @Consumes("application/json")
-    public void putJson(String content) {
-    }
+//    @RolesAllowed({"Attestation"})
+//    @PUT
+//    @Consumes("application/json")
+//    public void putJson(String content) {
+//    }
 
-    @RolesAllowed({"Attestation"})
+    //@RolesAllowed({"Attestation"})
+    @RequiresPermissions("hosts:create")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -83,7 +85,8 @@ public class Host {
         return Boolean.toString(result);
     }
 
-    @RolesAllowed({"Attestation"})
+    //@RolesAllowed({"Attestation"})
+    @RequiresPermissions("hosts:create")    
     @POST
     @Path("/custom")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -97,7 +100,8 @@ public class Host {
         return Boolean.toString(result);
     }
 
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"hosts:create","oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
     @POST
     @Path("/whitelist")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -108,7 +112,8 @@ public class Host {
         return Boolean.toString(result);
     }
 
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"hosts:create","oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
     @POST
     @Path("/whitelist/custom")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -129,7 +134,8 @@ public class Host {
      * the registration or update of the host passed in.
      * @throws ApiException
      */
-    @RolesAllowed({"Attestation", "Security"})
+    //@RolesAllowed({"Attestation", "Security"})
+    @RequiresPermissions("hosts:create")
     @POST
     @Path("/bulk/custom")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -192,7 +198,8 @@ public class Host {
      * of the registration or update of the host passed in.
      * @throws ApiException
      */
-    @RolesAllowed({"Attestation", "Security"})
+    //@RolesAllowed({"Attestation", "Security"})
+    @RequiresPermissions("hosts:create")
     @POST
     @Path("/bulk")
     @Consumes(MediaType.APPLICATION_JSON)
