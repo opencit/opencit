@@ -654,6 +654,7 @@ function isNumber(n) {
 		$('selection-create-desc').disable();
  		mtwilson.rivets.forms['selection-create-form'].input.name = name;
  		mtwilson.rivets.forms['selection-create-form'].input.desc = desc;
+                disable_sel_render = true;
 		ws.getSelectionDetails(uuid);
 	}
 
