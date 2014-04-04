@@ -685,7 +685,7 @@ function isNumber(n) {
 
                         <div id="certificates">
                             <div class="nagPanel">Manage Certificates &gt;</div>
-                            <div id="nameOfPage" class="NameHeader">Create New Certificate Request</div> 
+                            <div id="nameOfPage" class="NameHeader">Create New Certificate</div> 
                            
                             <form id="certificate-request-create-form" action="#" onsubmit="return false;">
                                  <div class="singleDiv">
