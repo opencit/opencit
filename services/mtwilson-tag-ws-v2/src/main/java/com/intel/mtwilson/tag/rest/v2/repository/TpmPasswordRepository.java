@@ -13,6 +13,7 @@ import com.intel.mtwilson.tag.model.TpmPasswordFilterCriteria;
 import com.intel.mtwilson.tag.model.TpmPasswordLocator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
 //import org.restlet.resource.ResourceException;
 //import org.restlet.resource.ServerResource;
@@ -28,6 +29,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("tpm_passwords:search")         
     public TpmPasswordCollection search(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection objCollection = new TpmPasswordCollection();
         
@@ -51,6 +53,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     }
 
     @Override
+    @RequiresPermissions("tpm_passwords:retrieve")         
     public TpmPassword retrieve(TpmPasswordLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
@@ -69,6 +72,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     }
 
     @Override
+    @RequiresPermissions("tpm_passwords:store")         
     public void store(TpmPassword item) {
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
@@ -88,6 +92,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     }
 
     @Override
+    @RequiresPermissions("tpm_passwords:create")         
     public void create(TpmPassword item) {
         
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
@@ -108,6 +113,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     }
 
     @Override
+    @RequiresPermissions("tpm_passwords:delete")         
     public void delete(TpmPasswordLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         
@@ -124,6 +130,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     }
     
     @Override
+    @RequiresPermissions("tpm_passwords:delete")         
     public void delete(TpmPasswordFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

@@ -22,6 +22,7 @@ import com.intel.mtwilson.tag.model.CertificateRequestLocator;
 import com.intel.mtwilson.tag.model.Selection;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -41,6 +42,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("certificate_requests:search") 
     public CertificateRequestCollection search(CertificateRequestFilterCriteria criteria) {
         CertificateRequestCollection objCollection = new CertificateRequestCollection();
         DSLContext jooq = null;
@@ -93,6 +95,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     }
 
     @Override
+    @RequiresPermissions("certificate_requests:retrieve") 
     public CertificateRequest retrieve(CertificateRequestLocator locator) {
         if (locator == null || locator.id == null) { return null;}
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
@@ -110,6 +113,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     }
 
     @Override
+    @RequiresPermissions("certificate_requests:store") 
     public void store(CertificateRequest item) {
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
             CertificateRequest obj = certRequestDao.findById(item.getId());
@@ -165,6 +169,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     }
     
     @Override
+    @RequiresPermissions("certificate_requests:create") 
     public void create(CertificateRequest item) {
         
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao(); 
@@ -189,6 +194,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     }
 
     @Override
+    @RequiresPermissions("certificate_requests:delete") 
     public void delete(CertificateRequestLocator locator) {
         if (locator == null || locator.id == null) { return;}
         try (CertificateRequestDAO certRequestDao = TagJdbi.certificateRequestDao()) {            
@@ -205,6 +211,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     }
     
     @Override
+    @RequiresPermissions("certificate_requests:delete") 
     public void delete(CertificateRequestFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

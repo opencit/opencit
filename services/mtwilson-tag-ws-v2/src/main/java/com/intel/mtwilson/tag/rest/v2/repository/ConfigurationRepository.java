@@ -17,6 +17,7 @@ import com.intel.mtwilson.tag.model.ConfigurationLocator;
 import java.io.IOException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -36,6 +37,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("configurations:search")     
     public ConfigurationCollection search(ConfigurationFilterCriteria criteria) {
         ConfigurationCollection objCollection = new ConfigurationCollection();
         DSLContext jooq = null;
@@ -79,6 +81,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     }
 
     @Override
+    @RequiresPermissions("configurations:retrieve")     
     public Configuration retrieve(ConfigurationLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
         
@@ -97,6 +100,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     }
 
     @Override
+    @RequiresPermissions("configurations:store")     
     public void store(Configuration item) {
         if (item == null) {return;}
         try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
@@ -119,6 +123,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     }
 
     @Override
+    @RequiresPermissions("configurations:create")     
     public void create(Configuration item) {
         
         try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
@@ -136,6 +141,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     }
 
     @Override
+    @RequiresPermissions("configurations:delete")     
     public void delete(ConfigurationLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         
@@ -153,6 +159,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     }
     
     @Override
+    @RequiresPermissions("configurations:delete")     
     public void delete(ConfigurationFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

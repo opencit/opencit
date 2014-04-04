@@ -18,6 +18,7 @@ import com.intel.mtwilson.tag.model.CertificateLocator;
 import java.sql.Timestamp;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -37,6 +38,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("certificates:search") 
     public CertificateCollection search(CertificateFilterCriteria criteria) {
         CertificateCollection objCollection = new CertificateCollection();
         DSLContext jooq = null;
@@ -117,6 +119,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
+    @RequiresPermissions("certificates:retrieve") 
     public Certificate retrieve(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return null;}
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -135,6 +138,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
+    @RequiresPermissions("certificates:store") 
     public void store(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -156,6 +160,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
+    @RequiresPermissions("certificates:create") 
     public void create(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -172,6 +177,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
+    @RequiresPermissions("certificates:delete") 
     public void delete(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return;}
         CertificateDAO dao = null;
@@ -195,6 +201,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
     
     @Override
+    @RequiresPermissions("certificates:delete") 
     public void delete(CertificateFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

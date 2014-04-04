@@ -15,6 +15,7 @@ import com.intel.mtwilson.tag.model.FileFilterCriteria;
 import com.intel.mtwilson.tag.model.FileLocator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -34,6 +35,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("files:search")     
     public FileCollection search(FileFilterCriteria criteria) {
         FileCollection objCollection = new FileCollection();
         DSLContext jooq = null;
@@ -79,6 +81,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     }
 
     @Override
+    @RequiresPermissions("files:retrieve")     
     public File retrieve(FileLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
         
@@ -98,6 +101,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     }
 
     @Override
+    @RequiresPermissions("files:store")     
     public void store(File item) {
         
         try(FileDAO dao = TagJdbi.fileDao()) {
@@ -118,6 +122,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     }
 
     @Override
+    @RequiresPermissions("files:create")     
     public void create(File item) {
 
         try(FileDAO dao = TagJdbi.fileDao()) {
@@ -149,6 +154,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     }
 
     @Override
+    @RequiresPermissions("files:delete")     
     public void delete(FileLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         try(FileDAO dao = TagJdbi.fileDao()) {
@@ -166,6 +172,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     }
     
     @Override
+    @RequiresPermissions("files:delete")     
     public void delete(FileFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
