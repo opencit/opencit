@@ -24,8 +24,8 @@
 					</table>
 					<div class="tableDiv" style=" overflow: auto;" id="editOSContentDiv">
 						<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
-							<tbody>
-							</tbody> 
+                                                    <tbody>
+                                                    </tbody>
 						</table>
 					</div>
 						<div id="editOSPaginationDiv">

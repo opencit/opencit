@@ -19,7 +19,9 @@ public class KvAttributeLocator implements Locator<KvAttribute> {
 
     @Override
     public void copyTo(KvAttribute item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
     }
     
 }

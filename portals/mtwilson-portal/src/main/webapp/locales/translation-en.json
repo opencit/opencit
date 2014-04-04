@@ -226,7 +226,7 @@
         "host_type": "Host Type:",
         "port_num": "Port #:",
         "register_host": "Register Host:",
-        "overwrite_wl": "Overwrite Whitelist <br> (If exists):"
+        "overwrite_wl": "Overwrite Whitelist:"
     },
     "table": {
         "name": "Name",

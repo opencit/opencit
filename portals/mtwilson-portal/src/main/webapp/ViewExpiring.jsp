@@ -9,7 +9,7 @@
 <body>
 <div class="container">
 		<div class="nagPanel"><span data-i18n="title.view_expiring">API Client Extend</span> ></div>
-		<div id="nameOfPage" class="NameHeader" data-i18n="head.view_expiring">Expiring API Clients</div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.view_expiring">Expiring API Clients</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="registerHostTable" class="registerHostTable" style="display: none;">
 				<table cellpadding="0" cellspacing="0" width="100%" class="tableHeader">

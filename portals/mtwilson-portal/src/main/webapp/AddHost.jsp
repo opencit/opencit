@@ -8,17 +8,17 @@
 </head>
 <body>
 <div class="container">
-    <div class="nagPanel" id="mainHeader"><span data-18n="title.host_management">Host Management</span> &gt; <span data-18n="title.add_host">Add Host</span></div>
+    <div class="nagPanel" id="mainHeader"><span data-i18n="title.host_management">Host Management</span> &gt; <span data-i18n="title.add_host">Add Host</span></div>
 		<div class="dataTableMle" id="mainAddHostContainer">
 			<div class="singleDiv">
-				<div class="labelDiv" data-18n="input.hostname">Host Name:</div>
+				<div class="labelDiv" data-i18n="input.hostname">Host Name:</div>
 				<div class="valueDiv">
 					<input type="text" id="MainContent_tbHostName" class="textBoxClass">
 				</div>
 			</div>
             
 			<div class="singleDiv">
-				<div class="labelDiv" data-18n="input.oem_vendor">OEM Vendor:</div>
+				<div class="labelDiv" data-i18n="input.oem_vendor">OEM Vendor:</div>
 				<div class="valueDiv">
 					<select class="textBoxClass" id="MainContent_ddlOEM" onchange="fnChangeOEMVender()">
 					</select>
@@ -26,7 +26,7 @@
 			</div>
 			
 			<div class="singleDiv">
-				<div class="labelDiv" data-18n="input.bios">BIOS Info:</div>
+				<div class="labelDiv" data-i18n="input.bios">BIOS Info:</div>
 				<div class="valueDiv">
 					<select id="MainContent_LstBIOS" class="textBoxClass">
 					</select>
@@ -34,7 +34,7 @@
 			</div>
 			
 			<div class="singleDiv">
-				<div class="labelDiv" data-18n="input.os_vmm">OS-VMM Info:</div>
+				<div class="labelDiv" data-i18n="input.os_vmm">OS-VMM Info:</div>
 				<div class="valueDiv">
 					<select onchange="javascript:SetRequired(this);" id="MainContent_LstVmm" size="4" class="textBoxClass" style="height: auto; width: auto">
 					</select>
@@ -54,7 +54,7 @@
 			</div>
 		    -->
 			<div class="singleDiv" id="hostPortDisplayDiv">
-				<div class="labelDiv" data-18n="input.host_port">Host Port:</div>
+				<div class="labelDiv" data-i18n="input.host_port">Host Port:</div>
 				<div class="valueDiv" >
                                     <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="9999"-->
 				</div>
@@ -62,19 +62,19 @@
 						            
                                     <div id="citrixStringElement">
 				<div class="singleDiv">
-					<div class="labelDiv" data-18n="input.xen_details">XenServer Details:</div>
+					<div class="labelDiv" data-i18n="input.xen_details">XenServer Details:</div>
 					<div class="valueDiv">&nbsp;
 						<!-- <textarea class="textAreaBoxClass" id="MainContent_tbVCenterDetails" cols="20" rows="2"></textarea> -->
 					</div>
 				</div>
 				<div class="subSingleDiv">
-						<div class="subLabelDivgkv labelDiv" data-18n="input.login_id">Login ID:</div>
+						<div class="subLabelDivgkv labelDiv" data-i18n="input.login_id">Login ID:</div>
 						<div class="valueDiv">
 							<input type="text" maxlength="200" id="MainContent_tbVcitrixLoginId" class="textBoxClass">
 						</div>
 				</div>
 				<div class="subSingleDiv">
-						<div class="subLabelDivgkv labelDiv" data-18n="input.password">Password:</div>
+						<div class="subLabelDivgkv labelDiv" data-i18n="input.password">Password:</div>
 						<div class="valueDiv">
 							<input type="password" maxlength="200" id="MainContent_tbVcitrixPass" class="textBoxClass">
 						</div>
@@ -82,7 +82,7 @@
 			</div>
 			<div id="vcenterStringElement">
 				<div class="singleDiv">
-					<div class="labelDiv" data-18n="input.vmware_details">vCenter Details:</div>
+					<div class="labelDiv" data-i18n="input.vmware_details">vCenter Details:</div>
 					<div class="valueDiv">&nbsp;
 						<!-- <textarea class="textAreaBoxClass" id="MainContent_tbVCenterDetails" cols="20" rows="2"></textarea> -->
 					</div>

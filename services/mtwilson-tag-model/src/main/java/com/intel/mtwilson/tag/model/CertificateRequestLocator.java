@@ -23,7 +23,9 @@ public class CertificateRequestLocator implements Locator<CertificateRequest>{
 
     @Override
     public void copyTo(CertificateRequest item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
         if( subject != null && !subject.isEmpty() && item.getSubject() == null ) {
             item.setSubject(subject);
         }
