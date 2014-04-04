@@ -24,7 +24,7 @@ public class Oss extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public Oss(URL url) {
+    public Oss(URL url) throws Exception{
         super(url);
     }
 

@@ -4,8 +4,11 @@
  */
 package com.intel.mountwilson.common;
 
+import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 import org.apache.commons.configuration.Configuration;
@@ -39,15 +42,10 @@ public class Config {
 
 
 	static{
-		File propFile;
-		try {
-			propFile = TAConfig.getFile("trustagent.properties");
-			homeFolder = propFile.getAbsolutePath();
-			homeFolder = homeFolder.substring(0,homeFolder.indexOf("trustagent.properties"));
-			LoggerFactory.getLogger(Config.class.getName()).warn("Home folder. Using " + homeFolder);
-		} catch (FileNotFoundException e) {
-			LoggerFactory.getLogger(Config.class.getName()).warn("Could Not find the home folder. Using " + homeFolder);
-		}
+//        TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
+//		File propFile = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        homeFolder = MyFilesystem.getApplicationFilesystem().getConfigurationPath();
+        LoggerFactory.getLogger(Config.class.getName()).warn("Home folder. Using " + homeFolder);
     }
     
     public static boolean isDebug() {
@@ -82,13 +80,13 @@ public class Config {
     
      
     public static String getAppPath(){
-        return config.getString("app.path");
+        return MyFilesystem.getApplicationFilesystem().getApplicationPath();
     }
     
     
     
     public static String getBinPath() {
-        return getAppPath() + File.separator + "bin";
+        return MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
     }
     
     

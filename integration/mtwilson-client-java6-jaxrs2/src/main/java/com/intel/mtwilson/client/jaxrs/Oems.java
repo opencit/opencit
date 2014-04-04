@@ -28,7 +28,7 @@ public class Oems extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public Oems(URL url) {
+    public Oems(URL url) throws Exception{
         super(url);
     }
 

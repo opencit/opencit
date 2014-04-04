@@ -24,7 +24,7 @@ public class MlePcrs extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public MlePcrs(URL url) {
+    public MlePcrs(URL url) throws Exception{
         super(url);
     }
 

@@ -29,7 +29,7 @@ public class Daa {
     @POST
     @Path("/challenge")
     public DaaResponse daaChallenge(DaaChallenge daaChallenge) throws IOException, TAException {
-        TrustagentConfiguration configuration = new TrustagentConfiguration(My.configuration().getConfiguration());
+        TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
         if( !configuration.isDaaEnabled() ) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
         }

@@ -4,11 +4,15 @@
  */
 package com.intel.mtwilson.trustagent.cmd;
 
+import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.Security;
+import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Connector;
@@ -39,7 +43,9 @@ public class StartHttpServer implements Command {
 
     @Override
     public void execute(String[] args) throws Exception {
-        configuration = new TrustagentConfiguration(My.configuration().getConfiguration());
+        configuration = TrustagentConfiguration.loadConfiguration();
+        System.setProperty("org.eclipse.jetty.ssl.password", configuration.getTrustagentKeystorePassword());
+        System.setProperty("org.eclipse.jetty.ssl.keypassword", configuration.getTrustagentKeystorePassword());
         Security.addProvider(new BouncyCastleProvider());
         server = createServer();
         server.start();
@@ -65,7 +71,9 @@ public class StartHttpServer implements Command {
         SslContextFactory sslContextFactory = new SslContextFactory();
         sslContextFactory.setKeyStorePath(configuration.getTrustagentKeystoreFile().getAbsolutePath());
         sslContextFactory.setKeyStorePassword(configuration.getTrustagentKeystorePassword());
-        //sslContextFactory.setKeyManagerPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
+        sslContextFactory.setTrustStorePath(configuration.getTrustagentKeystoreFile().getAbsolutePath());
+        sslContextFactory.setTrustStorePassword(configuration.getTrustagentKeystorePassword());
+//        sslContextFactory.setKeyManagerPassword(configuration.getTrustagentKeystorePassword()); // causes java.lang.NullPointerException at org.eclipse.jetty.util.ssl.SslContextFactory.getKeyManagers(SslContextFactory.java:904) ~[jetty-util-9.1.0.RC2.jar:9.1.0.RC2]
         ServerConnector https = new ServerConnector(server,
             new SslConnectionFactory(sslContextFactory,"http/1.1"),
             new HttpConnectionFactory(httpsConfig));

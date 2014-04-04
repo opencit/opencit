@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.common;
 
+import com.intel.mtwilson.MyFilesystem;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,99 +46,47 @@ public class TAConfig {
     
     private TAConfig() {
         Properties defaults = new Properties();
-        defaults.setProperty("app.path", ".");
+//        defaults.setProperty("app.path", MyFilesystem.getApplicationFilesystem().getApplicationPath());
         defaults.setProperty("debug", "false"); // allowed values: false, true (case insensitive)
-        defaults.setProperty("nonce.filename", "nonce");
-        defaults.setProperty("aikquote.filename", "aikquote");
-        defaults.setProperty("aikblob.filename", "aikblob.dat");
-        defaults.setProperty("aikcert.filename", "aikcert.pem"); // issue #878 the aikcert is in PEM format so we label it properly
+//        defaults.setProperty("nonce.filename", "nonce"); // only used from TADataContext.getNonceFileName by appending to var dir
+//        defaults.setProperty("aikquote.filename", "aikquote"); // only used from TADataContext.getQuoteFileName by appending to var dir
+        defaults.setProperty("aikblob.filename", "aik.blob");
+        defaults.setProperty("aikcert.filename", "aik.pem"); // issue #878 the aikcert is in PEM format so we label it properly
         defaults.setProperty("ekcert.filename", "ekcert.cer");
         defaults.setProperty("daa.challenge.filename", "daa-challenge");
         defaults.setProperty("daa.response.filename.filename", "daa-response");        
-        defaults.setProperty("cert.folder", "cert");
-        defaults.setProperty("data.folder", "data");
-        defaults.setProperty("secure.port", "9999");
-        defaults.setProperty("nonsecure.port", "9998");
-        defaults.setProperty("daa.enabled", "false");
+//        defaults.setProperty("cert.folder", "cert");
+//        defaults.setProperty("data.folder", "data");
+//        defaults.setProperty("secure.port", "9999");
+//        defaults.setProperty("nonsecure.port", "9998");
+//        defaults.setProperty("daa.enabled", "false");
         // Additional properties to support module attestation
-        defaults.setProperty("modules.folder", "modules"); 
-        defaults.setProperty("modulesXml.filename", "measureLog.xml");
-        defaults.setProperty("modulesScript.filename", "module_analysis.sh");        
-        config = gatherConfiguration("trustagent.properties", defaults);
+//        defaults.setProperty("modules.folder", "modules"); 
+//        defaults.setProperty("modulesXml.filename", "measureLog.xml"); // only used from TADataContext.getMeasureLogXmlFile()
+//        defaults.setProperty("modulesScript.filename", "module_analysis.sh");        
+        config = gatherConfiguration(defaults);
     }
     
     // for troubleshooting
     private void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[] { "app.path", "debug", "secure.port", "nonsecure.port" };
+        String keys[] = new String[] { /*"app.path",*/ "debug", "trustagent.http.tls.port", "mtwilson.api.url" };
         for(String key : keys) {
             String value = c.getString(key);
             System.out.println(String.format("TAConfig [%s]: %s=%s", label, key, value));
         }
     }
 
-	private void readPropertiesFile(String propertiesFilename,
-			CompositeConfiguration composite) throws IOException {
-		InputStream in = getClass().getResourceAsStream(propertiesFilename);
-		log.info("Reading property file " +  propertiesFilename);
-		if (in != null) {
-			try {
-				Properties properties = new Properties();
-				properties.load(in);
-				MapConfiguration classpath = new MapConfiguration(properties);
-				dumpConfiguration(classpath, "classpath:/" + propertiesFilename);
-				composite.addConfiguration(classpath);
-			} finally {
-				in.close();
-			}
-		}
-
-	}
-
-    private Configuration gatherConfiguration(String propertiesFilename, Properties defaults) {
-        CompositeConfiguration composite = new CompositeConfiguration();
-
-        // first priority are properties defined on the current JVM (-D switch or through web container)
-        SystemConfiguration system = new SystemConfiguration();
-        dumpConfiguration(system, "system");
-        composite.addConfiguration(system);
-
-        // second priority are properties defined on the classpath (like user's home directory)        
+    private Configuration gatherConfiguration(Properties defaults)  {
         try {
-            // user's home directory (assuming it's on the classpath!)
-            readPropertiesFile("/"+propertiesFilename, composite);
-        } catch (IOException ex) {
-           log.info( "Did not find "+propertiesFilename+" on classpath", ex);
-        }
+        CompositeConfiguration composite = new CompositeConfiguration();
         
-        // third priority are properties defined in standard install location
-        System.out.println("TAConfig os.name="+System.getProperty("os.name"));
-        ArrayList<File> files = new ArrayList<File>();
-        // windows-specific location
-        if( System.getProperty("os.name", "").toLowerCase().equals("win") ) {
-            System.out.println("TAConfig user.home="+System.getProperty("user.home"));
-            files.add(new File("C:"+File.separator+"Intel"+File.separator+"CloudSecurity"+File.separator+propertiesFilename));
-            files.add(new File(System.getProperty("user.home")+File.separator+propertiesFilename));
-        }
-        // linux-specific location
-        if( System.getProperty("os.name", "").toLowerCase().equals("linux") || System.getProperty("os.name", "").toLowerCase().equals("unix") ) {
-            files.add(new File("./config/"+propertiesFilename));
-            files.add(new File("/etc/intel/cloudsecurity/"+propertiesFilename));
-        }
-        files.add(new File(System.getProperty("app.path")+File.separator+propertiesFilename)); // this line specific to TA for backwards compatibility, not needed in AS/AH
-        // add all the files we found
-        for(File f : files) {
-            try {
-                if( f.exists() && f.canRead() ) {
-                    PropertiesConfiguration standard = new PropertiesConfiguration(f);
-                    dumpConfiguration(standard, "file:"+f.getAbsolutePath());
-                    composite.addConfiguration(standard);
-                }
-            } catch (ConfigurationException ex) {
-                log.error( null, ex);
-            }
-        }
-
-        // last priority are the defaults that were passed in, we use them if no better source was found
+        // first priority is the configuration file
+        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        PropertiesConfiguration standard = new PropertiesConfiguration(file);
+        dumpConfiguration(standard, "file:"+file.getAbsolutePath());
+        composite.addConfiguration(standard);
+        
+        // second priority are the defaults that were passed in, we use them if no better source was found
         if( defaults != null ) {
             MapConfiguration defaultconfig = new MapConfiguration(defaults);
             dumpConfiguration(defaultconfig, "default");
@@ -145,33 +94,12 @@ public class TAConfig {
         }
         dumpConfiguration(composite, "composite");
         return composite;
+        }
+        catch(ConfigurationException e) {
+            throw new RuntimeException("Cannot load properties configuration", e);
+        }
     }
     
-    // returns a File from which you can getAbsolutePath or wrap with FileInputStream
-    public static File getFile(String filename) throws FileNotFoundException {
-        // try standard install locations        
-        System.out.println("ResourceFinder os.name="+System.getProperty("os.name"));
-        ArrayList<File> files = new ArrayList<File>();
-        // windows-specific location
-        if( System.getProperty("os.name", "").toLowerCase().contains("win") ) {
-            System.out.println("ResourceFinder user.home="+System.getProperty("user.home"));
-            files.add(new File("C:"+File.separator+"Intel"+File.separator+"CloudSecurity"+File.separator+filename));
-            files.add(new File(System.getProperty("user.home")+File.separator+filename));
-        }
-        // linux-specific location
-        if( System.getProperty("os.name", "").toLowerCase().contains("linux") || System.getProperty("os.name", "").toLowerCase().contains("unix") ) {
-        	files.add(new File("./config/"+filename));
-            files.add(new File("/etc/intel/cloudsecurity/"+filename));
-        }
-        // try all the files we found
-        for(File f : files) {
-            if( f.exists() && f.canRead() ) {
-                return f;
-            }
-        }
-        
-        throw new FileNotFoundException("cannot find "+filename);        
-    }
 
     
 }

@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -52,31 +53,11 @@ public class GenerateModulesCmd implements ICommand {
         
         log.debug("About to run the command: " + context.getMeasureLogLaunchScript());
         long startTime = System.currentTimeMillis();
-        CommandUtil.runCommand( context.getMeasureLogLaunchScript());
+        CommandUtil.runCommand( context.getMeasureLogLaunchScript().getAbsolutePath() );
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
-        BufferedReader in = null;
-        String str;
-        String content;
-        StringBuffer res = new StringBuffer();
-        try {
-            in = new BufferedReader(new FileReader(context.getMeasureLogXmlFile()));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            if(in != null) {
-                while ((str = in.readLine()) != null) {
-                    //content = content + str;
-                    res.append(str);
-                }
-                in.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        content = res.toString();
+        String content = FileUtils.readFileToString(context.getMeasureLogXmlFile());
         log.debug("Content of the XML file before getting modules: " + content);
         
         getModulesFromMeasureLogXml(content);

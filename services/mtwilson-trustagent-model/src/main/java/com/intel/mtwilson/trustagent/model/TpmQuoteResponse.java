@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate;
  *
  * @author jbuhacoff
  */
-@JacksonXmlRootElement(localName="tpmQuoteResponse")
+@JacksonXmlRootElement(localName="tpm_quote_response")
 public class TpmQuoteResponse {
     public long timestamp;
     public String clientIp;

@@ -61,6 +61,23 @@ public class SecurityTestResource {
         return "hello, permitted user! you have 'hello' access to the 'test' resource";
     }
 
+    @RequiresPermissions("test:hello,goodbye")
+    @GET
+    @Path("/permission2")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloPermittedUser2() {
+        return "hello, permitted user! you have 'hello,goodbye' access to the 'test' resource";
+    }
+
+    @RequiresPermissions({"test:hello","test:goodbye"})
+    @GET
+    @Path("/permission3")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloPermittedUser3() {
+        return "hello, permitted user! you have 'hello' and 'goodbye' access to the 'test' resource";
+    }
+    
+    
     @RequiresRoles("test")
     @GET
     @Path("/rolebased1")

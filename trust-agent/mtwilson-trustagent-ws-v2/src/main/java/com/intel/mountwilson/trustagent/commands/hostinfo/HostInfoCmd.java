@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadx
  */
 public class HostInfoCmd implements ICommand {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostInfoCmd.class);
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
     TADataContext context = null;
 
     public HostInfoCmd(TADataContext context) {
@@ -47,7 +47,8 @@ public class HostInfoCmd implements ICommand {
             // Retrieve the processor information as well.
             getProcessorInfo();
             getHostUUID();
-        } catch (Exception ex) {
+        } catch (TAException | IOException ex) {
+            log.debug("Error while getting OS details", ex);
             throw new TAException(ErrorCode.ERROR, "Error while getting OS details.", ex);
         }
 

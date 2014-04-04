@@ -4,14 +4,11 @@
  */
 package com.intel.mtwilson.shiro.file;
 
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.shiro.UserId;
 import com.intel.mtwilson.shiro.Username;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.shiro.authc.AccountException;
@@ -36,7 +33,22 @@ public class FilePasswordRealm extends AuthorizingRealm {
     
     private String userFilePath;
     private String permissionFilePath;
+
     // TODO: password protection for integrity of these two files
+    public void setUserFilePath(String userFilePath) {
+        this.userFilePath = userFilePath;
+    }
+
+    public void setPermissionFilePath(String permissionFilePath) {
+        this.permissionFilePath = permissionFilePath;
+    }
+    
+    
+    
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof UsernamePasswordToken;
+    }
     
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection pc) {

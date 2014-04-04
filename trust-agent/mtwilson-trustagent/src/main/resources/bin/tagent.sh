@@ -55,16 +55,7 @@ case "$1" in
     echo $! > $TRUSTAGENT_PID_FILE
     ;;
   stop)
-    if [ -f $TRUSTAGENT_PID_FILE ]; then
-      TRUSTAGENT_PID=$(cat $TRUSTAGENT_PID_FILE)
-      if [ -n "$TRUSTAGENT_PID" ]; then
-        kill -9 $TRUSTAGENT_PID
-      else
-        echo "Empty PID file: $TRUSTAGENT_PID_FILE"
-      fi
-    else
-      echo "Missing PID file: $TRUSTAGENT_PID_FILE"
-    fi
+    trustagent_stop
     ;;
   setup)
     shift
@@ -82,6 +73,35 @@ case "$1" in
     fi
     ;;
 esac
+
+function trustagent_stop() {
+    if [ -f $TRUSTAGENT_PID_FILE ]; then
+      TRUSTAGENT_PID=$(cat $TRUSTAGENT_PID_FILE)
+      if [ -z "$TRUSTAGENT_PID" ]; then
+        echo "Empty PID file: $TRUSTAGENT_PID_FILE"
+        return 1
+      fi
+      is_running=`ps -eo pid | grep "^\s*${TRUSTAGENT_PID}$"`
+      if [ -z "$is_running" ]; then
+        echo "Stale PID file: Trust agent is not running"
+        return 1
+      fi
+    else
+      echo "Missing PID file: $TRUSTAGENT_PID_FILE"
+      return 1
+    fi
+    if [ -z "$TRUSTAGENT_PID" ]; then
+      echo "Trust agent is not running"
+      return 1
+    fi
+    kill -9 $TRUSTAGENT_PID
+    if [ $? ]; then
+      echo "Stopped trust agent"
+      rm $TRUSTAGENT_PID_FILE
+    else
+      echo "Failed to stop trust agent"
+    fi
+}
 
 function print_help() {
     echo "Usage: $0 start|stop|authorize|start-http-server"
