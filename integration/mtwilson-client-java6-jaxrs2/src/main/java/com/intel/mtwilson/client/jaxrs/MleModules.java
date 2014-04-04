@@ -24,7 +24,7 @@ public class MleModules extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public MleModules(URL url) {
+    public MleModules(URL url) throws Exception{
         super(url);
     }
 

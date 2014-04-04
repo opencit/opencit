@@ -15,13 +15,14 @@
   
 
   <modules>
-    <module>mtwilson-privacyca-client-jaxrs2</module>
-    <module>mtwilson-trustagent-console</module>
-    <module>mtwilson-trustagent-configuration</module>
-    <module>mtwilson-trustagent-privacyca-niarl</module>
+	<module>mtwilson-trustagent-client-jaxrs2</module>
 	<module>mtwilson-trustagent-setup</module>
 	<module>mtwilson-trustagent-ws-v2</module>
 	<module>mtwilson-trustagent</module>
+    <module>mtwilson-privacyca-client-jaxrs2</module>
+    <module>mtwilson-trustagent-configuration</module>
+    <module>mtwilson-trustagent-console</module>
+    <module>mtwilson-trustagent-privacyca-niarl</module>
   </modules>
 
 

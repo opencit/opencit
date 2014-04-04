@@ -53,7 +53,7 @@ fi
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 
 # PCAFIX 2014-03
-ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
+ZIP_PACKAGE=`ls -1 mtwilson-trustagent*.zip 2>/dev/null | tail -n 1`
 useradd --home /opt/trustagent --system --shell /bin/false --user-group trustagent
 # backup configuration directory before unzipping our package
 if [ -d /opt/trustagent/configuration ]; then
@@ -63,47 +63,59 @@ fi
 mkdir -p /opt/trustagent
 unzip -o $ZIP_PACKAGE -d /opt/trustagent
 chown -R trustagent:trustagent /opt/trustagent
+chown -R root /opt/trustagent/bin
 chown -R root /opt/trustagent/java
+chown -R root /opt/trustagent/configuration
 mkdir -p /var/log/trustagent
 chown trustagent:trustagent /var/log/trustagent
 chmod -R 770 /opt/trustagent/bin
 
-saveD=`pwd`
-# copy application files to /opt
-mkdir -p "${intel_conf_dir}"
-chmod 700 "${intel_conf_dir}"
-# bug #947 we do not replace trustagent.properties automatically because it contains important passwords that must not be clobbered.
-# if any release adds new properties to that file, use update_property_in_file to add them safely.
-if [ ! -f "${intel_conf_dir}/${package_name}.properties" ]; then
-  cp ${package_name}.properties "${intel_conf_dir}"
-  chmod 600 ${package_name}.properties
-fi
 
-# bug #947 if we are upgrading a previous install, move the trustagent.jks file from /opt to /etc
-if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
-  if [ -f "${package_dir}/cert/trustagent.jks" ]; then
-    mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
+# Migrate any old data to the new locations  (should be rewritten in java)
+v1_aik=/etc/intel/cloudsecurity/cert
+v2_aik=/opt/trustagent/configuration
+v1_conf=/etc/intel/cloudsecurity
+v2_conf=/opt/trustagent/configuration
+if [ -d "$v1_aik" ]; then
+  cp $v1_aik/aikblob.dat $v2_aik/aik.blob
+  cp $v1_aik/aikcert.pem $v2_aik/aik.pem
+fi
+if [ -d "$v1_conf" ]; then
+  # find the existing tpm owner and aik secrets
+  TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${v1_conf}/hisprovisioner.properties`
+  HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${v1_conf}/hisprovisioner.properties`
+  TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${v1_conf}/${package_name}.properties`
+  HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${v1_conf}/${package_name}.properties`
+  if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
+    export TPM_OWNER_SECRET=$TpmOwnerAuth_121
+  elif [ -n "$TpmOwnerAuth_122" ]; then
+    export TPM_OWNER_SECRET=$TpmOwnerAuth_122
+  fi
+  if [ -z "$HisIdentityAuth_122" ] && [ -n "$HisIdentityAuth_121" ]; then
+    export AIK_SECRET=$HisIdentityAuth_121
+  elif [ -n "$HisIdentityAuth_122" ]; then
+    export AIK_SECRET=$HisIdentityAuth_122
+  fi
+
+  # now copy the keystore and the keystore password
+  KeystorePassword_122=`read_property_from_file trustagent.keystore.password ${v1_conf}/${package_name}.properties`
+  if [ -n "$KeystorePassword_122" ]; then
+    export TRUSTAGENT_KEYSTORE_PASSWORD=$KeystorePassword_122
+    if [ -f "$v1_conf/trustagent.jks" ]; then
+      cp $v1_conf/trustagent.jks $v2_conf
+    fi
   fi
 fi
-TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/hisprovisioner.properties`
-HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/hisprovisioner.properties`
-TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
-HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/${package_name}.properties`
-if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
-  update_property_in_file TpmOwnerAuth "${intel_conf_dir}/${package_name}.properties" $TpmOwnerAuth_121
-  update_property_in_file TpmOwnerAuth "${intel_conf_dir}/hisprovisioner.properties"
-fi
-if [ -z "$HisIdentityAuth_122" ] && [ -n "$HisIdentityAuth_121" ]; then
-  update_property_in_file HisIdentityAuth "${intel_conf_dir}/${package_name}.properties" $HisIdentityAuth_121
-  update_property_in_file HisIdentityAuth "${intel_conf_dir}/hisprovisioner.properties"
-fi
+
+# Redefine the variables to the new locations
+
+intel_conf_dir=/opt/trustagent/configuration
+package_dir=/opt/trustagent
+
+saveD=`pwd`
 
 
-chmod 600 TPMModule.properties
-cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
 
-mkdir -p "${package_dir}"
-mkdir -p "${package_dir}"/bin
 
 #tpm_nvinfo
 tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
@@ -146,31 +158,17 @@ if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
   ln -s "$hex2bin" "${package_dir}/bin"
 fi
 
-mkdir -p "${package_dir}"/cert
-mkdir -p "${package_dir}"/data
-mkdir -p "${package_dir}"/lib
-chmod -R 700 "${package_dir}"
-cp version "${package_dir}"
-cp functions "${package_dir}"
-#cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
+mkdir -p "${package_dir}"/linux-util
+chmod -R 700 "${package_dir}"/linux-util
+cp version "${package_dir}"/linux-util
+cp functions "${package_dir}"/linux-util
 
-
-# copy default logging settings to /etc, but do not change it if it's already there (someone may have modified it)
-if [ ! -f "${intel_conf_dir}/logback.xml" ]; then
-  chmod 600 logback.xml
-  cp logback.xml "${intel_conf_dir}"
-fi
 
 # copy control scripts to /usr/local/bin
 mkdir -p /usr/local/bin
-cp tagent.sh /usr/local/bin/tagent
-cp pcakey.sh /usr/local/bin/pcakey
-chmod 700 /usr/local/bin/tagent /usr/local/bin/pcakey
+if [ -f /usr/local/bin/tagent ]; then rm /usr/local/bin/tagent; fi
+ln -s /opt/trustagent/bin/tagent.sh /usr/local/bin/tagent
 
-#module attestation script
-chmod 755 module_analysis.sh
-cp module_analysis.sh "${package_dir}"/bin
-update_property_in_file module_script "${intel_conf_dir}/${package_name}.properties" "${package_dir}/bin/module_analysis.sh"
 
 java_install $JAVA_PACKAGE
 
@@ -267,7 +265,7 @@ fix_existing_aikcert() {
 fix_existing_aikcert
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
-/usr/local/bin/tagent setup
+/usr/local/bin/tagent setup all
 /usr/local/bin/tagent start
 
 # now install monit
@@ -377,6 +375,8 @@ if [ ! -f /etc/monit/conf.d/ta.monit ]; then
  cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
+# TODO INSECURE need to rewrite this as a java setup task and leverage the
+#      existing tls policy for known mtwilson ssl cert 
 prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
 	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
@@ -397,4 +397,4 @@ service monit restart
 echo "monit installed and monitoring tagent"
 
 sleep 2
-/usr/local/bin/tagent start
+/opt/trustagent/bin/tagent start

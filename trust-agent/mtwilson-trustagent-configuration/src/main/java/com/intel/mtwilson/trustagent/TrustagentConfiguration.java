@@ -5,13 +5,17 @@
 package com.intel.mtwilson.trustagent;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.mtwilson.configuration.AbstractConfiguration;
 import java.io.File;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -161,5 +165,16 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     public boolean isTpmQuoteWithIpAddress() {
         return getConfiguration().getBoolean(TPM_QUOTE_IPV4, true);
+    }
+    
+    public static TrustagentConfiguration loadConfiguration() throws IOException {
+        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        try(FileInputStream in = new FileInputStream(file)) {
+            Properties properties = new Properties();
+            properties.load(in);
+            TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration(properties));
+            return configuration;
+        }
+        
     }
 }

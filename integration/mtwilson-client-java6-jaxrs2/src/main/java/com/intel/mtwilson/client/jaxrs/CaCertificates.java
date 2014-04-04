@@ -24,7 +24,7 @@ public class CaCertificates extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public CaCertificates(URL url) {
+    public CaCertificates(URL url) throws Exception{
         super(url);
     }
 

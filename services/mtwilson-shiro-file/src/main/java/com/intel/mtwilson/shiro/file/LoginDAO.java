@@ -80,11 +80,12 @@ public class LoginDAO  {
         return users.get(username);
     }
     
-    public void deleteUserByName(String username) {
+    public void deleteUserByName(String username) throws IOException {
         if( !users.containsKey(username)) {
             throw new IllegalArgumentException("User does not exist");
         }
         users.remove(username);
+        save();
     }
     
     public void addPermission(String username, String permissionText) throws IOException {

@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  * Sample input:   { "nonce":"base64string", "pcrs": [0,1,2,3,18,19,22] }
  * @author jbuhacoff
  */
-@JacksonXmlRootElement(localName="tpmQuoteRequest")
+@JacksonXmlRootElement(localName="tpm_quote_request")
 public class TpmQuoteRequest {
     private byte[] nonce; // must be 20 bytes
     private int[] pcrs; // variable-length array of pcr index numbers, each one 0-23 

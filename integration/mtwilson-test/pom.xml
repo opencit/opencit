@@ -221,6 +221,16 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v1</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v2</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-management</artifactId>
             <version>${project.version}</version>        
         </dependency>
@@ -285,7 +295,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey-util</artifactId>
+            <artifactId>mtwilson-jaxrs-util</artifactId>
             <version>${project.version}</version>
         </dependency>
 

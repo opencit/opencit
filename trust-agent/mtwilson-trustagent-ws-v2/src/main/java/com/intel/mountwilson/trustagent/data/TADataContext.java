@@ -8,7 +8,8 @@ import java.io.File;
 
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.ErrorCode;
-import com.intel.mountwilson.common.HisConfig;
+import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class TADataContext {
     private String hostUUID;
     private String ipaddress;  // localhost ip address
     private String assetTagHash;
-  
+    private TpmQuoteResponse tpmQuoteResponse;
     
     public String getBiosOem() {
         return biosOem;
@@ -74,7 +75,7 @@ public class TADataContext {
     }
 
     public String getNonceFileName() {
-        return getDataFolder() + Config.getInstance().getProperty("nonce.filename");
+        return getDataFolder() + File.separator + "nonce"; // like /opt/trustagent/var/nonce   TODO:  randomize filename to allow multiple simultaneous requests
     }
 
     public String getResponseXML() {
@@ -105,9 +106,9 @@ public class TADataContext {
         this.nonceBase64 = nonce;
     }
 
-    // issue #1038 prevent trust agent relay by default; customer can turn this off in configuration file by setting  mtwilson.tpm.quote.ipv4=false
+    // issue #1038 prevent trust agent relay by default; customer can turn this off in configuration file by setting  tpm.quote.ipv4=false
     public boolean isQuoteWithIPAddress() {
-        String enabled = Config.getInstance().getProperty("mtwilson.tpm.quote.ipv4");
+        String enabled = Config.getInstance().getProperty("tpm.quote.ipv4");
         if( enabled == null || "true".equalsIgnoreCase(enabled) || "enabled".equalsIgnoreCase(enabled) ) {
             return true;
         }
@@ -125,7 +126,7 @@ public class TADataContext {
 
     
     public String getQuoteFileName() {
-        return getDataFolder() + Config.getInstance().getProperty("aikquote.filename");
+        return getDataFolder() + File.separator + "aikquote";
     }
 
     public String getAikBlobFileName() {
@@ -136,24 +137,26 @@ public class TADataContext {
         return getCertificateFolder() + Config.getInstance().getProperty("aikcert.filename");
     }
 
+    // used only by the CreateIdentityDaaCmd - TODO  when creating the ekcert save it to an file so it can be used for the daa commands
     public String getEKCertFileName() {
         return getCertificateFolder() + Config.getInstance().getProperty("ekcert.filename");
     }
 
     public String getDaaChallengeFileName() {
-        return getCertificateFolder() + Config.getInstance().getProperty("daa.challenge.filename");
+        return getDataFolder() + Config.getInstance().getProperty("daa.challenge.filename");
     }
 
     public String getDaaResponseFileName() {
-        return getCertificateFolder() + Config.getInstance().getProperty("daa.response.filename");
+        return getDataFolder() + Config.getInstance().getProperty("daa.response.filename");
     }
 
     public String getCertificateFolder() {
-        return Config.getHomeFolder() + File.separator + Config.getInstance().getProperty("cert.folder") + File.separator;
+        return MyFilesystem.getApplicationFilesystem().getConfigurationPath();
     }
 
     public String getDataFolder() {
-        return Config.getHomeFolder() + File.separator + Config.getInstance().getProperty("data.folder") + File.separator;
+        //return Config.getHomeFolder() + File.separator + Config.getInstance().getProperty("data.folder") + File.separator;
+        return MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath();
     }
 
     public void setAIKCertificate(String certBytes) {
@@ -180,8 +183,19 @@ public class TADataContext {
         return daaResponse;
     }
 
+    /**
+     * @deprecated use setTpmQuoteResponse
+     * @param responseXML 
+     */
     public void setResponseXML(String responseXML) {
         this.responseXML = responseXML;
+    }
+    public void setTpmQuoteResponse(TpmQuoteResponse tpmQuoteResponse) {
+        this.tpmQuoteResponse = tpmQuoteResponse;
+    }
+
+    public TpmQuoteResponse getTpmQuoteResponse() {
+        return tpmQuoteResponse;
     }
 
     public ErrorCode getErrorCode() {
@@ -226,12 +240,14 @@ public class TADataContext {
     	return Config.getHomeFolder() + File.separator;
     }
     
-    public String getMeasureLogLaunchScript() {
-        return Config.getInstance().getProperty("modulesScript.filename");
+    public File getMeasureLogLaunchScript() {
+//        return Config.getInstance().getProperty("modulesScript.filename");
+        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh"); // Config.getInstance().getProperty("modulesScript.filename"));
     } 
     
-    public String getMeasureLogXmlFile() {
-        return Config.getInstance().getProperty("modulesXml.filename");
+    public File getMeasureLogXmlFile() {
+        //return Config.getInstance().getProperty("modulesXml.filename");
+        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "measureLog.xml"); // Config.getInstance().getProperty("modulesXml.filename"));
     }
     
     public void setModules(String allModules) {

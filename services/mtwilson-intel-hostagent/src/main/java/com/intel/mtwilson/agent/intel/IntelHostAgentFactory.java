@@ -9,8 +9,10 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +28,28 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public String getVendorProtocol() { return "intel"; }
     
     @Override
-    public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
+    public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             URL url = new URL(vendorConnectionString);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
-            log.debug("Creating IntelHostAgent for host {}", hostAddress); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
-            return new IntelHostAgent(client, hostAddress);
+            if( url.getPort() == 1443 || url.getPath().contains("/v2") ) {
+                // assume trust agent v2
+                log.debug("Creating IntelHostAgent v2 for host {}", hostAddress);
+                Properties properties = new Properties();
+                // mtwilson version 2.0 beta has authentication support on the trust agent but not yet in the mtwilson portal
+                // so we use this default username and empty password until the mtwilson portal is updated to ask for trust agent
+                // login credentials
+                properties.setProperty("mtwilson.api.username", "mtwilson");
+                properties.setProperty("mtwilson.api.password", "");
+//                properties.setProperty("mtwilson.api.ssl.policy", "INSECURE"); // TODO need to initialize the client with TlsPolicy
+                TrustAgentClient client = new TrustAgentClient(properties, new TlsConnection(url, tlsPolicy));
+                return new IntelHostAgent2(client, hostAddress);
+            }
+            else /*if( url.getPort() == 9999 )*/ {
+                // assume trust agent v1
+                TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
+                log.debug("Creating IntelHostAgent v1 for host {}", hostAddress); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
+                return new IntelHostAgent(client, hostAddress);
+            }
         }
         catch(Exception e) {
             throw new IOException("Cannot get trust agent client for host: "+hostAddress.toString()+": "+e.toString(), e);
@@ -42,10 +60,8 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             URL url = new URL(vendorConnectionString);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
-//            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             InternetAddress hostAddress = new InternetAddress(url.getHost());
-            return new IntelHostAgent(client, hostAddress);
+            return getHostAgent(hostAddress, vendorConnectionString, tlsPolicy);
         }
         catch(Exception e) {
             throw new IOException("Cannot get trust agent client for host connection: "+vendorConnectionString+": "+e.toString(), e);

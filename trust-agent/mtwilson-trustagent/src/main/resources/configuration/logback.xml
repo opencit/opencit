@@ -53,6 +53,8 @@
         <appender-ref ref="ConsoleWarn"/>
         <appender-ref ref="ConsoleInfo"/>
     </root>
+    
+    <logger name="org.eclipse.jetty" level="INFO"/>
 
 </configuration>
 

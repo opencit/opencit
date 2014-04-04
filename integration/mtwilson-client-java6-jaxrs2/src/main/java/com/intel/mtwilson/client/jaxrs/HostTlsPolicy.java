@@ -22,7 +22,7 @@ public class HostTlsPolicy extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public HostTlsPolicy(URL url) {
+    public HostTlsPolicy(URL url) throws Exception{
         super(url);
     }
 

@@ -76,7 +76,7 @@
         
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey-util</artifactId>
+            <artifactId>mtwilson-jaxrs-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         

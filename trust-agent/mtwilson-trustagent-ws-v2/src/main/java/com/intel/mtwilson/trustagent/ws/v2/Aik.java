@@ -36,7 +36,7 @@ import org.apache.commons.io.FileUtils;
 public class Aik {
     
     protected TrustagentConfiguration getConfiguration() throws IOException {
-        return new TrustagentConfiguration(My.configuration().getConfiguration());
+        return TrustagentConfiguration.loadConfiguration();
     }
     
     @GET

@@ -24,7 +24,7 @@ public class UserCertificates extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public UserCertificates(URL url) {
+    public UserCertificates(URL url)throws Exception {
         super(url);
     }
 

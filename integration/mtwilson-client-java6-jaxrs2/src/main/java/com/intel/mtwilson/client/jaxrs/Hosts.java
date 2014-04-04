@@ -24,7 +24,7 @@ public class Hosts extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public Hosts(URL url) {
+    public Hosts(URL url) throws Exception{
         super(url);
     }
 

@@ -23,7 +23,7 @@ public class PrivacyCA extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public PrivacyCA(URL url) {
+    public PrivacyCA(URL url)throws Exception {
         super(url);
     }
 

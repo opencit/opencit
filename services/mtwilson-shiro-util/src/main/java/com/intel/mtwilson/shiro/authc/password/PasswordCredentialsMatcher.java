@@ -35,8 +35,8 @@ public class PasswordCredentialsMatcher implements CredentialsMatcher {
         if( !(info.getCredentials() instanceof HashedPassword)) { return false; }
         HashedPassword userLoginPasswordHash = (HashedPassword)info.getCredentials();
         byte[] tokenBytes = toBytes(token.getCredentials());
-        if( tokenBytes == null || tokenBytes.length == 0 ) {
-            throw new IllegalArgumentException("Empty password credential"); // TODO:  error code  /  i18n
+        if( tokenBytes == null ) {
+            throw new IllegalArgumentException("Null password credential"); // TODO:  error code  /  i18n  ; empty passwords length==0 are allowed
         }
         
         byte[] hashedTokenBytes = passwordHash(tokenBytes, userLoginPasswordHash);

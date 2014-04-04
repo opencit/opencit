@@ -5,6 +5,7 @@
 package com.intel.mtwilson;
 
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
 import com.intel.dcsg.cpg.io.Platform;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 import org.apache.commons.configuration.CompositeConfiguration;
@@ -470,8 +472,12 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
+        String locales = conf.getString("mtwilson.locales");
+        if( locales == null || locales.isEmpty() ) {
+            return new String[] { LocaleUtil.toLanguageTag(Locale.getDefault()) };
+        }
 //        return conf.getString("mtwilson.locales", "en").split(",");
-        String localeParsed = conf.getProperty("mtwilson.locales").toString().replaceAll("\\s+", "");
+        String localeParsed = locales.replaceAll("\\s+", "");
         return localeParsed.substring(1, localeParsed.length() - 1).split(",");
     }
 

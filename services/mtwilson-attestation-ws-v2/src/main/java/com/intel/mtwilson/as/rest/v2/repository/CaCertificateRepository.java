@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.resource.*;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificate;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,7 +163,9 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
                     if( certFile.endsWith(".pem") ) {
                         File tlsPemFile = new File(certFile);
                         FileInputStream in = new FileInputStream(tlsPemFile);
-                        caCert.setCertificate(IOUtils.toByteArray(in));
+                        String pem = IOUtils.toString(in);
+                        X509Certificate cert = X509Util.decodePemCertificate(pem);
+                        caCert.setCertificate(cert.getEncoded());
                         IOUtils.closeQuietly(in);
                     }
                     if( certFile.endsWith(".crt") ) {
