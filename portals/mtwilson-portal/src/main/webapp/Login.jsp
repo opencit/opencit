@@ -6,16 +6,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
     <title data-i18n="app.greeting2">Welcome to Mt.Wilson</title>
-	
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
-	
 	<script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
         <script type="text/javascript" src="Scripts/token.js"></script>
 	<script type="text/javascript" src="Scripts/commonUtils.js"></script>
-	<script type="text/javascript" src="Scripts/login.js"></script>
+        <script type="text/javascript" src="Scripts/login.js"></script>
         <script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
 	<script type="text/javascript" src="Scripts/i18n_util.js"></script>
-
 </head>
 <body>
 	<div class="page">

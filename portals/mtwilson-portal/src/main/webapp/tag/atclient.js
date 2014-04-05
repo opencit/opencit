@@ -17,6 +17,7 @@ if (mtwilson === undefined) {
 
 loadTagsCall = true;
 loadSelsCall = true;
+disable_sel_render = false;
 var pres_selections;
 //var mtwilson = mtwilson || {};
 mtwilson.atag = mtwilson.atag || {};
@@ -640,6 +641,26 @@ mtwilson.atag = mtwilson.atag || {};
                 }
                 mtwilson.atag.notify({text: 'Retrieved file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
+            case 'selection_kv_attributes':
+                var tmp_dictionary = {};
+                var loop = 0;
+                $('selection-search-form').hide();
+                if(disable_sel_render) {
+                        disable_sel_render = false;
+                        break;
+                }
+                data.selections.clear();
+                for (var i = 0; i < data.selection_details.length; i++) {
+                        if(tmp_dictionary[data.selection_details[i].selection_id] == null) {
+                                data.selections[loop] = {};
+                                data.selections[loop].id = data.selection_details[i].selection_id;
+                                data.selections[loop].name = data.selection_details[i].selection_name;
+                                data.selections[loop].description= data.selection_details[i].selection_description;
+                                loop++;
+                                tmp_dictionary[data.selection_details[i].selection_id] = true;
+                        }
+                }
+                break;
             case 'uuid':
                 
                 //$('certificate-request-create-subject').value = event.memo.response.host_uuid;
@@ -1062,15 +1083,16 @@ mtwilson.atag = mtwilson.atag || {};
         // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
         // we form parameters like nameEqualTo=argument  or nameContains=argument
         var fields = ['name', 'tagName', 'tagOid', 'tagValue'];
+        var filterFields = ['name', 'attrName', 'tagOid', 'attrValue'];
         var i;
         for (i = 0; i < fields.length; i++) {
-            $('selection-search-' + fields[i]).name = fields[i] + $F('selection-search-' + fields[i] + '-criteria'); // this.options[this.selectedIndex].value;
+            $('selection-search-' + fields[i]).name = filterFields[i] + $F('selection-search-' + fields[i] + '-criteria'); // this.options[this.selectedIndex].value;
         }
 
         // first clear search results (otherwise the results we get from server will be appended to them)
-        data.selections.clear();
+        data.selection_details.clear();
 //        ajax.json.get('tags', {uri:'/tags?' + $(report.formId).serialize()}); // XXX TODO  serialize the search form controls into url parameters...
-        ajax.json.get('selections_json', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
+        ajax.json.get('selection_kv_attributes', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
 //    apiwait("Searching tags...");
 	if(loadSelsCall){
  	       ajax.json.get('unfiltered_sels', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)

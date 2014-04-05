@@ -7,21 +7,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
         <title data-i18n="title.preferences">My Preferences</title>
     </head>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
-        <title data-i18n="title.preferences">My Preferences</title>
-
-        <link rel="stylesheet" type="text/css" href="CSS/home.css" />
-
-        <script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
-        <script type="text/javascript" src="Scripts/token.js"></script>
-        <script type="text/javascript" src="Scripts/commonUtils.js"></script>
-        <script type="text/javascript" src="Scripts/Register.js"></script>
-        <script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
-	<script type="text/javascript" src="Scripts/i18n_util.js"></script>
-
-    </head>
     <body>
         <div class="container">
             <div class="nagPanel"><span data-i18n="title.preferences">My Preferences</span> &gt;</div>

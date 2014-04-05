@@ -233,30 +233,26 @@ case "$1" in
   start)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
-		  glassfish_require
-          glassfish_start_report
+          glassfish_start
         elif using_tomcat; then
-		  tomcat_require
-          tomcat_start_report
+          tomcat_start
         fi
         ;;
   stop)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
-		  glassfish_require
-          glassfish_shutdown
+          glassfish_stop
+          #glassfish_shutdown
         elif using_tomcat; then
-		  tomcat_require
-          tomcat_shutdown
+          tomcat_stop
+          #tomcat_shutdown
         fi
         ;;
   restart)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
-		  glassfish_require
           glassfish_restart
         elif using_tomcat; then
-		  tomcat_require
           tomcat_restart
         fi
         ;;

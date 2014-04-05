@@ -69,6 +69,13 @@ public class DeployTagCertificate implements Runnable{
             Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
+                // verify the certificate validity first
+                Date today = new Date();
+                if (today.before(obj.getNotBefore()) || today.after(obj.getNotAfter())) {
+                    log.error("Certificate with subject {} is expired/invalid. Will not be deployed.", obj.getSubject());
+                    throw new WebApplicationException("Certificate with subject is expired/invalid. Will not be deployed.", Response.Status.BAD_REQUEST);                    
+                }
+                
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
                 List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
                 if(hostList == null || hostList.isEmpty() ) {

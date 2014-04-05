@@ -51,22 +51,22 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
                 sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equal(criteria.subjectEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
             }
             if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.contains(criteria.subjectContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
             }
             if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equal(criteria.issuerEqualTo));
+                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equalIgnoreCase(criteria.issuerEqualTo));
             }
             if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.contains(criteria.issuerContains));
+                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.lower().contains(criteria.issuerContains.toLowerCase()));
             }
             if( criteria.sha1 != null  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equal(criteria.sha1.toHexString()));
+                sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equalIgnoreCase(criteria.sha1.toHexString()));
             }
             if( criteria.sha256 != null  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equal(criteria.sha256.toHexString()));
+                sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
             }
             if( criteria.validOn != null ) {
                 sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));

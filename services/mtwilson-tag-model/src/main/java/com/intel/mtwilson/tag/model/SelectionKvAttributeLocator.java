@@ -19,7 +19,9 @@ public class SelectionKvAttributeLocator implements Locator<SelectionKvAttribute
 
     @Override
     public void copyTo(SelectionKvAttribute item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
     }
     
 }

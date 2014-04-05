@@ -19,7 +19,9 @@ public class CertificateLocator implements Locator<Certificate>{
 
     @Override
     public void copyTo(Certificate item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
     }
     
 }

@@ -2140,33 +2140,46 @@ glassfish_running_report() {
   fi
 }
 glassfish_start() {
-  if [ -n "$glassfish" ]; then
-      $glassfish start-domain &
-      echo "Waiting for Glassfish services to startup..."
-      while ! glassfish_running; do
-        sleep 1
-      done
-  fi
-}
-glassfish_stop() {
-  if [ -n "$glassfish" ]; then
-      $glassfish stop-domain &
-      echo "Waiting for Glassfish services to shutdown..."
-      while glassfish_running; do
-        sleep 1
-      done
-  fi
-}
-glassfish_restart() {
-  if [ -n "$glassfish" ]; then
-      $glassfish restart-domain
+  glassfish_require 2>&1 > /dev/null
+  if glassfish_running; then
+    echo_warning "Glassfish already running [PID: $TOMCAT_PID]."
+  elif [ -n "$glassfish" ]; then
+    $glassfish start-domain & 2>&1 > /dev/null
+    echo -n "Waiting for Glassfish services to startup..."
+    while ! glassfish_running; do
+      sleep 1
+    done
+    echo_success " Done"
   fi
 }
 glassfish_shutdown() {
   glassfish_running
   if [ -n "$GLASSFISH_PID" ]; then
-      kill -9 $GLASSFISH_PID
+    kill -9 $GLASSFISH_PID
   fi
+}
+glassfish_stop() {
+  glassfish_require 2>&1 > /dev/null
+  if ! glassfish_running; then
+    echo_warning "Glassfish already stopped."
+  elif [ -n "$glassfish" ]; then
+    $glassfish stop-domain & 2>&1 > /dev/null
+    echo -n "Waiting for Glassfish services to shutdown..."
+    while glassfish_running; do
+      glassfish_shutdown 2>&1 > /dev/null
+      sleep 1
+    done
+    echo_success " Done"
+  fi
+}
+glassfish_restart() {
+  #if [ -n "$glassfish" ]; then
+  #    $glassfish restart-domain
+  #fi
+  glassfish_stop
+  sleep 3
+  glassfish_start
+  glassfish_running_report
 }
 glassfish_start_report() {
   action_condition GLASSFISH_RUNNING "Starting Glassfish" "glassfish_start > /dev/null; glassfish_running;"
@@ -2587,42 +2600,44 @@ tomcat_running_report() {
   fi
 }
 tomcat_start() {
-  if [ -n "$tomcat" ]; then
-      $tomcat start &
-      echo "Waiting for Tomcat services to startup..."
-      while ! tomcat_running; do
-        sleep 1
-      done
-  fi
-}
-tomcat_stop() {
-  if [ -n "$tomcat" ]; then
-      $tomcat stop &
-      echo "Waiting for Tomcat services to shutdown..."
-      while tomcat_running; do
-        sleep 1
-      done
-  fi
-}
-tomcat_restart() {
-  if [ -n "$tomcat" ]; then
-    tomcat_running_report
-	
-    if tomcat_running; then
-      $tomcat stop
-      #sleep 5
-    fi  
-  
-    tomcat_running_report
-    $tomcat start
+  tomcat_require 2>&1 > /dev/null
+  if tomcat_running; then
+    echo_warning "Tomcat already running [PID: $TOMCAT_PID]."
+  elif [ -n "$tomcat" ]; then
+    $tomcat start & 2>&1 > /dev/null
+    echo -n "Waiting for Tomcat services to startup..."
+    while ! tomcat_running; do
+      sleep 1
+    done
+    echo_success " Done"
   fi
 }
 tomcat_shutdown() {
   if tomcat_running; then
     if [ -n "$TOMCAT_PID" ]; then
-        kill -9 $TOMCAT_PID
+      kill -9 $TOMCAT_PID
     fi
   fi
+}
+tomcat_stop() {
+  tomcat_require 2>&1 > /dev/null
+  if ! tomcat_running; then
+    echo_warning "Tomcat already stopped."
+  elif [ -n "$tomcat" ]; then
+    $tomcat stop & 2>&1 > /dev/null
+    echo -n "Waiting for Tomcat services to shutdown..."
+    while tomcat_running; do
+      tomcat_shutdown 2>&1 > /dev/null
+      sleep 1
+    done
+    echo_success " Done"
+  fi
+}
+tomcat_restart() {
+  tomcat_stop
+  sleep 3
+  tomcat_start
+  tomcat_running_report
 }
 tomcat_start_report() {
   action_condition TOMCAT_RUNNING "Starting Tomcat" "tomcat_start > /dev/null; tomcat_running;"

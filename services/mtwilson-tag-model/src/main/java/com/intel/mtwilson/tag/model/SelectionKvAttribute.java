@@ -22,6 +22,7 @@ public class SelectionKvAttribute extends Document{
     private String kvAttributeName;
     private String kvAttributeValue;
     private String selectionName;
+    private String selectionDescription;
     
     public UUID getSelectionId() {
         return selectionId;
@@ -62,5 +63,14 @@ public class SelectionKvAttribute extends Document{
     public void setSelectionName(String selectionName) {
         this.selectionName = selectionName;
     }    
+
+    public String getSelectionDescription() {
+        return selectionDescription;
+    }
+
+    public void setSelectionDescription(String selectionDescription) {
+        this.selectionDescription = selectionDescription;
+    }
+ 
     
 }

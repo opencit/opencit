@@ -45,13 +45,13 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
             
             SelectQuery sql = jooq.select().from(MW_CONFIGURATION).getQuery();
             if( criteria.id != null ) {
-                sql.addConditions(MW_CONFIGURATION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_CONFIGURATION.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_CONFIGURATION.NAME.equalIgnoreCase(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_CONFIGURATION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
             }
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
