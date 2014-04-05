@@ -21,12 +21,9 @@ import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
 import java.io.IOException;
 import java.util.List;
+import java.util.Date;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

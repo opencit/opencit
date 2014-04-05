@@ -80,6 +80,9 @@ public class JaxrsClientBuilder {
     }
     
     private void authentication() throws Exception {
+        log.debug("authentication");
+        log.debug("mtwilson.api.username = {}", configuration.getString("mtwilson.api.username"));
+        log.debug("mtwilson.api.password = {}", configuration.getString("mtwilson.api.password"));
         // X509 authorization 
         SimpleKeystore keystore = null;
         if (configuration.getString("mtwilson.api.keystore") != null && configuration.getString("mtwilson.api.keystore.password") != null ) {
@@ -145,6 +148,7 @@ public class JaxrsClientBuilder {
     }
     
     public JaxrsClient build() throws Exception {
+        log.debug("building jaxrs client");
         url();
         tls(); // sets tls connection
         authentication(); // adds to clientConfig

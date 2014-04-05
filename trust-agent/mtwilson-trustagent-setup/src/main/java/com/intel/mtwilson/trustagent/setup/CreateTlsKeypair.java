@@ -78,6 +78,12 @@ public class CreateTlsKeypair extends AbstractSetupTask {
                 .selfSigned(dn, keypair)
                 .expires(3650, TimeUnit.DAYS) // 10 years default ; TODO: make it configurable 
                 .keyUsageKeyEncipherment();
+        // NOTE:  right now we are creating a self-signed cert but if we have
+        //        the mtwilson api url, username, and password, we could submit
+        //        a certificate signing request there and have our cert signed
+        //        by mtwilson's ca, and then the ssl policy for this host in 
+        //        mtwilson could be "signed by trusted ca" instead of
+        //        "that specific cert"
         String[] ip = trustagentConfiguration.getTrustagentTlsCertIp();
         String[] dns = trustagentConfiguration.getTrustagentTlsCertDns();
         for(String san : ip) {

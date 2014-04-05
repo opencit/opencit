@@ -310,6 +310,10 @@
             <artifactId>javax.ws.rs-api</artifactId>
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-api</artifactId>
+            </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
@@ -402,6 +406,7 @@
         <!-- end jetty -->
 
         <!-- being restlet (for test client) -->
+        <!--
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet</artifactId>  
@@ -417,6 +422,7 @@
             <artifactId>org.restlet.ext.jackson</artifactId>  
             <version>2.2-M4</version>  
         </dependency>
+        -->
         <!--
        <dependency>  
           <groupId>org.restlet.jse</groupId>  
