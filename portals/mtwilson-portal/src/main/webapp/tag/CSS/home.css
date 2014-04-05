@@ -259,6 +259,7 @@ h5, h6
     overflow-x: hidden; 
     overflow-y: auto; 
     width: 800px;
+    height: 650px;
 }
 
 .tableDisplayScroll_big { 

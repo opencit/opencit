@@ -19,7 +19,9 @@ public class ConfigurationLocator implements Locator<Configuration> {
 
     @Override
     public void copyTo(Configuration item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
     }
     
 }

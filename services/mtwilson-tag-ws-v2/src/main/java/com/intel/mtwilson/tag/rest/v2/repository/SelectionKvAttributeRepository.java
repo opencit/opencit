@@ -57,25 +57,25 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
                     .join(MW_TAG_SELECTION, JoinType.JOIN).on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID)))                    
                     .getQuery();
             if( criteria.attrNameEqualTo != null  && criteria.attrNameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equal(criteria.attrNameEqualTo));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equalIgnoreCase(criteria.attrNameEqualTo));
             }
             if( criteria.attrNameContains != null  && criteria.attrNameContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.contains(criteria.attrNameContains));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.lower().contains(criteria.attrNameContains.toLowerCase()));
             }
             if( criteria.attrValueEqualTo != null  && criteria.attrValueEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equal(criteria.attrValueEqualTo));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equalIgnoreCase(criteria.attrValueEqualTo));
             }
             if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.contains(criteria.attrValueContains));
+                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.lower().contains(criteria.attrValueContains.toLowerCase()));
             }
             if( criteria.id != null ) {
-                sql.addConditions(MW_TAG_SELECTION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                sql.addConditions(MW_TAG_SELECTION.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_SELECTION.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_TAG_SELECTION.NAME.equalIgnoreCase(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_SELECTION.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_TAG_SELECTION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
             }
             sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
@@ -88,6 +88,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
                 sAttr.setKvAttributeId(UUID.valueOf(r.getValue(MW_TAG_KVATTRIBUTE.ID)));
                 sAttr.setKvAttributeName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
                 sAttr.setKvAttributeValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE));
+                sAttr.setSelectionDescription(r.getValue(MW_TAG_SELECTION.DESCRIPTION));
                 
                 objCollection.getSelectionKvAttributeValues().add(sAttr);
             }

@@ -521,6 +521,11 @@ function updateTrustStatusSuccess(response,element,host) {
 	$(element).attr('value','Refresh');
 	var row = $(element).parent().parent();
 	if (response.result) {
+            if(response.hostVo.assetTagDetails)
+                row.find('td:eq(4)').html('<img border="0" title="'+ response.hostVo.assetTagDetails +'" src="'+response.hostVo.assetTagStatus+'">');
+            else
+                row.find('td:eq(4)').html('<img border="0" src="'+response.hostVo.assetTagStatus+'">');
+            
 		row.find('td:eq(5)').html('<img border="0" src="'+response.hostVo.biosStatus+'">');
 		row.find('td:eq(6)').html('<img border="0" src="'+response.hostVo.vmmStatus+'">');
 		row.find('td:eq(7)').html('<img border="0" src="'+response.hostVo.overAllStatus+'">');

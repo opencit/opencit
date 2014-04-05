@@ -19,7 +19,9 @@ public class TpmPasswordLocator implements Locator<TpmPassword> {
 
     @Override
     public void copyTo(TpmPassword item) {
-        item.setId(id);
+        if (id != null) {
+            item.setId(id);
+        }
     }
     
 }
