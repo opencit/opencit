@@ -28,7 +28,7 @@
                         <div class="valueDiv">
                             <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="AuthorizationToken" id="AuthorizationToken" />
-                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50"/>
+                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50"  data-i18n="[value]button.choose_file" style="height: 24px"/>
                                 <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()" data-i18n="[value]button.retrieve_hosts"/>
                             </form>
                             <input type="image" onclick="showDialogUpFlatFileHelp()" src="images/helpicon.png">
