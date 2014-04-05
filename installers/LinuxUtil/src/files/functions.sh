@@ -355,8 +355,32 @@ prompt_with_default_password() {
 ### FUNCTION LIBRARY: environment information functions
 
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
-using_glassfish() { if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then return 0; else return 1; fi }
-using_tomcat() { if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then return 0; else return 1; fi }
+using_glassfish() {
+  if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
+    return 0
+  else
+    glassfish_detect 2>&1 > /dev/null
+    tomcat_detect 2>&1 > /dev/null
+    if [ -n "$GLASSFISH_HOME" ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
+using_tomcat() {
+  if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then
+    return 0
+  else
+    glassfish_detect 2>&1 > /dev/null
+    tomcat_detect 2>&1 > /dev/null
+    if [ -n "$TOMCAT_HOME" ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
 using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
 using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
  
@@ -1954,6 +1978,8 @@ glassfish_enable_logging() {
 # Environment:
 # - glassfish_required_version
 glassfish_install() {
+  GLASSFISH_HOME=""
+  glassfish=""
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
   GLASSFISH_YUM_PACKAGES="unzip expect"
   GLASSFISH_APT_PACKAGES="unzip expect"
@@ -2008,6 +2034,7 @@ glassfish_install() {
   #fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
+  sleep 5
   glassfish_start
   glassfish_admin_user
   glassfish_memory 2048 512
@@ -2106,7 +2133,7 @@ glassfish_start() {
   if glassfish_running; then
     echo_warning "Glassfish already running [PID: $GLASSFISH_PID]."
   elif [ -n "$glassfish" ]; then
-    $glassfish start-domain & 2>&1 > /dev/null
+    ($glassfish start-domain) 2>&1 > /dev/null #NOT in background, takes some time to start, and will report a running pid in the interim
     echo -n "Waiting for Glassfish services to startup..."
     while ! glassfish_running; do
       sleep 1
@@ -2125,11 +2152,11 @@ glassfish_stop() {
   if ! glassfish_running; then
     echo_warning "Glassfish already stopped."
   elif [ -n "$glassfish" ]; then
-    $glassfish stop-domain & 2>&1 > /dev/null
+    ($glassfish stop-domain &) 2>&1 > /dev/null
     echo -n "Waiting for Glassfish services to shutdown..."
     sleep 5
     while glassfish_running; do
-      glassfish_shutdown 2>&1 > /dev/null
+      glassfish_shutdown
       sleep 3
     done
     echo_success " Done"
@@ -2145,6 +2172,14 @@ glassfish_restart() {
 }
 glassfish_start_report() {
   action_condition GLASSFISH_RUNNING "Starting Glassfish" "glassfish_start > /dev/null; glassfish_running;"
+}
+glassfish_uninstall() {
+  glassfish_require
+  echo "Stopping Glassfish..."
+  glassfish_shutdown
+  # application files
+  echo "Removing Glassfish in /usr/share/glassfish4..."
+  rm -rf /usr/share/glassfish4
 }
 
 # Must call java_require before calling this.
@@ -2485,6 +2520,8 @@ tomcat_detect() {
 }
 
 tomcat_install() {
+  TOMCAT_HOME=""
+  tomcat=""
   tomcat_detect
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
@@ -2499,8 +2536,8 @@ tomcat_install() {
       mv $tomcat_folder /usr/share
       tomcat_detect
     else
-      TOMCAT_YUM_PACKAGES="tomcat6"
-      TOMCAT_APT_PACKAGES="tomcat6"
+      TOMCAT_YUM_PACKAGES="tomcat7"
+      TOMCAT_APT_PACKAGES="tomcat7"
       auto_install "Tomcat via package manager" "TOMCAT"
       tomcat_detect
     fi
@@ -2566,7 +2603,7 @@ tomcat_start() {
   if tomcat_running; then
     echo_warning "Tomcat already running [PID: $TOMCAT_PID]."
   elif [ -n "$tomcat" ]; then
-    $tomcat start & 2>&1 > /dev/null
+    ($tomcat start &) 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to startup..."
     while ! tomcat_running; do
       sleep 1
@@ -2586,7 +2623,7 @@ tomcat_stop() {
   if ! tomcat_running; then
     echo_warning "Tomcat already stopped."
   elif [ -n "$tomcat" ]; then
-    $tomcat stop & 2>&1 > /dev/null
+    ($tomcat stop &) 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to shutdown..."
     sleep 5
     while tomcat_running; do
@@ -2603,6 +2640,14 @@ tomcat_restart() {
 }
 tomcat_start_report() {
   action_condition TOMCAT_RUNNING "Starting Tomcat" "tomcat_start > /dev/null; tomcat_running;"
+}
+tomcat_uninstall() {
+  tomcat_require
+  echo "Stopping Tomcat..."
+  tomcat_shutdown
+  # application files
+  echo "Removing Tomcat in $TOMCAT_HOME..."
+  rm -rf "$TOMCAT_HOME"
 }
 
 tomcat_create_ssl_cert_prompt() {
