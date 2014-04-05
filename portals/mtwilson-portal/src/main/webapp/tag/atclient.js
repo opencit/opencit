@@ -896,9 +896,9 @@ mtwilson.atag = mtwilson.atag || {};
 
     };
      // removes all tags with this oid
-    mtwilson.atag.exportXmlSelection = function(uuid) {
+    mtwilson.atag.exportXmlSelection = function(uuid, type) {
         log.debug("exportXmlSelection: " + uuid);
-        var url = "/mtwilson-portal/v2proxy/tag-selections/" + uuid;
+        var url = "/mtwilson-portal/v2proxy/tag-selections/" + uuid + "." + type;
         window.open(url,'open_window' , 'menubar, toolbar, location, directories, status, scrollbars, resizable, dependent, width=640, height=480, left=0, top=0');
     };
     
