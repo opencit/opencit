@@ -65,8 +65,8 @@ public class TrustagentConfiguration extends AbstractConfiguration {
      * 
      * @return 
      */
-    public List<String> getMtWilsonTlsCertificateFingerprints() {
-        String fingerprintCsv = System.getenv("MTWILSON_TLS_CERT_SHA1");
+    public List<String> getMtWilsonTlsCertificateFingerprints() {        
+        String fingerprintCsv = getConfiguration().getString(MTWILSON_TLS_CERT_SHA1);
         if( fingerprintCsv == null || fingerprintCsv.isEmpty() ) {
             return Collections.EMPTY_LIST;
         }

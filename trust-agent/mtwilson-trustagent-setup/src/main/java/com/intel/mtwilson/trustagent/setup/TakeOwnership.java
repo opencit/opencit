@@ -6,7 +6,7 @@ package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
-import com.intel.mtwilson.trustagent.niarl.TestOwnership;
+import com.intel.mtwilson.trustagent.niarl.Util;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
 
@@ -32,14 +32,8 @@ public class TakeOwnership extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        try {
-            TestOwnership test = new TestOwnership();
-            if (!test.isOwner(config.getTpmOwnerSecret())) {
-                validation("Trust Agent is not the TPM owner");
-            }
-        } catch (Exception e) {
-            log.error("TPM ownership test failed: {}", e);
-            validation(e, "TPM ownership test failed");
+        if (!Util.isOwner(config.getTpmOwnerSecret())) {
+            validation("Trust Agent is not the TPM owner");
         }
     }
 
@@ -50,9 +44,10 @@ public class TakeOwnership extends AbstractSetupTask {
         try {
             TpmModule.takeOwnership(config.getTpmOwnerSecret(), nonce1);
         } catch (TpmModule.TpmModuleException e) {
-            if (e.toString().contains(".takeOwnership returned nonzero error: 4")) {
+            if( e.getErrorCode() != null && e.getErrorCode() == 4 ) {
                 log.info("Ownership is already taken");
-            } else {
+            }
+            else {
                 throw e;
             }
         }

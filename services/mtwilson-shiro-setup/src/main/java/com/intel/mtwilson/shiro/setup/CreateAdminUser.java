@@ -48,6 +48,9 @@ import org.apache.commons.lang3.RandomStringUtils;
  * we do not store the admin username or password in configuration - the application
  * must display them to the administrator
  * 
+ * You can execute this task from command line with something like this:
+ * mtwilson setup setup-manager create-admin-user
+ * 
  * @author jbuhacoff
  */
 public class CreateAdminUser extends DatabaseSetupTask {

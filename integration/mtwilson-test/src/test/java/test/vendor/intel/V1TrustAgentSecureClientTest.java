@@ -27,6 +27,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
@@ -35,14 +36,37 @@ import org.junit.Test;
 * 
  * @author jbuhacoff
  */
-public class TrustAgentSecureClientTest {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustAgentSecureClientTest.class);
+public class V1TrustAgentSecureClientTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(V1TrustAgentSecureClientTest.class);
 
     private JAXB jaxb = new JAXB();
-    public TrustAgentSecureClientTest() {
+    public V1TrustAgentSecureClientTest() {
         
     }
 
+    @Test
+    public void testHostInfoCommand() throws IOException {
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.45:9999"), new InsecureTlsPolicy());
+        TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection);
+        HostInfo hostInfo = client.getHostInfo();
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug(mapper.writeValueAsString(hostInfo));
+    }
+    
+    @Test
+    public void testSetAssetTagCommand() throws IOException {
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.45:9999"), new InsecureTlsPolicy());
+        TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection);
+        String hash = "8f110749fd76cc35526c2ed30c95ed113fd0220a";
+        String uuid = "f4b17194-cae7-11df-b40b-001517fa9844";
+        boolean response = client.setAssetTag(hash, uuid);
+        if(response)
+            System.out.println("asset tag set!");
+        else
+            System.out.println("asset tag  not set!");
+    }
+    
+    
     private void sendIdentityRequest(String hostname, int port) throws UnknownHostException, IOException, JAXBException, KeyManagementException, NoSuchAlgorithmException, XMLStreamException {
         System.out.println("Sending Generate Identity");
         //byte[] data = "<identity_request></identity_request>".getBytes();

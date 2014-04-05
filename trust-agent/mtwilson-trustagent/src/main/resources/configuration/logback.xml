@@ -55,6 +55,9 @@
     </root>
     
     <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.apache.shiro" level="INFO"/>
+    <logger name="org.apache.commons" level="INFO"/>
+    <logger name="com.intel.dcsg.cpg" level="INFO"/>
 
 </configuration>
 

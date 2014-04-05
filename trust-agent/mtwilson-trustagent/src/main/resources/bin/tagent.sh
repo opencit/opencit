@@ -42,38 +42,6 @@ CLASSPATH=$(echo $JARS | tr ' ' ':')
 
 ###################################################################################################
 
-# here we look for specific commands first that we will handle in the
-# script, and anything else we send to the java application
-
-case "$1" in
-  help)
-    print_help
-    ;;
-  start)
-    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup
-    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &
-    echo $! > $TRUSTAGENT_PID_FILE
-    ;;
-  stop)
-    trustagent_stop
-    ;;
-  setup)
-    shift
-    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $*
-    ;;
-  *)
-    if [ -z "$*" ]; then
-      print_help
-    else
-      #echo "args: $*"
-      # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
-      #       acceptable; requires the functions file / linux utilities which
-      #       isn't integrated into the new trustagent installer yet.
-      java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
-    fi
-    ;;
-esac
-
 function trustagent_stop() {
     if [ -f $TRUSTAGENT_PID_FILE ]; then
       TRUSTAGENT_PID=$(cat $TRUSTAGENT_PID_FILE)
@@ -121,7 +89,42 @@ function print_help() {
     echo "request-aik-certificate"
 }
 
-exit
+###################################################################################################
+
+# here we look for specific commands first that we will handle in the
+# script, and anything else we send to the java application
+
+case "$1" in
+  help)
+    print_help
+    ;;
+  start)
+    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup
+    (cd /opt/trustagent && java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &)
+    echo $! > $TRUSTAGENT_PID_FILE
+    ;;
+  stop)
+    trustagent_stop
+    ;;
+  setup)
+    shift
+    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $*
+    ;;
+  *)
+    if [ -z "$*" ]; then
+      print_help
+    else
+      #echo "args: $*"
+      # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
+      #       acceptable; requires the functions file / linux utilities which
+      #       isn't integrated into the new trustagent installer yet.
+      java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
+    fi
+    ;;
+esac
+
+
+exit $?
 
 # constants
 script_name=tagent

@@ -138,6 +138,17 @@ Detected the following options on this server:"
       glassfish_create_ssl_cert_prompt
     fi
   fi
+
+  # new setup commands in mtwilson 2.0
+  # mtwilson setup setup-manager update-extensions-cache-file
+  # mtwilson setup setup-manager create-admin-user
+  call_tag_setupcommand setup-manager update-extensions-cache-file --force --no-ext-cache
+  # NOTE:  in order to run create-admin-user successfully you MUST have
+  #        the environment variable MC_FIRST_PASSWORD defined; this is already
+  #        done when running from the installer but if user runs 'mtwilson setup'
+  #        outside the installer the may have to export MC_FIRST_PASSWORD first
+  call_tag_setupcommand setup-manager create-certificate-authority-key create-admin-user
+
   # setup web services:
   if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
   if [ -n "$asctl" ]; then $asctl setup; fi
@@ -337,10 +348,10 @@ case "$1" in
   setup)
         if [ $# -gt 1 ]; then
           shift
-          # try the new setup commands first,  if there's an error (probably command not found)
-          # then try the older setup commands
-          call_tag_setupcommand $@          
-          if [ ! $? ]; then call_setupcommand $@; fi
+          # try the new setup commands first,  if there return code is 1 it
+          # means  the command was not found, so we try the older setup commands
+          call_tag_setupcommand $@
+          if [ $? == 1 ]; then call_setupcommand $@; fi
         else
           if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup

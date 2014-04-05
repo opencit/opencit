@@ -31,6 +31,9 @@ import org.apache.commons.lang3.StringUtils;
  * Create or update the extension cache file by scanning available jar files
  * for extensions 
  * 
+ * You can execute this task from command line with something like this:
+ * mtwilson setup setup-manager update-extensions-cache-file
+ * 
  * @author jbuhacoff
  */
 public class UpdateExtensionsCacheFile extends LocalSetupTask {

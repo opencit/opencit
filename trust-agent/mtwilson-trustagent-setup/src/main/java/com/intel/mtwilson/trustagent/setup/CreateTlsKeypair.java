@@ -48,6 +48,10 @@ public class CreateTlsKeypair extends AbstractSetupTask {
     protected void validate() throws Exception {
         String dn = trustagentConfiguration.getTrustagentTlsCertDn();
         File keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
+        if( !keystoreFile.exists() ) {
+            validation("Keystore file was not created");
+            return;
+        }
         String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
         RsaCredentialX509 credential = keystore.getRsaCredentialX509(TLS_ALIAS, keystorePassword);

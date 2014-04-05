@@ -10,8 +10,9 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
-
 ASSET_TAG_SETUP="y"
+
+logfile=/var/log/trustagent/install.log
 
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
@@ -27,41 +28,62 @@ APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-ce
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-load_conf 2>&1 >/dev/null
-load_defaults 2>&1 >/dev/null
+if [ -f ~/trustagent.env ]; then  . ~/trustagent.env; fi
 
+# this is a list of all the variables we expect to find in trustagent.env
+TRUSTAGENT_ENV_VARS="MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USERNAME MTWILSON_API_PASSWORD TPM_OWNER_SECRET TPM_SRK_SECRET AIK_SECRET AIK_INDEX TPM_QUOTE_IPV4 TRUSTAGENT_HTTP_TLS_PORT TRUSTAGENT_TLS_CERT_DN TRUSTAGENT_TLS_CERT_IP TRUSTAGENT_TLS_CERT_DNS TRUSTAGENT_KEYSTORE_PASSWORD DAA_ENABLED TRUSTAGENT_PASSWORD JAVA_REQUIRED_VERSION"
 
-# Automatic install in 4 steps:
+export_vars $TRUSTAGENT_ENV_VARS
+
+# before we start, clear the install log
+mkdir -p $(dirname $logfile)
+date > $logfile
+
+# Automatic install steps:
+# 1. Backup old files
+# 2. Create directory structure
 # 1. Install Mt Wilson Linux utilities (and use them in this script)
 # 2. Install JDK
 # 3. Compile TPM commands
 # 4. Install Trust Agent files
 
+
+##### stop existing trust agent if running
+
+
 # bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
 # if there's already a previous version installed, uninstall it
 # But if trust agent is already installed and running, stop it now (and start the new one later)
-tagent=`which tagent 2>/dev/null`
-if [ -f "$tagent" ]; then
+existing_tagent=`which tagent 2>/dev/null`
+if [ -f "$existing_tagent" ]; then
   echo "Stopping trust agent..."
-  $tagent stop
+  $existing_tagent stop
 fi
+
+
+##### backup old files
+
+# backup configuration directory before unzipping our package
+backupdate=`date +%Y-%m-%d.%H%M`
+if [ -d /opt/trustagent/configuration ]; then  
+  cp -r /opt/trustagent/configuration /opt/trustagent/configuration.$backupdate
+fi
+
+##### create directory structure
+
 
 # packages to install must be in current directory
 #JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
-# PCAFIX 2014-03
-ZIP_PACKAGE=`ls -1 mtwilson-trustagent*.zip 2>/dev/null | tail -n 1`
-useradd --home /opt/trustagent --system --shell /bin/false --user-group trustagent
-# backup configuration directory before unzipping our package
-if [ -d /opt/trustagent/configuration ]; then
-  backupdate=`date +%Y-%m-%d.%H%M`
-  cp -r /opt/trustagent/configuration /opt/trustagent/configuration.$backupdate
-fi
+# TODO: check if trustagent exists before trying to add it; allow user name to be
+#       specified by environment variable
+useradd --home /opt/trustagent --system --shell /bin/false --user-group trustagent >> $logfile  2>&1
+
 mkdir -p /opt/trustagent
-unzip -o $ZIP_PACKAGE -d /opt/trustagent
+unzip -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
 chown -R trustagent:trustagent /opt/trustagent
 chown -R root /opt/trustagent/bin
 chown -R root /opt/trustagent/java
@@ -84,8 +106,8 @@ if [ -d "$v1_conf" ]; then
   # find the existing tpm owner and aik secrets
   TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${v1_conf}/hisprovisioner.properties`
   HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${v1_conf}/hisprovisioner.properties`
-  TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${v1_conf}/${package_name}.properties`
-  HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${v1_conf}/${package_name}.properties`
+  TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${v1_conf}/trustagent.properties`
+  HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${v1_conf}/trustagent.properties`
   if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
     export TPM_OWNER_SECRET=$TpmOwnerAuth_121
   elif [ -n "$TpmOwnerAuth_122" ]; then
@@ -98,7 +120,7 @@ if [ -d "$v1_conf" ]; then
   fi
 
   # now copy the keystore and the keystore password
-  KeystorePassword_122=`read_property_from_file trustagent.keystore.password ${v1_conf}/${package_name}.properties`
+  KeystorePassword_122=`read_property_from_file trustagent.keystore.password ${v1_conf}/trustagent.properties`
   if [ -n "$KeystorePassword_122" ]; then
     export TRUSTAGENT_KEYSTORE_PASSWORD=$KeystorePassword_122
     if [ -f "$v1_conf/trustagent.jks" ]; then
@@ -111,9 +133,6 @@ fi
 
 intel_conf_dir=/opt/trustagent/configuration
 package_dir=/opt/trustagent
-
-saveD=`pwd`
-
 
 
 
@@ -147,12 +166,15 @@ if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
 fi
 
-cd hex2bin
-make
-cp hex2bin /usr/local/bin
-cd ..
+hex2bin_install() {
+  return_dir=`pwd`
+  cd hex2bin
+  make && cp hex2bin /usr/local/bin
+  cd $return_dir
+}
 
-#hex2bin
+hex2bin_install
+
 hex2bin=`which hex2bin 2>/dev/null`
 if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
   ln -s "$hex2bin" "${package_dir}/bin"
@@ -168,6 +190,9 @@ cp functions "${package_dir}"/linux-util
 mkdir -p /usr/local/bin
 if [ -f /usr/local/bin/tagent ]; then rm /usr/local/bin/tagent; fi
 ln -s /opt/trustagent/bin/tagent.sh /usr/local/bin/tagent
+if [[ ! -h /opt/trustagent/bin/tagent ]]; then
+  ln -s /opt/trustagent/bin/tagent.sh /opt/trustagent/bin/tagent
+fi
 
 
 java_install $JAVA_PACKAGE
@@ -204,6 +229,7 @@ fix_redhat_libcrypto() {
 
 fix_redhat_libcrypto
 
+return_dir=`pwd`
 
   is_citrix_xen=`lsb_release -a | grep "^Distributor ID" | grep XenServer`
   if [ -n "$is_citrix_xen" ]; then
@@ -245,6 +271,7 @@ fix_redhat_libcrypto
   echo "TRUST_AGENT_RELEASE=\"${BUILD}\"" >> ${myinstall}
 #  echo "TRUST_AGENT_ID=${WAR_NAME}" >> ${myinstall}
 
+cd $return_dir
 
 echo "Registering tagent in start up"
 register_startup_script /usr/local/bin/tagent tagent
@@ -263,10 +290,6 @@ fix_existing_aikcert() {
 }
 
 fix_existing_aikcert
-
-# give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
-/usr/local/bin/tagent setup all
-/usr/local/bin/tagent start
 
 # now install monit
 monit_required_version=5.5
@@ -351,29 +374,18 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
-cd $saveD
-if [ ! -d /etc/monit ]; then
- mkdir /etc/monit
-fi
+mkdir -p /etc/monit/conf.d
+backup_file /etc/monit/conf.d/ta.monit
+cp ta.monit /etc/monit/conf.d/ta.monit
 
-if [ -f /etc/monit/monitrc ]; then
-    echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
-    backup_file /etc/monit/monitrc
-else
-    cp monitrc /etc/monit/monitrc
-fi
+backup_file /etc/monit/monitrc
+cp monitrc /etc/monit/monitrc
 
 if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 fi
 
-if [ ! -d /etc/monit/conf.d ]; then
- mkdir -p /etc/monit/conf.d
-fi
 
-if [ ! -f /etc/monit/conf.d/ta.monit ]; then
- cp ta.monit /etc/monit/conf.d/ta.monit
-fi
 
 # TODO INSECURE need to rewrite this as a java setup task and leverage the
 #      existing tls policy for known mtwilson ssl cert 
@@ -397,4 +409,14 @@ service monit restart
 echo "monit installed and monitoring tagent"
 
 sleep 2
-/opt/trustagent/bin/tagent start
+
+# give tagent a chance to do any other setup (such as the .env file and pcakey)
+# and make sure it's successful before trying to start the trust agent
+# NOTE: only the output from start-http-server is redirected to the logfile;
+#       the stdout from the setup command will be displayed
+/usr/local/bin/tagent setup && /usr/local/bin/tagent start-http-server >> $logfile  2>&1
+
+# create a trustagent username "mtwilson" with no password and all privileges
+# which allows mtwilson to access it until mtwilson UI is updated to allow
+# entering username and password for accessing the trust agent
+/usr/local/bin/tagent password mtwilson --nopass *:*

@@ -13,6 +13,7 @@ import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
+import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
+            log.debug("IntelHostAgentFactory getHostAgent connection string: {}", vendorConnectionString);
             URL url = new URL(vendorConnectionString);
             if( url.getPort() == 1443 || url.getPath().contains("/v2") ) {
                 // assume trust agent v2
@@ -41,6 +43,14 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
                 properties.setProperty("mtwilson.api.username", "mtwilson");
                 properties.setProperty("mtwilson.api.password", "");
 //                properties.setProperty("mtwilson.api.ssl.policy", "INSECURE"); // TODO need to initialize the client with TlsPolicy
+                
+                // now add the /v2 path if it's not already there,  to maintain compatibility with the existing UI that only prompts for
+                // the hostname and port and doesn't give the user the ability to specify the complete connection url
+                if( url.getPath().isEmpty() || url.getPath().equals("/") ) {
+                    url = UriBuilder.fromUri(url.toURI()).replacePath("/v2").build().toURL();
+                    log.debug("Rewritten intel host url: {}", url.toExternalForm());
+                }
+                
                 TrustAgentClient client = new TrustAgentClient(properties, new TlsConnection(url, tlsPolicy));
                 return new IntelHostAgent2(client, hostAddress);
             }

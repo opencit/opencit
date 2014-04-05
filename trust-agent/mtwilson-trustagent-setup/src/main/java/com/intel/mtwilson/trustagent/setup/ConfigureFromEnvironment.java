@@ -21,16 +21,10 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        
-        
     }
 
     @Override
     protected void validate() throws Exception {
-        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
-        if( trustagentConfiguration.getMtWilsonApiUrl() == null ) {
-            validation("Missing Mt Wilson API URL");
-        }
     }
 
     @Override
@@ -56,7 +50,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         Configuration env = new KeyTransformerConfiguration(allcaps, new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
         for(String variable : variables) {
             String value = env.getString(variable);
-            if( value != null ) {
+            if( value != null && !value.isEmpty() ) {
                 log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(variable), variable, value);
                 configuration.setString(variable, value);
             }

@@ -138,7 +138,7 @@ public abstract class AbstractSetupTask implements SetupTask {
     @Override
     public void run() {
         if( !isConfigured() ) {
-            throw new ConfigurationException("Configuration required: "+getClass().getName());
+            throw new IllegalStateException("Configuration required");
         }
         try {
             execute();
@@ -149,7 +149,7 @@ public abstract class AbstractSetupTask implements SetupTask {
             throw new SetupException("Setup error", e);
         }
         if( !isValidated() ) {
-            throw new ValidationException("Validation failed: "+getClass().getName());
+            throw new IllegalStateException("Validation failed");
         }
     }
     

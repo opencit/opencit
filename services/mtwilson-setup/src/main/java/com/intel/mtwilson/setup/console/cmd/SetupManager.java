@@ -21,6 +21,7 @@ import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
 import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupTask;
@@ -67,12 +68,54 @@ public class SetupManager implements Command {
         this.options = options;
     }
     
+    /**
+     * This method returns false by default with the assumption that
+     * if a setup task has already been completed the administrator
+     * wants to skip it.
+     * 
+     * @return default false
+     */
     protected boolean isForceEnabled() {
         return options.getBoolean("force", false);
     }
-    protected boolean isNoExecEnabled() {
-        return options.getBoolean("noexec", false);
+    
+    /**
+     * This method returns true by default with the assumption that
+     * the administrator WANTS to run the setup tasks.  To do a 
+     * dry run (configure and validate but no execution) use the
+     * @{code --no-exec} option to disable execution.
+     * @return default true
+     */
+    protected boolean isExecEnabled() {
+        return options.getBoolean("exec", true);
     }
+    /**
+     * This method returns false by default 
+     * with the assumption that setup tasks
+     * are ordered and that later tasks depend on the results of earlier tasks;
+     * therefore if an earlier task fails the entire set should stop because
+     * trying subsequent tasks will likely only generate precondition 
+     * errors that are 
+     * distracting from the root cause.
+     * 
+     * @return default false
+     */
+    protected boolean continueAfterRuntimeException() {
+        return options.getBoolean("continue", false);
+    }
+    
+    /**
+     * loading extensions listed in extensions.cache is fast but if
+     * the user is trying to run a newly added setup task then it would
+     * not be found there 
+     * by adding the option --no-ext-cache the user can force scanning
+     * of all jar files in the classpath for extensions
+     * @return 
+     */
+    protected boolean useExtensionCacheFile() {
+        return options.getBoolean("ext-cache", true);
+    }
+
 
     protected File getConfigurationFile() {
         File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "mtwilson.properties");
@@ -80,10 +123,25 @@ public class SetupManager implements Command {
     }
 
     protected void registerExtensions() {
-        // first find all setup tasks
-        ExtensionCacheLauncher launcher = new ExtensionCacheLauncher();
-        launcher.setRegistrars(new Registrar[]{new ImplementationRegistrar(SetupTask.class)});
-        launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
+        if( useExtensionCacheFile() ) { 
+            ExtensionCacheLauncher launcher = new ExtensionCacheLauncher();
+            launcher.setRegistrars(new Registrar[]{new ImplementationRegistrar(SetupTask.class)});
+            launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
+        }
+        else {
+            ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
+            launcher.setRegistrars(new Registrar[]{new ImplementationRegistrar(SetupTask.class)});
+            // by default the application java folder will be scanned
+            // which is /opt/mtwilson/java or /opt/trustagent/java 
+            // but user can choose to scan another folder by specifying the
+            // --ext-java=/path/to/folder  option
+            // note that this only makes sense when --no-ext-cache is also used
+            if( options.getString("ext-java") != null ) {
+                launcher.setJavaFolder(new File(options.getString("ext-java")));
+            }
+            
+            launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
+        }
     }
 
     /**
@@ -173,6 +231,7 @@ public class SetupManager implements Command {
         PropertiesConfiguration properties = loadConfiguration();
         Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
         MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
+        boolean error = false;
         try {
             for (SetupTask setupTask : tasks) {
                 String taskName = setupTask.getClass().getSimpleName();
@@ -181,56 +240,65 @@ public class SetupManager implements Command {
                     if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
                         log.debug("Skipping {}", taskName);
                     }
-                    else if( isNoExecEnabled() ) {
+                    else if( !isExecEnabled() ) {
                         // only show validation errors, don't run the task
                         List<Fault> configurationFaults = setupTask.getConfigurationFaults();
                         for (Fault fault : configurationFaults) {
-                            log.debug("Configuration: {}", fault.toString());
-                            System.err.println(fault.toString());
+                            log.warn("Configuring {}: {}", taskName, fault.toString());
                         }
                         List<Fault> validationFaults = setupTask.getValidationFaults();
                         for (Fault fault : validationFaults) {
-                            log.debug("Validation: {}", fault.toString());
-                            System.err.println(fault.toString());
-                        }
-                        
+                            log.warn("Validating {}: {}", taskName, fault.toString());
+                        }                        
                     }
                     else {
                         log.debug("Running {}", taskName);
-                        setupTask.run(); // calls isConfigured and isValidated automatically and throws ConfigurationException, SetupException, or ValidationException on error
+                        try {
+                            setupTask.run(); // calls isConfigured and isValidated automatically and throws ConfigurationException, SetupException, or ValidationException on error
+                        }
+                        catch(IllegalStateException e) {
+                            error = true;
+                            log.error("Error from {}: {}", taskName, e.getMessage());
+                            List<Fault> configurationFaults = setupTask.getConfigurationFaults();
+                            for (Fault fault : configurationFaults) {
+                                log.warn("Configuring {}: {}", taskName, fault.toString());
+                            }
+                            List<Fault> validationFaults = setupTask.getValidationFaults();
+                            for (Fault fault : validationFaults) {
+                                log.warn("Validating {}: {}", taskName, fault.toString());
+                            }
+                            if( !continueAfterRuntimeException() ) {
+                                break;
+                            }
+                        }
                     }
                 } catch (ConfigurationException e) {
-                    log.error("Configuration error {}", taskName, e.getMessage());
+                    error = true;
+                    log.error("Cannot configure {}: {}", taskName, e.getMessage());
                     log.debug("Configuration error", e);
-                    System.err.println("Configuration error for " + taskName);
-                    List<Fault> configurationFaults = setupTask.getConfigurationFaults();
-                    for (Fault fault : configurationFaults) {
-                        log.debug("Configuration: {}", fault.toString());
-                        System.err.println(fault.toString());
-                    }
                 } catch (ValidationException e) {
-                    log.error("Validation error for {}: {}", taskName, e.getMessage());
+                    error = true;
+                    log.error("Cannot validate {}: {}", taskName, e.getMessage());
                     log.debug("Validation error", e);
-                    System.err.println("Validation error for " + taskName);
-                    List<Fault> validationFaults = setupTask.getValidationFaults();
-                    for (Fault fault : validationFaults) {
-                        log.debug("Validation: {}", fault.toString());
-                        System.err.println(fault.toString());
-                    }
                 } catch (SetupException e) {
-                    log.error("Runtime error for {}: {}", taskName, e.getMessage());
-                    log.debug("Runtime error for {}", taskName, e); // debug stack trace
-                    Throwable cause = e.getCause();
-                    System.err.println("Runtime error for " + taskName + ": " + (cause == null ? e.getMessage() : cause.getMessage()));
+                    error = true;
+                    log.error("Cannot run {}: {}", taskName, e.getMessage());
+                    log.debug("Runtime error", e); // debug stack trace
                 }
             }
         } catch (Exception e) {
+            error = true;
+            log.error("Setup error: {}", e.getMessage());
             log.debug("Setup error", e);
-            System.err.println("Setup error: " + e.getMessage());
         }
         storeConfiguration(properties);
+        if( error ) {
+            // the main application (cpg-console Main) will print this
+            // message and return a non-zero exit code
+            throw new IllegalStateException("Encountered errors during setup");
+        }
     }
-
+    
     protected PropertiesConfiguration loadConfiguration() throws IOException {
         // TODO:  need to handle the encrypted configuration file too like My.configuration() does, but using the filesystem location instaed of the looking-everywhere My.configuration() method because we need to have the mtwilson.properties file to write back to from the setup tasks
         File file = getConfigurationFile();

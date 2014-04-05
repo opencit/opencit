@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.CreateIdentity;
+import com.intel.mtwilson.trustagent.niarl.Util;
 import java.io.File;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
@@ -35,6 +36,8 @@ public class RequestAikCertificate extends AbstractSetupTask {
     @Override
     protected void configure() throws Exception {
         config = new TrustagentConfiguration(getConfiguration());
+        
+        if( config.getTrustagentKeystoreFile().exists() ) {
         keystore = new SimpleKeystore(new FileResource(config.getTrustagentKeystoreFile()), config.getTrustagentKeystorePassword());
         // TODO:  the SimpleKeystore needs an api for checking if a certificate exists and returning null if it doesn't
         //        exist, instead of an exception , like findCertificate,  so that we don't need to use a try/catch block
@@ -47,6 +50,14 @@ public class RequestAikCertificate extends AbstractSetupTask {
             log.debug("Cannot load Privacy CA certificate", e);
             configuration("Privacy CA certificate is missing");
         }
+        }
+        else {
+            configuration("Keystore file is missing");
+        }
+        if (!Util.isOwner(config.getTpmOwnerSecret())) {
+            configuration("Trust Agent is not the TPM owner");
+        }
+        
     }
 
     @Override

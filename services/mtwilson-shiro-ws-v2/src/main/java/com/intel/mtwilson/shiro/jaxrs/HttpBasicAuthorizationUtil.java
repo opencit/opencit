@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -66,4 +67,10 @@ public class HttpBasicAuthorizationUtil {
         return output;
     }
 
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public String getForm() {
+        return "<html><body><form method=\"post\" action=\"http-basic-authorization-header-generator.txt\"><input type=\"text\" name=\"username\"/><input type=\"password\" name=\"password\"/><input type=\"submit\"/></form></body></html>";
+    }
+    
 }

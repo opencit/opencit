@@ -11,6 +11,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.ProvisionTPM;
+import com.intel.mtwilson.trustagent.niarl.Util;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
 import java.security.InvalidKeyException;
@@ -42,11 +43,11 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         if( tpmOwnerSecretHex == null ) {
             configuration("TPM Owner Secret is not configured: "+TrustagentConfiguration.TPM_OWNER_SECRET); // this constant is the name of the property, literally "tpm.owner.secret"
         }
-        keystoreFile = config.getTrustagentKeystoreFile();
-        if( !keystoreFile.exists() ) {
-            configuration("Keystore file is missing");
-            return;
+        if (!Util.isOwner(config.getTpmOwnerSecret())) {
+            configuration("Trust Agent is not the TPM owner");
         }
+        keystoreFile = config.getTrustagentKeystoreFile();
+        if( keystoreFile.exists() ) {
         keystore = new SimpleKeystore(new FileResource(keystoreFile), config.getTrustagentKeystorePassword());
         try {
             X509Certificate endorsementCA = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
@@ -54,6 +55,10 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         }
         catch(NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
             configuration("Endorsement CA certificate cannot be loaded");
+        }
+        }
+        else {
+            configuration("Keystore file is missing");
         }
     }
 

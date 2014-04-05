@@ -42,6 +42,42 @@ DEFAULT_GLASSFISH_API_PORT="8181"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
+### FUNCTION LIBRARY: echo and export environment variables
+
+# exports the values of the given variables
+# example:
+# export_vars VARNAME1 VARNAME2 VARNAME3
+# there is no display output from this function
+export_vars() {
+  local names="$@"
+  local name
+  local value
+  for name in $names
+  do
+    eval value="\$$name"
+    eval export $name=$value
+  done
+}
+
+# prints the values of the given variables
+# example:
+# print_vars VARNAME1 VARNAME2 VARNAME3
+# example output:
+# VARNAME1=some_value1
+# VARNAME2=some_value2
+# VARNAME3=some_value3
+print_vars() {
+  local names="$@"
+  local name
+  local value
+  for name in $names
+  do
+    eval value="\$$name"
+    echo "$name=$value"
+  done
+}
+
+
 ### FUNCTION LIBRARY: generate random passwords
 
 # generates a random password. default is 32 characters in length.
@@ -453,7 +489,9 @@ backup_file() {
   if [[ -n "$filename" && -f "$filename" ]]; then
     cp ${filename} ${backup_filename}
     echo "${backup_filename}"
+    return 0
   fi
+  return 1
 }
 
 # read a property from a property file formatted like NAME=VALUE
@@ -3404,7 +3442,9 @@ call_tag_setupcommand() {
   if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.dcsg.cpg.console.Main
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  local jvm_memory=2048m
+  local jvm_maxperm=512m
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm}  -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ --ext-java=${setupconsole_dir} | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
   return $?
 }
 
@@ -3445,6 +3485,7 @@ encrypt_file() {
   fi
 }
 
+# TODO: remove variables from mtwilson 1.2 that are deprecated in mtwilson 2.0
 load_conf() {
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
@@ -3626,7 +3667,8 @@ load_conf() {
   export DEFAULT_ENV_LOADED=true
   return 0
 }
-  
+
+# TODO: remove variables from mtwilson 1.2 that are deprecated in mtwilson 2.0
 load_defaults() {
   export DEFAULT_MTWILSON_SERVER=""
   export DEFAULT_DATABASE_HOSTNAME=""
