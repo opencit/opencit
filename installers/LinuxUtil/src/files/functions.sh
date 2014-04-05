@@ -2760,11 +2760,10 @@ tomcat_init_manager() {
   TOMCAT_MANAGER_PORT=""
   if [ -z "$WEBSERVICE_USERNAME" ]; then WEBSERVICE_USERNAME=admin; fi
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
-  if [ -f "$config_file" ]; then
-    TOMCAT_MANAGER_USER=`read_property_from_file tomcat.admin.username "${config_file}"`
-    TOMCAT_MANAGER_PASS=`read_property_from_file tomcat.admin.password "${config_file}"`
-  else
-    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml | head -n 1`
+  TOMCAT_MANAGER_USER=`read_property_from_file tomcat.admin.username "${config_file}"`
+  TOMCAT_MANAGER_PASS=`read_property_from_file tomcat.admin.password "${config_file}"`
+  if [[ -z "$TOMCAT_MANAGER_USER" ]]; then
+    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_USERNAME\"" $TOMCAT_HOME/conf/tomcat-users.xml | head -n 1`
     
     OIFS="$IFS"
     IFS=' '
