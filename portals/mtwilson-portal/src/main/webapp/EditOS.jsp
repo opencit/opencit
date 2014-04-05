@@ -16,16 +16,16 @@
 					<thead>
 						<tr>
 							<th class="row1" data-i18n="table.options">Options</th>
-							<th class="row2" data-i18n="table.os_name">OS Name</th>
-							<th class="row3" data-i18n="table.version">Version</th>
-							<th class="row4" data-i18n="table.description">Description</th>
+							<th class="row1" data-i18n="table.os_name">OS Name</th>
+							<th class="row1" data-i18n="table.version">Version</th>
+							<th class="row1" data-i18n="table.description">Description</th>
 						</tr>
 					</thead>
 					</table>
 					<div class="tableDiv" style=" overflow: auto;" id="editOSContentDiv">
 						<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
-							<tbody>
-							</tbody> 
+                                                    <tbody>
+                                                    </tbody>
 						</table>
 					</div>
 						<div id="editOSPaginationDiv">

@@ -154,7 +154,7 @@ Detected the following options on this server:"
 }
 
 all_status() {
-  if using_glassfish; then  
+  if using_glassfish; then
     glassfish_running_report
   elif using_tomcat; then
     tomcat_running_report
@@ -222,30 +222,26 @@ case "$1" in
   start)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
-		  glassfish_require
-          glassfish_start_report
+          glassfish_start
         elif using_tomcat; then
-		  tomcat_require
-          tomcat_start_report
+          tomcat_start
         fi
         ;;
   stop)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
-		  glassfish_require
-          glassfish_shutdown
+          glassfish_stop
+          #glassfish_shutdown
         elif using_tomcat; then
-		  tomcat_require
-          tomcat_shutdown
+          tomcat_stop
+          #tomcat_shutdown
         fi
         ;;
   restart)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
-		  glassfish_require
           glassfish_restart
         elif using_tomcat; then
-		  tomcat_require
           tomcat_restart
         fi
         ;;
@@ -389,17 +385,22 @@ case "$1" in
           glassfish_require
           echo "Stopping Glassfish..."
           glassfish_shutdown
-          # application files
-          echo "Removing Glassfish in /usr/share/glassfish4..."
-          rm -rf /usr/share/glassfish4
+          #rm -rf /usr/share/glassfish4
         elif using_tomcat; then
           tomcat_require
           echo "Stopping Tomcat..."
           tomcat_shutdown
-          # application files
-          echo "Removing Tomcat in $TOMCAT_HOME..."
-          rm -rf "$TOMCAT_HOME"
+          #rm -rf "$TOMCAT_HOME"
         fi
+        # application files
+        echo "Removing mtwilson applications from webserver..."
+        webservice_uninstall HisPrivacyCAWebServices2
+        webservice_uninstall mtwilson-portal
+        webservice_uninstall mtwilson
+        webservice_uninstall AttestationService 2>&1 > /dev/null
+        webservice_uninstall ManagementService 2>&1 > /dev/null
+        webservice_uninstall WLMService 2>&1 > /dev/null
+
         echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
         rm -rf /opt/intel/cloudsecurity
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."

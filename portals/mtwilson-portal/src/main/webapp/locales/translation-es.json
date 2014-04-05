@@ -226,10 +226,10 @@
         "host_type": "Host Type (es-MX):",
         "port_num": "Port # (es-MX):",
         "register_host": "Register Host (es-MX):",
-        "overwrite_wl": "Overwrite Whitelist <br> (If exists) (es-MX):"
+        "overwrite_wl": "Overwrite Whitelist (es-MX):"
     },
     "table": {
-        "name": "Name",
+        "name": "Name (es-MX)",
         "requested_roles": "Requested Roles (es-MX)",
         "description": "Description (es-MX)",
         "version": "Version (es-MX)",

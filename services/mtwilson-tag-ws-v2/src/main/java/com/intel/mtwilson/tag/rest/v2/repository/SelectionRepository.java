@@ -51,16 +51,16 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
                 sql.addConditions(MW_TAG_SELECTION.ID.equal(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
             }
             if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_SELECTION.NAME.equal(criteria.nameEqualTo));
+                sql.addConditions(MW_TAG_SELECTION.NAME.equalIgnoreCase(criteria.nameEqualTo));
             }
             if( criteria.nameContains != null  && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_SELECTION.NAME.contains(criteria.nameContains));
+                sql.addConditions(MW_TAG_SELECTION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
             }
             if( criteria.descriptionEqualTo != null  && criteria.descriptionEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_SELECTION.DESCRIPTION.equal(criteria.descriptionEqualTo));
+                sql.addConditions(MW_TAG_SELECTION.DESCRIPTION.equalIgnoreCase(criteria.descriptionEqualTo));
             }
             if( criteria.descriptionContains != null  && criteria.descriptionContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_SELECTION.DESCRIPTION.contains(criteria.descriptionContains));
+                sql.addConditions(MW_TAG_SELECTION.DESCRIPTION.lower().contains(criteria.descriptionContains.toLowerCase()));
             }
             sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
