@@ -2108,7 +2108,7 @@ EOD
 glassfish_running() {  
   GLASSFISH_RUNNING=''
   if [ -z "$GLASSFISH_HOME" ]; then
-    glassfish_detect
+    glassfish_detect 2>&1 > /dev/null
   fi
   if [ -n "$GLASSFISH_HOME" ]; then
     GLASSFISH_PID=`ps gauwxx | grep java | grep -v grep | grep "$GLASSFISH_HOME" | awk '{ print $2 }'`
@@ -2133,8 +2133,8 @@ glassfish_start() {
   if glassfish_running; then
     echo_warning "Glassfish already running [PID: $GLASSFISH_PID]."
   elif [ -n "$glassfish" ]; then
-    ($glassfish start-domain) 2>&1 > /dev/null #NOT in background, takes some time to start, and will report a running pid in the interim
     echo -n "Waiting for Glassfish services to startup..."
+    ($glassfish start-domain) 2>&1 > /dev/null #NOT in background, takes some time to start, and will report a running pid in the interim
     while ! glassfish_running; do
       sleep 1
     done
@@ -2152,8 +2152,8 @@ glassfish_stop() {
   if ! glassfish_running; then
     echo_warning "Glassfish already stopped."
   elif [ -n "$glassfish" ]; then
-    ($glassfish stop-domain &) 2>&1 > /dev/null
     echo -n "Waiting for Glassfish services to shutdown..."
+    ($glassfish stop-domain &) 2>&1 > /dev/null
     sleep 5
     while glassfish_running; do
       glassfish_shutdown
@@ -2576,7 +2576,7 @@ tomcat_permissions() {
 tomcat_running() {  
   TOMCAT_RUNNING=''
   if [ -z "$TOMCAT_HOME" ]; then
-    tomcat_detect
+    tomcat_detect 2>&1 > /dev/null
   fi
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
@@ -2603,8 +2603,8 @@ tomcat_start() {
   if tomcat_running; then
     echo_warning "Tomcat already running [PID: $TOMCAT_PID]."
   elif [ -n "$tomcat" ]; then
-    ($tomcat start &) 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to startup..."
+    ($tomcat start &) 2>&1 > /dev/null
     while ! tomcat_running; do
       sleep 1
     done
@@ -2623,8 +2623,8 @@ tomcat_stop() {
   if ! tomcat_running; then
     echo_warning "Tomcat already stopped."
   elif [ -n "$tomcat" ]; then
-    ($tomcat stop &) 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to shutdown..."
+    ($tomcat stop &) 2>&1 > /dev/null
     sleep 5
     while tomcat_running; do
       tomcat_shutdown 2>&1 > /dev/null
@@ -2754,39 +2754,51 @@ tomcat_sslcert_report() {
 }
 
 tomcat_init_manager() {
+  local config_file=/opt/mtwilson/configuration/mtwilson.properties
   TOMCAT_MANAGER_USER=""
   TOMCAT_MANAGER_PASS=""
   TOMCAT_MANAGER_PORT=""
+  if [ -z "$WEBSERVICE_USERNAME" ]; then WEBSERVICE_USERNAME=admin; fi
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+  if [ -f "$config_file" ]; then
+    TOMCAT_MANAGER_USER=`read_property_from_file tomcat.admin.username "${config_file}"`
+    TOMCAT_MANAGER_PASS=`read_property_from_file tomcat.admin.password "${config_file}"`
+  else
+    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml | head -n 1`
+    
+    OIFS="$IFS"
+    IFS=' '
+    read -a managerArray <<< "${tomcat_manager_xml}"
+    IFS="$OIFS"
 
-  tomcat_manager_xml=`grep roles=\"manager $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
+    for i in "${managerArray[@]}"; do
+      if [[ "$i" == *"username"* ]]; then
+        TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+      fi
+  
+      if [[ "$i" == *"password"* ]]; then
+        TOMCAT_MANAGER_PASS=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+      fi
+    done
+  fi
+
+  # get manager port
   tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
-     awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
-     in_comment{next}
-     {gsub(/<!--+([^-]|-[^-])*--+>/,"");
-     in_comment=sub(/<!--+.*/,"");
-     print}'|
-     grep "<Connector"|grep "port="|head -n1`
+    awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
+    in_comment{next}
+    {gsub(/<!--+([^-]|-[^-])*--+>/,"");
+    in_comment=sub(/<!--+.*/,"");
+    print}'|
+    grep "<Connector"|grep "port="|head -n1`
 
   OIFS="$IFS"
   IFS=' '
   read -a managerPortArray <<< "${tomcat_managerPort_xml}"
-  read -a managerArray <<< "${tomcat_manager_xml}"
   IFS="$OIFS"
 
   for i in "${managerPortArray[@]}"; do
     if [[ "$i" == *"port"* ]]; then
       TOMCAT_MANAGER_PORT=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
-    fi
-  done
-
-  for i in "${managerArray[@]}"; do
-    if [[ "$i" == *"username"* ]]; then
-      TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
-    fi
-
-    if [[ "$i" == *"password"* ]]; then
-      TOMCAT_MANAGER_PASS=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
     fi
   done
 
