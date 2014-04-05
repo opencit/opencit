@@ -18,6 +18,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  * REST Web Service
@@ -48,6 +49,7 @@ public class Reports {
      * @return an XML document with the trust status of the specified hosts
      */
     @RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("host_attestations:search,retrieve")            
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_XML)
@@ -79,7 +81,8 @@ public class Reports {
      * @param hostName
      * @return an XML document with the PCR manifest and trust status of each PCR
      */
-    @RolesAllowed({"Attestation","Report"})
+    //@RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("host_attestations:search,retrieve")            
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_XML)
@@ -90,7 +93,8 @@ public class Reports {
         else return new JAXBElement<HostManifestReportType>(new QName("host_manifest_report"), HostManifestReportType.class,reportsBO.getReportManifest(new Hostname(hostName))); // datatype.Hostname        
     }
 
-    @RolesAllowed({"Attestation","Report","Security"})
+    //@RolesAllowed({"Attestation","Report","Security"})
+    @RequiresPermissions("host_attestations:search,retrieve")            
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_XML)
@@ -125,7 +129,8 @@ public class Reports {
      * @param hostName
      * @return an XML document with the PCR manifest and trust status of each PCR
      */
-    @RolesAllowed({"Attestation","Report"})
+    //@RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("host_attestations:search,retrieve")            
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)

@@ -69,6 +69,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  * REST Web Service
@@ -97,7 +98,8 @@ public class Mle {
      * @return 
      */
     @POST
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:create","mle_pcrs:create","mle_sources:create"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addMle(MleData mleData) {
@@ -120,7 +122,8 @@ public class Mle {
      * @return 
      */
     @PUT
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:store","mle_pcrs:create,store","mle_sources:create,store"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMle(MleData mleData) {
@@ -153,8 +156,9 @@ public class Mle {
      * @return 
      */
     @GET
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
 //    @Consumes(MediaType.TEXT_HTML)
+    @RequiresPermissions({"mles:search","mle_pcrs:search","mle_sources:search"})
     @Produces(MediaType.APPLICATION_JSON)
     public List<MleData> queryForMLE(@QueryParam("searchCriteria") String searchCriteria) {
         ValidationUtil.validate(searchCriteria);
@@ -173,7 +177,8 @@ public class Mle {
      * @return 
      */
     @GET
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_pcrs:retrieve","mle_sources:retrieve"})    
     @Path("/manifest")
 //    @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
@@ -207,7 +212,8 @@ public class Mle {
      * @return 
      */
     @DELETE
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:delete","mle_pcrs:delete","mle_sources:delete","mle_modules:delete"})    
 //    @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
     public String deleteMle(
@@ -235,8 +241,9 @@ public class Mle {
      * @return : "true" if success or else exception.
      */
     @POST
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
     @Path("/whitelist/pcr")
+    @RequiresPermissions({"mles:retrieve","mle_pcrs:create"})    
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addPCRWhiteList(PCRWhiteList pcrData) {
@@ -253,7 +260,8 @@ public class Mle {
      * @return : "true" if success or else exception.
      */
     @PUT
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_pcrs:store"})    
     @Path("/whitelist/pcr")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -278,7 +286,8 @@ public class Mle {
      * @return : "true" if success or else exception.
      */
     @DELETE
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_pcrs:delete"})    
     @Path("/whitelist/pcr")
     @Produces(MediaType.TEXT_PLAIN)
     public String deletePCRWhiteList(
@@ -308,7 +317,8 @@ public class Mle {
      * @return : "true" if success or else exception.
      */
     @POST
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_modules:create"})    
     @Path("/whitelist/module")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -326,7 +336,8 @@ public class Mle {
      * @return : "true" if success or else exception.
      */
     @PUT
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_modules:store"})    
     @Path("/whitelist/module")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -352,7 +363,8 @@ public class Mle {
      * @return : "true" if success or else exception.
      */
     @DELETE
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_modules:delete"})    
     @Path("/whitelist/module")
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteModuleWhiteList(
@@ -390,7 +402,8 @@ public class Mle {
      * @return : List of module white lists.
      */
     @GET
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_modules:retrieve"})    
     @Path("/whitelist/module")
     @Produces(MediaType.APPLICATION_JSON)
     public List<ModuleWhiteList> getModuleWhiteList(
@@ -410,7 +423,8 @@ public class Mle {
     }
 
     @POST
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_sources:create"})        
     @Path("/source")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -420,7 +434,8 @@ public class Mle {
     }
 
     @PUT
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_sources:store"})        
     @Path("/source")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -430,7 +445,8 @@ public class Mle {
     }
 
     @DELETE
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_sources:delete"})        
     @Path("/source")
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteMleSource(
@@ -450,7 +466,8 @@ public class Mle {
     }
 
     @GET
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions({"mles:retrieve","mle_sources:retrieve"})        
     @Path("/source")
     @Produces(MediaType.APPLICATION_JSON)
     public String getMleSource(

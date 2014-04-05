@@ -21,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  * REST Web Service
@@ -45,7 +46,8 @@ public class Os {
      * @return an instance of 
      */
     @GET
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oss:search,retrieve")
     @Produces("application/json")
     public List<OsData> listAllOs() {
         return osBO.getAllOs();
@@ -66,7 +68,8 @@ public class Os {
      * @return 
      */
     @PUT
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oss:store")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateOs(OsData osData) {
@@ -88,7 +91,8 @@ public class Os {
      * @return 
      */
     @POST
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oss:create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addOs(OsData osData) {
@@ -98,7 +102,8 @@ public class Os {
     
     
     @DELETE
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oss:delete")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteOs(@QueryParam("Name")String osName, @QueryParam("Version")String osVersion ) {

@@ -14,6 +14,7 @@ import com.intel.mtwilson.tag.model.HostUuidLocator;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
 //import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCo
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("host_uuids:search")         
     public HostUuidCollection search(HostUuidFilterCriteria criteria) {
         HostUuidCollection objCollection = new HostUuidCollection();
         
@@ -54,26 +56,31 @@ public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCo
     }
 
     @Override
+    @RequiresPermissions("host_uuids:retrieve")         
     public HostUuid retrieve(HostUuidLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_uuids:store")         
     public void store(HostUuid item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_uuids:create")         
     public void create(HostUuid item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_uuids:delete")         
     public void delete(HostUuidLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
+    @RequiresPermissions("host_uuids:delete")         
     public void delete(HostUuidFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

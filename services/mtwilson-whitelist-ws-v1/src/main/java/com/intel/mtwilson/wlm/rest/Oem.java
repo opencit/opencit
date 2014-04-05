@@ -22,6 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,8 @@ public class Oem {
      * @return an instance of 
      */
     @GET
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oems:search")        
     @Produces("application/json")
     public List<OemData> listAllOem() {
         return oemBo.getAllOem();
@@ -68,7 +70,8 @@ public class Oem {
      * @return 
      */
     @PUT
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oems:store")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateOem(OemData oemData) {
@@ -90,7 +93,8 @@ public class Oem {
      * @return 
      */
     @POST
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oems:create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addOem(OemData oemData) {
@@ -115,7 +119,8 @@ public class Oem {
      * @return 
      */   
     @DELETE
-    @RolesAllowed({"Whitelist"})
+    //@RolesAllowed({"Whitelist"})
+    @RequiresPermissions("oems:delete")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteOem(@QueryParam("Name")String oemName ) {

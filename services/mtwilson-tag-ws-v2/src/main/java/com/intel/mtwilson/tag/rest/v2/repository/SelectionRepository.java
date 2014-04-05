@@ -19,6 +19,7 @@ import com.intel.mtwilson.tag.model.SelectionKvAttributeLocator;
 import com.intel.mtwilson.tag.model.SelectionLocator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -38,6 +39,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("selections:search")         
     public SelectionCollection search(SelectionFilterCriteria criteria) {
         SelectionCollection objCollection = new SelectionCollection();
         DSLContext jooq = null;
@@ -85,6 +87,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     }
 
     @Override
+    @RequiresPermissions("selections:retrieve")         
     public Selection retrieve(SelectionLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
         try(SelectionDAO dao = TagJdbi.selectionDao()) {
@@ -103,6 +106,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     }
 
     @Override
+    @RequiresPermissions("selections:store")         
     public void store(Selection item) {
 
         try(SelectionDAO dao = TagJdbi.selectionDao()) {
@@ -125,6 +129,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     }
 
     @Override
+    @RequiresPermissions("selections:create")         
     public void create(Selection item) {
         
         try(SelectionDAO dao = TagJdbi.selectionDao()) {
@@ -158,6 +163,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     }
 
     @Override
+    @RequiresPermissions("selections:delete")         
     public void delete(SelectionLocator locator) {
         if (locator == null || locator.id == null ) { return ;}
         
@@ -188,6 +194,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     }
     
     @Override
+    @RequiresPermissions("selections:delete")         
     public void delete(SelectionFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

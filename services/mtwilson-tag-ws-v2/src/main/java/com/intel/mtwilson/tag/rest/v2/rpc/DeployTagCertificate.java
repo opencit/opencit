@@ -20,10 +20,12 @@ import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
 import java.io.IOException;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,7 @@ public class DeployTagCertificate implements Runnable{
     
     
     @Override
+    @RequiresPermissions({"certificates:deploy","hosts:search"})         
     public void run() {
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {

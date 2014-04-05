@@ -14,6 +14,7 @@ import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
 //import org.restlet.resource.ResourceException;
 
@@ -43,6 +44,7 @@ public class RevokeTagCertificate implements Runnable{
     }
     
     @Override
+    @RequiresPermissions("certificates:delete")         
     public void run() {
         log.debug("Got request to revocation of certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {

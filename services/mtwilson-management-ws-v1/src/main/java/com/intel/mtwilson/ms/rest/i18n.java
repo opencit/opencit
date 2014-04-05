@@ -22,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,8 @@ public class i18n {
     @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:retrieve")
     public String getLocaleForUser(
             @QueryParam("username") String username) throws IOException {
         log.debug("Retrieving information from database for portal user: {}", username);
@@ -84,7 +86,8 @@ public class i18n {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:store")
     public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException {
         log.debug("Retrieving portal user [{}] from database.", pul.getUser());
         MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
@@ -108,7 +111,8 @@ public class i18n {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locales")
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:retrieve")
     public String getLocales() throws IOException {
         log.debug("Retrieving available locales: {}", Arrays.toString(My.configuration().getAvailableLocales()));
         return Arrays.toString(My.configuration().getAvailableLocales());
