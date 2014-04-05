@@ -264,9 +264,9 @@ setup_interactive_install() {
     #elif using_tomcat; then
     #  tomcat_restart
     #fi
-      echo -n "Waiting for ${webservice_application_name} to become accessible... "
-      sleep 50s        #XXX TODO: remove when we have solution for webserver up
-      echo "Done"
+      #echo -n "Waiting for ${webservice_application_name} to become accessible... "
+      #sleep 50s        #XXX TODO: remove when we have solution for webserver up
+      #echo "Done"
       webservice_running_report "${webservice_application_name}"
   fi
 }
