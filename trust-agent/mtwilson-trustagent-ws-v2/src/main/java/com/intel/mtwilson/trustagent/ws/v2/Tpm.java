@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 
@@ -39,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 @V2
 @Path("/tpm")
 public class Tpm {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tpm.class);
 
     /*
     @POST
@@ -72,9 +75,15 @@ public class Tpm {
          */
         TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
         if( configuration.isTpmQuoteWithIpAddress() ) {
-            IPv4Address ipv4 = new IPv4Address(request.getLocalAddr());
-            byte[] extendedNonce = Sha1Digest.digestOf(tpmQuoteRequest.getNonce()).extend(ipv4.toByteArray()).toByteArray(); // again 20 bytes
-            tpmQuoteRequest.setNonce(extendedNonce);
+            if( IPv4Address.isValid(request.getLocalAddr()) ) {
+                IPv4Address ipv4 = new IPv4Address(request.getLocalAddr());
+                byte[] extendedNonce = Sha1Digest.digestOf(tpmQuoteRequest.getNonce()).extend(ipv4.toByteArray()).toByteArray(); // again 20 bytes
+                tpmQuoteRequest.setNonce(extendedNonce);
+            }
+            else {
+                log.debug("Local address is {}", request.getLocalAddr());
+                throw new WebApplicationException(Response.serverError().header("Error", "tpm.quote.ipv4 enabled but local address not IPv4").build());
+            }
         }
         
         
