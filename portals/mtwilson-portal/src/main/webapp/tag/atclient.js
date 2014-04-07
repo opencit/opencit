@@ -715,7 +715,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
 
     mtwilson.atag.createTag = function(input) {
-        
+        if($('tag-create-name').value.strip() == '' || $('tag-create-values').value.strip() == '') { return }
         var report = validate(input);
         if (report.isValid) {
             var tagObject = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
@@ -896,9 +896,9 @@ mtwilson.atag = mtwilson.atag || {};
 
     };
      // removes all tags with this oid
-    mtwilson.atag.exportXmlSelection = function(uuid) {
+    mtwilson.atag.exportXmlSelection = function(uuid, type) {
         log.debug("exportXmlSelection: " + uuid);
-        var url = "/mtwilson-portal/v2proxy/tag-selections/" + uuid;
+        var url = "/mtwilson-portal/v2proxy/tag-selections/" + uuid + "." + type;
         window.open(url,'open_window' , 'menubar, toolbar, location, directories, status, scrollbars, resizable, dependent, width=640, height=480, left=0, top=0');
     };
     

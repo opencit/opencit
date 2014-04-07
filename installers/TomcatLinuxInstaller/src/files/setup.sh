@@ -42,11 +42,13 @@ fi
 # Add the manager role give access to the tomcat user in the tomcat-users.xml
 
 cd $TOMCAT_CONF
-mv tomcat-users.xml tomcat-users.xml.old
-# XXX TODO: cleanup tomcat users, admin user should not be assigned both manager-gui and manager-sript roles
-sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
-rm  -f tomcat-users.xml.old
-
+# XXX TODO: cleanup tomcat users, admin user should not be assigned both manager-gui and manager-script roles
+userExists=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml`
+if [ -z "$userExists" ]; then
+  mv tomcat-users.xml tomcat-users.xml.old
+  sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+  rm  -f tomcat-users.xml.old
+fi
 
 # Here is what the connector string should look like
 #<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"

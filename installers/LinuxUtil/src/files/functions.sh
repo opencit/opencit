@@ -391,8 +391,40 @@ prompt_with_default_password() {
 ### FUNCTION LIBRARY: environment information functions
 
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
-using_glassfish() { if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then return 0; else return 1; fi }
-using_tomcat() { if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then return 0; else return 1; fi }
+using_glassfish() {
+  if [[ -n "$WEBSERVER_VENDOR" ]]; then
+    if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    glassfish_detect 2>&1 > /dev/null
+    tomcat_detect 2>&1 > /dev/null
+    if [ -n "$GLASSFISH_HOME" ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
+using_tomcat() {
+  if [[ -n "$WEBSERVER_VENDOR" ]]; then
+    if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    glassfish_detect 2>&1 > /dev/null
+    tomcat_detect 2>&1 > /dev/null
+    if [ -n "$TOMCAT_HOME" ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
 using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
 using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
  
@@ -1326,7 +1358,7 @@ add_postgresql_install_packages() {
 # installs postgres server 
 postgres_server_install(){
   POSTGRES_SERVER_YUM_PACKAGES=""
-  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
+  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3 postgresql-contrib-9.3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
   echo_warning "postgres_server_install postgres_com = $postgres_com"
@@ -1571,6 +1603,8 @@ if postgres_server_detect ; then
     echo "Creating database..."
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+    local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
+    sudo -u postgres psql postgres -c "${superuser_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
     local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
     sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
@@ -1999,6 +2033,8 @@ glassfish_enable_logging() {
 # Environment:
 # - glassfish_required_version
 glassfish_install() {
+  GLASSFISH_HOME=""
+  glassfish=""
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
   GLASSFISH_YUM_PACKAGES="unzip expect"
   GLASSFISH_APT_PACKAGES="unzip expect"
@@ -2053,6 +2089,7 @@ glassfish_install() {
   #fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
+  sleep 5
   glassfish_start
   glassfish_admin_user
   glassfish_memory 2048 512
@@ -2126,7 +2163,7 @@ EOD
 glassfish_running() {  
   GLASSFISH_RUNNING=''
   if [ -z "$GLASSFISH_HOME" ]; then
-    glassfish_detect
+    glassfish_detect 2>&1 > /dev/null
   fi
   if [ -n "$GLASSFISH_HOME" ]; then
     GLASSFISH_PID=`ps gauwxx | grep java | grep -v grep | grep "$GLASSFISH_HOME" | awk '{ print $2 }'`
@@ -2149,10 +2186,10 @@ glassfish_running_report() {
 glassfish_start() {
   glassfish_require 2>&1 > /dev/null
   if glassfish_running; then
-    echo_warning "Glassfish already running [PID: $TOMCAT_PID]."
+    echo_warning "Glassfish already running [PID: $GLASSFISH_PID]."
   elif [ -n "$glassfish" ]; then
-    $glassfish start-domain & 2>&1 > /dev/null
     echo -n "Waiting for Glassfish services to startup..."
+    ($glassfish start-domain) 2>&1 > /dev/null #NOT in background, takes some time to start, and will report a running pid in the interim
     while ! glassfish_running; do
       sleep 1
     done
@@ -2170,11 +2207,12 @@ glassfish_stop() {
   if ! glassfish_running; then
     echo_warning "Glassfish already stopped."
   elif [ -n "$glassfish" ]; then
-    $glassfish stop-domain & 2>&1 > /dev/null
     echo -n "Waiting for Glassfish services to shutdown..."
+    ($glassfish stop-domain &) 2>&1 > /dev/null
+    sleep 5
     while glassfish_running; do
-      glassfish_shutdown 2>&1 > /dev/null
-      sleep 1
+      glassfish_shutdown
+      sleep 3
     done
     echo_success " Done"
   fi
@@ -2184,12 +2222,19 @@ glassfish_restart() {
   #    $glassfish restart-domain
   #fi
   glassfish_stop
-  sleep 3
   glassfish_start
   glassfish_running_report
 }
 glassfish_start_report() {
   action_condition GLASSFISH_RUNNING "Starting Glassfish" "glassfish_start > /dev/null; glassfish_running;"
+}
+glassfish_uninstall() {
+  glassfish_require
+  echo "Stopping Glassfish..."
+  glassfish_shutdown
+  # application files
+  echo "Removing Glassfish in /usr/share/glassfish4..."
+  rm -rf /usr/share/glassfish4
 }
 
 # Must call java_require before calling this.
@@ -2530,6 +2575,8 @@ tomcat_detect() {
 }
 
 tomcat_install() {
+  TOMCAT_HOME=""
+  tomcat=""
   tomcat_detect
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
@@ -2544,8 +2591,8 @@ tomcat_install() {
       mv $tomcat_folder /usr/share
       tomcat_detect
     else
-      TOMCAT_YUM_PACKAGES="tomcat6"
-      TOMCAT_APT_PACKAGES="tomcat6"
+      TOMCAT_YUM_PACKAGES="tomcat7"
+      TOMCAT_APT_PACKAGES="tomcat7"
       auto_install "Tomcat via package manager" "TOMCAT"
       tomcat_detect
     fi
@@ -2584,7 +2631,7 @@ tomcat_permissions() {
 tomcat_running() {  
   TOMCAT_RUNNING=''
   if [ -z "$TOMCAT_HOME" ]; then
-    tomcat_detect
+    tomcat_detect 2>&1 > /dev/null
   fi
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
@@ -2611,8 +2658,8 @@ tomcat_start() {
   if tomcat_running; then
     echo_warning "Tomcat already running [PID: $TOMCAT_PID]."
   elif [ -n "$tomcat" ]; then
-    $tomcat start & 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to startup..."
+    ($tomcat start &) 2>&1 > /dev/null
     while ! tomcat_running; do
       sleep 1
     done
@@ -2631,23 +2678,31 @@ tomcat_stop() {
   if ! tomcat_running; then
     echo_warning "Tomcat already stopped."
   elif [ -n "$tomcat" ]; then
-    $tomcat stop & 2>&1 > /dev/null
     echo -n "Waiting for Tomcat services to shutdown..."
+    ($tomcat stop &) 2>&1 > /dev/null
+    sleep 5
     while tomcat_running; do
       tomcat_shutdown 2>&1 > /dev/null
-      sleep 1
+      sleep 3
     done
     echo_success " Done"
   fi
 }
 tomcat_restart() {
   tomcat_stop
-  sleep 3
   tomcat_start
   tomcat_running_report
 }
 tomcat_start_report() {
   action_condition TOMCAT_RUNNING "Starting Tomcat" "tomcat_start > /dev/null; tomcat_running;"
+}
+tomcat_uninstall() {
+  tomcat_require
+  echo "Stopping Tomcat..."
+  tomcat_shutdown
+  # application files
+  echo "Removing Tomcat in $TOMCAT_HOME..."
+  rm -rf "$TOMCAT_HOME"
 }
 
 tomcat_create_ssl_cert_prompt() {
@@ -2754,24 +2809,45 @@ tomcat_sslcert_report() {
 }
 
 tomcat_init_manager() {
+  local config_file=/opt/mtwilson/configuration/mtwilson.properties
   TOMCAT_MANAGER_USER=""
   TOMCAT_MANAGER_PASS=""
   TOMCAT_MANAGER_PORT=""
+  if [ -z "$WEBSERVICE_USERNAME" ]; then WEBSERVICE_USERNAME=admin; fi
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+  TOMCAT_MANAGER_USER=`read_property_from_file tomcat.admin.username "${config_file}"`
+  TOMCAT_MANAGER_PASS=`read_property_from_file tomcat.admin.password "${config_file}"`
+  if [[ -z "$TOMCAT_MANAGER_USER" ]]; then
+    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_USERNAME\"" $TOMCAT_HOME/conf/tomcat-users.xml | head -n 1`
+    
+    OIFS="$IFS"
+    IFS=' '
+    read -a managerArray <<< "${tomcat_manager_xml}"
+    IFS="$OIFS"
 
-  tomcat_manager_xml=`grep roles=\"manager $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
+    for i in "${managerArray[@]}"; do
+      if [[ "$i" == *"username"* ]]; then
+        TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+      fi
+  
+      if [[ "$i" == *"password"* ]]; then
+        TOMCAT_MANAGER_PASS=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+      fi
+    done
+  fi
+
+  # get manager port
   tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
-     awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
-     in_comment{next}
-     {gsub(/<!--+([^-]|-[^-])*--+>/,"");
-     in_comment=sub(/<!--+.*/,"");
-     print}'|
-     grep "<Connector"|grep "port="|head -n1`
+    awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
+    in_comment{next}
+    {gsub(/<!--+([^-]|-[^-])*--+>/,"");
+    in_comment=sub(/<!--+.*/,"");
+    print}'|
+    grep "<Connector"|grep "port="|head -n1`
 
   OIFS="$IFS"
   IFS=' '
   read -a managerPortArray <<< "${tomcat_managerPort_xml}"
-  read -a managerArray <<< "${tomcat_manager_xml}"
   IFS="$OIFS"
 
   for i in "${managerPortArray[@]}"; do
@@ -2780,17 +2856,7 @@ tomcat_init_manager() {
     fi
   done
 
-  for i in "${managerArray[@]}"; do
-    if [[ "$i" == *"username"* ]]; then
-      TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
-    fi
-
-    if [[ "$i" == *"password"* ]]; then
-      TOMCAT_MANAGER_PASS=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
-    fi
-  done
-
-  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@127.0.0.1:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
 
   if [ -n "$test" ]; then
     echo_success "Tomcat manger connection success."
@@ -3167,7 +3233,23 @@ webservice_running_report() {
     echo_failure "Not running"
   fi
 }
-
+webservice_running_report_wait() {
+  local webservice_application_name="$1"
+  echo -n "Checking ${webservice_application_name}... "
+  webservice_running "${webservice_application_name}"
+  for (( c=1; c<=5; c++ ))
+  do
+    if [ -z "$WEBSERVICE_RUNNING" ]; then
+      sleep 5
+      webservice_running "${webservice_application_name}"
+    fi
+  done
+  if [ -n "$WEBSERVICE_RUNNING" ]; then
+    echo_success "Running"
+  else
+    echo_failure "Not running"
+  fi
+}
 
 webservice_start() {
   local webservice_application_name="$1"
