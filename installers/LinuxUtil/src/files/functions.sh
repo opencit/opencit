@@ -1305,7 +1305,7 @@ add_postgresql_install_packages() {
 # installs postgres server 
 postgres_server_install(){
   POSTGRES_SERVER_YUM_PACKAGES=""
-  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3"
+  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3 postgresql-contrib-9.3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
   echo_warning "postgres_server_install postgres_com = $postgres_com"
@@ -1550,6 +1550,8 @@ if postgres_server_detect ; then
     echo "Creating database..."
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+    local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
+    sudo -u postgres psql postgres -c "${superuser_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
     local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
     sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
@@ -3172,6 +3174,13 @@ webservice_running_report() {
   local webservice_application_name="$1"
   echo -n "Checking ${webservice_application_name}... "
   webservice_running "${webservice_application_name}"
+  for (( c=1; c<=3; c++ ))
+  do
+    if [ -z "$WEBSERVICE_RUNNING" ]; then
+      sleep 3
+      webservice_running "${webservice_application_name}"
+    fi
+  done
   if [ -n "$WEBSERVICE_RUNNING" ]; then
     echo_success "Running"
   else
