@@ -73,7 +73,9 @@ public class StartHttpServer implements Command {
         sslContextFactory.setKeyStorePassword(configuration.getTrustagentKeystorePassword());
         sslContextFactory.setTrustStorePath(configuration.getTrustagentKeystoreFile().getAbsolutePath());
         sslContextFactory.setTrustStorePassword(configuration.getTrustagentKeystorePassword());
-//        sslContextFactory.setKeyManagerPassword(configuration.getTrustagentKeystorePassword()); // causes java.lang.NullPointerException at org.eclipse.jetty.util.ssl.SslContextFactory.getKeyManagers(SslContextFactory.java:904) ~[jetty-util-9.1.0.RC2.jar:9.1.0.RC2]
+        // fixes this error in mtwilson java.lang.NoClassDefFoundError: org/bouncycastle/jce/spec/ECPublicKeySpec by limiting our supported tls ciphers to RSA ciphers
+        // TODO: this list should be expanded somewhat and the mtwilson NoClassDefFoundError should be fixed on the mtwilson side, possibly by limiting its list of acceptable ciphers
+        sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA_WITH_AES_128_CBC_SHA","SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA","TLS_RSA_WITH_AES_128_CBC_SHA","SSL_RSA_WITH_3DES_EDE_CBC_SHA");
         ServerConnector https = new ServerConnector(server,
             new SslConnectionFactory(sslContextFactory,"http/1.1"),
             new HttpConnectionFactory(httpsConfig));

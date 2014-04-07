@@ -4,8 +4,12 @@
  */
 package com.intel.mtwilson.trustagent.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.mtwilson.jackson.X509CertificateDeserializer;
 import java.security.cert.X509Certificate;
+import com.intel.mtwilson.jackson.X509CertificateSerializer;
 
 /**
  *
@@ -17,6 +21,8 @@ public class TpmQuoteResponse {
     public String clientIp;
     public String errorCode;
     public String errorMessage;
+    @JsonSerialize(using=X509CertificateSerializer.class)
+    @JsonDeserialize(using=X509CertificateDeserializer.class)
     public X509Certificate aik;
     public byte[] quote;
     public String eventLog; // base64-encoded xml .... ugh.   TODO normalize this

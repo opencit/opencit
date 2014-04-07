@@ -735,11 +735,18 @@ hostaddress_list() {
   ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | grep -v "127.0.0.1"
 }
 
+# Echo all the localhost's addresses including loopback IP address
+# Parameters: none
+# output:  10.1.71.56,127.0.0.1
+hostaddress_list_csv() {
+  ifconfig | grep -E "^\s*inet addr:" | awk '{ print $2 }' | awk -F : '{ print $2 }' | paste -d',' -s
+}
+
 
 # Echo localhost's non-loopback IP address
 # Parameters: None
 # Output:
-#   If the environment variable HOSTADDRESS exists and has a value, its value will be used (careful to make sure it only has one addres!).
+#   If the environment variable HOSTADDRESS exists and has a value, its value will be used (careful to make sure it only has one address!).
 #   Otherwise If the file /etc/ipaddress exists, the first line of its content will be echoed. This allows a system administrator to "override" the output of this function for the localhost.
 #   Otherwise the output of "ifconfig" will be scanned for any non-loopback address and the first one will be used.
 hostaddress() {

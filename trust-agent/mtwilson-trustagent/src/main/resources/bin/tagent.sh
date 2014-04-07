@@ -36,32 +36,60 @@ fi
 ###################################################################################################
 
 # generated variables
-#CLASSPATH=$(ls -1 $TRUSTAGENT_JAVA/*.jar | tr '\n' ':' | sed -e 's/:$//')
 JARS=$(ls -1 $TRUSTAGENT_JAVA/*.jar)
 CLASSPATH=$(echo $JARS | tr ' ' ':')
 
+# the classpath is long and if we use the java -cp option we will not be
+# able to see the full command line in ps because the output is normally
+# truncated at 4096 characters. so we export the classpath to the environment
+export CLASSPATH
+
 ###################################################################################################
 
-function trustagent_stop() {
-    if [ -f $TRUSTAGENT_PID_FILE ]; then
-      TRUSTAGENT_PID=$(cat $TRUSTAGENT_PID_FILE)
-      if [ -z "$TRUSTAGENT_PID" ]; then
-        echo "Empty PID file: $TRUSTAGENT_PID_FILE"
-        return 1
+trustagent_start() {
+    # run setup before starting trust agent to allow taking ownership again if
+    # the tpm has been cleared, or re-initializing the keystore if the server
+    # ssl cert has changed and the user has updated the fingerprint in
+    # the trustagent.properties file
+    java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup
+    # the subshell allows the java process to have a reasonable current working
+    # directory without affecting the user's working directory. 
+    # the last background process pid $! must be stored from the subshell.
+    (
+      cd /opt/trustagent && if [ $? ]; then
+        java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &
+        echo $! > $TRUSTAGENT_PID_FILE
       fi
-      is_running=`ps -eo pid | grep "^\s*${TRUSTAGENT_PID}$"`
-      if [ -z "$is_running" ]; then
-        echo "Stale PID file: Trust agent is not running"
-        return 1
-      fi
-    else
-      echo "Missing PID file: $TRUSTAGENT_PID_FILE"
-      return 1
+    )
+}
+
+# returns 0 if trust agent is running, 1 if not running
+# side effects: sets TRUSTAGENT_PID if trust agent is running, or to empty otherwise
+trustagent_is_running() {
+  TRUSTAGENT_PID=
+  if [ -f $TRUSTAGENT_PID_FILE ]; then
+    TRUSTAGENT_PID=$(cat $TRUSTAGENT_PID_FILE)
+    local is_running=`ps -eo pid | grep "^\s*${TRUSTAGENT_PID}$"`
+    if [ -z "$is_running" ]; then
+      # stale PID file
+      TRUSTAGENT_PID=
     fi
-    if [ -z "$TRUSTAGENT_PID" ]; then
-      echo "Trust agent is not running"
-      return 1
-    fi
+  fi
+  if [ -z "$TRUSTAGENT_PID" ]; then
+    # check the process list just in case the pid file is stale
+    TRUSTAGENT_PID=$(ps ww | grep -v grep | grep java | grep "com.intel.dcsg.cpg.console.Main start-http-server" | awk '{ print $1 }')
+  fi
+  if [ -z "$TRUSTAGENT_PID" ]; then
+    # trust agent is not running
+    return 1
+  fi
+  # trust agent is running and TRUSTAGENT_PID is set
+  return 0
+}
+
+
+trustagent_stop() {
+  if trustagent_is_running; then
     kill -9 $TRUSTAGENT_PID
     if [ $? ]; then
       echo "Stopped trust agent"
@@ -69,6 +97,31 @@ function trustagent_stop() {
     else
       echo "Failed to stop trust agent"
     fi
+  fi
+}
+
+# backs up the configuration directory and removes all trustagent files
+trustagent_uninstall() {
+    datestr=`date +%Y-%m-%d.%H%M`
+    mkdir -p /var/backup/trustagent.configuration.$datestr
+    cp -r /opt/trustagent/configuration/* /var/backup/trustagent.configuration.$datestr
+	rm /usr/local/bin/tagent
+    rm -rf /opt/trustagent
+}
+
+# stops monit and removes its configuration
+# TODO if we didn't install monit we should uninstall it
+monit_uninstall() {
+  echo "Stopping Monit service..."
+  service monit stop &> /dev/null
+  #if [ -f /etc/monit/monitrc ]; then
+    ##remove monit config so when it starts back up it has nothing to monitor
+    #rm -rf /etc/monit/monitrc
+  #fi
+  if [ -d /etc/monit/conf.d ]; then
+    # remove only the trust agent monit config
+    rm -f /etc/monit/conf.d/ta.monit*
+  fi
 }
 
 function print_help() {
@@ -99,17 +152,28 @@ case "$1" in
     print_help
     ;;
   start)
-    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup
-    (cd /opt/trustagent && java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &)
-    echo $! > $TRUSTAGENT_PID_FILE
+    trustagent_start
     ;;
   stop)
     trustagent_stop
+    ;;
+  status)
+    if trustagent_is_running; then
+      echo "Trust agent is running"
+    else
+      echo "Trust agent is not running"
+    fi
     ;;
   setup)
     shift
     java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $*
     ;;
+  uninstall)
+    trustagent_stop
+    trustagent_uninstall
+    monit_uninstall
+    ;;
+
   *)
     if [ -z "$*" ]; then
       print_help
@@ -118,7 +182,7 @@ case "$1" in
       # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
       #       acceptable; requires the functions file / linux utilities which
       #       isn't integrated into the new trustagent installer yet.
-      java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
+      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
     fi
     ;;
 esac
@@ -332,25 +396,6 @@ setup_print_summary() {
   fi
 }
 
-setup_interactive_install() {
-    # Java installation is now a pre-requisite to trust agent setup 
-    # and it is installed by the trust agent install script. 
-    if [ -n "$JAVA_HOME" ]; then
-	checkServiceStatus
-	if [ -z "$TRUST_AGENT_RUNNING" ]; then
-	    stopService
-        fi
-        # This is the place to do any setup while trust agent is not running
-        /usr/local/bin/pcakey
-        if [ $? == 1 ]; then exit 1; fi
-        $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd 2>&1 >/dev/null
-        # After setup is done, start the trust agent:
-	checkServiceStatus
-	if [ -z "$TRUST_AGENT_RUNNING" ]; then
-	    startService
-	fi
-    fi
-}
 
 function main {
    RETVAL=0

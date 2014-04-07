@@ -27,7 +27,7 @@ import org.apache.commons.codec.binary.Hex;
 public class Tag {
     
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     public void writeTag(TagWriteRequest tagInfo, @Context HttpServletResponse response) throws TAException {
         // TODO:  confirm that the uuid in the tag request matches our own host hardware uuid, reject the request if they don't match 
         TADataContext context = new TADataContext();

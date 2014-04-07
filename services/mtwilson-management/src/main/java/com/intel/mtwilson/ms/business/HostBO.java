@@ -724,7 +724,8 @@ public class HostBO extends BaseBO {
                     gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
                     gkvHost.Processor_Info = gkvHostDetails.Processor_Info;
                 } catch (Throwable te) {
-                    log.error("Unexpected error in configureWhiteListFromCustomData: {}", te);
+                    log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.getMessage());
+                    log.debug("Unexpected error in configureWhiteListFromCustomData", te);
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
                 }
 

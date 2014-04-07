@@ -14,13 +14,13 @@ public class ConfigurationException extends SetupException {
     public ConfigurationException() {
         super();
     }
-    public ConfigurationException(Exception e) {
+    public ConfigurationException(Throwable e) {
         super(e);
     }
     public ConfigurationException(String message) {
         super(message);
     }
-    public ConfigurationException(String message, Exception e) {
+    public ConfigurationException(String message, Throwable e) {
         super(message, e);
     }
     

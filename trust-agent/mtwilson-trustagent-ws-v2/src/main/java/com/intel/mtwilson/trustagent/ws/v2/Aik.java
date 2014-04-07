@@ -14,6 +14,10 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +38,7 @@ import org.apache.commons.io.FileUtils;
 @V2
 @Path("/aik")
 public class Aik {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Aik.class);
     
     protected TrustagentConfiguration getConfiguration() throws IOException {
         return TrustagentConfiguration.loadConfiguration();
@@ -44,6 +49,7 @@ public class Aik {
     public X509Certificate getIdentity(@Context HttpServletResponse response) throws IOException, CertificateException {
         TrustagentConfiguration configuration = getConfiguration();
         if( configuration.isDaaEnabled() ) {
+            log.debug("daa is currently not supported");
 //                new CreateIdentityDaaCmd(context).execute();
 //                new BuildIdentityXMLCmd(context).execute();
             return null;
@@ -51,9 +57,10 @@ public class Aik {
         else {
             File aikCertificateFile = configuration.getAikCertificateFile();
             if( !aikCertificateFile.exists() ) {
-                //throw new WebApplicationException(Status.NOT_FOUND);
-                response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
-                return null;
+                log.error("Missing AIK certificate file: {}", aikCertificateFile.getAbsolutePath());
+//                response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
+//                return null;
+                throw new WebApplicationException(Response.serverError().header("Error", "Missing AIK certificate file").build());
             }
             String aikPem = FileUtils.readFileToString(aikCertificateFile);
             X509Certificate aikCertificate = X509Util.decodePemCertificate(aikPem);
@@ -64,10 +71,25 @@ public class Aik {
     @GET
     @Path("/ca")
     @Produces({OtherMediaType.APPLICATION_PKIX_CERT, OtherMediaType.APPLICATION_X_PEM_FILE})
-    public X509Certificate getIdentityCA() throws Exception {
+    public X509Certificate getIdentityCA(@Context HttpServletResponse response) throws Exception {
         TrustagentConfiguration configuration = getConfiguration();
-        SimpleKeystore keystore = new SimpleKeystore(new FileResource(configuration.getTrustagentKeystoreFile()), configuration.getTrustagentKeystorePassword());
-        X509Certificate privacyCACertificate = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
-        return privacyCACertificate;
+        File keystoreFile = configuration.getTrustagentKeystoreFile();
+        if( !keystoreFile.exists() ) {
+            log.error("Missing keystore file: {}", keystoreFile.getAbsolutePath());
+            response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
+            return null;
+        }
+        try {
+            SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), configuration.getTrustagentKeystorePassword());
+            X509Certificate privacyCACertificate = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
+            return privacyCACertificate;
+        }
+        catch(KeyManagementException | NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+            log.error("Unable to load Privacy CA certificate from keystore file");
+            log.debug("Unable to load Privacy CA certificate from keystore file", e);
+//            response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
+//            return null;
+            throw new WebApplicationException(Response.serverError().header("Error", "Cannot load Privacy CA certificate file").build());
+        }
     }
 }

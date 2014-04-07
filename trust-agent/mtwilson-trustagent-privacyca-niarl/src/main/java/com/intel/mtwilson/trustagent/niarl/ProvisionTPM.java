@@ -55,13 +55,16 @@ public class ProvisionTPM implements Configurable, Runnable {
 		 * 		- validity period of EC cert
 		 * 3. Store the newly created EC in the TPM's NV-RAM
 		 */
-		// Take Ownership
+		// Take Ownership - we expect either the tpm to be cleared so we can
+        // take ownership usng the configured tpm owner secret, or for
+        // the tpm to already be owned (we'll get error code #4) with the
+        // secret we know so we can continue
 		byte [] nonce1 = TpmUtils.createRandomBytes(20);
 		try {
 			TpmModule.takeOwnership(config.getTpmOwnerSecret(), nonce1);
 		} catch (TpmModule.TpmModuleException e){
-			if(e.toString().contains(".takeOwnership returned nonzero error: 4")){
-				log.info("Ownership is already taken");
+            if( e.getErrorCode() != null && e.getErrorCode() == 4 ) {
+				log.debug("Ownership is already taken"); 
                 /*
                                 if( !System.getProperty("forceCreateEk", "false").equals("true") ) { // feature to help with bug #554 and allow admin to force creating an ek (in case it failed the first time due to a non-tpm error such as java missing classes exception
                                     return;

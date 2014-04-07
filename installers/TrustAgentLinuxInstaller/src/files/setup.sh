@@ -84,6 +84,7 @@ useradd --home /opt/trustagent --system --shell /bin/false --user-group trustage
 
 mkdir -p /opt/trustagent
 unzip -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
+mkdir /opt/trustagent/var
 chown -R trustagent:trustagent /opt/trustagent
 chown -R root /opt/trustagent/bin
 chown -R root /opt/trustagent/java
@@ -409,6 +410,19 @@ service monit restart
 echo "monit installed and monitoring tagent"
 
 sleep 2
+
+# collect all the localhost ip addresses and make the list available as the
+# default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
+DEFAULT_TRUSTAGENT_TLS_CERT_IP=`hostaddress_list_csv`
+if [ -n "$TRUSTAGENT_TLS_CERT_IP" ]; then
+  export TRUSTAGENT_TLS_CERT_IP=$DEFAULT_TRUSTAGENT_TLS_CERT_IP
+fi
+# TODO: look up each ip address in /etc/hosts and generate the list of 
+# corresponding hostnames to be a default for TRUSTAGENT_TLS_CERT_DNS
+#DEFAULT_TRUSTAGENT_TLS_CERT_DNS=`hostaddress_list_csv`
+#if [ -n "$TRUSTAGENT_TLS_CERT_DNS" ]; then
+#  export TRUSTAGENT_TLS_CERT_DNS=$DEFAULT_TRUSTAGENT_TLS_CERT_DNS
+#fi
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey)
 # and make sure it's successful before trying to start the trust agent

@@ -21,10 +21,12 @@ import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.security.KeyManagementException;
+import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.filter.LoggingFilter;
+import com.intel.mtwilson.jersey2.JacksonFeature;
 
 /**
  *
@@ -45,11 +47,14 @@ public class JaxrsClientBuilder {
     
     public JaxrsClientBuilder() {
         clientConfig = new ClientConfig();
-        clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);        
+        clientConfig.register(JacksonFeature.class);        
+        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
         clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
+//        clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);        
         clientConfig.register(com.intel.mtwilson.jersey.provider.X509CertificateArrayPemProvider.class);
         clientConfig.register(com.intel.mtwilson.jersey.provider.X509CertificateDerProvider.class);
         clientConfig.register(com.intel.mtwilson.jersey.provider.X509CertificatePemProvider.class);        
+        clientConfig.register(com.intel.mtwilson.jersey.provider.DateParamConverterProvider.class);
     }
 
     /**
@@ -80,9 +85,7 @@ public class JaxrsClientBuilder {
     }
     
     private void authentication() throws Exception {
-        log.debug("authentication");
-        log.debug("mtwilson.api.username = {}", configuration.getString("mtwilson.api.username"));
-        log.debug("mtwilson.api.password = {}", configuration.getString("mtwilson.api.password"));
+        if( configuration == null ) { return; }
         // X509 authorization 
         SimpleKeystore keystore = null;
         if (configuration.getString("mtwilson.api.keystore") != null && configuration.getString("mtwilson.api.keystore.password") != null ) {
@@ -148,13 +151,19 @@ public class JaxrsClientBuilder {
     }
     
     public JaxrsClient build() throws Exception {
-        log.debug("building jaxrs client");
         url();
         tls(); // sets tls connection
         authentication(); // adds to clientConfig
 //        client = ClientBuilder.newClient(clientConfig);
         Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).withConfig(clientConfig).build();
-        client.register(new LoggingFilter());
+        if( configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", false) ) {
+            client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));
+        }
+        else {
+            client.register(new LoggingFilter());
+        }
+//        client.register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
+//        client.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
         WebTarget target = client.target(url.toExternalForm());
         
         return new JaxrsClient(client, target);

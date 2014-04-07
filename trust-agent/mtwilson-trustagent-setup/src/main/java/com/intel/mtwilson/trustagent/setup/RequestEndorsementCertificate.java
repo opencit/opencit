@@ -13,6 +13,7 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.ProvisionTPM;
 import com.intel.mtwilson.trustagent.niarl.Util;
 import gov.niarl.his.privacyca.TpmModule;
+import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.io.File;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
@@ -64,7 +65,25 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        byte[] ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+        byte[] ekCertBytes;
+        try {
+            ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+        }
+        catch(TpmModuleException e) {
+            if( e.getErrorCode() != null ) {
+                switch(e.getErrorCode()) {
+                    case 1:
+                        validation("Incorrect TPM owner password");
+                        break;
+                    case 2:
+                        validation("Endorsement certificate needs to be requested");
+                        break;
+                    default:
+                        validation("Error code %d while validating EC", e.getErrorCode());
+                }
+            }
+            return;
+        }
         X509Certificate ekCert = X509Util.decodeDerCertificate(ekCertBytes);
         X509Certificate endorsementCA = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
         try {

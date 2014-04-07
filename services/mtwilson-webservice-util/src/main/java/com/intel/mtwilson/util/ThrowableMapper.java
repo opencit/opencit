@@ -34,7 +34,7 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
-        log.debug("ThrowableMapper toResponse {}", exception.getClass().getName());
+        log.debug("ThrowableMapper toResponse", exception);
         Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages());
         MediaType mediaType = Util.getAcceptableMediaType(headers.getAcceptableMediaTypes());
 

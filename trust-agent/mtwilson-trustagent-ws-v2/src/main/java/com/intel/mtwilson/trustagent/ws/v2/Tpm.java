@@ -53,8 +53,8 @@ public class Tpm {
     
     @POST
     @Path("/quote")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     public TpmQuoteResponse tpmQuote(TpmQuoteRequest tpmQuoteRequest, @Context HttpServletRequest request) throws IOException, TAException {
         /**
          * issue #1038 we will hash this ip address together with the input
@@ -83,7 +83,7 @@ public class Tpm {
 
             context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
             
-            context.setSelectedPCRs(StringUtils.join(tpmQuoteRequest.getPcrs(), ','));
+            context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
             
             new CreateNonceFileCmd(context).execute();
             new ReadIdentityCmd(context).execute();
@@ -95,5 +95,13 @@ public class Tpm {
 //            return context.getResponseXML();
             return context.getTpmQuoteResponse();
         
+    }
+    
+    private String joinIntegers(int[] pcrs, char separator) {
+        String[] array = new String[pcrs.length];
+        for(int i=0; i<pcrs.length; i++) {
+            array[i] = String.valueOf(pcrs[i]);
+        }
+        return StringUtils.join(array, separator);
     }
 }

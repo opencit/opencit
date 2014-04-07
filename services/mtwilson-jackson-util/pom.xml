@@ -24,7 +24,6 @@
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>

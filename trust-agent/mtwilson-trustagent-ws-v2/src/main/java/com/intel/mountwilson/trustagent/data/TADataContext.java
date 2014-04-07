@@ -9,6 +9,7 @@ import java.io.File;
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
@@ -130,24 +131,24 @@ public class TADataContext {
     }
 
     public String getAikBlobFileName() {
-        return getCertificateFolder() + Config.getInstance().getProperty("aikblob.filename");
+        return getCertificateFolder() + File.separator + Config.getInstance().getProperty("aikblob.filename");
     }
 
     public String getAikCertFileName() {
-        return getCertificateFolder() + Config.getInstance().getProperty("aikcert.filename");
+        return getCertificateFolder() + File.separator + Config.getInstance().getProperty("aikcert.filename");
     }
 
     // used only by the CreateIdentityDaaCmd - TODO  when creating the ekcert save it to an file so it can be used for the daa commands
     public String getEKCertFileName() {
-        return getCertificateFolder() + Config.getInstance().getProperty("ekcert.filename");
+        return getCertificateFolder() + File.separator + Config.getInstance().getProperty("ekcert.filename");
     }
 
     public String getDaaChallengeFileName() {
-        return getDataFolder() + Config.getInstance().getProperty("daa.challenge.filename");
+        return getDataFolder() + File.separator + Config.getInstance().getProperty("daa.challenge.filename");
     }
 
     public String getDaaResponseFileName() {
-        return getDataFolder() + Config.getInstance().getProperty("daa.response.filename");
+        return getDataFolder() + File.separator +  Config.getInstance().getProperty("daa.response.filename");
     }
 
     public String getCertificateFolder() {
@@ -208,12 +209,16 @@ public class TADataContext {
 
     public String getIdentityAuthKey() {
         try {
+            TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
+            return configuration.getAikSecretHex();
+            /*
             File aikAuthFile = ResourceFinder.getFile("trustagent.properties");
             FileInputStream aikAuthFileInput = new FileInputStream(aikAuthFile);
             Properties tpmOwnerProperties = new Properties();
             tpmOwnerProperties.load(aikAuthFileInput);
             aikAuthFileInput.close();
             return tpmOwnerProperties.getProperty("HisIdentityAuth");
+            */
         }
         catch(IOException e) {
             throw new IllegalStateException("Cannot read trustagent.properties", e);
