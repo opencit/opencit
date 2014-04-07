@@ -356,8 +356,12 @@ prompt_with_default_password() {
 
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
 using_glassfish() {
-  if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
-    return 0
+  if [[ -n "$WEBSERVER_VENDOR" ]]; then
+    if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
+      return 0
+    else
+      return 1
+    fi
   else
     glassfish_detect 2>&1 > /dev/null
     tomcat_detect 2>&1 > /dev/null
@@ -369,8 +373,12 @@ using_glassfish() {
   fi
 }
 using_tomcat() {
-  if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then
-    return 0
+  if [[ -n "$WEBSERVER_VENDOR" ]]; then
+    if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then
+      return 0
+    else
+      return 1
+    fi
   else
     glassfish_detect 2>&1 > /dev/null
     tomcat_detect 2>&1 > /dev/null
@@ -3174,10 +3182,20 @@ webservice_running_report() {
   local webservice_application_name="$1"
   echo -n "Checking ${webservice_application_name}... "
   webservice_running "${webservice_application_name}"
-  for (( c=1; c<=3; c++ ))
+  if [ -n "$WEBSERVICE_RUNNING" ]; then
+    echo_success "Running"
+  else
+    echo_failure "Not running"
+  fi
+}
+webservice_running_report_wait() {
+  local webservice_application_name="$1"
+  echo -n "Checking ${webservice_application_name}... "
+  webservice_running "${webservice_application_name}"
+  for (( c=1; c<=5; c++ ))
   do
     if [ -z "$WEBSERVICE_RUNNING" ]; then
-      sleep 3
+      sleep 5
       webservice_running "${webservice_application_name}"
     fi
   done
@@ -3187,7 +3205,6 @@ webservice_running_report() {
     echo_failure "Not running"
   fi
 }
-
 
 webservice_start() {
   local webservice_application_name="$1"
