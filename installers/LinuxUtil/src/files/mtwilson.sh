@@ -149,6 +149,8 @@ Detected the following options on this server:"
   #        outside the installer the may have to export MC_FIRST_PASSWORD first
   call_tag_setupcommand setup-manager create-certificate-authority-key create-admin-user
 
+  call_setupcommand EncryptDatabase
+
   # setup web services:
   if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
   if [ -n "$asctl" ]; then $asctl setup; fi
@@ -161,7 +163,6 @@ Detected the following options on this server:"
 
   # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
   shift
-  call_setupcommand EncryptDatabase
 }
 
 all_status() {

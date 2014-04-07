@@ -178,9 +178,10 @@ create_saml_key() {
     saml_keystore_file=${intel_conf_dir}/${saml_keystore_file}
   fi
   
-  saml_keystore_password=${saml_keystore_password:-"changeit"}
+  default_random_password=$(generate_password 16)
+  saml_keystore_password=${saml_keystore_password:-$default_random_password}
   saml_key_alias=${saml_key_alias:-"samlkey1"}
-  saml_key_password=${saml_key_password:-"changeit"}
+  saml_key_password=${saml_key_password:-$default_random_password}
   keytool=${JAVA_HOME}/bin/keytool
   samlkey_exists=`$keytool -list -keystore ${saml_keystore_file} -storepass ${saml_keystore_password} | grep PrivateKeyEntry | grep "^${saml_key_alias}"`
   if [ -n "${samlkey_exists}" ]; then
@@ -213,6 +214,7 @@ create_data_encryption_key() {
 #    echo "Data encryption key already exists"
 #  else
 #    echo "Creating data encryption key"
+#####  this is now also called from "mtwilson setup"
     mtwilson setup EncryptDatabase
 #  fi
 }
