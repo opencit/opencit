@@ -8,10 +8,8 @@ import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 //import com.intel.mtwilson.trustagent.TrustagentConfiguration;
-import java.io.File;
 import org.apache.commons.configuration.Configuration;
 import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword; // file.model.UserPassword;
 import com.intel.mtwilson.shiro.jdbi.model.RolePermission; // file.model.UserPermission;
@@ -21,7 +19,6 @@ import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.Status;
 import com.intel.mtwilson.shiro.jdbi.model.User;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 /**
