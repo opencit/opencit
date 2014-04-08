@@ -27,11 +27,21 @@
         </encoder>
     </appender>
     
+    <!-- example production setting with less output -->
+    <!--
     <root level="WARN">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="AUDIT_FILE" />
     </root>
 
     <logger name="com.intel.mtwilson" level="INFO" />
+    -->
+    
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="AUDIT_FILE" />
+    </root>
+
+    <logger name="com.intel.mtwilson" level="DEBUG" />
     
 </configuration>
