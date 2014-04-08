@@ -64,17 +64,36 @@ public class Password implements Command {
         return password;
     }
     // get the 3rd arg if it's usrename passsword permissions, or the 2nd arg if it's username --nopass permissions
-    private String getPermissions(String[] args) throws Exception {
+    private RolePermission getPermissions(String[] args) throws Exception {
         String permissions = null;
         if( args.length == 2 && options.getBoolean("nopass", false) ) {
             permissions = args[1];
-        }
-        else if(args.length == 3 ) {
+        } else if(args.length == 3 ) {
             permissions = args[2];
         }
-        return permissions;
+        
+        RolePermission rp = new RolePermission();
+        
+        String[] parts = permissions.split(":");
+        if( parts.length == 3 ) {
+            rp.setPermitDomain(parts[0]);
+            rp.setPermitAction(parts[1]);
+            rp.setPermitSelection(parts[2]);
+        } else if( parts.length == 2 ) {
+            rp.setPermitDomain(parts[0]);
+            rp.setPermitAction(parts[1]);
+            rp.setPermitSelection("*");
+        } else if( parts.length == 1 ) {
+            rp.setPermitDomain(parts[0]);
+            rp.setPermitAction("*");
+            rp.setPermitSelection("*");
+        } else {
+            throw new IllegalArgumentException("Invalid permission format"); // must be in the form  domain:action:instance or domain:action or domain
+        }
+        
+        return rp;
     }
-
+    
     @Override
     public void execute(String[] args) throws Exception {
         // store or replace the user record
@@ -121,25 +140,28 @@ public class Password implements Command {
         dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
         log.info("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
         
-        String newPermissions = getPermissions(args);
-        if( newPermissions != null ) { 
-            removePermissions(username);
-            RolePermission userPermission = new RolePermission();
-            userPermission.setRoleId(new UUID());
-            userPermission.setPermitDomain("tpms");
-            userPermission.setPermitAction("endorse");
-            userPermission.setPermitSelection("*");
-            dao.insertRolePermission(userPermission.getRoleId(), userPermission.getPermitDomain(), userPermission.getPermitAction(), userPermission.getPermitSelection());
-            
-            log.info("Stored permissions {}", newPermissions);
+        Role userRole = dao.findRoleByName(username);
+        if (userRole == null) {
+            userRole = new Role();
+            userRole.setId(new UUID());
+            userRole.setRoleName(username);
+            userRole.setDescription("user created role");
+            dao.insertRole(userRole.getId(), userRole.getRoleName(), userRole.getDescription());
+            log.info("Stored user role [{}] with ID: {}", username, userRole.getId());
         }
         
+        RolePermission newPermissions = getPermissions(args);
+        newPermissions.setRoleId(userRole.getId());
+        removePermissions(username);
+        dao.insertRolePermission(newPermissions.getRoleId(), newPermissions.getPermitDomain(), newPermissions.getPermitAction(), newPermissions.getPermitSelection());
+        log.info("Stored permissions {}", newPermissions);
     }
     
     private void removeUser(String username) throws IOException {
         UserLoginPassword existingUser = dao.findUserLoginPasswordByUsername(username);
         if( existingUser != null ) {
             dao.deleteUser(existingUser.getUserId());
+            log.info("Deleted user {}", username);
         }
     }
     private void removePermissions(String username) throws IOException {
@@ -148,6 +170,7 @@ public class Password implements Command {
         List<RolePermission> existingPermissions = dao.findRolePermissionsByPasswordRoleIds(roleUuidList);
         for(RolePermission existingPermission : existingPermissions) {
             dao.deleteRolePermission(existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
+            log.info("Deleted role permission with role ID: {}, domain: {}, action: {}, selection: {}", existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
         }
     }
     
