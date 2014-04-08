@@ -6,7 +6,6 @@ package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.x509.X509Builder;
@@ -16,7 +15,6 @@ import java.io.File;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.codec.binary.Hex;
 
 /**
  *
@@ -28,14 +26,19 @@ public class CreateTlsKeypair extends AbstractSetupTask {
     private TrustagentConfiguration trustagentConfiguration;
     private static final String TLS_ALIAS = "tls";
     
+    private String keystorePassword;
+    private String dn;
+    private String[] ip;
+    private String[] dns;
+    
     @Override
     protected void configure() throws Exception {
         trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
-        String dn = trustagentConfiguration.getTrustagentTlsCertDn();
-        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
+        dn = trustagentConfiguration.getTrustagentTlsCertDn();
+        keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         // we need to know our own local ip addresses/hostname in order to add them to the ssl cert
-        String[] ip = trustagentConfiguration.getTrustagentTlsCertIp();
-        String[] dns = trustagentConfiguration.getTrustagentTlsCertDns();
+        ip = trustagentConfiguration.getTrustagentTlsCertIp();
+        dns = trustagentConfiguration.getTrustagentTlsCertDns();
         if( dn == null || dn.isEmpty() ) { configuration("DN not configured"); }
         if( keystorePassword == null || keystorePassword.isEmpty() ) { configuration("Keystore password has not been generated"); }
         // NOTE: keystore file itself does not need to be checked, we will create it automatically in execute() if it does not exist
@@ -46,13 +49,12 @@ public class CreateTlsKeypair extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        String dn = trustagentConfiguration.getTrustagentTlsCertDn();
         File keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
         if( !keystoreFile.exists() ) {
             validation("Keystore file was not created");
             return;
         }
-        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
+        keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
         RsaCredentialX509 credential = keystore.getRsaCredentialX509(TLS_ALIAS, keystorePassword);
 //        log.debug("credential {}", credential);
@@ -69,9 +71,7 @@ public class CreateTlsKeypair extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        String dn = trustagentConfiguration.getTrustagentTlsCertDn();
         File keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
-        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         // create the keypair
         KeyPair keypair = RsaUtil.generateRsaKeyPair(2048);
         X509Builder builder = X509Builder.factory()
@@ -84,8 +84,6 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         //        by mtwilson's ca, and then the ssl policy for this host in 
         //        mtwilson could be "signed by trusted ca" instead of
         //        "that specific cert"
-        String[] ip = trustagentConfiguration.getTrustagentTlsCertIp();
-        String[] dns = trustagentConfiguration.getTrustagentTlsCertDns();
         for(String san : ip) {
             builder.ipAlternativeName(san.trim());
         }

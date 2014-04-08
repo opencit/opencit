@@ -158,7 +158,7 @@ create_privacyca_keys() {
 
 # The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
 protect_privacyca_files() {
-  local PRIVACYCA_FILES="${intel_conf_dir}/EndorsementCA.p12 ${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/PrivacyCA.properties ${intel_conf_dir}/cacerts"
+  local PRIVACYCA_FILES="${intel_conf_dir}/EndorsementCA.p12 ${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/cacerts"
   chmod 600 $PRIVACYCA_FILES
   if using_glassfish; then
     glassfish_permissions $PRIVACYCA_FILES
