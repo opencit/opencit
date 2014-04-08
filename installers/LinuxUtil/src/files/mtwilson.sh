@@ -61,9 +61,6 @@ find_ctl_commands() {
   msctl=`which msctl 2>/dev/null`
   wlmctl=`which wlmctl 2>/dev/null`
   asctl=`which asctl 2>/dev/null`
-  #mcctl=`which mcctl 2>/dev/null`
-  #wpctl=`which wpctl 2>/dev/null`
-  #tdctl=`which tdctl 2>/dev/null`
   mpctl=`which mtwilson-portal 2>/dev/null`
 }
 
@@ -149,23 +146,21 @@ Detected the following options on this server:"
   #        outside the installer the may have to export MC_FIRST_PASSWORD first
   call_tag_setupcommand setup-manager create-certificate-authority-key create-admin-user
 
+  call_setupcommand EncryptDatabase
+
   # setup web services:
   if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
   if [ -n "$asctl" ]; then $asctl setup; fi
   if [ -n "$msctl" ]; then $msctl setup; fi
   if [ -n "$wlmctl" ]; then $wlmctl setup; fi
-  #if [ -n "$mcctl" ]; then $mcctl setup; fi
-  #if [ -n "$wpctl" ]; then $wpctl setup; fi
-  #if [ -n "$tdctl" ]; then $tdctl setup; fi
   if [ -n "$mpctl" ]; then $mpctl setup; fi
 
   # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
   shift
-  call_setupcommand EncryptDatabase
 }
 
 all_status() {
-  if using_glassfish; then  
+  if using_glassfish; then
     glassfish_running_report
   elif using_tomcat; then
     tomcat_running_report
@@ -174,11 +169,6 @@ all_status() {
   find_ctl_commands
   if [ -n "$pcactl" ]; then $pcactl status; fi
   if [ -n "$asctl" ]; then $asctl status; fi
-  #if [ -n "$msctl" ]; then $msctl status; fi
-  #if [ -n "$wlmctl" ]; then $wlmctl status; fi
-  #if [ -n "$mcctl" ]; then $mcctl status; fi
-  #if [ -n "$wpctl" ]; then $wpctl status; fi
-  #if [ -n "$tdctl" ]; then $tdctl status; fi
   if [ -n "$mpctl" ]; then $mpctl status; fi
 }
 
@@ -344,10 +334,16 @@ case "$1" in
   setup)
         if [ $# -gt 1 ]; then
           shift
-          # try the new setup commands first,  if there return code is 1 it
-          # means  the command was not found, so we try the older setup commands
-          call_tag_setupcommand $@
-          if [ $? == 1 ]; then call_setupcommand $@; fi
+          # first look for known old setup commands:
+          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ] || [ "$1" = "EncryptDatabase" ] || [ "$1" = "V2" ]; then
+            call_setupcommand $@
+          else            
+            # for everything else, try the new setup commands first,
+            # if there return code is 1 it means  the command was not found,
+            # and in that case we try the old setup commands
+            call_tag_setupcommand $@
+            if [ $? == 1 ]; then call_setupcommand $@; fi
+          fi
         else
           if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup
@@ -399,17 +395,22 @@ case "$1" in
           glassfish_require
           echo "Stopping Glassfish..."
           glassfish_shutdown
-          # application files
-          echo "Removing Glassfish in /usr/share/glassfish4..."
-          rm -rf /usr/share/glassfish4
+          #rm -rf /usr/share/glassfish4
         elif using_tomcat; then
           tomcat_require
           echo "Stopping Tomcat..."
           tomcat_shutdown
-          # application files
-          echo "Removing Tomcat in $TOMCAT_HOME..."
-          rm -rf "$TOMCAT_HOME"
+          #rm -rf "$TOMCAT_HOME"
         fi
+        # application files
+        echo "Removing mtwilson applications from webserver..."
+        webservice_uninstall HisPrivacyCAWebServices2
+        webservice_uninstall mtwilson-portal
+        webservice_uninstall mtwilson
+        webservice_uninstall AttestationService 2>&1 > /dev/null
+        webservice_uninstall ManagementService 2>&1 > /dev/null
+        webservice_uninstall WLMService 2>&1 > /dev/null
+
         echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
         rm -rf /opt/intel/cloudsecurity
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."

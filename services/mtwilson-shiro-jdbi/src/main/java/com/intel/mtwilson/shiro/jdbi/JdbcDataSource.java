@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.shiro;
+package com.intel.mtwilson.shiro.jdbi;
 
 import com.intel.mtwilson.My;
 import java.io.IOException;
