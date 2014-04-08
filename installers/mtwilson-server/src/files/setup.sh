@@ -249,13 +249,16 @@ if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
 fi
 
 # add MTWILSON_SERVER to shiro trust file
-hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
+# use "hostFilter.allow" when using the access-denying filter (any clients not from that list of ip's will be denied)
+# use "iniHostRealm.allow" when using the access-allowing filter (any clients from that list of ip's will be allowed access but clients from other ip's can still try password or x509 authentication) - this is the current default
+hostAllowPropertyName=iniHostRealm.allow
+hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
-  update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
+  update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
 fi
-hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
+hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_IP* ]]; then
-  update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
+  update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
 fi
 
 echo "Adding symlink for /opt/mtwilson/configuration..."
