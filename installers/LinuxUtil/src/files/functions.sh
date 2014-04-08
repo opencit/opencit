@@ -3195,6 +3195,46 @@ print_env_summary_report() {
   return $error
 }
 
+mtwilson_running() {
+  echo "Checking if mtwilson is running." >> $INSTALL_LOG_FILE
+  if using_glassfish; then
+    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8181/mtwilson/v1"}
+  else
+    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8443/mtwilson/v1"}
+  fi
+  MTWILSON_RUNNING=""
+
+  MTWILSON_RUNNING=`wget $MTWILSON_API_BASEURL/ManagementService/resources/msstatus -O - -q --no-check-certificate --no-proxy`
+}
+
+mtwilson_running_report() {
+  echo -n "Checking if mtwilson is running... "
+  mtwilson_running
+  if [ -n "$MTWILSON_RUNNING" ]; then
+    echo_success "Running"
+  else
+    echo_failure "Not running"
+  fi
+}
+
+mtwilson_running_report_wait() {
+  echo -n "Checking if mtwilson is running..."
+  mtwilson_running
+  for (( c=1; c<=10; c++ ))
+  do
+    if [ -z "$MTWILSON_RUNNING" ]; then
+      echo -n "."
+      sleep 5
+      mtwilson_running
+    fi
+  done
+  if [ -n "$MTWILSON_RUNNING" ]; then
+    echo_success "Running"
+  else
+    echo_failure "Not running"
+  fi
+}
+
 
 ### FUNCTION LIBRARY: web service on top of web server
 
@@ -3204,10 +3244,11 @@ webservice_running() {
   local webservice_application_name="$1"
 
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
+  MTWILSON_SERVER=${MTWILSON_SERVER:-127.0.0.1}
   WEBSERVICE_RUNNING=""
   WEBSERVICE_DEPLOYED=""
 
-  if using_glassfish; then 
+  if using_glassfish; then
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
       # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
@@ -3231,17 +3272,17 @@ webservice_running() {
 }
 webservice_running_report() {
   local webservice_application_name="$1"
-  echo -n "Checking if ${webservice_application_name} is running... "
+  echo -n "Deploying ${webservice_application_name} to webserver... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
-    echo_success "Running"
+    echo_success "Deployed"
   else
-    echo_failure "Not running"
+    echo_failure "Not deployed"
   fi
 }
 webservice_running_report_wait() {
   local webservice_application_name="$1"
-  echo -n "Waiting for ${webservice_application_name} to start... "
+  echo -n "Deploying ${webservice_application_name} to webserver..."
   webservice_running "${webservice_application_name}"
   for (( c=1; c<=10; c++ ))
   do
@@ -3252,9 +3293,9 @@ webservice_running_report_wait() {
     fi
   done
   if [ -n "$WEBSERVICE_RUNNING" ]; then
-    echo_success "Running"
+    echo_success "Deployed"
   else
-    echo_failure "Not running"
+    echo_failure "Not deployed"
   fi
 }
 

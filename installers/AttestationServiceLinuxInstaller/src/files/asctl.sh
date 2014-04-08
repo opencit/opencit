@@ -224,6 +224,7 @@ setup_interactive_install() {
       #sleep 50s        #XXX TODO: remove when we have solution for webserver up
       #echo "Done"
       webservice_running_report_wait "${webservice_application_name}"
+      mtwilson_running_report_wait
   fi
 }
 
