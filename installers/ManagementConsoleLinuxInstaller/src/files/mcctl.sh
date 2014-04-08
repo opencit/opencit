@@ -73,16 +73,17 @@ bootstrap_first_user() {
   local datestr=`date +%Y-%m-%d.%H%M`
 
   # bootstrap administrator user with all privileges
+  prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
+  prompt_with_default_password MC_FIRST_PASSWORD
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
   mtwilson setup V2 create-admin-user
 
   # XXX as implemented, the BootstrapUser command only works when Management Console is on same server as Management Service... TODO need to add ssh for remote access, or ask for adtabase connection details and just go and approve it oursevels (well, from the java code)
 #  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
-  prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
-  prompt_with_default_password MC_FIRST_PASSWORD
-  export MC_FIRST_PASSWORD
-  $mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${MTWILSON_API_BASEURL}" "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
-  #$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
-  #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
+  #$mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${MTWILSON_API_BASEURL}" "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
+  ####$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
+  ####msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
 }
 
 bootstrap_first_user__Not_Used() {

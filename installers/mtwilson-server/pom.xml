@@ -96,6 +96,7 @@
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
+                -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-management-service-installer</artifactId>
@@ -114,7 +115,6 @@
                     <version>${project.version}</version>
                     <type>bin</type>
                 </dependency>
-                -->
     
                 <!-- UI Portals -->
                 <dependency>
@@ -165,6 +165,7 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
+                                        -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-management-service-installer</artifactId>
@@ -183,7 +184,6 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
-                                        -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>logrotate</artifactId>
@@ -276,6 +276,7 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
+                                        -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-management-service-installer</artifactId>
@@ -294,7 +295,6 @@
                                             <version>${project.version}</version>
                                             <type>bin</type>
                                         </artifactItem>
-                                        -->
                                         <!-- other -->
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>

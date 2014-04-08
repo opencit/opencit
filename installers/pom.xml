@@ -16,10 +16,10 @@
     <module>LinuxUtil</module>
     <module>JavaLinuxInstaller</module>
     <module>GlassfishLinuxInstaller</module>
-	<!--
     <module>AttestationServiceLinuxInstaller</module>
     <module>ManagementServiceLinuxInstaller</module>
     <module>WLMServiceLinuxInstaller</module>
+	<!--
     <module>PrivacyCAServiceLinuxInstaller</module>
 	-->
     <module>TrustAgentLinuxInstaller</module>

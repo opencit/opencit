@@ -345,10 +345,16 @@ case "$1" in
   setup)
         if [ $# -gt 1 ]; then
           shift
-          # try the new setup commands first,  if there return code is 1 it
-          # means  the command was not found, so we try the older setup commands
-          call_tag_setupcommand $@
-          if [ $? == 1 ]; then call_setupcommand $@; fi
+          # first look for known old setup commands:
+          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ]; then
+            call_setupcommand $@
+          else            
+            # for everything else, try the new setup commands first,
+            # if there return code is 1 it means  the command was not found,
+            # and in that case we try the old setup commands
+            call_tag_setupcommand $@
+            if [ $? == 1 ]; then call_setupcommand $@; fi
+          fi
         else
           if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup

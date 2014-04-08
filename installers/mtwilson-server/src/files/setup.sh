@@ -662,7 +662,7 @@ elif using_tomcat; then
   fi
 fi
 
-if [ ! -z "$opt_privacyca" ]; then
+if [[ -n "$opt_privacyca" && -f "$privacyca_service"  ]]; then
   echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
   ./$privacyca_service 
   echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
@@ -672,19 +672,19 @@ if [ ! -z "$opt_privacyca" ]; then
 fi
 
 
-if [ ! -z "opt_attservice" ]; then
+if [[ -n "opt_attservice"  && -f "$attestation_service" ]]; then
   echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "mtwilson service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [ ! -z "$opt_mangservice" ]; then
+if [[ -n "$opt_mangservice" && -f "$management_service"  ]]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [ ! -z "$opt_wlmservice" ]; then
+if [[ -n "$opt_wlmservice" && -f "$whitelist_service" ]]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
@@ -708,7 +708,7 @@ fi
 #  echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
 #fi
 
-if [ ! -z "$opt_mtwportal" ]; then
+if [[ -n "$opt_mtwportal" && "$mtw_portal" ]]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE

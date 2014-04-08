@@ -1326,7 +1326,7 @@ add_postgresql_install_packages() {
   #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
-	#echo_warning "found packages $pgAddPackRequired"
+    #echo_warning "found packages $pgAddPackRequired"
     if [ -z "$pgAddPackRequired" ]; then
       prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
       if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
@@ -2555,7 +2555,7 @@ tomcat_detect() {
       local conf_dir=`dirname $c`
       local parent=`dirname $conf_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
-	    export TOMCAT_HOME="$parent"
+        export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
         export TOMCAT_CONF="$conf_dir"
         tomcat_bin=$parent/bin/catalina.sh
@@ -3968,18 +3968,17 @@ function erase_data() {
     mysql_version
     mysql_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-	for table in ${arr[*]}
-	do
-    
-		$mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
-	done 
+    for table in ${arr[*]}
+    do    
+        $mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
+    done 
   elif using_postgres; then #POSTGRES
     echo_success "using postgres"
     postgres_detect
     postgres_version
     postgres_test_connection_report
     if [ $? -ne 0 ]; 
-	 then exit; 
+     then exit; 
     fi
     for table in ${arr[*]}
     do
