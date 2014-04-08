@@ -390,6 +390,12 @@ prompt_with_default_password() {
 
 ### FUNCTION LIBRARY: environment information functions
 
+# Input: path to file that should exist
+wait_until_file_exists() {
+  markerfile=$1
+  while [ ! -f "$markerfile" ]; do sleep 1; done
+}
+
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
 using_glassfish() {
   if [[ -n "$WEBSERVER_VENDOR" ]]; then
@@ -3225,7 +3231,7 @@ webservice_running() {
 }
 webservice_running_report() {
   local webservice_application_name="$1"
-  echo -n "Checking ${webservice_application_name}... "
+  echo -n "Checking if ${webservice_application_name} is running... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
     echo_success "Running"
@@ -3235,11 +3241,12 @@ webservice_running_report() {
 }
 webservice_running_report_wait() {
   local webservice_application_name="$1"
-  echo -n "Checking ${webservice_application_name}... "
+  echo -n "Waiting for ${webservice_application_name} to start... "
   webservice_running "${webservice_application_name}"
-  for (( c=1; c<=5; c++ ))
+  for (( c=1; c<=10; c++ ))
   do
     if [ -z "$WEBSERVICE_RUNNING" ]; then
+      echo -n "."
       sleep 5
       webservice_running "${webservice_application_name}"
     fi
@@ -3687,25 +3694,6 @@ load_conf() {
     echo_success "Done"
   fi
 
-#  # PrivacyCA.properties.properties
-#  if [ -f "$pca_props_path" ]; then
-#    echo -n "Reading properties from "
-#    if file_encrypted "$pca_props_path"; then
-#      echo -n "encrypted file [$pca_props_path]....."
-#      temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
-#      if [[ "$temp" == *"Incorrect password"* ]]; then
-#        echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-#        return 2
-#      fi
-#      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
-#      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
-#    else
-#      echo -n "file [$pca_props_path]....."
-#      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`read_property_from_file ClientFilesDownloadUsername "$pca_props_path"`
-#      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`read_property_from_file ClientFilesDownloadPassword "$pca_props_path"`
-#    fi
-#    echo_success "Done"
-#  fi
 
   # mtwilson-portal.properties
   if [ -f "$mp_props_path" ]; then
@@ -3784,14 +3772,12 @@ load_defaults() {
   export DEFAULT_WEBSERVER_VENDOR=""
   export DEFAULT_DATABASE_VENDOR=""
   export DEFAULT_PRIVACYCA_SERVER=""
-  export DEFAULT_SAML_KEYSTORE_FILE=""
+  export DEFAULT_SAML_KEYSTORE_FILE="SAML.jks"
   export DEFAULT_SAML_KEYSTORE_PASSWORD=""
-  export DEFAULT_SAML_KEY_ALIAS=""
+  export DEFAULT_SAML_KEY_ALIAS="samlkey1"
   export DEFAULT_SAML_KEY_PASSWORD=""
   export DEFAULT_SAML_ISSUER=""
   export DEFAULT_PRIVACYCA_SERVER=""
-  #export DEFAULT_PRIVACYCA_DOWNLOAD_USERNAME=""
-  #export DEFAULT_PRIVACYCA_DOWNLOAD_PASSWORD=""
   export DEFAULT_MS_KEYSTORE_DIR="/var/opt/intel/management-service/users"
   export DEFAULT_API_KEY_ALIAS=""
   export DEFAULT_API_KEY_PASS=""
@@ -3818,8 +3804,6 @@ load_defaults() {
   export SAML_KEY_PASSWORD=${SAML_KEY_PASSWORD:-${CONF_SAML_KEY_PASSWORD:-$DEFAULT_SAML_KEY_PASSWORD}}
   export SAML_ISSUER=${SAML_ISSUER:-${CONF_SAML_ISSUER:-$DEFAULT_SAML_ISSUER}}
   export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
-  #export PRIVACYCA_DOWNLOAD_USERNAME=${PRIVACYCA_DOWNLOAD_USERNAME:-${CONF_PRIVACYCA_DOWNLOAD_USERNAME:-$DEFAULT_PRIVACYCA_DOWNLOAD_USERNAME}}
-  #export PRIVACYCA_DOWNLOAD_PASSWORD=${PRIVACYCA_DOWNLOAD_PASSWORD:-${CONF_PRIVACYCA_DOWNLOAD_PASSWORD:-$DEFAULT_PRIVACYCA_DOWNLOAD_PASSWORD}}
   export MS_KEYSTORE_DIR=${MS_KEYSTORE_DIR:-${CONF_MS_KEYSTORE_DIR:-$DEFAULT_MS_KEYSTORE_DIR}}
   export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}

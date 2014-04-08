@@ -103,7 +103,7 @@ public class BootstrapUser implements Command {
         // if(keyTest != null) {
         if ((keyTest != null) && (keyTest.getStatus().equalsIgnoreCase("approved") || keyTest.getStatus().equalsIgnoreCase("pending"))) {        
           log.debug("A user already exists with the specified User Name: {}", username);
-          throw new SetupException("User account with that name already exists. Please select different User Name.");
+          throw new SetupException(String.format("User account '%s' already exists", username));
         }
         
         // create user

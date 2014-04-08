@@ -61,9 +61,6 @@ find_ctl_commands() {
   msctl=`which msctl 2>/dev/null`
   wlmctl=`which wlmctl 2>/dev/null`
   asctl=`which asctl 2>/dev/null`
-  #mcctl=`which mcctl 2>/dev/null`
-  #wpctl=`which wpctl 2>/dev/null`
-  #tdctl=`which tdctl 2>/dev/null`
   mpctl=`which mtwilson-portal 2>/dev/null`
 }
 
@@ -156,9 +153,6 @@ Detected the following options on this server:"
   if [ -n "$asctl" ]; then $asctl setup; fi
   if [ -n "$msctl" ]; then $msctl setup; fi
   if [ -n "$wlmctl" ]; then $wlmctl setup; fi
-  #if [ -n "$mcctl" ]; then $mcctl setup; fi
-  #if [ -n "$wpctl" ]; then $wpctl setup; fi
-  #if [ -n "$tdctl" ]; then $tdctl setup; fi
   if [ -n "$mpctl" ]; then $mpctl setup; fi
 
   # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
@@ -175,11 +169,6 @@ all_status() {
   find_ctl_commands
   if [ -n "$pcactl" ]; then $pcactl status; fi
   if [ -n "$asctl" ]; then $asctl status; fi
-  #if [ -n "$msctl" ]; then $msctl status; fi
-  #if [ -n "$wlmctl" ]; then $wlmctl status; fi
-  #if [ -n "$mcctl" ]; then $mcctl status; fi
-  #if [ -n "$wpctl" ]; then $wpctl status; fi
-  #if [ -n "$tdctl" ]; then $tdctl status; fi
   if [ -n "$mpctl" ]; then $mpctl status; fi
 }
 
@@ -346,7 +335,7 @@ case "$1" in
         if [ $# -gt 1 ]; then
           shift
           # first look for known old setup commands:
-          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ]; then
+          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ] || [ "$1" = "EncryptDatabase" ] || [ "$1" = "V2" ]; then
             call_setupcommand $@
           else            
             # for everything else, try the new setup commands first,
