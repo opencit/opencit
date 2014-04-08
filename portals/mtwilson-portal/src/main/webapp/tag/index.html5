@@ -671,7 +671,7 @@ function isNumber(n) {
                                         <td align="center" class="col_del_link">
                                             <a data-bind-uuid="item.id" data-bind-name="item.name" data-bind-desc="item.description" href="#" onclick="javascript:getSelDetails(this.getAttribute('uuid'), this.getAttribute('name'), this.getAttribute('desc')); return false;">View Tags</a>&nbsp;&nbsp;
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a><br />
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a>
+                                             Export XML(<a data-bind-uuid="item.id" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid'), 'xml'); return false;">Plain</a>,&nbsp;<a data-bind-uuid="item.id" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid'), 'enc'); return false;">Encrypted</a>)
                                         </td>
                                     </tr>
                                 </tbody>
@@ -896,7 +896,7 @@ function isNumber(n) {
                                         <th class="row9">Issuer</th>
                                         <th class="row9">Not Before</th>
                                         <th class="row9">Not After</th>
-                                        <th class="row9">Status</th>
+                                        <th class="row9">Revoked</th>
                                         <th class="row9">Fingerprint (SHA-1)</th>
                                         <th class="row9">Fingerprint (SHA256)</th>
                                         <th class="row12"></th>

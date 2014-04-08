@@ -345,6 +345,7 @@ function fnRegisterMultipleHost() {
             }
             host.biosWLTarget = $(row).find('td:eq(4)').find('select').val();
             host.vmmWLtarget = $(row).find('td:eq(5)').find('select').val();
+            host.selectionTarget = $(row).find('td:eq(6)').find('select').val();
             host.registered = $(row).attr("registered") == "true" ? true : false;
             listOfHost.push(host);
         }
