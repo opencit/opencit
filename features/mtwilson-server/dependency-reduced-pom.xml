@@ -78,19 +78,16 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
         </dependency>
 
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.0.9</version>
         </dependency>
 
 	<!-- <dependency>
