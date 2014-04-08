@@ -4,20 +4,8 @@
  */
 package com.intel.mtwilson.shiro.authc.x509;
 
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mtwilson.shiro.*;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.dcsg.cpg.util.ByteArray;
-import com.intel.dcsg.cpg.x509.X509Util;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.crypto.BadPaddingException;

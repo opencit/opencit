@@ -6,7 +6,9 @@ package com.intel.mtwilson.setup.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.SetupTask;
+import com.intel.mtwilson.setup.ValidationException;
 import com.thoughtworks.xstream.XStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +68,7 @@ public class SetupTest {
     public void runSetupTasks(List<SetupTask> tasks) {
         XStream xs = new XStream();
         for(SetupTask task : tasks) {
+            try {
             if( task.isConfigured() && task.isValidated() ) {
                 log.debug("nothing to do for {}", task.getClass().getName());
             }
@@ -90,6 +93,22 @@ public class SetupTest {
             }
             else {
                 log.error("unexpected condition setup task {} configured? {} validated? {}", task.getClass().getName(), task.isConfigured(), task.isValidated());
+            }
+            }
+            catch(ConfigurationException e) {
+                log.debug("configuration error {}", e.getMessage());
+                for(Fault fault : task.getConfigurationFaults()) {
+                    log.debug("configuration: {}", fault.toString());
+                }
+            }
+            catch(ValidationException e) {
+                log.debug("validation error {}", e.getMessage());
+                for(Fault fault : task.getValidationFaults()) {
+                    log.debug("validation: {}", fault.toString());
+                }
+            }
+            catch(Exception e) {
+                log.debug("runtime error", e);
             }
         }
     }

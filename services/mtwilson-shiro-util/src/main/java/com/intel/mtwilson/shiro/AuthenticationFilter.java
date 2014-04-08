@@ -49,6 +49,43 @@ import org.apache.shiro.web.filter.PathMatchingFilter;
  */
 public abstract class AuthenticationFilter extends PathMatchingFilter {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthenticationFilter.class);
+    
+    private boolean skipAuthenticated = false;
+    private boolean permissive = true;
+    
+    /**
+     * Default value is false;  set  .skipAuthenticated=true in shiro.ini to
+     * change it.
+     * 
+     * @return true if this filter will skip processing for subjects that are already authenticated
+     */
+    public boolean isSkipAuthenticated() {
+        return skipAuthenticated;
+    }
+
+    public void setSkipAuthenticated(boolean skipAuthenticated) {
+        this.skipAuthenticated = skipAuthenticated;
+    }
+
+    /**
+     * Permissive mode allows chaining of authentication filters so that
+     * clients can choose one of a number of ways to authenticate; each
+     * filter in permissive mode allows processing to continue to other filters
+     * UNLESS the user is trying to authenticate with that filter and the
+     * authentication fails
+     * 
+     * @return true if processing should continue when the subject is not attempting to login in a way that this filter understands
+     */
+    public boolean isPermissive() {
+        return permissive;
+    }
+
+    public void setPermissive(boolean permissive) {
+        this.permissive = permissive;
+    }
+    
+    
+    
 /*
     private boolean multifactorAuthentication = false;
 
@@ -74,14 +111,15 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
     @Override
     protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
         log.debug("onPreHandle");
-        if( SecurityUtils.getSubject().isAuthenticated() /*&& !isMultifactorAuthentication()*/ ) {
-            log.debug("Subject is authenticated"); // and multifactor authentication is not enabled");
+        if( SecurityUtils.getSubject().isAuthenticated() && isSkipAuthenticated()  /*&& !isMultifactorAuthentication()*/ ) {
+            log.debug("Subject is authenticated; skipping {}", getClass().getName()); // and multifactor authentication is not enabled");
             return true;
         }
         if( isAuthenticationRequest(request) ) {
+            log.debug("Detected authentication request for {}", getClass().getName());
             return authenticate(request, response, mappedValue);
         }
-        return true; // it's not a request we know how to authenticate so let it continue - a "user" filter later on or an authorization check will stop the request if it cannot continue without being authenticated
+        return isPermissive(); // in permissive mode we let the request continue (default true) - a "user" filter later on or an authorization check will stop the request if it cannot continue without being authenticated
     }
     
     protected boolean authenticate(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {

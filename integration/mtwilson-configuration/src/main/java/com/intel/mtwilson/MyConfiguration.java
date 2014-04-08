@@ -594,7 +594,7 @@ public class MyConfiguration {
     }
     
     public File getPrivacyCaEndorsementP12() {
-        return findConfigurationFile(conf.getString("mtwilson.privacyca.ek.p12.file", "Endorsement.p12")); // ek signing certificate
+        return findConfigurationFile(conf.getString("mtwilson.privacyca.ek.p12.file", "EndorsementCA.p12")); // ek signing certificate
     }
     
     public String getPrivacyCaEndorsementPassword() {
