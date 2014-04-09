@@ -561,6 +561,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             responseView.addObject("message", "Input Parameters are NULL.");
             return responseView;
         }
+        log.debug("hostListString = " + hostListString);
 
         try {
             // Now get the API object from the session
