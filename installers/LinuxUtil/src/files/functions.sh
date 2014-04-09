@@ -3274,7 +3274,7 @@ webservice_running() {
 }
 webservice_running_report() {
   local webservice_application_name="$1"
-  echo -n "Deploying ${webservice_application_name} to webserver... "
+  echo -n "Checking if ${webservice_application_name} is deployed on webserver... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
     echo_success "Deployed"
@@ -3284,7 +3284,7 @@ webservice_running_report() {
 }
 webservice_running_report_wait() {
   local webservice_application_name="$1"
-  echo -n "Deploying ${webservice_application_name} to webserver..."
+  echo -n "Checking if ${webservice_application_name} is deployed on webserver..."
   webservice_running "${webservice_application_name}"
   for (( c=1; c<=10; c++ ))
   do

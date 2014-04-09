@@ -24,6 +24,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
@@ -120,7 +121,13 @@ public class CheckLoginController extends AbstractController {
                 try {
                     // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
-                    rsaApiClient = new ProxyApiClient(baseURL, credential, keystore, new MapConfiguration(p));
+                    //rsaApiClient = new ProxyApiClient(baseURL, credential, keystore, new MapConfiguration(p));
+                    
+                    Properties ptemp = new Properties();
+                    ptemp.setProperty("mtwilson.api.baseurl", My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
+                    ptemp.setProperty("mtwilson.api.ssl.policy", "INSECURE");
+                    Configuration temp = new MapConfiguration(ptemp);
+                    rsaApiClient = new ProxyApiClient(temp);
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
