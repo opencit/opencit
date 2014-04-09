@@ -44,7 +44,7 @@ public class RevokeTagCertificate implements Runnable{
     }
     
     @Override
-    @RequiresPermissions("certificates:delete")         
+    @RequiresPermissions("tag_certificates:delete")         
     public void run() {
         log.debug("Got request to revocation of certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {

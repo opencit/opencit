@@ -24,6 +24,7 @@ import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.policy.TrustReport;
 
 import java.util.Date;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
         
     @Override
+    @RequiresPermissions("host_attestations:search")    
     public HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
         HostAttestationCollection objCollection = new HostAttestationCollection();
         try {
@@ -82,6 +84,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     }
 
     @Override
+    @RequiresPermissions("host_attestations:retrieve")    
     public HostAttestation retrieve(HostAttestationLocator locator) {
         if (locator == null || locator.id == null) { return null;}
         String id = locator.id.toString();
@@ -101,11 +104,13 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     }
         
     @Override
+    @RequiresPermissions("host_attestations:store")    
     public void store(HostAttestation item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_attestations:create")    
     public void create(HostAttestation item) {
         try {
             HostTrustBO asBO = new HostTrustBO();
@@ -124,12 +129,14 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     }
 
     @Override
+    @RequiresPermissions("host_attestations:delete")    
     public void delete(HostAttestationLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         //TODO : We should be able to delete the report in the future. If possible by GA release
     }
 
     @Override
+    @RequiresPermissions("host_attestations:delete")    
     public void delete(HostAttestationFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

@@ -19,6 +19,7 @@ import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.OsBO;
 
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+    @RequiresPermissions("oss:search")    
     public OsCollection search(OsFilterCriteria criteria) {
         // start with a collection instance; if we don't find anything we'll return the empty collection
         OsCollection osCollection = new OsCollection();
@@ -66,6 +68,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     }
 
     @Override
+    @RequiresPermissions("oss:retrieve")    
     public Os retrieve(OsLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
         String id = locator.id.toString();
@@ -86,6 +89,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     }
 
     @Override
+    @RequiresPermissions("oss:store")    
     public void store(Os item) {
         OsData obj = new OsData();
         try {
@@ -101,6 +105,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     }
 
     @Override
+    @RequiresPermissions("oss:create")    
     public void create(Os item) {
         OsData obj = new OsData();
         try {
@@ -117,6 +122,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     }
 
     @Override
+    @RequiresPermissions("oss:delete")    
     public void delete(OsLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         String id = locator.id.toString();
@@ -140,6 +146,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     }
 
     @Override
+    @RequiresPermissions("oss:delete,search")    
     public void delete(OsFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

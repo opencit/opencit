@@ -18,6 +18,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostTlsCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsCertificateLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+    @RequiresPermissions("host_tls_certificates:search")    
     public HostTlsCertificateCollection search(HostTlsCertificateFilterCriteria criteria) {
         HostTlsCertificateCollection objCollection = new HostTlsCertificateCollection();
         try {
@@ -71,6 +73,7 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
     }
 
     @Override
+    @RequiresPermissions("host_tls_certificates:retrieve")    
     public HostTlsCertificate retrieve(HostTlsCertificateLocator locator) {
         if (locator.hostUuid == null || locator.sha1 == null) { return null; }
         String id = locator.hostUuid.toString();
@@ -116,11 +119,13 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
     }
 
     @Override
+    @RequiresPermissions("host_tls_certificates:store")    
     public void store(HostTlsCertificate item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_tls_certificates:create")    
     public void create(HostTlsCertificate item) {
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -146,6 +151,7 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
     }
 
     @Override
+    @RequiresPermissions("host_tls_certificates:delete")    
     public void delete(HostTlsCertificateLocator locator) {
         if (locator.hostUuid == null || locator.sha1 == null) { 
             throw new ASException(ErrorCode.AS_INVALID_INPUT);
@@ -181,6 +187,7 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
     }
 
     @Override
+    @RequiresPermissions("host_tls_certificates:delete,search")    
     public void delete(HostTlsCertificateFilterCriteria criteria) {
         HostTlsCertificateCollection objCollection = search(criteria);
         if (objCollection != null && !objCollection.getTlsCertificates().isEmpty()) {

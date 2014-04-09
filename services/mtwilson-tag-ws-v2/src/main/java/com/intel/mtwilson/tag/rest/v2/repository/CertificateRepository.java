@@ -38,7 +38,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
-    @RequiresPermissions("certificates:search") 
+    @RequiresPermissions("tag_certificates:search") 
     public CertificateCollection search(CertificateFilterCriteria criteria) {
         CertificateCollection objCollection = new CertificateCollection();
         DSLContext jooq = null;
@@ -119,7 +119,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
-    @RequiresPermissions("certificates:retrieve") 
+    @RequiresPermissions("tag_certificates:retrieve") 
     public Certificate retrieve(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return null;}
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -138,7 +138,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
-    @RequiresPermissions("certificates:store") 
+    @RequiresPermissions("tag_certificates:store") 
     public void store(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -160,7 +160,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
-    @RequiresPermissions("certificates:create") 
+    @RequiresPermissions("tag_certificates:create") 
     public void create(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -177,7 +177,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
 
     @Override
-    @RequiresPermissions("certificates:delete") 
+    @RequiresPermissions("tag_certificates:delete") 
     public void delete(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return;}
         CertificateDAO dao = null;
@@ -201,7 +201,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     }
     
     @Override
-    @RequiresPermissions("certificates:delete") 
+    @RequiresPermissions("tag_certificates:delete,search") 
     public void delete(CertificateFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

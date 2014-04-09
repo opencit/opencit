@@ -172,7 +172,7 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     }
     
     @Override
-    @RequiresPermissions("files:delete")     
+    @RequiresPermissions("files:delete,search")     
     public void delete(FileFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
