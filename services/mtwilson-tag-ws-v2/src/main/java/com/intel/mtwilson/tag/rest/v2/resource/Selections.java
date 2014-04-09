@@ -69,7 +69,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Override
     @Path("/{id}")
     @GET
-    @RequiresPermissions("selections:retrieve")         
+    @RequiresPermissions("tag_selections:retrieve")         
     @Produces({OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})   
     public Selection retrieveOne(@BeanParam SelectionLocator locator) {
         return super.retrieveOne(locator); 
@@ -79,7 +79,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})   
-    @RequiresPermissions("selections:retrieve")         
+    @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneJson(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         Selection obj = super.retrieveOne(locator); 
         SelectionsType selectionsType = getSelectionData(obj);
@@ -92,7 +92,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_XML})   
-    @RequiresPermissions("selections:retrieve")         
+    @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         Selection obj = super.retrieveOne(locator); //To change body of generated methods, choose Tools | Templates.
 //        if( obj == null ) {
@@ -140,7 +140,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @GET
     @Path("/{id}")
     @Produces(OtherMediaType.MESSAGE_RFC822)   
-    @RequiresPermissions("selections:retrieve")         
+    @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneEncryptedXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         String xml = retrieveOneXml(locator);
         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());

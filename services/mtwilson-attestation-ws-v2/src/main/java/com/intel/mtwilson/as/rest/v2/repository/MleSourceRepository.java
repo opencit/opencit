@@ -17,6 +17,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleSourceLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -26,6 +27,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources.class);
     
     @Override
+    @RequiresPermissions("mle_sources:search")    
     public MleSourceCollection search(MleSourceFilterCriteria criteria) {
         MleSourceCollection mleSourceCollection = new MleSourceCollection();
         
@@ -47,6 +49,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     }
 
     @Override
+    @RequiresPermissions("mle_sources:retrieve")    
     public MleSource retrieve(MleSourceLocator locator) {
         if( locator.mleUuid == null ) { return null; }
         String mleUuid = locator.mleUuid.toString();
@@ -67,6 +70,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     }
 
     @Override
+    @RequiresPermissions("mle_sources:store")    
     public void store(MleSource item) {
         com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
         try {
@@ -81,6 +85,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     }
 
     @Override
+    @RequiresPermissions("mle_sources:create")    
     public void create(MleSource item) {
         com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
         try {
@@ -96,6 +101,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     }
 
     @Override
+    @RequiresPermissions("mle_sources:delete")    
     public void delete(MleSourceLocator locator) {
         if (locator == null || locator.mleUuid == null) { return; }
         try {
@@ -117,6 +123,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     }
 
     @Override
+    @RequiresPermissions("mle_sources:delete,search")    
     public void delete(MleSourceFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

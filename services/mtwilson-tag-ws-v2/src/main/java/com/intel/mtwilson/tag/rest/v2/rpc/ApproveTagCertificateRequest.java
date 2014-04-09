@@ -60,7 +60,7 @@ public class ApproveTagCertificateRequest implements Runnable{
 
     
     @Override
-    @RequiresPermissions({"certificates:create","certificate_requests:store"})         
+    @RequiresPermissions({"tag_certificates:create","tag_certificate_requests:store"})         
     public void run() {
         log.debug("Got request to auto approve certificate request with ID {}.", certificateRequestId);        
         try (CertificateRequestDAO certRequestdao = TagJdbi.certificateRequestDao();

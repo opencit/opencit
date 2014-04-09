@@ -14,6 +14,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+    @RequiresPermissions("host_tls_policies:search")    
     public HostTlsPolicyCollection search(HostTlsPolicyFilterCriteria criteria) {
         HostTlsPolicyCollection objCollection = new HostTlsPolicyCollection();
         try {
@@ -48,6 +50,7 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     }
 
     @Override
+    @RequiresPermissions("host_tls_policies:retrieve")    
     public HostTlsPolicy retrieve(HostTlsPolicyLocator locator) {
         if (locator.hostUuid == null) { return null; }
         String id = locator.hostUuid.toString();
@@ -68,6 +71,7 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     }
 
     @Override
+    @RequiresPermissions("host_tls_policies:store")    
     public void store(HostTlsPolicy item) {
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -86,16 +90,19 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     }
 
     @Override
+    @RequiresPermissions("host_tls_policies:create")    
     public void create(HostTlsPolicy item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_tls_policies:delete")    
     public void delete(HostTlsPolicyLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_tls_policies:delete,search")    
     public void delete(HostTlsPolicyFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

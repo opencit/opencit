@@ -18,6 +18,7 @@ import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+    @RequiresPermissions("mle_modules:search")    
     public MleModuleCollection search(MleModuleFilterCriteria criteria) {
         MleModuleCollection objCollection = new MleModuleCollection();
         try {
@@ -70,6 +72,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     }
 
     @Override
+    @RequiresPermissions("mle_modules:retrieve")    
     public MleModule retrieve(MleModuleLocator locator) {
         if( locator.moduleUuid == null ) { return null; }
         try {
@@ -89,6 +92,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     }
 
     @Override
+    @RequiresPermissions("mle_modules:store")    
     public void store(MleModule item) {
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
@@ -104,6 +108,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     }
 
     @Override
+    @RequiresPermissions("mle_modules:create")    
     public void create(MleModule item) {
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
@@ -126,6 +131,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     }
 
     @Override
+    @RequiresPermissions("mle_modules:delete")    
     public void delete(MleModuleLocator locator) {
         if (locator.moduleUuid == null) { return; }
         try {
@@ -154,6 +160,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     }
 
     @Override
+    @RequiresPermissions("mle_modules:delete,search")    
     public void delete(MleModuleFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

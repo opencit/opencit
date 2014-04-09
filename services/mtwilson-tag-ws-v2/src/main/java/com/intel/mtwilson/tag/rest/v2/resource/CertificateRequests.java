@@ -71,7 +71,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
      */
     @Override
     @POST
-    @RequiresPermissions("certificate_requests:create")         
+    @RequiresPermissions("tag_certificate_requests:create")         
     public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest certificateRequest) {
         certificateRequest = super.createOne(locator, certificateRequest);
         // TODO:  this doesn't conform to JSON API,  the non-jsonapi links should go in the meta.links section;   also TODO revise NoLinks in the class declaration
@@ -99,7 +99,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Path("/{id}/content")
     @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     @GET
-    @RequiresPermissions("certificate_requests:retrieve")         
+    @RequiresPermissions("tag_certificate_requests:retrieve")         
     public String retrieveOneSelectionJson(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
         CertificateRequest certificateRequest = super.retrieveOne(locator);
         SelectionsType selection = getSelection(certificateRequest);
@@ -110,7 +110,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Path("/{id}/content")
     @Produces({MediaType.APPLICATION_XML})
     @GET
-    @RequiresPermissions("certificate_requests:retrieve")         
+    @RequiresPermissions("tag_certificate_requests:retrieve")         
     public String retrieveOneSelectionXml(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
         CertificateRequest certificateRequest = super.retrieveOne(locator);
         SelectionsType selection = getSelection(certificateRequest);

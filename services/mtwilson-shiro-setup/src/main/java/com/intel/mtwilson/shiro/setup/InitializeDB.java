@@ -29,6 +29,7 @@ public class InitializeDB extends DatabaseSetupTask {
     public static final String CHALLENGER_ROLE = "challenger";
     public static final String USER_MANAGER_ROLE = "user_manager";
     public static final String REPORT_MANAGER_ROLE = "report_manager";
+    public static final String SERVER_MANAGER_ROLE = "server_manager";
     // Below roles for backward compatibility
     public static final String SECURITY_ROLE = "Security";
     public static final String WHITE_LIST_ROLE = "Whitelist";
@@ -90,16 +91,15 @@ public class InitializeDB extends DatabaseSetupTask {
             
         } else if (roleName.equalsIgnoreCase(ASSET_TAG_MANAGER_ROLE) || roleName.equalsIgnoreCase(ASSET_TAG_MANAGEMENT_ROLE)) {
             
-            domainActions.put("certificates", "*");
-            domainActions.put("certificate_requests", "*");
-            domainActions.put("configurations", "*");
-            domainActions.put("kv_attributes", "*");
-            domainActions.put("selections", "*");
+            domainActions.put("tag_certificates", "*");
+            domainActions.put("tag_certificate_requests", "*");
+            domainActions.put("configurations", "search,retrieve");
+            domainActions.put("tag_kv_attributes", "*");
+            domainActions.put("tag_selections", "*");
             domainActions.put("selection_kv_attributes", "*");
-            domainActions.put("files", "*");
+            domainActions.put("files", "search,retrieve");
             domainActions.put("tpm_passwords", "*");
             domainActions.put("host_uuids", "*");
-            domainActions.put("tag_certificates", "*");
             domainActions.put("hosts", "search");
             
         } else if (roleName.equalsIgnoreCase(HOST_MANAGER_ROLE) || roleName.equalsIgnoreCase(ATTESTATION_ROLE)) {
@@ -118,6 +118,8 @@ public class InitializeDB extends DatabaseSetupTask {
             domainActions.put("mle_modules", "search,retrieve");
             domainActions.put("mle_sources", "search,retrieve");
             domainActions.put("tag_certificates", "*");
+            domainActions.put("configurations", "search,retrieve");
+            domainActions.put("files", "search,retrieve");
             
         } else if (roleName.equalsIgnoreCase(AUDITOR_ROLE) || roleName.equalsIgnoreCase(AUDIT_ROLE)) {
             
@@ -154,6 +156,11 @@ public class InitializeDB extends DatabaseSetupTask {
             domainActions.put("users", "*");
             domainActions.put("user_certificates", "*");
             
+        } else if (roleName.equalsIgnoreCase(SERVER_MANAGER_ROLE)) {
+
+            domainActions.put("configurations", "*");
+            domainActions.put("files", "*");
+            
         }         
         
         return domainActions;
@@ -173,6 +180,7 @@ public class InitializeDB extends DatabaseSetupTask {
             createRoleAndAssociatedPermissions(loginDAO, CHALLENGER_ROLE, "", createDomainActionListForRole(CHALLENGER_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, REPORT_MANAGER_ROLE, "", createDomainActionListForRole(REPORT_MANAGER_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, USER_MANAGER_ROLE, "", createDomainActionListForRole(USER_MANAGER_ROLE));
+            createRoleAndAssociatedPermissions(loginDAO, SERVER_MANAGER_ROLE, "", createDomainActionListForRole(SERVER_MANAGER_ROLE));
 
             createRoleAndAssociatedPermissions(loginDAO, SECURITY_ROLE, "This role is for backward compatibility with MTW 1.x", createDomainActionListForRole(SECURITY_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, WHITE_LIST_ROLE, "This role is for backward compatibility with MTW 1.x", createDomainActionListForRole(WHITE_LIST_ROLE));

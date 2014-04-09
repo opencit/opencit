@@ -130,7 +130,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     }
     
     @Override
-    @RequiresPermissions("tpm_passwords:delete")         
+    @RequiresPermissions("tpm_passwords:delete,search")         
     public void delete(TpmPasswordFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

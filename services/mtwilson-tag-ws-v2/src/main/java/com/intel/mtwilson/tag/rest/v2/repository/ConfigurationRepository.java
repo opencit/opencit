@@ -159,7 +159,7 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     }
     
     @Override
-    @RequiresPermissions("configurations:delete")     
+    @RequiresPermissions("configurations:delete,search")     
     public void delete(ConfigurationFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

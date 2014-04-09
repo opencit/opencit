@@ -61,7 +61,7 @@ public class DeployTagCertificate implements Runnable{
     
     
     @Override
-    @RequiresPermissions({"certificates:deploy","hosts:search"})         
+    @RequiresPermissions({"tag_certificates:deploy","hosts:search"})         
     public void run() {
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {

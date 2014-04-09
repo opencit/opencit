@@ -19,6 +19,7 @@ import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     private Logger log = LoggerFactory.getLogger(getClass().getName());
         
     @Override
+    @RequiresPermissions("tag_certificates:search")
     public TagCertificateCollection search(TagCertificateFilterCriteria criteria) {
         TagCertificateCollection objCollection = new TagCertificateCollection();
         try {
@@ -61,6 +63,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     }
 
     @Override
+    @RequiresPermissions("tag_certificates:retrieve")
     public TagCertificate retrieve(TagCertificateLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
         String id = locator.id.toString();
@@ -86,6 +89,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     }
 
     @Override
+    @RequiresPermissions("tag_certificates:import")
     public void create(TagCertificate item) {
         AssetTagCertCreateRequest obj = new AssetTagCertCreateRequest();
         try {
@@ -100,6 +104,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     }
 
     @Override
+    @RequiresPermissions("tag_certificates:revoke")
     public void delete(TagCertificateLocator locator) {
         if (locator == null || locator.id == null) { return; }
         AssetTagCertRevokeRequest obj = new AssetTagCertRevokeRequest();
@@ -115,6 +120,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     }
     
     @Override
+    @RequiresPermissions("tag_certificates:delete,search")
     public void delete(TagCertificateFilterCriteria criteria) {
         TagCertificateCollection objCollection = search(criteria);
         if (objCollection != null && !objCollection.getTagCertificates().isEmpty()) {
