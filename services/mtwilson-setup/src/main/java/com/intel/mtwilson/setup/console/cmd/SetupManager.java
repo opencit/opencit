@@ -303,6 +303,7 @@ public class SetupManager implements Command {
         // TODO:  need to handle the encrypted configuration file too like My.configuration() does, but using the filesystem location instaed of the looking-everywhere My.configuration() method because we need to have the mtwilson.properties file to write back to from the setup tasks
         File file = getConfigurationFile();
         if (file.exists()) {
+            log.debug("Loading configuration file {}", file.getAbsolutePath());
             try (FileInputStream in = new FileInputStream(file)) {
                 Properties properties = new Properties();
                 properties.load(in);

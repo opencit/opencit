@@ -55,7 +55,9 @@ export_vars() {
   for name in $names
   do
     eval value="\$$name"
-    eval export $name=$value
+    if [ -n "$value" ]; then
+      eval export $name=$value
+    fi
   done
 }
 
