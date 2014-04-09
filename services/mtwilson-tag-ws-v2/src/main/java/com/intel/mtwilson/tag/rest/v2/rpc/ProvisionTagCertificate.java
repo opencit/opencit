@@ -304,7 +304,10 @@ public class ProvisionTagCertificate  {
             // process only the first file we find.  TODO:  what if there are multiple selection files in the zip ?
             try(FileInputStream in = new FileInputStream(selectionFiles[0])) {
                 String xml = IOUtils.toString(in);
-                return createOneFromXmlToBytes(locator, xml, request, response);
+                //return createOneFromXmlToBytes(locator, xml, request, response); // don't call this because it checks if encryption is required and doesn't "know" that we just decrypted the file
+                SelectionsType selections = Util.fromXml(xml);
+                Certificate certificate = createOne(getSubject(request, locator), selections, request, response);
+                return certificate.getCertificate();
             }
             finally {
                 // TODO: delete all the temporary files - won't be necessary when the decryption moves to java and it's all in memory
