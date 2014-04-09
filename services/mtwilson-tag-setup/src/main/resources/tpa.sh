@@ -69,7 +69,7 @@ if [ -n "$xml" ]; then
     wget --no-proxy $xml -O $XML_FILE_LOCATION
 fi
 
-WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username"
+WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --auth-no-challenge"
 UUID=`dmidecode |grep UUID | awk '{print $2}'`
 tagChoice=""
 tagFile=""
