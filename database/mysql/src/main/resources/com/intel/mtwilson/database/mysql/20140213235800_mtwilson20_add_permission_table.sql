@@ -45,7 +45,7 @@ CREATE TABLE mw_user_login_password (
   salt blob NOT NULL,
   iterations int(11) DEFAULT 1,
   algorithm varchar(128) NOT NULL,
-  expires timestamp DEFAULT NULL,
+  expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (id)
 ); 
@@ -66,7 +66,7 @@ CREATE TABLE mw_user_login_hmac (
   user_id CHAR(36) DEFAULT NULL,
   hmac_key blob NOT NULL,
   protection varchar(128) NOT NULL,
-  expires timestamp DEFAULT NULL,
+  expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (id)
 ); 
@@ -83,7 +83,7 @@ CREATE TABLE mw_user_login_certificate (
   certificate blob NOT NULL,
   sha1_hash CHAR(36) NOT NULL,
   sha256_hash binary(32) NOT NULL,
-  expires timestamp DEFAULT NULL,
+  expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',
   status varchar(128) NOT NULL DEFAULT 'Pending',
   comment text,
