@@ -11,12 +11,14 @@ import java.util.concurrent.Callable;
 import com.intel.mtwilson.My;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.File;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author jbuhacoff
  */
 @RPC("endorse_tpm")
+@RequiresPermissions("tpms:endorse")
 public class EndorseTpm implements Callable<X509Certificate> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EndorseTpm.class);
 
