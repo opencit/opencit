@@ -82,7 +82,7 @@ public class DownloadMtWilsonPrivacyCACertificate extends AbstractSetupTask {
             }
         }
         catch(NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
-            log.error("Cannot load Privacy CA certificate", e);
+            log.debug("Cannot load Privacy CA certificate", e);
             validation("Cannot load Privacy CA certificate", e);
         }
     }

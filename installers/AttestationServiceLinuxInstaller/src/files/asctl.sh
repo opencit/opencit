@@ -151,9 +151,12 @@ configure_privacyca_user() {
 
 
 create_privacyca_keys() {
-   mtwilson setup V2 create-endorsement-c-a
-   mtwilson setup V2 create-privacy-c-a
-   # TODO:  mtwilson setup SetupManager create-endorsement-ca create-privacy-ca
+   # TODO:  a lot of Error: Cannot load class xyz  show up on the output because
+   #        the setup console does not have the same classpath as the mtwilson app;
+   #        when the plugin work is complete they will have the same classpath
+   #        so these errors would not be thrown
+   mtwilson setup setup-manager create-endorsement-ca >> /dev/null 2>&1
+   mtwilson setup setup-manager create-privacy-ca >> /dev/null 2>&1
 }
 
 # The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
