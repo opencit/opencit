@@ -25,8 +25,8 @@ import java.util.List;
  *
  * @author jbuhacoff
  */
-public class Password implements Command {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Password.class);
+public class LoginPassword implements Command {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginPassword.class);
 //    private TrustagentConfiguration configuration;
     private Configuration options;
     private LoginDAO dao;
