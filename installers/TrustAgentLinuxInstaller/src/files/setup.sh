@@ -24,7 +24,7 @@ DAEMON=/opt/trustagent/bin/$NAME
 # SCRIPT CONFIGURATION:
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
-package_dir=/opt/${package_name} #/opt/intel/cloudsecurity/${package_name}
+package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
@@ -53,6 +53,7 @@ TRUSTAGENT_ENV_VARS="MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USERNA
 
 export_vars $TRUSTAGENT_ENV_VARS
 
+mkdir -p "${package_dir}"
 # before we start, clear the install log
 mkdir -p $(dirname $logfile)
 date > $logfile
