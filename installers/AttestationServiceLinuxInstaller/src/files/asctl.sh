@@ -172,7 +172,7 @@ protect_privacyca_files() {
 
 update_ssl_port() {
   mtwilson setup setup-manager update-ssl-port
-]
+}
 
 setup_interactive_install() {
   if using_mysql; then   
