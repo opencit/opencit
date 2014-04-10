@@ -472,17 +472,13 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
-        String locales = "";
-//        String locales = conf.getProperty("mtwilson.locales").toString();
-//        if( locales == null || locales.isEmpty() ) {
-        if( conf.getProperty("mtwilson.locales").toString() == null || conf.getProperty("mtwilson.locales").toString().isEmpty() ) {
+        String locales = conf.getString("mtwilson.locales");
+        if( locales == null || locales.isEmpty() ) {
             return new String[] { LocaleUtil.toLanguageTag(Locale.getDefault()) };
-        } else {
-            locales = conf.getProperty("mtwilson.locales").toString();
-//            return conf.getString("mtwilson.locales", "en").split(",");
-            String localeParsed = locales.replaceAll("\\s+", "");
-            return localeParsed.substring(1, localeParsed.length() - 1).split(",");
         }
+        return new String[] { locales };
+//        String localeParsed = locales.replaceAll("\\s+", "");
+//        return localeParsed.substring(1, localeParsed.length() - 1).split(",");
     }
 
     ///////////////////////// database //////////////////////////////////
