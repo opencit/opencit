@@ -473,18 +473,16 @@ public class MyConfiguration {
     
     public String[] getAvailableLocales() {
         String locales = "";
-        try {
-            locales = conf.getProperty("mtwilson.locales").toString();
-        } catch (Exception e) {
-            log.error("locales property cannot be empty. error: {}", e);
-        }
-        
-        if( locales == null || locales.isEmpty() ) {
+//        String locales = conf.getProperty("mtwilson.locales").toString();
+//        if( locales == null || locales.isEmpty() ) {
+        if( conf.getProperty("mtwilson.locales").toString() == null || conf.getProperty("mtwilson.locales").toString().isEmpty() ) {
             return new String[] { LocaleUtil.toLanguageTag(Locale.getDefault()) };
+        } else {
+            locales = conf.getProperty("mtwilson.locales").toString();
+//            return conf.getString("mtwilson.locales", "en").split(",");
+            String localeParsed = locales.replaceAll("\\s+", "");
+            return localeParsed.substring(1, localeParsed.length() - 1).split(",");
         }
-//        return conf.getString("mtwilson.locales", "en").split(",");
-        String localeParsed = locales.replaceAll("\\s+", "");
-        return localeParsed.substring(1, localeParsed.length() - 1).split(",");
     }
 
     ///////////////////////// database //////////////////////////////////
