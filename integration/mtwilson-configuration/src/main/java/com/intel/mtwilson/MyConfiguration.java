@@ -472,7 +472,7 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
-        String locales = conf.getString("mtwilson.locales");
+        String locales = conf.getProperty("mtwilson.locales").toString();
         if( locales == null || locales.isEmpty() ) {
             return new String[] { LocaleUtil.toLanguageTag(Locale.getDefault()) };
         }
