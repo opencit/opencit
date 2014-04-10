@@ -6,7 +6,7 @@
 # SCRIPT CONFIGURATION:
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
-package_dir=/opt/intel/cloudsecurity/${package_name}
+package_dir=/opt/${package_name} #/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
@@ -38,8 +38,6 @@ export_vars $TRUSTAGENT_ENV_VARS
 # before we start, clear the install log
 mkdir -p $(dirname $logfile)
 date > $logfile
-
-mkdir -p "$package_dir"
 
 # Automatic install steps:
 # 1. Backup old files
