@@ -967,21 +967,21 @@ public class ManagementConsoleDataController extends MultiActionController {
 
         // TODO-stdale 
         // Need to talk to ryan about the best way to get the list of selections here 
-        List<String> selectionList = new ArrayList<String>();
-        selectionList.add("N/A");
-        SelectionRepository repo = new SelectionRepository();  
-        SelectionFilterCriteria criteria = new SelectionFilterCriteria();
-        criteria.nameEqualTo = "";
-        SelectionCollection collection = new SelectionCollection();
+        //List<String> selectionList = new ArrayList<String>();
+        //selectionList.add("N/A");
+        //SelectionRepository repo = new SelectionRepository();  
+        //SelectionFilterCriteria criteria = new SelectionFilterCriteria();
+        //criteria.nameEqualTo = "";
+        //SelectionCollection collection = new SelectionCollection();
         
-        collection = repo.search(criteria);
-        List<Selection> list = collection.getSelections();
+        //collection = repo.search(criteria);
+        //List<Selection> list = collection.getSelections();
         
-        for(Selection s: list) {
-            selectionList.add(s.getName());
-        }
+        //for(Selection s: list) {
+        //    selectionList.add(s.getName());
+        //}
         
-        responseView.addObject("selectionList",selectionList);
+        //responseView.addObject("selectionList",selectionList);
         
         return responseView;
     }

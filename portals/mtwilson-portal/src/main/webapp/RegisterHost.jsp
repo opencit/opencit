@@ -99,7 +99,7 @@
                             <th class="registerHostRow4">&nbsp;</td>
                             <th class="registerHostRow5Sub" data-i18n="table.bios">BIOS</td>
                             <th class="registerHostRow5Sub" data-i18n="table.vmm">VMM</td>
-                            <th class="registerHostRow5Sub">Asset Tag Selection</td>
+                            <!-- <th class="registerHostRow5Sub">Asset Tag Selection</td> -->
                             <th class="registerHostRow6Header">&nbsp;</td>
                         </tr>
                     </table>

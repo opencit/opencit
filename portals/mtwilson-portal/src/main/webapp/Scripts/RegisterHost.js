@@ -124,11 +124,11 @@ function updateListHostToBeRegister(responsJson) {
             }
             str += '</td>';
             // set the selection for auotmation of asset tag
-            str += '<td class="registerHostRow5Sub"><select class="registerHostConfigDropDown" id="selectionList_' + hostNameReplaced + '">';
-            for (var iteam in selectionList) {
-                str += '<option>' + selectionList[iteam] + '</option>';
-            }
-            str += '</select>&nbsp;';
+            //str += '<td class="registerHostRow5Sub"><select class="registerHostConfigDropDown" id="selectionList_' + hostNameReplaced + '">';
+            //for (var iteam in selectionList) {
+            //    str += '<option>' + selectionList[iteam] + '</option>';
+            //}
+            //str += '</select>&nbsp;';
             
             str += '<td class="registerHostRow6"><textarea id="status_' + hostNameReplaced + '" class="textAreaBoxClass" cols="16" rows="1" readonly="readonly"></textarea></td>' +
                     '</tr>';
