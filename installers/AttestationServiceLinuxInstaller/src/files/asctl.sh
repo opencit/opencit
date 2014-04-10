@@ -170,6 +170,9 @@ protect_privacyca_files() {
   fi
 }
 
+update_ssl_port() {
+  mtwilson setup setup-manager update-ssl-port
+]
 
 setup_interactive_install() {
   if using_mysql; then   
@@ -191,6 +194,7 @@ setup_interactive_install() {
       exit 1
     fi
   fi
+  update_ssl_port
   create_saml_key 
 
   configure_privacyca_user
