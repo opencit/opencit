@@ -26,7 +26,7 @@ intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
 package_dir=/opt/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_env_filename=${package_dir}/${package_name}.env
+package_env_filename=~/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 ASSET_TAG_SETUP="y"
 
