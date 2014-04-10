@@ -39,6 +39,8 @@ export_vars $TRUSTAGENT_ENV_VARS
 mkdir -p $(dirname $logfile)
 date > $logfile
 
+mkdir -p "$package_dir"
+
 # Automatic install steps:
 # 1. Backup old files
 # 2. Create directory structure
