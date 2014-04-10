@@ -711,6 +711,7 @@ register_startup_script() {
   # Ubuntu
   updatercd=`which update-rc.d  2>/dev/null`
   if [ -n "$updatercd" ]; then
+    $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults  2>/dev/null
   fi
 
