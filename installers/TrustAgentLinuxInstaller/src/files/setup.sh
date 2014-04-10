@@ -24,9 +24,9 @@ DAEMON=/opt/trustagent/bin/$NAME
 # SCRIPT CONFIGURATION:
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
-package_dir=/opt/${package_name}
+package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_env_filename=~/${package_name}.env
+package_env_filename=/root/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 ASSET_TAG_SETUP="y"
 
@@ -152,6 +152,8 @@ fi
 
 intel_conf_dir=/opt/trustagent/configuration
 package_dir=/opt/trustagent
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_install_filename=${package_dir}/${package_name}.install
 
 
 

@@ -197,7 +197,7 @@ TRUSTAGENT_CONF=/etc/intel/cloudsecurity
 package_name=trustagent
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${TRUSTAGENT_CONF}/${package_name}.properties
-package_env_filename=~/${package_name}.env
+package_env_filename=/root/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
