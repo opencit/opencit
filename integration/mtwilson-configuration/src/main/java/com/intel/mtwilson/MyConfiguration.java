@@ -472,7 +472,13 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
-        String locales = conf.getProperty("mtwilson.locales").toString();
+        String locales = "";
+        try {
+            locales = conf.getProperty("mtwilson.locales").toString();
+        } catch (Exception e) {
+            log.error("locales property cannot be empty. error: {}", e);
+        }
+        
         if( locales == null || locales.isEmpty() ) {
             return new String[] { LocaleUtil.toLanguageTag(Locale.getDefault()) };
         }
