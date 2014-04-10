@@ -28,11 +28,7 @@
             <artifactId>mtwilson-http-security-server</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.ejb</artifactId>
