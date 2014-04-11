@@ -171,7 +171,7 @@ protect_privacyca_files() {
 }
 
 update_ssl_port() {
-  mtwilson setup setup-manager update-ssl-port
+  mtwilson setup setup-manager update-ssl-port >> /dev/null 2>&1
 }
 
 setup_interactive_install() {
