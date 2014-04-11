@@ -228,13 +228,16 @@ public class SetupManager implements Command {
     }
 
     protected void execute(List<SetupTask> tasks) throws IOException {
-        PropertiesConfiguration properties = loadConfiguration();
-        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
-        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
+//        PropertiesConfiguration properties = loadConfiguration();
+//        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
+//        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
         boolean error = false;
         try {
             for (SetupTask setupTask : tasks) {
                 String taskName = setupTask.getClass().getSimpleName();
+                PropertiesConfiguration properties = loadConfiguration();
+                Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
+                MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
                 setupTask.setConfiguration(configuration);
                 try {
                     if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
@@ -284,14 +287,18 @@ public class SetupManager implements Command {
                     error = true;
                     log.error("Cannot run {}: {}", taskName, e.getMessage());
                     log.debug("Runtime error", e); // debug stack trace
+                } finally {
+                    storeConfiguration(properties);
                 }
             }
         } catch (Exception e) {
             error = true;
             log.error("Setup error: {}", e.getMessage());
             log.debug("Setup error", e);
+        } finally {
+//            storeConfiguration(properties);
         }
-        storeConfiguration(properties);
+        
         if( error ) {
             // the main application (cpg-console Main) will print this
             // message and return a non-zero exit code
