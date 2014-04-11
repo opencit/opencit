@@ -230,12 +230,12 @@ public class SetupManager implements Command {
     protected void execute(List<SetupTask> tasks) throws IOException {
         PropertiesConfiguration properties = loadConfiguration();
         Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
-        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
+//        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
         boolean error = false;
         try {
             for (SetupTask setupTask : tasks) {
                 String taskName = setupTask.getClass().getSimpleName();
-                setupTask.setConfiguration(configuration);
+                setupTask.setConfiguration(properties);
                 try {
                     if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
                         log.debug("Skipping {}", taskName);

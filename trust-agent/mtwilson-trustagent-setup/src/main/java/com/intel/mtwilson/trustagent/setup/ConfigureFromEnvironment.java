@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.util.ArrayList;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
     MutableConfiguration configuration;
-    ArrayList<String> updatelist = new ArrayList<>();
     String[] variables;
     AllCapsNamingStrategy allcaps;
     Configuration env;
@@ -51,17 +51,19 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
+        ArrayList<String> updatelist = new ArrayList<>();
         for (String variable : variables) {
             String envValue = env.getString(variable);
+            String confValue = configuration.getString(variable);
             log.debug("checking to see if environment variable [" + variable + "] with value [" + envValue + "] needs to be added to configuration");
-            if (envValue != null && !envValue.isEmpty()) {
+            if (envValue != null && !envValue.isEmpty() && (confValue == null || confValue != envValue)) {
                 log.debug("environment variable [" + variable + "] with value [" + envValue + "] needs to be added to configuration");
                 updatelist.add(variable);
             }
         }
         
         if (!updatelist.isEmpty()) {
-            validation(updatelist.size() + " environment variables need to be added to the configuration");
+            validation("Updates available for %d settings: %s", updatelist.size(), StringUtils.join(updatelist, ","));
         }
     }
 
