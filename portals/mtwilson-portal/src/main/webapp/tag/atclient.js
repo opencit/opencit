@@ -728,7 +728,8 @@ mtwilson.atag = mtwilson.atag || {};
             } else {
                 ajax.json.post('tags_json', tagObject, {app: report}); // pass {app:report} so it will be passed to the event handler after the request is complete
             }
-            $('tag-create-name').value = "";
+            $('tag-create-name').clear();
+            $('tag-create-values').clear();
             $('tag-create-name').focus();
         }
     };
