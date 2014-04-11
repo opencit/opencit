@@ -55,9 +55,9 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         for (String variable : variables) {
             String envValue = env.getString(variable);
             String confValue = configuration.getString(variable);
-            log.debug("checking to see if environment variable [" + variable + "] with value [" + envValue + "] needs to be added to configuration");
-            if (envValue != null && !envValue.isEmpty() && (confValue == null || confValue != envValue)) {
-                log.debug("environment variable [" + variable + "] with value [" + envValue + "] needs to be added to configuration");
+            log.debug("checking to see if environment variable [{}] needs to be added to configuration", variable);
+            if (envValue != null && !envValue.isEmpty() && (confValue == null || !confValue.equals(envValue))) {
+                log.debug("environment variable [{}] needs to be added to configuration", variable);
                 updatelist.add(variable);
             }
         }
@@ -72,7 +72,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         for (String variable : variables) {
             String envValue = env.getString(variable);
             if (envValue != null && !envValue.isEmpty()) {
-                log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(variable), variable, envValue);
+                log.debug("Copying environment variable {} to configuration property {}", allcaps.toAllCaps(variable), variable);
                 configuration.setString(variable, envValue);
             }
         }
