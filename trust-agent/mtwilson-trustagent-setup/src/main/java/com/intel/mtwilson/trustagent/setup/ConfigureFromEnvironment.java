@@ -18,19 +18,16 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
  */
 public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
+    MutableConfiguration configuration;
+    String[] variables;
+    AllCapsNamingStrategy allcaps;
+    Configuration env;
     
     @Override
     protected void configure() throws Exception {
-    }
-
-    @Override
-    protected void validate() throws Exception {
-    }
-
-    @Override
-    protected void execute() throws Exception {
-        MutableConfiguration configuration = getConfiguration();
-        String[] variables = new String[] { TrustagentConfiguration.MTWILSON_API_URL,
+        configuration = getConfiguration();
+        variables = new String[] {
+            TrustagentConfiguration.MTWILSON_API_URL,
             TrustagentConfiguration.MTWILSON_API_USERNAME,
             TrustagentConfiguration.MTWILSON_API_PASSWORD,
             TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1,
@@ -46,8 +43,26 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             TrustagentConfiguration.AIK_INDEX,
             TrustagentConfiguration.DAA_ENABLED
         };
-        AllCapsNamingStrategy allcaps = new AllCapsNamingStrategy();
-        Configuration env = new KeyTransformerConfiguration(allcaps, new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
+        allcaps = new AllCapsNamingStrategy();
+        env = new KeyTransformerConfiguration(allcaps, new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1
+    }
+
+    @Override
+    protected void validate() throws Exception {
+        for(String variable : variables) {
+            String confValue = configuration.getString(variable);
+//            String envValue = env.getString(variable);
+            if( confValue == null || confValue.isEmpty() ) {
+                validation("trustagent.properties variable [" + variable + "] cannot be null or empty");
+            }
+//            if( !confValue.equals(envValue)) {
+//                validation("[{}] variable for configuration [{}] does not match variable for environment [{}]", variable, confValue, envValue);
+//            }
+        }
+    }
+
+    @Override
+    protected void execute() throws Exception {
         for(String variable : variables) {
             String value = env.getString(variable);
             if( value != null && !value.isEmpty() ) {
