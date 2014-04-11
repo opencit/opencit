@@ -75,6 +75,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         for (String variable : variables) {
             String confValue = configuration.getString(variable);
             String envValue = env.getString(variable);
+            log.debug("comparing environment variable [" + envValue + "] with configuration variable [" + confValue + "]");
             if (envValue != null && !envValue.isEmpty()) {
                 if (confValue == null || confValue.isEmpty()) {
                     log.debug("environment variable " + variable + " with value " + envValue + " needs to be added to configuration");
