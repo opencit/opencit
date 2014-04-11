@@ -53,11 +53,24 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             String confValue = configuration.getString(variable);
 //            String envValue = env.getString(variable);
             if( confValue == null || confValue.isEmpty() ) {
-                validation("trustagent.properties variable [" + variable + "] cannot be null or empty");
+//                validation("trustagent.properties variable [" + variable + "] cannot be null or empty");
+                log.warn("trustagent.properties variable [{}] cannot be null or empty", variable);
             }
 //            if( !confValue.equals(envValue)) {
 //                validation("[{}] variable for configuration [{}] does not match variable for environment [{}]", variable, confValue, envValue);
 //            }
+        }
+        if( configuration.getString(TrustagentConfiguration.MTWILSON_API_URL) == null || configuration.getString(TrustagentConfiguration.MTWILSON_API_URL).isEmpty()) {
+            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_API_URL) + "] cannot be null or empty");
+        }
+        if( configuration.getString(TrustagentConfiguration.MTWILSON_API_USERNAME) == null || configuration.getString(TrustagentConfiguration.MTWILSON_API_USERNAME).isEmpty()) {
+            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_API_USERNAME) + "] cannot be null or empty");
+        }
+        if( configuration.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD) == null || configuration.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD).isEmpty()) {
+            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD) + "] cannot be null or empty");
+        }
+        if( configuration.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1) == null || configuration.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1).isEmpty()) {
+            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1) + "] cannot be null or empty");
         }
     }
 
