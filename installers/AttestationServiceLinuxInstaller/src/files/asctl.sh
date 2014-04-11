@@ -194,7 +194,7 @@ setup_interactive_install() {
       exit 1
     fi
   fi
-  update_ssl_port
+#  update_ssl_port
   create_saml_key 
 
   configure_privacyca_user
