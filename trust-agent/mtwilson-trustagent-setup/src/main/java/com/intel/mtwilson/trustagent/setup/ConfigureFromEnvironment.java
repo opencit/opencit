@@ -15,6 +15,10 @@ import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
@@ -25,6 +29,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
     PropertiesConfiguration fileconfig;
     MutableConfiguration configuration;
+    HashMap<String, String> returnconfig;
     String[] variables;
     AllCapsNamingStrategy allcaps;
     Configuration env;
@@ -67,39 +72,29 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             fileconfig = new PropertiesConfiguration();
         }
         
-        for(String variable : variables) {
+        for (String variable : variables) {
             String confValue = configuration.getString(variable);
-//            String envValue = env.getString(variable);
-            if( confValue == null || confValue.isEmpty() ) {
-//                validation("trustagent.properties variable [" + variable + "] cannot be null or empty");
-//                log.warn("trustagent.properties variable [{}] is null or empty", variable);
+            String envValue = env.getString(variable);
+            if (envValue != null && !envValue.isEmpty()) {
+                if (confValue == null || confValue.isEmpty()) {
+                    returnconfig.put(variable, envValue);
+                }
             }
-//            if( !confValue.equals(envValue)) {
-//                validation("[{}] variable for configuration [{}] does not match variable for environment [{}]", variable, confValue, envValue);
-//            }
-            log.debug("loading configuration variable [" + variable + "] with value [" + confValue + "]");
         }
-        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_API_URL) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_API_URL).isEmpty()) {
-            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_API_URL + "] cannot be null or empty");
-        }
-        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_API_USERNAME) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_API_USERNAME).isEmpty()) {
-            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_API_USERNAME + "] cannot be null or empty");
-        }
-        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD).isEmpty()) {
-            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_API_PASSWORD + "] cannot be null or empty");
-        }
-        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1).isEmpty()) {
-            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1 + "] cannot be null or empty");
+        
+        if (!returnconfig.isEmpty()) {
+            validation(returnconfig.size() + " environment variables need to be added to the configuration");
         }
     }
 
     @Override
     protected void execute() throws Exception {
-        for(String variable : variables) {
-            String value = env.getString(variable);
+        for(Entry<String, String> e : returnconfig.entrySet()) {
+            String key = e.getKey();
+            String value = e.getValue();
             if( value != null && !value.isEmpty() ) {
-                log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(variable), variable, value);
-                configuration.setString(variable, value);
+                log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(key), key, value);
+                configuration.setString(key, value);
             }
         }
     }
