@@ -77,12 +77,13 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             String envValue = env.getString(variable);
             if (envValue != null && !envValue.isEmpty()) {
                 if (confValue == null || confValue.isEmpty()) {
+                    log.debug("environment variable " + variable + " with value " + envValue + " needs to be added to configuration");
                     returnconfig.put(variable, envValue);
                 }
             }
         }
         
-        if (!returnconfig.isEmpty()) {
+        if (returnconfig != null && !returnconfig.isEmpty()) {
             validation(returnconfig.size() + " environment variables need to be added to the configuration");
         }
     }
