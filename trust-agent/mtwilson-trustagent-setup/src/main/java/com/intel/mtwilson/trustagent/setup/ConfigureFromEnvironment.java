@@ -8,9 +8,14 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
 import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.configuration.MutableConfiguration;
+import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
+import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 /**
  *
@@ -18,6 +23,7 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
  */
 public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
+    PropertiesConfiguration fileconfig;
     MutableConfiguration configuration;
     String[] variables;
     AllCapsNamingStrategy allcaps;
@@ -49,6 +55,18 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
+        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        if (file.exists()) {
+            log.debug("Loading just the configuration file {}", file.getAbsolutePath());
+            try (FileInputStream in = new FileInputStream(file)) {
+                Properties properties = new Properties();
+                properties.load(in);
+                fileconfig = new PropertiesConfiguration(properties);
+            }
+        } else {
+            fileconfig = new PropertiesConfiguration();
+        }
+        
         for(String variable : variables) {
             String confValue = configuration.getString(variable);
 //            String envValue = env.getString(variable);
@@ -59,18 +77,19 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
 //            if( !confValue.equals(envValue)) {
 //                validation("[{}] variable for configuration [{}] does not match variable for environment [{}]", variable, confValue, envValue);
 //            }
+            log.debug("loading configuration variable [" + variable + "] with value [" + confValue + "]");
         }
-        if( configuration.getString(TrustagentConfiguration.MTWILSON_API_URL) == null || configuration.getString(TrustagentConfiguration.MTWILSON_API_URL).isEmpty()) {
-            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_API_URL) + "] cannot be null or empty");
+        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_API_URL) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_API_URL).isEmpty()) {
+            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_API_URL + "] cannot be null or empty");
         }
-        if( configuration.getString(TrustagentConfiguration.MTWILSON_API_USERNAME) == null || configuration.getString(TrustagentConfiguration.MTWILSON_API_USERNAME).isEmpty()) {
-            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_API_USERNAME) + "] cannot be null or empty");
+        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_API_USERNAME) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_API_USERNAME).isEmpty()) {
+            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_API_USERNAME + "] cannot be null or empty");
         }
-        if( configuration.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD) == null || configuration.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD).isEmpty()) {
-            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD) + "] cannot be null or empty");
+        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_API_PASSWORD).isEmpty()) {
+            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_API_PASSWORD + "] cannot be null or empty");
         }
-        if( configuration.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1) == null || configuration.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1).isEmpty()) {
-            validation("trustagent.properties variable [" + configuration.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1) + "] cannot be null or empty");
+        if( fileconfig.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1) == null || fileconfig.getString(TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1).isEmpty()) {
+            validation("trustagent.properties variable [" + TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1 + "] cannot be null or empty");
         }
     }
 
