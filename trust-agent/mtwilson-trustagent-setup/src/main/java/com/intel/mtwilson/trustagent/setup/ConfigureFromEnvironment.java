@@ -54,7 +54,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
 //            String envValue = env.getString(variable);
             if( confValue == null || confValue.isEmpty() ) {
 //                validation("trustagent.properties variable [" + variable + "] cannot be null or empty");
-                log.warn("trustagent.properties variable [{}] is null or empty", variable);
+//                log.warn("trustagent.properties variable [{}] is null or empty", variable);
             }
 //            if( !confValue.equals(envValue)) {
 //                validation("[{}] variable for configuration [{}] does not match variable for environment [{}]", variable, confValue, envValue);
