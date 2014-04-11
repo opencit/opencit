@@ -375,18 +375,18 @@ monit_src_install() {
   fi
 }
 
-monit_install $MONIT_PACKAGE
-
-mkdir -p /etc/monit/conf.d
-backup_file /etc/monit/conf.d/ta.monit
-cp ta.monit /etc/monit/conf.d/ta.monit
-
-backup_file /etc/monit/monitrc
-cp monitrc /etc/monit/monitrc
-
-if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
- echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
-fi
+#monit_install $MONIT_PACKAGE     ############################# 20140411 SAVY: temporarily remove monit for 2.0 beta release
+#
+#mkdir -p /etc/monit/conf.d
+#backup_file /etc/monit/conf.d/ta.monit
+#cp ta.monit /etc/monit/conf.d/ta.monit
+#
+#backup_file /etc/monit/monitrc
+#cp monitrc /etc/monit/monitrc
+#
+#if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+# echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+#fi
 
 
 
