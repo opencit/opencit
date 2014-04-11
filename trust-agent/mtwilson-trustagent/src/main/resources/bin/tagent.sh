@@ -1,8 +1,21 @@
 #!/bin/bash
-#
-# chkconfig: 2345 80 30
-# description: Intel TrustAgent Service
-#
+### BEGIN INIT INFO
+# Provides:          tagent
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $portmap
+# Should-Stop:       $portmap
+# X-Start-Before:    nis
+# X-Stop-After:      nis
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# X-Interactive:     true
+# Short-Description: trust agent script
+# Description:       Main script to run trust agent tasks
+### END INIT INFO
+DESC="Trust Agent"
+NAME=tagent
+DAEMON=/opt/trustagent/bin/$NAME
 
 ###################################################################################################
 #Set environment specific variables here 
