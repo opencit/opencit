@@ -175,35 +175,29 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     
     public String[] getTrustagentTlsCertIp() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
-        String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP).split(",");
-        if(TlsCertIPs != null && TlsCertIPs.length > 0){
+        String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "").split(",");
+        if (TlsCertIPs != null && TlsCertIPs.length > 0) {
             return TlsCertIPs;
-        } else {
-            List<String> TlsCertIPsList = getNetworkIPs();
-            String[] ipListArray = new String[TlsCertIPsList.size()];
-            if(ipListArray != null && ipListArray.length > 0){
-                return TlsCertIPsList.toArray(ipListArray);
-            }
-            else {
-                return new String[]{"127.0.0.1"};
-            }
         }
+        List<String> TlsCertIPsList = getNetworkIPs();
+        String[] ipListArray = new String[TlsCertIPsList.size()];
+        if (ipListArray != null && ipListArray.length > 0) {
+            return TlsCertIPsList.toArray(ipListArray);
+        }
+        return new String[]{"127.0.0.1"};
     }
     public String[] getTrustagentTlsCertDns() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
-        String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS).split(",");
-        if(TlsCertDNs != null && TlsCertDNs.length > 0){
+        String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
+        if (TlsCertDNs != null && TlsCertDNs.length > 0) {
             return TlsCertDNs;
-        } else {
-            List<String> TlsCertDNsList = getNetworkDNs();
-            String[] dnListArray = new String[TlsCertDNsList.size()];
-            if(dnListArray != null && dnListArray.length > 0){
-                return TlsCertDNsList.toArray(dnListArray);
-            }
-            else {
-                return new String[]{"localhost"};
-            }
         }
+        List<String> TlsCertDNsList = getNetworkDNs();
+        String[] dnListArray = new String[TlsCertDNsList.size()];
+        if (dnListArray != null && dnListArray.length > 0) {
+            return TlsCertDNsList.toArray(dnListArray);
+        }
+        return new String[]{"localhost"};
     }
     
     public File getTrustagentKeystoreFile() {
