@@ -12,8 +12,14 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.codec.DecoderException;
@@ -139,11 +145,65 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public String getTrustagentTlsCertDn() {
         return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
     }
-    public String[] getTrustagentTlsCertIp() {
-        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
+    
+    private List<String> getNetworkIPs() throws SocketException {
+        ArrayList<String> ipList = new ArrayList<>();
+        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+        Enumeration<InetAddress> inetAddresses;
+        for (NetworkInterface netint : Collections.list(nets)) {
+            inetAddresses = netint.getInetAddresses();
+            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                if (inetAddress.getHostAddress() != null && !inetAddress.getHostAddress().isEmpty())
+                    ipList.add(inetAddress.getHostAddress());
+            }
+        }
+        return ipList;
     }
-    public String[] getTrustagentTlsCertDns() {
-        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
+    private List<String> getNetworkDNs() throws SocketException {
+        ArrayList<String> dnList = new ArrayList<>();
+        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+        Enumeration<InetAddress> inetAddresses;
+        for (NetworkInterface netint : Collections.list(nets)) {
+            inetAddresses = netint.getInetAddresses();
+            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                if (inetAddress.getHostName() != null && !inetAddress.getHostName().isEmpty())
+                    dnList.add(inetAddress.getHostName());
+            }
+        }
+        return dnList;
+    }
+    
+    public String[] getTrustagentTlsCertIp() throws SocketException {
+//        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
+        String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP).split(",");
+        if(TlsCertIPs != null && TlsCertIPs.length > 0){
+            return TlsCertIPs;
+        } else {
+            List<String> TlsCertIPsList = getNetworkIPs();
+            String[] ipListArray = new String[TlsCertIPsList.size()];
+            if(ipListArray != null && ipListArray.length > 0){
+                return TlsCertIPsList.toArray(ipListArray);
+            }
+            else {
+                return new String[]{"127.0.0.1"};
+            }
+        }
+    }
+    public String[] getTrustagentTlsCertDns() throws SocketException {
+//        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
+        String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS).split(",");
+        if(TlsCertDNs != null && TlsCertDNs.length > 0){
+            return TlsCertDNs;
+        } else {
+            List<String> TlsCertDNsList = getNetworkDNs();
+            String[] dnListArray = new String[TlsCertDNsList.size()];
+            if(dnListArray != null && dnListArray.length > 0){
+                return TlsCertDNsList.toArray(dnListArray);
+            }
+            else {
+                return new String[]{"localhost"};
+            }
+        }
     }
     
     public File getTrustagentKeystoreFile() {
