@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +29,7 @@ import org.apache.commons.codec.binary.Hex;
  * @author jbuhacoff
  */
 public class TrustagentConfiguration extends AbstractConfiguration {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustagentConfiguration.class);
     // Variables such as TRUSTAGENT_HOME, TRUSTAGENT_CONF, etc. for filesystem
     // paths are not defined here; see MyFilesystem instead.
     // Trust Agent administrator username and password is not defined here,
@@ -153,6 +153,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         for (NetworkInterface netint : Collections.list(nets)) {
             inetAddresses = netint.getInetAddresses();
             for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                log.debug("Found InetAddress [{}] with IP [{}] and Domain Name [{}]", inetAddress.getCanonicalHostName(), inetAddress.getHostAddress(), inetAddress.getHostName());
                 if (inetAddress.getHostAddress() != null && !inetAddress.getHostAddress().isEmpty())
                     ipList.add(inetAddress.getHostAddress());
             }
@@ -166,7 +167,8 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         for (NetworkInterface netint : Collections.list(nets)) {
             inetAddresses = netint.getInetAddresses();
             for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                if (inetAddress.getHostName() != null && !inetAddress.getHostName().isEmpty())
+                log.debug("Found InetAddress [{}] with IP [{}] and Domain Name [{}]", inetAddress.getCanonicalHostName(), inetAddress.getHostAddress(), inetAddress.getHostName());
+                if (inetAddress.getHostName() != null && !inetAddress.getHostName().isEmpty() && !inetAddress.getHostName().equals(inetAddress.getHostAddress()))
                     dnList.add(inetAddress.getHostName());
             }
         }
@@ -176,27 +178,33 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public String[] getTrustagentTlsCertIp() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
         String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "").split(",");
-        if (TlsCertIPs != null && TlsCertIPs.length > 0) {
+        if (TlsCertIPs != null && !TlsCertIPs[0].isEmpty()) {
+            log.debug("Retrieved IPs [{}] from trust agent configuration", TlsCertIPs);
             return TlsCertIPs;
         }
         List<String> TlsCertIPsList = getNetworkIPs();
         String[] ipListArray = new String[TlsCertIPsList.size()];
         if (ipListArray != null && ipListArray.length > 0) {
+            log.debug("Retrieved IPs [{}] from network configuration", ipListArray);
             return TlsCertIPsList.toArray(ipListArray);
         }
+        log.debug("Returning default IP address [127.0.0.1]");
         return new String[]{"127.0.0.1"};
     }
     public String[] getTrustagentTlsCertDns() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
         String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
-        if (TlsCertDNs != null && TlsCertDNs.length > 0) {
+        if (TlsCertDNs != null && !TlsCertDNs[0].isEmpty()) {
+            log.debug("Retrieved Domain Names [{}] trust agent from configuration", TlsCertDNs);
             return TlsCertDNs;
         }
         List<String> TlsCertDNsList = getNetworkDNs();
         String[] dnListArray = new String[TlsCertDNsList.size()];
         if (dnListArray != null && dnListArray.length > 0) {
+            log.debug("Retrieved Domain Names [{}] from network configuration", dnListArray);
             return TlsCertDNsList.toArray(dnListArray);
         }
+        log.debug("Returning default Domain Name [localhost]");
         return new String[]{"localhost"};
     }
     
