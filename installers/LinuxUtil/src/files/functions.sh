@@ -2045,10 +2045,10 @@ glassfish_install() {
   GLASSFISH_HOME=""
   glassfish=""
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
-  GLASSFISH_YUM_PACKAGES="unzip expect"
-  GLASSFISH_APT_PACKAGES="unzip expect"
-  GLASSFISH_YAST_PACKAGES="unzip expect"
-  GLASSFISH_ZYPPER_PACKAGES="unzip expect"
+  GLASSFISH_YUM_PACKAGES="unzip"
+  GLASSFISH_APT_PACKAGES="unzip"
+  GLASSFISH_YAST_PACKAGES="unzip"
+  GLASSFISH_ZYPPER_PACKAGES="unzip"
   glassfish_detect
 
   if glassfish_running; then glassfish_stop; fi
@@ -2132,7 +2132,8 @@ glassfish_admin_user() {
   fi
   
   if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
-    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
+    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd
+    echo "AS_ADMIN_NEWPASSWORD=${AS_ADMIN_PASSWORD}" >> $GF_CONFIG_PATH/admin.passwd
   fi
 
   if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
@@ -2145,18 +2146,21 @@ glassfish_admin_user() {
   #echo "Glassfish will now ask you for the same information:"
   # $glassfish is an alias for full path of asadmin
   
-(
-$expect << EOD
-spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
-expect "Enter the new admin password>"
-send "$WEBSERVICE_PASSWORD\r"
-expect "Enter the new admin password again>"
-send "$WEBSERVICE_PASSWORD\r"
-interact
-expect eof
-EOD
-) > /dev/null 2>&1
+#(
+#$expect << EOD
+#spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+#expect "Enter the new admin password>"
+#send "$WEBSERVICE_PASSWORD\r"
+#expect "Enter the new admin password again>"
+#send "$WEBSERVICE_PASSWORD\r"
+#interact
+#expect eof
+#EOD
+#) > /dev/null 2>&1
+  $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
 
+  # set the password file appropriately for further reads
+  echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
   glassfish_detect
   # XXX it asks for the password twice ...  can we script with our known value?
   $glassfish enable-secure-admin
