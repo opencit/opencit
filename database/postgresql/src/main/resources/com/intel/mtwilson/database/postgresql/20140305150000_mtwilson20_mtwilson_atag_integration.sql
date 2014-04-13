@@ -13,7 +13,7 @@ CREATE  TABLE mw_tag_kvattribute (
   value VARCHAR(255) NOT NULL ,
   PRIMARY KEY (id) );
 
-ALTER TABLE  mw_tag_kvattribute ADD CONSTRAINT mw_kvattributes_index UNIQUE (lower(name), lower(value));
+Create unique index mw_tag_kvattribute_unique_constraint on mw_tag_kvattribute(lower(name), lower(value));
   
 CREATE  TABLE mw_tag_selection (
   id CHAR(36) NOT NULL,
