@@ -11,6 +11,8 @@ import com.intel.dcsg.cpg.configuration.MutableConfiguration;
 import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import java.util.ArrayList;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -49,25 +51,29 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        for(String variable : variables) {
+        ArrayList<String> updatelist = new ArrayList<>();
+        for (String variable : variables) {
+            String envValue = env.getString(variable);
             String confValue = configuration.getString(variable);
-//            String envValue = env.getString(variable);
-            if( confValue == null || confValue.isEmpty() ) {
-                validation("trustagent.properties variable [" + variable + "] cannot be null or empty");
+            log.debug("checking to see if environment variable [{}] needs to be added to configuration", variable);
+            if (envValue != null && !envValue.isEmpty() && (confValue == null || !confValue.equals(envValue))) {
+                log.debug("environment variable [{}] needs to be added to configuration", variable);
+                updatelist.add(variable);
             }
-//            if( !confValue.equals(envValue)) {
-//                validation("[{}] variable for configuration [{}] does not match variable for environment [{}]", variable, confValue, envValue);
-//            }
+        }
+        
+        if (!updatelist.isEmpty()) {
+            validation("Updates available for %d settings: %s", updatelist.size(), StringUtils.join(updatelist, ","));
         }
     }
 
     @Override
     protected void execute() throws Exception {
-        for(String variable : variables) {
-            String value = env.getString(variable);
-            if( value != null && !value.isEmpty() ) {
-                log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(variable), variable, value);
-                configuration.setString(variable, value);
+        for (String variable : variables) {
+            String envValue = env.getString(variable);
+            if (envValue != null && !envValue.isEmpty()) {
+                log.debug("Copying environment variable {} to configuration property {}", allcaps.toAllCaps(variable), variable);
+                configuration.setString(variable, envValue);
             }
         }
     }

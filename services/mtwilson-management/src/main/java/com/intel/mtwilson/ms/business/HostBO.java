@@ -1538,7 +1538,7 @@ public class HostBO extends BaseBO {
             log.info("Added certificate from PrivacyCA.pem");
         }
         catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.cer
+            // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificate from file
             log.error("Cannot load PrivacyCA.pem", e);
         }

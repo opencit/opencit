@@ -230,12 +230,12 @@ public class SetupManager implements Command {
     protected void execute(List<SetupTask> tasks) throws IOException {
         PropertiesConfiguration properties = loadConfiguration();
         Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
-        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
+//        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
         boolean error = false;
         try {
             for (SetupTask setupTask : tasks) {
                 String taskName = setupTask.getClass().getSimpleName();
-                setupTask.setConfiguration(configuration);
+                setupTask.setConfiguration(properties);
                 try {
                     if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
                         log.debug("Skipping {}", taskName);
@@ -292,6 +292,7 @@ public class SetupManager implements Command {
             log.debug("Setup error", e);
         }
         storeConfiguration(properties);
+        
         if( error ) {
             // the main application (cpg-console Main) will print this
             // message and return a non-zero exit code
@@ -316,9 +317,11 @@ public class SetupManager implements Command {
 
     protected void storeConfiguration(PropertiesConfiguration configuration) throws IOException {
         // write the configuration back to disk
+        log.debug("Starting store configuration to file");
         File file = getConfigurationFile();
         try (FileOutputStream out = new FileOutputStream(file)) {
             configuration.getProperties().store(out, "saved by mtwilson setup");
         }
+        log.debug("Finished store configuration to file");
     }
 }

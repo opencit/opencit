@@ -93,9 +93,9 @@ public class UpdateSslPort extends LocalSetupTask {
         String newShiroConfig = "";
         Collection<Ini.Section> sections = shiroIni.getSections();
         for (Ini.Section section : sections) {
-            newShiroConfig = newShiroConfig + "[" + section.getName() + "]\n";
+            newShiroConfig = newShiroConfig + "[" + section.getName() + "]\r\n";
             for (String sectionKey : section.keySet()) {
-                newShiroConfig = newShiroConfig + sectionKey + " = " + section.get(sectionKey) + "\n";
+                newShiroConfig = newShiroConfig + sectionKey + " = " + section.get(sectionKey) + "\r\n";
             }
         }
         
