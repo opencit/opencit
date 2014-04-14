@@ -261,6 +261,9 @@ if [[ $hostAllow != *$MTWILSON_IP* ]]; then
   update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
 fi
 
+# This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
+ update_property_in_file "mtwilson.api.url" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_API_BASEURL"
+
 echo "Adding symlink for /opt/mtwilson/configuration..."
 # temp symlink -- SAVY added 2014-02-26
 if [[ ! -h "/opt/mtwilson/configuration" ]]; then
