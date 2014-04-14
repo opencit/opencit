@@ -23,6 +23,10 @@
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
         
+        <!-- Workaround for IE8 issue: Console object does not exist and hence console.log errors out with an exception -->
+        <script type="text/javascript">
+            var console=console||{"log":function(){}};
+        </script>
         <script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
