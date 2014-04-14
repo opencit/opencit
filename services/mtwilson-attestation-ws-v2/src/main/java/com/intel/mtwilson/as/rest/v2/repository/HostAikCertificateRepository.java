@@ -16,6 +16,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("host_aik_certificates:search")    
     public HostAikCertificateCollection search(HostAikCertificateFilterCriteria criteria) {
         HostAikCertificateCollection objCollection = new HostAikCertificateCollection();
         try {
@@ -48,6 +50,7 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
     }
 
     @Override
+    @RequiresPermissions("host_aik_certificates:retrieve")    
     public HostAikCertificate retrieve(HostAikCertificateLocator locator) {
         if (locator == null || locator.hostUuid == null) { return null; }
         String id = locator.hostUuid.toString();
@@ -69,11 +72,13 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
     }
 
     @Override
+    @RequiresPermissions("host_aik_certificates:store")    
     public void store(HostAikCertificate item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_aik_certificates:create")    
     public void create(HostAikCertificate item) {
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -93,11 +98,13 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
     }
 
     @Override
+    @RequiresPermissions("host_aik_certificates:delete")    
     public void delete(HostAikCertificateLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_aik_certificates:delete,search")    
     public void delete(HostAikCertificateFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

@@ -22,6 +22,7 @@ import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+    @RequiresPermissions("hosts:search")    
     public HostCollection search(HostFilterCriteria criteria) {
         HostCollection objCollection = new HostCollection();
         try {
@@ -73,6 +75,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     }
 
     @Override
+    @RequiresPermissions("hosts:retrieve")    
     public Host retrieve(HostLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
         String id = locator.id.toString();
@@ -93,6 +96,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     }
 
     @Override
+    @RequiresPermissions("hosts:store")    
     public void store(Host item) {
         TxtHostRecord obj = new TxtHostRecord();
         try {
@@ -148,6 +152,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     }
 
     @Override
+    @RequiresPermissions("hosts:create")    
     public void create(Host item) {
         TxtHostRecord obj = new TxtHostRecord();
         try {
@@ -203,6 +208,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     }
 
     @Override
+    @RequiresPermissions("hosts:delete")    
     public void delete(HostLocator locator) {
         if (locator == null || locator.id == null) { return; }
         String id = locator.id.toString();
@@ -217,6 +223,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     }
 
     @Override
+    @RequiresPermissions("hosts:delete,search")    
     public void delete(HostFilterCriteria criteria) {
         // TODO: Call into the search function and delete all the items. Low priority for WW 14
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

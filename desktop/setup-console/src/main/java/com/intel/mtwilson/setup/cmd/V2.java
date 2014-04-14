@@ -37,7 +37,7 @@ public class V2 implements Command {
         
         PascalCaseNamingStrategy name = new PascalCaseNamingStrategy();
         String className = name.toPascalCase(hyphenatedTaskName);
-        String[] packageNames = new String[] { "com.intel.mtwilson.setup.tasks", "com.intel.mtwilson.tag.setup", "com.intel.mtwilson.shiro.setup", "com.intel.mtwilson.privacyca.setup" };
+        String[] packageNames = new String[] { "com.intel.mtwilson.setup.tasks", "com.intel.mtwilson.tag.setup", "com.intel.mtwilson.shiro.setup", "com.intel.mtwilson.privacyca.setup", "com.intel.mtwilson.setup.console.cmd" };
         SetupTask setupTask = null;
         for(String packageName : packageNames) {
             try {

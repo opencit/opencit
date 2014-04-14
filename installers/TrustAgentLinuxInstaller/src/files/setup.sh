@@ -8,7 +8,7 @@ intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_env_filename=${package_dir}/${package_name}.env
+package_env_filename=/root/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 ASSET_TAG_SETUP="y"
 
@@ -134,6 +134,8 @@ fi
 
 intel_conf_dir=/opt/trustagent/configuration
 package_dir=/opt/trustagent
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_install_filename=${package_dir}/${package_name}.install
 
 
 
@@ -373,18 +375,18 @@ monit_src_install() {
   fi
 }
 
-monit_install $MONIT_PACKAGE
-
-mkdir -p /etc/monit/conf.d
-backup_file /etc/monit/conf.d/ta.monit
-cp ta.monit /etc/monit/conf.d/ta.monit
-
-backup_file /etc/monit/monitrc
-cp monitrc /etc/monit/monitrc
-
-if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
- echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
-fi
+#monit_install $MONIT_PACKAGE     ############################# 20140411 SAVY: temporarily remove monit for 2.0 beta release
+#
+#mkdir -p /etc/monit/conf.d
+#backup_file /etc/monit/conf.d/ta.monit
+#cp ta.monit /etc/monit/conf.d/ta.monit
+#
+#backup_file /etc/monit/monitrc
+#cp monitrc /etc/monit/monitrc
+#
+#if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+# echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+#fi
 
 
 
@@ -428,7 +430,7 @@ fi
 # and make sure it's successful before trying to start the trust agent
 # NOTE: only the output from start-http-server is redirected to the logfile;
 #       the stdout from the setup command will be displayed
-/usr/local/bin/tagent setup && /usr/local/bin/tagent start-http-server >> $logfile  2>&1
+/usr/local/bin/tagent setup && (/usr/local/bin/tagent start-http-server &) >> $logfile  2>&1
 
 # create a trustagent username "mtwilson" with no password and all privileges
 # which allows mtwilson to access it until mtwilson UI is updated to allow

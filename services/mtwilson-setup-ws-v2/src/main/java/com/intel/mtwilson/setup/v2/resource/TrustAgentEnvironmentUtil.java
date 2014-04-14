@@ -31,6 +31,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  * Utility for the UI to provide users with their "trustagent.env" file contents
@@ -95,6 +96,7 @@ public class TrustAgentEnvironmentUtil {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
+    @RequiresPermissions("files:create")
     public String generateTrustagentEnvFileText(@BeanParam BasicAuthorizationInput input, @Context HttpServletRequest request) throws Exception {
         if (input.username.contains(":")) {
             throw new IllegalArgumentException("The colon ':' is not allowed in usernames");
@@ -110,6 +112,7 @@ public class TrustAgentEnvironmentUtil {
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML})
+    @RequiresPermissions("files:create")
     public TrustagentEnvFileOutput generateTrustagentEnvFile(BasicAuthorizationInput input, @Context HttpServletRequest request) throws Exception {
         TrustagentEnvFileOutput output = new TrustagentEnvFileOutput();
         output.content = generateTrustagentEnvFileText(input, request);
@@ -118,6 +121,7 @@ public class TrustAgentEnvironmentUtil {
     
     @GET
     @Produces(MediaType.TEXT_HTML)
+    @RequiresPermissions("files:retrieve")
     public String getForm() {
         return "<html><body><form method=\"post\" action=\"trustagent-env-file.txt\"><input type=\"text\" name=\"username\"/><input type=\"password\" name=\"password\"/><input type=\"submit\"/></form></body></html>";
     }

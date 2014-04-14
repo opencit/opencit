@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +57,14 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         }
         keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
-        RsaCredentialX509 credential = keystore.getRsaCredentialX509(TLS_ALIAS, keystorePassword);
+        RsaCredentialX509 credential;
+        try {
+            credential = keystore.getRsaCredentialX509(TLS_ALIAS, keystorePassword);
+        } catch (FileNotFoundException e) {
+            log.warn("Keystore does not contain the specified key [{}]", TLS_ALIAS);
+            validation("Keystore does not contain the specified key %s", TLS_ALIAS);
+            return;
+        }
 //        log.debug("credential {}", credential);
 //        log.debug("credential certificate {}", credential.getCertificate());
 //        log.debug("credential certificate encoded {}", credential.getCertificate().getEncoded());
@@ -85,9 +93,11 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         //        mtwilson could be "signed by trusted ca" instead of
         //        "that specific cert"
         for(String san : ip) {
+            log.debug("Adding Subject Alternative Name (SAN) with IP address: {}", san);
             builder.ipAlternativeName(san.trim());
         }
         for(String san : dns) {
+            log.debug("Adding Subject Alternative Name (SAN) with Domain Name: {}", san);
             builder.dnsAlternativeName(san.trim());
         }
         X509Certificate tlscert = builder.build();

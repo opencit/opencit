@@ -75,9 +75,9 @@ import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
-import com.intel.mtwilson.tag.model.Selection;
-import com.intel.mtwilson.tag.model.SelectionCollection;
-import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
+//import com.intel.mtwilson.tag.model.Selection;
+//import com.intel.mtwilson.tag.model.SelectionCollection;
+//import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
+//import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
 /**
  * @author yuvrajsx
  *
@@ -561,6 +561,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             responseView.addObject("message", "Input Parameters are NULL.");
             return responseView;
         }
+        log.debug("hostListString = " + hostListString);
 
         try {
             // Now get the API object from the session
@@ -966,21 +967,21 @@ public class ManagementConsoleDataController extends MultiActionController {
 
         // TODO-stdale 
         // Need to talk to ryan about the best way to get the list of selections here 
-        List<String> selectionList = new ArrayList<String>();
-        selectionList.add("N/A");
-        SelectionRepository repo = new SelectionRepository();  
-        SelectionFilterCriteria criteria = new SelectionFilterCriteria();
-        criteria.nameEqualTo = "";
-        SelectionCollection collection = new SelectionCollection();
+        //List<String> selectionList = new ArrayList<String>();
+        //selectionList.add("N/A");
+        //SelectionRepository repo = new SelectionRepository();  
+        //SelectionFilterCriteria criteria = new SelectionFilterCriteria();
+        //criteria.nameEqualTo = "";
+        //SelectionCollection collection = new SelectionCollection();
         
-        collection = repo.search(criteria);
-        List<Selection> list = collection.getSelections();
+        //collection = repo.search(criteria);
+        //List<Selection> list = collection.getSelections();
         
-        for(Selection s: list) {
-            selectionList.add(s.getName());
-        }
+        //for(Selection s: list) {
+        //    selectionList.add(s.getName());
+        //}
         
-        responseView.addObject("selectionList",selectionList);
+        //responseView.addObject("selectionList",selectionList);
         
         return responseView;
     }

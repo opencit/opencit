@@ -188,7 +188,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
-    @RequiresPermissions("certificates:create")         
+    @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
         Certificate certificate = createOneJson(locator, json, request, response);
         return certificate.getCertificate();
@@ -196,7 +196,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @RequiresPermissions("certificates:create")         
+    @RequiresPermissions("tag_certificates:create")         
     public Certificate createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
@@ -228,7 +228,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
-    @RequiresPermissions("certificates:create")         
+    @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
         Certificate certificate = createOneXml(locator, xml, request, response);
         return certificate.getCertificate();
@@ -236,7 +236,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    @RequiresPermissions("certificates:create")         
+    @RequiresPermissions("tag_certificates:create")         
     public Certificate createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
@@ -268,7 +268,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(OtherMediaType.MESSAGE_RFC822)
     @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
-    @RequiresPermissions("certificates:create")         
+    @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         

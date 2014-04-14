@@ -711,6 +711,7 @@ register_startup_script() {
   # Ubuntu
   updatercd=`which update-rc.d  2>/dev/null`
   if [ -n "$updatercd" ]; then
+    $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults  2>/dev/null
   fi
 
@@ -2044,10 +2045,10 @@ glassfish_install() {
   GLASSFISH_HOME=""
   glassfish=""
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
-  GLASSFISH_YUM_PACKAGES="unzip expect"
-  GLASSFISH_APT_PACKAGES="unzip expect"
-  GLASSFISH_YAST_PACKAGES="unzip expect"
-  GLASSFISH_ZYPPER_PACKAGES="unzip expect"
+  GLASSFISH_YUM_PACKAGES="unzip"
+  GLASSFISH_APT_PACKAGES="unzip"
+  GLASSFISH_YAST_PACKAGES="unzip"
+  GLASSFISH_ZYPPER_PACKAGES="unzip"
   glassfish_detect
 
   if glassfish_running; then glassfish_stop; fi
@@ -2131,7 +2132,8 @@ glassfish_admin_user() {
   fi
   
   if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
-    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
+    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd
+    echo "AS_ADMIN_NEWPASSWORD=${AS_ADMIN_PASSWORD}" >> $GF_CONFIG_PATH/admin.passwd
   fi
 
   if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
@@ -2144,18 +2146,21 @@ glassfish_admin_user() {
   #echo "Glassfish will now ask you for the same information:"
   # $glassfish is an alias for full path of asadmin
   
-(
-$expect << EOD
-spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
-expect "Enter the new admin password>"
-send "$WEBSERVICE_PASSWORD\r"
-expect "Enter the new admin password again>"
-send "$WEBSERVICE_PASSWORD\r"
-interact
-expect eof
-EOD
-) > /dev/null 2>&1
+#(
+#$expect << EOD
+#spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+#expect "Enter the new admin password>"
+#send "$WEBSERVICE_PASSWORD\r"
+#expect "Enter the new admin password again>"
+#send "$WEBSERVICE_PASSWORD\r"
+#interact
+#expect eof
+#EOD
+#) > /dev/null 2>&1
+  $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
 
+  # set the password file appropriately for further reads
+  echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
   glassfish_detect
   # XXX it asks for the password twice ...  can we script with our known value?
   $glassfish enable-secure-admin
@@ -3274,7 +3279,7 @@ webservice_running() {
 }
 webservice_running_report() {
   local webservice_application_name="$1"
-  echo -n "Deploying ${webservice_application_name} to webserver... "
+  echo -n "Checking if ${webservice_application_name} is deployed on webserver... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
     echo_success "Deployed"
@@ -3284,7 +3289,7 @@ webservice_running_report() {
 }
 webservice_running_report_wait() {
   local webservice_application_name="$1"
-  echo -n "Deploying ${webservice_application_name} to webserver..."
+  echo -n "Checking if ${webservice_application_name} is deployed on webserver..."
   webservice_running "${webservice_application_name}"
   for (( c=1; c<=10; c++ ))
   do

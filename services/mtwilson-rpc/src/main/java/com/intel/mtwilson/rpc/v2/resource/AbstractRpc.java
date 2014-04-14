@@ -84,6 +84,7 @@ public class AbstractRpc {
     
     
     protected byte[] toXml(Object inputObject) {
+        log.info("BlockRPC: input xml is {}.", xstream.toXML(inputObject));
         return xstream.toXML(inputObject).getBytes(Charset.forName("UTF-8"));
     }
     

@@ -112,7 +112,7 @@ public class i18n {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locales")
     //@RolesAllowed({"Security"})
-    @RequiresPermissions("users:retrieve")
+    //@RequiresPermissions("users:retrieve")
     public String getLocales() throws IOException {
         log.debug("Retrieving available locales: {}", Arrays.toString(My.configuration().getAvailableLocales()));
         return Arrays.toString(My.configuration().getAvailableLocales());

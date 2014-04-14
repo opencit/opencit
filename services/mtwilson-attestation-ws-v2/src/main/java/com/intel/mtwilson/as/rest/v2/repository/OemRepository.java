@@ -19,6 +19,7 @@ import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.OemBO;
 
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     private Logger log = LoggerFactory.getLogger(getClass().getName());
         
     @Override
+    @RequiresPermissions("oems:search")    
     public OemCollection search(OemFilterCriteria criteria) {
         // start with a collection instance; if we don't find anything we'll return the empty collection
         OemCollection oemCollection = new OemCollection();
@@ -65,6 +67,7 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     }
 
     @Override
+    @RequiresPermissions("oems:retrieve")    
     public Oem retrieve(OemLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
         String id = locator.id.toString();
@@ -85,6 +88,7 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     }
 
     @Override
+    @RequiresPermissions("oems:store")    
     public void store(Oem item) {
         OemData obj = new OemData();
         try {
@@ -103,6 +107,7 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     }
 
     @Override
+    @RequiresPermissions("oems:create")    
     public void create(Oem item) {
         OemData obj = new OemData();
         try {
@@ -118,6 +123,7 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     }
 
     @Override
+    @RequiresPermissions("oems:delete")    
     public void delete(OemLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         String id = locator.id.toString();
@@ -143,6 +149,7 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     }
 
     @Override
+    @RequiresPermissions("oems:delete,search")    
     public void delete(OemFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

@@ -472,11 +472,11 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
-        String locales = conf.getString("mtwilson.locales");
+//        String locales = conf.getString("mtwilson.locales");
+        String locales = conf.getProperty("mtwilson.locales").toString();
         if( locales == null || locales.isEmpty() ) {
             return new String[] { LocaleUtil.toLanguageTag(Locale.getDefault()) };
         }
-//        return conf.getString("mtwilson.locales", "en").split(",");
         String localeParsed = locales.replaceAll("\\s+", "");
         return localeParsed.substring(1, localeParsed.length() - 1).split(",");
     }

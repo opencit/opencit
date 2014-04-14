@@ -43,7 +43,7 @@ public class MtWilsonImportTagCertificate implements Runnable{
     }
     
     @Override
-    @RequiresPermissions("certificates:import")         
+    @RequiresPermissions("tag_certificates:import")         
     public void run() {
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {

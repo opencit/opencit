@@ -24,6 +24,7 @@ import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.Collection;
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("mles:search")    
     public MleCollection search(MleFilterCriteria criteria) {
         MleCollection mleCollection = new MleCollection();
         try {
@@ -84,6 +86,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     }
 
     @Override
+    @RequiresPermissions("mles:retrieve")    
     public Mle retrieve(MleLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
         String id = locator.id.toString();
@@ -104,6 +107,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     }
 
     @Override
+    @RequiresPermissions("mles:store")    
     public void store(Mle item) {
         try {
             // Only the description and the PCR white lists are editable.
@@ -123,6 +127,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     }
 
     @Override
+    @RequiresPermissions("mles:create")    
     public void create(Mle item) {
         try {
             // Since the new APIs accept the UUID of the OEM and OS associated with the MLE, we need to verify the UUIDs
@@ -169,6 +174,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     }
 
     @Override
+    @RequiresPermissions("mles:delete")    
     public void delete(MleLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         String id = locator.id.toString();
@@ -183,6 +189,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     }
     
     @Override
+    @RequiresPermissions("mles:delete,search")    
     public void delete(MleFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

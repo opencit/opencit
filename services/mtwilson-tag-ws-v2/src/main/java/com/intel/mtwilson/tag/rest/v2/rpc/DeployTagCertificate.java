@@ -61,7 +61,7 @@ public class DeployTagCertificate implements Runnable{
     
     
     @Override
-    @RequiresPermissions({"certificates:deploy","hosts:search"})         
+    @RequiresPermissions({"tag_certificates:deploy","hosts:search"})         
     public void run() {
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -73,7 +73,7 @@ public class DeployTagCertificate implements Runnable{
                 Date today = new Date();
                 if (today.before(obj.getNotBefore()) || today.after(obj.getNotAfter())) {
                     log.error("Certificate with subject {} is expired/invalid. Will not be deployed.", obj.getSubject());
-                    throw new WebApplicationException("Certificate with subject is expired/invalid. Will not be deployed.", Response.Status.BAD_REQUEST);                    
+                    throw new WebApplicationException("Certificate with subject is expired/invalid. Will not be deployed.", Response.Status.BAD_REQUEST);
                 }
                 
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
@@ -91,6 +91,9 @@ public class DeployTagCertificate implements Runnable{
                 }
                 
                 deployAssetTagToHost(obj.getSha1(), hostRecord);
+            } else {
+                log.error("Failed to retreive certificate while trying to discover host by certificate ID [{}].", obj.getSubject());
+                throw new WebApplicationException("Failed to retreive certificate while trying to discover host by certificate ID.", Response.Status.BAD_REQUEST);
             }
 
         } catch (WebApplicationException aex) {

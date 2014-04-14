@@ -12,6 +12,7 @@ import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.FileLocator;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -27,6 +28,7 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     }
     
     @Override
+    @RequiresPermissions("files:search")    
     public FileCollection search(FileFilterCriteria criteria) {
         try {
             log.debug("File search: {}", mapper.writeValueAsString(criteria));
@@ -44,6 +46,7 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     }
 
     @Override
+    @RequiresPermissions("files:retrieve")    
     public File retrieve(FileLocator locator) {
 //        String id = locator.id;
         log.debug("File retrieve: {}", locator.id);
@@ -58,6 +61,7 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
         return file;
     }
     
+    @RequiresPermissions("files:retrieve")    
     public File retrieveWithContent(FileLocator locator) {
 //        String id = locator.id;
         log.debug("File retrieve: {}", locator.id);
@@ -73,6 +77,7 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     }
 
     @Override
+    @RequiresPermissions("files:create")    
     public void create(File item) {
         try {
             log.debug("File create: {}", mapper.writeValueAsString(item));
@@ -82,7 +87,9 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
         }
         // store it...
     }
+
     @Override
+    @RequiresPermissions("files:store")    
     public void store(File item) {
         try {
             log.debug("File store: {}", mapper.writeValueAsString(item));
@@ -94,15 +101,15 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     }
 
     @Override
+    @RequiresPermissions("files:delete")    
     public void delete(FileLocator locator) {
         log.debug("File delete: {}", locator.id.toString());
     }
 
     @Override
+    @RequiresPermissions("files:delete")    
     public void delete(FileFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-
     
 }

@@ -97,7 +97,7 @@ cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJso
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>com.intel.mtwilson.jersey2.Jersey2Application1</param-value>
+            <param-value>com.intel.mtwilson.jersey2.LocalizableJersey2Application2</param-value>
         </init-param>
         <!--
         <init-param>

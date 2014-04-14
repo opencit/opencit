@@ -69,7 +69,7 @@ if [ -n "$xml" ]; then
     wget --no-proxy $xml -O $XML_FILE_LOCATION
 fi
 
-WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username"
+WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --auth-no-challenge"
 UUID=`dmidecode |grep UUID | awk '{print $2}'`
 tagChoice=""
 tagFile=""
@@ -238,7 +238,7 @@ function provisionCert() {
  fi
  if [ $resp -eq 0 ]; then
   # Retrieve password if TA, else generate new passwords and take ownership
-  $WGET $server/host-tpm-passwords/$UUID.json -O /tmp/tpmPassword
+  $WGET $server/host-tpm-passwords/$UUID.json -q -O /tmp/tpmPassword
   #export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
   export ownerPass=`cat /tmp/tpmPassword | awk -F'"password":' '{print $2}' | awk -F'"' '{print $2}'`
   if [ -z $ownerPass ]; then

@@ -85,7 +85,7 @@ public class SetAssetTag implements ICommand{
     private boolean writeHashToNvram(String NvramPassword) throws TAException, IOException {
         List<String> result;
         try {
-            //String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            //String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f /tmp/hash");
             String[] variables = { "NvramPassword=" + NvramPassword };
@@ -113,7 +113,7 @@ public class SetAssetTag implements ICommand{
     private boolean createIndex(String NvramPassword) throws TAException, IOException {
         List<String> result;
         try {
-            String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -aXXXX -oXXXX --permissions=AUTHWRITE");
             String[] variables = { "tpmOwnerPass=" + tpmOwnerPass, "NvramPassword=" + NvramPassword };
@@ -130,7 +130,7 @@ public class SetAssetTag implements ICommand{
     private boolean releaseIndex() throws TAException, IOException {
         List<String> result;
         try {
-            String tpmOwnerPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
             log.debug("running command tpm_nvrelease -x -t -i " + index + " -oXXXX");
             String[] variables = { "tpmOwnerPass=" + tpmOwnerPass };
             result = CommandUtil.runCommand("tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass", variables);

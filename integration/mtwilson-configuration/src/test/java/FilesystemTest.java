@@ -1,7 +1,9 @@
 
+import com.intel.mtwilson.MyConfiguration;
 import com.intel.mtwilson.fs.ApplicationFilesystem;
 import com.intel.mtwilson.fs.ConfigurableFilesystem;
 import com.intel.mtwilson.fs.FeatureFilesystem;
+import java.io.IOException;
 import org.junit.Test;
 
 /*
@@ -31,4 +33,11 @@ public class FilesystemTest {
         log.debug("sql = {}", bootstrapFilesystem.getSqlPath());
         log.debug("var = {}", bootstrapFilesystem.getVarPath());
     }
+    
+    @Test
+    public void testRetrieveLocale() throws IOException {
+        MyConfiguration myConfiguration = new MyConfiguration();
+        String[] availableLocales = myConfiguration.getAvailableLocales();
+        System.out.println(availableLocales);
+}
 }

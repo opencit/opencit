@@ -37,7 +37,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
-    @RequiresPermissions("kv_attributes:search")     
+    @RequiresPermissions("tag_kv_attributes:search")     
     public KvAttributeCollection search(KvAttributeFilterCriteria criteria) {
         KvAttributeCollection objCollection = new KvAttributeCollection();
         KvAttributeDAO dao = null;
@@ -104,7 +104,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     }
 
     @Override
-    @RequiresPermissions("kv_attributes:retrieve")     
+    @RequiresPermissions("tag_kv_attributes:retrieve")     
     public KvAttribute retrieve(KvAttributeLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
@@ -123,7 +123,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     }
 
     @Override
-    @RequiresPermissions("kv_attributes:store")     
+    @RequiresPermissions("tag_kv_attributes:store")     
     public void store(KvAttribute item) {
         
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
@@ -145,7 +145,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     }
 
     @Override
-    @RequiresPermissions("kv_attributes:create")     
+    @RequiresPermissions("tag_kv_attributes:create")     
     public void create(KvAttribute item) {
 
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
@@ -183,7 +183,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     }
 
     @Override
-    @RequiresPermissions("kv_attributes:delete")     
+    @RequiresPermissions("tag_kv_attributes:delete")     
     public void delete(KvAttributeLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
@@ -199,7 +199,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     }
     
     @Override
-    @RequiresPermissions("kv_attributes:delete")     
+    @RequiresPermissions("tag_kv_attributes:delete,search")     
     public void delete(KvAttributeFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

@@ -94,12 +94,14 @@ public class PatchUtil {
             Map<String,Object> replaceAttrs = PropertyUtils.describe(o1);// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
             for(Map.Entry<String,Object> attr : replaceAttrs.entrySet()) {
                 String translatedKey = namingStrategy.translate(attr.getKey());
+                log.debug("BlockRPC: Attribute key value pair is {}-{}", attr.getKey(), attr.getValue());
+                log.debug("BlockRPC: Attribute key and translated key are {} - {}", attr.getKey(), translatedKey);
                 // there are attributes we skip, like "class" from getClass() 
                 if( attr.getKey().equals("class") ) { continue; }
                 Object a1 = PropertyUtils.getSimpleProperty(o1, attr.getKey());
                 Object a2 = PropertyUtils.getSimpleProperty(o2, attr.getKey());
                 if( a1 == null && a2 == null ) { continue; }
-                else if( a1 != null && a2 == null ) { result.put(translatedKey, null); }
+                else if( a1 != null && a2 == null ) { result.put(translatedKey, a1); }
                 else if( a1 == null && a2 != null ) { result.put(translatedKey, a2); }
                 else if( a1 != null && a2 != null && !a1.equals(a2)) { result.put(translatedKey, a2); }
             }

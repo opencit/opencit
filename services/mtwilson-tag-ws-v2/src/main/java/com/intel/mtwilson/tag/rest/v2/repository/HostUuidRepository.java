@@ -80,7 +80,7 @@ public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCo
     }
     
     @Override
-    @RequiresPermissions("host_uuids:delete")         
+    @RequiresPermissions("host_uuids:delete,search")         
     public void delete(HostUuidFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

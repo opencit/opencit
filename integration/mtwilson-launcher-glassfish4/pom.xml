@@ -181,6 +181,13 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
             <artifactId>javaee-web-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- include all the app dependencies ... XXX TODO  load from java filesystem path like /opt/mtwilson/java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.features</groupId>
+            <artifactId>mtwilson-server</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
         
     </dependencies>
     

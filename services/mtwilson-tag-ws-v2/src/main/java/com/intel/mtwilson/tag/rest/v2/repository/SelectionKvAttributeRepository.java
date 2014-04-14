@@ -45,7 +45,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
-    @RequiresPermissions("selection_kv_attributes:search")         
+    @RequiresPermissions("tag_selection_kv_attributes:search")         
     public SelectionKvAttributeCollection search(SelectionKvAttributeFilterCriteria criteria) {
         SelectionKvAttributeCollection objCollection = new SelectionKvAttributeCollection();
         DSLContext jooq = null;
@@ -106,7 +106,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
     }
 
     @Override
-    @RequiresPermissions("selection_kv_attributes:retrieve")         
+    @RequiresPermissions("tag_selection_kv_attributes:retrieve")         
     public SelectionKvAttribute retrieve(SelectionKvAttributeLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
@@ -125,13 +125,13 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
     }
 
     @Override
-    @RequiresPermissions("selection_kv_attributes:store")         
+    @RequiresPermissions("tag_selection_kv_attributes:store")         
     public void store(SelectionKvAttribute item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    @RequiresPermissions("selection_kv_attributes:create")         
+    @RequiresPermissions("tag_selection_kv_attributes:create")         
     public void create(SelectionKvAttribute item) {
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao();
                 SelectionDAO selectionDao = TagJdbi.selectionDao();
@@ -168,7 +168,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
     }
 
     @Override
-    @RequiresPermissions("selection_kv_attributes:delete")         
+    @RequiresPermissions("tag_selection_kv_attributes:delete")         
     public void delete(SelectionKvAttributeLocator locator) {
         if (locator == null || locator.id == null) { return; }
         
@@ -185,7 +185,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
     }
     
     @Override
-    @RequiresPermissions("selection_kv_attributes:delete")         
+    @RequiresPermissions("tag_selection_kv_attributes:delete,search")         
     public void delete(SelectionKvAttributeFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
