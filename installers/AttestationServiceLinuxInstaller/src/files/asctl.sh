@@ -171,6 +171,7 @@ protect_privacyca_files() {
 }
 
 update_ssl_port() {
+  configure_api_baseurl "${package_config_filename}"
   mtwilson setup setup-manager update-ssl-port >> /dev/null 2>&1
 }
 
@@ -194,7 +195,7 @@ setup_interactive_install() {
       exit 1
     fi
   fi
-  # update_ssl_port
+  update_ssl_port
   create_saml_key 
 
   configure_privacyca_user

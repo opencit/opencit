@@ -15,6 +15,7 @@ import org.junit.Test;
  * @author ssbangal
  */
 public class TestUpdateSslPort {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestUpdateSslPort.class);
     
     @Test
     public void testUpdateSslPort() throws Exception {
@@ -34,5 +35,17 @@ public class TestUpdateSslPort {
         }
         FileUtils.writeStringToFile(shiroIniFile, newShiroConfig);
 
+    }
+    
+    @Test
+    public void testStoreIni() {
+        String text = "[main]\nfoo=bar\n[baz]\nhello=world\n";
+        Ini ini = new Ini();
+        ini.load(text);
+        log.debug("ini tostring: {}", ini.toString()); // outputs list of section names, for example: ini tostring: sections=main,baz
+        Collection<Ini.Section> sections = ini.getSections();
+        for(Ini.Section section : sections) {
+            log.debug("section tostring: {}", section.toString()); // outputs section name, for example example:  "main"  and  "baz"
+        }
     }
 }
