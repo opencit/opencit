@@ -22,7 +22,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 /**
- *
+ * Usage examples:
+ * login-password username password --permissions domain:action
+ * login-password username password --permissions domain1:action1 domain2:action2 domain3:action3 ...
+ * login-password username --nopass --permissions domain:action
+ * login-password username --nopass --permissions domain1:action1 domain2:action2 domain3:action3 ...
+ * 
  * @author jbuhacoff
  */
 public class LoginPassword implements Command {
@@ -36,10 +41,14 @@ public class LoginPassword implements Command {
         this.options = options;
     }
     
+    protected boolean isEmptyPassword() {
+        return options.getBoolean("nopass", false);
+    }
+    
     // never returns null but password may be empty (and that's allowed)
     private String getPassword(String[] args) throws Exception {
         String password;
-        if( options.getBoolean("nopass", false) ) {
+        if( isEmptyPassword() ) {
             password = "";
         }
         else if(args.length > 1) {
@@ -64,15 +73,20 @@ public class LoginPassword implements Command {
         return password;
     }
     // get the 3rd arg if it's usrename passsword permissions, or the 2nd arg if it's username --nopass permissions
-    private RolePermission getPermissions(String[] args) throws Exception {
-        String permissions = null;
-        if( args.length == 2 && options.getBoolean("nopass", false) ) {
-            permissions = args[1];
-        } else if(args.length == 3 ) {
-            permissions = args[2];
+    private List<RolePermission> getPermissions(String[] args) throws Exception {
+        int i = args.length;
+        if( args.length == 2 && isEmptyPassword() ) {
+//            permissions = args[1];
+            i = 1;
+        } else if(args.length >= 3 ) {
+//            permissions = args[2];
+            i = 2;
         }
         
+        ArrayList<RolePermission> list = new ArrayList<>();
+        for( ; i<args.length; i++) {
         RolePermission rp = new RolePermission();
+        String permissions = args[i];
         
         String[] parts = permissions.split(":");
         if( parts.length == 3 ) {
@@ -90,8 +104,9 @@ public class LoginPassword implements Command {
         } else {
             throw new IllegalArgumentException("Invalid permission format"); // must be in the form  domain:action:instance or domain:action or domain
         }
-        
-        return rp;
+        list.add(rp);
+        }
+        return list;
     }
     
     @Override
@@ -150,11 +165,13 @@ public class LoginPassword implements Command {
             log.info("Stored user role [{}] with ID: {}", username, userRole.getId());
         }
         
-        RolePermission newPermissions = getPermissions(args);
-        newPermissions.setRoleId(userRole.getId());
         removePermissions(username);
-        dao.insertRolePermission(newPermissions.getRoleId(), newPermissions.getPermitDomain(), newPermissions.getPermitAction(), newPermissions.getPermitSelection());
-        log.info("Stored permissions {}", newPermissions);
+        List<RolePermission> newPermissions = getPermissions(args);
+        for(RolePermission newPermission : newPermissions) {
+            newPermission.setRoleId(userRole.getId());
+            dao.insertRolePermission(newPermission.getRoleId(), newPermission.getPermitDomain(), newPermission.getPermitAction(), newPermission.getPermitSelection());
+            log.info("Stored permissions {}", newPermissions);
+        }
     }
     
     private void removeUser(String username) throws IOException {
