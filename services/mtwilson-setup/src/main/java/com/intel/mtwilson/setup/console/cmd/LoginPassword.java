@@ -18,9 +18,11 @@ import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.Status;
 import com.intel.mtwilson.shiro.jdbi.model.User;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginPasswordRole;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 /**
  *
  * @author jbuhacoff
@@ -117,8 +119,8 @@ public class LoginPassword implements Command {
         String password = getPassword(args); // never returns null but password may be empty 
         
         // create the new user record
+//        removeUser(username);
         User user = dao.findUserByName(username);
-        removeUser(username);
         if (user == null) {
             user = new User();
             user.setId(new UUID());
@@ -128,17 +130,35 @@ public class LoginPassword implements Command {
             user.setUsername(username);
             dao.insertUser(user);
             log.info("Stored User: {}", username);
+        } else {
+            user.setEnabled(true);
+            user.setStatus(Status.APPROVED);
+            dao.updateUser(user);
+            log.info("Updated User: {}", username);
         }
-        UserLoginPassword userLoginPassword = new UserLoginPassword();
-        userLoginPassword.setId(new UUID());
-        userLoginPassword.setUserId(user.getId());
-        userLoginPassword.setAlgorithm("SHA256");
-        userLoginPassword.setIterations(1);
-        userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
-        userLoginPassword.setEnabled(true);
-        dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
-        log.info("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
+        
+        UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUsername(username);
+        if (userLoginPassword == null) {
+            userLoginPassword = new UserLoginPassword();
+            userLoginPassword.setId(new UUID());
+            userLoginPassword.setUserId(user.getId());
+            userLoginPassword.setAlgorithm("SHA256");
+            userLoginPassword.setIterations(1);
+            userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
+            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setEnabled(true);
+            dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            log.info("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
+        } else {
+            userLoginPassword.setUserId(user.getId());
+            userLoginPassword.setAlgorithm("SHA256");
+            userLoginPassword.setIterations(1);
+            userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
+            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setEnabled(true);
+            dao.updateUserLoginPasswordWithUserId(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            log.info("Updated UserLoginPassword with ID: {}", userLoginPassword.getId());
+        }
         
         Role userRole = dao.findRoleByName(username);
         if (userRole == null) {
@@ -150,9 +170,21 @@ public class LoginPassword implements Command {
             log.info("Stored user role [{}] with ID: {}", username, userRole.getId());
         }
         
+        UserLoginPasswordRole userLoginPasswordRole = dao.findUserLoginPasswordRoleByUserLoginPasswordId(userLoginPassword.getId());
+        if (userLoginPasswordRole == null) {
+            dao.insertUserLoginPasswordRole(userLoginPassword.getId(), userRole.getId());
+        } else {
+            dao.updateUserLoginPasswordRole(userLoginPassword.getId(), userRole.getId());
+        }
+        
+        /* XXX TODO comment:
+           1) add a query to the dao to see which users have a specific role by id
+           2) if more than one user has this role then create a new role just for this user and add permissions there then ensure this user login password only has that new role
+           3) if only this user has that role then just update the existing role
+        */
+        removePermissions(username);
         RolePermission newPermissions = getPermissions(args);
         newPermissions.setRoleId(userRole.getId());
-        removePermissions(username);
         dao.insertRolePermission(newPermissions.getRoleId(), newPermissions.getPermitDomain(), newPermissions.getPermitAction(), newPermissions.getPermitSelection());
         log.info("Stored permissions {}", newPermissions);
     }
@@ -166,9 +198,17 @@ public class LoginPassword implements Command {
     }
     private void removePermissions(String username) throws IOException {
         UserLoginPassword existingUser = dao.findUserLoginPasswordByUsername(username);
+        if (existingUser == null) {
+            log.info("No user found for username: {}", username);
+            return;
+        }
         List<UUID> roleUuidList = getRoleUuidList(dao.findRolesByUserLoginPasswordId(existingUser.getId()));
+        if (roleUuidList.isEmpty()) {
+            log.info("No role list found for user: {}", existingUser.getId());
+            return;
+        }
         List<RolePermission> existingPermissions = dao.findRolePermissionsByPasswordRoleIds(roleUuidList);
-        for(RolePermission existingPermission : existingPermissions) {
+        for (RolePermission existingPermission : existingPermissions) {
             dao.deleteRolePermission(existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
             log.info("Deleted role permission with role ID: {}, domain: {}, action: {}, selection: {}", existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
         }

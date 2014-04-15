@@ -70,7 +70,7 @@ trustagent_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd /opt/trustagent && if [ $? ]; then
-        java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &
+        java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server > /dev/null 2>&1 &
         echo $! > $TRUSTAGENT_PID_FILE
       fi
     )

@@ -692,6 +692,7 @@ zypper_detect() {
 register_startup_script() {
   local absolute_filename="${1}"
   local startup_name="${2}"
+  shift; shift;
 
   # try to install it as a startup script
   if [ -d /etc/init.d ]; then
@@ -712,7 +713,7 @@ register_startup_script() {
   updatercd=`which update-rc.d  2>/dev/null`
   if [ -n "$updatercd" ]; then
     $updatercd -f "${startup_name}" remove 2>/dev/null
-    $updatercd "${startup_name}" defaults  2>/dev/null
+    $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
 
 }

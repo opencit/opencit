@@ -41,7 +41,7 @@ com.intel.mtwilson.rpc.v2.model.RpcLocator
 com.intel.mtwilson.agent.vmware.VmwareClientFactory
 com.intel.mtwilson.as.rest.v2.repository.MlePcrRepository
 com.intel.mtwilson.tag.common.JooqUtil$SelectionResultMapper
-com.intel.mtwilson.setup.console.cmd.Password
+com.intel.mtwilson.setup.console.cmd.LoginPassword
 com.intel.mtwilson.as.rest.v2.model.UserRoleFilterCriteria
 com.intel.mtwilson.as.helper.ASAuthenticationFilter
 com.intel.mtwilson.setup.cmd.EraseUserAccounts
