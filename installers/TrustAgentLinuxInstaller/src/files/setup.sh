@@ -225,7 +225,7 @@ fix_libcrypto() {
   local has_libcrypto=`find / -name libcrypto.so.1.0.0`
   local has_symlink=`find / -name libcrypto.so`
   local libdir=`dirname $has_libcrypto`
-  if [[ -n "$has_libcrypto" && -z "$has_redhat_symlink" ]]; then
+  if [[ -n "$has_libcrypto" && -z "$has_symlink" ]]; then
     echo "Creating missing symlink for $has_libcrypto"
     if [ -n "$yum" ]; then #RHEL
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
