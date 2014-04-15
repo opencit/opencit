@@ -23,10 +23,11 @@ import java.util.Map;
 public abstract class Document {
     private UUID id;
     private URL href;
-    private final HashMap<String,Object> meta = new HashMap<String,Object>();
-    private final HashMap<String,Object> links = new HashMap<String,Object>();
+    private final HashMap<String,Object> meta = new HashMap<>();
+    private final HashMap<String,Object> links = new HashMap<>();
     // TODO:  these fields should be returned inside the metadata structure since they are not part of the record itself.
     //        maybe the metadata structure should be a declared class instead of a map, then it can have etag, createdon, modifiedon, href.
+    private String etag;
     private Date createdOn; // TODO define a jackson formatter for Date objects to use com.intel.dcsg.cpg.iso8601.Iso8601Date 
     private Date modifiedOn;// TODO  define a jackson formatter for Date objects to use com.intel.dcsg.cpg.iso8601.Iso8601Date 
     
@@ -41,6 +42,11 @@ public abstract class Document {
     public URL getHref() {
         return href;
     }
+    
+    public void setHref(URL href) {
+        this.href = href;
+    }
+    
     
     public Map<String, Object> getMeta() {
         return meta;
@@ -66,12 +72,20 @@ public abstract class Document {
         this.modifiedOn = modifiedOn;
     }
 
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
+
+    
+
     public String getEtag() {
-        if( modifiedOn == null ) { return null; }
-        String hex = Long.toHexString(modifiedOn.getTime());
-        ByteArray byteArray = ByteArray.fromHex(hex);
-        Sha1Digest digest = Sha1Digest.digestOf(byteArray.getBytes());
-        return digest.toHexString();
-//        return hex;
+        if( etag != null ) { return etag; }
+        if( modifiedOn != null ) {
+            String hex = Long.toHexString(modifiedOn.getTime());
+            ByteArray byteArray = ByteArray.fromHex(hex);
+            Sha1Digest digest = Sha1Digest.digestOf(byteArray.getBytes());
+            return digest.toHexString();
+        }
+        return null;
     }
 }

@@ -16,11 +16,9 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
  * @author jbuhacoff
  */
 public class RolePermissionResultMapper implements ResultSetMapper<RolePermission> {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RolePermissionResultMapper.class);
     
     @Override
     public RolePermission map(int i, ResultSet rs, StatementContext sc) throws SQLException {
-        log.info("role permission mapper record {}", i);
 //        UUID uuid = UUID.valueOf(rs.getBytes("id")); // use this when uuid is a binary(mysql) or uuid(postgresql) type in database
 //        UUID uuid = UUID.valueOf(rs.getString("id")); // use this when uuid is a char type in database
         RolePermission rolePermission = new RolePermission();
