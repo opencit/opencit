@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# chkconfig: 2345 80 30
+# description: Intel TrustAgent Service
+
 ### BEGIN INIT INFO
 # Provides:          tagent
 # Required-Start:    $remote_fs $syslog
