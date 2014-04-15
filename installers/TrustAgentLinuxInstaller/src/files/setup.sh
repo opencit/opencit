@@ -231,6 +231,7 @@ fix_libcrypto() {
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
     elif [[ -n "$zypper" || -n "$yast" ]] #SUSE
       ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
+    fi
     ldconfig
   fi
 }
