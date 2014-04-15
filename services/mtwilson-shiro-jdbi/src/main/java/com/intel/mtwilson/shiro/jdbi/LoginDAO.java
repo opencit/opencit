@@ -138,7 +138,7 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_role_permission (role_id, permit_domain, permit_action, permit_selection) values (:role_id, :permit_domain, :permit_action, :permit_selection)")
     void insertRolePermission(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);
 
-    @SqlUpdate("delete from mw_role_permission where role_id=:role_id, permit_domain=:permit_domain, permit_action=:permit_action, permit_selection=:permit_selection")
+    @SqlUpdate("delete from mw_role_permission where role_id=:role_id and permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
     void deleteRolePermission(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);
     
 
@@ -226,7 +226,7 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user_login_certificate_role (login_certificate_id, role_id) values (:login_certificate_id, :role_id)")
     void insertUserLoginCertificateRole(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);
 
-    @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id, role_id=:role_id")
+    @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id and role_id=:role_id")
     void deleteUserLoginCertificateRole(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);
 
     @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
