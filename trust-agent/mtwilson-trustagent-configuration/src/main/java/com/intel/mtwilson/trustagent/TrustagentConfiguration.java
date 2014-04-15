@@ -257,12 +257,18 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     
     public static TrustagentConfiguration loadConfiguration() throws IOException {
         File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
-        try(FileInputStream in = new FileInputStream(file)) {
+        if( file.exists() ) {
+            try(FileInputStream in = new FileInputStream(file)) {
+                Properties properties = new Properties();
+                properties.load(in);
+                TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration(properties));
+                return configuration;
+            }
+        }
+        else {
             Properties properties = new Properties();
-            properties.load(in);
             TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration(properties));
             return configuration;
         }
-        
     }
 }
