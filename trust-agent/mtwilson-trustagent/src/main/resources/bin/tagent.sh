@@ -170,7 +170,7 @@ case "$1" in
       echo_failure "trousers installation is required for trust agent to run successfully."
       exit -1
     else
-      tcsd
+      $trousers
     fi
 
     # run setup before starting trust agent to allow taking ownership again if
