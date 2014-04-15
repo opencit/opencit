@@ -730,13 +730,15 @@ public class HostTrustBO extends BaseBO {
 
         try {
             log.debug("Checking if there are any asset tag certificates mapped to host with ID : {}", tblHosts.getId());
-            List<MwAssetTagCertificate> atagCertsForHost = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(tblHosts.getId());
-            // There should be only one valid asset tag certificate for the host.
-            if (atagCertsForHost != null && atagCertsForHost.size() == 1) {
-                hostReport.tagCertificate = X509AttributeCertificate.valueOf(atagCertsForHost.get(0).getCertificate());
+            // Load the asset tag certificate only if it is associated and valid.
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblHosts.getId());            
+            if (atagCertForHost != null) {
+                log.debug("Asset tag certificate is associated to host {} with status {}.", tblHosts.getName(), atagCertForHost.getRevoked());
+                hostReport.tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
             }
             else {
-                log.info("Asset tag certificate not present for host {}.", tblHosts.getName());
+                log.debug("Asset tag certificate is either not associated or valid for host {}.", tblHosts.getName());
             }
         } catch (Exception ex) {
             log.error("Exception when looking up the asset tag whitelist.", ex);
