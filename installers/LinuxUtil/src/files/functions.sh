@@ -703,9 +703,10 @@ register_startup_script() {
     cd "$prevdir"
   fi
 
-  # RedHat
+  # RedHat and SUSE
   chkconfig=`which chkconfig  2>/dev/null`
   if [ -n "$chkconfig" ]; then
+    $chkconfig --del "${startup_name}"  2>/dev/null
     $chkconfig --add "${startup_name}"  2>/dev/null
   fi
 

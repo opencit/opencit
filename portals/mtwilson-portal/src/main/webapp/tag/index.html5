@@ -341,7 +341,7 @@ function isNumber(n) {
 
                                     <input type="submit" class="uploadButton" value="Search" onclick="ws.searchTags(this); return false;">
 					&nbsp;&nbsp;
-                                    <input type="button" class="uploadButton" value="Cancel" onclick="toggleElementVisibility('tag-search-form'); return false;">
+                                    <input type="button" class="uploadButton" value="Cancel" onclick="$('tag-search-form').reset();toggleElementVisibility('tag-search-form'); ws.searchTags(this); return false;">
 
                             </form>
 
@@ -617,7 +617,7 @@ function isNumber(n) {
                                 </div>
 
                                 <input type="submit" class="uploadButton" value="Search" onclick="$('table_view_sel_details').hide();ws.searchSelections(this); return false;"/>
-                                <input type="button" class="uploadButton" value="Cancel" onclick="toggleElementVisibility('selection-search-form'); return false;"/>
+                                <input type="button" class="uploadButton" value="Cancel" onclick="$('selection-search-form').reset(); toggleElementVisibility('selection-search-form');$('table_view_sel_details').hide();ws.searchSelections(this); return false;"/>
 
 	                            <div class="singleDiv" style="height: 10px;"></div>
                             </form>
@@ -883,7 +883,7 @@ function isNumber(n) {
                                         </select>
 
                                         <input type="submit" class="uploadButton" id="searchCertButton" value="Search" onclick="ws.searchCertificates(this); return false;"/>
-                                        <input type="button" class="uploadButton" id="searchCertButton" value="Cancel" onclick="toggleElementVisibility('certificate-search-form'); return false;"/>
+                                        <input type="button" class="uploadButton" id="searchCertButton" value="Cancel" onclick="$('certificate-search-form').reset(); toggleElementVisibility('certificate-search-form'); ws.searchCertificates(this); return false;"/>
                                     </div>
                                 </div>
                             <div class="singleDiv" style="height: 8px;"></div>
@@ -900,7 +900,7 @@ function isNumber(n) {
                                         <th class="row9">Issuer</th>
                                         <th class="row9">Not Before</th>
                                         <th class="row9">Not After</th>
-                                        <th class="row9">Revoked</th>
+                                        <th class="row9">Status</th>
                                         <th class="row9">Fingerprint (SHA-1)</th>
                                         <th class="row9">Fingerprint (SHA256)</th>
                                         <th class="row12"></th>
@@ -912,7 +912,7 @@ function isNumber(n) {
                                         <td align="center" data-bind-text="item.issuer"></td>
                                         <td align="center" data-bind-text="item.not_before | date"></td>
                                         <td align="center" data-bind-text="item.not_after | date"></td>
-                                        <td align="center" data-bind-text="item.revoked | yesno Revoked Active"></td>
+                                        <td align="center" data-bind-text="item.status"></td>
                                         <td align="center" data-bind-text="item.sha1 | wrap 16"></td>
                                         <td align="center" data-bind-text="item.sha256 | wrap 16"></td>
                                         <td align="center">
