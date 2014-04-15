@@ -219,8 +219,7 @@ public class ApiClientBO extends BaseBO {
     // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
     // we are populating all the tables now.
     private void populateShiroUserTables(ApiClientCreateRequest apiClientRequest, X509Certificate x509Certificate) {
-        try {
-            LoginDAO loginDAO = MyJdbi.authz();
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
             User user = loginDAO.findUserByName(getSimpleNameFromCert(x509Certificate));
             if (user == null) {
                 user = new User();
@@ -269,8 +268,7 @@ public class ApiClientBO extends BaseBO {
     // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
     // we are populating all the tables now.
     private void updateShiroUserTables(ApiClientUpdateRequest apiClientUpdateRequest, String userName) {
-        try {
-            LoginDAO loginDAO = MyJdbi.authz();
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(apiClientUpdateRequest.fingerprint);
             if (userLoginCertificate != null) {
                 userLoginCertificate.setEnabled(apiClientUpdateRequest.enabled);

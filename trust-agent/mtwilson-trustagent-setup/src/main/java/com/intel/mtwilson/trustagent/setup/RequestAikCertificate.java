@@ -4,8 +4,13 @@
  */
 package com.intel.mtwilson.trustagent.setup;
 
+import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
+import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -32,10 +37,26 @@ public class RequestAikCertificate extends AbstractSetupTask {
     private TrustagentConfiguration config;
     private SimpleKeystore keystore;
     private X509Certificate privacyCA;
+    private String url;
+    private String username;
+    private String password;
     
     @Override
     protected void configure() throws Exception {
         config = new TrustagentConfiguration(getConfiguration());
+        
+        url = config.getMtWilsonApiUrl();
+        username = config.getMtWilsonApiUsername();
+        password = config.getMtWilsonApiPassword();
+        if (url == null || url.isEmpty()) {
+            configuration("Mt Wilson URL [mtwilson.api.url] must be set");
+        }
+        if (username == null || username.isEmpty()) {
+            configuration("Mt Wilson username [mtwilson.api.username] must be set");
+        }
+        if (password == null || password.isEmpty()) {
+            configuration("Mt Wilson password [mtwilson.api.password] must be set");
+        }
         
         if( config.getTrustagentKeystoreFile().exists() ) {
         keystore = new SimpleKeystore(new FileResource(config.getTrustagentKeystoreFile()), config.getTrustagentKeystorePassword());
@@ -89,7 +110,7 @@ public class RequestAikCertificate extends AbstractSetupTask {
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
         
         CreateIdentity provisioner = new CreateIdentity();
-        provisioner.setConfiguration(getConfiguration());
+        provisioner.setConfiguration(config.getConfiguration());
         provisioner.run();
     }
     

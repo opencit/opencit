@@ -4,7 +4,8 @@
 
 CREATE  TABLE `mw_as`.`mw_host_tpm_password` (
   `id` CHAR(36) NOT NULL ,
-  `password` VARCHAR(255) NOT NULL ,
+  `password` TEXT NOT NULL ,
+  `modifiedOn` DATETIME NOT NULL ,
   PRIMARY KEY (`id`) );
   
 CREATE  TABLE `mw_as`.`mw_tag_kvattribute` (

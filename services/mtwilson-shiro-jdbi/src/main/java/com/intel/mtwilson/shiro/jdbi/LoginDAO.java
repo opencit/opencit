@@ -22,6 +22,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
+import java.util.Set;
 import org.skife.jdbi.v2.sqlobject.BindBean;
 
 /**
@@ -187,16 +188,13 @@ public interface LoginDAO extends Closeable {
     void deleteUserLoginPasswordRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
 
     @SqlQuery("select login_password_id, role_id from mw_user_login_password_role where login_password_id=:login_password_id")
-    UserLoginPasswordRole findUserLoginPasswordRoleByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
-    
-    @SqlUpdate("update mw_user_login_password_role set role_id=:role_id where login_password_id=:login_password_id")
-    void updateUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID RoleId);
-    
+    List<UserLoginPasswordRole> findUserLoginPasswordRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
+
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_password_role on mw_role.id = mw_user_login_password_role.role_id where mw_user_login_password_role.login_password_id=:login_password_id")
     List<Role> findRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
 
     @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id in ( <role_ids> )")
-    List<RolePermission> findRolePermissionsByPasswordRoleIds(@BindIn("role_ids") List<UUID> role_ids);
+    List<RolePermission> findRolePermissionsByPasswordRoleIds(@BindIn("role_ids") Set<String> role_ids);
     
     
     /**
@@ -248,7 +246,7 @@ public interface LoginDAO extends Closeable {
     List<Role> findRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
 
     @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id in ( <role_ids> )")
-    List<RolePermission> findRolePermissionsByCertificateRoleIds(@BindIn("role_ids") List<UUID> role_ids);
+    List<RolePermission> findRolePermissionsByCertificateRoleIds(@BindIn("role_ids") Set<String> roleIds);
         
     
 }

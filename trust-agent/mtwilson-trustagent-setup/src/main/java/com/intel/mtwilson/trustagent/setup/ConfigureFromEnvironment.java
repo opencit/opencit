@@ -12,6 +12,10 @@ import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -20,18 +24,19 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
-    MutableConfiguration configuration;
-    String[] variables;
-    AllCapsNamingStrategy allcaps;
-    Configuration env;
+    private MutableConfiguration configuration;
+    private String[] variables;
+    private String[] prohibited; // variables that must not be stored in the configuration
+    private AllCapsNamingStrategy allcaps;
+    private Configuration env;
     
     @Override
     protected void configure() throws Exception {
         configuration = getConfiguration();
         variables = new String[] {
             TrustagentConfiguration.MTWILSON_API_URL,
-            TrustagentConfiguration.MTWILSON_API_USERNAME,
-            TrustagentConfiguration.MTWILSON_API_PASSWORD,
+//            TrustagentConfiguration.MTWILSON_API_USERNAME, // NOTE: MUST NOT BE STORED TO FILE
+//            TrustagentConfiguration.MTWILSON_API_PASSWORD, // NOTE: MUST NOT BE STORED TO FILE
             TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1,
             TrustagentConfiguration.TPM_QUOTE_IPV4,
             TrustagentConfiguration.TPM_OWNER_SECRET,
@@ -43,8 +48,10 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             TrustagentConfiguration.TRUSTAGENT_TLS_CERT_IP,
             TrustagentConfiguration.AIK_SECRET,
             TrustagentConfiguration.AIK_INDEX,
-            TrustagentConfiguration.DAA_ENABLED
+            TrustagentConfiguration.DAA_ENABLED,
+            TrustagentConfiguration.HARDWARE_UUID
         };
+        prohibited = new String[] { TrustagentConfiguration.MTWILSON_API_USERNAME, TrustagentConfiguration.MTWILSON_API_PASSWORD };
         allcaps = new AllCapsNamingStrategy();
         env = new KeyTransformerConfiguration(allcaps, new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1
     }
@@ -75,6 +82,11 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
                 log.debug("Copying environment variable {} to configuration property {}", allcaps.toAllCaps(variable), variable);
                 configuration.setString(variable, envValue);
             }
+        }
+        // ensure that any variables prohibited from storage are not in the configuration
+        for(String variable : prohibited) {
+            log.debug("Removing storage-prohibited variable {} from configuration", variable);
+            configuration.setString(variable, null);
         }
     }
     

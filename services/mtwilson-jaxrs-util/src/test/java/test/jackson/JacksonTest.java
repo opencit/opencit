@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.mtwilson.jersey.Document;
+import java.util.Date;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -20,9 +22,10 @@ public class JacksonTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JacksonTest.class);
     
     @JacksonXmlRootElement(localName="fruit")
-    public static class Fruit {
+    public static class Fruit extends Document {
         public String fruitName;
         public String fruitColor;
+        public Date modifiedOn;
     }
     
     @Test
@@ -37,6 +40,7 @@ public class JacksonTest {
         mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
         log.debug(mapper.writeValueAsString(fruit)); // {"fruit_name":"apple","fruit_color":"red"}
     }
+    
     @Test
     public void testWriteUnderscores() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -94,4 +98,18 @@ public class JacksonTest {
         assertNotEquals("{\"fruit_name\":\"apple\",\"fruit_color\":\"red\"}", json2); 
         assertEquals("{\"fruitName\":\"apple\",\"fruitColor\":\"red\"}", json2);
     }
+    
+    @Test
+    public void testWriteUnderscoresWithEtag() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        Fruit fruit = new Fruit();
+        fruit.fruitName = "apple";
+        fruit.fruitColor = "red";
+        fruit.setModifiedOn(new Date());
+        String json = mapper.writeValueAsString(fruit);
+        log.debug(json); // {"modified_on":1397555037640,"fruit_name":"apple","fruit_color":"red","etag":"9fda622d89075e962a4be5086e3b8bcd7ca7d227"}
+//        assertEquals("{\"fruit_name\":\"apple\",\"fruit_color\":\"red\"}", json);
+    }
+    
 }

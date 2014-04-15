@@ -4,9 +4,14 @@
  */
 package com.intel.mtwilson.trustagent.setup;
 
+import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
+import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -24,41 +29,56 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 /**
  *
  * @author jbuhacoff
  */
 public class RequestEndorsementCertificate extends AbstractSetupTask {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RequestEndorsementCertificate.class);
     private TrustagentConfiguration config;
     private File keystoreFile;
     private SimpleKeystore keystore;
     private String tpmOwnerSecretHex;
-    
+    private String url;
+    private String username;
+    private String password;
+
     @Override
     protected void configure() throws Exception {
         config = new TrustagentConfiguration(getConfiguration());
+
+        url = config.getMtWilsonApiUrl();
+        username = config.getMtWilsonApiUsername();
+        password = config.getMtWilsonApiPassword();
+        if (url == null || url.isEmpty()) {
+            configuration("Mt Wilson URL [mtwilson.api.url] must be set");
+        }
+        if (username == null || username.isEmpty()) {
+            configuration("Mt Wilson username [mtwilson.api.username] must be set");
+        }
+        if (password == null || password.isEmpty()) {
+            configuration("Mt Wilson password [mtwilson.api.password] must be set");
+        }
+
         tpmOwnerSecretHex = config.getTpmOwnerSecretHex(); // we check it here because ProvisionTPM calls getOwnerSecret() which relies on this
-        if( tpmOwnerSecretHex == null ) {
-            configuration("TPM Owner Secret is not configured: "+TrustagentConfiguration.TPM_OWNER_SECRET); // this constant is the name of the property, literally "tpm.owner.secret"
+        if (tpmOwnerSecretHex == null) {
+            configuration("TPM Owner Secret is not configured: " + TrustagentConfiguration.TPM_OWNER_SECRET); // this constant is the name of the property, literally "tpm.owner.secret"
         }
         if (!Util.isOwner(config.getTpmOwnerSecret())) {
             configuration("Trust Agent is not the TPM owner");
         }
         keystoreFile = config.getTrustagentKeystoreFile();
-        if( keystoreFile.exists() ) {
-        keystore = new SimpleKeystore(new FileResource(keystoreFile), config.getTrustagentKeystorePassword());
-        try {
-            X509Certificate endorsementCA = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
-            log.debug("Endorsement CA {}", Sha1Digest.digestOf(endorsementCA.getEncoded()).toHexString());
-        }
-        catch(NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
-            configuration("Endorsement CA certificate cannot be loaded");
-        }
-        }
-        else {
+        if (keystoreFile.exists()) {
+            keystore = new SimpleKeystore(new FileResource(keystoreFile), config.getTrustagentKeystorePassword());
+            try {
+                X509Certificate endorsementCA = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
+                log.debug("Endorsement CA {}", Sha1Digest.digestOf(endorsementCA.getEncoded()).toHexString());
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | CertificateEncodingException e) {
+                configuration("Endorsement CA certificate cannot be loaded");
+            }
+        } else {
             configuration("Keystore file is missing");
         }
     }
@@ -68,10 +88,9 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         byte[] ekCertBytes;
         try {
             ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
-        }
-        catch(TpmModuleException e) {
-            if( e.getErrorCode() != null ) {
-                switch(e.getErrorCode()) {
+        } catch (TpmModuleException e) {
+            if (e.getErrorCode() != null) {
+                switch (e.getErrorCode()) {
                     case 1:
                         validation("Incorrect TPM owner password");
                         break;
@@ -88,11 +107,9 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         X509Certificate endorsementCA = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
         try {
             ekCert.verify(endorsementCA.getPublicKey());
-        }
-        catch(SignatureException e) {
+        } catch (SignatureException e) {
             validation("Known Endorsement CA did not sign TPM EC", e);
-        }
-        catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException e) {
+        } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException e) {
             validation("Unable to verify TPM EC", e);
         }
     }
@@ -104,10 +121,9 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
-        
+
         ProvisionTPM provisioner = new ProvisionTPM();
-        provisioner.setConfiguration(getConfiguration());
+        provisioner.setConfiguration(config.getConfiguration());
         provisioner.run();
     }
-    
 }

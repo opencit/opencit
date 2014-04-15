@@ -5,7 +5,6 @@
 package com.intel.mtwilson.tag.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.Document;
 
 /**
