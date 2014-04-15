@@ -222,11 +222,11 @@ auto_install "TrustAgent requirements" "APPLICATION"
 # XXX TODO for now we are not doing the general steps, just solving for a specific system.
 fix_libcrypto() {
   #yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
-  local has_libcrypto=`find / -name libcrypto.so.1.0.0 -1`
+  local has_libcrypto=`find / -name libcrypto.so.1.0.0 | head -1`
   local libdir=`dirname $has_libcrypto`
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
-  if [[ -n "$has_libcrypto" ]]; then
+  if [ -n "$has_libcrypto" ]; then
     if [ -z "$has_libdir_symlink" ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
