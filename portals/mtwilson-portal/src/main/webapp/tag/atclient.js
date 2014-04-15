@@ -610,6 +610,17 @@ mtwilson.atag = mtwilson.atag || {};
                 }
 		$('selection-search-form').hide();
                 break;
+          case 'certificates_json':
+                for(var loop = 0; loop < data.certificates.length; loop++) {
+                        data.certificates[loop].status = "Active";
+                        var now = new Date();
+                        if(JSON.parse(data.certificates[loop].revoked)) {
+                                data.certificates[loop].status = "Revoked";
+                        } else if(!now.between(new Date(data.certificates[loop].not_before), new Date(data.certificates[loop].not_after))) {
+                                data.certificates[loop].status = 'Expired';
+                        }
+                }
+                break;
             case 'certificateRequests':
                 if (event.memo.response.length > 0) {
                     mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' certificate requests SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
