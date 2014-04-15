@@ -226,7 +226,7 @@ fix_libcrypto() {
   local libdir=`dirname $has_libcrypto`
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
-  if [[ -n "$has_libcrypto" && -z "$has_symlink" ]]; then
+  if [[ -n "$has_libcrypto" ]]; then
     if [ -z "$has_libdir_symlink" ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
