@@ -392,25 +392,27 @@ monit_src_install() {
 
 # TODO INSECURE need to rewrite this as a java setup task and leverage the
 #      existing tls policy for known mtwilson ssl cert 
-prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
-if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
-	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
-	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
-	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
-	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
-	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
-	TPM_PASSWORD=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
-	UUID=`dmidecode |grep UUID | awk '{print $2}'`
-	echo "registering $TPM_PASSWORD to $UUID"
-	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
-fi
+###
+#prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
+#if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
+#	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
+#	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
+#	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
+#	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+#	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
+#	TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
+#	UUID=`dmidecode |grep UUID | awk '{print $2}'`
+#	echo "registering $TPM_PASSWORD to $UUID"
+#	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
+#fi
 
 
+# TODO:  monit should only be restarted AFTER trustagent is up and running
+#        so that it doesn't try to start it before we're done with our setup
+#        tasks.
 chmod 700 /etc/monit/monitrc
 service monit restart
-
 echo "monit installed and monitoring tagent"
-
 sleep 2
 
 # collect all the localhost ip addresses and make the list available as the
@@ -426,13 +428,30 @@ fi
 #  export TRUSTAGENT_TLS_CERT_DNS=$DEFAULT_TRUSTAGENT_TLS_CERT_DNS
 #fi
 
-# give tagent a chance to do any other setup (such as the .env file and pcakey)
-# and make sure it's successful before trying to start the trust agent
-# NOTE: only the output from start-http-server is redirected to the logfile;
-#       the stdout from the setup command will be displayed
-/usr/local/bin/tagent setup && (/usr/local/bin/tagent start-http-server &) >> $logfile  2>&1
-
 # create a trustagent username "mtwilson" with no password and all privileges
 # which allows mtwilson to access it until mtwilson UI is updated to allow
 # entering username and password for accessing the trust agent
 /usr/local/bin/tagent password mtwilson --nopass *:*
+
+# give tagent a chance to do any other setup (such as the .env file and pcakey)
+# and make sure it's successful before trying to start the trust agent
+# NOTE: only the output from start-http-server is redirected to the logfile;
+#       the stdout from the setup command will be displayed
+/usr/local/bin/tagent start >>$logfile  2>&1
+
+# optional: register tpm password with mtwilson so pull provisioning can
+#           be accomplished with less reboots (no ownership transfer)
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD}
+if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
+#	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
+	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
+	prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
+    export MTWILSON_API_USERNAME MTWILSON_API_PASSWORD
+#	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+#	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
+#	TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
+	export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+#	echo "registering $TPM_PASSWORD to $UUID"
+#	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
+    /usr/local/bin/tagent setup register-tpm-password
+fi
