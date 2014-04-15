@@ -165,9 +165,11 @@ case "$1" in
     ;;
   start)
     # need to start trousers before we can run tagent
-    trousers_detect
+    #trousers_detect
+    trousers=`which tcsd 2>/dev/null`
     if [ -z "$trousers" ]; then
-      echo_failure "trousers installation is required for trust agent to run successfully."
+      #echo_failure "trousers installation is required for trust agent to run successfully."
+      echo "trousers installation is required for trust agent to run successfully."
       exit -1
     else
       $trousers
