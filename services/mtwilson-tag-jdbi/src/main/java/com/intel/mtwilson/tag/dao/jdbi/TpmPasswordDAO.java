@@ -36,10 +36,10 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterArgumentFactory({UUIDArgument.class,DateArgument.class})
 public interface TpmPasswordDAO extends Closeable {
  
-    @SqlUpdate("create table mw_host_tpm_password (id char(36) primary key,password varchar(255))")
+    @SqlUpdate("create table mw_host_tpm_password (id char(36) primary key,password varchar(255), modifiedOn timestamp)")
     void create();
     
-    @SqlUpdate("insert into mw_host_tpm_password (id, password) values (:id, :password, :modifiedOn)")
+    @SqlUpdate("insert into mw_host_tpm_password (id, password, modifiedOn) values (:id, :password, :modifiedOn)")
     void insert(@Bind("id") UUID id, @Bind("password") String password, @Bind("modifiedOn") Date modifiedOn);
        
     @SqlUpdate("update mw_host_tpm_password set password=:password, modifiedOn=:modifiedOn where id=:id")
