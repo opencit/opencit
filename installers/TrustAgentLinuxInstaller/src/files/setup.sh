@@ -220,19 +220,22 @@ auto_install "TrustAgent requirements" "APPLICATION"
 # 4. run ldconfig to capture it
 # 5. run ldconfig -p to ensure it is found
 # XXX TODO for now we are not doing the general steps, just solving for a specific system.
-fix_redhat_libcrypto() {
+fix_libcrypto() {
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
   local has_libcrypto=`find / -name libcrypto.so.1.0.0`
   local has_symlink=`find / -name libcrypto.so`
-  if [[ -n "$has_libcrypto" && -z "$has_symlink" ]]; then
+  local libdir=`dirname $has_libcrypto`
+  if [[ -n "$has_libcrypto" && -z "$has_redhat_symlink" ]]; then
     echo "Creating missing symlink for $has_libcrypto"
-    local libdir=`dirname $has_libcrypto`
-    #ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
-    ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
+    if [ -n "$yum" ]; then #RHEL
+      ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
+    elif [[ -n "$zypper" || -n "$yast" ]] #SUSE
+      ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
     ldconfig
   fi
 }
 
-fix_redhat_libcrypto
+fix_libcrypto
 
 return_dir=`pwd`
 

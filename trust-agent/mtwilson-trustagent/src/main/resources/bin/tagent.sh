@@ -64,6 +64,15 @@ export CLASSPATH
 ###################################################################################################
 
 trustagent_start() {
+    # need to start trousers before we can run tagent
+    trousers_detect
+    if [ -z "$trousers" ]; then
+      echo_failure "trousers installation is required for trust agent to run successfully."
+      exit -1
+    else
+      tcsd
+    fi
+  
     # run setup before starting trust agent to allow taking ownership again if
     # the tpm has been cleared, or re-initializing the keystore if the server
     # ssl cert has changed and the user has updated the fingerprint in
