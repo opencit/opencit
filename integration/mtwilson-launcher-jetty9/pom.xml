@@ -142,4 +142,45 @@ This error message indicates you need a jersey implementation like org.glassfish
         </dependency>
     </dependencies>
     
+    <!-- todo:  enable command line usage like  "mvn jetty:start" for 
+    production-like setup and "mvn -Dtest jetty:start" for including test
+    dependencies as well; can be done either by including them in this
+    profile or by using the useTestDependencies option in jetty in this
+    profile.  
+    currently this has no effect because the extensions cache launcher reads
+    the extensions.cache file which mentions some of the test classes
+    locally and loads them as long as they are in the java folder, and the
+    directory launcher would load whatever is in the java folder which 
+    is not maintained by maven... so need to use the maven launcher with
+    the extensions.cache file to only load mentioned extensions that have
+    dependencies in the maven-generated classpath (dependencies in ~/.m2/repository)
+    
+    NOTE: it's important to keep these test dependencies out of the production
+    build.
+    -->
+    <!--
+    <profiles>
+    <profile>
+                <id>test</id>
+                <activation>
+                    <property>
+                        <name>test</name>
+                        <value>true</value>
+                    </property>
+                </activation>
+                <dependencies>
+                        <dependency>
+                                <groupId>com.intel.mtwilson.services</groupId>
+                                <artifactId>mtwilson-test-ws-v1</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>com.intel.mtwilson.services</groupId>
+                                <artifactId>mtwilson-test-ws-v2</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+                </dependencies>
+        </profile>
+    </profiles>
+    -->
 </project>
