@@ -9,9 +9,11 @@ package com.intel.mtwilson.tag.dao.jdbi;
 
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jdbi.util.DateArgument;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import java.io.Closeable;
+import java.util.Date;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
@@ -31,19 +33,19 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  * @author stdalex
  */
 @RegisterMapper(TpmPasswordResultMapper.class)
-@RegisterArgumentFactory(UUIDArgument.class)
+@RegisterArgumentFactory({UUIDArgument.class,DateArgument.class})
 public interface TpmPasswordDAO extends Closeable {
  
     @SqlUpdate("create table mw_host_tpm_password (id char(36) primary key,password varchar(255))")
     void create();
     
-    @SqlUpdate("insert into mw_host_tpm_password (id, password) values (:id, :password)")
-    void insert(@Bind("id") UUID id, @Bind("password") String password);
+    @SqlUpdate("insert into mw_host_tpm_password (id, password) values (:id, :password, :modifiedOn)")
+    void insert(@Bind("id") UUID id, @Bind("password") String password, @Bind("modifiedOn") Date modifiedOn);
        
-    @SqlUpdate("update mw_host_tpm_password set password=:password where id=:id")
-    void update(@Bind("id") UUID id, @Bind("password") String password);
+    @SqlUpdate("update mw_host_tpm_password set password=:password, modifiedOn=:modifiedOn where id=:id")
+    void update(@Bind("id") UUID id, @Bind("password") String password, @Bind("modifiedOn") Date modifiedOn);
 
-    @SqlQuery("select id, password from mw_host_tpm_password where id=:id")
+    @SqlQuery("select id, password, modifiedOn from mw_host_tpm_password where id=:id")
     TpmPassword findById(@Bind("id") UUID id);
 
 //    @SqlQuery("select id,uuid,password from mw_host_tpm_password where uuid=:uuid")

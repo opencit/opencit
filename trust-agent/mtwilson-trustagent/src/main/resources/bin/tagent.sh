@@ -28,6 +28,7 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
 TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
 TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
 TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
+TRUSTAGENT_SETUP_TASKS="configure-from-environment create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate register-tpm-password"
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
 
@@ -59,20 +60,24 @@ export CLASSPATH
 
 ###################################################################################################
 
+# arguments are optional, if provided they are the tasks to run, in order
+trustagent_setup() {
+  local tasklist="$*"
+  if [ -z "$tasklist" ]; then
+    tasklist=$TRUSTAGENT_SETUP_TASKS
+  fi
+  java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $tasklist
+  return $?
+}
+
 trustagent_start() {
-    # run setup before starting trust agent to allow taking ownership again if
-    # the tpm has been cleared, or re-initializing the keystore if the server
-    # ssl cert has changed and the user has updated the fingerprint in
-    # the trustagent.properties file
-    java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup
     # the subshell allows the java process to have a reasonable current working
     # directory without affecting the user's working directory. 
     # the last background process pid $! must be stored from the subshell.
     (
-      cd /opt/trustagent && if [ $? ]; then
-        java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &
-        echo $! > $TRUSTAGENT_PID_FILE
-      fi
+      cd /opt/trustagent
+      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server &
+      echo $! > $TRUSTAGENT_PID_FILE
     )
 }
 
@@ -142,17 +147,7 @@ function print_help() {
     # TODO:  add the "register" command when it's implemented
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
-    echo "configure-from-environment"
-    echo "create-keystore-password"
-    echo "create-tls-keypair"
-    echo "create-admin-user"
-    echo "create-tpm-owner-secret"
-    echo "create-aik-secret"
-    echo "take-ownership"
-    echo "download-mtwilson-tls-certificate"
-    echo "download-mtwilson-privacy-ca-certificate"
-    echo "request-endorsement-certificate"
-    echo "request-aik-certificate"
+    echo $TRUSTAGENT_SETUP_TASKS | tr ' ' '\n'
 }
 
 ###################################################################################################
@@ -165,7 +160,13 @@ case "$1" in
     print_help
     ;;
   start)
-    trustagent_start
+    # run setup before starting trust agent to allow taking ownership again if
+    # the tpm has been cleared, or re-initializing the keystore if the server
+    # ssl cert has changed and the user has updated the fingerprint in
+    # the trustagent.properties file
+    if [ trustagent_setup ]; then
+      trustagent_start
+    fi
     ;;
   stop)
     trustagent_stop
@@ -179,7 +180,7 @@ case "$1" in
     ;;
   setup)
     shift
-    java -cp $CLASSPATH $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $*
+    trustagent_setup $*
     ;;
   uninstall)
     trustagent_stop

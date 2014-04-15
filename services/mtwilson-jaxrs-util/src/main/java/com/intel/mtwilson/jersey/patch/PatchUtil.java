@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.beanutils.PropertyUtils;
 
 /**
@@ -78,8 +79,16 @@ public class PatchUtil {
     }
     
     /**
-     * Returns a "replace" map showing which attributes changes from
-     * o1 to o2
+     * Returns a "replace" map showing which attributes change from
+     * o1 to o2 such that creating a clone of o1 and applying the diff
+     * map would result in o2. The value of using diff and apply 
+     * instead of just copy is if you want to see what are the differences
+     * and possibly let the user approve or reject individual changes.
+     * If you're not using the diff in an intermediate step you can 
+     * just use copy(source,target) instead and it will copy all
+     * properties from the source to the target (even if they are null), or
+     * use merge(source,target) to copy all non-null properties from the
+     * source to the target.
      * 
      * This method assumes the objects are flat -- it does not support
      * objects having arrays, lists, etc.  maybe a future version will.
@@ -89,28 +98,41 @@ public class PatchUtil {
      */
     public static <T> Map<String,Object> diff(T o1, T o2) throws PatchException {
         try {
-            LowerCaseWithUnderscoresStrategy namingStrategy = new LowerCaseWithUnderscoresStrategy();
             Map<String,Object> result = new HashMap<>();
             Map<String,Object> replaceAttrs = PropertyUtils.describe(o1);// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
             for(Map.Entry<String,Object> attr : replaceAttrs.entrySet()) {
-                String translatedKey = namingStrategy.translate(attr.getKey());
-                log.debug("BlockRPC: Attribute key value pair is {}-{}", attr.getKey(), attr.getValue());
-                log.debug("BlockRPC: Attribute key and translated key are {} - {}", attr.getKey(), translatedKey);
                 // there are attributes we skip, like "class" from getClass() 
                 if( attr.getKey().equals("class") ) { continue; }
                 Object a1 = PropertyUtils.getSimpleProperty(o1, attr.getKey());
                 Object a2 = PropertyUtils.getSimpleProperty(o2, attr.getKey());
                 if( a1 == null && a2 == null ) { continue; }
-                else if( a1 != null && a2 == null ) { result.put(translatedKey, a1); }
-                else if( a1 == null && a2 != null ) { result.put(translatedKey, a2); }
-                else if( a1 != null && a2 != null && !a1.equals(a2)) { result.put(translatedKey, a2); }
+                else if( a1 != null && a2 == null ) { result.put(attr.getKey(), null); }
+                else if( a1 == null && a2 != null ) { result.put(attr.getKey(), a2); }
+                else if( a1 != null && a2 != null && !a1.equals(a2)) { result.put(attr.getKey(), a2); }
             }
             return result;
         }
         catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new PatchException(e);
         }
-    }    
+    }
+    
+    /**
+     * Creates a new map instance containing the same key-value pairs as the
+     * input instance but with the keys renamed using the lowercase with underscores
+     * naming strategy
+     * @param input
+     * @return 
+     */
+    public static Map<String,Object> toLowercaseWithUnderscores(Map<String,Object> input) {
+        LowerCaseWithUnderscoresStrategy namingStrategy = new LowerCaseWithUnderscoresStrategy();
+        HashMap<String,Object> result = new HashMap<>();
+        for(Map.Entry<String,Object> kv : input.entrySet()) {
+            String translatedKey = namingStrategy.translate(kv.getKey());
+            result.put(translatedKey, kv.getValue());
+        }
+        return result;
+    }
 
     /**
      * Returns a "replace" map showing which attributes changes from
@@ -121,18 +143,20 @@ public class PatchUtil {
      * so currently any object taht is present will replace the previous
      * value completely, which means changes to arrays or maps require the
      * full arra/map to be sent
+     * 
+     * This function wraps PropertyUtils.describe and excludes the "class"
+     * attribute which ends up in the described object.
+     * 
      */
-    public static <T> Map<String,Object> propertyMap(T source) throws PatchException {
+    public static <T> Map<String,Object> toMap(T source) throws PatchException {
         try {
-            LowerCaseWithUnderscoresStrategy namingStrategy = new LowerCaseWithUnderscoresStrategy();
             Map<String,Object> result = new HashMap<>();
             Map<String,Object> sourceAttrs = PropertyUtils.describe(source);// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
             for(Map.Entry<String,Object> attr : sourceAttrs.entrySet()) {
-                String translatedKey = namingStrategy.translate(attr.getKey());
                 // there are attributes we skip, like "class" from getClass() 
                 if( attr.getKey().equals("class") ) { continue; }
-                Object a1 = PropertyUtils.getSimpleProperty(source, attr.getKey());
-                result.put(translatedKey, a1);
+                Object value = PropertyUtils.getSimpleProperty(source, attr.getKey());
+                result.put(attr.getKey(), value);
             }
             return result;
         }
@@ -141,41 +165,58 @@ public class PatchUtil {
         }
     }
     
-    public static Map<String,Object> removeNullValues(Map<String,Object> map) {
-        HashSet<String> toRemove = new HashSet<>();
-        for(Map.Entry<String,Object> attr : map.entrySet()) {
+    /**
+     * Returns a set of key names that have null values in the map
+     * @param map
+     * @return 
+     */
+    public static <T> Set<String> nullValueKeySet(Map<String,T> map) {
+        HashSet<String> nullValueKeys = new HashSet<>();
+        for(Map.Entry<String,T> attr : map.entrySet()) {
             if( attr.getValue() == null ) {
-                toRemove.add(attr.getKey());
+                nullValueKeys.add(attr.getKey());
             }
         }
+        return nullValueKeys;
+    }
+    
+    /**
+     * Modifies the input map by removing keys that have null values
+     * @param map 
+     */
+    public static <T> void removeNullValues(Map<String,T> map) {
+        Set<String> toRemove = nullValueKeySet(map);
         for(String key : toRemove) {
             map.remove(key);
         }
-        return map;
     }
     
     /**
      * Copies all non-null source properties to the target. 
+     * Source and target need not be of the same type; only properties
+     * that are available in the target would be copied from the source.
      * 
      * @param source
      * @param target
      * @throws PatchException 
      */
-    public static void patch(Object source, Object target) throws PatchException {
-        Map<String,Object> properties = propertyMap(source);
+    public static void merge(Object source, Object target) throws PatchException {
+        Map<String,Object> properties = toMap(source);
         removeNullValues(properties);
         apply(properties, target);
     }
     
     /**
      * Copies all null and non-null source properties to the target.
+     * Source and target need not be of the same type; only properties
+     * that are available in the target would be copied from the source.
      * 
      * @param source
      * @param target
      * @throws PatchException 
      */
     public static void copy(Object source, Object target) throws PatchException {
-        Map<String,Object> properties = propertyMap(source);
+        Map<String,Object> properties = toMap(source);
         apply(properties, target);
     }
 }

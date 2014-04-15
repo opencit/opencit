@@ -13,6 +13,7 @@ com.intel.mtwilson.trustagent.setup.CreateTlsKeypair
 com.intel.mtwilson.trustagent.setup.CreateTpmOwnerSecret
 com.intel.mtwilson.trustagent.setup.DownloadMtWilsonPrivacyCACertificate
 com.intel.mtwilson.trustagent.setup.DownloadMtWilsonTlsCertificate
+com.intel.mtwilson.trustagent.setup.RegisterTpmPassword
 com.intel.mtwilson.trustagent.setup.RequestAikCertificate
 com.intel.mtwilson.trustagent.setup.RequestEndorsementCertificate
 com.intel.mtwilson.trustagent.setup.TakeOwnership

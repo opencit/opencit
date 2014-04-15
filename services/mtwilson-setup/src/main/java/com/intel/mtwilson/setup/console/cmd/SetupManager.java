@@ -159,10 +159,12 @@ public class SetupManager implements Command {
 
         // now find the setup tasks that the user has asked for or use a default set
         if (args.length == 0) {
-            execute(getAllSetupTasks());
-        } else {
-            execute(getSetupTasksByName(args));
+            log.error("One or more tasks must be specified");
+//            execute(getAllSetupTasks());
+            return;
         }
+        
+        execute(getSetupTasksByName(args));
 
     }
 

@@ -5,7 +5,9 @@
 package com.intel.mtwilson.jersey;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.util.ByteArray;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ public abstract class Document {
     private URL href;
     private final HashMap<String,Object> meta = new HashMap<String,Object>();
     private final HashMap<String,Object> links = new HashMap<String,Object>();
+    // TODO:  these fields should be returned inside the metadata structure since they are not part of the record itself.
+    //        maybe the metadata structure should be a declared class instead of a map, then it can have etag, createdon, modifiedon, href.
     private Date createdOn; // TODO define a jackson formatter for Date objects to use com.intel.dcsg.cpg.iso8601.Iso8601Date 
     private Date modifiedOn;// TODO  define a jackson formatter for Date objects to use com.intel.dcsg.cpg.iso8601.Iso8601Date 
     
@@ -62,5 +66,12 @@ public abstract class Document {
         this.modifiedOn = modifiedOn;
     }
 
-    
+    public String getEtag() {
+        if( modifiedOn == null ) { return null; }
+        String hex = Long.toHexString(modifiedOn.getTime());
+        ByteArray byteArray = ByteArray.fromHex(hex);
+        Sha1Digest digest = Sha1Digest.digestOf(byteArray.getBytes());
+        return digest.toHexString();
+//        return hex;
+    }
 }

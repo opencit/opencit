@@ -27,6 +27,10 @@
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-extensions</artifactId>
         </dependency>
         <dependency>

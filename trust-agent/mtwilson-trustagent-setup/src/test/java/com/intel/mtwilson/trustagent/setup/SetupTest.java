@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import java.util.Properties;
@@ -25,6 +26,23 @@ public class SetupTest {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SetupTest.class);
 
+    public static List<SetupTask> getTasks() {
+        ArrayList<SetupTask> list = new ArrayList<>();
+        list.add(new ConfigureFromEnvironment());
+        list.add(new CreateKeystorePassword());
+        list.add(new CreateTlsKeypair());
+        list.add(new CreateAdminUser());
+        list.add(new CreateTpmOwnerSecret());
+        list.add(new CreateAikSecret());
+        list.add(new TakeOwnership());
+        list.add(new DownloadMtWilsonTlsCertificate());
+        list.add(new DownloadMtWilsonPrivacyCACertificate());
+        list.add(new RequestEndorsementCertificate());
+        list.add(new RequestAikCertificate());
+        // TODO: register host with Mt Wilson (TBD - requires Mt Wilson to allow registration and setting trust policy as separate steps, which is not yet implemented)
+        return list;
+    }
+    
     // copied from mtwilson-trustagent-console:Setup
     protected File getConfigurationFile() {
         File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
@@ -54,7 +72,7 @@ public class SetupTest {
     @Test
     public void testSetupTasks() throws IOException {
         PropertiesConfiguration configuration = loadConfiguration();
-        List<SetupTask> tasks = SetupTaskFactory.getTasks();
+        List<SetupTask> tasks = getTasks();
         for (SetupTask task : tasks) {
             task.setConfiguration(configuration);
             if (task.isConfigured()) {

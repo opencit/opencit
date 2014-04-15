@@ -4,7 +4,8 @@
 
 CREATE  TABLE mw_host_tpm_password (
   id CHAR(36) NOT NULL,
-  password VARCHAR(255) NOT NULL ,
+  password TEXT NOT NULL ,
+  modifiedOn timestamp without time zone NOT NULL ,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_kvattribute (

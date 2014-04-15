@@ -12,7 +12,7 @@ import com.intel.mtwilson.jersey.Document;
  * @author ssbangal
  */
 @JacksonXmlRootElement(localName="tpm_password")
-public class TpmPassword extends Document{
+public class TpmPassword extends Document {
     
     private String password;
 
@@ -23,6 +23,5 @@ public class TpmPassword extends Document{
     public void setPassword(String password) {
         this.password = password;
     }
-    
-    
+
 }
