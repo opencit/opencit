@@ -80,11 +80,23 @@ ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
 # TODO: check if trustagent exists before trying to add it; allow user name to be
 #       specified by environment variable
-useradd --home /opt/trustagent --system --shell /bin/false --user-group trustagent >> $logfile  2>&1
+yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+if [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+  groupadd trustagent >> $logfile  2>&1
+  useradd -d /opt/trustagent -r -s /bin/false -G trustagent trustagent >> $logfile  2>&1
+elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+  groupadd trustagent >> $logfile  2>&1
+  useradd -d /opt/trustagent -r -s /bin/false -G trustagent trustagent >> $logfile  2>&1
+elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+  groupadd trustagent >> $logfile  2>&1
+  useradd -d /opt/trustagent -r -s /bin/false -G trustagent trustagent >> $logfile  2>&1yum -y install $yum_packages
+elif [[ -n "$aptget" && -n "$apt_packages" ]]; then
+  useradd --home /opt/trustagent --system --shell /bin/false --user-group trustagent >> $logfile  2>&1
+fi
 
 mkdir -p /opt/trustagent
 unzip -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
-mkdir /opt/trustagent/var
+mkdir -p /opt/trustagent/var
 chown -R trustagent:trustagent /opt/trustagent
 chown -R root /opt/trustagent/bin
 chown -R root /opt/trustagent/java

@@ -214,8 +214,8 @@ RETVAL=0
 case "$1" in
   version)
         echo "MtWilson Linux Utility"
-	echo "Version ${VERSION}"
-	echo "Build ${BUILD}"
+        echo "Version ${VERSION}"
+        echo "Build ${BUILD}"
         ;;
   setup-env)
         setup_env
@@ -367,19 +367,19 @@ case "$1" in
         ;;
   erase-data)
         #load_default_env 1>/dev/null
-		erase_data
+        erase_data
         #call_setupcommand EraseLogs
         #call_setupcommand EraseHostRegistrationData
         #call_setupcommand EraseWhitelistData
         
         ;;
   erase-users)
-		#load_default_env 1>/dev/null
-		if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
-			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
-			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
-		fi
-		export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
+        #load_default_env 1>/dev/null
+        if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
+          echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
+          prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
+        fi
+        export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
   change-db-pass)
@@ -424,13 +424,13 @@ case "$1" in
         # control scripts
         echo "Removing Mt Wilson control scripts..."
         echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
-		# only remove the config files we added to conf.d, not anything else
-		echo "Removing mtwilson monit config files"
-		rm -fr /etc/monit/conf.d/*.mtwilson
-		echo "Restarting monit after removing configs"
-		service monit stop &> /dev/null
-		echo "Removing mtwilson logrotate files"
-		rm -fr /etc/logrotate.d/mtwilson
+            # only remove the config files we added to conf.d, not anything else
+            echo "Removing mtwilson monit config files"
+            rm -fr /etc/monit/conf.d/*.mtwilson
+            echo "Restarting monit after removing configs"
+            service monit stop &> /dev/null
+            echo "Removing mtwilson logrotate files"
+            rm -fr /etc/logrotate.d/mtwilson
         # java:  rm -rf /usr/share/jdk1.7.0_51
         # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
@@ -439,9 +439,9 @@ case "$1" in
         postgres_clear; export POSTGRES_HOME=""; export psql=""
         mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"
-		if [ -n "$INSTALLED_MARKER_FILE" ]; then
-			rm -fr $INSTALLED_MARKER_FILE
-		fi
+        if [ -n "$INSTALLED_MARKER_FILE" ]; then
+          rm -fr $INSTALLED_MARKER_FILE
+        fi
         ;;
   help)
         ;&
