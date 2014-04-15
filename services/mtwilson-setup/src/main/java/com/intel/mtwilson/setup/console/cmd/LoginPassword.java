@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
-//import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import org.apache.commons.configuration.Configuration;
 import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword; // file.model.UserPassword;
 import com.intel.mtwilson.shiro.jdbi.model.RolePermission; // file.model.UserPermission;
@@ -18,9 +17,13 @@ import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.Status;
 import com.intel.mtwilson.shiro.jdbi.model.User;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginPasswordRole;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 /**
  * Usage examples:
  * login-password username password --permissions domain:action
@@ -34,7 +37,6 @@ public class LoginPassword implements Command {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginPassword.class);
 //    private TrustagentConfiguration configuration;
     private Configuration options;
-    private LoginDAO dao;
     
     @Override
     public void setOptions(Configuration options) {
@@ -113,7 +115,6 @@ public class LoginPassword implements Command {
     public void execute(String[] args) throws Exception {
         // store or replace the user record
         log.debug("Loading users and permissions");
-        dao = MyJdbi.authz();
         // usage:   username  (prompt for password, no permissions)
         // usage:   username password  (no permissions)
         // usage:   username password permissions
@@ -125,15 +126,16 @@ public class LoginPassword implements Command {
         if( options.getBoolean("remove",false) ) {
             removeUser(username);
             removePermissions(username);
-            log.info("Removed username {}", username);
+            log.debug("Removed username {}", username);
             return;
         }
         
         String password = getPassword(args); // never returns null but password may be empty 
         
+        try(LoginDAO dao = MyJdbi.authz()) {
         // create the new user record
+//        removeUser(username);
         User user = dao.findUserByName(username);
-        removeUser(username);
         if (user == null) {
             user = new User();
             user.setId(new UUID());
@@ -142,61 +144,138 @@ public class LoginPassword implements Command {
             user.setStatus(Status.APPROVED);
             user.setUsername(username);
             dao.insertUser(user);
-            log.info("Stored User: {}", username);
+            log.info("Created user {}", username);
+        } else {
+            user.setEnabled(true);
+            user.setStatus(Status.APPROVED);
+            dao.updateUser(user);
+            log.debug("Updated User: {}", username);
         }
-        UserLoginPassword userLoginPassword = new UserLoginPassword();
-        userLoginPassword.setId(new UUID());
-        userLoginPassword.setUserId(user.getId());
-        userLoginPassword.setAlgorithm("SHA256");
-        userLoginPassword.setIterations(1);
-        userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
-        userLoginPassword.setEnabled(true);
-        dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
-        log.info("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
         
+        UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUsername(username);
+        if (userLoginPassword == null) {
+            userLoginPassword = new UserLoginPassword();
+            userLoginPassword.setId(new UUID());
+            userLoginPassword.setUserId(user.getId());
+            userLoginPassword.setAlgorithm("SHA256");
+            userLoginPassword.setIterations(1);
+            userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
+            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setEnabled(true);
+            dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            log.debug("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
+        } else {
+            userLoginPassword.setUserId(user.getId());
+            userLoginPassword.setAlgorithm("SHA256");
+            userLoginPassword.setIterations(1);
+            userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
+            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setEnabled(true);
+            dao.updateUserLoginPasswordWithUserId(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            log.debug("Updated UserLoginPassword with ID: {}", userLoginPassword.getId());
+        }
+        log.debug("finding role by username");
         Role userRole = dao.findRoleByName(username);
         if (userRole == null) {
+            log.debug("roles not found for username");
             userRole = new Role();
             userRole.setId(new UUID());
             userRole.setRoleName(username);
             userRole.setDescription("user created role");
             dao.insertRole(userRole.getId(), userRole.getRoleName(), userRole.getDescription());
-            log.info("Stored user role [{}] with ID: {}", username, userRole.getId());
+            log.debug("Stored user role [{}] with ID: {}", username, userRole.getId());
+        }
+        log.debug("finding user login password roles by user login password id");
+        List<UserLoginPasswordRole> userLoginPasswordRoles = dao.findUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
+        if (userLoginPasswordRoles == null || userLoginPasswordRoles.isEmpty() ) {
+            dao.insertUserLoginPasswordRole(userLoginPassword.getId(), userRole.getId());
+        } else {
+            // try to find the user's custom role in the list of existing roles
+            List<String> userLoginPasswordRoleIds =  getRoleUuidHexList(userLoginPasswordRoles);
+            if( userLoginPasswordRoleIds.contains(userRole.getId().toHexString()) ) {
+                log.debug("user login password already linked to custom role");
+            }
+            else {
+                log.debug("Inserting user login password role id {} role id {}", userLoginPassword.getId(), userRole.getId());
+                dao.insertUserLoginPasswordRole(userLoginPassword.getId(), userRole.getId());
+            }
         }
         
+        /* XXX TODO comment:
+           1) add a query to the dao to see which users have a specific role by id
+           2) if more than one user has this role then create a new role just for this user and add permissions there then ensure this user login password only has that new role
+           3) if only this user has that role then just update the existing role
+        */
+        log.debug("removing permissions");
         removePermissions(username);
+        log.debug("getting permissions");
         List<RolePermission> newPermissions = getPermissions(args);
         for(RolePermission newPermission : newPermissions) {
             newPermission.setRoleId(userRole.getId());
             dao.insertRolePermission(newPermission.getRoleId(), newPermission.getPermitDomain(), newPermission.getPermitAction(), newPermission.getPermitSelection());
-            log.info("Stored permissions {}", newPermissions);
+            log.debug("Stored permissions {}", newPermissions);
+        }
+        
         }
     }
     
-    private void removeUser(String username) throws IOException {
-        UserLoginPassword existingUser = dao.findUserLoginPasswordByUsername(username);
-        if( existingUser != null ) {
-            dao.deleteUser(existingUser.getUserId());
+    private void removeUser(String username) throws IOException, SQLException {
+        try(LoginDAO dao = MyJdbi.authz()) {
+        UserLoginPassword existingUserLoginPassword = dao.findUserLoginPasswordByUsername(username);
+        if( existingUserLoginPassword != null ) {
+            dao.deleteUser(existingUserLoginPassword.getUserId());
             log.info("Deleted user {}", username);
         }
+        }
     }
-    private void removePermissions(String username) throws IOException {
-        UserLoginPassword existingUser = dao.findUserLoginPasswordByUsername(username);
-        List<UUID> roleUuidList = getRoleUuidList(dao.findRolesByUserLoginPasswordId(existingUser.getId()));
-        List<RolePermission> existingPermissions = dao.findRolePermissionsByPasswordRoleIds(roleUuidList);
-        for(RolePermission existingPermission : existingPermissions) {
+    private void removePermissions(String username) throws IOException, SQLException {
+        try(LoginDAO dao = MyJdbi.authz()) {
+        log.debug("finding existing user login password by username");
+        UserLoginPassword existingUserLoginPassword = dao.findUserLoginPasswordByUsername(username);
+        if (existingUserLoginPassword == null) {
+            log.debug("No user found for username: {}", username);
+            return;
+        }
+        log.debug("finding existing roles by user login password id");
+        Set<UUID> roleUuidList = getRoleUuids(dao.findRolesByUserLoginPasswordId(existingUserLoginPassword.getId()));
+        if (roleUuidList.isEmpty()) {
+            log.debug("No role list found for user: {}", existingUserLoginPassword.getId());
+            return;
+        }
+        log.debug("finding role permisiosn by password role ids {}", roleUuidList);
+        List<RolePermission> existingPermissions = dao.findRolePermissionsByPasswordRoleIds(toStrings(roleUuidList));
+        log.debug("got permissions {}", existingPermissions);
+        for (RolePermission existingPermission : existingPermissions) {
+            log.debug("deleting role permission");
             dao.deleteRolePermission(existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
-            log.info("Deleted role permission with role ID: {}, domain: {}, action: {}, selection: {}", existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
+            log.debug("Deleted role permission with role ID: {}, domain: {}, action: {}, selection: {}", existingPermission.getRoleId(), existingPermission.getPermitDomain(), existingPermission.getPermitAction(), existingPermission.getPermitSelection());
+        }
         }
     }
     
-    List<UUID> getRoleUuidList(List<Role> roles) {
-        ArrayList<UUID> uuids = new ArrayList<>();
+    Set<UUID> getRoleUuids(List<Role> roles) {
+        HashSet<UUID> uuids = new HashSet<>();
         for (Role role : roles) {
             uuids.add(role.getId());
         }
         return uuids;
+    }
+
+    List<String> getRoleUuidHexList(List<UserLoginPasswordRole> userLoginPasswordRoles) {
+        ArrayList<String> ids = new ArrayList<>();
+        for (UserLoginPasswordRole userLoginPasswordRole : userLoginPasswordRoles) {
+            ids.add(userLoginPasswordRole.getRoleId().toHexString());
+        }
+        return ids;
+    }
+    
+    // see also CreateAdminUser command
+    private Set<String> toStrings(Set<UUID> uuids) {
+        HashSet<String> set = new HashSet<>();
+        for(UUID uuid : uuids) {
+            set.add(uuid.toString());
+        }
+        return set;
     }
     
 }

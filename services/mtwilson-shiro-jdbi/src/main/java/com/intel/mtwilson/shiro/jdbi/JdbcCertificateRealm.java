@@ -22,6 +22,7 @@ import com.intel.mtwilson.shiro.jdbi.model.User;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -67,10 +68,10 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
                 
                 
                 List<Role> roles = dao.findRolesByUserLoginCertificateId(loginCertificateId.getLoginCertificateId());
-                ArrayList<UUID> roleIds = new ArrayList<>();
+                HashSet<String> roleIds = new HashSet<>();
                 for (Role role : roles) {
                     log.debug("doGetAuthorizationInfo found role: {}", role.getRoleName());
-                    roleIds.add(role.getId());
+                    roleIds.add(role.getId().toString());
                     authzInfo.addRole(role.getRoleName());
                 }
                 if (!roleIds.isEmpty()) {

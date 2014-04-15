@@ -5,6 +5,7 @@
 package com.intel.mtwilson.shiro.jdbi;
 
 import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.skife.jdbi.v2.DBI;
@@ -58,7 +59,7 @@ public class MyJdbi {
             try {
                 return My.jdbc().connection();
             }
-            catch(Exception e) {
+            catch(IOException | ClassNotFoundException | SQLException e) {
                 throw new RuntimeException(e);
             }
         }    

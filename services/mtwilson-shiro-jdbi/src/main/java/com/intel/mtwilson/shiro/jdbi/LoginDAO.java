@@ -22,6 +22,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
+import java.util.Set;
 import org.skife.jdbi.v2.sqlobject.BindBean;
 
 /**
@@ -61,6 +62,9 @@ public interface LoginDAO extends Closeable {
     
     @SqlUpdate("update mw_user set locale=:locale, comment=:comment WHERE id=:id")
     void updateUser(@Bind("id") UUID id, @Bind("locale") Locale locale, @Bind("comment") String comment);
+    
+    @SqlUpdate("update mw_user set id=:id, username=:username, locale=:locale, enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
+    void updateUser(@BindBean User user);
 
     @SqlUpdate("update mw_user set enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
     void enableUser(@Bind("id") UUID id, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
@@ -165,6 +169,9 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user_login_password (id, user_id, password_hash, salt, iterations, algorithm, expires, enabled) values (:id, :user_id, :password_hash, :salt, :iterations, :algorithm, :expires, :enabled)")
     void insertUserLoginPassword(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled);
 
+    @SqlUpdate("update mw_user_login_password set user_id=:user_id, password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled where id=:id")
+    void updateUserLoginPasswordWithUserId(@Bind("id") UUID id, @Bind("user_id") UUID user_id, @Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled);
+    
     @SqlUpdate("update mw_user_login_password set password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled where id=:id")
     void updateUserLoginPassword(@Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("id") UUID id);
 
@@ -179,12 +186,15 @@ public interface LoginDAO extends Closeable {
 
     @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id")
     void deleteUserLoginPasswordRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
-    
+
+    @SqlQuery("select login_password_id, role_id from mw_user_login_password_role where login_password_id=:login_password_id")
+    List<UserLoginPasswordRole> findUserLoginPasswordRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
+
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_password_role on mw_role.id = mw_user_login_password_role.role_id where mw_user_login_password_role.login_password_id=:login_password_id")
     List<Role> findRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
 
     @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id in ( <role_ids> )")
-    List<RolePermission> findRolePermissionsByPasswordRoleIds(@BindIn("role_ids") List<UUID> role_ids);
+    List<RolePermission> findRolePermissionsByPasswordRoleIds(@BindIn("role_ids") Set<String> role_ids);
     
     
     /**
@@ -236,7 +246,7 @@ public interface LoginDAO extends Closeable {
     List<Role> findRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
 
     @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id in ( <role_ids> )")
-    List<RolePermission> findRolePermissionsByCertificateRoleIds(@BindIn("role_ids") List<UUID> role_ids);
+    List<RolePermission> findRolePermissionsByCertificateRoleIds(@BindIn("role_ids") Set<String> roleIds);
         
     
 }

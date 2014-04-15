@@ -79,7 +79,7 @@ public class EraseUserAccounts implements Command {
     }
     
     private void deleteUsers() throws Exception {
-        LoginDAO dao = MyJdbi.authz();
+        try(LoginDAO dao = MyJdbi.authz()) {
         List<User> users = dao.findAllUsers();
         for(User user : users) {
             UserKeystore userKeystore = dao.findUserKeystoreByUserId(user.getId());
@@ -97,6 +97,7 @@ public class EraseUserAccounts implements Command {
                 dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
             }
             dao.deleteUser(user.getId());
+        }
         }
     }
     
