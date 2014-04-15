@@ -220,19 +220,31 @@ auto_install "TrustAgent requirements" "APPLICATION"
 # 4. run ldconfig to capture it
 # 5. run ldconfig -p to ensure it is found
 # XXX TODO for now we are not doing the general steps, just solving for a specific system.
-fix_redhat_libcrypto() {
-  local has_libcrypto=`find / -name libcrypto.so.1.0.0`
-  local has_symlink=`find / -name libcrypto.so`
-  if [[ -n "$has_libcrypto" && -z "$has_symlink" ]]; then
-    echo "Creating missing symlink for $has_libcrypto"
-    local libdir=`dirname $has_libcrypto`
-    #ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
-    ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
+fix_libcrypto() {
+  #yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  local has_libcrypto=`find / -name libcrypto.so.1.0.0 | head -1`
+  local libdir=`dirname $has_libcrypto`
+  local has_libdir_symlink=`find $libdir -name libcrypto.so`
+  local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
+  if [ -n "$has_libcrypto" ]; then
+    if [ -z "$has_libdir_symlink" ]; then
+      echo "Creating missing symlink for $has_libcrypto"
+      ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
+    fi
+    if [ -z "$has_usrbin_symlink" ]; then
+      echo "Creating missing symlink for $has_libcrypto"
+      ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
+    fi
+    
+    #if [ -n "$yum" ]; then #RHEL
+    #elif [[ -n "$zypper" || -n "$yast" ]]; then #SUSE
+    #fi
+
     ldconfig
   fi
 }
 
-fix_redhat_libcrypto
+fix_libcrypto
 
 return_dir=`pwd`
 
@@ -378,18 +390,18 @@ monit_src_install() {
   fi
 }
 
-#monit_install $MONIT_PACKAGE     ############################# 20140411 SAVY: temporarily remove monit for 2.0 beta release
-#
-#mkdir -p /etc/monit/conf.d
-#backup_file /etc/monit/conf.d/ta.monit
-#cp ta.monit /etc/monit/conf.d/ta.monit
-#
-#backup_file /etc/monit/monitrc
-#cp monitrc /etc/monit/monitrc
-#
-#if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
-# echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
-#fi
+monit_install $MONIT_PACKAGE
+
+mkdir -p /etc/monit/conf.d
+backup_file /etc/monit/conf.d/ta.monit
+cp ta.monit /etc/monit/conf.d/ta.monit
+
+backup_file /etc/monit/monitrc
+cp monitrc /etc/monit/monitrc
+
+if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+ echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+fi
 
 
 

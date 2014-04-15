@@ -686,6 +686,10 @@ zypper_detect() {
   zypper=`which zypper 2>/dev/null`
 }
 
+trousers_detect() {
+  trousers=`which tcsd 2>/dev/null`
+}
+
 # Parameters:
 # - absolute path to startup script to register
 # - the name to use in registration (one word)
