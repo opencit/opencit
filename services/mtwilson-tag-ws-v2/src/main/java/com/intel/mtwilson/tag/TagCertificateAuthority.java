@@ -184,12 +184,14 @@ public class TagCertificateAuthority {
         // second search by ip or name
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
-                String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
-                if (uuid != null) {
-                    log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),uuid);
-                    if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
-                        // found a selection with the target subject uuid
-                        return getInlineOrLookupSelection(selection);
+                if (subject.getIp() != null) {
+                    String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
+                    if (uuid != null) {
+                        log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),uuid);
+                        if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
+                            // found a selection with the target subject uuid
+                            return getInlineOrLookupSelection(selection);
+                        }
                     }
                 }
             }

@@ -117,6 +117,14 @@ public class BlockingRpc extends AbstractRpc {
             adapter.setInput(inputObject);
             adapter.invoke();
             outputObject = adapter.getOutput();
+            List<Fault> faults = adapter.getFaults();
+            if (faults != null && faults.size() > 0) {
+                // Since there are errors, we will capture the error details and throw an exception.
+                for (Fault fault : faults) {
+                    log.error("Error during RPC exectution : {}", fault.toString());
+                }
+                throw new Exception("Error during RPC exectuion."); // this will get converted to the web application exception in the catch block.
+            }
 //            ((Runnable)inputObject).run();
 //            outputObject = inputObject;
         }

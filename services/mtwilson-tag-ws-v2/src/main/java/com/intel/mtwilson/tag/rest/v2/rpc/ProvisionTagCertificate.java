@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
@@ -125,6 +126,9 @@ public class ProvisionTagCertificate  {
         // if the subject is an ip address or hostname, resolve it to a hardware uuid with mtwilson - if the host isn't registered in mtwilson we can't get the hardware uuid so we have to reject the request
         if( !UUID.isValid(subject)) {
             subject = ca.findSubjectHardwareUuid(subject);
+            if (subject == null) {
+                throw new Exception("Invalid subject specified in the call");
+            }
         }
         if( selections == null ) {
             selections = SelectionBuilder.factory().selection().build(); // default empty selection
@@ -144,19 +148,33 @@ public class ProvisionTagCertificate  {
         // if there is an existing currently valid certificate we return it
         CertificateFilterCriteria criteria = new CertificateFilterCriteria();
         criteria.subjectEqualTo = subject;
-        CertificateCollection results = certificateRepository.search(criteria); // TODO:  order by creation date so we get most recent first, and we pick the most recently created cert that is currently valid. 
+        CertificateCollection results = certificateRepository.search(criteria); // DONE: TODO:  order by creation date so we get most recent first, and we pick the most recently created cert that is currently valid. 
         Date today = new Date();
+        Certificate latestCert = null;
+        BigInteger latestCreateTime = BigInteger.ZERO;
         if( !results.getCertificates().isEmpty() ) {
-            for(Certificate certificate : results.getCertificates()) {
-                if( today.before(certificate.getNotBefore()) ) {
-                continue;
-            }
-                if( today.after(certificate.getNotAfter())) {
+            for (Certificate certificate : results.getCertificates()) {
+                if (today.before(certificate.getNotBefore())) {
                     continue;
                 }
-                return certificate;  // we return the first certificate (most recent, see TODO above) that is currently valid
+                if (today.after(certificate.getNotAfter())) {
+                    continue;
+                }
+                // While creating the certificates we are storing the create time in the serial number field
+                if (latestCreateTime.compareTo(certificate.getX509Certificate().getSerialNumber()) <= 0) {
+                    latestCreateTime = certificate.getX509Certificate().getSerialNumber();
+                    latestCert = certificate;                    
+                } else {
+                    continue;
+                }
+                // We won't return the first certificate found. Instead we return back the latest certificate.
+                //return certificate;  // we return the first certificate (most recent, see TODO above) that is currently valid
             }
         }
+        // Check if a valid certificate was found during the search.
+        if (latestCert != null)
+            return latestCert;
+        
         // no cached certificate so generate a new certificate
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
