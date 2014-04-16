@@ -1,27 +1,32 @@
 #!/bin/bash
 # VERSION 1.0.0     last-edited-by: rksavinx     date: 2014-02-01
 TITLE="Asset tag provisioning Agent"
+tpaDir = /var/tpa
+if [ ! -d $tpaDir ]; then 
+    mkdir -p $tpaDir 
+    chmod 700 $tpaDir
+fi
 
-certSha1=/tmp/certSha1
+certSha1=$tpaDir/certSha1
 nvramPass=ffffffffffffffffffffffffffffffffffffffff
 ownerPass=ffffffffffffffffffffffffffffffffffffffff
 srkPass=ffffffffffffffffffffffffffffffffffffffff
-autoSelect=0
+# autoSelect=0
 mode="VMWARE"
 selection=""
 server=""
 cert=""
 username=""
 password=""
-config="/tmp/config"
-CERT_FILE_LOCATION=/tmp/cacert
-XML_FILE_LOCATION=/tmp/xml
+config="$tpaDir/config"
+CERT_FILE_LOCATION=$tpaDir/cacert
+XML_FILE_LOCATION=$tpaDir/xml
 values=`cat /proc/cmdline`
 OIFS="$IFS"
 IFS=' '
 read -a valueArray <<< "${values}"
 IFS="$OIFS"
-cmdFile=/tmp/command
+cmdFile=$tpaDir/command
 tpmnvinfo=/usr/local/sbin/tpm_nvinfo
 tpmnvdefine=/usr/local/sbin/tpm_nvdefine
 tpmnvwrite=/usr/local/sbin/tpm_nvwrite
@@ -77,10 +82,10 @@ tagServer=""
 tagSelectionName=""
 certAuthority=""
 certFile=""
-selectionFile=/tmp/selection
-certFile=/tmp/cert
-certInfoFile=/tmp/certInfo
-certFileValues=/tmp/certValues
+selectionFile=$tpaDir/selection
+certFile=$tpaDir/cert
+certInfoFile=$tpaDir/certInfo
+certFileValues=$tpaDir/certValues
 
 rm $selectionFile
 rm $certFile
@@ -180,7 +185,8 @@ function getRemoteTag() {
 function getTagOption() {
  functionReturn=0
  if [ -z "$selection" ]; then
-	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
+	# tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
+	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
 	if [ $? -eq 1 ]; then
       exit 0;
 	fi
@@ -195,12 +201,12 @@ function provisionCert() {
 	server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  fi
  if [ $isUsingXml == 0 ]; then
-   if [ $autoSelect != 1 ]; then
-     if [ -z "$selectionName" ]; then
-       selectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
-     fi
-     json='{"selections":[{"name":"'$selectionName'"}]}'
-   fi
+   # if [ $autoSelect != 1 ]; then
+    if [ -z "$selectionName" ]; then
+      selectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
+    fi
+    json='{"selections":[{"name":"'$selectionName'"}]}'
+   # fi
    echo "$WGET --header=\"Content-Type: application/json\" --header=\"Accept: application/pkix-cert\" --post-data=\"$json\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
  else
@@ -238,9 +244,9 @@ function provisionCert() {
  fi
  if [ $resp -eq 0 ]; then
   # Retrieve password if TA, else generate new passwords and take ownership
-  $WGET $server/host-tpm-passwords/$UUID.json -q -O /tmp/tpmPassword
+  $WGET $server/host-tpm-passwords/$UUID.json -q -O $tpaDir/tpmPassword
   #export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
-  export ownerPass=`cat /tmp/tpmPassword | awk -F'"password":' '{print $2}' | awk -F'"' '{print $2}'`
+  export ownerPass=`cat $tpaDir/tpmPassword | awk -F'"password":' '{print $2}' | awk -F'"' '{print $2}'`
   if [ -z $ownerPass ]; then
     mode="VMWARE"
     export ownerPass=`generatePasswordHex 40`
@@ -261,8 +267,8 @@ function provisionCert() {
   # hex2bin "$sha1" $certSha1
   openssl dgst -sha1 -binary $certFile > $certSha1
 
-  echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
-  $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
+  echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > $tpaDir/certWrite" >> $cmdFile
+  $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > $tpaDir/certWrite 2>&1
   result=$?
 
   # If VMWARE, clear TPM ownership
@@ -273,15 +279,15 @@ function provisionCert() {
   sleep 5;
   if [ $result -eq 0 ]; then
    if [ "$accept" == "yes" ]; then
-     echo "completed sucessfully " > /tmp/completion
+     echo "completed sucessfully " > $tpaDir/completion
    else
 	dialog --backtitle "$TITLE" --msgbox "Certificate deployed.\nThank you for using the Asset Tag Provisioning Tool" 10 34
    fi
   else
    if [ "$accept" == "yes" ]; then
-     echo "completed sucessfully " > /tmp/completion
+     echo "completed sucessfully " > $tpaDir/completion
    else
-     dialog --backtitle "$TITLE" --msgbox "Certificate not deployed.\nPlease check /tmp/certWrite for error messages" 10 34
+     dialog --backtitle "$TITLE" --msgbox "Certificate not deployed.\nPlease check $tpaDir/certWrite for error messages" 10 34
    fi
   fi
  fi
@@ -301,7 +307,7 @@ function _main() {
     #  tagChoice=4
     #fi
     mybreak=1
-    autoSelect=0
+    # autoSelect=0
     tagChoice=4
     ;;
    2)
@@ -312,11 +318,11 @@ function _main() {
       tagChoice=4
     fi
     ;;
-   3)
-    mybreak=1
-    autoSelect=1
-    tagChoice=4
-    ;;
+  # 3)
+  #  mybreak=1
+  #  autoSelect=1
+  #  tagChoice=4
+  #  ;;
    *)
     getTagOption
     ;;
