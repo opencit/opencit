@@ -145,6 +145,9 @@ public class ProvisionTagCertificate  {
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
         }
+        // TODO: Once the subject matches, we also need to make sure that all the selections also match
+        // This needs to be done for the GA release.
+        
         // if there is an existing currently valid certificate we return it
         CertificateFilterCriteria criteria = new CertificateFilterCriteria();
         criteria.subjectEqualTo = subject;
