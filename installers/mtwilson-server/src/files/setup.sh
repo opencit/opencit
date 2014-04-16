@@ -695,14 +695,14 @@ prompt_with_default TAG_PROVISION_EXTERNAL "Use external CA instead of the built
 prompt_with_default TAG_PROVISION_NOCACHE "Always generate new certificates for incoming requests? " ${TAG_PROVISION_NOCACHE:-true}
 prompt_with_default TAG_PROVISION_XML_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_REQUIRED:-false}
 prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD}
-prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
+#prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
 prompt_with_default TAG_VALIDITY_SECONDS "Tag certificate validity duration: " ${TAG_VALIDITY_SECONDS:-31536000}
 prompt_with_default TAG_ISSUER_DN "Tag issuer distinguished name: " ${TAG_ISSUER_DN:-"CN=mtwilson-tag-ca"}
 update_property_in_file "tag.provision.external" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_EXTERNAL"
 update_property_in_file "tag.provision.nocache" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_NOCACHE"
 update_property_in_file "tag.provision.xml.encryption.required" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_REQUIRED"
 update_property_in_file "tag.provision.xml.encryption.password" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_PASSWORD"
-update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_SELECTION_DEFAULT"
+#update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_SELECTION_DEFAULT"
 update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "$TAG_VALIDITY_SECONDS"
 update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_ISSUER_DN"
 
