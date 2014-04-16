@@ -32,7 +32,8 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
 TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
 TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
 TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
-TRUSTAGENT_SETUP_TASKS="configure-from-environment create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate register-tpm-password"
+TRUSTAGENT_SETUP_TASKS="configure-from-environment create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
+# not including register-tpm-password because we are prompting for it in the setup.sh
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
 
