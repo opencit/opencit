@@ -107,13 +107,13 @@ public class Password implements Command {
         userPassword.setPasswordHash(hashedPassword);
         removeUser(username);
         dao.createUser(userPassword);
-        log.info("Stored username {}", username);
+        log.info("Created user {}", username);
         
         String newPermissions = getPermissions(args);
         if( newPermissions != null ) { 
             removePermissions(username);
             dao.addPermission(username, newPermissions);
-            log.info("Stored permissions {}", newPermissions);
+            log.info("Added permissions {}", newPermissions);
         }
         
     }

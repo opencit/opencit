@@ -257,6 +257,13 @@ public class SetupManager implements Command {
                         }                        
                     }
                     else {
+                        for (Fault fault : setupTask.getConfigurationFaults()) {
+                            log.debug("Configuration check in {}: {}", taskName, fault.toString());
+                        }
+                        for (Fault fault : setupTask.getValidationFaults()) {
+                            log.debug("Validation check in {}: {}", taskName, fault.toString());
+                        }
+                        
                         log.debug("Running {}", taskName);
                         try {
                             setupTask.run(); // calls isConfigured and isValidated automatically and throws ConfigurationException, SetupException, or ValidationException on error
