@@ -1442,17 +1442,17 @@ postgres_server_detect() {
     local version_name=`$c --version 2>/dev/null | head -n 1 | awk '{ print $3 }'`
     local bin_dir=`dirname $c`
     local version_dir=`dirname $bin_dir`
-    echo "postgres candidate version=$version_name"
+    echo "postgres candidate version=$version_name" >> $INSTALL_LOG_FILE
 
     if is_version_at_least "$version_name" "$min_version"; then
-      echo "found postgres $version_name"
+      echo "Found postgres with version: $version_name" >> $INSTALL_LOG_FILE
       if [[ -z "$best_version" ]]; then
-        echo "setting best version $best_version"
+        echo "setting best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
         best_version_short=`basename $version_dir`
       elif is_version_at_least "$version_name" "$best_version"; then
-        echo "current best version $best_version"
+        echo "current best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
         best_version_short=`basename $version_dir`
@@ -1460,27 +1460,27 @@ postgres_server_detect() {
     fi
   done
   if [[ -z "$best_version" ]]; then
-    echo "Cannot find postgres version $min_version or later"
+    echo_failure "Cannot find postgres version $min_version or later"
     postgres_clear
     return 1
   fi
 
   # now we have selected a postgres version so set variables accordingly
-  echo "Found PostgreSQL $best_version"
+  echo "Best version of PostgreSQL: $best_version" >> $INSTALL_LOG_FILE
   POSTGRES_SERVER_VERSION="$best_version"
   POSTGRES_SERVER_BIN="$best_version_bin"  
   POSTGRES_SERVER_VERSION_SHORT="$best_version_short"
 
-  echo "server version $POSTGRES_SERVER_VERSION"
+  echo "server version $POSTGRES_SERVER_VERSION" >> $INSTALL_LOG_FILE
   if [[ -f /etc/init.d/postgresql ]]; then
     postgres_com=/etc/init.d/postgresql
   fi
   postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
   postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
   # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
-  echo "postgres_pghb_conf=$postgres_pghb_conf"
-  echo "postgres_conf=$postgres_conf"
-  echo "postgres_com=$postgres_com"
+  echo "postgres_pghb_conf=$postgres_pghb_conf" >> $INSTALL_LOG_FILE
+  echo "postgres_conf=$postgres_conf" >> $INSTALL_LOG_FILE
+  echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
   # TODO:  add >> $INSTALL_LOG_FILE  to above three lines
   return 0
 }
@@ -1594,7 +1594,7 @@ postgres_configure_connection() {
       postgres_userinput_connection_properties
       postgres_test_connection
     done
-      echo_success "Connected to database \`${POSTGRES_DATABASE}\` on ${POSTGRES_HOSTNAME}"
+      echo_success "Connected to database [${POSTGRES_DATABASE}] on ${POSTGRES_HOSTNAME}" >> $INSTALL_LOG_FILE
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
@@ -1610,12 +1610,12 @@ postgres_create_database() {
 if postgres_server_detect ; then
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
-    echo_success "Database \`${POSTGRES_DATABASE}\` already exists"
-    echo_success "Database \`${POSTGRES_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
+    echo_success "Database [${POSTGRES_DATABASE}] already exists"
+    echo_success "Database [${POSTGRES_DATABASE}] already exists"   >> $INSTALL_LOG_FILE
     return 0
   else
-    echo "Creating database..."    >> $INSTALL_LOG_FILE
     echo "Creating database..."
+    echo "Creating database..."    >> $INSTALL_LOG_FILE
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
