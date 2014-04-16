@@ -5,6 +5,7 @@
 package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
@@ -33,6 +34,9 @@ public class CaCertificates extends MtWilsonClient {
     }
     public CaCertificates(Configuration configuration) throws Exception {
         super(configuration);
+    }
+    public CaCertificates(Properties properties, TlsConnection tlsConnection) throws Exception {
+        super(properties, tlsConnection);
     }
     
     public X509Certificate[] searchCaCertificates(CaCertificateFilterCriteria criteria) {
