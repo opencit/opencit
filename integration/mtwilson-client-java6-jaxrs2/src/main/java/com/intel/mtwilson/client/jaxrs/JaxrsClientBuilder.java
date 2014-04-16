@@ -119,6 +119,7 @@ public class JaxrsClientBuilder {
             if( configuration != null ) {
                 url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
             }
+            throw new IllegalStateException("URL must be set");
         }
     }
     
@@ -130,6 +131,7 @@ public class JaxrsClientBuilder {
                 tlsConnection = new TlsConnection(url,tlsPolicy);
             }
             else {
+                log.debug("creating TlsConnection with InsecureTlsPolicy");
                 tlsConnection = new TlsConnection(url,new InsecureTlsPolicy());
             }
         }
@@ -141,6 +143,7 @@ public class JaxrsClientBuilder {
         this.tlsConnection = tlsConnection;
         this.url = tlsConnection.getURL();
         this.tlsPolicy = tlsConnection.getTlsPolicy();
+        log.debug("TlsPolicy is {}", this.tlsPolicy.getClass().getName());
         return this;
     }
     public JaxrsClientBuilder url(URL url) {
@@ -157,6 +160,7 @@ public class JaxrsClientBuilder {
         tls(); // sets tls connection
         authentication(); // adds to clientConfig
 //        client = ClientBuilder.newClient(clientConfig);
+        // TODO: if URL is http and not https then we should skip the ssl configuration
         Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).withConfig(clientConfig).build();
         if( configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", false) ) {
             client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));

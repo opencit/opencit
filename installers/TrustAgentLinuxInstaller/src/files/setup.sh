@@ -299,7 +299,7 @@ return_dir=`pwd`
 cd $return_dir
 
 echo "Registering tagent in start up"
-register_startup_script /usr/local/bin/tagent tagent 21
+register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1
 # trousers has N=20 startup number, need to lookup and do a N+1
 
 fix_existing_aikcert() {

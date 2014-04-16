@@ -149,7 +149,7 @@ public class LoginDAO  {
     
     private void load() throws IOException {
         if( !userFile.exists() ) {
-            log.info("Password file does not exist");
+            log.debug("Password file does not exist");
             return; // not an error because caller can add users and then call save() to create the password file
         }
         // load users

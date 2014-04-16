@@ -32,6 +32,7 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
 TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
 TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
 TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
+TRUSTAGENT_HTTP_LOG_FILE=/var/log/trustagent/http.log
 TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
 # not including configure-from-environment because we are running it always before the user-chosen tasks
 # not including register-tpm-password because we are prompting for it in the setup.sh
@@ -83,7 +84,7 @@ trustagent_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd /opt/trustagent
-      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server >/dev/null 2>&1 &
+      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server >>$TRUSTAGENT_HTTP_LOG_FILE 2>&1 &
       echo $! > $TRUSTAGENT_PID_FILE
     )
 }
