@@ -94,5 +94,6 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
         return rpcInstance;
     }
     
+    @Override
     public List<Fault> getFaults() { return faults; }
 }
