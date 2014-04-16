@@ -1610,7 +1610,7 @@ postgres_create_database() {
 if postgres_server_detect ; then
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
-    echo_success "Database [${POSTGRES_DATABASE}] already exists"
+    #echo_success "Database [${POSTGRES_DATABASE}] already exists"
     echo_success "Database [${POSTGRES_DATABASE}] already exists"   >> $INSTALL_LOG_FILE
     return 0
   else
