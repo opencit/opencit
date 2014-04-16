@@ -7,6 +7,9 @@ package com.intel.mtwilson.trustagent.setup;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.AnyProtocolSelector;
 import com.intel.mtwilson.client.jaxrs.CaCertificates;
@@ -20,6 +23,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Prerequisites:  Trust Agent Keystore must already be created
@@ -89,13 +93,22 @@ public class DownloadMtWilsonPrivacyCACertificate extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
+        /*
         // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", trustagentConfiguration.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", trustagentConfiguration.getTrustagentKeystorePassword());
+        */
+        log.debug("Creating TLS policy");
+        TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath(), trustagentConfiguration.getTrustagentKeystorePassword());
+        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
-        CaCertificates client = new CaCertificates(trustagentConfiguration.getConfiguration());
+        Properties clientConfiguration = new Properties();
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, username);
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
+        
+        CaCertificates client = new CaCertificates(clientConfiguration, tlsConnection);
         X509Certificate certificate = client.retrieveCaCertificate("privacy");
         keystore.addTrustedCaCertificate(certificate, "privacy");
         X509Certificate endorsementCertificate = client.retrieveCaCertificate("endorsement");

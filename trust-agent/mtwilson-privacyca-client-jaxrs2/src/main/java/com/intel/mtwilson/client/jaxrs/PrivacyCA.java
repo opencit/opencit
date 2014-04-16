@@ -5,6 +5,7 @@
 package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.privacyca.v2.model.*;
 import java.net.URL;
@@ -32,6 +33,9 @@ public class PrivacyCA extends MtWilsonClient {
     }
     public PrivacyCA(Configuration configuration) throws Exception {
         super(configuration);
+    }
+    public PrivacyCA(Properties properties, TlsConnection tlsConnection) throws Exception {
+        super(properties, tlsConnection);
     }
     
     public X509Certificate endorseTpm(byte[] ekModulus) {

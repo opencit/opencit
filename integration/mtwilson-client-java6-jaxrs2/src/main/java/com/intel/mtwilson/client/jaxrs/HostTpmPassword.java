@@ -6,10 +6,12 @@ package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.tag.model.TpmPasswordCollection;
 import com.intel.mtwilson.tag.model.TpmPasswordFilterCriteria;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
@@ -35,6 +37,9 @@ public class HostTpmPassword extends MtWilsonClient {
     public HostTpmPassword(Configuration configuration) throws Exception {
         super(configuration);
     }
+    public HostTpmPassword(Properties configuration, TlsConnection tlsConnection) throws Exception {
+        super(configuration, tlsConnection);
+    }
     
     /**
      * 
@@ -58,6 +63,7 @@ public class HostTpmPassword extends MtWilsonClient {
         return null;
     }
 
+    /*
     public TpmPassword retrieveTpmPassword(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection collection = getTargetPathWithQueryParams("/host-tpm-passwords", criteria).request(MediaType.APPLICATION_JSON).get(TpmPasswordCollection.class);
         if( collection.getTpmPasswords().isEmpty() ) {
@@ -65,4 +71,13 @@ public class HostTpmPassword extends MtWilsonClient {
         }
         return collection.getTpmPasswords().get(0);
     }
+    */
+
+    public TpmPassword retrieveTpmPassword(UUID hardwareUuid) {
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("id", hardwareUuid.toString());
+        TpmPassword tpmPassword = getTarget().path("/host-tpm-passwords/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(TpmPassword.class);
+        return tpmPassword; // may be null
+    }
+
 }

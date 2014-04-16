@@ -6,13 +6,18 @@ package com.intel.mtwilson.trustagent.niarl;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
 import com.intel.mtwilson.configuration.Configurable;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
+import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 
 /**
  * Take ownership
@@ -83,7 +88,16 @@ public class ProvisionTPM implements Configurable, Runnable {
             log.debug("Public EK Modulus: {}", TpmUtils.byteArrayToHexString(pubEkMod));
             log.debug("Requesting TPM endorsement from Privacy CA");
             // send the public endorsement key modulus to the privacy ca and receive the endorsement certificate
-            PrivacyCA pcaClient = new PrivacyCA(configuration);
+            
+            TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+            TlsConnection tlsConnection = new TlsConnection(new URL(config.getMtWilsonApiUrl()), tlsPolicy);
+
+            Properties clientConfiguration = new Properties();
+            clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, config.getMtWilsonApiUsername());
+            clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, config.getMtWilsonApiPassword());
+            
+            PrivacyCA pcaClient = new PrivacyCA(clientConfiguration, tlsConnection);
+
             X509Certificate ekCert = pcaClient.endorseTpm(pubEkMod);
             log.debug("Received EC {}", Sha1Digest.digestOf(ekCert.getEncoded()).toHexString());
             // write the EC to the TPM NVRAM

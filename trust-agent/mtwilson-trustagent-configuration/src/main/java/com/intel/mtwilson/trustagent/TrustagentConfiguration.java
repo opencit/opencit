@@ -64,10 +64,10 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     public TrustagentConfiguration(Configuration configuration) {
         super();
-        initEnvironmentConfiguration(configuration);
-        
+        setConfiguration(configuration);
+//        initEnvironmentConfiguration(configuration);
     }
-    
+    /*
     private void initEnvironmentConfiguration(Configuration given) {
         // using the environment configuration 
         // allows the MTWILSON_API_USERNAME and MTWILSON_API_PASSWORD to be set
@@ -76,7 +76,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         Configuration configuration = new CompositeConfiguration(given, env);        
         setConfiguration(configuration);
     }
-    
+    */
     
     /**
      * NOTE: this comes from an environment variable and would only be used
@@ -266,8 +266,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
             }
         }
         else {
-            Properties properties = new Properties();
-            TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration(properties));
+            TrustagentConfiguration configuration = new TrustagentConfiguration(new PropertiesConfiguration());
             return configuration;
         }
     }

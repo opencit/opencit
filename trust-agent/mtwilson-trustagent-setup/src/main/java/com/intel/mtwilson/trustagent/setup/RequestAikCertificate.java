@@ -103,12 +103,13 @@ public class RequestAikCertificate extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
+        /*
         // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
-        
+        */
         CreateIdentity provisioner = new CreateIdentity();
         provisioner.setConfiguration(config.getConfiguration());
         provisioner.run();

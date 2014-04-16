@@ -7,6 +7,9 @@ package com.intel.mtwilson.trustagent.niarl;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
@@ -27,9 +30,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
+import java.util.Properties;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.io.IOUtils;
 
@@ -71,13 +76,22 @@ public class CreateIdentity implements Configurable, Runnable {
 //             TpmKey aik = new TpmKey(newId.getAikBlob());
             
             // XXX TODO issue #497 issue #541 need to allow caller to specify a TlsPolicy; use a secure default StrictTlsPolicy if not specified; do not use NopX509HostnameVerifier it's deprecated; if user wants insecure policy use InsecureTlsPolicy
-            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
+//            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
 
+            TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+            TlsConnection tlsConnection = new TlsConnection(new URL(config.getMtWilsonApiUrl()), tlsPolicy);
+
+            Properties clientConfiguration = new Properties();
+            clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, config.getMtWilsonApiUsername());
+            clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, config.getMtWilsonApiPassword());
+            
             // send the identity request to the privacy ca to get a challenge
-            PrivacyCA client = new PrivacyCA(config.getConfiguration());
+            PrivacyCA client = new PrivacyCA(clientConfiguration, tlsConnection);
+            
             IdentityChallengeRequest request = new IdentityChallengeRequest();
             request.setEndorsementCertificate(encryptedEkCert.toByteArray());
             request.setIdentityRequest(newId.getIdentityRequest());
+            
             IdentityChallenge identityChallenge = client.identityChallengeRequest(request);
             byte[] challenge = identityChallenge.getIdentityChallenge();
             

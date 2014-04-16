@@ -200,11 +200,13 @@ public class TagCertificateAuthority {
                 return getInlineOrLookupSelection(selection);
             }
         }
-        // fourth look for a server default selection
+        /*
+        // fourth look for a server default selection - disabling this for now because it may be confusing to customers to have a server default behind their own selections file default because if they choose not to supply a default in their file they may still get one from the server.
         String defaultSelectionName = configuration.getTagProvisionSelectionDefault();
         if (defaultSelectionName != null && !defaultSelectionName.isEmpty()) {
             return findSelectionByName(defaultSelectionName);
         }
+        */
         throw new IllegalArgumentException("No matching selection");
     }
 

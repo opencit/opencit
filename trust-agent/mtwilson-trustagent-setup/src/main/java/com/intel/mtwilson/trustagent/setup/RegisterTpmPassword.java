@@ -12,6 +12,9 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.PropertiesUtil;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
 import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.client.jaxrs.HostTpmPassword;
@@ -88,6 +91,14 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         else {
             hostHardwareId = UUID.valueOf(hostHardwareIdHex);
         }
+        
+        // these properties are used in validate() and execute() and must be defined
+        if( config.getTrustagentKeystoreFile() == null ) {
+            configuration("Keystore file is not set");
+        }
+        if( config.getTrustagentKeystorePassword() == null ) {
+            configuration("Keystore password is not set");
+        }
     }
 
     @Override
@@ -98,17 +109,27 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         //        until that is done, user should always run this setup task
         //        with --force
         
+        /*
         // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
+        */
         
+        TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
+        
+        Properties clientConfiguration = new Properties();
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, username);
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
+
         // check if mt wilson already knows the tpm owner secret
-        HostTpmPassword client = new HostTpmPassword(config.getConfiguration());
+        HostTpmPassword client = new HostTpmPassword(clientConfiguration, tlsConnection);
         TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
         criteria.id = hostHardwareId;
-        TpmPassword tpmPassword = client.retrieveTpmPassword(criteria);
+//        TpmPassword tpmPassword = client.retrieveTpmPassword(criteria);
+        TpmPassword tpmPassword = client.retrieveTpmPassword(hostHardwareId);
         if( tpmPassword == null ) {
             validation("TPM Owner Secret not yet registered with Mt Wilson");
         }
@@ -127,13 +148,24 @@ public class RegisterTpmPassword extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
+        /*
         // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
+        */
         
-        HostTpmPassword client = new HostTpmPassword(config.getConfiguration());
+        // TODO: duplicate code here= (log.debug("Cf and download privacy ca certs
+        log.debug("Creating TLS policy");
+        TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+        TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
+        
+        Properties clientConfiguration = new Properties();
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, username);
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
+        
+        HostTpmPassword client = new HostTpmPassword(clientConfiguration, tlsConnection);
         String etag = client.storeTpmPassword(hostHardwareId, tpmOwnerSecretHex);
         if( etag != null && !etag.isEmpty() ) {
             etagCache.setProperty(TrustagentConfiguration.TPM_OWNER_SECRET, etag);
