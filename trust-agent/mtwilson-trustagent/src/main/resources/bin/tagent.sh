@@ -180,7 +180,7 @@ case "$1" in
     # the tpm has been cleared, or re-initializing the keystore if the server
     # ssl cert has changed and the user has updated the fingerprint in
     # the trustagent.properties file
-    if [ trustagent_setup ]; then
+    if trustagent_setup; then
       trustagent_start
     fi
     ;;
