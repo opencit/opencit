@@ -231,7 +231,7 @@ public class SetupManager implements Command {
 
     protected void execute(List<SetupTask> tasks) throws IOException {
         PropertiesConfiguration properties = loadConfiguration();
-        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
+//        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
 //        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
         boolean error = false;
         try {

@@ -58,6 +58,8 @@
     <logger name="org.apache.shiro" level="INFO"/>
     <logger name="org.apache.commons" level="INFO"/>
     <logger name="com.intel.dcsg.cpg" level="INFO"/>
+    <logger name="com.intel.dcsg.cpg.console" level="DEBUG"/>
+    <logger name="com.intel.dcsg.cpg.configuration" level="DEBUG"/>
 
 </configuration>
 

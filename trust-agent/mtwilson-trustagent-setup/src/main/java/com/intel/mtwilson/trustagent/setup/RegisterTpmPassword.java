@@ -88,6 +88,14 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         else {
             hostHardwareId = UUID.valueOf(hostHardwareIdHex);
         }
+        
+        // these properties are used in validate() and execute() and must be defined
+        if( config.getTrustagentKeystoreFile() == null ) {
+            configuration("Keystore file is not set");
+        }
+        if( config.getTrustagentKeystorePassword() == null ) {
+            configuration("Keystore password is not set");
+        }
     }
 
     @Override
