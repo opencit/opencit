@@ -15,20 +15,14 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 public class CreateAikSecret extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateAikSecret.class);
     
-    private String aikSecretHex;
-    
     @Override
     protected void configure() throws Exception {
-        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
-        aikSecretHex = trustagentConfiguration.getAikSecretHex();
-        if( aikSecretHex == null || aikSecretHex.isEmpty() ) {
-            aikSecretHex = RandomUtil.randomHexString(20);
-            log.info("Generated random AIK secret"); 
-        }
     }
 
     @Override
     protected void validate() throws Exception {
+        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
+        String aikSecretHex = trustagentConfiguration.getAikSecretHex();
         if( aikSecretHex == null || aikSecretHex.isEmpty() ) {
             validation("AIK secret is not set");
         }
@@ -36,6 +30,8 @@ public class CreateAikSecret extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
+        String aikSecretHex = RandomUtil.randomHexString(20);
+        log.info("Generated random AIK secret"); 
         getConfiguration().setString(TrustagentConfiguration.AIK_SECRET, aikSecretHex);
     }
     
