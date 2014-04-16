@@ -4,23 +4,10 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
-import java.util.Map;
 import java.util.Properties;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import org.glassfish.jersey.client.ClientConfig;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import org.glassfish.jersey.filter.LoggingFilter;
 /**
  *
  * @author jbuhacoff

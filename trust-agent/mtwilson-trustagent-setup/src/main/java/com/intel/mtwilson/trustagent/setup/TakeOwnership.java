@@ -25,6 +25,7 @@ public class TakeOwnership extends AbstractSetupTask {
         // tpm owner password must have already been generated
         config = new TrustagentConfiguration(getConfiguration());
         tpmOwnerSecret = config.getTpmOwnerSecretHex();
+        log.debug("TakeOwnership tpmOwnerSecret = {}", tpmOwnerSecret);
         if (tpmOwnerSecret == null || tpmOwnerSecret.isEmpty()) {
             configuration("TPM owner secret must be configured to take ownership");
         }

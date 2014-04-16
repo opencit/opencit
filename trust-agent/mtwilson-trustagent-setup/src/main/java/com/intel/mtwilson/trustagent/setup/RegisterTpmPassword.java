@@ -4,41 +4,19 @@
  */
 package com.intel.mtwilson.trustagent.setup;
 
-import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
-import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.PropertiesUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
-import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
-import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.client.jaxrs.HostTpmPassword;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.tag.model.TpmPassword;
-import com.intel.mtwilson.tag.model.TpmPasswordFilterCriteria;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
-import com.intel.mtwilson.trustagent.niarl.CreateIdentity;
-import com.intel.mtwilson.trustagent.niarl.Util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -116,7 +94,7 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
         */
-        
+        log.debug("RegisterTpmPassword.validate creating strict TLS Policy using keystore");
         TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
@@ -126,8 +104,8 @@ public class RegisterTpmPassword extends AbstractSetupTask {
 
         // check if mt wilson already knows the tpm owner secret
         HostTpmPassword client = new HostTpmPassword(clientConfiguration, tlsConnection);
-        TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
-        criteria.id = hostHardwareId;
+//        TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
+//        criteria.id = hostHardwareId;
 //        TpmPassword tpmPassword = client.retrieveTpmPassword(criteria);
         TpmPassword tpmPassword = client.retrieveTpmPassword(hostHardwareId);
         if( tpmPassword == null ) {
@@ -157,7 +135,7 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         */
         
         // TODO: duplicate code here= (log.debug("Cf and download privacy ca certs
-        log.debug("Creating TLS policy");
+        log.debug("RegisterTpmPassword.execute creating strict TLS policy using keystore");
         TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         

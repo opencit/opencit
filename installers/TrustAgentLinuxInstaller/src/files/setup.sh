@@ -47,9 +47,24 @@ date > $logfile
 # 3. Compile TPM commands
 # 4. Install Trust Agent files
 
+##### backup old files
+
+# backup configuration directory before unzipping our package
+backupdate=`date +%Y-%m-%d.%H%M`
+if [ -d /opt/trustagent/configuration ]; then  
+  cp -r /opt/trustagent/configuration /opt/trustagent/configuration.$backupdate
+fi
+
 
 ##### stop existing trust agent if running
 
+# before we stop the trust agent, remove it from the monit config (if applicable)
+# to prevent monit from trying to restart it while we are setting up.
+if [ -f /etc/monit/conf.d/ta.monit ]; then
+  mkdir -p /etc/monit.bak
+  mv /etc/monit/conf.d/ta.monit /etc/monit.bak/ta.monit.$backupdate
+  service monit restart
+fi
 
 # bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
 # if there's already a previous version installed, uninstall it
@@ -61,13 +76,6 @@ if [ -f "$existing_tagent" ]; then
 fi
 
 
-##### backup old files
-
-# backup configuration directory before unzipping our package
-backupdate=`date +%Y-%m-%d.%H%M`
-if [ -d /opt/trustagent/configuration ]; then  
-  cp -r /opt/trustagent/configuration /opt/trustagent/configuration.$backupdate
-fi
 
 ##### create directory structure
 
@@ -392,12 +400,19 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
+
+
 mkdir -p /etc/monit/conf.d
-backup_file /etc/monit/conf.d/ta.monit
+# ta.monit is already backed up at the beginning of setup.sh
+# not using backup_file /etc/monit/conf.d/ta.monit because we want it in a different folder to prevent monit from reading the new ta.monit AND all the backups and complaining about duplicates
 cp ta.monit /etc/monit/conf.d/ta.monit
 
-backup_file /etc/monit/monitrc
+if [ -f /etc/monit/monitrc ]; then
+  cp /etc/monit/monitrc /etc/monit.bak/monitrc.$backupdate
+fi
+# backup_file /etc/monit/monitrc
 cp monitrc /etc/monit/monitrc
+chmod 700 /etc/monit/monitrc
 
 if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
@@ -421,14 +436,6 @@ fi
 #	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
 #fi
 
-
-# TODO:  monit should only be restarted AFTER trustagent is up and running
-#        so that it doesn't try to start it before we're done with our setup
-#        tasks.
-chmod 700 /etc/monit/monitrc
-service monit restart
-echo "monit installed and monitoring tagent"
-sleep 2
 
 # collect all the localhost ip addresses and make the list available as the
 # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
@@ -457,7 +464,7 @@ fi
 # optional: register tpm password with mtwilson so pull provisioning can
 #           be accomplished with less reboots (no ownership transfer)
 prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD}
-if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
+if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$REGISTER_TPM_PASSWORD" == "yes" ]]; then 
 #	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
 	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
 	prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
@@ -469,4 +476,15 @@ if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; the
 #	echo "registering $TPM_PASSWORD to $UUID"
 #	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
     /usr/local/bin/tagent setup register-tpm-password
+fi
+
+
+# NOTE:  monit should only be restarted AFTER trustagent is up and running
+#        so that it doesn't try to start it before we're done with our setup
+#        tasks.
+/usr/local/bin/tagent status > /dev/null
+if [ $? ]; then
+  service monit restart
+else
+  echo "Trust agent not running; skipping monit restart"
 fi
