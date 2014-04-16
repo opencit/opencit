@@ -126,6 +126,7 @@ public class JaxrsClientBuilder {
         assert url != null;
         if( tlsConnection == null ) {
             if( tlsPolicy != null ) {
+                log.debug("creating TlsConnection from URL and TlsPolicy");
                 tlsConnection = new TlsConnection(url,tlsPolicy);
             }
             else {
@@ -136,6 +137,7 @@ public class JaxrsClientBuilder {
     
     // you can set this instead of url and tlsPolicy
     public JaxrsClientBuilder tlsConnection(TlsConnection tlsConnection) {
+        log.debug("set TlsConnection");
         this.tlsConnection = tlsConnection;
         this.url = tlsConnection.getURL();
         this.tlsPolicy = tlsConnection.getTlsPolicy();

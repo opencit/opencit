@@ -240,6 +240,7 @@ public class SetupManager implements Command {
             for (SetupTask setupTask : tasks) {
                 String taskName = setupTask.getClass().getSimpleName();
                 setupTask.setConfiguration(properties);
+                log.debug("set tpm owner password {} for task {}", properties.getString("tpm.owner.secret"), taskName);
                 try {
                     if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
                         log.debug("Skipping {}", taskName);

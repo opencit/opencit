@@ -26,20 +26,13 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
         if( tpmOwnerSecretHex == null || tpmOwnerSecretHex.isEmpty() ) {
             validation("TPM owner secret is not set");
         }
-        String tpmSrkSecretHex = trustagentConfiguration.getTpmSrkSecretHex();
-        if( tpmSrkSecretHex == null || tpmSrkSecretHex.isEmpty() ) {
-            validation("TPM SRK secret is not set");
-        }
     }
 
     @Override
     protected void execute() throws Exception {
         String tpmOwnerSecretHex = RandomUtil.randomHexString(20);
         log.info("Generated random owner secret"); 
-        String tpmSrkSecretHex = "0000000000000000000000000000000000000000"; // to match existing ProvisionTPM hard-coded value;  TODO: change to RandomUtil.randomHexString(20) after verifying rest of stack can handle well-known SRK ... well-known SRK may be a bad assumption, but at least now we have an option to use a configured value instead;  see issue #1012
-        log.info("Generated well-known SRK secret"); 
         getConfiguration().setString(TrustagentConfiguration.TPM_OWNER_SECRET, tpmOwnerSecretHex);
-        getConfiguration().setString(TrustagentConfiguration.TPM_SRK_SECRET, tpmSrkSecretHex);
     }
     
 }

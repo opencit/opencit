@@ -64,7 +64,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
 
         tpmOwnerSecretHex = config.getTpmOwnerSecretHex(); // we check it here because ProvisionTPM calls getOwnerSecret() which relies on this
         if (tpmOwnerSecretHex == null) {
-            configuration("TPM Owner Secret is not configured: " + TrustagentConfiguration.TPM_OWNER_SECRET); // this constant is the name of the property, literally "tpm.owner.secret"
+            configuration("TPM Owner Secret is not configured: %s", TrustagentConfiguration.TPM_OWNER_SECRET); // this constant is the name of the property, literally "tpm.owner.secret"
         }
         if (!Util.isOwner(config.getTpmOwnerSecret())) {
             configuration("Trust Agent is not the TPM owner");

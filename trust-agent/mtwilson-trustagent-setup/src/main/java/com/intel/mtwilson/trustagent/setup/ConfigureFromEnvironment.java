@@ -26,12 +26,12 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
     private MutableConfiguration configuration;
     private String[] variables;
-    private String[] prohibited; // variables that must not be stored in the configuration
     private AllCapsNamingStrategy allcaps;
     private Configuration env;
     
     @Override
     protected void configure() throws Exception {
+        log.debug("setup task configuration instance {}", getConfiguration());
         configuration = getConfiguration();
         variables = new String[] {
             TrustagentConfiguration.MTWILSON_API_URL,
@@ -51,7 +51,6 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             TrustagentConfiguration.DAA_ENABLED,
             TrustagentConfiguration.HARDWARE_UUID
         };
-        prohibited = new String[] { TrustagentConfiguration.MTWILSON_API_USERNAME, TrustagentConfiguration.MTWILSON_API_PASSWORD };
         allcaps = new AllCapsNamingStrategy();
         env = new KeyTransformerConfiguration(allcaps, new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1
     }
@@ -63,6 +62,7 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
             String envValue = env.getString(variable);
             String confValue = configuration.getString(variable);
             log.debug("checking to see if environment variable [{}] needs to be added to configuration", variable);
+            log.debug("env {} property {}", envValue, confValue);
             if (envValue != null && !envValue.isEmpty() && (confValue == null || !confValue.equals(envValue))) {
                 log.debug("environment variable [{}] needs to be added to configuration", variable);
                 updatelist.add(variable);
@@ -79,17 +79,10 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         for (String variable : variables) {
             String envValue = env.getString(variable);
             if (envValue != null && !envValue.isEmpty()) {
-                log.debug("Copying environment variable {} to configuration property {}", allcaps.toAllCaps(variable), variable);
+                log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(variable), variable, envValue);
                 configuration.setString(variable, envValue);
             }
         }
-        /*
-        // ensure that any variables prohibited from storage are not in the configuration
-        for(String variable : prohibited) {
-            log.debug("Removing storage-prohibited variable {} from configuration", variable);
-            configuration.setString(variable, null);
-        }
-        */
     }
     
 }

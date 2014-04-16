@@ -10,9 +10,7 @@ import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
 import com.intel.mtwilson.configuration.Configurable;
 import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
@@ -23,7 +21,6 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
-import gov.niarl.his.privacyca.TpmKey;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmPubKey;
 import java.io.File;
@@ -35,7 +32,6 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
-import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.io.IOUtils;
 
 /**

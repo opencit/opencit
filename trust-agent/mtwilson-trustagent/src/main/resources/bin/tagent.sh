@@ -32,9 +32,9 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
 TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
 TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
 TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
-TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
+TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
+# not including configure-from-environment because we are running it always before the user-chosen tasks
 # not including register-tpm-password because we are prompting for it in the setup.sh
-# not including configure-from-environment because it's included automatically when running "tagent setup" (but not when running "tagent start")
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
 
@@ -72,7 +72,8 @@ trustagent_setup() {
   if [ -z "$tasklist" ]; then
     tasklist=$TRUSTAGENT_SETUP_TASKS
   fi
-  java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup $tasklist
+  # TODO:  else if tasklist is not empty, check if configure-from-environment is in there and if not automatically prepend it
+  java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup configure-from-environment $tasklist
   return $?
 }
 
@@ -153,7 +154,9 @@ function print_help() {
     # TODO:  add the "register" command when it's implemented
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
+    echo configure-from-environment
     echo $TRUSTAGENT_SETUP_TASKS | tr ' ' '\n'
+    echo register-tpm-password
 }
 
 ###################################################################################################
@@ -191,13 +194,15 @@ case "$1" in
   status)
     if trustagent_is_running; then
       echo "Trust agent is running"
+      exit 0
     else
       echo "Trust agent is not running"
+      exit 1
     fi
     ;;
   setup)
     shift
-    trustagent_setup configure-from-environment $*
+    trustagent_setup $*
     ;;
   uninstall)
     trustagent_stop
