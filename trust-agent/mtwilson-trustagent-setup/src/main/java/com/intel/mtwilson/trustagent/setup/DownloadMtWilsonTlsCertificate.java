@@ -43,15 +43,15 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
         trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         url = trustagentConfiguration.getMtWilsonApiUrl();
         if( url == null || url.isEmpty() ) {
-            configuration("Mt Wilson URL is not set");
+            configuration("Mt Wilson URL is not set: mtwilson.api.url");
         }
         username = trustagentConfiguration.getMtWilsonApiUsername();
         password = trustagentConfiguration.getMtWilsonApiPassword();
         if( username == null || username.isEmpty() ) {
-            configuration("Mt Wilson username is not set");
+            configuration("Mt Wilson username is not set: mtwilson.api.username");
         }
         if( password == null || password.isEmpty() ) {
-            configuration("Mt Wilson password is not set");
+            configuration("Mt Wilson password is not set: mtwilson.api.password");
         }
         keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
         if( keystoreFile == null || !keystoreFile.exists() ) {

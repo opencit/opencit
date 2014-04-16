@@ -17,13 +17,6 @@ public class CreateKeystorePassword extends AbstractSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
-        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
-        if( keystorePassword == null || keystorePassword.isEmpty() ) {
-            keystorePassword = RandomUtil.randomBase64String(8).replace("=","_");
-            log.info("Generated random keystore password"); 
-            getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_KEYSTORE_PASSWORD, keystorePassword);
-        }
     }
 
     @Override
@@ -37,7 +30,9 @@ public class CreateKeystorePassword extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        // nothing to do here, this setup task is only configuration
+        String keystorePassword = RandomUtil.randomBase64String(8).replace("=","_");
+        log.info("Generated random keystore password"); 
+        getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_KEYSTORE_PASSWORD, keystorePassword);
     }
     
 }

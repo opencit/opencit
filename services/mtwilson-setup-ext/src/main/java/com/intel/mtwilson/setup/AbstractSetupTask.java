@@ -203,5 +203,13 @@ public abstract class AbstractSetupTask implements SetupTask {
         validationFaults.add(new Fault(m, format, args));
     }
     
-    
+    // convenience methods
+    /*
+    protected void requireNonEmptyString(String key) {
+        String value = configuration.getString(key);
+        if( value == null || value.isEmpty() ) {
+            configuration("Missing required setting: %s", key);
+        }
+    }
+    */
 }

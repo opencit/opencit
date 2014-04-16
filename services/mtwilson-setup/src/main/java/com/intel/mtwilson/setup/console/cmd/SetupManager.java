@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import org.apache.commons.collections.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -322,8 +324,18 @@ public class SetupManager implements Command {
         log.debug("Starting store configuration to file");
         File file = getConfigurationFile();
         try (FileOutputStream out = new FileOutputStream(file)) {
-            configuration.getProperties().store(out, "saved by mtwilson setup");
+            Properties properties = beforeStore(configuration.getProperties());
+            properties.store(out, "saved by mtwilson setup");
         }
         log.debug("Finished store configuration to file");
+    }
+    
+    /**
+     * 
+     * @param properties
+     * @return must not return null
+     */
+    protected Properties beforeStore(Properties properties) {
+        return properties;
     }
 }

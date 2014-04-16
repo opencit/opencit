@@ -35,8 +35,8 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         configuration = getConfiguration();
         variables = new String[] {
             TrustagentConfiguration.MTWILSON_API_URL,
-//            TrustagentConfiguration.MTWILSON_API_USERNAME, // NOTE: MUST NOT BE STORED TO FILE
-//            TrustagentConfiguration.MTWILSON_API_PASSWORD, // NOTE: MUST NOT BE STORED TO FILE
+            TrustagentConfiguration.MTWILSON_API_USERNAME, // NOTE: excluded from storing in trustagent.properties by com.intel.mtwilson.trustagent.cmd.Setup beforeStore
+            TrustagentConfiguration.MTWILSON_API_PASSWORD, // NOTE: excluded from storing in trustagent.properties by com.intel.mtwilson.trustagent.cmd.Setup beforeStore
             TrustagentConfiguration.MTWILSON_TLS_CERT_SHA1,
             TrustagentConfiguration.TPM_QUOTE_IPV4,
             TrustagentConfiguration.TPM_OWNER_SECRET,
@@ -83,11 +83,13 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
                 configuration.setString(variable, envValue);
             }
         }
+        /*
         // ensure that any variables prohibited from storage are not in the configuration
         for(String variable : prohibited) {
             log.debug("Removing storage-prohibited variable {} from configuration", variable);
             configuration.setString(variable, null);
         }
+        */
     }
     
 }
