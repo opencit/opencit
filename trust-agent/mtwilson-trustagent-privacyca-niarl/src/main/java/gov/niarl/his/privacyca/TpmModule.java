@@ -238,6 +238,9 @@ public class TpmModule {
 		commandLineResult toReturn = new commandLineResult(returnCode, returnCount);
 		if ((returnCode == 0)&&(returnCount != 0)) {
 			StringTokenizer st = new StringTokenizer(line);
+            if( st.countTokens() < returnCount ) {
+                log.debug("executeVer2Command mode {} with return count {} but only {} tokens are available; expect java.util.NoSuchElementException", mode, returnCount, st.countTokens());
+            }
 			for (int i = 0; i < returnCount; i++) {
 				toReturn.setResult(i, st.nextToken());
 			}
