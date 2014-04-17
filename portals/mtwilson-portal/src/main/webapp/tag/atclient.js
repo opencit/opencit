@@ -330,6 +330,7 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
             case 'provision-certificate':
                 mtwilson.atag.notify({text: 'Provisioned certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                $('certificate-provision-host').clear();
                 $('certificate-provision-form').hide();
                 break;
             case 'deploy-certificate':
