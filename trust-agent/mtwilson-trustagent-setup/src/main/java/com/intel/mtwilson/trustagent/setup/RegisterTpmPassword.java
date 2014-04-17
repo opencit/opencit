@@ -107,19 +107,20 @@ public class RegisterTpmPassword extends AbstractSetupTask {
 //        TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
 //        criteria.id = hostHardwareId;
 //        TpmPassword tpmPassword = client.retrieveTpmPassword(criteria);
-        TpmPassword tpmPassword = client.retrieveTpmPassword(hostHardwareId);
-        if( tpmPassword == null ) {
-            validation("TPM Owner Secret not yet registered with Mt Wilson");
+        TpmPassword tpmPassword = null;
+        try {
+            tpmPassword = client.retrieveTpmPassword(hostHardwareId);
+        } catch (Exception e) {
+            validation("Cannot determine if TPM Owner Secret is registered with Mt Wilson");
+            return;
         }
-        else {
-            // mt wilson has a value for this, check if it's the same as ours
-            if( etagCache.containsKey(TrustagentConfiguration.TPM_OWNER_SECRET) ) {
-                String previousEtag = etagCache.getProperty(TrustagentConfiguration.TPM_OWNER_SECRET); 
-                log.debug("The previous tag is {}", previousEtag);
-                String currentEtag = tpmPassword.getEtag();
-                if( currentEtag != null && !currentEtag.equalsIgnoreCase(previousEtag) ) {
-                    validation("TPM Owner Secret was updated and should be re-registered in Mt Wilson");
-                }
+        // mt wilson has a value for this, check if it's the same as ours
+        if (etagCache.containsKey(TrustagentConfiguration.TPM_OWNER_SECRET)) {
+            String previousEtag = etagCache.getProperty(TrustagentConfiguration.TPM_OWNER_SECRET);
+            log.debug("The previous tag is {}", previousEtag);
+            String currentEtag = tpmPassword.getEtag();
+            if (currentEtag != null && !currentEtag.equalsIgnoreCase(previousEtag)) {
+                validation("TPM Owner Secret was updated and should be re-registered in Mt Wilson");
             }
         }
     }
