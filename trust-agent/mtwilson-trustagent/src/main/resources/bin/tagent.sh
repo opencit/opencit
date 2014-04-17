@@ -34,6 +34,7 @@ TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
 TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
 TRUSTAGENT_HTTP_LOG_FILE=/var/log/trustagent/http.log
 TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin-user create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
+TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair create-admin-user take-ownership"
 # not including configure-from-environment because we are running it always before the user-chosen tasks
 # not including register-tpm-password because we are prompting for it in the setup.sh
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
@@ -185,7 +186,7 @@ case "$1" in
     # the tpm has been cleared, or re-initializing the keystore if the server
     # ssl cert has changed and the user has updated the fingerprint in
     # the trustagent.properties file
-    if trustagent_setup; then
+    if trustagent_setup $TRUSTAGENT_START_TASKS; then
       trustagent_start
     fi
     ;;
