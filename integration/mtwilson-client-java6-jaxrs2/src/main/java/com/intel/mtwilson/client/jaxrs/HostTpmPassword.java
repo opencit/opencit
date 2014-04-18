@@ -63,16 +63,16 @@ public class HostTpmPassword extends MtWilsonClient {
         return null;
     }
 
-    /*
-    public TpmPassword retrieveTpmPassword(TpmPasswordFilterCriteria criteria) {
+
+    public TpmPassword searchTpmPasswords(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection collection = getTargetPathWithQueryParams("/host-tpm-passwords", criteria).request(MediaType.APPLICATION_JSON).get(TpmPasswordCollection.class);
         if( collection.getTpmPasswords().isEmpty() ) {
             return null;
         }
         return collection.getTpmPasswords().get(0);
     }
-    */
 
+    
     public TpmPassword retrieveTpmPassword(UUID hardwareUuid) {
         HashMap<String,Object> map = new HashMap<>();
         map.put("id", hardwareUuid.toString());

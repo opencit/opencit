@@ -4,25 +4,21 @@
  */
 package test.patch;
 
-import com.intel.mtwilson.jersey.patch.ReverseLowerCaseWithUnderscoresStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy;
 import com.intel.mtwilson.jersey.FilterCriteria;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.Patch;
 import com.intel.mtwilson.jersey.PatchException;
 import com.intel.mtwilson.jersey.PatchLink;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.intel.mtwilson.jersey.patch.PatchUtil;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -167,4 +163,21 @@ public class RelationalPatchTest {
         return PatchUtil.apply(patch.getReplace(), o);
     }
 
+    
+    @Test
+    public void testCopy() throws Exception {
+        // the initial record
+        Fruit apple = new Fruit();
+        apple.id = "1234";
+        apple.fruitName = "apple";
+        apple.fruitColor = "red";
+        apple.groveId = "abcd";
+        log.debug("apple: {}", mapper.writeValueAsString(apple));
+        
+        Fruit apple2 = new Fruit();
+        PatchUtil.copy(apple, apple2);
+        log.debug("apple2: {}", mapper.writeValueAsString(apple2));
+        
+       assertEquals(mapper.writeValueAsString(apple),mapper.writeValueAsString(apple2));
+    }
 }
