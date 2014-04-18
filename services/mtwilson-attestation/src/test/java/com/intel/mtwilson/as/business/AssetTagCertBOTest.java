@@ -115,44 +115,11 @@ public class AssetTagCertBOTest {
     }
 
     @Test
-    public void testCitrixTagExpected() {
+    public void testTagExpected() {
         Sha1Digest tag = Sha1Digest.valueOf("23ecd222c153b045994a6544bf2c53bc70652d19");
         Sha1Digest expectedHash = Sha1Digest.ZERO.extend(tag.toByteArray());
         System.out.println("hex value1: " + expectedHash.toHexString());
     }
-    
-    @Test
-    public void testCitrixTagRandom() {
-        
-        Sha1Digest tag = Sha1Digest.valueOf("23ecd222c153b045994a6544bf2c53bc70652d19");
-        Sha1Digest expectedHash2 = null;
-        expectedHash2 = Sha1Digest.ZERO.extend(tag.toByteArray());
-
-//log.debug("mapAssetTagCertToHostById : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
-
-                        // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
-                        // It then appends a 20 byte zero array to the SHA1 of SHA1 hash for extending into PCR 22
-        //byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + citrixInput.toByteArray().length];                   
-        //System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
-        //System.arraycopy(citrixInput.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, citrixInput.toByteArray().length); 
-        // Final value that is written into PCR 22 is the SHA1 of the zero appended value
-        Sha1Digest expectedHash1 = null;
-        expectedHash1 = Sha1Digest.ZERO.extend( Sha1Digest.digestOf(tag.toHexString().getBytes()));
-        
-        
-        Sha1Digest expectedHash3 = null;
-        Sha1Digest expectedHash4 = null;
-        
-        expectedHash3 = Sha1Digest.ZERO.extend("23ecd222c153b045994a6544bf2c53bc70652d19".getBytes());
-        expectedHash4 = Sha1Digest.ZERO.extend(tag.toHexString().getBytes());
-        System.out.println("hex value1: " + expectedHash1.toHexString());
-        System.out.println("hex value2: " + expectedHash2.toHexString());
-        System.out.println("hex value3: " + expectedHash3.toHexString());
-        System.out.println("hex value4: " + expectedHash4.toHexString());
-        // expectedHash === PCR 22 of citrix host 
-
-    }
-    
     
     @Test
     public void insertAssetTagCert() {
