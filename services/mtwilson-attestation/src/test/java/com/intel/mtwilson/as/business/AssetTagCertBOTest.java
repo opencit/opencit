@@ -113,7 +113,13 @@ public class AssetTagCertBOTest {
                  }
           }
     }
-    
+
+    @Test
+    public void testTagExpected() {
+        Sha1Digest tag = Sha1Digest.valueOf("23ecd222c153b045994a6544bf2c53bc70652d19");
+        Sha1Digest expectedHash = Sha1Digest.ZERO.extend(tag.toByteArray());
+        System.out.println("hex value1: " + expectedHash.toHexString());
+    }
     
     @Test
     public void insertAssetTagCert() {
