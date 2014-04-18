@@ -131,7 +131,8 @@ public class ProvisionTagCertificate  {
             }
         }
         if( selections == null ) {
-            selections = SelectionBuilder.factory().selection().build(); // default empty selection
+            // default empty selection, which will only work if someone has already generated the necessary certificate and ensured it will be found (below) by making it the only valid cert for that host for a specific time period
+            selections = SelectionBuilder.factory().selection().build();
         }
         // if external ca is configured then we only save the request to the database and indicate async processing in our response
         if( configuration.isTagProvisionExternal() || isAsync(request) ) {
@@ -139,13 +140,14 @@ public class ProvisionTagCertificate  {
             storeAsyncRequest(subject, selections, response);
             return null;
         }
-        // if always generate ca is enabled then generate it right now and return it - no need to check database for existing certs etc. 
+        // if always-generate / no-cache is enabled then generate it right now and return it - no need to check database for existing certs etc. 
         if( configuration.isTagProvisionNoCache() ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
         }
-        // TODO: Once the subject matches, we also need to make sure that all the selections also match
+        // TODO: Once the subject matches, we also need to make sure that all the selections also match.
+        // If the selection is empty then it would match anything so we would choose the latest created for that host that is valid.
         // This needs to be done for the GA release.
         
         // if there is an existing currently valid certificate we return it

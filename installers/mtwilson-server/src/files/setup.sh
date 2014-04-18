@@ -694,7 +694,7 @@ update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properti
 prompt_with_default TAG_PROVISION_EXTERNAL "Use external CA instead of the built-in CA? " ${TAG_PROVISION_EXTERNAL:-false}
 prompt_with_default TAG_PROVISION_NOCACHE "Always generate new certificates for incoming requests? " ${TAG_PROVISION_NOCACHE:-true}
 prompt_with_default TAG_PROVISION_XML_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_REQUIRED:-false}
-prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD}
+prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD:-$(generate_password 16)}
 #prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
 prompt_with_default TAG_VALIDITY_SECONDS "Tag certificate validity duration: " ${TAG_VALIDITY_SECONDS:-31536000}
 prompt_with_default TAG_ISSUER_DN "Tag issuer distinguished name: " ${TAG_ISSUER_DN:-"CN=mtwilson-tag-ca"}

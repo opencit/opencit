@@ -73,6 +73,8 @@ trustagent_setup() {
   local tasklist="$*"
   if [ -z "$tasklist" ]; then
     tasklist=$TRUSTAGENT_SETUP_TASKS
+  elif [ "$tasklist" == "--force" ]; then
+    tasklist="$TRUSTAGENT_SETUP_TASKS --force"
   fi
   # TODO:  else if tasklist is not empty, check if configure-from-environment is in there and if not automatically prepend it
   java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup configure-from-environment $tasklist

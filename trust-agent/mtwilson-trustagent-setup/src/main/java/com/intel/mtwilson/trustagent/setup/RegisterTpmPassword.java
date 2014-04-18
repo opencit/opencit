@@ -111,6 +111,7 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         try {
             tpmPassword = client.retrieveTpmPassword(hostHardwareId);
         } catch (Exception e) {
+//            log.debug("Error while retrieving tpm password for {}: {}", hostHardwareId, e.getMessage());
             validation("Cannot determine if TPM Owner Secret is registered with Mt Wilson");
             return;
         }
