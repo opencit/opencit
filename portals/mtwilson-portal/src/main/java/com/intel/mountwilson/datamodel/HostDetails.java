@@ -17,6 +17,7 @@ public class HostDetails {
         private String status;
         private String biosWLTarget;
         private String vmmWLtarget;
+        //private String selectionTarget;
         private boolean registered;
 	
         // Modified the BIOS and VMM target variables to be of String instead of HostWhiteListTarget for easier reverse mapping when it would be used in the ManagementConsoleServiceImpl file.
@@ -93,12 +94,20 @@ public class HostDetails {
                 this.status = status;
         }
         
+        //public void setSelectionTarget(String selectionTarget) {
+        //    this.selectionTarget = selectionTarget;
+        //}
+        
+        //public String getSelectionTarget() {
+        //    return this.selectionTarget;
+        //}
+        
         @Override
         public String toString() {
                 return "HostDetails [hostType=" + hostType + ", hostName=" + hostName
                                 + ", hostPortNo=" + hostPortNo + ", vCenterString="
                                 + vCenterString + ", vmWareType=" + vmWareType + ", status="
-                                + status + ", config=" + vmmWLtarget + ", registered=" + registered
+                                + status + ", config=" + vmmWLtarget + ", registered=" + registered //+ ", selectionTarget=" + selectionTarget
                                 + "]";
         }
 	
