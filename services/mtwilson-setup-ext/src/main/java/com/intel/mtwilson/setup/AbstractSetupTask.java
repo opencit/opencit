@@ -66,6 +66,9 @@ public abstract class AbstractSetupTask implements SetupTask {
      * object itself for persistent settings. Those member variables and
      * saved configuration can then be accessed from validate() and execute().
      * 
+     * The job of configure() is to ensure that all the settings needed 
+     * in order to complete execute() successfully are present and inform
+     * the calling code if they are not present (by logging configuration faults)
      * 
      * @throws Exception 
      */

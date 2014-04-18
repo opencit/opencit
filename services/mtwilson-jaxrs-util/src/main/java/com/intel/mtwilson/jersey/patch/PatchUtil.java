@@ -32,15 +32,16 @@ public class PatchUtil {
     public static <T> T apply(Map<String,Object> replaceAttrs, T target) throws PatchException {
         try {
             Map<String,Object> targetAttrs = PropertyUtils.describe(target);// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
-            ReverseLowerCaseWithUnderscoresStrategy reverseNamingStrategy = new ReverseLowerCaseWithUnderscoresStrategy(target);        
+//            ReverseLowerCaseWithUnderscoresStrategy reverseNamingStrategy = new ReverseLowerCaseWithUnderscoresStrategy(target);        
             for(Map.Entry<String,Object> attr : replaceAttrs.entrySet()) {
                 // there are attributes we skip, like "class" from getClass() 
                 if( attr.getKey().equals("class") ) { continue; }
                 // find the corresponding property in the object (reverse of naming strategy)
-                String key = reverseNamingStrategy.translate(attr.getKey());
-                log.debug("patch replace attr {} -> {} value {}", attr.getKey(), key, attr.getValue());
-                if( targetAttrs.containsKey(key) ) {
-                    PropertyUtils.setSimpleProperty(target, key, attr.getValue());
+//                String key = reverseNamingStrategy.translate(attr.getKey());
+//                log.debug("patch replace attr {} -> {} value {}", attr.getKey(), key, attr.getValue());
+                log.debug("patch replace attr {} value {}", attr.getKey(), attr.getValue());
+                if( targetAttrs.containsKey(attr.getKey()) ) {
+                    PropertyUtils.setSimpleProperty(target, attr.getKey(), attr.getValue());
                 }
             }
             return target; // can be ignored by caller since we modify the argument
@@ -62,14 +63,14 @@ public class PatchUtil {
      */
     public static <T> T applyAll(Map<String,Object> replaceAttrs, T target) throws PatchException {
         try {
-            ReverseLowerCaseWithUnderscoresStrategy reverseNamingStrategy = new ReverseLowerCaseWithUnderscoresStrategy(target);        
+//            ReverseLowerCaseWithUnderscoresStrategy reverseNamingStrategy = new ReverseLowerCaseWithUnderscoresStrategy(target);        
             for(Map.Entry<String,Object> attr : replaceAttrs.entrySet()) {
                 // there are attributes we skip, like "class" from getClass() 
                 if( attr.getKey().equals("class") ) { continue; }
                 log.debug("patch replace attr {} value {}", attr.getKey(), attr.getValue());
                 // find the corresponding property in the object (reverse of naming strategy)
-                String key = reverseNamingStrategy.translate(attr.getKey());
-                PropertyUtils.setSimpleProperty(target, key, attr.getValue());
+//                String key = reverseNamingStrategy.translate(attr.getKey());
+                PropertyUtils.setSimpleProperty(target, attr.getKey(), attr.getValue());
             }
             return target; // can be ignored by caller since we modify the argument
         }
