@@ -185,8 +185,8 @@ function getRemoteTag() {
 function getTagOption() {
  functionReturn=0
  if [ -z "$selection" ]; then
-	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
-	#tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
+	# tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
+	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
 	if [ $? -eq 1 ]; then
       exit 0;
 	fi
@@ -201,12 +201,12 @@ function provisionCert() {
 	server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  fi
  if [ $isUsingXml == 0 ]; then
-   if [ $autoSelect != 1 ]; then
+   # if [ $autoSelect != 1 ]; then
     if [ -z "$selectionName" ]; then
       selectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
     fi
     json='{"selections":[{"name":"'$selectionName'"}]}'
-   fi
+   # fi
    echo "$WGET --header=\"Content-Type: application/json\" --header=\"Accept: application/pkix-cert\" --post-data=\"$json\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
  else
@@ -307,7 +307,7 @@ function _main() {
     #  tagChoice=4
     #fi
     mybreak=1
-    autoSelect=0
+    # autoSelect=0
     tagChoice=4
     ;;
    2)
@@ -318,11 +318,11 @@ function _main() {
       tagChoice=4
     fi
     ;;
-   3)
-    mybreak=1
-    autoSelect=1
-    tagChoice=4
-    ;;
+  # 3)
+  #  mybreak=1
+  #  autoSelect=1
+  #  tagChoice=4
+  #  ;;
    *)
     getTagOption
     ;;
