@@ -92,7 +92,7 @@ public class DeployTagCertificate implements Runnable{
                 
                 deployAssetTagToHost(obj.getSha1(), hostRecord);
             } else {
-                log.error("Failed to retreive certificate while trying to discover host by certificate ID [{}].", obj.getSubject());
+                log.error("Failed to retreive certificate while trying to discover host by certificate ID.");
                 throw new WebApplicationException("Failed to retreive certificate while trying to discover host by certificate ID.", Response.Status.BAD_REQUEST);
             }
 

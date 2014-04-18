@@ -161,6 +161,17 @@ function print_help() {
     echo register-tpm-password
 }
 
+trousers_detect_and_run() {
+  trousers=`which tcsd 2>/dev/null`
+  if [ -z "$trousers" ]; then
+    #echo_failure "trousers installation is required for trust agent to run successfully."
+    echo "trousers installation is required for trust agent to run successfully."
+    exit -1
+  else
+    $trousers
+  fi
+}
+trousers_detect_and_run
 ###################################################################################################
 
 # here we look for specific commands first that we will handle in the
@@ -173,14 +184,7 @@ case "$1" in
   start)
     # need to start trousers before we can run tagent
     #trousers_detect
-    trousers=`which tcsd 2>/dev/null`
-    if [ -z "$trousers" ]; then
-      #echo_failure "trousers installation is required for trust agent to run successfully."
-      echo "trousers installation is required for trust agent to run successfully."
-      exit -1
-    else
-      $trousers
-    fi
+    #trousers_detect_and_run
 
     # run setup before starting trust agent to allow taking ownership again if
     # the tpm has been cleared, or re-initializing the keystore if the server
@@ -203,6 +207,7 @@ case "$1" in
     fi
     ;;
   setup)
+    trousers_detect_and_run
     shift
     trustagent_setup $*
     ;;

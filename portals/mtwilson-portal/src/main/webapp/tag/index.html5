@@ -890,6 +890,30 @@ function isNumber(n) {
 
                             </form>
 
+                            <form id="certificate-provision-form" style="display: none;" action="#" onsubmit="return false;" >
+                                <p>Currently push-provisioning works only with Citrix Xen hosts and Intel Trust agents and must currently be registered in Mt. Wilson.</p>
+                                <input type="hidden" name="certificateUuid" id="certificate-provision-uuid"/>
+                                <ul>
+                                    <li>
+                                        <label for="certificate-provision-host">Internet Address</label>
+                                        <input type="text" id="certificate-provision-host" name="host" size="40" placeholder="Hostname or IP Address"/>
+                                    </li>
+                                    <!-- 
+                                    <li>
+                                        <label for="certificate-provision-username">Username</label>
+                                        <input type="text" id="certificate-provision-username" name="username" placeholder="Username"/>
+                                    </li>
+                                    <li>
+                                        <label for="certificate-provision-password">Password</label>
+                                        <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
+                                    </li>
+                                    -->
+                                     <li>
+                                            <input type="button" value="Provision" onclick="ws.provisionCertificate(this); return false;"/>
+                                            <input type="button" value="Cancel" onclick="$('certificate-provision-form').hide(); return false;"/>
+                                     </li>
+                                </ul>
+                            </form>
 
 
                             <div  class="tableDisplayScroll_big">
@@ -917,7 +941,7 @@ function isNumber(n) {
                                         <td align="center" data-bind-text="item.sha256 | wrap 16"></td>
                                         <td align="center">
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> &nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show();  $('certificate-provision-host').focus(); return false;">Deploy</a> &nbsp;
                                             <a href="" onmouseover="$(this).download = $(this).getAttribute('filename') + '.crt';$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);"  data-bind-filename="item.subject">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>
@@ -927,30 +951,6 @@ function isNumber(n) {
                             </table>
                             </div>
 
-                            <form id="certificate-provision-form" style="display: none;" action="#" onsubmit="return false;" >
-                                <p>Currently push-provisioning works only with Citrix Xen hosts and Intel Trust agents and must currently be registered in Mt. Wilson.</p>
-                                <input type="hidden" name="certificateUuid" id="certificate-provision-uuid"/>
-                                <ul>
-                                    <li>
-                                        <label for="certificate-provision-host">Internet Address</label>
-                                        <input type="text" id="certificate-provision-host" name="host" size="40" placeholder="Hostname or IP Address"/>
-                                    </li>
-                                    <!-- 
-                                    <li>
-                                        <label for="certificate-provision-username">Username</label>
-                                        <input type="text" id="certificate-provision-username" name="username" placeholder="Username"/>
-                                    </li>
-                                    <li>
-                                        <label for="certificate-provision-password">Password</label>
-                                        <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
-                                    </li>
-                                    -->
-                                     <li>
-                                            <input type="button" value="Provision" onclick="ws.provisionCertificate(this); return false;"/>
-                                            <input type="button" value="Cancel" onclick="$('certificate-provision-form').hide(); return false;"/>
-                                     </li>
-                                </ul>
-                            </form>
 
 
                         </div> <!-- end certificates tab -->
