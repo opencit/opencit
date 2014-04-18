@@ -30,6 +30,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +71,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
      */
     @Override
     @POST
+    @RequiresPermissions("tag_certificate_requests:create")         
     public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest certificateRequest) {
         certificateRequest = super.createOne(locator, certificateRequest);
         // TODO:  this doesn't conform to JSON API,  the non-jsonapi links should go in the meta.links section;   also TODO revise NoLinks in the class declaration
@@ -97,6 +99,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Path("/{id}/content")
     @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     @GET
+    @RequiresPermissions("tag_certificate_requests:retrieve")         
     public String retrieveOneSelectionJson(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
         CertificateRequest certificateRequest = super.retrieveOne(locator);
         SelectionsType selection = getSelection(certificateRequest);
@@ -107,6 +110,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Path("/{id}/content")
     @Produces({MediaType.APPLICATION_XML})
     @GET
+    @RequiresPermissions("tag_certificate_requests:retrieve")         
     public String retrieveOneSelectionXml(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
         CertificateRequest certificateRequest = super.retrieveOne(locator);
         SelectionsType selection = getSelection(certificateRequest);

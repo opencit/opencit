@@ -42,6 +42,44 @@ DEFAULT_GLASSFISH_API_PORT="8181"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
+### FUNCTION LIBRARY: echo and export environment variables
+
+# exports the values of the given variables
+# example:
+# export_vars VARNAME1 VARNAME2 VARNAME3
+# there is no display output from this function
+export_vars() {
+  local names="$@"
+  local name
+  local value
+  for name in $names
+  do
+    eval value="\$$name"
+    if [ -n "$value" ]; then
+      eval export $name=$value
+    fi
+  done
+}
+
+# prints the values of the given variables
+# example:
+# print_vars VARNAME1 VARNAME2 VARNAME3
+# example output:
+# VARNAME1=some_value1
+# VARNAME2=some_value2
+# VARNAME3=some_value3
+print_vars() {
+  local names="$@"
+  local name
+  local value
+  for name in $names
+  do
+    eval value="\$$name"
+    echo "$name=$value"
+  done
+}
+
+
 ### FUNCTION LIBRARY: generate random passwords
 
 # generates a random password. default is 32 characters in length.
@@ -354,6 +392,12 @@ prompt_with_default_password() {
 
 ### FUNCTION LIBRARY: environment information functions
 
+# Input: path to file that should exist
+wait_until_file_exists() {
+  markerfile=$1
+  while [ ! -f "$markerfile" ]; do sleep 1; done
+}
+
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
 using_glassfish() {
   if [[ -n "$WEBSERVER_VENDOR" ]]; then
@@ -485,7 +529,9 @@ backup_file() {
   if [[ -n "$filename" && -f "$filename" ]]; then
     cp ${filename} ${backup_filename}
     echo "${backup_filename}"
+    return 0
   fi
+  return 1
 }
 
 # read a property from a property file formatted like NAME=VALUE
@@ -640,12 +686,17 @@ zypper_detect() {
   zypper=`which zypper 2>/dev/null`
 }
 
+trousers_detect() {
+  trousers=`which tcsd 2>/dev/null`
+}
+
 # Parameters:
 # - absolute path to startup script to register
 # - the name to use in registration (one word)
 register_startup_script() {
   local absolute_filename="${1}"
   local startup_name="${2}"
+  shift; shift;
 
   # try to install it as a startup script
   if [ -d /etc/init.d ]; then
@@ -656,16 +707,18 @@ register_startup_script() {
     cd "$prevdir"
   fi
 
-  # RedHat
+  # RedHat and SUSE
   chkconfig=`which chkconfig  2>/dev/null`
   if [ -n "$chkconfig" ]; then
+    $chkconfig --del "${startup_name}"  2>/dev/null
     $chkconfig --add "${startup_name}"  2>/dev/null
   fi
 
   # Ubuntu
   updatercd=`which update-rc.d  2>/dev/null`
   if [ -n "$updatercd" ]; then
-    $updatercd "${startup_name}" defaults  2>/dev/null
+    $updatercd -f "${startup_name}" remove 2>/dev/null
+    $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
 
 }
@@ -729,11 +782,18 @@ hostaddress_list() {
   ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | grep -v "127.0.0.1"
 }
 
+# Echo all the localhost's addresses including loopback IP address
+# Parameters: none
+# output:  10.1.71.56,127.0.0.1
+hostaddress_list_csv() {
+  ifconfig | grep -E "^\s*inet addr:" | awk '{ print $2 }' | awk -F : '{ print $2 }' | paste -d',' -s
+}
+
 
 # Echo localhost's non-loopback IP address
 # Parameters: None
 # Output:
-#   If the environment variable HOSTADDRESS exists and has a value, its value will be used (careful to make sure it only has one addres!).
+#   If the environment variable HOSTADDRESS exists and has a value, its value will be used (careful to make sure it only has one address!).
 #   Otherwise If the file /etc/ipaddress exists, the first line of its content will be echoed. This allows a system administrator to "override" the output of this function for the localhost.
 #   Otherwise the output of "ifconfig" will be scanned for any non-loopback address and the first one will be used.
 hostaddress() {
@@ -1281,7 +1341,7 @@ add_postgresql_install_packages() {
   #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
-	#echo_warning "found packages $pgAddPackRequired"
+    #echo_warning "found packages $pgAddPackRequired"
     if [ -z "$pgAddPackRequired" ]; then
       prompt_with_default ADD_POSTGRESQL_REPO "Add \"$apt_packages\" key and packages to local apt repository? " "no"
       if [ "$ADD_POSTGRESQL_REPO" == "no" ]; then
@@ -1382,17 +1442,17 @@ postgres_server_detect() {
     local version_name=`$c --version 2>/dev/null | head -n 1 | awk '{ print $3 }'`
     local bin_dir=`dirname $c`
     local version_dir=`dirname $bin_dir`
-    echo "postgres candidate version=$version_name"
+    echo "postgres candidate version=$version_name" >> $INSTALL_LOG_FILE
 
     if is_version_at_least "$version_name" "$min_version"; then
-      echo "found postgres $version_name"
+      echo "Found postgres with version: $version_name" >> $INSTALL_LOG_FILE
       if [[ -z "$best_version" ]]; then
-        echo "setting best version $best_version"
+        echo "setting best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
         best_version_short=`basename $version_dir`
       elif is_version_at_least "$version_name" "$best_version"; then
-        echo "current best version $best_version"
+        echo "current best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
         best_version_short=`basename $version_dir`
@@ -1400,27 +1460,27 @@ postgres_server_detect() {
     fi
   done
   if [[ -z "$best_version" ]]; then
-    echo "Cannot find postgres version $min_version or later"
+    echo_failure "Cannot find postgres version $min_version or later"
     postgres_clear
     return 1
   fi
 
   # now we have selected a postgres version so set variables accordingly
-  echo "Found PostgreSQL $best_version"
+  echo "Best version of PostgreSQL: $best_version" >> $INSTALL_LOG_FILE
   POSTGRES_SERVER_VERSION="$best_version"
   POSTGRES_SERVER_BIN="$best_version_bin"  
   POSTGRES_SERVER_VERSION_SHORT="$best_version_short"
 
-  echo "server version $POSTGRES_SERVER_VERSION"
+  echo "server version $POSTGRES_SERVER_VERSION" >> $INSTALL_LOG_FILE
   if [[ -f /etc/init.d/postgresql ]]; then
     postgres_com=/etc/init.d/postgresql
   fi
   postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
   postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
   # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
-  echo "postgres_pghb_conf=$postgres_pghb_conf"
-  echo "postgres_conf=$postgres_conf"
-  echo "postgres_com=$postgres_com"
+  echo "postgres_pghb_conf=$postgres_pghb_conf" >> $INSTALL_LOG_FILE
+  echo "postgres_conf=$postgres_conf" >> $INSTALL_LOG_FILE
+  echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
   # TODO:  add >> $INSTALL_LOG_FILE  to above three lines
   return 0
 }
@@ -1534,7 +1594,7 @@ postgres_configure_connection() {
       postgres_userinput_connection_properties
       postgres_test_connection
     done
-      echo_success "Connected to database \`${POSTGRES_DATABASE}\` on ${POSTGRES_HOSTNAME}"
+      echo_success "Connected to database [${POSTGRES_DATABASE}] on ${POSTGRES_HOSTNAME}" >> $INSTALL_LOG_FILE
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
@@ -1550,12 +1610,12 @@ postgres_create_database() {
 if postgres_server_detect ; then
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
-    echo_success "Database \`${POSTGRES_DATABASE}\` already exists"
-    echo_success "Database \`${POSTGRES_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
+    #echo_success "Database [${POSTGRES_DATABASE}] already exists"
+    echo_success "Database [${POSTGRES_DATABASE}] already exists"   >> $INSTALL_LOG_FILE
     return 0
   else
-    echo "Creating database..."    >> $INSTALL_LOG_FILE
     echo "Creating database..."
+    echo "Creating database..."    >> $INSTALL_LOG_FILE
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
@@ -1991,10 +2051,10 @@ glassfish_install() {
   GLASSFISH_HOME=""
   glassfish=""
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
-  GLASSFISH_YUM_PACKAGES="unzip expect"
-  GLASSFISH_APT_PACKAGES="unzip expect"
-  GLASSFISH_YAST_PACKAGES="unzip expect"
-  GLASSFISH_ZYPPER_PACKAGES="unzip expect"
+  GLASSFISH_YUM_PACKAGES="unzip"
+  GLASSFISH_APT_PACKAGES="unzip"
+  GLASSFISH_YAST_PACKAGES="unzip"
+  GLASSFISH_ZYPPER_PACKAGES="unzip"
   glassfish_detect
 
   if glassfish_running; then glassfish_stop; fi
@@ -2078,7 +2138,8 @@ glassfish_admin_user() {
   fi
   
   if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
-    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
+    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd
+    echo "AS_ADMIN_NEWPASSWORD=${AS_ADMIN_PASSWORD}" >> $GF_CONFIG_PATH/admin.passwd
   fi
 
   if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
@@ -2091,18 +2152,21 @@ glassfish_admin_user() {
   #echo "Glassfish will now ask you for the same information:"
   # $glassfish is an alias for full path of asadmin
   
-(
-$expect << EOD
-spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
-expect "Enter the new admin password>"
-send "$WEBSERVICE_PASSWORD\r"
-expect "Enter the new admin password again>"
-send "$WEBSERVICE_PASSWORD\r"
-interact
-expect eof
-EOD
-) > /dev/null 2>&1
+#(
+#$expect << EOD
+#spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+#expect "Enter the new admin password>"
+#send "$WEBSERVICE_PASSWORD\r"
+#expect "Enter the new admin password again>"
+#send "$WEBSERVICE_PASSWORD\r"
+#interact
+#expect eof
+#EOD
+#) > /dev/null 2>&1
+  $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
 
+  # set the password file appropriately for further reads
+  echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
   glassfish_detect
   # XXX it asks for the password twice ...  can we script with our known value?
   $glassfish enable-secure-admin
@@ -2510,7 +2574,7 @@ tomcat_detect() {
       local conf_dir=`dirname $c`
       local parent=`dirname $conf_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
-	    export TOMCAT_HOME="$parent"
+        export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
         export TOMCAT_CONF="$conf_dir"
         tomcat_bin=$parent/bin/catalina.sh
@@ -3144,6 +3208,46 @@ print_env_summary_report() {
   return $error
 }
 
+mtwilson_running() {
+  echo "Checking if mtwilson is running." >> $INSTALL_LOG_FILE
+  if using_glassfish; then
+    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8181/mtwilson/v1"}
+  else
+    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8443/mtwilson/v1"}
+  fi
+  MTWILSON_RUNNING=""
+
+  MTWILSON_RUNNING=`wget $MTWILSON_API_BASEURL/ManagementService/resources/msstatus -O - -q --no-check-certificate --no-proxy`
+}
+
+mtwilson_running_report() {
+  echo -n "Checking if mtwilson is running... "
+  mtwilson_running
+  if [ -n "$MTWILSON_RUNNING" ]; then
+    echo_success "Running"
+  else
+    echo_failure "Not running"
+  fi
+}
+
+mtwilson_running_report_wait() {
+  echo -n "Checking if mtwilson is running..."
+  mtwilson_running
+  for (( c=1; c<=10; c++ ))
+  do
+    if [ -z "$MTWILSON_RUNNING" ]; then
+      echo -n "."
+      sleep 5
+      mtwilson_running
+    fi
+  done
+  if [ -n "$MTWILSON_RUNNING" ]; then
+    echo_success "Running"
+  else
+    echo_failure "Not running"
+  fi
+}
+
 
 ### FUNCTION LIBRARY: web service on top of web server
 
@@ -3153,10 +3257,11 @@ webservice_running() {
   local webservice_application_name="$1"
 
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
+  MTWILSON_SERVER=${MTWILSON_SERVER:-127.0.0.1}
   WEBSERVICE_RUNNING=""
   WEBSERVICE_DEPLOYED=""
 
-  if using_glassfish; then 
+  if using_glassfish; then
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
       # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
@@ -3180,29 +3285,30 @@ webservice_running() {
 }
 webservice_running_report() {
   local webservice_application_name="$1"
-  echo -n "Checking ${webservice_application_name}... "
+  echo -n "Checking if ${webservice_application_name} is deployed on webserver... "
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_RUNNING" ]; then
-    echo_success "Running"
+    echo_success "Deployed"
   else
-    echo_failure "Not running"
+    echo_failure "Not deployed"
   fi
 }
 webservice_running_report_wait() {
   local webservice_application_name="$1"
-  echo -n "Checking ${webservice_application_name}... "
+  echo -n "Checking if ${webservice_application_name} is deployed on webserver..."
   webservice_running "${webservice_application_name}"
-  for (( c=1; c<=5; c++ ))
+  for (( c=1; c<=10; c++ ))
   do
     if [ -z "$WEBSERVICE_RUNNING" ]; then
+      echo -n "."
       sleep 5
       webservice_running "${webservice_application_name}"
     fi
   done
   if [ -n "$WEBSERVICE_RUNNING" ]; then
-    echo_success "Running"
+    echo_success "Deployed"
   else
-    echo_failure "Not running"
+    echo_failure "Not deployed"
   fi
 }
 
@@ -3494,13 +3600,17 @@ call_setupcommand() {
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
   $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  return $?
 }
 
 call_tag_setupcommand() {
   if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.dcsg.cpg.console.Main
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  local jvm_memory=2048m
+  local jvm_maxperm=512m
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm}  -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback-stderr.xml $mainclass $@ --ext-java=${setupconsole_dir} | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  return $?
 }
 
 file_encrypted() {
@@ -3540,6 +3650,7 @@ encrypt_file() {
   fi
 }
 
+# TODO: remove variables from mtwilson 1.2 that are deprecated in mtwilson 2.0
 load_conf() {
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
@@ -3637,25 +3748,6 @@ load_conf() {
     echo_success "Done"
   fi
 
-#  # PrivacyCA.properties.properties
-#  if [ -f "$pca_props_path" ]; then
-#    echo -n "Reading properties from "
-#    if file_encrypted "$pca_props_path"; then
-#      echo -n "encrypted file [$pca_props_path]....."
-#      temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
-#      if [[ "$temp" == *"Incorrect password"* ]]; then
-#        echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-#        return 2
-#      fi
-#      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
-#      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
-#    else
-#      echo -n "file [$pca_props_path]....."
-#      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`read_property_from_file ClientFilesDownloadUsername "$pca_props_path"`
-#      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`read_property_from_file ClientFilesDownloadPassword "$pca_props_path"`
-#    fi
-#    echo_success "Done"
-#  fi
 
   # mtwilson-portal.properties
   if [ -f "$mp_props_path" ]; then
@@ -3721,7 +3813,8 @@ load_conf() {
   export DEFAULT_ENV_LOADED=true
   return 0
 }
-  
+
+# TODO: remove variables from mtwilson 1.2 that are deprecated in mtwilson 2.0
 load_defaults() {
   export DEFAULT_MTWILSON_SERVER=""
   export DEFAULT_DATABASE_HOSTNAME=""
@@ -3733,14 +3826,12 @@ load_defaults() {
   export DEFAULT_WEBSERVER_VENDOR=""
   export DEFAULT_DATABASE_VENDOR=""
   export DEFAULT_PRIVACYCA_SERVER=""
-  export DEFAULT_SAML_KEYSTORE_FILE=""
+  export DEFAULT_SAML_KEYSTORE_FILE="SAML.jks"
   export DEFAULT_SAML_KEYSTORE_PASSWORD=""
-  export DEFAULT_SAML_KEY_ALIAS=""
+  export DEFAULT_SAML_KEY_ALIAS="samlkey1"
   export DEFAULT_SAML_KEY_PASSWORD=""
   export DEFAULT_SAML_ISSUER=""
   export DEFAULT_PRIVACYCA_SERVER=""
-  #export DEFAULT_PRIVACYCA_DOWNLOAD_USERNAME=""
-  #export DEFAULT_PRIVACYCA_DOWNLOAD_PASSWORD=""
   export DEFAULT_MS_KEYSTORE_DIR="/var/opt/intel/management-service/users"
   export DEFAULT_API_KEY_ALIAS=""
   export DEFAULT_API_KEY_PASS=""
@@ -3767,8 +3858,6 @@ load_defaults() {
   export SAML_KEY_PASSWORD=${SAML_KEY_PASSWORD:-${CONF_SAML_KEY_PASSWORD:-$DEFAULT_SAML_KEY_PASSWORD}}
   export SAML_ISSUER=${SAML_ISSUER:-${CONF_SAML_ISSUER:-$DEFAULT_SAML_ISSUER}}
   export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
-  #export PRIVACYCA_DOWNLOAD_USERNAME=${PRIVACYCA_DOWNLOAD_USERNAME:-${CONF_PRIVACYCA_DOWNLOAD_USERNAME:-$DEFAULT_PRIVACYCA_DOWNLOAD_USERNAME}}
-  #export PRIVACYCA_DOWNLOAD_PASSWORD=${PRIVACYCA_DOWNLOAD_PASSWORD:-${CONF_PRIVACYCA_DOWNLOAD_PASSWORD:-$DEFAULT_PRIVACYCA_DOWNLOAD_PASSWORD}}
   export MS_KEYSTORE_DIR=${MS_KEYSTORE_DIR:-${CONF_MS_KEYSTORE_DIR:-$DEFAULT_MS_KEYSTORE_DIR}}
   export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
@@ -3905,7 +3994,7 @@ function erase_data() {
   done
   
   for i in ${encrypted_files[@]}; do
-    decrypt_file "$i" "$cryptopass"
+    decrypt_file "$i" "$MTWILSON_PASSWORD"
   done
   
   arr=(mw_file mw_tag_certificate mw_tag_certificate_request mw_configuration mw_tag_selection_kvattribute mw_tag_selection mw_tag_kvattribute mw_host_tpm_password mw_asset_tag_certificate mw_audit_log_entry mw_module_manifest_log mw_ta_log mw_saml_assertion mw_host_specific_manifest mw_hosts mw_mle_source mw_module_manifest mw_pcr_manifest mw_mle mw_os mw_oem)
@@ -3917,18 +4006,17 @@ function erase_data() {
     mysql_version
     mysql_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-	for table in ${arr[*]}
-	do
-    
-		$mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
-	done 
+    for table in ${arr[*]}
+    do    
+        $mysql -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" -D"$DATABASE_SCHEMA" -e "DELETE from $table;"
+    done 
   elif using_postgres; then #POSTGRES
     echo_success "using postgres"
     postgres_detect
     postgres_version
     postgres_test_connection_report
     if [ $? -ne 0 ]; 
-	 then exit; 
+     then exit; 
     fi
     for table in ${arr[*]}
     do

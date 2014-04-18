@@ -91,12 +91,6 @@
                 <!-- Web Services -->
                 <dependency>
                     <groupId>com.intel.mtwilson.linux</groupId>
-                    <artifactId>PrivacyCAService</artifactId>
-                    <version>${project.version}</version>
-                    <type>bin</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>mtwilson-management-service-installer</artifactId>
                     <version>${project.version}</version>
                     <type>bin</type>
@@ -156,12 +150,6 @@
                                 <configuration>
                                     <artifactItems>
                                         <!-- Web services -->
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>PrivacyCAService</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>bin</type>
-                                        </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-management-service-installer</artifactId>
@@ -265,12 +253,6 @@
                                             <type>bin</type>
                                         </artifactItem>
                                         <!-- Web services -->
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>PrivacyCAService</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>bin</type>
-                                        </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.linux</groupId>
                                             <artifactId>mtwilson-management-service-installer</artifactId>

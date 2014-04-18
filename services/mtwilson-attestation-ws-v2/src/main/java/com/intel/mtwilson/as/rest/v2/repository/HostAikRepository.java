@@ -15,6 +15,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostAikLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class HostAikRepository implements SimpleRepository<HostAik, HostAikColle
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+    @RequiresPermissions("host_aiks:search")    
     public HostAikCollection search(HostAikFilterCriteria criteria) {
         HostAikCollection objCollection = new HostAikCollection();
         try {
@@ -47,6 +49,7 @@ public class HostAikRepository implements SimpleRepository<HostAik, HostAikColle
     }
 
     @Override
+    @RequiresPermissions("host_aiks:retrieve")    
     public HostAik retrieve(HostAikLocator locator) {
         if (locator == null || locator.hostUuid == null) { return null; }
         String id = locator.hostUuid.toString();
@@ -68,21 +71,25 @@ public class HostAikRepository implements SimpleRepository<HostAik, HostAikColle
     }
 
     @Override
+    @RequiresPermissions("host_aiks:store")    
     public void store(HostAik item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_aiks:create")    
     public void create(HostAik item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_aiks:delete")    
     public void delete(HostAikLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    @RequiresPermissions("host_aiks:delete,search")    
     public void delete(HostAikFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

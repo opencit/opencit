@@ -46,13 +46,51 @@ public abstract class AbstractSetupTask implements SetupTask {
 
 //    private transient Integer lastHashCode = null;
     private transient MutableConfiguration configuration = new PropertiesConfiguration();
-    private transient ArrayList<Fault> configurationFaults = new ArrayList<Fault>();
-    private transient ArrayList<Fault> validationFaults = new ArrayList<Fault>();
+    private transient ArrayList<Fault> configurationFaults = new ArrayList<>();
+    private transient ArrayList<Fault> validationFaults = new ArrayList<>();
 
+    /**
+     * The application should call isConfigured() before calling isValidated()
+     * or run() on the setup task so the configure() method will always be 
+     * called before validate() and 
+     * before execute() and both validate() and execute() will only be called
+     * if there are no configuration errors.
+     * 
+     * The configure() method should check that all necessary configuration
+     * is available (or generate it if possible) and log configuration
+     * errors for situations that cannot be fixed automatically or require
+     * user input. 
+     * 
+     * Typically the configure() method will store the configuration in either
+     * private member variables for transient settings or into the provided MutableConfiguration
+     * object itself for persistent settings. Those member variables and
+     * saved configuration can then be accessed from validate() and execute().
+     * 
+     * The job of configure() is to ensure that all the settings needed 
+     * in order to complete execute() successfully are present and inform
+     * the calling code if they are not present (by logging configuration faults)
+     * 
+     * @throws Exception 
+     */
     abstract protected void configure() throws Exception;
 
+    /**
+     * The validate() method relies on configuration prepared by configure()
+     * and checks that whatever was supposed to happen in execute() either
+     * happened successfully or for any other reason it's not required to
+     * call execute(). It logs validation errors if there is any issue which
+     * requires further configuration or calling execute().
+     * 
+     * @throws Exception 
+     */
     abstract protected void validate() throws Exception;
     
+    /**
+     * The execute() method relies on configuration prepared by configure()
+     * and is responsible for successful completion of the setup task. If
+     * that cannot be accomplished it must throw an exception.
+     * @throws Exception 
+     */
     abstract protected void execute() throws Exception;
 
     @Override
@@ -103,7 +141,7 @@ public abstract class AbstractSetupTask implements SetupTask {
     @Override
     public void run() {
         if( !isConfigured() ) {
-            throw new ConfigurationException("Configuration required: "+getClass().getName());
+            throw new IllegalStateException("Configuration required");
         }
         try {
             execute();
@@ -111,7 +149,10 @@ public abstract class AbstractSetupTask implements SetupTask {
         catch(Exception e) {
             log.error("Setup task error: {}", e.getMessage());
             log.debug("Setup task error", e);
-            throw new SetupException("Setup error"); // TODO:  add exception as second argument here
+            throw new SetupException("Setup error", e);
+        }
+        if( !isValidated() ) {
+            throw new IllegalStateException("Validation failed");
         }
     }
     
@@ -165,5 +206,13 @@ public abstract class AbstractSetupTask implements SetupTask {
         validationFaults.add(new Fault(m, format, args));
     }
     
-    
+    // convenience methods
+    /*
+    protected void requireNonEmptyString(String key) {
+        String value = configuration.getString(key);
+        if( value == null || value.isEmpty() ) {
+            configuration("Missing required setting: %s", key);
+        }
+    }
+    */
 }

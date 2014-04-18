@@ -724,7 +724,8 @@ public class HostBO extends BaseBO {
                     gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
                     gkvHost.Processor_Info = gkvHostDetails.Processor_Info;
                 } catch (Throwable te) {
-                    log.error("Unexpected error in configureWhiteListFromCustomData: {}", te);
+                    log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.getMessage());
+                    log.debug("Unexpected error in configureWhiteListFromCustomData", te);
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
                 }
 
@@ -1518,28 +1519,28 @@ public class HostBO extends BaseBO {
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem")); // may contain multiple trusted privacy CA certs
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
             IOUtils.closeQuietly(privacyCaIn);
-            log.debug("Added {} certificates from PrivacyCA.p12.pem", privacyCaCerts.size());
+            log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
         }
         catch(Exception e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file
-            log.error("Cannot load PrivacyCA.p12.pem");            
+            log.error("Cannot load PrivacyCA.list.pem");            
         }
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem")); // may contain multiple trusted privacy CA certs
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
             IOUtils.closeQuietly(privacyCaIn);
-            log.info("Added certificate from PrivacyCA.cer");
+            log.info("Added certificate from PrivacyCA.pem");
         }
         catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.cer
+            // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificate from file
-            log.error("Cannot load PrivacyCA.cer", e);            
+            log.error("Cannot load PrivacyCA.pem", e);
         }
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {

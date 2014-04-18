@@ -18,6 +18,7 @@ import com.intel.mtwilson.datatypes.PCRWhiteList;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+    @RequiresPermissions("mle_pcrs:search")    
     public MlePcrCollection search(MlePcrFilterCriteria criteria) {
         MlePcrCollection objCollection = new MlePcrCollection();
         try {
@@ -70,6 +72,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     }
 
     @Override
+    @RequiresPermissions("mle_pcrs:retrieve")    
     public MlePcr retrieve(MlePcrLocator locator) {
         if (locator.mleUuid == null || locator.pcrIndex == null) { return null;}
         String mleUuid = locator.mleUuid.toString();
@@ -93,6 +96,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     }
 
     @Override
+    @RequiresPermissions("mle_pcrs:store")    
     public void store(MlePcr item) {
         PCRWhiteList obj = new PCRWhiteList();
         try {
@@ -115,6 +119,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     }
 
     @Override
+    @RequiresPermissions("mle_pcrs:create")    
     public void create(MlePcr item) {
         PCRWhiteList obj = new PCRWhiteList();
         try {
@@ -131,6 +136,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     }
 
     @Override
+    @RequiresPermissions("mle_pcrs:delete")    
     public void delete(MlePcrLocator locator) {
         if (locator.mleUuid == null || locator.pcrIndex == null) { return ;}
         String mleUuid = locator.mleUuid.toString();
@@ -162,6 +168,7 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     }
 
     @Override
+    @RequiresPermissions("mle_pcrs:delete,search")    
     public void delete(MlePcrFilterCriteria criteria) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

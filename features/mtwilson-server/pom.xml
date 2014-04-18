@@ -102,6 +102,11 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-privacyca-ws-v2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-audit-handler</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -164,7 +169,12 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-jersey-util</artifactId>
+      <artifactId>mtwilson-jaxrs-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-jersey2-util</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -255,11 +265,7 @@
       <artifactId>mtwilson-trust-policy</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-trust-utils</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-util</artifactId>

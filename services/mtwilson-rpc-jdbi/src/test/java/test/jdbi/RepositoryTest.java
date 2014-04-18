@@ -4,26 +4,10 @@
  */
 package test.jdbi;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
-//import com.intel.mtwilson.atag.cmd.CreateDatabase;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import javax.sql.DataSource;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.AfterClass;
-import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.v2.rpc.jdbi.*;

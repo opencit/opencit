@@ -16,7 +16,7 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.mtwilson.audit.controller.AuditLogEntryJpaController;
 import com.intel.mtwilson.audit.data.AuditLogEntry;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
@@ -27,14 +27,10 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class EraseLogs implements Command {
-    private SetupContext ctx = null;
+    
     private ASPersistenceManager pm;
     private EntityManagerFactory em;
     
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
 
     private Configuration options = null;
     @Override

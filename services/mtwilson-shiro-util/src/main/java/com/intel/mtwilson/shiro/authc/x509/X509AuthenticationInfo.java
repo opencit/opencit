@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.shiro.authc.x509;
 
-import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -18,7 +18,7 @@ import org.apache.shiro.subject.PrincipalCollection;
  */
 public class X509AuthenticationInfo implements AuthenticationInfo {
     private PrincipalCollection principals;
-    private UserLoginCertificate credentials;
+    private X509Certificate credentials;
             
     public void setPrincipals(PrincipalCollection principals) {
         this.principals = principals;
@@ -30,11 +30,11 @@ public class X509AuthenticationInfo implements AuthenticationInfo {
     }
 
     @Override
-    public UserLoginCertificate getCredentials() {
+    public X509Certificate getCredentials() {
         return credentials;
     }
     
-    public void setCredentials(UserLoginCertificate credentials) {
+    public void setCredentials(X509Certificate credentials) {
         this.credentials = credentials;
     }
     

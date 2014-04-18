@@ -4,15 +4,19 @@
  */
 package com.intel.mtwilson.shiro;
 
-import com.intel.dcsg.cpg.io.UUID;
+import java.io.Serializable;
+
 
 /**
  *
  * @author jbuhacoff
  */
-public class Username {
+public class Username implements Serializable {
+    private static final long serialVersionUID = 352226147L;
     private String username;
 
+    protected Username() { }
+    
     public Username(String username) {
         this.username = username;
     }

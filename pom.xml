@@ -551,6 +551,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
                 <artifactId>commons-configuration</artifactId>
                 <version>1.9</version>
             </dependency>      
+    <dependency>
+		<groupId>commons-digester</groupId>
+		<artifactId>commons-digester</artifactId>
+		<version>2.1</version>
+    </dependency>
 	<dependency>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>commons-io</artifactId>
@@ -791,7 +796,7 @@ reference : https://java.net/jira/browse/JERSEY-2325
             </dependency>
         
         
-            <!--  AttributeConverter interface and @Convert annotation are since javaee 7 -->
+            <!--  AttributeConverter interface and @Convert annotation are since javaee 7,  also javax.ws.rs.core.MultivaluedMap.addAll is since java7 -->
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>

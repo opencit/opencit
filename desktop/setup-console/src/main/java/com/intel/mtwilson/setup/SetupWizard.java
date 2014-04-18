@@ -130,9 +130,9 @@ public class SetupWizard {
                 //conf.setProperty(name, dekBase64); // this does not automatically save to the configuration file
                 // save the new dek to configuration file.    the Properties object inserts backslash-escapes before punctuation like : , = , etc. which affects the values... not sure if they'll be read in properly!!!
                 Properties xxxTodoSubclassConf = new Properties();
-                xxxTodoSubclassConf.load(new FileInputStream("/etc/intel/cloudsecurity/attestation-service.properties"));
+                xxxTodoSubclassConf.load(new FileInputStream("/etc/intel/cloudsecurity/mtwilson.properties"));
                 xxxTodoSubclassConf.setProperty(name, dekBase64);
-                FileOutputStream out = new FileOutputStream("/etc/intel/cloudsecurity/attestation-service.properties");
+                FileOutputStream out = new FileOutputStream("/etc/intel/cloudsecurity/mtwilson.properties");
                 xxxTodoSubclassConf.store(out, "auto-saved");
                 IOUtils.closeQuietly(out);
                 My.reset();

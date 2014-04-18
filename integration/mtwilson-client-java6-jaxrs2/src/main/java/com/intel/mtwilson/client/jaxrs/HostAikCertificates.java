@@ -23,8 +23,8 @@ public class HostAikCertificates extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public HostAikCertificates(URL url) {
-        //super(url);
+    public HostAikCertificates(URL url) throws Exception{
+        super(url);
     }
 
     public HostAikCertificates(Properties properties) throws Exception {

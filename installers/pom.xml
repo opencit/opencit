@@ -19,7 +19,6 @@
     <module>AttestationServiceLinuxInstaller</module>
     <module>ManagementServiceLinuxInstaller</module>
     <module>WLMServiceLinuxInstaller</module>
-    <module>PrivacyCAServiceLinuxInstaller</module>
     <module>TrustAgentLinuxInstaller</module>
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-client-java6</module>

@@ -330,6 +330,7 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
             case 'provision-certificate':
                 mtwilson.atag.notify({text: 'Provisioned certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                $('certificate-provision-host').clear();
                 $('certificate-provision-form').hide();
                 break;
             case 'deploy-certificate':
@@ -610,6 +611,17 @@ mtwilson.atag = mtwilson.atag || {};
                 }
 		$('selection-search-form').hide();
                 break;
+          case 'certificates_json':
+                for(var loop = 0; loop < data.certificates.length; loop++) {
+                        data.certificates[loop].status = "Active";
+                        var now = new Date();
+                        if(JSON.parse(data.certificates[loop].revoked)) {
+                                data.certificates[loop].status = "Revoked";
+                        } else if(!now.between(new Date(data.certificates[loop].not_before), new Date(data.certificates[loop].not_after))) {
+                                data.certificates[loop].status = 'Expired';
+                        }
+                }
+                break;
             case 'certificateRequests':
                 if (event.memo.response.length > 0) {
                     mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' certificate requests SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -728,7 +740,8 @@ mtwilson.atag = mtwilson.atag || {};
             } else {
                 ajax.json.post('tags_json', tagObject, {app: report}); // pass {app:report} so it will be passed to the event handler after the request is complete
             }
-            $('tag-create-name').value = "";
+            $('tag-create-name').clear();
+            $('tag-create-values').clear();
             $('tag-create-name').focus();
         }
     };
@@ -738,7 +751,7 @@ mtwilson.atag = mtwilson.atag || {};
         subject_id = $F("uuid-populate-host");
         selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-            if( false ) { // TODO:  find out if encrypted xmls are required by checking something like  data.currentConfiguration['tag.encrypted.xml.required'] == 'true'  after the configuration is available via the API again
+            if( true ) { // TODO:  find out if encrypted xmls are required by checking something like  data.currentConfiguration['tag.encrypted.xml.required'] == 'true'  after the configuration is available via the API again
                 var requestObject = "";
                 console.log("Certificate request: " + Object.toJSON(requestObject));
 
@@ -749,7 +762,7 @@ mtwilson.atag = mtwilson.atag || {};
                         var requestObject = xmlhttp.responseText;
                         // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
                         //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
-                        ajax.custom.post('certificateRequests', requestObject, {app: report, contentType: 'message/rfc822'}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
+                        ajax.custom.post('certificateRequests', requestObject, {app: report, contentType: 'message/rfc822', accept: 'application/pkix-cert'}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
                     }
                 };
                 xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id+".enc",true);

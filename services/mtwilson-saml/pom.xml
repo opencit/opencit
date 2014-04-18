@@ -107,7 +107,7 @@
         
         <!-- asset tag support -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>

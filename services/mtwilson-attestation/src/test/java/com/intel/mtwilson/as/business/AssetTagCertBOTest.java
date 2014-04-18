@@ -12,9 +12,9 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
-import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
-import com.intel.mtwilson.atag.model.X509AttributeCertificate;
-import com.intel.mtwilson.atag.model.x509.UTF8NameValueMicroformat;
+import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
+import com.intel.mtwilson.tag.model.x509.UTF8NameValueMicroformat;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
@@ -113,7 +113,13 @@ public class AssetTagCertBOTest {
                  }
           }
     }
-    
+
+    @Test
+    public void testTagExpected() {
+        Sha1Digest tag = Sha1Digest.valueOf("23ecd222c153b045994a6544bf2c53bc70652d19");
+        Sha1Digest expectedHash = Sha1Digest.ZERO.extend(tag.toByteArray());
+        System.out.println("hex value1: " + expectedHash.toHexString());
+    }
     
     @Test
     public void insertAssetTagCert() {

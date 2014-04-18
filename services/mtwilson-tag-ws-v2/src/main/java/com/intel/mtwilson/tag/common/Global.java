@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.tag.common;
 
-import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.ApiClientFactory;
@@ -14,13 +13,9 @@ import com.intel.mtwilson.tag.dao.jdbi.*;
 import com.intel.mtwilson.tag.model.*;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.io.Resource;
-import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
-//import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;

@@ -7,8 +7,7 @@ package com.intel.mtwilson.tag.rest.v2.resource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
-import com.intel.mtwilson.atag.model.SelectionTagValue;
-import com.intel.mtwilson.atag.model.x509.UTF8NameValueSequence;
+import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -24,7 +23,6 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
-import com.intel.mtwilson.tag.selection.xml.SelectionType;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,9 +34,9 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import org.apache.commons.codec.binary.Base64;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +69,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Override
     @Path("/{id}")
     @GET
+    @RequiresPermissions("tag_selections:retrieve")         
     @Produces({OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})   
     public Selection retrieveOne(@BeanParam SelectionLocator locator) {
         return super.retrieveOne(locator); 
@@ -80,6 +79,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})   
+    @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneJson(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         Selection obj = super.retrieveOne(locator); 
         SelectionsType selectionsType = getSelectionData(obj);
@@ -92,6 +92,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @Produces({MediaType.APPLICATION_XML})   
+    @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         Selection obj = super.retrieveOne(locator); //To change body of generated methods, choose Tools | Templates.
 //        if( obj == null ) {
@@ -139,6 +140,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @GET
     @Path("/{id}")
     @Produces(OtherMediaType.MESSAGE_RFC822)   
+    @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneEncryptedXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         String xml = retrieveOneXml(locator);
         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());

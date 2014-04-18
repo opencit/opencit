@@ -49,6 +49,12 @@ public class TagSelectionJsonTest {
         SelectionsType selections = SelectionBuilder.factory().selection().textAttributeKV("Country", "US").build();
         log.debug("selections1: {}", mapper.writeValueAsString(selections)); // {"selections":[{"attributes":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"}]}]}
     }
+
+    @Test
+    public void createTagSelectionJsonById() throws JsonProcessingException {
+        SelectionsType selections = SelectionBuilder.factory().selection().name("California Finance").build();
+        log.debug("selections1: {}", mapper.writeValueAsString(selections)); // {"selections":[{"attributes":[{"text":{"value":"Country=US"},"oid":"2.5.4.789.1"}]}]}
+    }
     
     @Test
     public void parseTagSelectionJson() throws IOException {

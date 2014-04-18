@@ -24,8 +24,8 @@ public class TagCertificates extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public TagCertificates(URL url) {
-        //super(url);
+    public TagCertificates(URL url) throws Exception{
+        super(url);
     }
 
     public TagCertificates(Properties properties) throws Exception {

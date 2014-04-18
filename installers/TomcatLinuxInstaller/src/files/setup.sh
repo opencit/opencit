@@ -44,11 +44,14 @@ fi
 cd $TOMCAT_CONF
 # XXX TODO: cleanup tomcat users, admin user should not be assigned both manager-gui and manager-script roles
 userExists=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml`
+mv tomcat-users.xml tomcat-users.xml.old
 if [ -z "$userExists" ]; then
-  mv tomcat-users.xml tomcat-users.xml.old
   sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
-  rm  -f tomcat-users.xml.old
+else
+  sed -i 's/.*username="'$WEBSERVICE_USERNAME'".*/  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>/g' tomcat-users.xml.old
+  cp tomcat-users.xml.old tomcat-users.xml
 fi
+rm  -f tomcat-users.xml.old
 
 # Here is what the connector string should look like
 #<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"

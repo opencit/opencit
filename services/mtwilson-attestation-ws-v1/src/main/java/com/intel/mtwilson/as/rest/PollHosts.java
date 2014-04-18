@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,8 @@ public class PollHosts {
      * @param input
      * @return the trust status of the specified hosts
      */
-    @RolesAllowed({"Attestation","Report"})
+    //@RolesAllowed({"Attestation","Report"})
+    @RequiresPermissions("poll_hosts:create,retrieve") 
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})

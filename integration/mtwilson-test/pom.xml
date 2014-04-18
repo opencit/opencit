@@ -108,6 +108,11 @@
             <version>${project.version}</version>        
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>        
@@ -154,12 +159,12 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-setup</artifactId>
+            <artifactId>mtwilson-tag-ws-v2</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>asset-tag-service</artifactId>
+            <artifactId>mtwilson-shiro-setup</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -217,6 +222,16 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-attestation</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v1</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v2</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -285,7 +300,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey-util</artifactId>
+            <artifactId>mtwilson-jaxrs-util</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -295,6 +310,10 @@
             <artifactId>javax.ws.rs-api</artifactId>
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-api</artifactId>
+            </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
@@ -387,6 +406,7 @@
         <!-- end jetty -->
 
         <!-- being restlet (for test client) -->
+        <!--
         <dependency>  
             <groupId>org.restlet.jse</groupId>  
             <artifactId>org.restlet</artifactId>  
@@ -402,6 +422,7 @@
             <artifactId>org.restlet.ext.jackson</artifactId>  
             <version>2.2-M4</version>  
         </dependency>
+        -->
         <!--
        <dependency>  
           <groupId>org.restlet.jse</groupId>  
@@ -421,10 +442,5 @@
         </dependency>
 
         <!-- end restlet (for test client) -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>  
 </project>

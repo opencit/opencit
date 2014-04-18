@@ -10,25 +10,28 @@ import java.io.File;
  *
  * @author jbuhacoff
  */
-public class RelativeFilesystem extends AbstractFilesystem {
+public class RelativeFilesystem implements PlatformFilesystem {
 
     private String root;
-    public RelativeFilesystem() { root = "."; }
-    public RelativeFilesystem(String root ) {
-        this.root = root;
-    }
-    public void setRootPath(String root) {
-        this.root = root;
-    }
-    public String getRootPath() { return root; }
-    
-    @Override
-    protected String getDefaultConfigurationPath() {
-        return root + File.separator + "configuration";
+
+    public RelativeFilesystem() {
+        root = ".";
     }
 
+    public RelativeFilesystem(String root) {
+        this.root = root;
+    }
+
+    /**
+     * Return the location where applications should be installed.
+     * Even though the basic implementation of this is simply the
+     * current directory ".", 
+     * another implementation could return "./target" or any other
+     * relative (or absolute) location.
+     * @return 
+     */
     @Override
-    protected String getDefaultApplicationPath() {
+    public String getApplicationRoot() {
         return root;
     }
 }

@@ -4,7 +4,8 @@
 
 CREATE  TABLE mw_host_tpm_password (
   id CHAR(36) NOT NULL,
-  password VARCHAR(255) NOT NULL ,
+  password TEXT NOT NULL ,
+  modifiedOn timestamp without time zone NOT NULL ,
   PRIMARY KEY (id) );
   
 CREATE  TABLE mw_tag_kvattribute (
@@ -13,7 +14,7 @@ CREATE  TABLE mw_tag_kvattribute (
   value VARCHAR(255) NOT NULL ,
   PRIMARY KEY (id) );
 
-ALTER TABLE  mw_tag_kvattribute ADD CONSTRAINT mw_kvattributes_index UNIQUE (lower(name), lower(value));
+Create unique index mw_tag_kvattribute_unique_constraint on mw_tag_kvattribute(lower(name), lower(value));
   
 CREATE  TABLE mw_tag_selection (
   id CHAR(36) NOT NULL,

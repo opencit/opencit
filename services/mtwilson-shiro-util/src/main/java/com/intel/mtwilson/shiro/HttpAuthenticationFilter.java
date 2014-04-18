@@ -92,7 +92,7 @@ public abstract class HttpAuthenticationFilter extends AuthenticationFilter {
         HttpServletResponse httpResponse = WebUtils.toHttp(response);
         httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         String authcHeader = authenticationScheme + " realm=\"" + getApplicationName() + "\"";
-        httpResponse.setHeader(challengeHeaderName, authcHeader);
+        httpResponse.addHeader(challengeHeaderName, authcHeader);
     }
 
     @Override

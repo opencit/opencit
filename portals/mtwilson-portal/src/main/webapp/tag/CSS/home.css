@@ -250,7 +250,6 @@ h5, h6
 	color: #3A4F63;
 	text-align: center;
 	width: 100%;
-        height: auto;
             /* Removed the column height so as to allow the resize automatically */
 	/* height: 40px; */
         table-layout: fixed;
@@ -264,7 +263,8 @@ h5, h6
 
 .tableDisplayScroll_big { 
     overflow-x: hide; 
-    overflow-y: scroll; 
+    overflow-y: auto;
+    height: 650px;
 }
 
 .tableDisplayBind thead {
@@ -432,6 +432,7 @@ h5, h6
 .col_del_link {
 	width: 100px;
 	border-right: 1px solid #3A4F63 !important;
+        padding-right: 5px;
 }
 
 .col_auto {

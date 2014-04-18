@@ -61,7 +61,7 @@ This error message indicates you need jackson 1.x implementation like org.codeha
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-jetty-util</artifactId>
+            <artifactId>mtwilson-jetty9-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

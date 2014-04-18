@@ -114,11 +114,19 @@ public class BlockingRpc extends AbstractRpc {
         // from this point forward the implmentation is a duplicate of what is in RpcInvoker after it deserializes the task object
         Object outputObject;
         try {
-//            adapter.setInput(inputObject);
-//            adapter.invoke();
-//            outputObject = adapter.getOutput();
-            ((Runnable)inputObject).run();
-            outputObject = inputObject;
+            adapter.setInput(inputObject);
+            adapter.invoke();
+            outputObject = adapter.getOutput();
+            List<Fault> faults = adapter.getFaults();
+            if (faults != null && faults.size() > 0) {
+                // Since there are errors, we will capture the error details and throw an exception.
+                for (Fault fault : faults) {
+                    log.error("Error during RPC exectution : {}", fault.toString());
+                }
+                throw new Exception("Error during RPC exectuion."); // this will get converted to the web application exception in the catch block.
+            }
+//            ((Runnable)inputObject).run();
+//            outputObject = inputObject;
         }
         catch(Exception e) {
             log.error("Error while executing RPC {}", rpc.getName(), e);

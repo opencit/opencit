@@ -4,19 +4,17 @@
  */
 package com.intel.mtwilson.tag.rest.v2.rpc;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
-import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
-import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
 //import org.restlet.resource.ResourceException;
 
@@ -24,7 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * The "import" link next to each certificate in the UI calls this RPC
+ * 
  * @author ssbangal
  */
 @RPC("mtwilson-import-tag-certificate")
@@ -44,6 +43,7 @@ public class MtWilsonImportTagCertificate implements Runnable{
     }
     
     @Override
+    @RequiresPermissions("tag_certificates:import")         
     public void run() {
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {

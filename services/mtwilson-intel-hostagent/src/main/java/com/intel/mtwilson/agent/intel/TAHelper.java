@@ -1,5 +1,6 @@
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.util.ByteArray;
@@ -43,6 +44,8 @@ import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
+import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 //import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -402,6 +405,100 @@ public class TAHelper {
 
     }
 
+    // NOTE:  this v2 client method is a little different from the getQuoteInformationForHost for the v1 trust agent because
+    //        it hashes the nonce and the ip address together  (instead of replacing the last 4 bytes of the nonce 
+    //        with the ip address like the v1 does)
+    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException, 
+            UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException  {
+        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        File q = null;
+        File n = null;
+        File c = null;
+        File r = null;
+        byte[] nonce = generateNonce(); // 20 random bytes
+        
+        // to fix issue #1038 we have a new option to put the host ip address in the nonce (we don't send this to the host - the hsot automatically would do the same thing)
+        byte[] verifyNonce = nonce; // verifyNonce is what we save to verify against host's tpm quote response
+        if( quoteWithIPAddress ) {
+            // is the hostname a dns name or an ip address?  if it's a dns name we have to resolve it to an ip address
+            // see also corresponding code in TrustAgent CreateNonceFileCmd
+            byte[] ipaddress = getIPAddress(hostname);
+            if( ipaddress == null ) {
+                throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled but host address cannot be resolved: "+hostname);
+            }
+            verifyNonce = Sha1Digest.digestOf(nonce).extend(ipaddress).toByteArray();
+        }
+//        String verifyNonceBase64 = Base64.encodeBase64String(verifyNonce);
+        
+        String sessionId = generateSessionId();
+
+        // FIrst let us ensure that we have an AIK cert created on the host before trying to retrieve the quote. The trust agent
+        // would verify if a AIK is already present or not. If not it will create a new one.
+        trustedAik = X509Util.encodePemCertificate(client.getAik());
+
+        // to fix issue #1038 trust agent relay we send 20 random bytes nonce to the host (base64-encoded) but if mtwilson.tpm.quote.ipaddress is enabled then in our copy we replace the last 4 bytes with the host's ip address, and when the host generates the quote it does the same thing, and we can verify it later
+        TpmQuoteResponse tpmQuoteResponse = client.getTpmQuote(nonce, new int[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23}); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
+        log.debug("got response from server [" + hostname + "] ");
+
+        log.debug("extracted quote from response: {}", Base64.encodeBase64String(tpmQuoteResponse.quote));
+
+        q = saveQuote(tpmQuoteResponse.quote, sessionId);
+        log.debug("saved quote with session id: " + sessionId);
+
+        // we only need to save the certificate when registring the host ... when we are just getting a quote we need to verify it using the previously saved AIK.
+        if (trustedAik == null) {
+            String aikCertificate = X509Util.encodePemCertificate(tpmQuoteResponse.aik);
+            log.debug("extracted aik cert from response: " + aikCertificate);
+
+            c = saveCertificate(aikCertificate, sessionId);
+            log.debug("saved host-provided AIK certificate with session id: " + sessionId);
+        } else {
+            c = saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
+            log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
+        }
+
+        n = saveNonce(verifyNonce, sessionId);
+
+        log.debug("saved nonce with session id: " + sessionId);
+
+        r = createRSAKeyFile(sessionId);
+
+        log.debug("created RSA key file for session id: " + sessionId);
+        
+        log.debug("Event log: {}", tpmQuoteResponse.eventLog); // issue #879
+        byte[] eventLogBytes = Base64.decodeBase64(tpmQuoteResponse.eventLog);// issue #879
+        log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
+        if( eventLogBytes != null ) { // issue #879
+            String decodedEventLog = new String(eventLogBytes);
+            log.debug("Event log retrieved from the host consists of: " + decodedEventLog);
+
+            // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
+            PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
+            log.info("Got PCR map");
+            //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
+            if( deleteTemporaryFiles ) {
+                q.delete();
+                n.delete();
+                c.delete();
+                r.delete();
+            }
+            return pcrManifest;
+        }
+        else {
+            PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
+            log.info("Got PCR map");
+            //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
+            if( deleteTemporaryFiles ) {
+                q.delete();
+                n.delete();
+                c.delete();
+                r.delete();
+            }
+            return pcrManifest;
+        }
+
+    }
+    
     // hostName == internetAddress.toString() or Hostname.toString() or IPAddress.toString()
     // vmmName == tblHosts.getVmmMleId().getName()
     public String getHostAttestationReport(String hostName, PcrManifest pcrManifest, String vmmName) throws XMLStreamException {
@@ -608,10 +705,18 @@ public class TAHelper {
         file = saveFile(getQuoteFileName(sessionId), quoteBytes);
         return file;
     }
+    private File saveQuote(byte[] quoteBytes, String sessionId) throws IOException {
+        File file = saveFile(getQuoteFileName(sessionId), quoteBytes);
+        return file;
+    }
 
     private File saveNonce(String nonce, String sessionId) throws IOException {
-//          byte[] nonceBytes = new BASE64Decoder().decodeBuffer(nonce);
         byte[] nonceBytes = Base64.decodeBase64(nonce);
+        File file = null;
+        file = saveFile(getNonceFileName(sessionId), nonceBytes);
+        return file;
+    }
+    private File saveNonce(byte[] nonceBytes, String sessionId) throws IOException {
         File file = null;
         file = saveFile(getNonceFileName(sessionId), nonceBytes);
         return file;
@@ -630,7 +735,7 @@ public class TAHelper {
         String x509cert = IOUtils.toString(in);
         IOUtils.closeQuietly(in);
         X509Certificate aikcert = X509Util.decodePemCertificate(x509cert);
-        String aikpubkey = X509Util.encodePemPublicKey(aikcert.getPublicKey());
+        String aikpubkey = RsaUtil.encodePemPublicKey(aikcert.getPublicKey());
         file = new File(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId));
         FileOutputStream out = new FileOutputStream(file);
         IOUtils.write(aikpubkey, out);

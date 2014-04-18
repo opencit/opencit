@@ -16,13 +16,13 @@ public class ValidationException extends SetupException {
     public ValidationException() {
         super();
     }
-    public ValidationException(Exception e) {
+    public ValidationException(Throwable e) {
         super(e);
     }
     public ValidationException(String message) {
         super(message);
     }
-    public ValidationException(String message, Exception e) {
+    public ValidationException(String message, Throwable e) {
         super(message, e);
     }
     

@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.model.SetupTarget;
 import java.io.File;
@@ -26,12 +26,7 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 public class ImportConfig implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImportConfig.class);
 
     private Configuration options = null;
     @Override
@@ -50,6 +45,7 @@ public class ImportConfig implements Command {
         
             PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
             if( !protection.isAvailable() ) {
+//                log.warn("Protection algorithm {} key length {} mode {} padding {} not available", protection.getAlgorithm(), protection.getKeyLengthBits(), protection.getMode(), protection.getPadding());
                 protection = PasswordProtectionBuilder.factory().aes(128).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
             }
             FileResource resource = new FileResource(new File(filename));

@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.setup.ui.console;
 
+import com.intel.dcsg.cpg.console.ExtendedOptions;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.*;
 import java.io.Console;
 import java.util.Arrays;
@@ -69,11 +71,11 @@ public class Main {
             Object commandObject = commandClass.newInstance();
             Command command = (Command)commandObject;
             String[] subargs = Arrays.copyOfRange(args, 1, args.length);
-            command.setContext(ctx);
+//            command.setContext(ctx);
             ExtendedOptions getopt = new ExtendedOptions(subargs);
             Configuration options = getopt.getOptions();
             subargs = getopt.getArguments();
-            command.setContext(ctx);
+//            command.setContext(ctx);
             command.setOptions(options);
             command.execute(subargs);
         }

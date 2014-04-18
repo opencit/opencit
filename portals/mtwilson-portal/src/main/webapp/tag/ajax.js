@@ -499,10 +499,11 @@ ajax.custom = {
         var request = new Ajax.Request(req_uri, {
             method: 'post',
             contentType: my.contentType,
-            //accept: 'application/json',
-            headers: { "AuthorizationToken": authorizationToken, /*'Accept': 'application/json'*/ },
-            requestHeaders: { /*'Accept': 'application/json'*/ },
-            postBody: Object.toJSON(postObject),
+            accept: my.accept,
+            headers: { "AuthorizationToken": authorizationToken, 'Accept': my.accept },
+            requestHeaders: { 'Accept': my.accept },
+            //postBody: Object.toJSON(postObject),
+            postBody: postObject,
             onSuccess: function(transport) {
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);

@@ -4,7 +4,7 @@
  */
 package test.validation;
 
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.cmd.TestDataValidation;
 import org.junit.Test;
 

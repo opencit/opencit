@@ -46,7 +46,7 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
     public ExtensionCacheLauncher() {
         // look for java extension cache file
         String cachePath = MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
-        log.info("Extension cache: {}", cachePath);
+        log.debug("Extension cache: {}", cachePath);
         cacheFile = new File(cachePath);
         registrars = new Registrar[] { new ImplementationRegistrar() } ;        
         log.debug("thread context class loader: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
@@ -107,7 +107,7 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
                 }
             }
             long time1 = System.currentTimeMillis();
-            log.info("Loaded {} extensions in {}ms", count, time1-time0);
+            log.debug("Loaded {} extensions in {}ms", count, time1-time0);
         }
         else {
             log.warn("Extension cache file does not exist: {}", cacheFile.getAbsolutePath());

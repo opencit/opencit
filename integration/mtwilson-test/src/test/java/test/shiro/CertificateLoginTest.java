@@ -4,20 +4,21 @@
  */
 package test.shiro;
 
-import com.intel.dcsg.cpg.crypto.RsaCredential;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
-import com.intel.mtwilson.datatypes.OemData;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.ms.data.MwPortalUser;
-import java.io.File;
-import java.net.URL;
-import java.util.List;
-import java.util.Properties;
-import org.apache.commons.io.FileUtils;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.mtwilson.security.http.RsaAuthorization;
+import com.intel.mtwilson.shiro.jdbi.model.Status;
+import com.intel.mtwilson.shiro.jdbi.model.User;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,43 +27,56 @@ import org.junit.Test;
  * @author jbuhacoff
  */
 public class CertificateLoginTest {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateLoginTest.class);
+    private static KeyPair keyPair;
+    private static X509Certificate certificate;
     private static String username = "admin";
-    private static String password;
-    private static byte[] keystoreBytes;
-    private static SimpleKeystore keystore;
-    private static URL url;
-    private static ApiClient client;
+    private static User user;
+    private static UserLoginCertificate userLoginCertificate;
+
+    @BeforeClass
+    public static void createUserLoginCertificate() throws Exception {
+        user = new User();
+        user.setId(new UUID());
+        user.setComment("automatically created by setup");
+        user.setEnabled(true);
+        user.setUsername(username);
+        user.setStatus(Status.APPROVED);
+        keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
+        certificate = X509Builder.factory().selfSigned(String.format("CN=%s", username), keyPair).expires(365, TimeUnit.DAYS).build();
+        userLoginCertificate = new UserLoginCertificate();
+        userLoginCertificate.setId(new UUID());
+        userLoginCertificate.setCertificate(certificate.getEncoded());
+        userLoginCertificate.setComment("automatically created by setup");
+        userLoginCertificate.setEnabled(true);
+        userLoginCertificate.setExpires(certificate.getNotAfter());
+        userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(certificate.getEncoded()).toByteArray());
+        userLoginCertificate.setSha256Hash(Sha256Digest.digestOf(certificate.getEncoded()).toByteArray());
+        userLoginCertificate.setStatus(Status.APPROVED);
+        userLoginCertificate.setUserId(user.getId());
+
+    }
+
+    private byte[] signature;
+    private byte[] digest; // of the docment being signed
     
     /**
-     * To avoid having to re-register a test client with the
-     * system being tested, we look for a local file 
-     * mtwilson/configuration/private/password.txt
-     * which has the admin password, use the information in local
-     * mtwilson/configuration/mtwilson.properties to connect
-     * to the remote system's database, open the admin keystore
-     * using the locally stored password, and then use that
-     * keystore with the api client.
+     * example output:
+     * Authorization: X509 fingerprint="byQSuPelf/1+eiQid7QE1YJwPu9hnpdvh5d/gy1Exts=", headers="X-Nonce,Date", algorithm="SHA256withRSA", signature="iW5NhHULEblcJ1sdhaNtc1y1mBLyXp0Euogj/zQevoTGIgw+bEorWVosxBKODwpByuRWJ62J4NCwzR6iZ5Ncwh8sn8PVwvFfkl6dlR9EcmKd11T7sUFD3ojcI7E1xXKe1Myiir/ASeQj/vAN05VTEKCli2s6KP2+E2axPrZn6pyY1nOQwKbdqAJ0qd3zUH6GMoqix2T8O8tZtznSYaEN1LP59yjZhKVjIoRDpwcccpUPg5zp2PWiRDtc5q/qAUNtK8RMjJ3Vl/Bi8nAzF+z6cYWFi27XzNpWdKI0HwAKlM8OwhqG94lwzbojbMqOYA+8q8IRgSSNGLEyP/xMjEH3ZA=="
      */
-    @BeforeClass
-    public static void getUserKeystore() throws Exception {
-        password = FileUtils.readFileToString(new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "private" + File.separator + "password.txt"));
-        MwPortalUser user = My.jpa().mwPortalUser().findMwPortalUserByUserName(username);
-        keystoreBytes = user.getKeystore();
-        keystore = new SimpleKeystore(new ByteArrayResource(keystoreBytes), password);
-        RsaCredential credential = keystore.getRsaCredentialX509(username, password);
-        url = My.configuration().getMtWilsonURL();
-        Properties configuration = new Properties();
-        configuration.setProperty("mtwilson.api.ssl.policy", "INSECURE"); 
-        client = new ApiClient(url, credential, configuration);
-    }
-    
     @Test
-    public void testCertificateLogin() throws Exception {
-//        List<OemData> oems = client.listAllOEM();
-//        log.debug("oems: {}", oems);
-        // now something with a query string
-        List<TxtHostRecord> hosts = client.queryForHosts("");
-        log.debug("hosts: {}", hosts);
+    public void createAuthorizationHeader() throws Exception {
+        RsaCredentialX509 credential = new RsaCredentialX509(keyPair.getPrivate(), certificate);
+        RsaAuthorization authorization = new RsaAuthorization(credential);
+        HashMap<String, String> map = new HashMap<>();
+        map.put("Date", new Date().toString());
+        String text = authorization.getAuthorization("GET", "https://localhost", map);
+        log.debug("Authorization: {}", text);
+    }
+
+    @Test
+    public void verifyAuthorizationHeader() {
+//        X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(userLoginCertificate.getSha256Hash()), new Credential(signature, digest));
     }
 }

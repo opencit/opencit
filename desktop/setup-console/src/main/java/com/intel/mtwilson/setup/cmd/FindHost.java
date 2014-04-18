@@ -6,7 +6,7 @@ package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.util.List;
 import org.apache.commons.configuration.Configuration;
@@ -16,12 +16,7 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class FindHost implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
+  
 
     private Configuration options = null;
     @Override

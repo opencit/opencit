@@ -80,7 +80,7 @@ function updateListHostToBeRegister(responsJson) {
         var values = responsJson.hostVO;
         var wlBiosList = responsJson.wlBiosList;
         var wlVMMList = responsJson.wlVMMList;
-        var selectionList = responsJson.selectionList;
+        // var selectionList = responsJson.selectionList;
         for (var val in values) {
             var str = "";
             var classValue = null;
@@ -345,7 +345,7 @@ function fnRegisterMultipleHost() {
             }
             host.biosWLTarget = $(row).find('td:eq(4)').find('select').val();
             host.vmmWLtarget = $(row).find('td:eq(5)').find('select').val();
-            host.selectionTarget = $(row).find('td:eq(6)').find('select').val();
+//            host.selectionTarget = $(row).find('td:eq(6)').find('select').val();
             host.registered = $(row).attr("registered") == "true" ? true : false;
             listOfHost.push(host);
         }

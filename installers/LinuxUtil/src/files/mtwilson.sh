@@ -61,9 +61,6 @@ find_ctl_commands() {
   msctl=`which msctl 2>/dev/null`
   wlmctl=`which wlmctl 2>/dev/null`
   asctl=`which asctl 2>/dev/null`
-  #mcctl=`which mcctl 2>/dev/null`
-  #wpctl=`which wpctl 2>/dev/null`
-  #tdctl=`which tdctl 2>/dev/null`
   mpctl=`which mtwilson-portal 2>/dev/null`
 }
 
@@ -138,19 +135,28 @@ Detected the following options on this server:"
       glassfish_create_ssl_cert_prompt
     fi
   fi
+
+  # new setup commands in mtwilson 2.0
+  # mtwilson setup setup-manager update-extensions-cache-file
+  # mtwilson setup setup-manager create-admin-user
+  call_tag_setupcommand setup-manager update-extensions-cache-file --force --no-ext-cache
+  # NOTE:  in order to run create-admin-user successfully you MUST have
+  #        the environment variable MC_FIRST_PASSWORD defined; this is already
+  #        done when running from the installer but if user runs 'mtwilson setup'
+  #        outside the installer the may have to export MC_FIRST_PASSWORD first
+  call_tag_setupcommand setup-manager create-certificate-authority-key create-admin-user
+
+  call_setupcommand EncryptDatabase
+
   # setup web services:
   if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
   if [ -n "$asctl" ]; then $asctl setup; fi
   if [ -n "$msctl" ]; then $msctl setup; fi
   if [ -n "$wlmctl" ]; then $wlmctl setup; fi
-  #if [ -n "$mcctl" ]; then $mcctl setup; fi
-  #if [ -n "$wpctl" ]; then $wpctl setup; fi
-  #if [ -n "$tdctl" ]; then $tdctl setup; fi
   if [ -n "$mpctl" ]; then $mpctl setup; fi
 
   # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
   shift
-  call_setupcommand EncryptDatabase
 }
 
 all_status() {
@@ -163,11 +169,6 @@ all_status() {
   find_ctl_commands
   if [ -n "$pcactl" ]; then $pcactl status; fi
   if [ -n "$asctl" ]; then $asctl status; fi
-  #if [ -n "$msctl" ]; then $msctl status; fi
-  #if [ -n "$wlmctl" ]; then $wlmctl status; fi
-  #if [ -n "$mcctl" ]; then $mcctl status; fi
-  #if [ -n "$wpctl" ]; then $wpctl status; fi
-  #if [ -n "$tdctl" ]; then $tdctl status; fi
   if [ -n "$mpctl" ]; then $mpctl status; fi
 }
 
@@ -213,8 +214,8 @@ RETVAL=0
 case "$1" in
   version)
         echo "MtWilson Linux Utility"
-	echo "Version ${VERSION}"
-	echo "Build ${BUILD}"
+        echo "Version ${VERSION}"
+        echo "Build ${BUILD}"
         ;;
   setup-env)
         setup_env
@@ -333,7 +334,16 @@ case "$1" in
   setup)
         if [ $# -gt 1 ]; then
           shift
-          call_setupcommand $@
+          # first look for known old setup commands:
+          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ] || [ "$1" = "EncryptDatabase" ] || [ "$1" = "ImportConfig" ] || [ "$1" = "ExportConfig" ] || [ "$1" = "V2" ]; then
+            call_setupcommand $@
+          else            
+            # for everything else, try the new setup commands first,
+            # if there return code is 1 it means  the command was not found,
+            # and in that case we try the old setup commands
+            call_tag_setupcommand $@
+            if [ $? == 1 ]; then call_setupcommand $@; fi
+          fi
         else
           if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup
@@ -357,19 +367,19 @@ case "$1" in
         ;;
   erase-data)
         #load_default_env 1>/dev/null
-		erase_data
+        erase_data
         #call_setupcommand EraseLogs
         #call_setupcommand EraseHostRegistrationData
         #call_setupcommand EraseWhitelistData
         
         ;;
   erase-users)
-		#load_default_env 1>/dev/null
-		if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
-			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
-			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
-		fi
-		export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
+        #load_default_env 1>/dev/null
+        if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
+          echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
+          prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
+        fi
+        export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
   change-db-pass)
@@ -414,13 +424,13 @@ case "$1" in
         # control scripts
         echo "Removing Mt Wilson control scripts..."
         echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
-		# only remove the config files we added to conf.d, not anything else
-		echo "Removing mtwilson monit config files"
-		rm -fr /etc/monit/conf.d/*.mtwilson
-		echo "Restarting monit after removing configs"
-		service monit stop &> /dev/null
-		echo "Removing mtwilson logrotate files"
-		rm -fr /etc/logrotate.d/mtwilson
+            # only remove the config files we added to conf.d, not anything else
+            echo "Removing mtwilson monit config files"
+            rm -fr /etc/monit/conf.d/*.mtwilson
+            echo "Restarting monit after removing configs"
+            service monit stop &> /dev/null
+            echo "Removing mtwilson logrotate files"
+            rm -fr /etc/logrotate.d/mtwilson
         # java:  rm -rf /usr/share/jdk1.7.0_51
         # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
@@ -429,17 +439,17 @@ case "$1" in
         postgres_clear; export POSTGRES_HOME=""; export psql=""
         mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"
-		if [ -n "$INSTALLED_MARKER_FILE" ]; then
-			rm -fr $INSTALLED_MARKER_FILE
-		fi
+        if [ -n "$INSTALLED_MARKER_FILE" ]; then
+          rm -fr $INSTALLED_MARKER_FILE
+        fi
         ;;
   help)
         ;&
   *)
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
-				"\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
-				"\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
-				"\t\trestart|setup|start|status|stop|uninstall|version}"
+          "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
+          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+          "\t\trestart|setup|start|status|stop|uninstall|version}"
         exit 1
 esac
 
