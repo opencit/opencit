@@ -25,6 +25,6 @@ Successfully restarted the domain
 Command restart-domain executed successfully.
 
 
-/root/mtwilson-dev/integration/mtwilson-launcher-glassfish4/target/mtwilson-launcher-glassfish4-1.2.3-SNAPSHOT.war
+/root/mtwilson-dev/integration/mtwilson-launcher-glassfish4/target/mtwilson-launcher-glassfish4-2.0-SNAPSHOT.war
 
 /usr/share/glassfish4/glassfish/domains/domain1/logs/server.log
