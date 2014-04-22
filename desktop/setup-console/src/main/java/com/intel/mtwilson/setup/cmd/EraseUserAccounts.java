@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;
@@ -13,13 +12,11 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.MSPersistenceManager;
-import com.intel.mtwilson.setup.Command;
-import com.intel.mtwilson.setup.SetupContext;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.configuration.Configuration;
@@ -35,14 +32,10 @@ import org.slf4j.LoggerFactory;
 public class EraseUserAccounts implements Command {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    private SetupContext ctx = null;
+  
     private MSPersistenceManager pm;
     private EntityManagerFactory em;
 
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
     private Configuration options = null;
 
     @Override
@@ -86,7 +79,7 @@ public class EraseUserAccounts implements Command {
     }
     
     private void deleteUsers() throws Exception {
-        LoginDAO dao = MyJdbi.authz();
+        try(LoginDAO dao = MyJdbi.authz()) {
         List<User> users = dao.findAllUsers();
         for(User user : users) {
             UserKeystore userKeystore = dao.findUserKeystoreByUserId(user.getId());
@@ -95,12 +88,16 @@ public class EraseUserAccounts implements Command {
             }
             UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUserId(user.getId());
             if( userLoginPassword != null ) {
+                dao.deleteUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
                 dao.deleteUserLoginPasswordById(userLoginPassword.getId());
             }
             UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateByUserId(user.getId());
             if( userLoginCertificate != null ) {
+                dao.deleteUserLoginCertificateRolesByUserLoginCertificateId(userLoginCertificate.getId());
                 dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
             }
+            dao.deleteUser(user.getId());
+        }
         }
     }
     

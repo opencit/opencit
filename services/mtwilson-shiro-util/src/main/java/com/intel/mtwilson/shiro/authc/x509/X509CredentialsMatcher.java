@@ -4,22 +4,8 @@
  */
 package com.intel.mtwilson.shiro.authc.x509;
 
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mtwilson.shiro.*;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.dcsg.cpg.util.ByteArray;
-import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
-import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.crypto.BadPaddingException;
@@ -54,15 +40,13 @@ public class X509CredentialsMatcher implements CredentialsMatcher {
         if (!(token.getCredentials() instanceof Credential)) {
             return false;
         }
-        if (!(info.getCredentials() instanceof UserLoginCertificate)) {
+        if (!(info.getCredentials() instanceof X509Certificate)) {
             return false;
         }
         Credential credential = (Credential) token.getCredentials();
-        UserLoginCertificate userLoginCertificate = (UserLoginCertificate) info.getCredentials();
+        X509Certificate certificate = (X509Certificate) info.getCredentials();
 
         try {
-
-            X509Certificate certificate = X509Util.decodeDerCertificate(userLoginCertificate.getCertificate());
             log.debug("Verifying signature");
             
             // the credential.getDigest() value is the oid for "SHA1" or "SHA256" concatenated with the digest of the signed document 
@@ -84,7 +68,7 @@ public class X509CredentialsMatcher implements CredentialsMatcher {
             }
             log.debug("Invalid signature");
             return false;
-        } catch (CertificateException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             log.error("Cannot verify credentials: {}", e.getMessage());
             throw new AuthenticationException(e);
         }

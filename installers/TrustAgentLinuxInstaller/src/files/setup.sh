@@ -8,10 +8,11 @@ intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_env_filename=${package_dir}/${package_name}.env
+package_env_filename=/root/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
-
 ASSET_TAG_SETUP="y"
+
+logfile=/var/log/trustagent/install.log
 
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
@@ -27,67 +28,125 @@ APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-ce
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-load_conf 2>&1 >/dev/null
-load_defaults 2>&1 >/dev/null
+if [ -f ~/trustagent.env ]; then  . ~/trustagent.env; fi
 
+# this is a list of all the variables we expect to find in trustagent.env
+TRUSTAGENT_ENV_VARS="MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USERNAME MTWILSON_API_PASSWORD TPM_OWNER_SECRET TPM_SRK_SECRET AIK_SECRET AIK_INDEX TPM_QUOTE_IPV4 TRUSTAGENT_HTTP_TLS_PORT TRUSTAGENT_TLS_CERT_DN TRUSTAGENT_TLS_CERT_IP TRUSTAGENT_TLS_CERT_DNS TRUSTAGENT_KEYSTORE_PASSWORD DAA_ENABLED TRUSTAGENT_PASSWORD JAVA_REQUIRED_VERSION HARDWARE_UUID"
 
-# Automatic install in 4 steps:
+export_vars $TRUSTAGENT_ENV_VARS
+
+# before we start, clear the install log
+mkdir -p $(dirname $logfile)
+date > $logfile
+
+# Automatic install steps:
+# 1. Backup old files
+# 2. Create directory structure
 # 1. Install Mt Wilson Linux utilities (and use them in this script)
 # 2. Install JDK
 # 3. Compile TPM commands
 # 4. Install Trust Agent files
 
+##### backup old files
+
+# backup configuration directory before unzipping our package
+backupdate=`date +%Y-%m-%d.%H%M`
+if [ -d /opt/trustagent/configuration ]; then  
+  cp -r /opt/trustagent/configuration /opt/trustagent/configuration.$backupdate
+fi
+
+
+##### stop existing trust agent if running
+
+# before we stop the trust agent, remove it from the monit config (if applicable)
+# to prevent monit from trying to restart it while we are setting up.
+if [ -f /etc/monit/conf.d/ta.monit ]; then
+  mkdir -p /etc/monit.bak
+  mv /etc/monit/conf.d/ta.monit /etc/monit.bak/ta.monit.$backupdate
+  service monit restart
+fi
+
 # bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
 # if there's already a previous version installed, uninstall it
 # But if trust agent is already installed and running, stop it now (and start the new one later)
-tagent=`which tagent 2>/dev/null`
-if [ -f "$tagent" ]; then
+existing_tagent=`which tagent 2>/dev/null`
+if [ -f "$existing_tagent" ]; then
   echo "Stopping trust agent..."
-  $tagent stop
+  $existing_tagent stop
 fi
+
+
+
+##### create directory structure
+
 
 # packages to install must be in current directory
-JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
+#JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
-saveD=`pwd`
-# copy application files to /opt
-mkdir -p "${intel_conf_dir}"
-chmod 700 "${intel_conf_dir}"
-# bug #947 we do not replace trustagent.properties automatically because it contains important passwords that must not be clobbered.
-# if any release adds new properties to that file, use update_property_in_file to add them safely.
-if [ ! -f "${intel_conf_dir}/${package_name}.properties" ]; then
-  cp ${package_name}.properties "${intel_conf_dir}"
-  chmod 600 ${package_name}.properties
+# TODO: check if trustagent exists before trying to add it; allow user name to be
+#       specified by environment variable
+groupadd trustagent >> $logfile  2>&1
+useradd -d /opt/trustagent -r -s /bin/false -G trustagent trustagent >> $logfile  2>&1
+
+mkdir -p /opt/trustagent
+unzip -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
+mkdir -p /opt/trustagent/var
+chown -R trustagent:trustagent /opt/trustagent
+chown -R root /opt/trustagent/bin
+chown -R root /opt/trustagent/java
+chown -R root /opt/trustagent/configuration
+mkdir -p /var/log/trustagent
+chown trustagent:trustagent /var/log/trustagent
+chmod -R 770 /opt/trustagent/bin
+
+
+# Migrate any old data to the new locations  (should be rewritten in java)
+v1_aik=/etc/intel/cloudsecurity/cert
+v2_aik=/opt/trustagent/configuration
+v1_conf=/etc/intel/cloudsecurity
+v2_conf=/opt/trustagent/configuration
+if [ -d "$v1_aik" ]; then
+  cp $v1_aik/aikblob.dat $v2_aik/aik.blob
+  cp $v1_aik/aikcert.pem $v2_aik/aik.pem
 fi
+if [ -d "$v1_conf" ]; then
+  # find the existing tpm owner and aik secrets
+  TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${v1_conf}/hisprovisioner.properties`
+  HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${v1_conf}/hisprovisioner.properties`
+  TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${v1_conf}/trustagent.properties`
+  HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${v1_conf}/trustagent.properties`
+  if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
+    export TPM_OWNER_SECRET=$TpmOwnerAuth_121
+  elif [ -n "$TpmOwnerAuth_122" ]; then
+    export TPM_OWNER_SECRET=$TpmOwnerAuth_122
+  fi
+  if [ -z "$HisIdentityAuth_122" ] && [ -n "$HisIdentityAuth_121" ]; then
+    export AIK_SECRET=$HisIdentityAuth_121
+  elif [ -n "$HisIdentityAuth_122" ]; then
+    export AIK_SECRET=$HisIdentityAuth_122
+  fi
 
-# bug #947 if we are upgrading a previous install, move the trustagent.jks file from /opt to /etc
-if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
-  if [ -f "${package_dir}/cert/trustagent.jks" ]; then
-    mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
+  # now copy the keystore and the keystore password
+  KeystorePassword_122=`read_property_from_file trustagent.keystore.password ${v1_conf}/trustagent.properties`
+  if [ -n "$KeystorePassword_122" ]; then
+    export TRUSTAGENT_KEYSTORE_PASSWORD=$KeystorePassword_122
+    if [ -f "$v1_conf/trustagent.jks" ]; then
+      cp $v1_conf/trustagent.jks $v2_conf
+    fi
   fi
 fi
-TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/hisprovisioner.properties`
-HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/hisprovisioner.properties`
-TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
-HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/${package_name}.properties`
-if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
-  update_property_in_file TpmOwnerAuth "${intel_conf_dir}/${package_name}.properties" $TpmOwnerAuth_121
-  update_property_in_file TpmOwnerAuth "${intel_conf_dir}/hisprovisioner.properties"
-fi
-if [ -z "$HisIdentityAuth_122" ] && [ -n "$HisIdentityAuth_121" ]; then
-  update_property_in_file HisIdentityAuth "${intel_conf_dir}/${package_name}.properties" $HisIdentityAuth_121
-  update_property_in_file HisIdentityAuth "${intel_conf_dir}/hisprovisioner.properties"
-fi
+
+# Redefine the variables to the new locations
+
+intel_conf_dir=/opt/trustagent/configuration
+package_dir=/opt/trustagent
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_install_filename=${package_dir}/${package_name}.install
 
 
-chmod 600 TPMModule.properties
-cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
-
-mkdir -p "${package_dir}"
-mkdir -p "${package_dir}"/bin
 
 #tpm_nvinfo
 tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
@@ -119,41 +178,34 @@ if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
 fi
 
-cd hex2bin
-make
-cp hex2bin /usr/local/bin
-cd ..
+hex2bin_install() {
+  return_dir=`pwd`
+  cd hex2bin
+  make && cp hex2bin /usr/local/bin
+  cd $return_dir
+}
 
-#hex2bin
+hex2bin_install
+
 hex2bin=`which hex2bin 2>/dev/null`
 if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
   ln -s "$hex2bin" "${package_dir}/bin"
 fi
 
-mkdir -p "${package_dir}"/cert
-mkdir -p "${package_dir}"/data
-mkdir -p "${package_dir}"/lib
-chmod -R 700 "${package_dir}"
-cp version "${package_dir}"
-cp functions "${package_dir}"
-cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
+mkdir -p "${package_dir}"/linux-util
+chmod -R 700 "${package_dir}"/linux-util
+cp version "${package_dir}"/linux-util
+cp functions "${package_dir}"/linux-util
 
-# copy default logging settings to /etc, but do not change it if it's already there (someone may have modified it)
-if [ ! -f "${intel_conf_dir}/logback.xml" ]; then
-  chmod 600 logback.xml
-  cp logback.xml "${intel_conf_dir}"
-fi
 
 # copy control scripts to /usr/local/bin
 mkdir -p /usr/local/bin
-cp tagent.sh /usr/local/bin/tagent
-cp pcakey.sh /usr/local/bin/pcakey
-chmod 700 /usr/local/bin/tagent /usr/local/bin/pcakey
+if [ -f /usr/local/bin/tagent ]; then rm /usr/local/bin/tagent; fi
+ln -s /opt/trustagent/bin/tagent.sh /usr/local/bin/tagent
+if [[ ! -h /opt/trustagent/bin/tagent ]]; then
+  ln -s /opt/trustagent/bin/tagent.sh /opt/trustagent/bin/tagent
+fi
 
-#module attestation script
-chmod 755 module_analysis.sh
-cp module_analysis.sh "${package_dir}"/bin
-update_property_in_file module_script "${intel_conf_dir}/${package_name}.properties" "${package_dir}/bin/module_analysis.sh"
 
 java_install $JAVA_PACKAGE
 
@@ -176,19 +228,33 @@ auto_install "TrustAgent requirements" "APPLICATION"
 # 4. run ldconfig to capture it
 # 5. run ldconfig -p to ensure it is found
 # XXX TODO for now we are not doing the general steps, just solving for a specific system.
-fix_redhat_libcrypto() {
-  local has_libcrypto=`find / -name libcrypto.so.1.0.0`
-  local has_symlink=`find / -name libcrypto.so`
-  if [[ -n "$has_libcrypto" && -z "$has_symlink" ]]; then
-    echo "Creating missing symlink for $has_libcrypto"
-    local libdir=`dirname $has_libcrypto`
-    ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
+fix_libcrypto() {
+  #yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  local has_libcrypto=`find / -name libcrypto.so.1.0.0 | head -1`
+  local libdir=`dirname $has_libcrypto`
+  local has_libdir_symlink=`find $libdir -name libcrypto.so`
+  local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
+  if [ -n "$has_libcrypto" ]; then
+    if [ -z "$has_libdir_symlink" ]; then
+      echo "Creating missing symlink for $has_libcrypto"
+      ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
+    fi
+    if [ -z "$has_usrbin_symlink" ]; then
+      echo "Creating missing symlink for $has_libcrypto"
+      ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
+    fi
+    
+    #if [ -n "$yum" ]; then #RHEL
+    #elif [[ -n "$zypper" || -n "$yast" ]]; then #SUSE
+    #fi
+
     ldconfig
   fi
 }
 
-fix_redhat_libcrypto
+fix_libcrypto
 
+return_dir=`pwd`
 
   is_citrix_xen=`lsb_release -a | grep "^Distributor ID" | grep XenServer`
   if [ -n "$is_citrix_xen" ]; then
@@ -230,9 +296,11 @@ fix_redhat_libcrypto
   echo "TRUST_AGENT_RELEASE=\"${BUILD}\"" >> ${myinstall}
 #  echo "TRUST_AGENT_ID=${WAR_NAME}" >> ${myinstall}
 
+cd $return_dir
 
 echo "Registering tagent in start up"
-register_startup_script /usr/local/bin/tagent tagent
+register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1
+# trousers has N=20 startup number, need to lookup and do a N+1
 
 fix_existing_aikcert() {
   local aikdir=${intel_conf_dir}/cert
@@ -248,10 +316,6 @@ fix_existing_aikcert() {
 }
 
 fix_existing_aikcert
-
-# give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
-/usr/local/bin/tagent setup
-/usr/local/bin/tagent start
 
 # now install monit
 monit_required_version=5.5
@@ -336,48 +400,92 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
-cd $saveD
-if [ ! -d /etc/monit ]; then
- mkdir /etc/monit
-fi
+
+
+mkdir -p /etc/monit/conf.d
+# ta.monit is already backed up at the beginning of setup.sh
+# not using backup_file /etc/monit/conf.d/ta.monit because we want it in a different folder to prevent monit from reading the new ta.monit AND all the backups and complaining about duplicates
+cp ta.monit /etc/monit/conf.d/ta.monit
 
 if [ -f /etc/monit/monitrc ]; then
-    echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
-    backup_file /etc/monit/monitrc
-else
-    cp monitrc /etc/monit/monitrc
+  cp /etc/monit/monitrc /etc/monit.bak/monitrc.$backupdate
 fi
+# backup_file /etc/monit/monitrc
+cp monitrc /etc/monit/monitrc
+chmod 700 /etc/monit/monitrc
 
 if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 fi
 
-if [ ! -d /etc/monit/conf.d ]; then
- mkdir -p /etc/monit/conf.d
+
+
+# TODO INSECURE need to rewrite this as a java setup task and leverage the
+#      existing tls policy for known mtwilson ssl cert 
+###
+#prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
+#if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
+#	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
+#	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
+#	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
+#	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+#	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
+#	TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
+#	UUID=`dmidecode |grep UUID | awk '{print $2}'`
+#	echo "registering $TPM_PASSWORD to $UUID"
+#	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
+#fi
+
+
+# collect all the localhost ip addresses and make the list available as the
+# default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
+DEFAULT_TRUSTAGENT_TLS_CERT_IP=`hostaddress_list_csv`
+if [ -n "$TRUSTAGENT_TLS_CERT_IP" ]; then
+  export TRUSTAGENT_TLS_CERT_IP=$DEFAULT_TRUSTAGENT_TLS_CERT_IP
+fi
+# TODO: look up each ip address in /etc/hosts and generate the list of 
+# corresponding hostnames to be a default for TRUSTAGENT_TLS_CERT_DNS
+#DEFAULT_TRUSTAGENT_TLS_CERT_DNS=`hostaddress_list_csv`
+#if [ -n "$TRUSTAGENT_TLS_CERT_DNS" ]; then
+#  export TRUSTAGENT_TLS_CERT_DNS=$DEFAULT_TRUSTAGENT_TLS_CERT_DNS
+#fi
+
+# create a trustagent username "mtwilson" with no password and all privileges
+# which allows mtwilson to access it until mtwilson UI is updated to allow
+# entering username and password for accessing the trust agent
+/usr/local/bin/tagent password mtwilson --nopass *:*
+
+# give tagent a chance to do any other setup (such as the .env file and pcakey)
+# and make sure it's successful before trying to start the trust agent
+# NOTE: only the output from start-http-server is redirected to the logfile;
+#       the stdout from the setup command will be displayed
+/usr/local/bin/tagent setup
+/usr/local/bin/tagent start >>$logfile  2>&1
+
+# optional: register tpm password with mtwilson so pull provisioning can
+#           be accomplished with less reboots (no ownership transfer)
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD}
+if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$REGISTER_TPM_PASSWORD" == "yes" ]]; then 
+#	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
+	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
+	prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
+    export MTWILSON_API_USERNAME MTWILSON_API_PASSWORD
+#	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+#	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
+#	TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
+	export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+#	echo "registering $TPM_PASSWORD to $UUID"
+#	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
+    /usr/local/bin/tagent setup register-tpm-password
 fi
 
-if [ ! -f /etc/monit/conf.d/ta.monit ]; then
- cp ta.monit /etc/monit/conf.d/ta.monit
+
+# NOTE:  monit should only be restarted AFTER trustagent is up and running
+#        so that it doesn't try to start it before we're done with our setup
+#        tasks.
+/usr/local/bin/tagent status > /dev/null
+if [ $? ]; then
+  service monit restart
+else
+  echo "Trust agent not running; skipping monit restart"
 fi
-
-prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
-if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
-	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
-	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
-	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
-	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
-	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
-	TPM_PASSWORD=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
-	UUID=`dmidecode |grep UUID | awk '{print $2}'`
-	echo "registering $TPM_PASSWORD to $UUID"
-	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
-fi
-
-
-chmod 700 /etc/monit/monitrc
-service monit restart
-
-echo "monit installed and monitoring tagent"
-
-sleep 2
-/usr/local/bin/tagent start

@@ -19,13 +19,9 @@ java_installer=`find_installer java`
 glassfish_installer=`find_installer glassfish`
 monit_installer=`find_installer monit`
 mtwilson_util=`find_installer MtWilsonLinuxUtil`
-privacyca_service=`find_installer PrivacyCAService`
 management_service=`find_installer ManagementService`
 whitelist_service=`find_installer WLMService`
 attestation_service=`find_installer AttestationService`
-whitelist_portal=`find_installer WhiteListPortal`
-management_console=`find_installer ManagementConsole`
-trust_dashboard=`find_installer TrustDashBoard`
 
 # Gather default configuration
 MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
@@ -61,12 +57,7 @@ chmod +x *.bin
 ./$java_installer
 ./$mtwilson_util
 ./$glassfish_installer
-./$privacyca_service
-/usr/local/bin/pcactl restart
 ./$attestation_service
 ./$management_service
 ./$whitelist_service
-./$management_console
-./$whitelist_portal
-./$trust_dashboard
 ./$monit_installer

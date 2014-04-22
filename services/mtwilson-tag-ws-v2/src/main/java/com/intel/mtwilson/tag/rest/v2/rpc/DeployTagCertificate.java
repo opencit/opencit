@@ -24,15 +24,14 @@ import java.util.Date;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * The "deploy" link next to each certificate in the UI calls this RPC
+ * 
  * @author ssbangal
  */
 @RPC("deploy-tag-certificate")
@@ -62,6 +61,7 @@ public class DeployTagCertificate implements Runnable{
     
     
     @Override
+    @RequiresPermissions({"tag_certificates:deploy","hosts:search"})         
     public void run() {
         log.debug("Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
@@ -73,12 +73,12 @@ public class DeployTagCertificate implements Runnable{
                 Date today = new Date();
                 if (today.before(obj.getNotBefore()) || today.after(obj.getNotAfter())) {
                     log.error("Certificate with subject {} is expired/invalid. Will not be deployed.", obj.getSubject());
-                    throw new WebApplicationException("Certificate with subject is expired/invalid. Will not be deployed.", Response.Status.BAD_REQUEST);                    
+                    throw new WebApplicationException("Certificate with subject is expired/invalid. Will not be deployed.", Response.Status.BAD_REQUEST);
                 }
                 
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
                 List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
-                if(hostList == null || hostList.size() == 0) {
+                if(hostList == null || hostList.isEmpty() ) {
                     log.error("No hosts were returned back matching name " + host.toString());
                     Response.status(Response.Status.NOT_FOUND);
                     throw new WebApplicationException("No hosts were found matching the specified criteria.", Response.Status.NOT_FOUND);
@@ -91,6 +91,9 @@ public class DeployTagCertificate implements Runnable{
                 }
                 
                 deployAssetTagToHost(obj.getSha1(), hostRecord);
+            } else {
+                log.error("Failed to retreive certificate while trying to discover host by certificate ID.");
+                throw new WebApplicationException("Failed to retreive certificate while trying to discover host by certificate ID.", Response.Status.BAD_REQUEST);
             }
 
         } catch (WebApplicationException aex) {

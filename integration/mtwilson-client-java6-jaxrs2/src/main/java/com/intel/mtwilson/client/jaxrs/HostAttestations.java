@@ -24,8 +24,8 @@ public class HostAttestations extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public HostAttestations(URL url) {
-        //super(url);
+    public HostAttestations(URL url) throws Exception{
+        super(url);
     }
 
     public HostAttestations(Properties properties) throws Exception {

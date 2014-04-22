@@ -4,13 +4,19 @@
  */
 package com.intel.mtwilson.shiro.authc.x509;
 
+import java.io.Serializable;
+
 /**
  *
  * @author jbuhacoff
  */
-public class Credential {
+public class Credential implements Serializable {
+    private static final long serialVersionUID = 42127181L;
+    
     private byte[] signature;
     private byte[] digest;
+    
+    protected Credential() { }
 
     public Credential(byte[] signature, byte[] digest) {
         this.signature = signature;

@@ -6,7 +6,6 @@ package com.intel.mtwilson.shiro.authc.password;
 
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.util.ByteArray;
-import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -33,11 +32,11 @@ public class PasswordCredentialsMatcher implements CredentialsMatcher {
     public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
         log.debug("doCredentialsMatch with token {} and info {}", token, info);
         if( token.getCredentials() == null ) { return false; }
-        if( !(info.getCredentials() instanceof UserLoginPassword)) { return false; }
-        UserLoginPassword userLoginPasswordHash = (UserLoginPassword)info.getCredentials();
+        if( !(info.getCredentials() instanceof HashedPassword)) { return false; }
+        HashedPassword userLoginPasswordHash = (HashedPassword)info.getCredentials();
         byte[] tokenBytes = toBytes(token.getCredentials());
-        if( tokenBytes == null || tokenBytes.length == 0 ) {
-            throw new IllegalArgumentException("Empty password credential"); // TODO:  error code  /  i18n
+        if( tokenBytes == null ) {
+            throw new IllegalArgumentException("Null password credential"); // TODO:  error code  /  i18n  ; empty passwords length==0 are allowed
         }
         
         byte[] hashedTokenBytes = passwordHash(tokenBytes, userLoginPasswordHash);
@@ -47,7 +46,7 @@ public class PasswordCredentialsMatcher implements CredentialsMatcher {
         return false;
     }
 
-    public static byte[] passwordHash(byte[] inputPasswordBytes, UserLoginPassword storedPassword) {
+    public static byte[] passwordHash(byte[] inputPasswordBytes, HashedPassword storedPassword) {
         // SHA-256 is the standard Java name but we also accept SHA256 
         if( "SHA-256".equalsIgnoreCase(storedPassword.getAlgorithm()) ||  "SHA256".equalsIgnoreCase(storedPassword.getAlgorithm()) ) {
             // first iteration is mandatory

@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.tag.model;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.x509.UTF8NameValueMicroformat;
 import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
@@ -65,6 +67,10 @@ public class X509AttributeCertificate {
     
     public byte[] getEncoded() {
         return encoded;
+    }
+    
+    public byte[] getFingerprintSha256() {
+        return Sha256Digest.digestOf(encoded).toByteArray();
     }
     
     public String getIssuer() {

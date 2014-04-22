@@ -46,8 +46,9 @@ load_defaults 2>&1 >/dev/null
 #  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
 #}
 
+## this is not being called anymore,  please see note below about asctl.sh
 bootstrap_first_user() {
-  echo "Configuring Management Console administrator username and password..."
+  echo "Configuring Mt Wilson Portal administrator username and password..."
 
   # run the bootstrap command
   mtwilson=`which mtwilson 2>/dev/null`
@@ -151,7 +152,10 @@ setup_interactive_install() {
     #echo "Done"
     webservice_running_report_wait "${webservice_application_name}"
   fi
-  bootstrap_first_user
+
+  # commenting out because this is now automatically created by asctl.sh setup 
+  #  when it calls mtwilson setup V2 create-admin-user
+  #bootstrap_first_user
 }
 
 

@@ -5,6 +5,7 @@
 package com.intel.mtwilson.shiro.jdbi.model;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import java.util.Date;
 
 /**
@@ -21,7 +22,7 @@ import java.util.Date;
  *
  * @author jbuhacoff
  */
-public class UserLoginPassword {
+public class UserLoginPassword implements HashedPassword {
     private UUID id;
     private UUID userId;
     private byte[] passwordHash;

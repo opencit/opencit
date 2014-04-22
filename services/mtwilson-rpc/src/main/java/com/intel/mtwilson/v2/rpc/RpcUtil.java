@@ -6,6 +6,7 @@ package com.intel.mtwilson.v2.rpc;
 
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.rpc.v2.resource.CallableRpcAdapter;
 import com.intel.mtwilson.rpc.v2.resource.RpcAdapter;
 import com.intel.mtwilson.rpc.v2.resource.RunnableRpcAdapter;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
@@ -68,7 +70,11 @@ public class RpcUtil {
     
     
     
-    private static RpcAdapter getAdapter(Object rpcInstance) {
+    private static RpcAdapter createAdapter(Object rpcObject) throws InstantiationException, IllegalAccessException {
+        Object rpcInstance = rpcObject.getClass().newInstance(); // create a new instance of the RPC object to prevent multi-threaded access to the same instance where client A invokes RPC and sets inputs and then client B invokes RPC and sets inputs and then client A gets the result of client B's inputs
+        if( rpcInstance instanceof Callable ) {
+            return new CallableRpcAdapter((Callable)rpcInstance);
+        }
         if( rpcInstance instanceof Runnable ) {
             return new RunnableRpcAdapter((Runnable)rpcInstance);
         }
@@ -96,12 +102,18 @@ public class RpcUtil {
             log.error("Application configuration error: multiple RPC extensions found for {}: {}", name, found);
             return null;
         }
-        RpcAdapter adapter = getAdapter(found.get(0));
-        if( adapter == null ) {
-            log.error("Cannot find RpcAdapter for {}", name);
+        try {
+            RpcAdapter adapter = createAdapter(found.get(0));
+            if( adapter == null ) {
+                log.error("Cannot find RpcAdapter for {}", name);
+                return null;
+            }
+            return adapter;
+        }
+        catch(InstantiationException | IllegalAccessException e ) {
+            log.error("Cannot instantiate RPC {} class {}: {}", name, found.get(0).getClass().getName(), e.getMessage());
             return null;
         }
-        return adapter;
     }
     
     // TODO:  move to mtwilson-jersey-util  (might be renamed mtwilson-jaxrs-util) 

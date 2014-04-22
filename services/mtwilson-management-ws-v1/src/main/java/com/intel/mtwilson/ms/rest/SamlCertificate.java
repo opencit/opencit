@@ -54,7 +54,7 @@ public class SamlCertificate {
     @GET
     @Path("/certificate/mtwilson-saml.crt")
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
-    @PermitAll
+    //@PermitAll
     public byte[] getSamlCertificateFilename() {
         return getSamlCertificate();
     }    
@@ -68,7 +68,7 @@ public class SamlCertificate {
     @GET
     @Path("/certificate")
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
-    @PermitAll
+    //@PermitAll
     public byte[] getSamlCertificate() {
 
         try {

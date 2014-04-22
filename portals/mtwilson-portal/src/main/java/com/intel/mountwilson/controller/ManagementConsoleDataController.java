@@ -75,9 +75,9 @@ import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
-import com.intel.mtwilson.tag.model.Selection;
-import com.intel.mtwilson.tag.model.SelectionCollection;
-import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
+//import com.intel.mtwilson.tag.model.Selection;
+//import com.intel.mtwilson.tag.model.SelectionCollection;
+//import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
+//import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
 /**
  * @author yuvrajsx
  *

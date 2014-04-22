@@ -5,6 +5,7 @@
 package com.intel.mtwilson.policy.impl;
 
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.as.business.AssetTagCertBO;
 import java.util.HashSet;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -123,13 +124,18 @@ public class HostTrustPolicyManager {
         
         // Add the rules for the asset tag verification
         try {
-            List<MwAssetTagCertificate> atagCertsForHost = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(host.getId());
-            // There should be only one valid asset tag certificate for the host.
-            if (atagCertsForHost != null && atagCertsForHost.size() == 1) {
-                rules.addAll(factory.loadTrustRulesForAssetTag(atagCertsForHost.get(0), host));
-            }
-            else {
-                log.info("Asset tag certificate not present for host {}.", host.getName());
+            // Since this function can be called either during attestation or during verification of mle matches during which
+            // the host is actually not registered, we need to check for that explicitly.
+            if (host != null && host.getId() != null && host.getId() != 0) {
+                // Need to add the certificate whitelist only if the host is associated with a valid asset tag certificate.
+                AssetTagCertBO atagCertBO = new AssetTagCertBO();
+                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(host.getId());            
+                if (atagCertForHost != null) { 
+                    rules.addAll(factory.loadTrustRulesForAssetTag(atagCertForHost, host));
+                }
+                else {
+                    log.info("Asset tag certificate is either not present or valid for host {}.", host.getName());
+                }
             }
         } catch (Exception ex) {
             log.error("Exception when looking up the asset tag whitelist.", ex);

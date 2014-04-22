@@ -19,7 +19,7 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.MSPersistenceManager;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
@@ -44,15 +44,10 @@ public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
 //    private MwPortalUserJpaController keystoreJpa ;// new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
     private static final Logger log = LoggerFactory.getLogger(BootstrapUser.class.getName());
-    private SetupContext ctx = null;
     public static final Console console = System.console();
     MSPersistenceManager persistenceManager = new MSPersistenceManager();
     MwPortalUserJpaController portalUserJpa; // new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
     
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
     
     private Configuration options = null;
     @Override
@@ -108,7 +103,7 @@ public class BootstrapUser implements Command {
         // if(keyTest != null) {
         if ((keyTest != null) && (keyTest.getStatus().equalsIgnoreCase("approved") || keyTest.getStatus().equalsIgnoreCase("pending"))) {        
           log.debug("A user already exists with the specified User Name: {}", username);
-          throw new SetupException("User account with that name already exists. Please select different User Name.");
+          throw new SetupException(String.format("User account '%s' already exists", username));
         }
         
         // create user

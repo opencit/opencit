@@ -54,112 +54,6 @@ load_defaults 2>&1 >/dev/null
 #}
 
 
-# This function downloads the Privacy CA's AIK Certificate and EK Certificate.
-# TODO XXX this should probably be ported to the Attestation Service Java code
-# so it will work on any platform...
-# Environment:
-#   - if the configuration file includes "privacyca.server" then this address
-#     will be used. otherwise, the user will be prompted for this value and it
-#     will be saved into the configuration file.
-# Parameters: None
-# Input: Privacy CA Server and Password
-# Output: PrivacyCA.cer and Endorsement.cer are saved into the config dir
-download_privacyca_certs() {
-  local privacyca_server_config
-  if [ -z "${PRIVACYCA_SERVER}" ]; then
-    #privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
-    #PRIVACYCA_SERVER=${privacyca_server_config}
-    prompt_with_default PRIVACYCA_SERVER "Privacy CA Server:"
-  fi
-
-  if [ -n "${PRIVACYCA_SERVER}" ]; then
-    # check if the privacy ca password is saved in a properties file
-    #local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
-    echo "Login to download the Privacy CA client files"
-    if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME}" ]; then
-      prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${PRIVACYCA_DOWNLOAD_USERNAME}
-      export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
-    fi
-    if [ -z "${PRIVACYCA_DOWNLOAD_PASSWORD}" ]; then
-      prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
-      export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
-    fi
-    
-    echo "Connecting to Privacy CA..."
-
-    # zip file downloaded to /tmp so that if client and server are same machine, the download won't clobber the server's copy of clientfiles.zip in /etc
-    local zipfile=/tmp/clientfiles.zip
-    touch $zipfile
-    chmod 600 $zipfile
-    # XXX password in URL is insecure in systems that have user accounts or software which should not know this password
-    #wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:$DEFAULT_API_PORT/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O ${zipfile}
-	encodedPW=$(echo "${PRIVACYCA_DOWNLOAD_PASSWORD}" | sed -e 's/%/%25/g' -e 's/ /%20/g' -e 's/!/%21/g' -e 's/"/%22/g' -e 's/#/%23/g' -e 's/\$/%24/g' -e 's/\&/%26/g' -e 's/'\''/%27/g' -e 's/(/%28/g' -e 's/)/%29/g' -e 's/\*/%2a/g' -e 's/+/%2b/g' -e 's/,/%2c/g' -e 's/-/%2d/g' -e 's/\./%2e/g' -e 's/\//%2f/g' -e 's/:/%3a/g' -e 's/;/%3b/g' -e 's//%3e/g' -e 's/?/%3f/g' -e 's/@/%40/g' -e 's/\[/%5b/g' -e 's/\\/%5c/g' -e 's/\]/%5d/g' -e 's/\^/%5e/g' -e 's/_/%5f/g' -e 's/`/%60/g' -e 's/{/%7b/g' -e 's/|/%7c/g' -e 's/}/%7d/g' -e 's/~/%7e/g')
-	tomcat_detect > /dev/null 2>&1;glassfish_detect > /dev/null 2>&1;
-    if [ -z "$DEFAULT_API_PORT" ]; then
-      if using_tomcat; then
-        DEFAULT_API_PORT=8443
-      else
-        DEFAULT_API_PORT=8181
-      fi
-    fi
-    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:$DEFAULT_API_PORT/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${encodedPW}" -O ${zipfile}
-    if [ -s ${zipfile} ]; then
-      mkdir -p /tmp/clientfiles.x
-      chmod -R 600 /tmp/clientfiles.x
-      unzip -o ${zipfile} -d /tmp/clientfiles.x
-      rm -f ${zipfile}
-
-      if using_glassfish; then
-        glassfish_permissions /tmp/clientfiles.x
-      else
-        tomcat_permissions /tmp/clientfiles.x
-      fi
-
-      mv /tmp/clientfiles.x/hisprovisioner.properties ${intel_conf_dir}/hisprovisioner.properties
-      mv /tmp/clientfiles.x/PrivacyCA.cer ${intel_conf_dir}/PrivacyCA.cer
-      mv /tmp/clientfiles.x/endorsement.p12 ${intel_conf_dir}/endorsement.p12
-      rm -r /tmp/clientfiles.x
-
-      # create the PrivacyCA.pem cert so it can be download from the portal
-      if [ -f "$intel_conf_dir/PrivacyCA.cer" ]; then
-        openssl x509 -inform der -in "$intel_conf_dir/PrivacyCA.cer" -out "$intel_conf_dir/PrivacyCA.pem"
-      else
-        echo_warning "Missing PrivacyCA.cer.  File will not be available via portals"
-      fi
-
-      # create the list of trusted privacy ca's if it doesn't exist.  the list is in PrivacyCA.p12.pem
-      if [ ! -f "${intel_conf_dir}/PrivacyCA.p12.pem" ]; then
-          touch "${intel_conf_dir}/PrivacyCA.p12.pem"
-          chmod 600 "${intel_conf_dir}/PrivacyCA.p12.pem"
-      fi
-      # add the privacy ca certificate to a list of trusted privacy ca's
-      openssl x509 -in "${intel_conf_dir}/PrivacyCA.cer" -inform der -outform pem >> "${intel_conf_dir}/PrivacyCA.p12.pem"
-      # if we got here with user input then save the Privacy CA server name in properties file
-      if [ -z "${privacyca_server_config}" ]; then
-        update_property_in_file privacyca.server "${package_config_filename}" "${PRIVACYCA_SERVER}"
-      fi
-      # use the password in hisprovisioner.propeties to extract the Endorsement certificate from endorsement.p12, then delete the password
-      if [ -f "${intel_conf_dir}/endorsement.p12" ]; then
-        export endorsement_password="$ENDORSEMENT_P12_PASS"   #`read_property_from_file EndorsementP12Pass ${intel_conf_dir}/hisprovisioner.properties`
-        openssl pkcs12 -in ${intel_conf_dir}/endorsement.p12 -out ${intel_conf_dir}/privacyca-endorsement.pem -nokeys -passin env:endorsement_password
-        export endorsement_password=
-        rm ${intel_conf_dir}/hisprovisioner.properties
-        rm ${intel_conf_dir}/endorsement.p12
-        openssl x509 -inform pem -in ${intel_conf_dir}/privacyca-endorsement.pem -out ${intel_conf_dir}/privacyca-endorsement.crt -outform der
-        chmod 600 ${intel_conf_dir}/privacyca-endorsement.crt
-        #glassfish_permissions ${intel_conf_dir}/privacyca-endorsement.crt
-        rm ${intel_conf_dir}/privacyca-endorsement.pem
-      else
-        echo_failure "Cannot unzip package from Privacy CA"
-      fi
-    else
-      echo_failure "Cannot connect to Privacy CA: ${PRIVACYCA_SERVER}"
-    fi
-  else
-    echo_failure "PrivacyCA Server and Password are required in order to download certificates"
-  fi
-  
-}
 
 
 create_saml_key() {
@@ -167,31 +61,29 @@ create_saml_key() {
   # TODO:  keystore password can be set in environment variable and passed like env:varname (see docs.. only in java 1.7 did they copy this from openssl)... same for key password
   # windows path: C:\Intel\CloudSecurity\SAML.jks
   # the saml.keystore.file property is just a file name and not an absolute path
-  # TODO XXX: use convention over configuration... document that the SAML keystore file is a file called SAML.jks inside the
-  # configuration directory, and use that fact everywhere instead of reading a configuration.
-  saml_keystore_file="${SAML_KEYSTORE_FILE:-SAML.jks}"          #`read_property_from_file saml.keystore.file ${package_config_filename}`
-  saml_keystore_password="$SAML_KEYSTORE_PASSWORD"  #`read_property_from_file saml.keystore.password ${package_config_filename}`
-  saml_key_alias="$SAML_KEY_ALIAS"                  #`read_property_from_file saml.key.alias ${package_config_filename}`
-  saml_key_password="$SAML_KEY_PASSWORD"            #`read_property_from_file saml.key.password ${package_config_filename}`
   # prepend the configuration directory to the keystore filename
-  if [ ! -f $saml_keystore_file ]; then
-    saml_keystore_file=${intel_conf_dir}/${saml_keystore_file}
+  if [ ! -f $SAML_KEYSTORE_FILE ]; then
+    SAML_KEYSTORE_FILE=${intel_conf_dir}/${SAML_KEYSTORE_FILE}
   fi
   
-  saml_keystore_password=${saml_keystore_password:-"changeit"}
-  saml_key_alias=${saml_key_alias:-"samlkey1"}
-  saml_key_password=${saml_key_password:-"changeit"}
+  if [ -z "$SAML_KEYSTORE_PASSWORD" ]; then
+    SAML_KEYSTORE_PASSWORD=$(generate_password 16)
+    SAML_KEY_PASSWORD=$SAML_KEYSTORE_PASSWORD
+    update_property_in_file saml.keystore.password "${package_config_filename}" "${SAML_KEYSTORE_PASSWORD}"
+    update_property_in_file saml.key.password "${package_config_filename}" "${SAML_KEY_PASSWORD}"
+  fi
+
   keytool=${JAVA_HOME}/bin/keytool
-  samlkey_exists=`$keytool -list -keystore ${saml_keystore_file} -storepass ${saml_keystore_password} | grep PrivateKeyEntry | grep "^${saml_key_alias}"`
+  samlkey_exists=`$keytool -list -keystore ${SAML_KEYSTORE_FILE} -storepass ${SAML_KEYSTORE_PASSWORD} | grep PrivateKeyEntry | grep "^${SAML_KEY_ALIAS}"`
   if [ -n "${samlkey_exists}" ]; then
-    echo "SAML key with alias ${saml_key_alias} already exists in ${saml_keystore_file}"
+    echo "SAML key with alias ${SAML_KEY_ALIAS} already exists in ${SAML_KEYSTORE_FILE}"
     # TODO: check if the key is at least 2048 bits. if not, prompt to create a new key.
   else
-    $keytool -genkey -alias ${saml_key_alias} -keyalg RSA  -keysize 2048 -keystore ${saml_keystore_file} -storepass ${saml_keystore_password} -dname "CN=mtwilson, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${saml_key_password}
+    $keytool -genkey -alias ${SAML_KEY_ALIAS} -keyalg RSA  -keysize 2048 -keystore ${SAML_KEYSTORE_FILE} -storepass ${SAML_KEYSTORE_PASSWORD} -dname "CN=mtwilson, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${SAML_KEY_PASSWORD}
   fi
-  chmod 600 ${saml_keystore_file}
+  chmod 600 ${SAML_KEYSTORE_FILE}
   # export the SAML certificate so it can be easily provided to API clients
-  $keytool -export -alias ${saml_key_alias} -keystore ${saml_keystore_file}  -storepass ${saml_keystore_password} -file ${intel_conf_dir}/saml.crt
+  $keytool -export -alias ${SAML_KEY_ALIAS} -keystore ${SAML_KEYSTORE_FILE}  -storepass ${SAML_KEYSTORE_PASSWORD} -file ${intel_conf_dir}/saml.crt
   openssl x509 -in ${intel_conf_dir}/saml.crt -inform der -out ${intel_conf_dir}/saml.crt.pem -outform pem
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
 
@@ -204,6 +96,9 @@ create_saml_key() {
     #saml_issuer=`echo $saml_issuer |  sed -e 's/\\//g'`
   fi
   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
+
+  # TODO:
+  # mtwilson setup V2 create-saml-certificate
 }
 
 create_data_encryption_key() {
@@ -213,10 +108,72 @@ create_data_encryption_key() {
 #    echo "Data encryption key already exists"
 #  else
 #    echo "Creating data encryption key"
+#####  this is now also called from "mtwilson setup"
     mtwilson setup EncryptDatabase
 #  fi
 }
 
+bootstrap_first_user() {
+  echo "Configuring Mt Wilson Portal administrator username and password..."
+
+  # run the bootstrap command
+  mtwilson=`which mtwilson 2>/dev/null`
+  if [ -z "$mtwilson" ]; then
+    echo_failure "Missing mtwilson command line tool"
+    return 1
+  fi
+
+  # bootstrap administrator user with all privileges
+  prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
+  prompt_with_default_password MC_FIRST_PASSWORD
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
+  mtwilson setup V2 create-certificate-authority-key
+  cat /etc/intel/cloudsecurity/cacerts.pem >> /etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem
+  mtwilson setup V2 create-admin-user
+}
+
+
+configure_privacyca_user() {
+  # Now prompt for the client files download username and password
+  echo "You need to set a username and password for administrators installing Trust Agents to access the Privacy CA service."
+  prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "PrivacyCA Administrator Username:" admin
+  prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "PrivacyCA Administrator Password:"
+  export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
+  export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
+  #PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
+  #update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
+  #update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD_HASH}"
+  # TODO:  instead of ClientFilesDownload* we should  make a user with permission specifically
+  #        to authorize hosts while installing trust agent, instead of using the admin user for that
+  mtwilson setup login-password $PRIVACYCA_DOWNLOAD_USERNAME env:PRIVACYCA_DOWNLOAD_PASSWORD --permissions tpms:endorse tpm_passwords:store tpm_passwords:search
+}
+
+
+create_privacyca_keys() {
+   # TODO:  a lot of Error: Cannot load class xyz  show up on the output because
+   #        the setup console does not have the same classpath as the mtwilson app;
+   #        when the plugin work is complete they will have the same classpath
+   #        so these errors would not be thrown
+   mtwilson setup setup-manager create-endorsement-ca >> /dev/null 2>&1
+   mtwilson setup setup-manager create-privacy-ca >> /dev/null 2>&1
+}
+
+# The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
+protect_privacyca_files() {
+  local PRIVACYCA_FILES="${intel_conf_dir}/EndorsementCA.p12 ${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/cacerts"
+  chmod 600 $PRIVACYCA_FILES
+  if using_glassfish; then
+    glassfish_permissions $PRIVACYCA_FILES
+  elif using_tomcat; then
+    tomcat_permissions $PRIVACYCA_FILES
+  fi
+}
+
+update_ssl_port() {
+  configure_api_baseurl "${package_config_filename}"
+  mtwilson setup setup-manager update-ssl-port >> /dev/null 2>&1
+}
 
 setup_interactive_install() {
   if using_mysql; then   
@@ -238,9 +195,16 @@ setup_interactive_install() {
       exit 1
     fi
   fi
+  update_ssl_port
   create_saml_key 
-  download_privacyca_certs
+
+  configure_privacyca_user
+  create_privacyca_keys
+  protect_privacyca_files
+
   create_data_encryption_key
+  bootstrap_first_user
+
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
@@ -268,6 +232,7 @@ setup_interactive_install() {
       #sleep 50s        #XXX TODO: remove when we have solution for webserver up
       #echo "Done"
       webservice_running_report_wait "${webservice_application_name}"
+      mtwilson_running_report_wait
   fi
 }
 
@@ -357,7 +322,9 @@ case "$1" in
         create_saml_key
         ;;
   privacyca-setup)
-        download_privacyca_certs
+        configure_privacyca_user
+        create_privacyca_keys
+        protect_privacyca_files
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall|saml-createkey|privacyca-setup}"

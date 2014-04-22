@@ -24,7 +24,7 @@ public class ConfigurableFeatureFilesystem extends BasicFeatureFilesystem implem
     }
     public ConfigurableFeatureFilesystem(Configuration config) {
         this.config = config;
-        super.setRootPath(config.getString("mtwilson.fs.feature.root"));
+        super.setRootPath(config.getString("fs.feature.root"));
     }
     
     /*
@@ -33,37 +33,37 @@ public class ConfigurableFeatureFilesystem extends BasicFeatureFilesystem implem
         super.setRootPath(root);
     }
     @Override
-    public String getRootPath() { return config.getString("mtwilson.fs.feature.root", super.getRootPath()); }
+    public String getRootPath() { return config.getString("fs.feature.root", super.getRootPath()); }
     * */
     
     @Override
     public String getBinPath() {
-        return config.getString("mtwilson.fs.feature.bin", super.getBinPath()); // root + File.separator + "bin"
+        return config.getString("fs.feature.bin", super.getBinPath()); // root + File.separator + "bin"
     }
     @Override
     public String getHypertextPath() {
-        return config.getString("mtwilson.fs.feature.hypertext", super.getHypertextPath()); // root + File.separator + "hypertext"
+        return config.getString("fs.feature.hypertext", super.getHypertextPath()); // root + File.separator + "hypertext"
     }
     @Override
     public String getJavaPath() {
-        return config.getString("mtwilson.fs.feature.java", super.getJavaPath()); // root + File.separator + "java"
+        return config.getString("fs.feature.java", super.getJavaPath()); // root + File.separator + "java"
     }
     @Override
     public String getLicensePath() {
-        return config.getString("mtwilson.fs.feature.license_d", super.getLicensePath()); // root + File.separator + "license.d"
+        return config.getString("fs.feature.license_d", super.getLicensePath()); // root + File.separator + "license.d"
     }
     @Override
     public String getLinuxUtilPath() {
-        return config.getString("mtwilson.fs.feature.linux_util", super.getLinuxUtilPath()); // root + File.separator + "linux-util"
+        return config.getString("fs.feature.linux_util", super.getLinuxUtilPath()); // root + File.separator + "linux-util"
     }
     @Override
     public String getSqlPath() {
-        return config.getString("mtwilson.fs.feature.sql", super.getSqlPath()); // root + File.separator + "sql"
+        return config.getString("fs.feature.sql", super.getSqlPath()); // root + File.separator + "sql"
     }
     
     @Override
     public String getVarPath() {
-        return config.getString("mtwilson.fs.feature.var", super.getVarPath()); // root + File.separator + "var"
+        return config.getString("fs.feature.var", super.getVarPath()); // root + File.separator + "var"
     }
 
 }

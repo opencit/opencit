@@ -4,7 +4,14 @@
  */
 package com.intel.mtwilson.v2.test.shiro;
 
+import com.intel.dcsg.cpg.performance.Task;
 import com.intel.mtwilson.launcher.ws.ext.V2;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -25,7 +32,8 @@ import org.apache.shiro.subject.Subject;
 @V2
 @Path("/test/security")
 public class SecurityTestResource {
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecurityTestResource.class);
+    
     
     @GET
     @Path("/default")
@@ -61,6 +69,23 @@ public class SecurityTestResource {
         return "hello, permitted user! you have 'hello' access to the 'test' resource";
     }
 
+    @RequiresPermissions("test:hello,goodbye")
+    @GET
+    @Path("/permission2")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloPermittedUser2() {
+        return "hello, permitted user! you have 'hello,goodbye' access to the 'test' resource";
+    }
+
+    @RequiresPermissions({"test:hello","test:goodbye"})
+    @GET
+    @Path("/permission3")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloPermittedUser3() {
+        return "hello, permitted user! you have 'hello' and 'goodbye' access to the 'test' resource";
+    }
+    
+    
     @RequiresRoles("test")
     @GET
     @Path("/rolebased1")
@@ -99,6 +124,31 @@ public class SecurityTestResource {
     public String helloRememberMeUser() {
         Subject currentUser = SecurityUtils.getSubject();
         return "hello, user! authenticated="+String.valueOf(currentUser.isAuthenticated())+" but we remember you "+currentUser.getPrincipal().getClass().getName();
+    }
+    
+    
+    @RequiresPermissions({"test:thread"})
+    @GET
+    @Path("/permission-thread-executor")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String helloPermittedUserNewTaskThread() throws InterruptedException, ExecutionException, TimeoutException {
+        ExecutorService scheduler = Executors.newFixedThreadPool(1);
+        SubTask task = new SubTask();
+        Future<?> status = scheduler.submit(task);
+        status.get(5, TimeUnit.SECONDS); // 5 seconds timeout        ; throws InterruptedException, ExecutionException, TimeoutException
+        return String.format("hello, permitted user! you have 'thread' access to the 'test' resource and the result is: %s",task.isDone());
+    }
+    
+    public static class SubTask extends Task {
+
+        @RequiresRoles("unobtanium")
+        @RequiresPermissions({"test:thread"})
+        @Override
+        protected void execute() throws Exception {
+            log.debug("executing subtask");
+            throw new Exception("exception from subtask");
+        }
+        
     }
     
 }

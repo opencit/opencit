@@ -23,8 +23,8 @@ public class HostAiks extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public HostAiks(URL url) {
-        //super(url);
+    public HostAiks(URL url)throws Exception {
+        super(url);
     }
 
     public HostAiks(Properties properties) throws Exception {

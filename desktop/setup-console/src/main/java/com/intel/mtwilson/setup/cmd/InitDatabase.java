@@ -10,7 +10,7 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.dcsg.cpg.io.Classpath;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
@@ -82,14 +82,7 @@ import org.slf4j.LoggerFactory;
 public class InitDatabase implements Command {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    private SetupContext ctx = null;
     private String databaseVendor = null;
-    
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
-
     private Configuration options = null;
     @Override
     public void setOptions(Configuration options) {

@@ -9,11 +9,13 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.*;
 import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import org.junit.Test;
@@ -38,7 +40,7 @@ public class RepositoryTest {
 
     @Test
     public void testCreateRole() throws Exception {
-        LoginDAO dao = MyJdbi.authz();
+        try(LoginDAO dao = MyJdbi.authz()) {
         
         //create a new role
         Role role = new Role();
@@ -57,12 +59,12 @@ public class RepositoryTest {
         rolePermission.setPermitSelection("*");
         dao.insertRolePermission(rolePermission.getRoleId(), rolePermission.getPermitDomain(), rolePermission.getPermitAction(), rolePermission.getPermitSelection());
         
-        dao.close();
+        }
     }
     
     @Test
     public void testCreateUser() throws Exception {
-        LoginDAO dao = MyJdbi.authz();
+        try(LoginDAO dao = MyJdbi.authz()) {
         
         //create a new user
         User user = new User();
@@ -84,14 +86,14 @@ public class RepositoryTest {
         userLoginPassword.setIterations(1000);
         userLoginPassword.setAlgorithm("SHA256");
         userLoginPassword.setEnabled(true);
-        userLoginPassword.setPasswordHash(passwordHash(userLoginPassword, My.configuration().getKeystorePassword()));
+        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
         
         // add a role for the user
         Role root = dao.findRoleByName("root");
         dao.insertUserLoginPasswordRole(userLoginPassword.getId(), root.getId());
         
-        dao.close();
+        }
     }
     
     /**
@@ -102,45 +104,33 @@ public class RepositoryTest {
      */
     @Test
     public void testResetPassword() throws Exception {
-        LoginDAO dao = MyJdbi.authz();
+        try(LoginDAO dao = MyJdbi.authz()) {
         UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUsername(My.configuration().getKeystoreUsername());
         if( userLoginPassword == null ) {
             throw new IllegalArgumentException("No such user: "+My.configuration().getKeystoreUsername());
         }
         userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-        userLoginPassword.setPasswordHash(passwordHash(userLoginPassword, My.configuration().getKeystorePassword()));
+        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         userLoginPassword.setEnabled(true);
         dao.updateUserLoginPassword(userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getId());
-        dao.close();
+        }
     }
     
     @Test
     public void testGetRolePermissions() throws Exception {
-        LoginDAO dao = MyJdbi.authz();
+        try(LoginDAO dao = MyJdbi.authz()) {
         
         List<Role> roles = dao.findRolesByUserLoginPasswordId(UUID.valueOf("39bee0f8-9284-4d55-9abe-cf372e200e79")); //df10be6f-7d67-4e86-a7e4-a13169d9ce23"));
-        ArrayList<UUID> roleIds = new ArrayList<>();
+        HashSet<String> roleIds = new HashSet<>();
         for(Role role : roles) {
             log.debug("role: {}", role.getRoleName());
-            roleIds.add(role.getId());
+            roleIds.add(role.getId().toString());
         }
         List<RolePermission> permissions = dao.findRolePermissionsByPasswordRoleIds(roleIds);
         for(RolePermission permission : permissions) {
             log.debug("permission: {} {} {}", permission.getPermitDomain(), permission.getPermitAction(), permission.getPermitSelection());
                     }
-        dao.close();
+        }
     }
     
-    private byte[] passwordHash(UserLoginPassword userLoginPassword, String password) {
-        if( "SHA256".equalsIgnoreCase(userLoginPassword.getAlgorithm())) {
-            // first iteration is mandatory
-            Sha256Digest digest = Sha256Digest.digestOf(ByteArray.concat(userLoginPassword.getSalt(), password.getBytes(Charset.forName("UTF-8"))));
-            int max = userLoginPassword.getIterations() - 1; // -1 because we just completed the first iteration
-            for(int i=0; i<max; i++) {
-                digest = Sha256Digest.digestOf(digest.toByteArray());
-            }
-            return digest.toByteArray();
-        }
-        return null;
-    }
 }

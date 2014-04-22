@@ -5,6 +5,7 @@
 package com.intel.mtwilson.fs;
 
 import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
+import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.io.File;
 import org.apache.commons.configuration.CompositeConfiguration;
@@ -16,52 +17,65 @@ import org.apache.commons.configuration.SystemConfiguration;
  * @author jbuhacoff
  */
 public abstract class AbstractFilesystem implements ApplicationFilesystem {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractFilesystem.class);
 
-    private CompositeConfiguration configuration;
     private String applicationPath = null;
     private String configurationPath = null;
     private String environmentExtPath = null;
     private BasicFeatureFilesystem bootstrapFilesystem = null;
-
+    private PlatformFilesystem platformFilesystem = null;
+    
     /**
-     * When a variable is needed like mtwilson.home, first the JVM properties
-     * are checked, then the environment variables, then the environment
-     * variables with an all caps translation of the name, for example
-     * MTWILSON_HOME
+     * Used to construct application paths. For example the application
+     * home directory is {applicationRoot}/{applicationName} which might
+     * be /opt/mtwilson on linux and C:\mtwilson on windows. 
+     * @return "mtwilson" or "trustagent" for example
      */
-    public AbstractFilesystem() {
-        CompositeConfiguration composite = new CompositeConfiguration();
-        SystemConfiguration system = new SystemConfiguration();
-        composite.addConfiguration(system);
-        EnvironmentConfiguration env = new EnvironmentConfiguration();
-        composite.addConfiguration(env);
-        AllCapsEnvironmentConfiguration envAllCaps = new AllCapsEnvironmentConfiguration();
-        composite.addConfiguration(envAllCaps);
-        configuration = composite;
+    protected abstract String getApplicationName();
+    
+    protected PlatformFilesystem getPlatformFilesystem() {
+        if( platformFilesystem == null ) {
+            if (Platform.isUnix()) {
+                platformFilesystem = new UnixFilesystem();
+            }
+            else if (Platform.isWindows()) {
+                platformFilesystem = new WindowsFilesystem();
+            }
+            else {
+                platformFilesystem = new RelativeFilesystem();
+            }
+        }
+        return platformFilesystem;
     }
 
-    protected abstract String getDefaultConfigurationPath();
-
-    protected abstract String getDefaultApplicationPath();
-
-    // MTWILSON_HOME
+    /**
+     * 
+     * @return the application home directory, for example /opt/mtwilson
+     */
     @Override
     public String getApplicationPath() {
         if (applicationPath == null) {
-            applicationPath = configuration.getString("mtwilson.home", getDefaultApplicationPath());
+            applicationPath = getPlatformFilesystem().getApplicationRoot() + File.separator + getApplicationName();
         }
         return applicationPath;
     }
 
-    // MTWILSON_CONF
+    /**
+     * 
+     * @return the application home directory, for example /opt/mtwilson/configuration or /etc/mtwilson
+     */
     @Override
     public String getConfigurationPath() {
         if (configurationPath == null) {
-            configurationPath = configuration.getString("mtwilson.conf", getDefaultConfigurationPath());
+            configurationPath = getApplicationPath() + File.separator + "configuration";
         }
         return configurationPath;
     }
 
+    /**
+     * 
+     * @return the application environment settings directory, for example /opt/mtwilson/env.d
+     */
     @Override
     public String getEnvironmentExtPath() {
         if (environmentExtPath == null) {

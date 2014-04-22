@@ -41,12 +41,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.sql.Connection;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 /**
  * we do not store the admin username or password in configuration - the application
  * must display them to the administrator
+ * 
+ * You can execute this task from command line with something like this:
+ * mtwilson setup setup-manager create-admin-user
  * 
  * @author jbuhacoff
  */
@@ -95,12 +100,21 @@ public class CreateAdminUser extends DatabaseSetupTask {
         
     }
 
-    List<UUID> getRoleUuidList(List<Role> roles) {
-        ArrayList<UUID> uuids = new ArrayList<>();
+    Set<UUID> getRoleUuidList(List<Role> roles) {
+        HashSet<UUID> uuids = new HashSet<>();
         for (Role role : roles) {
             uuids.add(role.getId());
         }
         return uuids;
+    }
+    
+    // see also LoginPassword command
+    private Set<String> toStrings(Set<UUID> uuids) {
+        HashSet<String> set = new HashSet<>();
+        for(UUID uuid : uuids) {
+            set.add(uuid.toString());
+        }
+        return set;
     }
 
     @Override
@@ -114,8 +128,8 @@ public class CreateAdminUser extends DatabaseSetupTask {
             }
             else {
                 List<Role> passwordRoles = loginDAO.findRolesByUserLoginPasswordId(userLoginPassword.getId());
-                List<UUID> passwordRoleIds = getRoleUuidList(passwordRoles);
-                List<RolePermission> passwordRolePermissions = loginDAO.findRolePermissionsByPasswordRoleIds(passwordRoleIds);
+                Set<UUID> passwordRoleIds = getRoleUuidList(passwordRoles);
+                List<RolePermission> passwordRolePermissions = loginDAO.findRolePermissionsByPasswordRoleIds(toStrings(passwordRoleIds));
                 if (passwordRolePermissions == null || passwordRolePermissions.isEmpty()) {
                     validation("User does not have password permissions assigned: %s", username);
                 }
@@ -134,8 +148,8 @@ public class CreateAdminUser extends DatabaseSetupTask {
             }
             else {
                 List<Role> certificateRoles = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
-                List<UUID> certificateRoleIds = getRoleUuidList(certificateRoles);
-                List<RolePermission> certificateRolePermissions = loginDAO.findRolePermissionsByCertificateRoleIds(certificateRoleIds);
+                Set<UUID> certificateRoleIds = getRoleUuidList(certificateRoles);
+                List<RolePermission> certificateRolePermissions = loginDAO.findRolePermissionsByCertificateRoleIds(toStrings(certificateRoleIds));
                 if (certificateRolePermissions == null || certificateRolePermissions.isEmpty()) {
                     validation("User does not have certificate permissions assigned: %s", username);
                 }
@@ -235,7 +249,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
 
     private List<RolePermission> createAdminUserPasswordPermissions(LoginDAO loginDAO, Role adminRole, UserLoginPassword userLoginPassword) {
         List<Role> adminUserPasswordRoles = loginDAO.findRolesByUserLoginPasswordId(userLoginPassword.getId());
-        ArrayList<UUID> adminUserPasswordRoleIdList = new ArrayList<>(); // it's a list but it will only be populated with ONE role id -- the administrator role id
+        HashSet<UUID> adminUserPasswordRoleIdList = new HashSet<>(); // it's a list but it will only be populated with ONE role id -- the administrator role id
         if (adminUserPasswordRoles.isEmpty()) {
             loginDAO.insertUserLoginPasswordRole(userLoginPassword.getId(), adminRole.getId());
             adminUserPasswordRoleIdList.add(adminRole.getId());
@@ -251,7 +265,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
                 adminUserPasswordRoleIdList.add(adminRole.getId());
             }
         }
-        List<RolePermission> adminPasswordRolePermissions = loginDAO.findRolePermissionsByPasswordRoleIds(adminUserPasswordRoleIdList);
+        List<RolePermission> adminPasswordRolePermissions = loginDAO.findRolePermissionsByPasswordRoleIds(toStrings(adminUserPasswordRoleIdList));
         if (adminPasswordRolePermissions.isEmpty()) {
             RolePermission adminPermission = new RolePermission();
             adminPermission.setRoleId(adminRole.getId());
@@ -378,7 +392,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
 
     private List<RolePermission> createAdminUserCertificatePermissions(LoginDAO loginDAO, Role adminRole, UserLoginCertificate userLoginCertificate) {
         List<Role> adminUserCertificateRoles = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
-        ArrayList<UUID> adminUserCertificateRoleIdList = new ArrayList<>(); // it's a list but it will only be populated with ONE role id -- the administrator role id
+        HashSet<UUID> adminUserCertificateRoleIdList = new HashSet<>(); // it's a list but it will only be populated with ONE role id -- the administrator role id
         if (adminUserCertificateRoles.isEmpty()) {
             loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), adminRole.getId());
             adminUserCertificateRoleIdList.add(adminRole.getId());
@@ -395,7 +409,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             }
         }
         // already handled above by password block... this would link to same role which would have same permissions.... so this block is a no-op
-        List<RolePermission> adminCertificateRolePermissions = loginDAO.findRolePermissionsByCertificateRoleIds(adminUserCertificateRoleIdList);
+        List<RolePermission> adminCertificateRolePermissions = loginDAO.findRolePermissionsByCertificateRoleIds(toStrings(adminUserCertificateRoleIdList));
         if (adminCertificateRolePermissions.isEmpty()) {
             RolePermission adminPermission = new RolePermission();
             adminPermission.setRoleId(adminRole.getId());

@@ -23,6 +23,10 @@
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
         
+        <!-- Workaround for IE8 issue: Console object does not exist and hence console.log errors out with an exception -->
+        <script type="text/javascript">
+            var console=console||{"log":function(){}};
+        </script>
         <script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
@@ -214,7 +218,7 @@ function isNumber(n) {
                                     //mtwilson.rivets.forms['tag-create-form'].input.values.push($F('tag-create-values')); 
                                     mtwilson.rivets.forms['tag-create-form'].input.value = $F('tag-create-values'); 
                                     $('tag-create-values').focus(); 
-                                    $('tag-create-values').clear();
+                                    //$('tag-create-values').clear();
                                     //$('tag-create-name').disable();
                                 }
 			
@@ -337,7 +341,7 @@ function isNumber(n) {
 
                                     <input type="submit" class="uploadButton" value="Search" onclick="ws.searchTags(this); return false;">
 					&nbsp;&nbsp;
-                                    <input type="button" class="uploadButton" value="Cancel" onclick="toggleElementVisibility('tag-search-form'); return false;">
+                                    <input type="button" class="uploadButton" value="Cancel" onclick="$('tag-search-form').reset();toggleElementVisibility('tag-search-form'); ws.searchTags(this); return false;">
 
                             </form>
 
@@ -613,7 +617,7 @@ function isNumber(n) {
                                 </div>
 
                                 <input type="submit" class="uploadButton" value="Search" onclick="$('table_view_sel_details').hide();ws.searchSelections(this); return false;"/>
-                                <input type="button" class="uploadButton" value="Cancel" onclick="toggleElementVisibility('selection-search-form'); return false;"/>
+                                <input type="button" class="uploadButton" value="Cancel" onclick="$('selection-search-form').reset(); toggleElementVisibility('selection-search-form');$('table_view_sel_details').hide();ws.searchSelections(this); return false;"/>
 
 	                            <div class="singleDiv" style="height: 10px;"></div>
                             </form>
@@ -879,49 +883,12 @@ function isNumber(n) {
                                         </select>
 
                                         <input type="submit" class="uploadButton" id="searchCertButton" value="Search" onclick="ws.searchCertificates(this); return false;"/>
-                                        <input type="button" class="uploadButton" id="searchCertButton" value="Cancel" onclick="toggleElementVisibility('certificate-search-form'); return false;"/>
+                                        <input type="button" class="uploadButton" id="searchCertButton" value="Cancel" onclick="$('certificate-search-form').reset(); toggleElementVisibility('certificate-search-form'); ws.searchCertificates(this); return false;"/>
                                     </div>
                                 </div>
                             <div class="singleDiv" style="height: 8px;"></div>
 
                             </form>
-
-
-
-                            <div  class="tableDisplayScroll_big">
-                            <table id="certificate-browse-table" class="tableDisplayBind" cellpadding=0 cellspacing=0>
-                                <thead>
-                                    <tr>
-                                        <th class="row9">Subject (Host ID)</th>
-                                        <th class="row9">Issuer</th>
-                                        <th class="row9">Not Before</th>
-                                        <th class="row9">Not After</th>
-                                        <th class="row9">Revoked</th>
-                                        <th class="row9">Fingerprint (SHA-1)</th>
-                                        <th class="row9">Fingerprint (SHA256)</th>
-                                        <th class="row12"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="evenRow" data-bind-each-item="certificates">
-                                        <td align="center" data-bind-text="item.subject"></td>
-                                        <td align="center" data-bind-text="item.issuer"></td>
-                                        <td align="center" data-bind-text="item.not_before | date"></td>
-                                        <td align="center" data-bind-text="item.not_after | date"></td>
-                                        <td align="center" data-bind-text="item.revoked | yesno Revoked Active"></td>
-                                        <td align="center" data-bind-text="item.sha1 | wrap 16"></td>
-                                        <td align="center" data-bind-text="item.sha256 | wrap 16"></td>
-                                        <td align="center">
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> &nbsp;
-                                            <a href="" onmouseover="$(this).download = $(this).getAttribute('filename') + '.crt';$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);"  data-bind-filename="item.subject">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
-                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            </div>
 
                             <form id="certificate-provision-form" style="display: none;" action="#" onsubmit="return false;" >
                                 <p>Currently push-provisioning works only with Citrix Xen hosts and Intel Trust agents and must currently be registered in Mt. Wilson.</p>
@@ -947,6 +914,43 @@ function isNumber(n) {
                                      </li>
                                 </ul>
                             </form>
+
+
+                            <div  class="tableDisplayScroll_big">
+                            <table id="certificate-browse-table" class="tableDisplayBind" cellpadding=0 cellspacing=0>
+                                <thead>
+                                    <tr>
+                                        <th class="row9">Subject (Host ID)</th>
+                                        <th class="row9">Issuer</th>
+                                        <th class="row9">Not Before</th>
+                                        <th class="row9">Not After</th>
+                                        <th class="row9">Status</th>
+                                        <th class="row9">Fingerprint (SHA-1)</th>
+                                        <th class="row9">Fingerprint (SHA256)</th>
+                                        <th class="row12"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="evenRow" data-bind-each-item="certificates">
+                                        <td align="center" data-bind-text="item.subject"></td>
+                                        <td align="center" data-bind-text="item.issuer"></td>
+                                        <td align="center" data-bind-text="item.not_before | date"></td>
+                                        <td align="center" data-bind-text="item.not_after | date"></td>
+                                        <td align="center" data-bind-text="item.status"></td>
+                                        <td align="center" data-bind-text="item.sha1 | wrap 16"></td>
+                                        <td align="center" data-bind-text="item.sha256 | wrap 16"></td>
+                                        <td align="center">
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show();  $('certificate-provision-host').focus(); return false;">Deploy</a> &nbsp;
+                                            <a href="" onmouseover="$(this).download = $(this).getAttribute('filename') + '.crt';$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);"  data-bind-filename="item.subject">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
+                                            <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </div>
+
 
 
                         </div> <!-- end certificates tab -->

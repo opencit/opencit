@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.RemoteSetup;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.Timeout;
@@ -59,8 +59,7 @@ import org.apache.commons.configuration.Configuration;
  */
 public class ConfigureRemote implements Command {
     public static final Console console = System.console(); // safe because Main checks that it exists before calling this command
-    private SetupContext ctx = null;
-
+  
     private static final InternetAddressInput INTERNET_ADDRESS_INPUT = new InternetAddressInput();
     private static final URLInput URL_INPUT = new URLInput();
     private static final YesNoInput YES_NO_INPUT = new YesNoInput();
@@ -69,13 +68,8 @@ public class ConfigureRemote implements Command {
     
     public static final String MTWILSON_CA_KEYSTORE_PACKAGE = "com/intel/mtwilson/ca/keystores";
     public static final String MTWILSON_SSH_KNOWN_HOSTS_PACKAGE = "com/intel/mtwilson/ssh/known_hosts";
+    private SetupContext ctx = new SetupContext();
     
-    
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
-
     private Configuration options = null;
     @Override
     public void setOptions(Configuration options) {

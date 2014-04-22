@@ -18,6 +18,7 @@ import com.intel.mtwilson.tag.model.CertificateRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
 //import org.restlet.resource.ResourceException;
 
@@ -25,7 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * For use by an external CA if one is configured. The external CA would
+ * use the /tag-certificate-requests search API to find pending requests,
+ * generate the certificates, and then post the certificates back using
+ * this RPC.
+ * 
  * @author ssbangal
  */
 @RPC("approve-tag-certificate-request")
@@ -55,6 +60,7 @@ public class ApproveTagCertificateRequest implements Runnable{
 
     
     @Override
+    @RequiresPermissions({"tag_certificates:create","tag_certificate_requests:store"})         
     public void run() {
         log.debug("Got request to auto approve certificate request with ID {}.", certificateRequestId);        
         try (CertificateRequestDAO certRequestdao = TagJdbi.certificateRequestDao();

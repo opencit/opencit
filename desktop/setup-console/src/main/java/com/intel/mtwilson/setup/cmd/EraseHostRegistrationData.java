@@ -13,7 +13,7 @@ import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import java.util.List;
@@ -24,13 +24,7 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class EraseHostRegistrationData implements Command {
-    private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
-
+  
     private Configuration options = null;
     @Override
     public void setOptions(Configuration options) {

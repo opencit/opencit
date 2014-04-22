@@ -23,8 +23,8 @@ public class PollHosts extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public PollHosts(URL url) {
-        //super(url);
+    public PollHosts(URL url) throws Exception{
+        super(url);
     }
 
     public PollHosts(Properties properties) throws Exception {

@@ -13,13 +13,13 @@ public class SetupException extends RuntimeException {
     public SetupException() {
         super();
     }
-    public SetupException(Exception e) {
+    public SetupException(Throwable e) {
         super(e);
     }
     public SetupException(String message) {
         super(message);
     }
-    public SetupException(String message, Exception e) {
+    public SetupException(String message, Throwable e) {
         super(message, e);
     }
 }

@@ -14,6 +14,7 @@ import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,7 @@ public class PollHostRepository implements SimpleRepository<PollHost, PollHostCo
     }
 
     @Override
+    @RequiresPermissions("poll_hosts:create")    
     public void create(PollHost item) {
         OpenStackHostTrustLevelQuery obj = new OpenStackHostTrustLevelQuery();
         try {

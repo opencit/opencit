@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.launcher.ws.ext.V1;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -38,7 +39,8 @@ public class AssetTagCert {
      * @param atagObj
      * @return 
      */
-    @RolesAllowed({"AssetTagManagement"})
+    //@RolesAllowed({"AssetTagManagement"})
+    @RequiresPermissions({"tag_certificates:create","hosts:search"})
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -54,7 +56,8 @@ public class AssetTagCert {
      * @param atagObj
      * @return 
      */
-    @RolesAllowed({"AssetTagManagement"})
+    //@RolesAllowed({"AssetTagManagement"})
+    @RequiresPermissions({"tag_certificates:store"})
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)

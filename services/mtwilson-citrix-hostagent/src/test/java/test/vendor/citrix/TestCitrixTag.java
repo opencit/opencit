@@ -5,6 +5,10 @@
 package test.vendor.citrix;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.agent.citrix.CitrixClient;
+import java.net.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 /**
@@ -28,4 +32,11 @@ public class TestCitrixTag {
         // server actual pcr 22 value: 0c9d49067ed4d013ee715a5dcf7be8e3ae4fd646  
     }
 
+    
+    @Test
+    public void testPushTag() throws Exception {
+        CitrixClient client = new CitrixClient(new TlsConnection(new URL("https://10.1.71.91:443/;root;P@ssw0rd"), new InsecureTlsPolicy()));
+        client.init();
+        client.setAssetTag(Sha1Digest.ZERO);
+    }
 }

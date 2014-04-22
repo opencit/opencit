@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.intel.mtwilson.portals</groupId>
         <artifactId>mtwilson-portals</artifactId>
-        <version>1.2.3-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -192,11 +192,7 @@
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>	
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>         
-        </dependency>        
+            
         <!-- TODO for plugin architecture and html5 portal rewrite, the vmware-specific GUI features need to be moved to a plugin -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>

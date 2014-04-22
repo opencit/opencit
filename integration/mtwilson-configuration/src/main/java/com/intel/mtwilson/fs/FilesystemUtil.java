@@ -18,4 +18,5 @@ public class FilesystemUtil {
      * statements and we don't want to have to escape them everywhere
      */
     public static final String FEATURE_ID_REGEX = "(?:[a-zA-Z](?:\\.[a-zA-Z0-9]|[_-]+[a-zA-Z0-9]|[a-zA-Z0-9])*)";
+    
 }

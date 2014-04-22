@@ -244,19 +244,25 @@ cp logback-stderr.xml /etc/intel/cloudsecurity
 
 # copy shiro.ini api security file
 if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
-  chmod 700 shiro.ini
-  cp shiro.ini /etc/intel/cloudsecurity
+  chmod 700 shiro.ini shiro-localhost.ini
+  cp shiro.ini shiro-localhost.ini /etc/intel/cloudsecurity
 fi
 
 # add MTWILSON_SERVER to shiro trust file
-hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
+# use "hostFilter.allow" when using the access-denying filter (any clients not from that list of ip's will be denied)
+# use "iniHostRealm.allow" when using the access-allowing filter (any clients from that list of ip's will be allowed access but clients from other ip's can still try password or x509 authentication) - this is the current default
+hostAllowPropertyName=iniHostRealm.allow
+hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
-  update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
+  update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
 fi
-hostAllow=`read_property_from_file hostFilter.allow /etc/intel/cloudsecurity/shiro.ini`
+hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_IP* ]]; then
-  update_property_in_file "hostFilter.allow" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
+  update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
 fi
+
+# This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
+ update_property_in_file "mtwilson.api.url" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_API_BASEURL"
 
 echo "Adding symlink for /opt/mtwilson/configuration..."
 # temp symlink -- SAVY added 2014-02-26
@@ -282,13 +288,9 @@ java_installer=`find_installer java`
 monit_installer=`find_installer monit`
 logrotate_installer=`find_installer logrotate`
 mtwilson_util=`find_installer mtwilson-linux-util` #MtWilsonLinuxUtil`
-privacyca_service=`find_installer PrivacyCAService`
 management_service=`find_installer mtwilson-management-service` #ManagementService`
 whitelist_service=`find_installer mtwilson-whitelist-service` #WLMService`
 attestation_service=`find_installer mtwilson-attestation-service` #AttestationService`
-whitelist_portal=`find_installer mtwilson-portal-installer` #WhiteListPortal`
-management_console=`find_installer ManagementConsole`
-trust_dashboard=`find_installer TrustDashBoard`
 mtw_portal=`find_installer mtwilson-portal-installer`
 glassfish_installer=`find_installer glassfish`
 tomcat_installer=`find_installer tomcat`
@@ -321,13 +323,6 @@ if [ ! -z "$opt_tomcat" ]; then
 fi
 
 
-if [ ! -z "$opt_privacyca" ]; then
-  if [ ! -e $privacyca_service ]; then
-  echo_warning "Privacy CA installer marked for install but missing. Please verify you are using the right installer"
-  exit -1;
-  fi
-fi
-
 if [ ! -z "$opt_attservice" ]; then
   if [ ! -e $attestation_service ]; then
     echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
@@ -346,27 +341,6 @@ fi
 if [ ! -z "$opt_wlmservice" ]; then
   if [ ! -e $whitelist_service ]; then
     echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
-fi
-
-if [ ! -z "$opt_mangportal" ]; then
-  if [ ! -e $management_console ]; then
-    echo_warning "Management Console installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
-fi
-
-if [ ! -z "$opt_wlmportal" ]; then
-  if [ ! -e $whitelist_portal ]; then
-    echo_warning "WhiteList Portal installer marked for install but missing. Please verify you are using the right installer"
-    exit -1;
-  fi
-fi
-
-if [ ! -z "$opt_trustportal" ]; then
-  if [ ! -e $trust_dashboard ]; then
-    echo_warning "Trust DashBoard installer marked for install but missing. Please verify you are using the right installer"
     exit -1;
   fi
 fi
@@ -662,53 +636,26 @@ elif using_tomcat; then
   fi
 fi
 
-if [ ! -z "$opt_privacyca" ]; then
-  echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
-  ./$privacyca_service 
-  echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
-  #echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
-  #/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
-  #echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
-fi
 
-
-if [ ! -z "opt_attservice" ]; then
+if [[ -n "opt_attservice"  && -f "$attestation_service" ]]; then
   echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "mtwilson service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [ ! -z "$opt_mangservice" ]; then
+if [[ -n "$opt_mangservice" && -f "$management_service"  ]]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [ ! -z "$opt_wlmservice" ]; then
+if [[ -n "$opt_wlmservice" && -f "$whitelist_service" ]]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-#if [ ! -z "$mangportal" ]; then
-#  echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
-#  ./$management_console
-#  echo "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
-#fi
-
-#if [ ! -z "$wlmportal" ]; then
-#  echo "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
-#  ./$whitelist_portal >> $INSTALL_LOG_FILE
-#  echo "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
-#fi
-
-#if [ ! -z "$trustportal" ]; then
-#  echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
-#  ./$trust_dashboard >> $INSTALL_LOG_FILE
-#  echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
-#fi
-
-if [ ! -z "$opt_mtwportal" ]; then
+if [[ -n "$opt_mtwportal" && "$mtw_portal" ]]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
@@ -747,15 +694,15 @@ update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properti
 prompt_with_default TAG_PROVISION_EXTERNAL "Use external CA instead of the built-in CA? " ${TAG_PROVISION_EXTERNAL:-false}
 prompt_with_default TAG_PROVISION_NOCACHE "Always generate new certificates for incoming requests? " ${TAG_PROVISION_NOCACHE:-true}
 prompt_with_default TAG_PROVISION_XML_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_REQUIRED:-false}
-prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD}
-prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
+prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD:-$(generate_password 16)}
+#prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
 prompt_with_default TAG_VALIDITY_SECONDS "Tag certificate validity duration: " ${TAG_VALIDITY_SECONDS:-31536000}
 prompt_with_default TAG_ISSUER_DN "Tag issuer distinguished name: " ${TAG_ISSUER_DN:-"CN=mtwilson-tag-ca"}
 update_property_in_file "tag.provision.external" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_EXTERNAL"
 update_property_in_file "tag.provision.nocache" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_NOCACHE"
 update_property_in_file "tag.provision.xml.encryption.required" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_REQUIRED"
 update_property_in_file "tag.provision.xml.encryption.password" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_PASSWORD"
-update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_SELECTION_DEFAULT"
+#update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_SELECTION_DEFAULT"
 update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "$TAG_VALIDITY_SECONDS"
 update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_ISSUER_DN"
 

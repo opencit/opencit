@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
 import com.intel.dcsg.cpg.extensions.ExtensionUtil;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.dcsg.cpg.extensions.Scanner;
 import com.intel.dcsg.cpg.io.file.FilenameContainsFilter;
 import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.dcsg.cpg.performance.CountingIterator;
@@ -50,7 +51,7 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         // look for java extension directory
 //        String javaPath = My.filesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java 
         String javaPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java
-        log.info("Application Java path: {}", javaPath);
+        log.debug("Default application java path: {}", javaPath);
 //        if( My.configuration().getmtwj)
         javaFolder = new File(javaPath);
 //        applicationClassLoader = new MultiJarFileClassLoader(parentClassLoader); 
@@ -125,6 +126,7 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
     }
     
     public File[] getApplicationJars() {
+        log.debug("Scanning jar files in {}", javaFolder.getAbsolutePath());
         // list all the jar files in the java directory
         FilenameEndsWithFilter jarfilter = new FilenameEndsWithFilter(".jar");
         File[] jars = javaFolder.listFiles(jarfilter);
@@ -181,10 +183,15 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
                 for(Registrar registrar : registrars) {
                     ExtensionUtil.scan(registrar, new JarClassIterator(jar, applicationClassLoader));// we use our current classloader which means if any classes are already loaded we'll reuse them
                 }*/
-                ExtensionUtil.scan(new JarClassIterator(jar, applicationClassLoader), registrars);
+//                ExtensionUtil.scan(new JarClassIterator(jar, applicationClassLoader), registrars);
+                Scanner scanner = new Scanner(registrars);
+                scanner.setThrowExceptions(false);
+                scanner.setThrowErrors(false);
+                scanner.scan(new JarClassIterator(jar, applicationClassLoader));
             }
             catch(Throwable e) { // catch ClassNotFoundException and NoClassDefFoundError 
                 log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName() + ": " + e.getMessage());
+                log.debug("Caught throwable", e);
                 //e.printStackTrace();
                 // log.error("Cannot read jar file {}", jar.getAbsolutePath());
             }

@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
@@ -47,6 +48,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 
 import org.slf4j.Logger;
@@ -124,9 +126,13 @@ public class ProvisionTagCertificate  {
         // if the subject is an ip address or hostname, resolve it to a hardware uuid with mtwilson - if the host isn't registered in mtwilson we can't get the hardware uuid so we have to reject the request
         if( !UUID.isValid(subject)) {
             subject = ca.findSubjectHardwareUuid(subject);
+            if (subject == null) {
+                throw new Exception("Invalid subject specified in the call");
+            }
         }
         if( selections == null ) {
-            selections = SelectionBuilder.factory().selection().build(); // default empty selection
+            // default empty selection, which will only work if someone has already generated the necessary certificate and ensured it will be found (below) by making it the only valid cert for that host for a specific time period
+            selections = SelectionBuilder.factory().selection().build();
         }
         // if external ca is configured then we only save the request to the database and indicate async processing in our response
         if( configuration.isTagProvisionExternal() || isAsync(request) ) {
@@ -134,28 +140,46 @@ public class ProvisionTagCertificate  {
             storeAsyncRequest(subject, selections, response);
             return null;
         }
-        // if always generate ca is enabled then generate it right now and return it - no need to check database for existing certs etc. 
+        // if always-generate / no-cache is enabled then generate it right now and return it - no need to check database for existing certs etc. 
         if( configuration.isTagProvisionNoCache() ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
         }
+        // TODO: Once the subject matches, we also need to make sure that all the selections also match.
+        // If the selection is empty then it would match anything so we would choose the latest created for that host that is valid.
+        // This needs to be done for the GA release.
+        
         // if there is an existing currently valid certificate we return it
         CertificateFilterCriteria criteria = new CertificateFilterCriteria();
         criteria.subjectEqualTo = subject;
-        CertificateCollection results = certificateRepository.search(criteria); // TODO:  order by creation date so we get most recent first, and we pick the most recently created cert that is currently valid. 
+        CertificateCollection results = certificateRepository.search(criteria); // DONE: TODO:  order by creation date so we get most recent first, and we pick the most recently created cert that is currently valid. 
         Date today = new Date();
+        Certificate latestCert = null;
+        BigInteger latestCreateTime = BigInteger.ZERO;
         if( !results.getCertificates().isEmpty() ) {
-            for(Certificate certificate : results.getCertificates()) {
-                if( today.before(certificate.getNotBefore()) ) {
-                continue;
-            }
-                if( today.after(certificate.getNotAfter())) {
+            for (Certificate certificate : results.getCertificates()) {
+                if (today.before(certificate.getNotBefore())) {
                     continue;
                 }
-                return certificate;  // we return the first certificate (most recent, see TODO above) that is currently valid
+                if (today.after(certificate.getNotAfter())) {
+                    continue;
+                }
+                // While creating the certificates we are storing the create time in the serial number field
+                if (latestCreateTime.compareTo(certificate.getX509Certificate().getSerialNumber()) <= 0) {
+                    latestCreateTime = certificate.getX509Certificate().getSerialNumber();
+                    latestCert = certificate;                    
+                } else {
+                    continue;
+                }
+                // We won't return the first certificate found. Instead we return back the latest certificate.
+                //return certificate;  // we return the first certificate (most recent, see TODO above) that is currently valid
             }
         }
+        // Check if a valid certificate was found during the search.
+        if (latestCert != null)
+            return latestCert;
+        
         // no cached certificate so generate a new certificate
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
@@ -187,6 +211,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
         Certificate certificate = createOneJson(locator, json, request, response);
         return certificate.getCertificate();
@@ -194,6 +219,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @RequiresPermissions("tag_certificates:create")         
     public Certificate createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
@@ -225,6 +251,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
         Certificate certificate = createOneXml(locator, xml, request, response);
         return certificate.getCertificate();
@@ -232,6 +259,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
+    @RequiresPermissions("tag_certificates:create")         
     public Certificate createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
@@ -263,6 +291,7 @@ public class ProvisionTagCertificate  {
     @POST
     @Consumes(OtherMediaType.MESSAGE_RFC822)
     @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         
@@ -298,7 +327,10 @@ public class ProvisionTagCertificate  {
             // process only the first file we find.  TODO:  what if there are multiple selection files in the zip ?
             try(FileInputStream in = new FileInputStream(selectionFiles[0])) {
                 String xml = IOUtils.toString(in);
-                return createOneFromXmlToBytes(locator, xml, request, response);
+                //return createOneFromXmlToBytes(locator, xml, request, response); // don't call this because it checks if encryption is required and doesn't "know" that we just decrypted the file
+                SelectionsType selections = Util.fromXml(xml);
+                Certificate certificate = createOne(getSubject(request, locator), selections, request, response);
+                return certificate.getCertificate();
             }
             finally {
                 // TODO: delete all the temporary files - won't be necessary when the decryption moves to java and it's all in memory

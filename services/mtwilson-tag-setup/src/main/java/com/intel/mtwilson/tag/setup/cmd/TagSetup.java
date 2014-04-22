@@ -24,7 +24,8 @@ public class TagSetup extends TagCommand {
         TagInitDatabase initDatabase = new TagInitDatabase();
         TagCreateCaKey createCaKey = new TagCreateCaKey();
         TagCreateTlsKeystore createTlsKeystore = new TagCreateTlsKeystore(); // XXX TODO  we probably should keep the configuration for this in the property file then it can execute w/o arguments...
-        Command[] tasks = new Command[] { initDatabase, createCaKey, createTlsKeystore };
+        TagCreateMtWilsonClient createMtwClient = new TagCreateMtWilsonClient();
+        Command[] tasks = new Command[] { initDatabase, createCaKey, createTlsKeystore, createMtwClient };
         for(int i=0; i<tasks.length; i++) {
             tasks[i].setOptions(getOptions());
             tasks[i].execute(new String[0]);

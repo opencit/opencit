@@ -84,6 +84,7 @@ bootstrap_ms_internal_user() {
   # passing the password securely to the tool via the environment variable (must be exported)
   # we need to call setup BootstrapUser here so that the key is created in the DB not on disk
   # user keystores are now stored in the database so removed useless option: --keystore.users.dir="${package_keystore_users_dir}" 
+echo "BootstrapUser: $ms_key_alias"
   mtwilson setup BootstrapUser --mtwilson.api.baseurl="${mtwilson_api_baseurl}" "${ms_key_alias}" env:ms_key_password >> $INSTALL_LOG_FILE
   #mtwilson api CreateUser ${package_keystore_users_dir} ${ms_key_alias} env:ms_key_password
   #mtwilson api RegisterUser ${package_keystore_users_dir}/${ms_key_alias}.jks "${mtwilson_api_baseurl}" Attestation,Whitelist env:ms_key_password

@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,8 @@ public class APIClient {
      * Retrieves representation of an instance of com.intel.mountwilson.ms.rest.APIClient
      * @return an instance of java.lang.String
      */
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:retrieve")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ApiClientInfo getApiClientInfo(@QueryParam("fingerprint") String fingerprintHex) {
@@ -61,7 +63,8 @@ public class APIClient {
      * @param content representation for the resource
      * @return 
      */
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions({"users:store"})
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -80,7 +83,8 @@ public class APIClient {
      * @param ApiClientCreateRequest
      * @return 
      */
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:create")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -95,7 +99,8 @@ public class APIClient {
      * @return an instance of java.lang.String
      */
     @Path("/availableRoles")
-    @RolesAllowed({"Security"})
+    @RequiresPermissions("users:search")
+    //@RolesAllowed({"Security"})
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Role[] listAvailableRoles() {
@@ -110,7 +115,8 @@ public class APIClient {
      * @return an instance of java.lang.String
      */
     @Path("/search")
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:search")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ApiClientInfo> searchApiClientInfo(
@@ -188,7 +194,7 @@ public class APIClient {
      * @param ApiClientCreateRequest
      * @return 
      */
-    @PermitAll
+    //@PermitAll - If nothing is specified, then the access is open to everyone
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -205,7 +211,8 @@ public class APIClient {
     /**
      * DELETE method for resource APIClient
      */
-    @RolesAllowed({"Security"})
+    //@RolesAllowed({"Security"})
+    @RequiresPermissions("users:delete")
     @DELETE
     public void delete(@QueryParam("fingerprint") String fingerprintHex) {
         ValidationUtil.validate(fingerprintHex);

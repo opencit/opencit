@@ -4,36 +4,15 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
-import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.x509.X509Builder;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.dcsg.cpg.io.CopyResource;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.setup.AbstractCommand;
-import com.intel.mtwilson.setup.Command;
-import com.intel.mtwilson.setup.SetupContext;
-import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.util.ResourceFinder;
+import com.intel.dcsg.cpg.console.AbstractCommand;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
 import java.security.KeyPair;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *

@@ -13,9 +13,9 @@ CREATE TABLE mw_role_permission (
   role_id CHAR(36) NOT NULL,
   permit_domain character varying(200) DEFAULT NULL,
   permit_action character varying(200) DEFAULT NULL,
-  permit_selection character varying(200) DEFAULT NULL,
-  PRIMARY KEY (role_id)
+  permit_selection character varying(200) DEFAULT NULL
 ); 
+ALTER TABLE mw_role_permission ADD CONSTRAINT mw_role_permission_ukey UNIQUE (role_id,permit_domain,permit_action,permit_selection);
 
 -- replaces mw_portal_user 
 CREATE TABLE mw_user (

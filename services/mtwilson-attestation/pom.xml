@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>1.2.3-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -59,6 +59,11 @@
         -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-saml</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -106,18 +111,6 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-        <groupId>com.intel.mtwilson.database</groupId>
-        <artifactId>mtwilson-postgres</artifactId>
-        <version>${project.version}</version>
-    </dependency> 
-        -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-model</artifactId>
@@ -126,7 +119,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>asset-tag-model</artifactId>
+            <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -148,11 +141,7 @@
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-trust-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+      
         <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>

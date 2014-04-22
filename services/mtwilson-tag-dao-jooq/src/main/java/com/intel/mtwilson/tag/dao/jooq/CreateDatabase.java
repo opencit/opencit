@@ -4,16 +4,12 @@
  */
 package com.intel.mtwilson.tag.dao.jooq;
 
-//import com.intel.mtwilson.atag.AtagCommand;
-//import com.intel.mtwilson.tag.dao.Derby;
 import com.intel.mtwilson.tag.dao.jdbi.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 import java.util.Set;
 import javax.sql.DataSource;
-import org.apache.commons.configuration.MapConfiguration;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

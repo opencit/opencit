@@ -4,13 +4,16 @@
  */
 package test.jackson;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.mtwilson.jackson.PublicKeyDeserializer;
 import com.intel.mtwilson.jackson.PublicKeySerializer;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -25,10 +28,12 @@ public class JacksonTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JacksonTest.class);
     
     @JacksonXmlRootElement(localName="fruit")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Fruit {
         public String fruitName;
         public String fruitColor;
         @JsonSerialize(using=PublicKeySerializer.class)
+        @JsonDeserialize(using=PublicKeyDeserializer.class)
         public PublicKey publicKey;
     }
     
@@ -41,11 +46,26 @@ public class JacksonTest {
         fruit.fruitColor = "red";
         fruit.publicKey = keypair.getPublic();
         String json = mapper.writeValueAsString(fruit);
-        log.debug(json); // {"fruitName":"apple","fruitColor":"red"}
+        log.debug(json); // {"fruitName":"apple","fruitColor":"red","publicKey":"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBnOkYfoEG7pCGsJLxxX4WtDkB9Padlc+x+5vLA+mwcFkiDxGQSMr4zcj9XWhtMFNp7+nCg4dBOX0jczeYkRG1KxT9nRgasUvYdxF0xqyywsvViskWQUei75+rHyZ559aYWAGHEXoGK9acrpcTaLu1W46rISPe9ojBIWNj8KLqSwIDAQAB"}
 //        assertEquals("{\"fruitName\":\"apple\",\"fruitColor\":\"red\"}", json);
         mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
         log.debug(mapper.writeValueAsString(fruit)); // {"fruit_name":"apple","fruit_color":"red"}
     }
+    
+    @Test
+    public void testReadPublicKey() throws Exception {
+        KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
+        ObjectMapper mapper = new ObjectMapper();
+        Fruit fruit = new Fruit();
+        fruit.fruitName = "apple";
+        fruit.fruitColor = "red";
+        fruit.publicKey = keypair.getPublic();
+        String json = mapper.writeValueAsString(fruit);
+        log.debug(json); // {"fruitName":"apple","fruitColor":"red","publicKey":"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBnOkYfoEG7pCGsJLxxX4WtDkB9Padlc+x+5vLA+mwcFkiDxGQSMr4zcj9XWhtMFNp7+nCg4dBOX0jczeYkRG1KxT9nRgasUvYdxF0xqyywsvViskWQUei75+rHyZ559aYWAGHEXoGK9acrpcTaLu1W46rISPe9ojBIWNj8KLqSwIDAQAB"}
+        Fruit copy = mapper.readValue(json, Fruit.class);
+        log.debug("got fruit copy");
+    }
+    
     @Test
     public void testWriteUnderscores() throws Exception {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);

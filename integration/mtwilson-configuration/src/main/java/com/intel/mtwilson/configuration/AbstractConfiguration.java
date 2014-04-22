@@ -8,7 +8,6 @@ import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.configuration.Configuration;
 
 /**
- * THIS CLASS IS TENTATIVE - NOT CURENTLY BEING USED OUTSIDE THIS PACKAGE
  * @author jbuhacoff
  */
 public class AbstractConfiguration implements Configurable {
@@ -19,7 +18,7 @@ public class AbstractConfiguration implements Configurable {
         this.configuration = configuration;
     }
     
-    protected Configuration getConfiguration() {
+    public Configuration getConfiguration() {
         return configuration;
     }
 

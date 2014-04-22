@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.setup.Command;
+import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -20,14 +20,7 @@ import org.apache.commons.configuration.Configuration;
  */
 public class SetMtWilsonURL implements Command {
 
-      private SetupContext ctx = null;
-
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
-
-    
+   
     private Configuration options = null;
     @Override
     public void setOptions(Configuration options) {

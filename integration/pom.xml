@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.intel.mtwilson</groupId>
 		<artifactId>mtwilson</artifactId>
-		<version>1.2.3-SNAPSHOT</version>
+		<version>2.0-SNAPSHOT</version>
 	</parent>
   
   <modules>
@@ -29,7 +29,6 @@
     <module>mtwilson-configuration</module>
     <module>mtwilson-launcher</module>
     <module>mtwilson-launcher-ext</module>
-    <module>mtwilson-launcher-jersey2</module>
     <module>mtwilson-test</module>
     <module>mtwilson-version</module>
 	<module>mtwilson-launcher-glassfish4</module>
@@ -38,6 +37,7 @@
     <module>mtwilson-feature-xml</module>
 	<module>mtwilson-tag-selection-xml</module>
 	<module>mtwilson-tag-selection-json</module>
+	<module>mtwilson-jetty9-util</module>
   </modules>
 
 

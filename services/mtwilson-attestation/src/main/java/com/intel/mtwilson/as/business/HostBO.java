@@ -240,28 +240,28 @@ public class HostBO extends BaseBO {
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs from remove Privacy CAs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem")); // may contain multiple trusted privacy CA certs from remove Privacy CAs
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
             IOUtils.closeQuietly(privacyCaIn);
-            log.debug("Added {} certificates from PrivacyCA.p12.pem", privacyCaCerts.size());
+            log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
         }
         catch(Exception e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file
-            log.warn("Cannot load PrivacyCA.p12.pem");            
+            log.warn("Cannot load PrivacyCA.list.pem");            
         }
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain one trusted privacy CA cert from local Privacy CA
-            X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem")); // may contain one trusted privacy CA cert from local Privacy CA
+            X509Certificate privacyCaCert = X509Util.decodePemCertificate(IOUtils.toString(privacyCaIn));
             pcaList.add(privacyCaCert);
             IOUtils.closeQuietly(privacyCaIn);
-            log.debug("Added certificate from PrivacyCA.cer");
+            log.debug("Added certificate from PrivacyCA.pem");
         }
         catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.cer
+            // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificate from file
-            log.warn("Cannot load PrivacyCA.cer", e);            
+            log.warn("Cannot load PrivacyCA.pem");            
         }
         // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;

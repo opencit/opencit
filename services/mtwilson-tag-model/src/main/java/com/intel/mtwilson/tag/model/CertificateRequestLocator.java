@@ -10,7 +10,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 /**
- *
+ * When an external CA is polling for certificate requests and then wants
+ * to download a specific certificate request by UUID, it would call
+ * /tag-certificate-requests/{id}  
+ * 
+ * When a provisioning agent sends a certificate request to the ProvisionTagCertificate
+ * RPC it sends to a URL like /tag-certificate-requests-rpc/provision?subject=uuid
+ * with the selection XML in the POST body.
+ * 
+ * For example, the UI would do:
+ * POST /tag-certificate-requests-rpc/provision?subject=uuid
+ * Content-Type: application/json
+ * 
+ * { selections: [ { id: "uuid" } ] }
+ * 
+ * Alternatively, the UI could send the selection name instead of id:
+ * 
+ * { selections: [ { name: "California Finance" } ] }
+ * 
+ * 
  * @author ssbangal
  */
 public class CertificateRequestLocator implements Locator<CertificateRequest>{

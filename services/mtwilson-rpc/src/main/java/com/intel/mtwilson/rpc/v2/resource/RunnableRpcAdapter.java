@@ -61,9 +61,10 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
     public void setInput(Object/*T*/ input) {
         // use beanutils to copy the properties we need
         try {
-            Map<String,Object> diff = PatchUtil.diff(input, rpcInstance);
-            log.debug("Going to apply input to rpc instance: {}", mapper.writeValueAsString(diff)); // throws 
-            PatchUtil.apply(diff, rpcInstance); // throws JsonProcessingException
+//            Map<String,Object> diff = PatchUtil.diff(input, rpcInstance);
+            log.debug("Going to copy input to rpc instance: {}", mapper.writeValueAsString(input)); // throws 
+//            PatchUtil.apply(diff, rpcInstance); // throws JsonProcessingException
+            PatchUtil.copy(input, rpcInstance);
             log.debug("RPC instance is now: {}", mapper.writeValueAsString(rpcInstance));
         }
         catch(Exception e) {
@@ -93,5 +94,6 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
         return rpcInstance;
     }
     
+    @Override
     public List<Fault> getFaults() { return faults; }
 }

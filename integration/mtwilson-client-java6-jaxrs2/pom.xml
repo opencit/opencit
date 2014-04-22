@@ -15,7 +15,7 @@
     <parent> 
         <groupId>com.intel.mtwilson.integration</groupId> 
         <artifactId>mtwilson-integration</artifactId> 
-        <version>1.2.3-SNAPSHOT</version> 
+        <version>2.0-SNAPSHOT</version> 
     </parent>
 
     <build>
@@ -224,16 +224,16 @@
         <!-- end httpclient -->
         
         
+        <!--
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
-
+        -->
         
-        <!-- XXX TODO need to separate data model from web services -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-ws-v2</artifactId>
+            <artifactId>mtwilson-attestation-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         
@@ -247,12 +247,12 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>2.5.1</version>
+<!--            <version>2.5.1</version> -->
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
-            <version>2.5.1</version>
+<!--            <version>2.5.1</version> -->
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -266,7 +266,12 @@
         </dependency>
 <dependency>
     <groupId>com.intel.mtwilson.services</groupId>
-    <artifactId>mtwilson-jersey-util</artifactId>
+    <artifactId>mtwilson-jaxrs-util</artifactId>
+    <version>${project.version}</version>
+</dependency>
+<dependency>
+    <groupId>com.intel.mtwilson.services</groupId>
+    <artifactId>mtwilson-jersey2-util</artifactId>
     <version>${project.version}</version>
 </dependency>
 
@@ -288,7 +293,12 @@
       <groupId>com.fasterxml.jackson.jaxrs</groupId>
       <artifactId>jackson-jaxrs-json-provider</artifactId>
     </dependency>
-        
+    <!--
+    <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+    -->
         <!--
            	<dependency>
          			<groupId>org.bouncycastle</groupId>
@@ -330,7 +340,6 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.1</version>
         </dependency>
         <!-- end saml verification -->
     

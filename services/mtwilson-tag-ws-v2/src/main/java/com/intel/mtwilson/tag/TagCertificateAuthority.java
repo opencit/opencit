@@ -184,12 +184,14 @@ public class TagCertificateAuthority {
         // second search by ip or name
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
-                String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
-                if (uuid != null) {
-                    log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),uuid);
-                    if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
-                        // found a selection with the target subject uuid
-                        return getInlineOrLookupSelection(selection);
+                if (subject.getIp() != null) {
+                    String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
+                    if (uuid != null) {
+                        log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),uuid);
+                        if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
+                            // found a selection with the target subject uuid
+                            return getInlineOrLookupSelection(selection);
+                        }
                     }
                 }
             }
@@ -200,11 +202,13 @@ public class TagCertificateAuthority {
                 return getInlineOrLookupSelection(selection);
             }
         }
-        // fourth look for a server default selection
+        /*
+        // fourth look for a server default selection - disabling this for now because it may be confusing to customers to have a server default behind their own selections file default because if they choose not to supply a default in their file they may still get one from the server.
         String defaultSelectionName = configuration.getTagProvisionSelectionDefault();
         if (defaultSelectionName != null && !defaultSelectionName.isEmpty()) {
             return findSelectionByName(defaultSelectionName);
         }
+        */
         throw new IllegalArgumentException("No matching selection");
     }
 

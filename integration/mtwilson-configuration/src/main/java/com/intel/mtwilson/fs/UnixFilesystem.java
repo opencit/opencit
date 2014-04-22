@@ -8,16 +8,18 @@ package com.intel.mtwilson.fs;
  *
  * @author jbuhacoff
  */
-public class UnixFilesystem extends AbstractFilesystem {
+public class UnixFilesystem implements PlatformFilesystem {
 
+    /**
+     * Return the location where applications should be installed.
+     * Even though the basic implementation of this is /opt, 
+     * another implementation could return /usr/share or /usr/local.
+     * So it is not an equivalent to the
+     * filesystem root.
+     * @return 
+     */
     @Override
-    protected String getDefaultConfigurationPath() {
-//        return "/etc/mtwilson"; // installer can symlink this to /opt/mtwilson/configuration
-        return "/opt/mtwilson/configuration";
-    }
-
-    @Override
-    protected String getDefaultApplicationPath() {
-        return "/opt/mtwilson";
+    public String getApplicationRoot() {
+        return "/opt";
     }
 }
