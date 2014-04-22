@@ -99,7 +99,7 @@ public class HostBO extends BaseBO {
             } catch (Throwable te) {
                 isError = true;
                 attestationReport = null;
-                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData" , te);
+                log.debug("Unexpected error while retrieving attestation report." , te);
                 errorMessage = te.getClass().getSimpleName();
             }
         }
@@ -943,7 +943,7 @@ public class HostBO extends BaseBO {
                     
                     if (reqdManifestList.contains(pcrNum)) {
                         if (!isComponentValid(digVal)) {
-                            log.error("Module '{0}' specified for '{1}' is not valid.", digVal, compName);
+                            log.error("Module '{}' specified for '{}' is not valid.", digVal, compName);
                             return false;
                         }
                     }
@@ -953,7 +953,7 @@ public class HostBO extends BaseBO {
                     
                     if (reqdManifestList.contains(pcrNum)) {
                         if (!isComponentValid(digVal)) {
-                            log.error("PCR '{0}' specified for '{1}' is not valid.", digVal, pcrNum);
+                            log.error("PCR '{}' specified for '{}' is not valid.", digVal, pcrNum);
                             return false;
                         }
                     }
