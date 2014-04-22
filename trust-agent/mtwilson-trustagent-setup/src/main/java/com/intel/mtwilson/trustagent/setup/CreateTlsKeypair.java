@@ -13,8 +13,15 @@ import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyManagementException;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,7 +34,6 @@ public class CreateTlsKeypair extends AbstractSetupTask {
     private TrustagentConfiguration trustagentConfiguration;
     private static final String TLS_ALIAS = "tls";
     
-    private String keystorePassword;
     private String dn;
     private String[] ip;
     private String[] dns;
@@ -36,7 +42,7 @@ public class CreateTlsKeypair extends AbstractSetupTask {
     protected void configure() throws Exception {
         trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         dn = trustagentConfiguration.getTrustagentTlsCertDn();
-        keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
+        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         // we need to know our own local ip addresses/hostname in order to add them to the ssl cert
         ip = trustagentConfiguration.getTrustagentTlsCertIp();
         dns = trustagentConfiguration.getTrustagentTlsCertDns();
@@ -55,7 +61,7 @@ public class CreateTlsKeypair extends AbstractSetupTask {
             validation("Keystore file was not created");
             return;
         }
-        keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
+        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
         RsaCredentialX509 credential;
         try {
@@ -63,6 +69,11 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         } catch (FileNotFoundException e) {
             log.warn("Keystore does not contain the specified key [{}]", TLS_ALIAS);
             validation("Keystore does not contain the specified key %s", TLS_ALIAS);
+            return;
+        }
+        catch(java.security.UnrecoverableKeyException e) {
+            log.debug("Incorrect password for existing key; will create new key: {}", e.getMessage());
+            validation("Key must be recreated");
             return;
         }
 //        log.debug("credential {}", credential);
@@ -80,6 +91,7 @@ public class CreateTlsKeypair extends AbstractSetupTask {
     @Override
     protected void execute() throws Exception {
         File keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
+        String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         // create the keypair
         KeyPair keypair = RsaUtil.generateRsaKeyPair(2048);
         X509Builder builder = X509Builder.factory()
@@ -101,8 +113,20 @@ public class CreateTlsKeypair extends AbstractSetupTask {
             builder.dnsAlternativeName(san.trim());
         }
         X509Certificate tlscert = builder.build();
-        // store in the keystore
+        // look for an existing tls keypair and delete it
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
+        try {
+//            String alias = String.format("%s (ssl)", TLS_ALIAS);
+            String alias = TLS_ALIAS;
+            List<String> aliases = Arrays.asList(keystore.aliases());
+            if( aliases.contains(alias) ) {
+                keystore.delete(alias);
+            }
+        }
+        catch(KeyStoreException | KeyManagementException e) {
+            log.debug("Cannot remove existing tls keypair", e);
+        }
+        // store it in the keystore
         keystore.addKeyPairX509(keypair.getPrivate(), tlscert, TLS_ALIAS, keystorePassword);
         keystore.save();
     }
