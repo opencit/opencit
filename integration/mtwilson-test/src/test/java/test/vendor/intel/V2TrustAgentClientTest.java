@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.performance.report.PerformanceInfo;
+import com.intel.dcsg.cpg.performance.report.PerformanceUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import java.util.Properties;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.*;
 import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.BeforeClass;
 
@@ -40,7 +43,7 @@ public class V2TrustAgentClientTest {
         client = new TrustAgentClient(properties, tlsConnection);
     }
     
-//    @Test
+    @Test
     public void testHostInfoCommand() throws Exception {
         HostInfo hostInfo = client.getHostInfo();
         ObjectMapper mapper = new ObjectMapper();
@@ -60,8 +63,37 @@ public class V2TrustAgentClientTest {
         tpmQuoteRequest.setNonce(RandomUtil.randomByteArray(20));
         tpmQuoteRequest.setPcrs(new int[] { 0, 17, 18, 19 });
         TpmQuoteResponse tpmQuoteResponse = client.getTpmQuote(tpmQuoteRequest.getNonce(), tpmQuoteRequest.getPcrs());
-//        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
 //        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
-//        log.debug(mapper.writeValueAsString(tpmQuoteResponse));
+        log.debug(mapper.writeValueAsString(tpmQuoteResponse));
+    }
+    
+    public static class QuoteTask implements Runnable {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(QuoteTask.class);
+        
+        @Override
+        public void run() {
+            try {
+                TpmQuoteRequest tpmQuoteRequest = new TpmQuoteRequest();
+                tpmQuoteRequest.setNonce(RandomUtil.randomByteArray(20));
+                tpmQuoteRequest.setPcrs(new int[] { 0, 17, 18, 19 });
+                TpmQuoteResponse tpmQuoteResponse = client.getTpmQuote(tpmQuoteRequest.getNonce(), tpmQuoteRequest.getPcrs());
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("quote response for nonce {} is {}", Base64.encodeBase64String(tpmQuoteRequest.getNonce()), mapper.writeValueAsString(tpmQuoteResponse));
+            }
+            catch(Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+    }
+    
+    @Test
+    public void testConcurrentTpmQuotes() throws Exception {
+        QuoteTask task1 = new QuoteTask();
+        QuoteTask task2 = new QuoteTask();
+        PerformanceInfo performanceInfo = PerformanceUtil.measureMultipleConcurrentTasks(2000, task1, task2);
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("performance: {}", mapper.writeValueAsString(performanceInfo));
     }
 }

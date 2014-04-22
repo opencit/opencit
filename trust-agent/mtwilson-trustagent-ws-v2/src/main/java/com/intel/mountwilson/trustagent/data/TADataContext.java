@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.trustagent.data;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import java.io.File;
 
 import com.intel.mountwilson.common.Config;
@@ -21,6 +22,7 @@ import java.util.Properties;
  * @author dsmagadX
  */
 public class TADataContext {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TADataContext.class);
 
     private ErrorCode errorCode = ErrorCode.OK;
     private String selectedPCRs = null;
@@ -42,6 +44,15 @@ public class TADataContext {
     private String ipaddress;  // localhost ip address
     private String assetTagHash;
     private TpmQuoteResponse tpmQuoteResponse;
+    private String sessionId;
+    
+    public String getSessionId() {
+        if( sessionId == null ) {
+            sessionId = RandomUtil.randomHexString(4);
+            log.debug("Generated session id {}", sessionId);
+        }
+        return sessionId;
+    }
     
     public String getBiosOem() {
         return biosOem;
@@ -156,8 +167,18 @@ public class TADataContext {
     }
 
     public String getDataFolder() {
+        String path = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + getSessionId();
+        File dir = new File(path);
+        if( !dir.exists() ) {
+            if( dir.mkdirs() ) {
+                log.debug("Created session data folder {}", path);
+            }
+            else {
+                log.error("Error creating data folder {}", path);
+            }
+        }
         //return Config.getHomeFolder() + File.separator + Config.getInstance().getProperty("data.folder") + File.separator;
-        return MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath();
+        return path;
     }
 
     public void setAIKCertificate(String certBytes) {

@@ -255,6 +255,11 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         return getConfiguration().getString(HARDWARE_UUID);
     }
     
+    public File getMeasureLogLaunchScript() {
+        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh");
+    } 
+    
+    
     public static TrustagentConfiguration loadConfiguration() throws IOException {
         File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
         if( file.exists() ) {

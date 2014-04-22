@@ -11,6 +11,7 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.TrustagentRepository;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -55,15 +56,11 @@ public class Aik {
             return null;
         }
         else {
-            File aikCertificateFile = configuration.getAikCertificateFile();
-            if( !aikCertificateFile.exists() ) {
-                log.error("Missing AIK certificate file: {}", aikCertificateFile.getAbsolutePath());
-//                response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
-//                return null;
-                throw new WebApplicationException(Response.serverError().header("Error", "Missing AIK certificate file").build());
+            TrustagentRepository repository = new TrustagentRepository(configuration);
+            X509Certificate aikCertificate = repository.getAikCertificate();
+            if( aikCertificate == null ) {
+                throw new WebApplicationException(Response.serverError().header("Error", "Cannot load AIK certificate file").build());
             }
-            String aikPem = FileUtils.readFileToString(aikCertificateFile);
-            X509Certificate aikCertificate = X509Util.decodePemCertificate(aikPem);
             return aikCertificate;
         }
     }

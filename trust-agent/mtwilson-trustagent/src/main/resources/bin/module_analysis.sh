@@ -33,7 +33,6 @@ xml_module()
   echo "$BLANK6</module>"
 }
 
-
 analysis_bios()
 {
   if [ -d $BIOSTMP ];then
@@ -140,7 +139,7 @@ xml_pcr()
 {
   echo "$BLANK6<module>"
   echo "$BLANK8<pcrNumber>$1</pcrNumber>"
-  if [ $4 -eq 4 ];then
+  if [ $4 -eq 4 ]; then
     case $2 in
     1)
       echo "$BLANK8<name>tb_policy</name>"
@@ -154,6 +153,9 @@ xml_pcr()
     4)
       echo "$BLANK8<name>initrd</name>"
       ;;
+    5)
+      echo "$BLANK8<name>asset-tag</name>"
+      ;;
     esac
   else
       case $2 in
@@ -165,6 +167,9 @@ xml_pcr()
       ;;
     3)
       echo "$BLANK8<name>initrd</name>"
+      ;;
+    4)
+      echo "$BLANK8<name>asset-tag</name>"
       ;;
     esac
   fi
@@ -393,13 +398,18 @@ if [ $txt_status -eq 2 -a $x501Data!="EOF" ];then
   done
 else
   num=`get_line_number 'VL measurements'`
-  line=`txt-stat | sed -n "$num, $((num+4)) p" | grep PCR | wc -l`
+  line=`txt-stat | sed -n "$num, $((num+10)) p" | grep PCR | wc -l`
+  pcr22_line=`txt-stat | sed -n "$num, $((num+10)) p" | grep "PCR 22" | wc -l`
   ### now just support 2 same pcr index###
   for((l=1;l<=$line;l++));do
-     str="`txt-stat | sed -n "$num, $((num+4)) p" | grep PCR | sed -n "$l p"`"
-     index=`echo $str | awk -F: '{print $2}' | awk '{print $2}'`
-     value="`echo $str | awk -F: '{print $3}'  | sed "s/ //g" | sed "s/\t//g"`"
-     xml_pcr $index $l $value $line >>$OUTFILE
+     str1="`txt-stat | sed -n "$num, $((num+10)) p" | grep PCR | sed -n "$l p"`"
+     #echo $str1
+     str2="`txt-stat | sed -n "$num, $((num+10)) p" | grep "alg 0004" | sed -n "$l p"`"
+     #echo $str2
+     index=`echo $str1 | awk -F: '{print $2}' | awk '{print $2}'`
+     value="`echo $str2 | awk -F: '{print $3}'  | sed "s/ //g" | sed "s/\t//g"`"
+     #echo $index $l $value $line $pcr22_line $((line-pcr22_line))
+     xml_pcr $index $l $value $((line-pcr22_line)) >>$OUTFILE
   done
 fi
 echo "$BLANK2$BLANK2</modules>" >>$OUTFILE

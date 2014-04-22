@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.trustagent.ws.v2;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.mountwilson.common.TAException;
@@ -16,7 +17,10 @@ import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.TrustagentRepository;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -24,14 +28,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.TpmQuoteRequest;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -88,22 +97,25 @@ public class Tpm {
         
         
         
-            TADataContext context = new TADataContext();
+            TADataContext context = new TADataContext(); // when we call getSessionId it will create a new random one
 
             context.setNonce(Base64.encodeBase64String(tpmQuoteRequest.getNonce()));
             
             context.setSelectedPCRs(joinIntegers(tpmQuoteRequest.getPcrs(), ' '));
             
-            new CreateNonceFileCmd(context).execute();
-            new ReadIdentityCmd(context).execute();
+            new CreateNonceFileCmd(context).execute(); // FileUtils.write to file nonce (binary)
+            new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
+
             // Get the module information
-            new GenerateModulesCmd(context).execute();
+            new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
             
 //            return context.getResponseXML();
-            return context.getTpmQuoteResponse();
-        
+            TpmQuoteResponse response = context.getTpmQuoteResponse();
+            // delete temporary session directory
+            CommandUtil.runCommand(String.format("rm -rf %s", context.getDataFolder()));
+            return response;
     }
     
     private String joinIntegers(int[] pcrs, char separator) {
@@ -113,4 +125,5 @@ public class Tpm {
         }
         return StringUtils.join(array, separator);
     }
+    
 }
