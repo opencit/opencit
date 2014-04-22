@@ -1,13 +1,13 @@
 #!/bin/bash
 # VERSION 1.0.0     last-edited-by: rksavinx     date: 2014-02-01
 TITLE="Asset tag provisioning Agent"
-tpaDir = /var/tpa
-if [ ! -d $tpaDir ]; then 
-    mkdir -p $tpaDir 
-    chmod 700 $tpaDir
+tpaDir=/var/tpa
+if [ ! -d "$tpaDir" ]; then 
+  mkdir -p "$tpaDir"
+  chmod 700 "$tpaDir"
 fi
 
-certSha1=$tpaDir/certSha1
+certSha1="$tpaDir/certSha1"
 nvramPass=ffffffffffffffffffffffffffffffffffffffff
 ownerPass=ffffffffffffffffffffffffffffffffffffffff
 srkPass=ffffffffffffffffffffffffffffffffffffffff
@@ -19,14 +19,14 @@ cert=""
 username=""
 password=""
 config="$tpaDir/config"
-CERT_FILE_LOCATION=$tpaDir/cacert
-XML_FILE_LOCATION=$tpaDir/xml
+CERT_FILE_LOCATION="$tpaDir/cacert"
+XML_FILE_LOCATION="$tpaDir/xml"
 values=`cat /proc/cmdline`
 OIFS="$IFS"
 IFS=' '
 read -a valueArray <<< "${values}"
 IFS="$OIFS"
-cmdFile=$tpaDir/command
+cmdFile="$tpaDir/command"
 tpmnvinfo=/usr/local/sbin/tpm_nvinfo
 tpmnvdefine=/usr/local/sbin/tpm_nvdefine
 tpmnvwrite=/usr/local/sbin/tpm_nvwrite
@@ -161,11 +161,11 @@ function getLocalTag() {
 function getRemoteTag() {
  functionReturn=0
  if [ -z "$selection" ]; then 
-	tagServer=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to download Asset tag Selection:" 8 50)
-	if [ $? -eq 1 ]; then 
-		functionReturn=1
-		return
-	fi
+   tagServer=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to download Asset tag Selection:" 8 50)
+   if [ $? -eq 1 ]; then 
+     functionReturn=1
+     return
+   fi
  else
     tagServer=$selection
  fi
@@ -178,18 +178,18 @@ function getRemoteTag() {
   exit -1;
  fi
  if [ ! "$accept" == "yes"]; then
-	dialog --stdout --backtitle "$TITLE" --msgbox 'Tag selection downloaded successfully!' 6 20
+   dialog --stdout --backtitle "$TITLE" --msgbox 'Tag selection downloaded successfully!' 6 20
  fi
 }
 
 function getTagOption() {
  functionReturn=0
  if [ -z "$selection" ]; then
-	# tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
-	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
-	if [ $? -eq 1 ]; then
-      exit 0;
-	fi
+   # tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
+   tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
+   if [ $? -eq 1 ]; then
+     exit 0;
+   fi
  else
   tagChoice=1
  fi
@@ -198,7 +198,7 @@ function getTagOption() {
 function provisionCert() {
  functionReturn=0
  if [ -z "$server" ]; then 
-	server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
+   server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  fi
  if [ $isUsingXml == 0 ]; then
    # if [ $autoSelect != 1 ]; then
@@ -225,20 +225,27 @@ function provisionCert() {
    fi
  fi
 
- if [ ! "$accept" == "yes" ]; then
-	acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
-	if [ $? -eq 0 ]; then
-		#xml2 < $certFile > $certFileValues
-                #dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
-                
-                #XXX TODO: convert binary cert data to hex and display
-                #openssl x509 -in $certFile -text -noout > $certFileValues
-                less $certFile
-	fi
+ certOutput=`less $certFile`
+ if [ -z "$certOutput" ]; then
+   echo "Error downloading asset tag certificate. Check certificate file output here: $certFile"
+   echo "Error downloading asset tag certificate. Check certificate file output here: $certFile" > "$tpaDir/completion"
+   exit -1
  fi
+
+ #if [ ! "$accept" == "yes" ]; then
+ #  acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
+ #  if [ $? -eq 0 ]; then
+     #xml2 < $certFile > $certFileValues
+     #dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
+     
+     #XXX TODO: convert binary cert data to hex and display
+     #openssl x509 -in $certFile -text -noout > $certFileValues
+ #    less $certFile
+ #  fi
+ #fi
  if [ ! "$accept" == "yes" ]; then
-	writeCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to deploy downloaded certificate to host TPM?" 10 60)
-	resp=$?;
+   writeCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to deploy downloaded certificate to host TPM?" 10 60)
+   resp=$?;
  else
     resp=0;
  fi
@@ -268,7 +275,7 @@ function provisionCert() {
   openssl dgst -sha1 -binary $certFile > $certSha1
 
   echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > $tpaDir/certWrite" >> $cmdFile
-  $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > $tpaDir/certWrite 2>&1
+  $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 #> $tpaDir/certWrite 2>&1
   result=$?
 
   # If VMWARE, clear TPM ownership
@@ -281,7 +288,7 @@ function provisionCert() {
    if [ "$accept" == "yes" ]; then
      echo "completed sucessfully " > $tpaDir/completion
    else
-	dialog --backtitle "$TITLE" --msgbox "Certificate deployed.\nThank you for using the Asset Tag Provisioning Tool" 10 34
+     dialog --backtitle "$TITLE" --msgbox "Certificate deployed.\nThank you for using the Asset Tag Provisioning Tool" 10 34
    fi
   else
    if [ "$accept" == "yes" ]; then
