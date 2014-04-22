@@ -674,8 +674,6 @@ update_property_in_file "mtwilson.atag.mtwilson.baseurl" $CONFIG_DIR/mtwilson.pr
 
 prompt_with_default MTWILSON_TAG_ADMIN_USER "Mtwilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USER:-tagadmin}
 prompt_with_default_password MTWILSON_TAG_ADMIN_PASS "Mtwilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASS
-update_property_in_file "mtwilson.tag.admin.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_ADMIN_USER"
-update_property_in_file "mtwilson.tag.admin.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_ADMIN_PASS"
 
 MTWILSON_TAG_API_USER=tagservice
 MTWILSON_TAG_API_PASS=$(generate_password 16)
@@ -724,7 +722,11 @@ call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
-call_tag_setupcommand login-password $MTWILSON_TAG_ADMIN_USER env:MTWILSON_TAG_ADMIN_PASS --permissions tag_certificates:create
+if [ -n "$MTWILSON_TAG_ADMIN_PASS" ]; then
+  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USER:-tagadmin} env:MTWILSON_TAG_ADMIN_PASS --permissions tag_certificates:create
+else
+  echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASS is not set"
+fi
 
 #user is approved directly in TagCreateMtWilsonClient now
 #fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`
