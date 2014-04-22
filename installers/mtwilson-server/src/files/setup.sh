@@ -672,10 +672,15 @@ MTWILSON_API_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER
 update_property_in_file "mtwilson.atag.url" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_URL"
 update_property_in_file "mtwilson.atag.mtwilson.baseurl" $CONFIG_DIR/mtwilson.properties "$MTWILSON_API_TAG_URL"
 
-prompt_with_default MTWILSON_TAG_API_USER "Mtwilson Tag API User: " ${MTWILSON_TAG_API_USER:-ATDemo}
-prompt_with_default_password MTWILSON_TAG_API_PASS "Mtwilson Tag API Password: " $MTWILSON_TAG_API_PASS
-update_property_in_file "mtwilson.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USER"
-update_property_in_file "mtwilson.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASS"
+prompt_with_default MTWILSON_TAG_ADMIN_USER "Mtwilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USER:-tagadmin}
+prompt_with_default_password MTWILSON_TAG_ADMIN_PASS "Mtwilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASS
+update_property_in_file "mtwilson.tag.admin.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_ADMIN_USER"
+update_property_in_file "mtwilson.tag.admin.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_ADMIN_PASS"
+
+MTWILSON_TAG_API_USER=tagservice
+MTWILSON_TAG_API_PASS=$(generate_password 16)
+update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USER"
+update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASS"
 
 #prompt_with_default MTWILSON_TAG_KEYSTORE "Mtwilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
 #prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mtwilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
@@ -719,6 +724,7 @@ call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+call_tag_setupcommand login-password $MTWILSON_TAG_ADMIN_USER env:MTWILSON_TAG_ADMIN_PASS --permissions tag_certificates:create
 
 #user is approved directly in TagCreateMtWilsonClient now
 #fingerprint=`openssl dgst -sha256 $CONFIG_DIR/serverAtag.cer | awk -F= '{print $2}' | sed -e 's/^ *//' -e 's/ *$//'`

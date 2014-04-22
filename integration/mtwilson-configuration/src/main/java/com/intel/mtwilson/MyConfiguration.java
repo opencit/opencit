@@ -433,6 +433,14 @@ public class MyConfiguration {
     public String getKeystorePassword() {
         return conf.getString("mtwilson.api.password"); 
     }
+    
+    public String getTagKeystoreUsername() {
+        return conf.getString("mtwilson.tag.api.username");
+    }
+
+    public String getTagKeystorePassword() {
+        return conf.getString("mtwilson.tag.api.password"); 
+    }
 
     public URL getMtWilsonURL() throws MalformedURLException {
         return new URL(conf.getString("mtwilson.api.url", conf.getString("mtwilson.api.baseurl", "https://127.0.0.1:8181")));

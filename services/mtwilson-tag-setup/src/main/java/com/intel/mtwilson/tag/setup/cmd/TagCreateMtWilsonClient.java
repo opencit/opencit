@@ -56,10 +56,10 @@ public class TagCreateMtWilsonClient extends TagCommand {
             mtwilsonUrl = My.configuration().getMtWilsonURL().toString(); // Global.configuration().getMtWilsonURL();
         }
         if( mtwilsonClientKeystoreUsername == null || mtwilsonClientKeystoreUsername.isEmpty() ) {
-            mtwilsonClientKeystoreUsername = My.configuration().getKeystoreUsername(); // Global.configuration().getMtWilsonClientKeystoreUsername();
+            mtwilsonClientKeystoreUsername = My.configuration().getTagKeystoreUsername(); // Global.configuration().getMtWilsonClientKeystoreUsername();
         }
         if( mtwilsonClientKeystorePassword == null || mtwilsonClientKeystorePassword.isEmpty() ) {
-            mtwilsonClientKeystorePassword = My.configuration().getKeystorePassword(); //Global.configuration().getMtWilsonClientKeystorePassword();
+            mtwilsonClientKeystorePassword = My.configuration().getTagKeystorePassword(); //Global.configuration().getMtWilsonClientKeystorePassword();
         }
         
         // defaults:  username=asset-tag-prov-svc and password=random-16-chars ... XXX TODO maybe prompt for the username & url?  password can still be generated.
@@ -67,7 +67,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
             mtwilsonUrl = "https://127.0.0.1:8181";
         }
         if( mtwilsonClientKeystoreUsername == null || mtwilsonClientKeystoreUsername.isEmpty() ) {
-            mtwilsonClientKeystoreUsername = "asset-tag-prov-svc";
+            mtwilsonClientKeystoreUsername = "tagservice";
         }
         if( mtwilsonClientKeystorePassword == null || mtwilsonClientKeystorePassword.isEmpty() ) {
             mtwilsonClientKeystorePassword = RandomStringUtils.randomAlphanumeric(16);
