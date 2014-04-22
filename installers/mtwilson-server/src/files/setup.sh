@@ -723,6 +723,7 @@ call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
 if [ -n "$MTWILSON_TAG_ADMIN_PASS" ]; then
+  export MTWILSON_TAG_ADMIN_PASS
   call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USER:-tagadmin} env:MTWILSON_TAG_ADMIN_PASS --permissions tag_certificates:create
 else
   echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASS is not set"
