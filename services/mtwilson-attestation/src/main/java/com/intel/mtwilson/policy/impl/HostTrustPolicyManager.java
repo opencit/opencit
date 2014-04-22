@@ -124,14 +124,18 @@ public class HostTrustPolicyManager {
         
         // Add the rules for the asset tag verification
         try {
-            // Need to add the certificate whitelist only if the host is associated with a valid asset tag certificate.
-            AssetTagCertBO atagCertBO = new AssetTagCertBO();
-            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(host.getId());            
-            if (atagCertForHost != null) { 
-                rules.addAll(factory.loadTrustRulesForAssetTag(atagCertForHost, host));
-            }
-            else {
-                log.info("Asset tag certificate is either not present or valid for host {}.", host.getName());
+            // Since this function can be called either during attestation or during verification of mle matches during which
+            // the host is actually not registered, we need to check for that explicitly.
+            if (host != null && host.getId() != null && host.getId() != 0) {
+                // Need to add the certificate whitelist only if the host is associated with a valid asset tag certificate.
+                AssetTagCertBO atagCertBO = new AssetTagCertBO();
+                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(host.getId());            
+                if (atagCertForHost != null) { 
+                    rules.addAll(factory.loadTrustRulesForAssetTag(atagCertForHost, host));
+                }
+                else {
+                    log.info("Asset tag certificate is either not present or valid for host {}.", host.getName());
+                }
             }
         } catch (Exception ex) {
             log.error("Exception when looking up the asset tag whitelist.", ex);
