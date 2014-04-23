@@ -22,6 +22,9 @@
                 <configuration>
                     <archiveClasses>true</archiveClasses>
                     <attachClasses>true</attachClasses>
+                    <packagingExcludes>
+                        WEB-INF/lib/mtwilson-test-*.jar
+                    </packagingExcludes>
                 </configuration>
             </plugin>
             

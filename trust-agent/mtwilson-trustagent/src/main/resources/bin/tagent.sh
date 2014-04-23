@@ -199,6 +199,12 @@ case "$1" in
   stop)
     trustagent_stop
     ;;
+  restart)
+    trustagent_stop
+    if trustagent_setup $TRUSTAGENT_START_TASKS; then
+      trustagent_start
+    fi
+    ;;
   status)
     if trustagent_is_running; then
       echo "Trust agent is running"

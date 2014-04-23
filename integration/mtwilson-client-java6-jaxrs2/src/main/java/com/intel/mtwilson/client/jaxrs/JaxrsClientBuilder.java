@@ -116,10 +116,13 @@ public class JaxrsClientBuilder {
 
     private void url() throws Exception {
         if( url == null ) {
-            if( configuration != null ) {
-                url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
+            try {
+                if( configuration != null ) {
+                    url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
+                }
+            } catch (Exception ex) {
+                throw new IllegalStateException("URL must be set");
             }
-            throw new IllegalStateException("URL must be set");
         }
     }
     
