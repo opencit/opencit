@@ -32,7 +32,7 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     
     @Override
     public Response toResponse(MWException exception) {
-        log.debug("intercepted MWException; localizing response");
+        log.debug("intercepted MWException", exception);
         Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages());
         // localize the error message using the selected locale
         log.debug("localizing MWException to {}", locale.getDisplayName());
