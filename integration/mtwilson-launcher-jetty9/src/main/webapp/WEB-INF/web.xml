@@ -14,12 +14,13 @@
     </filter-mapping>
 -->
 
-<!--  TODO:  mtwilson-launcher-xyz  should have a listener that uses Extensions.findAll(Shutdown.class) and calls all components that need to be informed of web server shutdown
+<!--  
+    TODO:  mtwilson-launcher-xyz  should have a listener that uses Extensions.findAll(Shutdown.class) and calls all components that need to be informed of web server shutdown
+-->
     <listener>
         <description>Cleans up Persistence factory.</description>
         <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
     </listener>
--->
 
 <!--
 LocalIniWebEnvironment tries to load from MTWILSON_CONF/shiro.ini first and then

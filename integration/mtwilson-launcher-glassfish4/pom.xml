@@ -48,6 +48,7 @@ no indication of problems with these yet.
 		    <archiveClasses>true</archiveClasses>
 		    <attachClasses>true</attachClasses>
             <packagingExcludes>
+                WEB-INF/lib/mtwilson-test-*.jar,
                 WEB-INF/lib/cglib-*.jar,
                 WEB-INF/lib/guava-*.jar,
                 WEB-INF/lib/hk2-*.jar,

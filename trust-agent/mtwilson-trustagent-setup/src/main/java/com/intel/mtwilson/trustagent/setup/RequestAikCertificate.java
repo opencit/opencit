@@ -16,6 +16,7 @@ import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.CreateIdentity;
 import com.intel.mtwilson.trustagent.niarl.Util;
+import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
@@ -77,8 +78,21 @@ public class RequestAikCertificate extends AbstractSetupTask {
         }
         if (!Util.isOwner(config.getTpmOwnerSecret())) {
             configuration("Trust Agent is not the TPM owner");
+            return;
         }
         
+        // we need an EC in order to request an AIK, so make sure we have it
+        try {
+            byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+        }
+        catch(TpmModule.TpmModuleException e) {
+            if( e.getErrorCode() == 2 ) {
+                configuration("Endorsement Certificate is missing");
+            }
+            else {
+                configuration("Cannot determine presence of Endorsement Certificate: %s", e.getMessage());
+            }
+        }
     }
 
     @Override
