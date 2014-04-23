@@ -26,6 +26,7 @@
 	<script type="text/javascript" src="Scripts/i18n_util.js"></script>
 	<script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
     <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
+    <script type="text/javascript" src="Scripts/JQuery/prettify.js"></script>
     
     <script type="text/javascript" src="Scripts/commonUtils.js"></script>
 	<script type="text/javascript" src="Scripts/CommonMessage.js"></script>
