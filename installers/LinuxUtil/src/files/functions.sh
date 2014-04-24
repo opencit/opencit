@@ -1349,6 +1349,7 @@ add_postgresql_install_packages() {
         echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
         exit -1
       fi
+      echo_warning "Adding \"$apt_packages\" package(s) to installer repository..."
       codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
       echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
       # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d
@@ -1377,7 +1378,7 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3 postgresql-contrib-9.3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
-  echo_warning "postgres_server_install postgres_com = $postgres_com"
+  #echo "postgres_server_install postgres_com = $postgres_com"
   if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
