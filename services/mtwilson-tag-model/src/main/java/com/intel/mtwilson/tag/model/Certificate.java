@@ -141,7 +141,7 @@ public class Certificate extends CertificateDocument{
         }
         catch(CertificateException ce) {
             //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+            throw new ASException(ce, ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
     }
 
