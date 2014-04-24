@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.test;
 
-import com.intel.mtwilson.shiro.env.JunitEnvironment;
+import com.intel.dcsg.cpg.util.shiro.Login;
 import org.junit.BeforeClass;
 
 /**
@@ -20,6 +20,6 @@ public class UnitTest {
     
     @BeforeClass
     public static void login() throws Exception {
-        JunitEnvironment.superuser();
+        Login.superuser();
     }
 }

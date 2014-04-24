@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.intel.mtwilson.test.IntegrationTest;
 
 /**
- *
+ * 
  * @author jbuhacoff
  */
 public class ShiroIntegrationTest extends IntegrationTest {

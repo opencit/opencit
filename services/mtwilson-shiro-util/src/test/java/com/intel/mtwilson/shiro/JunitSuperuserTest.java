@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.shiro;
 
-import com.intel.mtwilson.shiro.env.JunitEnvironment;
+import com.intel.dcsg.cpg.util.shiro.Login;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.junit.Test;
 import org.junit.BeforeClass;
@@ -18,7 +18,7 @@ public class JunitSuperuserTest {
 
     @BeforeClass
     public static void login() throws Exception {
-        JunitEnvironment.superuser();
+        Login.superuser();
     }
     
 
