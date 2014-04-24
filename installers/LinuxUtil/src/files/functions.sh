@@ -1341,6 +1341,7 @@ add_postgresql_install_packages() {
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
   #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
+    echo "Checking to see if postgresql package is available for install..."
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
     #echo_warning "found packages $pgAddPackRequired"
     if [ -z "$pgAddPackRequired" ]; then

@@ -429,8 +429,6 @@ elif using_postgres; then
     chmod 755 /etc/apt/trusted.gpg.d
     cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
     POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
-	
-    echo_warning "Checking to see if postgresql package is available for install..."
     add_postgresql_install_packages "POSTGRES_SERVER"
   fi
 
