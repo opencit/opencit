@@ -245,7 +245,7 @@ public class MleBO extends BaseBO {
 
                                     // We also need to delete entries in the MleSource table for the MLE. This table would store the host
                                     // name that was used to white list the MLE.
-                                    deleteMleSource(mleName, mleVersion, osName, osVersion, oemName, null);
+                                    deleteMleSource(mleName, mleVersion, osName, osVersion, oemName, mleUuid);
 
                                     mleJpaController.destroy(tblMle.getId());
 
