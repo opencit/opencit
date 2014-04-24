@@ -6,7 +6,6 @@ package com.intel.mtwilson.test;
 
 import com.intel.dcsg.cpg.util.shiro.Login;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.shiro.env.JunitEnvironment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
