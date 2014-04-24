@@ -38,10 +38,10 @@ public class ImportConfig implements Command {
     public void execute(String[] args) throws Exception {
 
         if( args.length < 1) { throw new IllegalArgumentException("Usage: ImportConfig <encrypted-file> [--in=<file>|--stdin] [--env-password=MTWILSON_PASSWORD]"); }   
+        String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         for(int i=0;i<args.length;i++) {
             String filename = args[i];
         
-            String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         
             PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
             if( !protection.isAvailable() ) {

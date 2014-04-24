@@ -32,9 +32,9 @@ public class ExportConfig implements Command {
     public void execute(String[] args) throws Exception {
 
         if( args.length < 1) { throw new IllegalArgumentException("Usage: ExportConfig <encrypted-file> [--out=<file>|--stdout] [--env-password=MTWILSON_PASSWORD]"); }
+        String password = getExistingPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         for(int i=0;i<args.length;i++) {
             String filename = args[i];
-            String password = getExistingPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         
             FileResource resource = new FileResource(new File(filename));
             PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
