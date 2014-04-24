@@ -2106,7 +2106,7 @@ glassfish_install() {
   glassfish_permissions "${GLASSFISH_HOME}"
   sleep 5
   glassfish_start
-  glassfish_admin_user
+  #glassfish_admin_user
   glassfish_memory 2048 512
   glassfish_logback
   

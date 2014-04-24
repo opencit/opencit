@@ -24,6 +24,7 @@ import com.intel.mtwilson.tag.model.CertificateCollection;
 import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateRequest;
 import com.intel.mtwilson.tag.model.CertificateRequestLocator;
+import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRepository;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRequestRepository;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
@@ -159,16 +160,18 @@ public class ProvisionTagCertificate  {
         BigInteger latestCreateTime = BigInteger.ZERO;
         if( !results.getCertificates().isEmpty() ) {
             for (Certificate certificate : results.getCertificates()) {
-                if (today.before(certificate.getNotBefore())) {
+                X509AttributeCertificate attributeCertificate = X509AttributeCertificate.valueOf(certificate.getCertificate());
+                if (today.before(attributeCertificate.getNotBefore())) {
                     continue;
                 }
-                if (today.after(certificate.getNotAfter())) {
+                if (today.after(attributeCertificate.getNotAfter())) {
                     continue;
                 }
+                
                 // While creating the certificates we are storing the create time in the serial number field
-                if (latestCreateTime.compareTo(certificate.getX509Certificate().getSerialNumber()) <= 0) {
-                    latestCreateTime = certificate.getX509Certificate().getSerialNumber();
-                    latestCert = certificate;                    
+                if (latestCreateTime.compareTo(attributeCertificate.getSerialNumber()) <= 0) {
+                    latestCreateTime = attributeCertificate.getSerialNumber();
+                    latestCert = certificate;
                 } else {
                     continue;
                 }
