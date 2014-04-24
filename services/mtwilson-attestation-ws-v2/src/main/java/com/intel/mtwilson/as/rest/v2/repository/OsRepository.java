@@ -44,7 +44,7 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
                     osCollection.getOss().add(convert(tblOs));
                 }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                List<TblOs> osList = osJpaController.findTblOsByName(criteria.nameContains);
+                List<TblOs> osList = osJpaController.findTblOsByName(criteria.nameEqualTo);
                 if (osList != null && !osList.isEmpty()) {
                     for(TblOs tblOsObj : osList) {
                         osCollection.getOss().add(convert(tblOsObj));
