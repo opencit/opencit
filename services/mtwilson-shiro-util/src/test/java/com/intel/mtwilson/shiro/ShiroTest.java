@@ -4,19 +4,11 @@
  */
 package com.intel.mtwilson.shiro;
 
-import com.intel.mtwilson.My;
-import java.io.IOException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.junit.Test;
 import org.junit.BeforeClass;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import com.intel.mtwilson.shiro.env.JunitEnvironment;
-import static com.intel.mtwilson.shiro.env.JunitEnvironment.init;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.IniSecurityManagerFactory;
