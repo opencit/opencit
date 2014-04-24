@@ -15,7 +15,7 @@ import javax.ws.rs.QueryParam;
  */
 public class MleFilterCriteria implements FilterCriteria<Mle>{
     
-    @PathParam("id")
+    @QueryParam("id")
     public UUID id;
     @QueryParam("nameEqualTo")
     public String nameEqualTo;
