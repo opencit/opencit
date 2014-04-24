@@ -678,6 +678,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <artifactId>cpg-util</artifactId>
             <version>0.2-SNAPSHOT</version>
     </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-shiro</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
 	<dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-validation</artifactId>
