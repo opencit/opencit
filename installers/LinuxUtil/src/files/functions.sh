@@ -1322,6 +1322,18 @@ postgres_install() {
       echo_failure "Unable to auto-install Postgres client" | tee -a $INSTALL_LOG_FILE
       echo "Postgres download URL:" >> $INSTALL_LOG_FILE
       echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
+    else
+      postgres_server_detect
+      has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
+      if [ -n "$has_local_peer" ]; then
+        sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
+      fi
+      #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
+      if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
+        if [ -f /root/.pgpass ]; then
+          rm /root/.pgpass
+        fi
+      fi
     fi
   else
     echo "Postgres client is already installed" >> $INSTALL_LOG_FILE
