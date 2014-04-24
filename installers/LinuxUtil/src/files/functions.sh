@@ -12,6 +12,7 @@ conf_dir=/etc/intel/cloudsecurity
 TERM_DISPLAY_MODE=color
 TERM_STATUS_COLUMN=60
 TERM_COLOR_GREEN="\\033[1;32m"
+TERM_COLOR_CYAN="\\033[1;36m"
 TERM_COLOR_RED="\\033[1;31m"
 TERM_COLOR_YELLOW="\\033[1;33m"
 TERM_COLOR_NORMAL="\\033[0;39m"
@@ -277,12 +278,12 @@ prompt_yes_no() {
   local userprompt="${2}"
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
-    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
     echo "$userprompt [Y/n] ${!resultvarname}"
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
-  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
   echo -n "$userprompt [Y/n] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
   local userinput
@@ -321,12 +322,12 @@ prompt_with_default() {
   eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
-    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
     echo "$userprompt [$default_value] ${!resultvarname:-$default_value}"
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
-  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
   echo -n "$userprompt [$default_value] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
   local userinput
@@ -351,12 +352,12 @@ prompt_with_default_password() {
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
-    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
     echo "$userprompt [$default_value_display] ${default_value_display}"
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
-  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
   echo -n "$userprompt [$default_value_display] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
   local userinput=""
@@ -2163,14 +2164,13 @@ glassfish_admin_user() {
 #expect eof
 #EOD
 #) > /dev/null 2>&1
-  $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
+  $glassfish --user=$AS_ADMIN_USER --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
 
   # set the password file appropriately for further reads
   echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
   glassfish_detect
-  # XXX it asks for the password twice ...  can we script with our known value?
   $glassfish enable-secure-admin
-
+  $glassfish restart-domain domain1
 }
 
 # pre-conditions:   GLASSFISH_HOME  must be set  (find it with glassfish_detect)

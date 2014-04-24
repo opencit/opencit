@@ -370,8 +370,7 @@ case "$1" in
         erase_data
         #call_setupcommand EraseLogs
         #call_setupcommand EraseHostRegistrationData
-        #call_setupcommand EraseWhitelistData
-        
+        #call_setupcommand EraseWhitelistData        
         ;;
   erase-users)
         #load_default_env 1>/dev/null
