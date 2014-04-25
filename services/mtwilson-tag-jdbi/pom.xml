@@ -361,6 +361,14 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-dbcp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
     </dependencies>  
     
 </project>

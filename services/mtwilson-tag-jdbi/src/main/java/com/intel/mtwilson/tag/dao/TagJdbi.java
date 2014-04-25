@@ -13,6 +13,8 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
+import com.intel.mtwilson.util.dbcp.HybridPoolingDataSource;
+import com.intel.mtwilson.util.dbcp.apache.LoggingDataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,12 +40,13 @@ public class TagJdbi {
             if (ds == null) {
                 String driver = My.jdbc().driver();
                 String dbUrl = My.jdbc().url();                
-                BasicDataSource dataSource = new BasicDataSource();
+//                BasicDataSource dataSource = new BasicDataSource();
+                LoggingDataSource dataSource = new LoggingDataSource(); // extends BasicDataSource and adds logging whenever a connection is opened and closed
                 dataSource.setDriverClassName(driver); // or com.mysql.jdbc.Driver  for mysql
                 dataSource.setUrl(dbUrl);
                 dataSource.setUsername(My.configuration().getDatabaseUsername());
                 dataSource.setPassword(My.configuration().getDatabasePassword());
-                ds = dataSource;
+                ds = new HybridPoolingDataSource(dataSource); // will use our own connection pool implementation to manage the connections
             }
         } catch (Exception ex) {
             log.error("Error connecting to the database. {}", ex.getMessage());

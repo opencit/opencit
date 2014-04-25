@@ -108,7 +108,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
         
         try {
-            ApproveMtWilsonClient(rsaCredentialX509.identity());
+            approveMtWilsonClient(rsaCredentialX509.identity());
             System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
          }
          catch(Exception e) {
@@ -118,7 +118,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         
     }
     
-    private void ApproveMtWilsonClient(byte[] fingerprint) {
+    private void approveMtWilsonClient(byte[] fingerprint) {
         try {
             System.out.println(String.format("Searching for client by fingerprint: %s", Hex.encodeHexString(fingerprint)));
             ApiClientX509JpaController x509jpaController = My.jpa().mwApiClientX509();
