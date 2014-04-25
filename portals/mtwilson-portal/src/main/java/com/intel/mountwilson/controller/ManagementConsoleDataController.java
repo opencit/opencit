@@ -1153,7 +1153,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         //ModelAndView responseView = new ModelAndView("SAMLDownload");
         ModelAndView responseView = new ModelAndView(new JSONView());
         res.setContentType("application/octet-stream ");
-        res.setHeader("Content-Disposition", "attachment;filename=PrivacyCA.p12.pem");
+        res.setHeader("Content-Disposition", "attachment;filename=PrivacyCA.list.pem");
 
         try {
             // Now get the API object from the session
@@ -1180,7 +1180,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         //ModelAndView responseView = new ModelAndView("SAMLDownload");
         ModelAndView responseView = new ModelAndView(new JSONView());
         res.setContentType("application/octet-stream ");
-        res.setHeader("Content-Disposition", "attachment;filename=ssl.crt");
+        res.setHeader("Content-Disposition", "attachment;filename=ssl.crt.pem");
 
         try {
             // Now get the API object from the session
