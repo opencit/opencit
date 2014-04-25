@@ -57,11 +57,12 @@ function _log(level, message) {
 }
 
 // XXX TODO  allow configuring these levels BY PACKAGE  like log4j, slf4j, etc.
-var _logerror = true;
-var _logwarning = true;
-var _loginfo = true;
-var _logdebug = true;
-var _logtrace = true;
+// For now, enable/disable all logging here.
+var _logerror = false;
+var _logwarning = false;
+var _loginfo = false;
+var _logdebug = false;
+var _logtrace = false;
 
 	// XXX TODO  the enabled flags must be BY PACKAGE (like log4j, slf4j, etc) so that means a user must first obtain a log instance FOR THEIR PACKAGE then we can calculate whether these are enabled based on their configuration (todo also)
 log.isErrorEnabled = function() { return _logerror; };
