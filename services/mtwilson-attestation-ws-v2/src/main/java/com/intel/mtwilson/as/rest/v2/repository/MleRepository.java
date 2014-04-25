@@ -18,6 +18,7 @@ import com.intel.mtwilson.as.rest.v2.model.Mle;
 import com.intel.mtwilson.as.rest.v2.model.MleCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleLocator;
+import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.MleData;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
@@ -164,6 +165,18 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
             
             // Call into the business layer to create the MLE
             new MleBO().addMLe(obj, item.getId().toString());
+            
+            // Check if the user has provided the mle source (the host from which the white list is being added)
+            if (item.getSource() != null && !item.getSource().isEmpty())
+            {
+                log.debug("Configuring Mle source host {} for mle {}", item.getSource(), item.getId().toString());
+                MleSourceRepository sourceRepo = new MleSourceRepository();
+                MleSource mleSource = new MleSource();
+                mleSource.setId(new UUID());
+                mleSource.setName(item.getSource());
+                mleSource.setMleUuid(item.getId().toString());
+                sourceRepo.create(mleSource);
+            }
             
         } catch (ASException aex) {
             throw aex;            
