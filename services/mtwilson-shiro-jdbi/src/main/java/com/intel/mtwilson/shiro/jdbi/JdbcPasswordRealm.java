@@ -11,6 +11,7 @@ import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
 import com.intel.mtwilson.shiro.jdbi.model.Role;
 import com.intel.mtwilson.shiro.jdbi.model.RolePermission;
+import com.intel.mtwilson.shiro.jdbi.model.User;
 import com.intel.mtwilson.shiro.jdbi.model.UserLoginPassword;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,15 +99,20 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         }
         log.debug("doGetAuthenticationInfo for username {}", username);
         UserLoginPassword userLoginPassword = null;
+        User user = null;
         try (LoginDAO dao = MyJdbi.authz()) {
-            userLoginPassword = dao.findUserLoginPasswordByUsername(username);
+            userLoginPassword = dao.findUserLoginPasswordByUsernameEnabled(username, true);
+            if( userLoginPassword != null && userLoginPassword.isEnabled() ) {
+                user = dao.findUserByIdEnabled(userLoginPassword.getUserId(),true);
+            }
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);
             throw new AuthenticationException("Internal server error", e); // TODO: i18n
         }
-        if (userLoginPassword == null) {
+        if (userLoginPassword == null || user == null ) {
             return null;
         }
+
         log.debug("doGetAuthenticationInfo found user login password id {}", userLoginPassword.getId());
         SimplePrincipalCollection principals = new SimplePrincipalCollection();
         principals.add(new UserId(userLoginPassword.getUserId()), getName());
