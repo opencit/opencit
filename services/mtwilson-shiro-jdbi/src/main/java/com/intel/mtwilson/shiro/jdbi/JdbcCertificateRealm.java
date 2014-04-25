@@ -109,8 +109,8 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
                 else {
                     log.error("Unsupported digest length {}", fingerprint.getBytes().length);
                 }
-                if(userLoginCertificate != null ) {
-                    user = dao.findUserById(userLoginCertificate.getUserId());
+                if(userLoginCertificate != null && userLoginCertificate.isEnabled() ) {
+                    user = dao.findUserByIdEnabled(userLoginCertificate.getUserId(),true);
                 }
     //            xToken.
     //            userLoginCertificate = dao.findUserLoginCertificateByUsername(username);

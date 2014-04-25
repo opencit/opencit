@@ -5,9 +5,7 @@
 package com.intel.mtwilson.shiro.authc.host;
 
 import com.intel.mtwilson.shiro.*;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
