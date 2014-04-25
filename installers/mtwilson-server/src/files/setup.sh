@@ -436,7 +436,7 @@ elif using_postgres; then
   touch ~/.pgpass
   chmod 0600 ~/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-  if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]; then
+  if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]]; then
     PGPASS_HOSTNAME=localhost
   else
     PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
