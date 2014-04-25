@@ -118,7 +118,12 @@ Detected the following options on this server:"
   elif using_postgres; then
     postgres_userinput_connection_properties
     export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]; then
+      PGPASS_HOSTNAME=localhost
+    else
+      PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
+    fi
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
     chmod 0600 $HOME/.pgpass
   fi
 

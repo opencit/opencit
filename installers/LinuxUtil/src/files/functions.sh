@@ -1322,6 +1322,18 @@ postgres_install() {
       echo_failure "Unable to auto-install Postgres client" | tee -a $INSTALL_LOG_FILE
       echo "Postgres download URL:" >> $INSTALL_LOG_FILE
       echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
+    else
+      postgres_server_detect
+      has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
+      if [ -n "$has_local_peer" ]; then
+        sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
+      fi
+      #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
+      if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
+        if [ -f /root/.pgpass ]; then
+          rm /root/.pgpass
+        fi
+      fi
     fi
   else
     echo "Postgres client is already installed" >> $INSTALL_LOG_FILE
@@ -1341,6 +1353,7 @@ add_postgresql_install_packages() {
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
   #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
+    echo "Checking to see if postgresql package is available for install..."
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
     #echo_warning "found packages $pgAddPackRequired"
     if [ -z "$pgAddPackRequired" ]; then
@@ -1349,6 +1362,7 @@ add_postgresql_install_packages() {
         echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
         exit -1
       fi
+      echo_warning "Adding \"$apt_packages\" package(s) to installer repository..."
       codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
       echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
       # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d
@@ -1377,7 +1391,7 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3 postgresql-contrib-9.3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
-  echo_warning "postgres_server_install postgres_com = $postgres_com"
+  #echo "postgres_server_install postgres_com = $postgres_com"
   if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
