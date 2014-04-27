@@ -557,7 +557,7 @@ public class MyConfiguration {
     public String getDatabaseSchema() {
         return conf.getString("mtwilson.db.schema", "mw_as");
     }
-
+    
     public String getDataEncryptionKeyBase64() {
         return conf.getString("mtwilson.as.dek", ""); // removing default in mtwilson 1.2;  was "hPKk/2uvMFRAkpJNJgoBwA=="
     }

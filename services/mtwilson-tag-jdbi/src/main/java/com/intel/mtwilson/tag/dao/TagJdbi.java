@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tag.dao;
 
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateRequestDAO;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.dao.jdbi.TpmPasswordDAO;
@@ -13,8 +14,10 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
-import com.intel.mtwilson.util.dbcp.HybridPoolingDataSource;
-import com.intel.mtwilson.util.dbcp.apache.LoggingDataSource;
+import com.intel.dcsg.cpg.util.jdbc.PoolingDataSource;
+import com.intel.dcsg.cpg.util.jdbc.ValidatingConnectionPool;
+import com.intel.mtwilson.MyPersistenceManager;
+import com.intel.mtwilson.util.dbcp.DataSourceFactory;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,15 +41,18 @@ public class TagJdbi {
     public static DataSource getDataSource() {        
         try {
             if (ds == null) {
+                /*
                 String driver = My.jdbc().driver();
-                String dbUrl = My.jdbc().url();                
-//                BasicDataSource dataSource = new BasicDataSource();
-                LoggingDataSource dataSource = new LoggingDataSource(); // extends BasicDataSource and adds logging whenever a connection is opened and closed
+                String dbUrl = My.jdbc().url();      
+                BasicDataSource dataSource = new BasicDataSource();
                 dataSource.setDriverClassName(driver); // or com.mysql.jdbc.Driver  for mysql
                 dataSource.setUrl(dbUrl);
                 dataSource.setUsername(My.configuration().getDatabaseUsername());
                 dataSource.setPassword(My.configuration().getDatabasePassword());
-                ds = new HybridPoolingDataSource(dataSource); // will use our own connection pool implementation to manage the connections
+                ds = DataSourceFactory.createConfigurableObjectPool(dataSource, My.configuration().getConfiguration());
+                */
+                
+                ds = PersistenceManager.createDataSource(MyPersistenceManager.getASDataJpaProperties(My.configuration()));
             }
         } catch (Exception ex) {
             log.error("Error connecting to the database. {}", ex.getMessage());
