@@ -114,7 +114,7 @@ public class ApacheHttpClient implements java.io.Closeable {
 
         if (config == null) {
             config = new SystemConfiguration();
-            log.info("ApacheHttpClient: using system configuration");
+            log.debug("ApacheHttpClient: using system configuration");
         }
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
@@ -200,28 +200,28 @@ public class ApacheHttpClient implements java.io.Closeable {
             boolean requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
             if (requireTrustedCertificate && verifyHostname) {
-                log.info("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
+                log.debug("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
                 return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
             } else if (requireTrustedCertificate && !verifyHostname) {
                 // two choices: trust first certificate or trust known certificate;  we choose trust first certificate as a usability default
                 // furthermore we assume that the api client keystore is a server-specific keystore (it's a client configured for a specific mt wilson server)
                 // that either has a server instance ssl cert or a cluster ssl cert.  either should work.
-                log.info("Using TLS Policy TRUST_FIRST_CERTIFICATE");
+                log.debug("Using TLS Policy TRUST_FIRST_CERTIFICATE");
                 KeystoreCertificateRepository repository = sslKeystore.getRepository();
                 return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
             } else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
-                log.info("Using TLS Policy INSECURE");
+                log.warn("Using TLS Policy INSECURE");
                 return new InsecureTlsPolicy();
             }
         } else if (tlsPolicyName.equals("TRUST_CA_VERIFY_HOSTNAME")) {
-            log.info("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
+            log.debug("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
             return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
         } else if (tlsPolicyName.equals("TRUST_FIRST_CERTIFICATE")) {
-            log.info("TLS Policy: TRUST_FIRST_CERTIFICATE");
+            log.debug("TLS Policy: TRUST_FIRST_CERTIFICATE");
             KeystoreCertificateRepository repository = sslKeystore.getRepository();
             return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
         } else if (tlsPolicyName.equals("TRUST_KNOWN_CERTIFICATE")) {
-            log.info("TLS Policy: TRUST_KNOWN_CERTIFICATE");
+            log.debug("TLS Policy: TRUST_KNOWN_CERTIFICATE");
             return new TrustKnownCertificateTlsPolicy(sslKeystore.getRepository(), pSelector);
         } else if (tlsPolicyName.equals("INSECURE")) {
             log.warn("TLS Policy: INSECURE");

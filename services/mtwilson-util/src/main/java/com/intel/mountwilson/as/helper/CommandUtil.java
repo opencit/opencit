@@ -32,8 +32,7 @@ public class CommandUtil {
             Process p = Runtime.getRuntime().exec(commandLine);
 
             if (readResult) {
-            	InputStream in = p.getInputStream();
-            	try {
+            	try(InputStream in = p.getInputStream()) {
                 BufferedReader input = new BufferedReader(new InputStreamReader(in));
 
 
@@ -45,11 +44,6 @@ public class CommandUtil {
                 }
 
                 input.close();
-            	}
-            	finally {
-            		if(in != null ) {
-            			in.close();
-            		}
             	}
             }
             String resultForLog = result.size()+" items:\n"+StringUtils.join(result, "\n");

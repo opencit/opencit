@@ -3644,10 +3644,14 @@ decrypt_file() {
     #echo -n "Decrypting file [$filename]....."
     call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
     if file_encrypted $filename; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; exit -1; fi
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+      return 1
+    fi
+    return 0
     #echo_success " Done"
   else
-    echo_warning "File NOT found: $filename"
+    echo_warning "File not found: $filename"
+    return 2
   fi
 }
 
@@ -3921,10 +3925,18 @@ change_db_pass() {
     let count++
   done
   
+  local decryption_error=false
   for i in ${encrypted_files[@]}; do
     decrypt_file "$i" "$cryptopass"
+    if [ $? != 0 ]; then
+      decryption_error=true
+    fi
   done
-
+  if $decryption_error; then
+    echo_error "Cannot decrypt configuration files; please set MTWILSON_PASSWORD"
+    return 1
+  fi
+  
   load_conf
   load_defaults
   
@@ -3964,13 +3976,17 @@ change_db_pass() {
     echo_success "Done"
   done
 
-  # Update password in mtwilson.env file
-  if [ -f /root/mtwilson.env ]; then
-    echo -n "Updating database password value in mtwilson.env file...."
-    export sed_escaped_value=$(sed_escape $new_db_pass)
-    sed -i -e 's/DATABASE_PASSWORD=[^\n]*/DATABASE_PASSWORD='\'"$sed_escaped_value"\''/g' "/root/mtwilson.env"
-    echo_success "Done"
-  fi
+  # 20140427 commented out the update to mtwilson.env because
+  # running system should not depend on it or update it in any way;
+  # the mtwilson.env is for install time only and is assumed to be 
+  # deleted after install.
+  ## Update password in mtwilson.env file
+  #if [ -f /root/mtwilson.env ]; then
+  #  echo -n "Updating database password value in mtwilson.env file...."
+  #  export sed_escaped_value=$(sed_escape $new_db_pass)
+  #  sed -i -e 's/DATABASE_PASSWORD=[^\n]*/DATABASE_PASSWORD='\'"$sed_escaped_value"\''/g' "/root/mtwilson.env"
+  #  echo_success "Done"
+  #fi
 
   # Restart
   if using_glassfish; then

@@ -85,28 +85,45 @@ public class ProxyApiClient extends ApiClient {
      * Facilitates integration of tag management UI into mtwilson-portal by
      * allowing it to access mtwilson APIs using the credentials of the 
      * portal user.
-     * See also V2Proxy.jsp
+     * See also V2Proxy.java
      * 
      * @param request
      * @param response
      * @throws Exception 
      */
     public void proxy(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String proxyUrl = request.getParameter("proxyUrl"); /*request.getPathInfo()*/
+        log.debug("path info: {}", request.getPathInfo()); // example:  path info: /configurations
+//        log.debug("context path: {}", request.getContextPath()); // example:   context path: /mtwilson-portal
+//        log.debug("path translated: {}", request.getPathTranslated()); // example:  path translated: /usr/share/glassfish4/glassfish/domains/domain1/applications/mtwilson-portal-2.0-SNAPSHOT/configurations  (assumes file on disk which of course doesn't make sense for an api unless we have some static content for some GET urls)
+//        log.debug("request uri: {}", request.getRequestURI()); // example: request uri: /mtwilson-portal/v2proxy/configurations
+//        log.debug("sevlet path: {}", request.getServletPath()); // example: servlet path: /v2proxy
+        log.debug("query string: {}", request.getQueryString());
+        
+        String proxyUrl  = request.getPathInfo();
         /*
-        if( proxyUrl.startsWith("/v2proxy") ) {
-            proxyUrl = proxyUrl.replaceFirst("/v2proxy", "");
-        }*/
+        String proxyUrl = request.getParameter("proxyUrl");
+//        if( proxyUrl.startsWith("/v2proxy") ) {
+//            proxyUrl = proxyUrl.replaceFirst("/v2proxy", "");
+//        }
+        */
         if( proxyUrl.startsWith("/") ) {
             proxyUrl = proxyUrl.replaceFirst("/", "");
         }
         
+        /*
         // reconstruct the query string without the proxyUrl parameter, instead of using  request.getQueryString() which would also include it
         // unfortunately because of the way the proxy is configured we get every parameter twice 
         MutableQuery query = new MutableQuery(request.getParameterMap());
         query.removeAll("proxyUrl");
         removeDuplicateParameters(query);
         String queryString = query.toString();
+        */
+        String queryString = request.getQueryString();
+        if( queryString == null ) { queryString = ""; }
+        if( queryString.startsWith("?") ) {
+            queryString = queryString.replaceFirst("?", "");
+        }
+        
         String querySeparator = "?";
         if( queryString.isEmpty()) { querySeparator = ""; }
             
