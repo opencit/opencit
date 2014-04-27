@@ -117,10 +117,10 @@ function fnPrivacyCAListDownloadSuccess(responseJSON){
             if (document.execCommand) {
             /* Start For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */
 	          //  var oWin = window.open("about:blank", "_blank");
-    	        var oWin = window.open("PrivacyCA.p12.pem", "_blank");
+    	        var oWin = window.open("PrivacyCA.list.pem", "_blank");
 	            oWin.document.write(responseJSON.Certificate);
 	            oWin.document.close();
-                    var fileName = "/PrivacyCA.p12.pem";
+                    var fileName = "/PrivacyCA.list.pem";
 	            var success = oWin.document.execCommand('SaveAs','null',fileName);
 	            oWin.close();
 	            /* End For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */

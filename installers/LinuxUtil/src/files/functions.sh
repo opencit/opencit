@@ -2445,6 +2445,7 @@ glassfish_create_ssl_cert() {
 
     #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${tmpHost}.crt" -out /tmp/mycert.der -outform DER
     #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
+    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
     cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
@@ -3948,9 +3949,10 @@ change_db_pass() {
     # Edit postgres password file if it exists
     if [ -f /root/.pgpass ]; then
       echo -n "Updating database password value in .pgpass file...."
-      temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
-      temp="$temp:$new_db_pass"
-      echo $temp > /root/.pgpass;
+      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' /root/.pgpass
+      #temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
+      #temp="$temp:$new_db_pass"
+      #echo $temp > /root/.pgpass;
     fi
     echo_success "Done"
   fi

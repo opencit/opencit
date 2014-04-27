@@ -169,7 +169,7 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username")
     UserLoginPassword findUserLoginPasswordByUsername(@Bind("username") String username);
     
-    @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username and enabled=:enabled")
+    @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username and mw_user_login_password.enabled=:enabled")
     UserLoginPassword findUserLoginPasswordByUsernameEnabled(@Bind("username") String username, @Bind("enabled") boolean enabled);
     
     @SqlUpdate("insert into mw_user_login_password (id, user_id, password_hash, salt, iterations, algorithm, expires, enabled) values (:id, :user_id, :password_hash, :salt, :iterations, :algorithm, :expires, :enabled)")
