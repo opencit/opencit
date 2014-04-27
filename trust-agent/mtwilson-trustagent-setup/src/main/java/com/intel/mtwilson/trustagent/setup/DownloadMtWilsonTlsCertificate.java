@@ -73,7 +73,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
         try {
             X509Certificate[] certificates = keystore.getTrustedCertificates(SimpleKeystore.SSL);
             if( certificates.length == 0 ) {
-                validation("Mt Wilson TLS certificate is not configured");
+                validation("Keystore does not contain any Mt Wilson TLS certificates");
             }
             else {
                 // check to see if any pre-approved certificates are NOT already in our keystore
@@ -86,7 +86,7 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
                     present.add(fingerprint);
                 }
                 if( !containsAny(present, approved) ) {
-                    validation("Keystore does not contain any approved certificates");
+                    validation("Keystore does not contain any approved TLS certificates");
                 }
             }
         }
@@ -107,17 +107,26 @@ public class DownloadMtWilsonTlsCertificate extends AbstractSetupTask {
     @Override
     protected void execute() throws Exception {
         X509Certificate[] certificates = TlsUtil.getServerCertificates(new URL(url), new AnyProtocolSelector());
+        ArrayList<X509Certificate> rejected = new ArrayList<>();
+        ArrayList<X509Certificate> accepted = new ArrayList<>();
         for(X509Certificate certificate : certificates) {
             String fingerprint = Sha1Digest.digestOf(certificate.getEncoded()).toHexString();
             if( approved.contains(fingerprint)) {
                 log.debug("Server certificate {} is approved", fingerprint);
                 keystore.addTrustedSslCertificate(certificate, fingerprint);
+                accepted.add(certificate);
             }
             else {
                 log.debug("Server certificate {} is rejected", fingerprint);
+                rejected.add(certificate);
             }
         }
-        keystore.save();
+        if( !accepted.isEmpty() ) {
+            keystore.save();
+        }
+        if( accepted.isEmpty() && !rejected.isEmpty() ) {
+            log.warn("All server certificates were rejected; check MTWILSON_TLS_CERT_SHA1");
+        }
     }
     
 }

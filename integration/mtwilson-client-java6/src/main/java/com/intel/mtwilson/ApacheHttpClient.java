@@ -352,29 +352,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if (response.getFirstHeader("Content-Type") != null) {
             String contentType = response.getFirstHeader("Content-Type").getValue();
             log.debug("We got Content-Type: " + contentType);
-            if ("text/plain".equals(contentType)) {
-                return MediaType.TEXT_PLAIN_TYPE;
-            }
-            if ("text/xml".equals(contentType)) {
-                return MediaType.TEXT_XML_TYPE;
-            }
-            if ("text/html".equals(contentType)) {
-                return MediaType.TEXT_HTML_TYPE;
-            }
-            if ("application/json".equals(contentType)) {
-                return MediaType.APPLICATION_JSON_TYPE;
-            }
-            if ("application/xml".equals(contentType)) {
-                return MediaType.APPLICATION_XML_TYPE;
-            }
-            if ("application/samlassertion+xml".equals(contentType)) {
-                return MediaType.APPLICATION_XML_TYPE;
-            }
-            if ("application/octet-stream".equals(contentType)) {
-                return MediaType.APPLICATION_OCTET_STREAM_TYPE;
-            }
-            log.warn("Got unsupported content type from server: " + contentType);
-            return MediaType.APPLICATION_OCTET_STREAM_TYPE;
+            return MediaType.valueOf(contentType);
         }
         log.warn("Missing content type header from server, assuming application/octet-stream");
         return MediaType.APPLICATION_OCTET_STREAM_TYPE;
