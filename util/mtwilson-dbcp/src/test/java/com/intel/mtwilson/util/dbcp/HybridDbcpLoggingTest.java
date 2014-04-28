@@ -131,10 +131,10 @@ public class HybridDbcpLoggingTest {
     @Test
     public void testMultipleConnectionOpenClose() throws Exception {
         AlarmClock alarm = new AlarmClock(5, TimeUnit.SECONDS);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             log.debug("testing connection {}", (i + 1));
             testLogConnectionOpenClose();
-            alarm.sleep();
+            //alarm.sleep();
         }
     }
 
