@@ -42,6 +42,20 @@ log.attach = function(element_id) {
 	});
 };
 
+if( !window.console ) { console = {}; }
+if( !console.log ) { console.log = function(){}; }
+if( !console.trace ) { console.trace = console.log; }
+if( !console.debug ) { console.debug = console.log; }
+if( !console.info ) { console.info = function(){}; }
+if( !console.warn ) { console.warn = function(){}; }
+if( !console.error ) { console.error = function(){}; }
+_console = {
+    'TRACE': function(message) { console.trace(message); },
+    'DEBUG': function(message) { console.debug(message); },
+    'INFO': function(message) { console.info(message); },
+    'WARNING': function(message) { console.warn(message); },
+    'ERROR': function(message) { console.error(message); }
+};
 
 // XXX TODO:  add an optional marker parameter to the log methods so messages can be logged with specific subsystems, error codes, password information or other secrets (so can be configured not to display) etc. 
 function _log(level, message) {
@@ -54,14 +68,16 @@ function _log(level, message) {
 	if( _logelementid ) {
         _logelementid.fire('log:entry', newentry);
     }
+    // since we are hiding the log tab, print the message to the console instead (works on firefox and chrome)
+    (_console[level])(message);
 }
 
 // XXX TODO  allow configuring these levels BY PACKAGE  like log4j, slf4j, etc.
 // For now, enable/disable all logging here.
-var _logerror = false;
-var _logwarning = false;
-var _loginfo = false;
-var _logdebug = false;
+var _logerror = true;
+var _logwarning = true;
+var _loginfo = true;
+var _logdebug = true;
 var _logtrace = false;
 
 	// XXX TODO  the enabled flags must be BY PACKAGE (like log4j, slf4j, etc) so that means a user must first obtain a log instance FOR THEIR PACKAGE then we can calculate whether these are enabled based on their configuration (todo also)

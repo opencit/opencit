@@ -197,8 +197,13 @@ ajax.json = {
             },
             onFailure: function(transport) {
                 var response = transport.responseText || "no response text";
-                _log.debug("Failure! \n\n" + response);
-                if (transport.responseText) {
+                _log.debug("Failure! "+transport.status+" \n\n" + response);
+                if( transport.status === 401 ) {
+                    var message = transport.statusText || "Unauthorized";
+                    _log.debug("ERROR: 401 "+message);
+                    ajax.event.fire("httpPostFailure", {resource:my, content: postObject, response: null, message: message, unauthorized:true});
+                }
+                else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if (typeof json === 'object' && json != null) {  //check if object
@@ -273,8 +278,13 @@ ajax.json = {
             },
             onFailure: function(transport) {
                 var response = transport.responseText || "no response text";
-                _log.debug("Failure! \n\n" + response);
-                if (transport.responseText) {
+                _log.debug("Failure! "+transport.status+"\n\n" + response);
+                if( transport.status === 401 ) {
+                    var message = transport.statusText || "Unauthorized";
+                    _log.debug("ERROR: 401 "+message);
+                    ajax.event.fire("httpGetFailure", {resource:my, params: params, response: null, message: message, unauthorized:true});
+                }
+                else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if (typeof json === 'object' && json != null) {  //check if object
@@ -369,8 +379,13 @@ ajax.json = {
             },
             onFailure: function(transport) {
                 var response = transport.responseText || "no response text";
-                _log.debug("Failure! \n\n" + response);
-                if (transport.responseText) {
+                _log.debug("Failure! "+transport.status+"\n\n" + response);
+                if( transport.status === 401 ) {
+                    var message = transport.statusText || "Unauthorized";
+                    _log.debug("ERROR: 401 "+message);
+                    ajax.event.fire("httpPutFailure", {resource:my, content: putObject, response: null, message: message, unauthorized:true});
+                }
+                else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if (typeof json === 'object' && json != null) {  //check if object
@@ -421,8 +436,13 @@ ajax.json = {
             },
             onFailure: function(transport) {
                 var response = transport.responseText || "no response text";
-                _log.debug("Failure! \n\n" + response);
-                if (transport.responseText) {
+                _log.debug("Failure! "+transport.status+"\n\n" + response);
+                if( response.transport === 401 ) {
+                    var message = transport.statusText || "Unauthorized";
+                    _log.debug("ERROR: 401 "+message);
+                    ajax.event.fire("httpDeleteFailure", {resource:my, content: deleteObject, response: null, message: message, unauthorized:true});
+                }
+                else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if (typeof json === 'object' && json != null) {  //check if object
@@ -518,7 +538,7 @@ ajax.custom = {
             },
             onFailure: function(transport) {
                 var response = transport.responseText || "no response text";
-                _log.debug("Failure! \n\n" + response);
+                _log.debug("Failure! "+transport.status+"\n\n" + response);
                 if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
