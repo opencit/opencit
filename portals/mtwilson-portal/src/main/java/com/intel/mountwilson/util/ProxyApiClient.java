@@ -128,7 +128,12 @@ public class ProxyApiClient extends ApiClient {
         if( queryString.isEmpty()) { querySeparator = ""; }
             
         // TODO:  remove the requestUrl parameter from the query string before passing it on 
-        String urltext = String.format("%s://%s:%d/mtwilson/v2/%s%s%s", request.getScheme(), request.getLocalName(), request.getLocalPort(), proxyUrl, querySeparator, queryString);
+        log.debug("Request URI: {}", request.getRequestURI()); // looks like this:  /mtwilson-portal/v2proxy/configurations
+        log.debug("Request URL: {}", request.getRequestURL()); // looks like this:  https://10.1.71.49:8443/mtwilson-portal/v2proxy/configurations
+        int pathIndex = request.getRequestURL().toString().indexOf(request.getRequestURI());
+        String server = request.getRequestURL().toString().substring(0, pathIndex);
+//        String server = String.format("%s://%s:%d", request.getScheme(), request.getLocalName(), request.getLocalPort()); // this is wrong because if client sends https://192.168.1.100:8443  but the local /etc/hosts file has 192.168.1.100 mapped to "testserver"  then we would see here https://testserver:8443 which is fine for networking but will cause the signature on the original request to be unverifiable by the server (since the client signed the URL *they* used, not the URL we are rewriting - so we have to keep it the same)
+        String urltext = String.format("%s/mtwilson/v2/%s%s%s", server, proxyUrl, querySeparator, queryString);
         log.debug("Proxy URL: {}", urltext);
         log.debug("Proxy Content-Type: {}", request.getContentType()); // example:    application/json; charset=UTF-8
         //  MediaType.valueof(...)  can't handle the  parameters like "; charset=UTF-8"  so we have to strip them out ... TODO parse the content type and then use the MediaType constructor that accepts a map of already-parsed parameters,

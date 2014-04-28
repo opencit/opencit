@@ -393,7 +393,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse get(String requestURL, Headers headers) throws IOException, ApiException, SignatureException {
-        //log.debug("GET url: {}", requestURL);        
+        log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
         if (locale != null) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
@@ -416,7 +416,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse delete(String requestURL, Headers headers) throws IOException, SignatureException {
-        //log.debug("DELETE url: {}", requestURL);
+        log.debug("DELETE url: {}", requestURL);
         HttpDelete request = new HttpDelete(requestURL);
         if (locale != null) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
@@ -439,7 +439,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse put(String requestURL, ApiRequest message, Headers headers) throws IOException, SignatureException {
-        //log.debug("PUT url: {}", requestURL);
+        log.debug("PUT url: {}", requestURL);
         //log.debug("PUT content: {}", message == null ? "(empty)" : message.content);
         HttpPut request = new HttpPut(requestURL);
         if (message != null && message.content != null) {
@@ -465,7 +465,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse post(String requestURL, ApiRequest message, Headers headers) throws IOException, SignatureException {
-        //log.debug("POST url: {}", requestURL);
+        log.debug("POST url: {}", requestURL);
         //log.debug("POST content-type: {}", message == null ? "(empty)" : message.content.toString());
         //log.debug("POST content: {}", message == null ? "(empty)" : message.content);
         HttpPost request = new HttpPost(requestURL);
