@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -46,17 +47,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         if ("root".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
-                if( certFile != null && !certFile.startsWith(File.separator) ) {
-                    certFile = "/etc/intel/cloudsecurity/" + certFile;
-                }
-                if(certFile != null) {
-                    File rootCaPemFile = new File(certFile); 
-                    FileInputStream in = new FileInputStream(rootCaPemFile);
-                    caCert.setCertificate(IOUtils.toByteArray(in));
-                    IOUtils.closeQuietly(in);
-                } else {
-                    throw new FileNotFoundException("Could not obtain Root CA cert location from config");
-                }
+                caCert = readCaCert(certFile);
             } 
             catch (FileNotFoundException e) {
                 log.error("Mt Wilson Root CA certificate file is not found. ", e);
@@ -73,17 +64,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         } else if ("saml".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); 
-                if( certFile != null && !certFile.startsWith(File.separator) ) {
-                    certFile = "/etc/intel/cloudsecurity/" + certFile; 
-                }
-                if(certFile != null) {
-                    File samlPemFile = new File(certFile);
-                    FileInputStream in = new FileInputStream(samlPemFile);
-                    caCert.setCertificate(IOUtils.toByteArray(in));
-                    IOUtils.closeQuietly(in);
-                } else {
-                    throw new FileNotFoundException("Could not load Saml Cert location from config");
-                }
+                caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
                 log.error("SAML certificate file is not found.", e);
@@ -100,17 +81,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         } else if ("privacy".equals(id)) {
             try {
                 String certFile = My.configuration().getPrivacyCaIdentityCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
-                 if( certFile != null && !certFile.startsWith(File.separator) ) {
-                    certFile = "/etc/intel/cloudsecurity/" + certFile; 
-                }
-                if(certFile != null) {
-                    File privacyCaPemFile = new File(certFile); 
-                    FileInputStream in = new FileInputStream(privacyCaPemFile);
-                    caCert.setCertificate(IOUtils.toByteArray(in));
-                    IOUtils.closeQuietly(in);
-                } else  { 
-                    throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
-                }
+                caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
                 log.error("Privacy CA certificate file is not found.", e);
@@ -127,17 +98,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         } else if ("endorsement".equals(id)) {
             try {
                 String certFile = My.configuration().getPrivacyCaEndorsementCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
-                 if( certFile != null && !certFile.startsWith(File.separator) ) {
-                    certFile = "/etc/intel/cloudsecurity/" + certFile; 
-                }
-                if(certFile != null) {
-                    File privacyCaPemFile = new File(certFile); 
-                    FileInputStream in = new FileInputStream(privacyCaPemFile);
-                    caCert.setCertificate(IOUtils.toByteArray(in));
-                    IOUtils.closeQuietly(in);
-                } else  { 
-                    throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
-                }
+                caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
                 log.error("Privacy CA certificate file is not found.", e);
@@ -156,29 +117,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         } else if ("tls".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
-                if( certFile != null && !certFile.startsWith(File.separator) ) {
-                    certFile = "/etc/intel/cloudsecurity/" + certFile; 
-                }
-                if(certFile != null) {
-                    if( certFile.endsWith(".pem") ) {
-                        File tlsPemFile = new File(certFile);
-                        FileInputStream in = new FileInputStream(tlsPemFile);
-                        String pem = IOUtils.toString(in);
-                        X509Certificate cert = X509Util.decodePemCertificate(pem);
-                        caCert.setCertificate(cert.getEncoded());
-                        IOUtils.closeQuietly(in);
-                    }
-                    if( certFile.endsWith(".crt") ) {
-                        File tlsPemFile = new File(certFile);
-                        FileInputStream in = new FileInputStream(tlsPemFile);
-                        caCert.setCertificate(IOUtils.toByteArray(in));
-                        IOUtils.closeQuietly(in);
-                    }
-                    throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
-                }else{
-                    throw new FileNotFoundException("Could not obtain TLS cert chain location from config");
-                }
-
+                caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
                 log.error("Server SSL certificate file is not found.", e);
@@ -192,6 +131,34 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
                 log.error("Error during retrieval of SSL CA chain.", e);
                 throw new MSException(ErrorCode.MS_SSL_CERT_ERROR, e.getClass().getSimpleName());
             }   
+        }
+        return caCert;
+    }
+    
+    private CaCertificate readCaCert(String path) throws FileNotFoundException, IOException, CertificateException {
+        String certFile = path;
+        CaCertificate caCert = new CaCertificate();
+        if( certFile != null && !certFile.startsWith(File.separator)) {
+            certFile = "/opt/mtwilson/configuration/" + certFile;
+        }
+        if (certFile != null) {
+            if (certFile.endsWith(".pem")) {
+                File PemFile = new File(certFile);
+                FileInputStream in = new FileInputStream(PemFile);
+                String pem = IOUtils.toString(in);
+                X509Certificate cert = X509Util.decodePemCertificate(pem);
+                caCert.setCertificate(cert.getEncoded());
+                IOUtils.closeQuietly(in);
+            } else if (certFile.endsWith(".crt")) {
+                File crtFile = new File(certFile);
+                FileInputStream in = new FileInputStream(crtFile);
+                caCert.setCertificate(IOUtils.toByteArray(in));
+                IOUtils.closeQuietly(in);
+            } else {
+                throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
+            }
+        } else {
+            throw new FileNotFoundException("Could not obtain cert chain location from config");
         }
         return caCert;
     }
