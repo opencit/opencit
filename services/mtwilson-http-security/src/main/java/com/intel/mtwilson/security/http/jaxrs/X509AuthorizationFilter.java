@@ -10,6 +10,9 @@ import javax.ws.rs.client.ClientRequestContext;
 import com.intel.mtwilson.security.http.RsaAuthorization;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.HashMap;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.core.MultivaluedMap;
@@ -59,11 +62,11 @@ public class X509AuthorizationFilter implements ClientRequestFilter {
         try {
             // first convert the headers we want to sign into to a map<string,string>   
             MultivaluedMap<String,Object> headers = requestContext.getHeaders();
-            HashMap<String,String> map = new HashMap<String,String>();
+            HashMap<String,String> map = new HashMap<>();
             if( headers.containsKey("Date")) {
                 map.put("Date", headers.getFirst("Date").toString());
             }
-            
+            log.debug("Request context URL: {}", requestContext.getUri().toURL().toString());
             String header;
             if( requestContext.getEntity() == null ) {
                 header = auth.getAuthorization(requestContext.getMethod(), requestContext.getUri().toURL().toString(), map);
@@ -81,7 +84,7 @@ public class X509AuthorizationFilter implements ClientRequestFilter {
             requestContext.getHeaders().add("Authorization", header);
             
         }
-        catch(Exception e) {
+        catch(NoSuchAlgorithmException | InvalidKeyException | IOException | SignatureException e) {
             throw new IOException(e);
         }
         
