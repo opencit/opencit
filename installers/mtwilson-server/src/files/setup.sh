@@ -58,16 +58,15 @@ load_defaults
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
  echo_warning "Program files are writable by the web service container, this is a possible security issue"
 else
- ret=false
- getent passwd $MTWILSON_OWNER >/dev/null && ret=true
- if $ret; then
-  echo "Mt Wilson owner account already created, moving on"
- else
+ getent passwd $MTWILSON_OWNER >/dev/null
+ if [ $? != 0 ]; then
   echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
   #prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
   #pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
   useradd -s /bin/false -d /opt/mtwilson $MTWILSON_OWNER
-  echo "Account Created!"
+  if [ $? != 0 ]; then
+    echo_warning "Failed to create user '$MTWILSON_OWNER'"
+  fi
  fi
 fi
 

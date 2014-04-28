@@ -69,9 +69,7 @@ public class Global {
     public static PrivateKey cakey() {
         if( cakey == null ) {
             log.debug("Loading CA key...");
-            FileDAO fileDao = null;
-            try {
-                fileDao = TagJdbi.fileDao();
+            try(FileDAO fileDao = TagJdbi.fileDao()) {
                 File cakeyFile = fileDao.findByName("cakey");
                 if( cakeyFile == null ) {
                     log.debug("Cannot find 'cakey' file");
@@ -86,9 +84,6 @@ public class Global {
                 log.error("Cannot load cakey", e);
                 cakey = null;
                 cakeyCert = null;
-            }
-            finally {
-                if( fileDao != null ) { fileDao.close(); }
             }
         }
         return cakey;

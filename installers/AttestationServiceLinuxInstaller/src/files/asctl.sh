@@ -272,11 +272,13 @@ case "$1" in
         webservice_stop_report "${webservice_application_name}"
         ;;
   status)
-      #if using_glassfish; then  
-      #  glassfish_running_report
-      #elif using_tomcat; then
-      #  tomcat_running_report
-      #fi
+      if using_glassfish; then
+        glassfish_clear
+        glassfish_detect > /dev/null
+      elif using_tomcat; then
+        tomcat_clear
+        tomcat_detect > /dev/null
+      fi
         webservice_running_report "${webservice_application_name}"
         ;;
   restart)

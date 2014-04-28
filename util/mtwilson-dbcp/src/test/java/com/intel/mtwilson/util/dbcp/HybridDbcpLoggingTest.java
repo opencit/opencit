@@ -4,7 +4,7 @@ package com.intel.mtwilson.util.dbcp;
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-import com.intel.mtwilson.util.dbcp.apache.LoggingDataSource;
+import com.intel.dcsg.cpg.util.jdbc.PoolingDataSource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.performance.AlarmClock;
 import com.intel.mtwilson.My;
@@ -50,36 +50,16 @@ public class HybridDbcpLoggingTest {
         bds.setTimeBetweenEvictionRunsMillis(1000 * 60); // run once a minute to evict stale connections
     }
     
-//    @BeforeClass
-    public static void createLoggingDataSource() throws IOException {
-        LoggingDataSource loggingDataSource = new LoggingDataSource();
-        configureBasicDataSource(loggingDataSource);
-        ds = new HybridPoolingDataSource(loggingDataSource);
-    }
-    
-//    @BeforeClass
-    public static void createBasicDataSource() throws IOException {
-        BasicDataSource loggingDataSource = new BasicDataSource();
-        configureBasicDataSource(loggingDataSource);
-        ds = new HybridPoolingDataSource(loggingDataSource);
-    }
-
-//    @BeforeClass
-    public static void createHybridPoolingDataSource() throws IOException {
-        LoggingDataSource loggingDataSource = new LoggingDataSource();
-        configureBasicDataSource(loggingDataSource);
-        ConnectionPool connectionPool = new ConnectionPool(loggingDataSource);
-        HybridPoolingDataSource hybridDataSource = new HybridPoolingDataSource(connectionPool);
-        ds = hybridDataSource;
-    }
-    
     @BeforeClass
-    public static void createHybridPoolingDataSourceWithManagedPool() throws IOException {
-        LoggingDataSource loggingDataSource = new LoggingDataSource();
-        configureBasicDataSource(loggingDataSource);
-        ManagedConnectionPool connectionPool = new ManagedConnectionPool(loggingDataSource);
-        HybridPoolingDataSource hybridDataSource = new HybridPoolingDataSource(connectionPool);
-        ds = hybridDataSource;
+    public static void createHybridPoolingDataSourceWithManagedPool3() throws IOException {
+        BasicDataSource basicDataSource = new BasicDataSource();
+        configureBasicDataSource(basicDataSource);
+        com.intel.dcsg.cpg.util.jdbc.ValidatingConnectionPool connectionPool = new com.intel.dcsg.cpg.util.jdbc.ValidatingConnectionPool();
+        connectionPool.setDataSource(basicDataSource);
+        connectionPool.setValidateOnBorrow(true);
+        connectionPool.setValidateOnReturn(true);
+        connectionPool.setValidationQuery("SELECT 1");
+        ds = new PoolingDataSource(connectionPool);
     }
     
     /**

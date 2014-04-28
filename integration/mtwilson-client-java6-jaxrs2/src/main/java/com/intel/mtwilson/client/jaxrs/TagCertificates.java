@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificate;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateFilterCriteria;
@@ -30,6 +31,10 @@ public class TagCertificates extends MtWilsonClient {
 
     public TagCertificates(Properties properties) throws Exception {
         super(properties);
+    }
+    
+    public TagCertificates(Properties properties, TlsConnection tlsConnection) throws Exception {
+        super(properties, tlsConnection);
     }
     
     public TagCertificateCollection searchTagCertificates(TagCertificateFilterCriteria criteria) {

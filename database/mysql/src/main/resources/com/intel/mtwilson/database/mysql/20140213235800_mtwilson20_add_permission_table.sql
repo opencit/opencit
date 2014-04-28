@@ -81,7 +81,7 @@ CREATE TABLE mw_user_login_certificate (
   id CHAR(36) DEFAULT NULL,
   user_id CHAR(36) DEFAULT NULL,
   certificate blob NOT NULL,
-  sha1_hash CHAR(36) NOT NULL,
+  sha1_hash binary(20) NOT NULL,
   sha256_hash binary(32) NOT NULL,
   expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',

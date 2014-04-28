@@ -3,10 +3,7 @@
  */
 package com.intel.mountwilson.controller;
 
-import com.intel.mountwilson.common.MCPConfig;
 import com.intel.mountwilson.common.MCPersistenceManager;
-import com.intel.mountwilson.common.TDPConfig;
-import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
@@ -27,8 +24,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.slf4j.Logger;

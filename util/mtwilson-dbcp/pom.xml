@@ -29,7 +29,6 @@
             <artifactId>logback-classic</artifactId>
 			<scope>test</scope>
         </dependency>        
-
 		
         <!-- apache 2.0 license http://www.jdbi.org/getting_jdbi/  java database programming interface -->
         <dependency>
@@ -46,6 +45,10 @@
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
         
         <!-- apache 2.0 license ,  java database system -->
         <dependency>
@@ -55,6 +58,14 @@
 			<scope>test</scope>
         </dependency>
         
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-objectpool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-jdbc</artifactId>
+        </dependency>
         
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
