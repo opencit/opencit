@@ -251,6 +251,7 @@ fi
 # use "hostFilter.allow" when using the access-denying filter (any clients not from that list of ip's will be denied)
 # use "iniHostRealm.allow" when using the access-allowing filter (any clients from that list of ip's will be allowed access but clients from other ip's can still try password or x509 authentication) - this is the current default
 hostAllowPropertyName=iniHostRealm.allow
+sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' /etc/intel/cloudsecurity/shiro.ini
 hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
   update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
@@ -259,6 +260,7 @@ hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecuri
 if [[ $hostAllow != *$MTWILSON_IP* ]]; then
   update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
 fi
+sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' /etc/intel/cloudsecurity/shiro.ini
 
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
  update_property_in_file "mtwilson.api.url" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_API_BASEURL"
