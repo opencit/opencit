@@ -1,82 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mtwilson-tag-jdbi</artifactId>
+    <artifactId>mtwilson-feature-jdbi</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-tag-jdbi</name>
-    <description>Asset Tag and Provisioning Service Data Access Objects</description>
+    <name>mtwilson-feature-jdbi</name>
+    <description>Feature metadata</description>
     <parent>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>mtwilson-services</artifactId>
 		<version>2.0-SNAPSHOT</version>
     </parent>
-
-<!--
-IMPORTANT NOTE ON BUILDING THIS PROJECT:
-** most of below has been automated in this pom, project build should "just work" even the first time **
-When you build it the first time, the JOOQ plugin will generate sources but they will be
-incomplete because it automatically generates them from an existing database. So after
-building the first time, run the junit tests in test.jdbi.RepositoryTest; they will automatically
-create a local Derby database.
-Then delete target/generated-sources/jooq and build the project again to generate the
-complete set of jooq source classes.
-Then you'll be able to run junit tests for search APIs etc that use JOOQ in their implementation.
--->
-
-    <build>
-        
-        <plugins>
-            
-           
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            
-            
-            <!-- NOTE: this property definition is repeated in the ant tasks that create the database to prepare for
-            generating jooq sources -->
-            <!--
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <configuration>
-        <systemProperties>
-            <property>
-                <name>derby.stream.error.file</name>
-                <value>${project.build.directory}/derby/derby.log</value>
-            </property>
-        </systemProperties>
-    </configuration>
-</plugin>
--->
-
-<plugin>
-    <groupId>org.codehaus.mojo</groupId>
-    <artifactId>properties-maven-plugin</artifactId>
-    <version>1.0-alpha-2</version>
-    <executions>
-        <execution>
-            <phase>initialize</phase>
-            <goals>
-                <goal>set-system-properties</goal>
-            </goals>
-            <configuration>
-                <properties>
-                    <property>
-                        <name>derby.stream.error.file</name>
-                        <value>${project.build.directory}/derby/derby.log</value>
-                    </property>
-                </properties>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
-            
-               
-        </plugins>
-    </build>
 
 
     <dependencies>
@@ -87,7 +20,7 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jooq-util</artifactId>
+            <artifactId>mtwilson-shiro-util</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -97,44 +30,14 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <!-- XXX TODO LEGAL   must mark as test only  before release ... it is not authorized for distribution  <scope>test</scope>  -->
         </dependency>
 
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<!--        
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.slf4j</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-<dependency>  
-   <groupId>org.restlet.jse</groupId>  
-   <artifactId>org.restlet.ext.jackson</artifactId>  
-   <version>2.2-M4</version>  
-</dependency>
-        
-    <dependency>
-	<groupId>javax.servlet</groupId>
-	<artifactId>servlet-api</artifactId>
-	<version>2.5</version>
-    </dependency>
--->
-    <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-   <!-- <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tag-ws-v2</artifactId>
-            <version>${project.version}</version>
-        </dependency> -->
 
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
+        </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
@@ -193,6 +96,7 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+			<scope>test</scope>
         </dependency>        
         <dependency>
             <groupId>commons-codec</groupId>
