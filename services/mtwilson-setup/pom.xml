@@ -56,6 +56,11 @@
 			<artifactId>mtwilson-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-feature-jdbi</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

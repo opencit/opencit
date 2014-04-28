@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.tag.model.CertificateCollection;
@@ -41,12 +42,10 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     @RequiresPermissions("tag_certificates:search") 
     public CertificateCollection search(CertificateFilterCriteria criteria) {
         CertificateCollection objCollection = new CertificateCollection();
-        DSLContext jooq = null;
-        
         // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
         
-        try {
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_TAG_CERTIFICATE).getQuery();
             if( criteria.id != null ) {
@@ -114,7 +113,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
         } catch (Exception ex) {
             log.error("Error during certificate search.", ex);
             throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
-        }        
+        } 
         return objCollection;
     }
 

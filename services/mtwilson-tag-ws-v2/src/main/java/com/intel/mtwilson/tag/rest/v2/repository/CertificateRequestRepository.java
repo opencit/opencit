@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE_REQUEST;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateRequestDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
@@ -45,10 +46,8 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
     @RequiresPermissions("tag_certificate_requests:search") 
     public CertificateRequestCollection search(CertificateRequestFilterCriteria criteria) {
         CertificateRequestCollection objCollection = new CertificateRequestCollection();
-        DSLContext jooq = null;
-        
-        try (SelectionDAO selectionDao = TagJdbi.selectionDao()) {
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select()
                     .from(MW_TAG_CERTIFICATE_REQUEST) // .join(CERTIFICATE_REQUEST_TAG_VALUE)

@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_CONFIGURATION;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.Configuration;
@@ -40,10 +41,8 @@ public class ConfigurationRepository implements SimpleRepository<Configuration, 
     @RequiresPermissions("configurations:search")     
     public ConfigurationCollection search(ConfigurationFilterCriteria criteria) {
         ConfigurationCollection objCollection = new ConfigurationCollection();
-        DSLContext jooq = null;
-        
-        try (ConfigurationDAO dao = TagJdbi.configurationDao()) {
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_CONFIGURATION).getQuery();
             if( criteria.id != null ) {
