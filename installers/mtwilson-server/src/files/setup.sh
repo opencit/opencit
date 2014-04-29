@@ -493,7 +493,7 @@ elif using_postgres; then
   postgres_server_detect
   has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
   if [ -n "$has_local_peer" ]; then
-    echo "Replacing PostgreSQL local \'peer\' authentication with \'password\' authentication..."
+    echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
     sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
   fi
   #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
