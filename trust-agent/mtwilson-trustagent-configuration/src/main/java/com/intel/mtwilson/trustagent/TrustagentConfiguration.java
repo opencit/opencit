@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
 import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
+import com.intel.dcsg.cpg.net.NetUtils;
 import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.configuration.AbstractConfiguration;
 import java.io.File;
@@ -162,49 +163,18 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public String getTrustagentTlsCertDn() {
         return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
     }
-    
-    // TODO: move to cpg-net NetworkUtil.getNetworkAddressList() and catch the SocketException to return empty list
-    private List<String> getNetworkIPs() throws SocketException {
-        ArrayList<String> ipList = new ArrayList<>();
-        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-        Enumeration<InetAddress> inetAddresses;
-        for (NetworkInterface netint : Collections.list(nets)) {
-            inetAddresses = netint.getInetAddresses();
-            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                log.debug("Found InetAddress [{}] with IP [{}] and Domain Name [{}]", inetAddress.getCanonicalHostName(), inetAddress.getHostAddress(), inetAddress.getHostName());
-                if (inetAddress.getHostAddress() != null && !inetAddress.getHostAddress().isEmpty())
-                    ipList.add(inetAddress.getHostAddress());
-            }
-        }
-        return ipList;
-    }
-    // TODO: move to cpg-net NetworkUtil.getNetworkHostnameList() and catch the SocketException to return empty list
-    private List<String> getNetworkDNs() throws SocketException {
-        ArrayList<String> dnList = new ArrayList<>();
-        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-        Enumeration<InetAddress> inetAddresses;
-        for (NetworkInterface netint : Collections.list(nets)) {
-            inetAddresses = netint.getInetAddresses();
-            for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                log.debug("Found InetAddress [{}] with IP [{}] and Domain Name [{}]", inetAddress.getCanonicalHostName(), inetAddress.getHostAddress(), inetAddress.getHostName());
-                if (inetAddress.getHostName() != null && !inetAddress.getHostName().isEmpty() && !inetAddress.getHostName().equals(inetAddress.getHostAddress()))
-                    dnList.add(inetAddress.getHostName());
-            }
-        }
-        return dnList;
-    }
-    
+        
     public String[] getTrustagentTlsCertIp() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
         String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "").split(",");
         if (TlsCertIPs != null && !TlsCertIPs[0].isEmpty()) {
-            log.debug("Retrieved IPs [{}] from trust agent configuration", TlsCertIPs);
+            log.debug("Retrieved IPs from trust agent configuration: {}", (Object[])TlsCertIPs);
             return TlsCertIPs;
         }
-        List<String> TlsCertIPsList = getNetworkIPs();
+        List<String> TlsCertIPsList = NetUtils.getNetworkAddressList();
         String[] ipListArray = new String[TlsCertIPsList.size()];
         if (ipListArray != null && ipListArray.length > 0) {
-            log.debug("Retrieved IPs [{}] from network configuration", ipListArray);
+            log.debug("Retrieved IPs from network configuration: {}", (Object[])ipListArray);
             return TlsCertIPsList.toArray(ipListArray);
         }
         log.debug("Returning default IP address [127.0.0.1]");
@@ -214,13 +184,13 @@ public class TrustagentConfiguration extends AbstractConfiguration {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
         String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
         if (TlsCertDNs != null && !TlsCertDNs[0].isEmpty()) {
-            log.debug("Retrieved Domain Names [{}] trust agent from configuration", TlsCertDNs);
+            log.debug("Retrieved Domain Names trust agent from configuration: {}", (Object[])TlsCertDNs);
             return TlsCertDNs;
         }
-        List<String> TlsCertDNsList = getNetworkDNs();
+        List<String> TlsCertDNsList = NetUtils.getNetworkHostnameList();
         String[] dnListArray = new String[TlsCertDNsList.size()];
         if (dnListArray != null && dnListArray.length > 0) {
-            log.debug("Retrieved Domain Names [{}] from network configuration", dnListArray);
+            log.debug("Retrieved Domain Names from network configuration: {}", (Object[])dnListArray);
             return TlsCertDNsList.toArray(dnListArray);
         }
         log.debug("Returning default Domain Name [localhost]");

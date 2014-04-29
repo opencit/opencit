@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.trustagent.commands.hostinfo;
 
+import com.intel.mountwilson.common.CommandResult;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
@@ -64,8 +65,8 @@ public class HostInfoCmd implements ICommand {
      */
     
     private void getOsAndVersion() throws TAException, IOException {
-        List<String> result = CommandUtil.runCommand("lsb_release -a");
-
+        CommandResult commandResult = CommandUtil.runCommand("lsb_release -a");
+        String[] result = commandResult.getStdout().split("\n");
         for (String str : result) {
             String[] parts = str.split(":");
 
@@ -93,18 +94,14 @@ public class HostInfoCmd implements ICommand {
      */
     private void getBiosAndVersion() throws TAException, IOException {
 
-        List<String> result = CommandUtil.runCommand("dmidecode -s bios-vendor");
-        if (result != null && result.size() > 0) {
-            context.setBiosOem(result.get(0));
-        }
+        // TODO: multline output is ignored, we just use the "first" string. whic his the only line anyway.
+        CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
+        context.setBiosOem(result.getStdout());
         log.debug("Bios OEM: " + context.getBiosOem());
 
 
-        result = CommandUtil.runCommand("dmidecode -s bios-version");
-
-        if (result != null && result.size() > 0) {
-            context.setBiosVersion(result.get(0));
-        }
+        CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
+        context.setBiosVersion(result2.getStdout());
         log.debug("Bios Version: " + context.getBiosVersion());
 
 
@@ -120,7 +117,8 @@ public class HostInfoCmd implements ICommand {
 
     private void getVmmAndVersion() throws TAException, IOException {
 
-        List<String> result = CommandUtil.runCommand("virsh version");
+        CommandResult commandResult = CommandUtil.runCommand("virsh version");
+        String[] result = commandResult.getStdout().split("\n");
 
         for (String str : result) {
             String[] parts = str.split(":");
@@ -152,7 +150,8 @@ public class HostInfoCmd implements ICommand {
      */
        private void getProcessorInfo() throws TAException, IOException {
            
-            List<String> result = CommandUtil.runCommand("dmidecode --type processor");
+            CommandResult commandResult = CommandUtil.runCommand("dmidecode --type processor");
+            String[] result = commandResult.getStdout().split("\n");
             String processorInfo = "";
             
             // Sample output would look like below for a 2 CPU system. We will extract the processor info between CPU and the @ sign
@@ -185,12 +184,9 @@ public class HostInfoCmd implements ICommand {
      * @throws IOException
      */
       public void getHostUUID() throws TAException, IOException {
-          List<String> result = CommandUtil.runCommand("dmidecode -s system-uuid");
-          String hostUUID = "";
-          // sample output would look like UUID: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
-          for(String entry: result) {
-              hostUUID = entry;
-          }
+          CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
+          String hostUUID = result.getStdout();
+          // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
           
           context.setHostUUID(hostUUID);
           log.info("Context set with host UUID info: " + context.getHostUUID());
