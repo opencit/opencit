@@ -623,7 +623,7 @@ mtwilson.atag = mtwilson.atag || {};
           case 'certificates_json':
                 for(var loop = 0; loop < data.certificates.length; loop++) {
                         data.certificates[loop].status = "Active";
-                        var now = new Date();
+                        var now = new Date(event.memo.serverTime);
                         if(JSON.parse(data.certificates[loop].revoked)) {
                                 data.certificates[loop].status = "Revoked";
                         } else if(!now.between(new Date(data.certificates[loop].not_before), new Date(data.certificates[loop].not_after))) {

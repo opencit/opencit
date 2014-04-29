@@ -262,7 +262,7 @@ ajax.json = {
                         log.debug("calling setx with keypath: " + keyPath + " and data: " + Object.toJSON(existingData));
                         ajax.data.setx(keyPath, existingData);
                     }
-                    ajax.event.fire("httpGetSuccess", {resource: my, params: params, response: ptr});
+                    ajax.event.fire("httpGetSuccess", {resource: my, params: params, response: ptr, serverTime: transport.getResponseHeader("Date")});
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(json);
                     }
