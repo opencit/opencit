@@ -424,6 +424,7 @@ if using_mysql; then
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
   
 elif using_postgres; then
+  postgres_installed=1
   # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
   if [ -d "/etc/apt" ]; then
     mkdir -p /etc/apt/trusted.gpg.d
@@ -456,8 +457,8 @@ elif using_postgres; then
       aptget_detect; dpkg_detect; yum_detect;
       if [[ -n "$aptget" ]]; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
-      fi 
-
+      fi
+      postgres_installed=0 #postgres is being installed
       # don't need to restart postgres server unless the install script says we need to (by returning zero)
       if postgres_server_install; then
         postgres_restart >> $INSTALL_LOG_FILE
@@ -489,24 +490,23 @@ elif using_postgres; then
   # postgress db init end
   else
     echo_warning "Skipping init of database"
-  fi 
-  postgres_server_detect
-  has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
-  if [ -n "$has_local_peer" ]; then
-    echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
-    sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
   fi
-  #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
-  if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
-    if [ -f /root/.pgpass ]; then
-      echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
-      rm /root/.pgpass
+  if [ $postgres_installed -eq 0 ]; then
+    postgres_server_detect
+    has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
+    if [ -n "$has_local_peer" ]; then
+      echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
+      sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
     fi
-  fi 
+    #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
+    if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
+      if [ -f /root/.pgpass ]; then
+        echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
+        rm /root/.pgpass
+      fi
+    fi
+  fi
 fi
-
-
-
 
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
