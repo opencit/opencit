@@ -225,7 +225,7 @@ function provisionCert() {
    fi
  fi
 
- certOutput=`less $certFile`
+ certOutput=`cat $certFile` 
  if [ -z "$certOutput" ]; then
    echo "Error downloading asset tag certificate. Check certificate file output here: $certFile"
    echo "Error downloading asset tag certificate. Check certificate file output here: $certFile" > "$tpaDir/completion"
