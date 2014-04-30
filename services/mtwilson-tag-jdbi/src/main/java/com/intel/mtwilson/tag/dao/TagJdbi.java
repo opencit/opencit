@@ -33,19 +33,18 @@ public class TagJdbi {
 
     private static Logger log = LoggerFactory.getLogger(TagJdbi.class);
     public static DataSource ds = null;
-    
+
     synchronized public static void createDataSource() throws IOException {
-        if( ds == null ) {
+        if (ds == null) {
             ds = PersistenceManager.createDataSource(MyPersistenceManager.getASDataJpaProperties(My.configuration()));
-       }
+        }
     }
 
-    public static DataSource getDataSource() throws SQLException {        
+    public static DataSource getDataSource() throws SQLException {
         if (ds == null) {
             try {
                 createDataSource();
-            }
-            catch(IOException e) {
+            } catch (IOException e) {
                 throw new SQLException(e);
             }
         }
@@ -61,7 +60,6 @@ public class TagJdbi {
         DBI dbi = new DBI(getDataSource());
         return dbi.open(CertificateRequestDAO.class);
     }
-
 
     public static CertificateDAO certificateDao() throws SQLException {
         DBI dbi = new DBI(getDataSource());
@@ -93,6 +91,22 @@ public class TagJdbi {
         return dbi.open(FileDAO.class);
     }
 
+    /**
+     * CODE QUALITY: All usage of this method should be in the following form:
+     * <pre>
+     * try(JooqContainer jc = TagJdbi.jooq()) {
+     * DSLContext jooq = jc.getDslContext();
+     * // code
+     * }
+     * </pre>
+     *
+     * This ensures the jooq database connection is automatically released
+     * at the end of the block (either closed or returned to the pool)
+     * 
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
     public static JooqContainer jooq() throws SQLException, IOException {
         // omits the schema name from generated sql ; when we connect to the database we already specify a schema so this settings avoid 
         // redundancy in the sql and allows the administrator to change the database name without breaking the application
@@ -101,19 +115,19 @@ public class TagJdbi {
         // throws SQLException; Note that the DSLContext doesn't close the connection. We'll have to do that ourselves.
         Connection connection = TagJdbi.getDataSource().getConnection();
         DSLContext jooq = DSL.using(connection, dbDialect, settings);
-        
+
         return new JooqContainer(jooq, connection);
     }
-    
+
     public static SQLDialect getSqlDialect() throws IOException {
-        String protocol = My.configuration().getDatabaseProtocol(); 
-        if( "mysql".equalsIgnoreCase(protocol) ) {
+        String protocol = My.configuration().getDatabaseProtocol();
+        if ("mysql".equalsIgnoreCase(protocol)) {
             return SQLDialect.MYSQL;
         }
-        if( "postgresql".equalsIgnoreCase(protocol) || "postgres".equalsIgnoreCase(protocol) ) {
+        if ("postgresql".equalsIgnoreCase(protocol) || "postgres".equalsIgnoreCase(protocol)) {
             return SQLDialect.POSTGRES;
         }
-        if( "derby".equalsIgnoreCase(protocol) ) {
+        if ("derby".equalsIgnoreCase(protocol)) {
             return SQLDialect.DERBY;
         }
         return SQLDialect.valueOf(protocol);
