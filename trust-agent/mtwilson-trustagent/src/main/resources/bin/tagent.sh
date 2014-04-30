@@ -88,15 +88,19 @@ trustagent_setup() {
   return $?
 }
 
+# TPM_OWNER_SECRET and TPM_SRK_SECRET are also required but assumed to already
+# be set in the trustagent.properties
 trustagent_authorize() {
-  local authorize_vars="MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
+  local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
   local default_value
   for v in $authorize_vars
   do
     default_value=$(eval "echo \$$v")
     prompt_with_default $v "Required: $v" $default_value
   done
+  export_vars $authorize_vars
   trustagent_setup --force $TRUSTAGENT_AUTHORIZE_TASKS
+  return $?
 }
 
 trustagent_start() {
@@ -220,6 +224,12 @@ case "$1" in
   restart)
     trustagent_stop
     if trustagent_setup $TRUSTAGENT_START_TASKS; then
+      trustagent_start
+    fi
+    ;;
+  authorize)
+    if trustagent_authorize; then
+      trustagent_stop
       trustagent_start
     fi
     ;;

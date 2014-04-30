@@ -9,7 +9,7 @@ package_name=trustagent
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=/root/${package_name}.env
-package_install_filename=${package_dir}/${package_name}.install
+package_version_filename=/opt/trustagent/env.d/trustagent.version
 ASSET_TAG_SETUP="y"
 
 logfile=/var/log/trustagent/install.log
@@ -153,7 +153,6 @@ fi
 intel_conf_dir=/opt/trustagent/configuration
 package_dir=/opt/trustagent
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_install_filename=${package_dir}/${package_name}.install
 
 
 
@@ -292,18 +291,14 @@ return_dir=`pwd`
     cd ..
   fi
   cd ..
-  # create trustagent.install file
+  # create trustagent.version file
+  mkdir -p $package_version_filename
   datestr=`date +%Y-%m-%d.%H%M`
-  myinstall=${package_install_filename}
-  touch ${myinstall}
-  chmod 600 ${myinstall}
-  echo "" > ${myinstall}
-  echo "# Installed Trust Agent on ${datestr}" >> ${myinstall}
-  echo "TRUST_AGENT_HOME=${package_dir}" >> ${myinstall}
-  echo "TRUST_AGENT_NAME=${ARTIFACT}" >> ${myinstall}
-  echo "TRUST_AGENT_VERSION=${VERSION}" >> ${myinstall}
-  echo "TRUST_AGENT_RELEASE=\"${BUILD}\"" >> ${myinstall}
-#  echo "TRUST_AGENT_ID=${WAR_NAME}" >> ${myinstall}
+  touch $package_version_filename
+  chmod 600 $package_version_filename
+  echo "# Installed Trust Agent on ${datestr}" > $package_version_filename
+  echo "TRUSTAGENT_VERSION=${VERSION}" >> $package_version_filename
+  echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
 
 cd $return_dir
 
