@@ -17,6 +17,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.mountwilson.common.CommandResult;
 import com.intel.mountwilson.common.TAConfig;
 import java.io.PrintWriter;
 import org.apache.commons.lang.StringUtils;
@@ -83,15 +84,12 @@ public class SetAssetTag implements ICommand{
     }
     
     private boolean writeHashToNvram(String NvramPassword) throws TAException, IOException {
-        List<String> result;
         try {
             //String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f /tmp/hash");
             String[] variables = { "NvramPassword=" + NvramPassword };
-            result = CommandUtil.runCommand("tpm_nvwrite -x -t -i " + index + " -pNvramPassword -f /tmp/hash", variables);
-            String response = StringUtils.join(result,"\n");
-            log.debug("writeHashToNvram output: " + response);
+            CommandUtil.runCommand("tpm_nvwrite -x -t -i " + index + " -pNvramPassword -f /tmp/hash", variables);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -101,9 +99,8 @@ public class SetAssetTag implements ICommand{
     
     private void writeHashToFile() throws TAException, IOException {
         try {
-            List<String> result = CommandUtil.runCommand("/usr/local/bin/hex2bin " + context.getAssetTagHash() + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
-            String response = StringUtils.join(result,"\n");
-            log.debug("writeHashToFile output: " + response);
+            // TODO: multiline output is concatenated... so we could be returning just a single string.
+            CommandUtil.runCommand("/usr/local/bin/hex2bin " + context.getAssetTagHash() + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -117,9 +114,7 @@ public class SetAssetTag implements ICommand{
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -aXXXX -oXXXX --permissions=AUTHWRITE");
             String[] variables = { "tpmOwnerPass=" + tpmOwnerPass, "NvramPassword=" + NvramPassword };
-            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -t -aNvramPassword -otpmOwnerPass --permissions=AUTHWRITE", variables);
-            String response = StringUtils.join(result,"\n");
-            log.debug("createIndex output: " + response);
+            CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -t -aNvramPassword -otpmOwnerPass --permissions=AUTHWRITE", variables);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -128,14 +123,11 @@ public class SetAssetTag implements ICommand{
     }
     
     private boolean releaseIndex() throws TAException, IOException {
-        List<String> result;
         try {
             String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
             log.debug("running command tpm_nvrelease -x -t -i " + index + " -oXXXX");
             String[] variables = { "tpmOwnerPass=" + tpmOwnerPass };
-            result = CommandUtil.runCommand("tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass", variables);
-            String response = StringUtils.join(result,"\n");
-            log.debug("releaseIndex output: " + response);
+            CommandUtil.runCommand("tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass", variables);
         }catch(TAException ex) {
                 log.error("error releasing nvram index, " + ex.getMessage() );
                 throw ex;
@@ -148,12 +140,9 @@ public class SetAssetTag implements ICommand{
     }
     
     private boolean indexExists() throws TAException, IOException {     
-        List<String> result;
         try {
-            result = CommandUtil.runCommand("tpm_nvinfo -i " + index);  
-            String response = StringUtils.join(result,"\n");
-            log.debug("indexExists output: " + response);
-            if(response.contains("NVRAM index")) 
+            CommandResult result = CommandUtil.runCommand("tpm_nvinfo -i " + index);  
+            if(result.getStdout().contains("NVRAM index")) 
                 return true;
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );

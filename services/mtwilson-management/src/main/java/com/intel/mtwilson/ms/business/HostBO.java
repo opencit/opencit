@@ -651,6 +651,11 @@ public class HostBO extends BaseBO {
     }
 
     /**
+     * XXX TODO reduce duplication of logic;  the attestation service HostBO
+     * already has an addHost function; logic for what is a valid registration,
+     * aik checks, etc. must be in one place only.
+     * 
+     * 
      * This function using the white list configuration settings including pcr details, whether the whitelist is for an
      * individual host/for OEM specific host/global white list, etc, configures the DB with the whitelist from the
      * specified good known host.

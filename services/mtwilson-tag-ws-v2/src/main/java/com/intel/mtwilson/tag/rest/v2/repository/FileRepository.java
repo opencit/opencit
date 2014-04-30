@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_FILE;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.File;
 import com.intel.mtwilson.tag.model.FileCollection;
@@ -38,10 +39,8 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     @RequiresPermissions("files:search")     
     public FileCollection search(FileFilterCriteria criteria) {
         FileCollection objCollection = new FileCollection();
-        DSLContext jooq = null;
-        
-        try (FileDAO dao = TagJdbi.fileDao()) {
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_FILE).getQuery();
             if( criteria.id != null ) {

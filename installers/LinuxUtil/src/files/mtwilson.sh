@@ -118,7 +118,13 @@ Detected the following options on this server:"
   elif using_postgres; then
     postgres_userinput_connection_properties
     export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]; then
+      PGPASS_HOSTNAME=localhost
+    else
+      PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
+    fi
     echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $HOME/.pgpass
     chmod 0600 $HOME/.pgpass
   fi
 
@@ -160,6 +166,14 @@ Detected the following options on this server:"
 }
 
 all_status() {
+  if using_glassfish; then
+    glassfish_clear
+    glassfish_detect > /dev/null
+  elif using_tomcat; then
+    tomcat_clear
+    tomcat_detect > /dev/null
+  fi
+
   if using_glassfish; then
     glassfish_running_report
   elif using_tomcat; then

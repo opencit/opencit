@@ -38,11 +38,12 @@ public class HttpRequestURL {
      * using Map<String,Object> because due to generics type erasure it's not possible to have 
      * separate constructors for Map<String,String> and Map<String,String[]> and Map<String,List<String>>
      **/
-    public HttpRequestURL(String path, Map<String,Object>query) throws UnsupportedEncodingException {
+    public HttpRequestURL(String path, Map<String,Object> query) throws UnsupportedEncodingException {
         this.path = path;
         this.query = queryString(query);
     }
     
+    @Override
     public String toString() {
         return path + ( query.isEmpty() ? "" : "?"+query );
     }
@@ -58,9 +59,9 @@ public class HttpRequestURL {
      */
     private String queryString(Map<String,Object> query) throws UnsupportedEncodingException {
         if( query == null ) { return ""; }
-        List<String> keyList = new ArrayList<String>(query.keySet());
+        List<String> keyList = new ArrayList<>(query.keySet());
         Collections.sort(keyList);
-        List<String> queryParam = new ArrayList<String>();
+        List<String> queryParam = new ArrayList<>();
         for(String key : keyList) {
             Object value = query.get(key);
             if( value == null ) {
@@ -87,7 +88,7 @@ public class HttpRequestURL {
     }
 
     private List<String> multiValue(String key, String[] value) throws UnsupportedEncodingException {
-        List<String> paramList = new ArrayList<String>();
+        List<String> paramList = new ArrayList<>();
         List<String> list = Arrays.asList((String[])value);
         Collections.sort(list);
         for(String v : list) {
@@ -97,7 +98,7 @@ public class HttpRequestURL {
     }
 
     private List<String> multiValue(String key, List<String> valueList) throws UnsupportedEncodingException {
-        List<String> paramList = new ArrayList<String>();
+        List<String> paramList = new ArrayList<>();
         Collections.sort(valueList);
         for(String v : valueList) {
             paramList.add(String.format("%s=%s", urlencode(key), urlencode((String)v)));

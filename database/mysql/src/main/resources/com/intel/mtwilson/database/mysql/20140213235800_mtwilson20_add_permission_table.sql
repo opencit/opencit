@@ -9,6 +9,8 @@ CREATE TABLE mw_role (
   PRIMARY KEY (id)
 ); 
 
+-- describes which permissions are granted to users having a role
+-- this is a many-to-many table; there is no primary key but each record must be unique (see constraint)
 CREATE TABLE mw_role_permission (
   role_id CHAR(36) NOT NULL,
   permit_domain varchar(200) DEFAULT NULL,
@@ -16,6 +18,19 @@ CREATE TABLE mw_role_permission (
   permit_selection varchar(200) DEFAULT NULL
 ); 
 ALTER TABLE mw_role_permission ADD UNIQUE KEY mw_role_permission_ukey (role_id,permit_domain,permit_action,permit_selection);
+
+-- describes available permissions and features they came from
+-- this is a many-to-many table; there is no primary key but each record must be unique (see constraint)
+CREATE TABLE mw_feature_permission (
+  feature_id CHAR(36) NOT NULL,
+  feature_name varchar(200) NOT NULL,
+  permit_domain varchar(200) DEFAULT NULL,
+  permit_action varchar(200) DEFAULT NULL,
+  permit_selection varchar(200) DEFAULT NULL,
+  comment TEXT NULL
+); 
+ALTER TABLE mw_feature_permission ADD UNIQUE KEY mw_feature_permission_ukey (feature_id,feature_name,permit_domain,permit_action,permit_selection);
+
 
 -- replaces mw_portal_user 
 CREATE TABLE mw_user (
@@ -81,7 +96,7 @@ CREATE TABLE mw_user_login_certificate (
   id CHAR(36) DEFAULT NULL,
   user_id CHAR(36) DEFAULT NULL,
   certificate blob NOT NULL,
-  sha1_hash CHAR(36) NOT NULL,
+  sha1_hash binary(20) NOT NULL,
   sha256_hash binary(32) NOT NULL,
   expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',

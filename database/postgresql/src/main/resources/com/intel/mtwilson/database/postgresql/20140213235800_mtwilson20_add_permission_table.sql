@@ -9,6 +9,8 @@ CREATE TABLE mw_role (
   PRIMARY KEY (id)
 ); 
 
+-- describes which permissions are granted to users having a role
+-- this is a many-to-many table; there is no primary key but each record must be unique (see constraint)
 CREATE TABLE mw_role_permission (
   role_id CHAR(36) NOT NULL,
   permit_domain character varying(200) DEFAULT NULL,
@@ -16,6 +18,18 @@ CREATE TABLE mw_role_permission (
   permit_selection character varying(200) DEFAULT NULL
 ); 
 ALTER TABLE mw_role_permission ADD CONSTRAINT mw_role_permission_ukey UNIQUE (role_id,permit_domain,permit_action,permit_selection);
+
+-- describes available permissions and features they came from
+-- this is a many-to-many table; there is no primary key but each record must be unique (see constraint)
+CREATE TABLE mw_feature_permission (
+  feature_id CHAR(36) NOT NULL,
+  feature_name character varying(200) NOT NULL,
+  permit_domain character varying(200) DEFAULT NULL,
+  permit_action character varying(200) DEFAULT NULL,
+  permit_selection character varying(200) DEFAULT NULL,
+  comment text DEFAULT NULL
+); 
+ALTER TABLE mw_feature_permission ADD CONSTRAINT mw_feature_permission_ukey UNIQUE (feature_id,feature_name,permit_domain,permit_action,permit_selection);
 
 -- replaces mw_portal_user 
 CREATE TABLE mw_user (

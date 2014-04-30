@@ -6,6 +6,7 @@ package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION;
@@ -42,10 +43,8 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     @RequiresPermissions("tag_selections:search")         
     public SelectionCollection search(SelectionFilterCriteria criteria) {
         SelectionCollection objCollection = new SelectionCollection();
-        DSLContext jooq = null;
-        
-        try {
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_TAG_SELECTION).getQuery();
             if( criteria.id != null ) {

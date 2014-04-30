@@ -33,7 +33,8 @@ public class ApacheRsaHttpAuthorization implements ApacheHttpAuthorization {
     
     @Override
     public void addAuthorization(HttpRequest request) throws SignatureException {
-        HashMap<String,String> headers = new HashMap<String,String>();
+        log.debug("Signing request for URL: {}", request.getRequestLine().getUri());
+        HashMap<String,String> headers = new HashMap<>();
         request.addHeader("Authorization",
                 authority.getAuthorizationQuietly(request.getRequestLine().getMethod(), request.getRequestLine().getUri(), headers));
         // the RsaAuthorization class may generate headers for the request such as nonce and date, so we look for those and add them.
@@ -48,6 +49,7 @@ public class ApacheRsaHttpAuthorization implements ApacheHttpAuthorization {
      */
     @Override
     public void addAuthorization(HttpEntityEnclosingRequest request) throws SignatureException, IOException {
+        log.debug("Signing request for URL: {}", request.getRequestLine().getUri());
         if( request.getEntity() == null ) {
             addAuthorization((HttpRequest)request);
             return;
@@ -57,7 +59,7 @@ public class ApacheRsaHttpAuthorization implements ApacheHttpAuthorization {
         }
         String body = IOUtils.toString(request.getEntity().getContent());
         
-        HashMap<String,String> headers = new HashMap<String,String>();
+        HashMap<String,String> headers = new HashMap<>();
         request.addHeader("Authorization",
                 authority.getAuthorizationQuietly(request.getRequestLine().getMethod(), request.getRequestLine().getUri(), headers, body));
         // the RsaAuthorization class may generate headers for the request such as nonce and date, so we look for those and add them.

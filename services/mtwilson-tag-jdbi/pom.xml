@@ -86,6 +86,11 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <version>${project.version}</version>        
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jooq-util</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
@@ -141,7 +146,15 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-objectpool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-jdbc</artifactId>
         </dependency>
 
         <!-- mtwilson integration -->
@@ -184,14 +197,10 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-            <type>jar</type>
         </dependency>
     <!--
         <dependency>
@@ -361,6 +370,14 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-dbcp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
     </dependencies>  
     
 </project>

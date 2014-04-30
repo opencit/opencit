@@ -114,7 +114,7 @@ public class ApacheHttpClient implements java.io.Closeable {
 
         if (config == null) {
             config = new SystemConfiguration();
-            log.info("ApacheHttpClient: using system configuration");
+            log.debug("ApacheHttpClient: using system configuration");
         }
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
@@ -200,28 +200,28 @@ public class ApacheHttpClient implements java.io.Closeable {
             boolean requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
             if (requireTrustedCertificate && verifyHostname) {
-                log.info("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
+                log.debug("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
                 return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
             } else if (requireTrustedCertificate && !verifyHostname) {
                 // two choices: trust first certificate or trust known certificate;  we choose trust first certificate as a usability default
                 // furthermore we assume that the api client keystore is a server-specific keystore (it's a client configured for a specific mt wilson server)
                 // that either has a server instance ssl cert or a cluster ssl cert.  either should work.
-                log.info("Using TLS Policy TRUST_FIRST_CERTIFICATE");
+                log.debug("Using TLS Policy TRUST_FIRST_CERTIFICATE");
                 KeystoreCertificateRepository repository = sslKeystore.getRepository();
                 return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
             } else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
-                log.info("Using TLS Policy INSECURE");
+                log.warn("Using TLS Policy INSECURE");
                 return new InsecureTlsPolicy();
             }
         } else if (tlsPolicyName.equals("TRUST_CA_VERIFY_HOSTNAME")) {
-            log.info("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
+            log.debug("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
             return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
         } else if (tlsPolicyName.equals("TRUST_FIRST_CERTIFICATE")) {
-            log.info("TLS Policy: TRUST_FIRST_CERTIFICATE");
+            log.debug("TLS Policy: TRUST_FIRST_CERTIFICATE");
             KeystoreCertificateRepository repository = sslKeystore.getRepository();
             return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
         } else if (tlsPolicyName.equals("TRUST_KNOWN_CERTIFICATE")) {
-            log.info("TLS Policy: TRUST_KNOWN_CERTIFICATE");
+            log.debug("TLS Policy: TRUST_KNOWN_CERTIFICATE");
             return new TrustKnownCertificateTlsPolicy(sslKeystore.getRepository(), pSelector);
         } else if (tlsPolicyName.equals("INSECURE")) {
             log.warn("TLS Policy: INSECURE");
@@ -352,29 +352,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if (response.getFirstHeader("Content-Type") != null) {
             String contentType = response.getFirstHeader("Content-Type").getValue();
             log.debug("We got Content-Type: " + contentType);
-            if ("text/plain".equals(contentType)) {
-                return MediaType.TEXT_PLAIN_TYPE;
-            }
-            if ("text/xml".equals(contentType)) {
-                return MediaType.TEXT_XML_TYPE;
-            }
-            if ("text/html".equals(contentType)) {
-                return MediaType.TEXT_HTML_TYPE;
-            }
-            if ("application/json".equals(contentType)) {
-                return MediaType.APPLICATION_JSON_TYPE;
-            }
-            if ("application/xml".equals(contentType)) {
-                return MediaType.APPLICATION_XML_TYPE;
-            }
-            if ("application/samlassertion+xml".equals(contentType)) {
-                return MediaType.APPLICATION_XML_TYPE;
-            }
-            if ("application/octet-stream".equals(contentType)) {
-                return MediaType.APPLICATION_OCTET_STREAM_TYPE;
-            }
-            log.warn("Got unsupported content type from server: " + contentType);
-            return MediaType.APPLICATION_OCTET_STREAM_TYPE;
+            return MediaType.valueOf(contentType);
         }
         log.warn("Missing content type header from server, assuming application/octet-stream");
         return MediaType.APPLICATION_OCTET_STREAM_TYPE;
@@ -415,7 +393,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse get(String requestURL, Headers headers) throws IOException, ApiException, SignatureException {
-        //log.debug("GET url: {}", requestURL);        
+        log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
         if (locale != null) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
@@ -438,7 +416,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse delete(String requestURL, Headers headers) throws IOException, SignatureException {
-        //log.debug("DELETE url: {}", requestURL);
+        log.debug("DELETE url: {}", requestURL);
         HttpDelete request = new HttpDelete(requestURL);
         if (locale != null) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
@@ -461,7 +439,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse put(String requestURL, ApiRequest message, Headers headers) throws IOException, SignatureException {
-        //log.debug("PUT url: {}", requestURL);
+        log.debug("PUT url: {}", requestURL);
         //log.debug("PUT content: {}", message == null ? "(empty)" : message.content);
         HttpPut request = new HttpPut(requestURL);
         if (message != null && message.content != null) {
@@ -487,7 +465,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse post(String requestURL, ApiRequest message, Headers headers) throws IOException, SignatureException {
-        //log.debug("POST url: {}", requestURL);
+        log.debug("POST url: {}", requestURL);
         //log.debug("POST content-type: {}", message == null ? "(empty)" : message.content.toString());
         //log.debug("POST content: {}", message == null ? "(empty)" : message.content);
         HttpPost request = new HttpPost(requestURL);

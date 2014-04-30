@@ -19,7 +19,14 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.commons.io.IOUtils;
 
 /**
- *
+ * On Tomcat 7 the ServletRequest we get is 
+ * org.apache.catalina.connector.RequestFacade which
+ * does not implement markSupported.
+ * 
+ * On Glassfish 4 the ServletRequest we get is also 
+ * org.apache.catalina.connector.RequestFacade which
+ * does not implement markSupported.
+ * 
  * @author jbuhacoff
  */
 public class RepeatableRequestFilter implements Filter {

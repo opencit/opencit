@@ -101,7 +101,16 @@ chown -R root /opt/trustagent/configuration
 mkdir -p /var/log/trustagent
 chown trustagent:trustagent /var/log/trustagent
 chmod -R 770 /opt/trustagent/bin
+mkdir -p /opt/trustagent/env.d
+chown -R root /opt/trustagent/env.d
 
+# If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
+# copy it to our new env.d folder so it will be available to tagent on startup
+if [ -n "$LIBVIRT_DEFAULT_URI" ]; then
+  echo "export LIBVIRT_DEFAULT_URI=$LIBVIRT_DEFAULT_URI" > /opt/trustagent/env.d/virsh
+elif [ -n "$VIRSH_DEFAULT_CONNECT_URI" ]; then
+  echo "export VIRSH_DEFAULT_CONNECT_URI=$VIRSH_DEFAULT_CONNECT_URI" > /opt/trustagent/env.d/virsh
+fi
 
 # Migrate any old data to the new locations  (should be rewritten in java)
 v1_aik=/etc/intel/cloudsecurity/cert
@@ -420,21 +429,6 @@ fi
 
 
 
-# TODO INSECURE need to rewrite this as a java setup task and leverage the
-#      existing tls policy for known mtwilson ssl cert 
-###
-#prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${ASSET_TAG_SETUP}
-#if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" ]]; then 
-#	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
-#	prompt_with_default ASSET_TAG_USERNAME "Username:" ${ASSET_TAG_USERNAME}
-#	prompt_with_default_password ASSET_TAG_PASSWORD "Password:" ${ASSET_TAG_PASSWORD}
-#	# json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
-#	# wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --header="Content-Type: application/json" --post-data="$json"
-#	TPM_PASSWORD=`read_property_from_file tpm.owner.secret /opt/trustagent/configuration/trustagent.properties`
-#	UUID=`dmidecode |grep UUID | awk '{print $2}'`
-#	echo "registering $TPM_PASSWORD to $UUID"
-#	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
-#fi
 
 
 # collect all the localhost ip addresses and make the list available as the

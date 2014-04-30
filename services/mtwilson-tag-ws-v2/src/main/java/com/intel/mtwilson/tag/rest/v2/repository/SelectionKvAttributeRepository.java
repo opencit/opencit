@@ -6,6 +6,7 @@ package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
@@ -48,10 +49,8 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
     @RequiresPermissions("tag_selection_kv_attributes:search")         
     public SelectionKvAttributeCollection search(SelectionKvAttributeFilterCriteria criteria) {
         SelectionKvAttributeCollection objCollection = new SelectionKvAttributeCollection();
-        DSLContext jooq = null;
-        
-        try {
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select()
                     .from(MW_TAG_KVATTRIBUTE.join(MW_TAG_SELECTION_KVATTRIBUTE, JoinType.JOIN)

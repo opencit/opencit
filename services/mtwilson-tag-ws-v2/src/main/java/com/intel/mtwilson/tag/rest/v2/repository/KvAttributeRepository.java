@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.jooq.util.UUIDConverter;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.KvAttribute;
@@ -40,12 +41,8 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     @RequiresPermissions("tag_kv_attributes:search")     
     public KvAttributeCollection search(KvAttributeFilterCriteria criteria) {
         KvAttributeCollection objCollection = new KvAttributeCollection();
-        KvAttributeDAO dao = null;
-        DSLContext jooq = null;
-        
-        try {
-            dao = TagJdbi.kvAttributeDao();
-            jooq = TagJdbi.jooq();
+        try(JooqContainer jc = TagJdbi.jooq()) {
+            DSLContext jooq = jc.getDslContext();
             
              SelectQuery sql = jooq.select().from(MW_TAG_KVATTRIBUTE).getQuery();
 //            SelectQuery sql = jooq.select(MW_TAG_KVATTRIBUTE.ID.coerce(byte[].class), MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE).from(MW_TAG_KVATTRIBUTE).getQuery();
@@ -96,9 +93,6 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
         } catch (Exception ex) {
             log.error("Error during attribute search.", ex);
             throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
-        } finally {
-            if (dao != null)
-                dao.close();
         }        
         return objCollection;
     }

@@ -18,6 +18,11 @@ import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.setup.SetupException;
+import com.intel.mtwilson.shiro.jdbi.LoginDAO;
+import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.shiro.jdbi.model.Status;
+import com.intel.mtwilson.shiro.jdbi.model.User;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Hex;
@@ -100,15 +105,19 @@ public class TagCreateMtWilsonClient extends TagCommand {
         // and the application setup manager would write all the properties out to mtwilson.properties
         // file at the end of setup
         Properties p = new Properties();
-        p.setProperty("mtwilson.api.url", mtwilsonUrl);
-        p.setProperty("mtwilson.api.username", mtwilsonClientKeystoreUsername);
-        p.setProperty("mtwilson.api.password", mtwilsonClientKeystorePassword);
+        p.setProperty("mtwilson.tag.api.url", mtwilsonUrl);
+        p.setProperty("mtwilson.tag.api.username", mtwilsonClientKeystoreUsername);
+        p.setProperty("mtwilson.tag.api.password", mtwilsonClientKeystorePassword);
         //p.store(System.out, "mtwilson.properties"); // user is responsible for copying this into mtwilson.properties (and it might be encrypted etc)
 
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
         
         try {
-            ApproveMtWilsonClient(rsaCredentialX509.identity());
+            approveMtWilsonClient(rsaCredentialX509.identity());
+            try (LoginDAO loginDAO = MyJdbi.authz()) {
+                ApproveUser(loginDAO, mtwilsonClientKeystoreUsername);
+                ApproveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
+            }
             System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
          }
          catch(Exception e) {
@@ -118,7 +127,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         
     }
     
-    private void ApproveMtWilsonClient(byte[] fingerprint) {
+    private void approveMtWilsonClient(byte[] fingerprint) {
         try {
             System.out.println(String.format("Searching for client by fingerprint: %s", Hex.encodeHexString(fingerprint)));
             ApiClientX509JpaController x509jpaController = My.jpa().mwApiClientX509();
@@ -134,6 +143,16 @@ public class TagCreateMtWilsonClient extends TagCommand {
         catch(Exception e) {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }
+    }
+    
+    private void ApproveUser(LoginDAO loginDAO, String username) {
+        User user = loginDAO.findUserByName(username);
+        loginDAO.enableUser(user.getId(), true, Status.APPROVED, "");
+    }
+    
+    private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
+        UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
+        loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");
     }
             
     

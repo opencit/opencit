@@ -31,7 +31,16 @@
     <url-pattern>*.jsp</url-pattern>
   </filter-mapping>
   
+  <servlet>
+    <servlet-name>V2Proxy</servlet-name>
+    <servlet-class>com.intel.mountwilson.util.V2Proxy</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>V2Proxy</servlet-name>
+    <url-pattern>/v2proxy/*</url-pattern>
+  </servlet-mapping>
   
+  <!--
 <filter>
     <filter-name>UrlRewriteFilter</filter-name>
     <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
@@ -48,7 +57,7 @@
     <filter-name>UrlRewriteFilter</filter-name>
     <url-pattern>/v2proxy/*</url-pattern>
 </filter-mapping>
-
+    -->
     
   <welcome-file-list>
   	<welcome-file>Login.jsp</welcome-file>

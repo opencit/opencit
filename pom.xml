@@ -22,6 +22,7 @@
     
   <modules>
     <module>common</module>
+    <module>util</module>
     <module>database</module>
     <module>integration</module>
     <module>trust-agent</module>
@@ -660,6 +661,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
     </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-objectpool</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-performance</artifactId>
         <version>0.2-SNAPSHOT</version>
     </dependency>
@@ -677,6 +683,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-util</artifactId>
             <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-jdbc</artifactId>
+            <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>

@@ -1341,6 +1341,7 @@ add_postgresql_install_packages() {
   yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
   #echo_warning "aptget = $aptget, apt_packages = $apt_packages"
   if [[ -n "$aptget" && -n "$apt_packages" ]]; then
+    echo "Checking to see if postgresql package is available for install..."
     pgAddPackRequired=`apt-cache search \`echo $apt_packages | cut -d' ' -f1\``
     #echo_warning "found packages $pgAddPackRequired"
     if [ -z "$pgAddPackRequired" ]; then
@@ -1349,6 +1350,7 @@ add_postgresql_install_packages() {
         echo_failure "User declined to add \"$apt_packages\" to local apt repository. Exiting installation..."
         exit -1
       fi
+      echo_warning "Adding \"$apt_packages\" package(s) to installer repository..."
       codename=`cat /etc/*-release | grep DISTRIB_CODENAME | sed 's/DISTRIB_CODENAME=//'`
       echo "deb http://apt.postgresql.org/pub/repos/apt/ $codename-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
       # mtwilson-server installer now includes ACCC4CF8.asc and copies it to /etc/apt/trusted.gpg.d
@@ -1377,7 +1379,7 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3 pgadmin3 postgresql-contrib-9.3"
 
   postgres_clear; postgres_server_detect >> $INSTALL_LOG_FILE
-  echo_warning "postgres_server_install postgres_com = $postgres_com"
+  #echo "postgres_server_install postgres_com = $postgres_com"
   if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
@@ -2194,6 +2196,8 @@ glassfish_running() {
   return 1
 }
 
+# you should call glassfish_clear and glassfish_detect before calling this
+# if you don't already have a $glassfish variable with the glassfish admin password
 glassfish_running_report() {
   echo -n "Checking Glassfish process... "
   if glassfish_running; then
@@ -2431,6 +2435,7 @@ glassfish_create_ssl_cert() {
 
     #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${tmpHost}.crt" -out /tmp/mycert.der -outform DER
     #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
+    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
     cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
@@ -3629,10 +3634,14 @@ decrypt_file() {
     #echo -n "Decrypting file [$filename]....."
     call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
     if file_encrypted $filename; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; exit -1; fi
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+      return 1
+    fi
+    return 0
     #echo_success " Done"
   else
-    echo_warning "File NOT found: $filename"
+    echo_warning "File not found: $filename"
+    return 2
   fi
 }
 
@@ -3906,10 +3915,18 @@ change_db_pass() {
     let count++
   done
   
+  local decryption_error=false
   for i in ${encrypted_files[@]}; do
     decrypt_file "$i" "$cryptopass"
+    if [ $? != 0 ]; then
+      decryption_error=true
+    fi
   done
-
+  if $decryption_error; then
+    echo_error "Cannot decrypt configuration files; please set MTWILSON_PASSWORD"
+    return 1
+  fi
+  
   load_conf
   load_defaults
   
@@ -3934,9 +3951,10 @@ change_db_pass() {
     # Edit postgres password file if it exists
     if [ -f /root/.pgpass ]; then
       echo -n "Updating database password value in .pgpass file...."
-      temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
-      temp="$temp:$new_db_pass"
-      echo $temp > /root/.pgpass;
+      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' /root/.pgpass
+      #temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
+      #temp="$temp:$new_db_pass"
+      #echo $temp > /root/.pgpass;
     fi
     echo_success "Done"
   fi
@@ -3948,13 +3966,17 @@ change_db_pass() {
     echo_success "Done"
   done
 
-  # Update password in mtwilson.env file
-  if [ -f /root/mtwilson.env ]; then
-    echo -n "Updating database password value in mtwilson.env file...."
-    export sed_escaped_value=$(sed_escape $new_db_pass)
-    sed -i -e 's/DATABASE_PASSWORD=[^\n]*/DATABASE_PASSWORD='\'"$sed_escaped_value"\''/g' "/root/mtwilson.env"
-    echo_success "Done"
-  fi
+  # 20140427 commented out the update to mtwilson.env because
+  # running system should not depend on it or update it in any way;
+  # the mtwilson.env is for install time only and is assumed to be 
+  # deleted after install.
+  ## Update password in mtwilson.env file
+  #if [ -f /root/mtwilson.env ]; then
+  #  echo -n "Updating database password value in mtwilson.env file...."
+  #  export sed_escaped_value=$(sed_escape $new_db_pass)
+  #  sed -i -e 's/DATABASE_PASSWORD=[^\n]*/DATABASE_PASSWORD='\'"$sed_escaped_value"\''/g' "/root/mtwilson.env"
+  #  echo_success "Done"
+  #fi
 
   # Restart
   if using_glassfish; then

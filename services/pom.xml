@@ -19,6 +19,7 @@
 	<module>mtwilson-audit-data</module>
 	<module>mtwilson-citrix-hostagent</module>
 	<module>mtwilson-configuration-ws-v2</module>
+	<module>mtwilson-feature-jdbi</module>
 	<module>mtwilson-hostagent-ext</module>
 	<module>mtwilson-http-servlets</module>
 	<module>mtwilson-intel-hostagent</module>
@@ -42,6 +43,7 @@
 	<module>mtwilson-shiro-setup</module>
 	<module>mtwilson-shiro-util</module>
 	<module>mtwilson-shiro-ws-v2</module>
+	<module>mtwilson-tag-client-jaxrs2</module>
 	<module>mtwilson-tag-dao-jooq</module>
 	<module>mtwilson-tag-jdbi</module>
 	<module>mtwilson-tag-model</module>

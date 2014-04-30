@@ -58,16 +58,15 @@ load_defaults
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
  echo_warning "Program files are writable by the web service container, this is a possible security issue"
 else
- ret=false
- getent passwd $MTWILSON_OWNER >/dev/null && ret=true
- if $ret; then
-  echo "Mt Wilson owner account already created, moving on"
- else
+ getent passwd $MTWILSON_OWNER >/dev/null
+ if [ $? != 0 ]; then
   echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
   #prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
   #pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
   useradd -s /bin/false -d /opt/mtwilson $MTWILSON_OWNER
-  echo "Account Created!"
+  if [ $? != 0 ]; then
+    echo_warning "Failed to create user '$MTWILSON_OWNER'"
+  fi
  fi
 fi
 
@@ -252,6 +251,7 @@ fi
 # use "hostFilter.allow" when using the access-denying filter (any clients not from that list of ip's will be denied)
 # use "iniHostRealm.allow" when using the access-allowing filter (any clients from that list of ip's will be allowed access but clients from other ip's can still try password or x509 authentication) - this is the current default
 hostAllowPropertyName=iniHostRealm.allow
+sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' /etc/intel/cloudsecurity/shiro.ini
 hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecurity/shiro.ini`
 if [[ $hostAllow != *$MTWILSON_SERVER* ]]; then
   update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_SERVER";
@@ -260,6 +260,7 @@ hostAllow=`read_property_from_file $hostAllowPropertyName /etc/intel/cloudsecuri
 if [[ $hostAllow != *$MTWILSON_IP* ]]; then
   update_property_in_file "$hostAllowPropertyName" /etc/intel/cloudsecurity/shiro.ini "$hostAllow,$MTWILSON_IP";
 fi
+sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' /etc/intel/cloudsecurity/shiro.ini
 
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
  update_property_in_file "mtwilson.api.url" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_API_BASEURL"
@@ -423,16 +424,13 @@ if using_mysql; then
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
   
 elif using_postgres; then
+  postgres_installed=1
   # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
   if [ -d "/etc/apt" ]; then
-    echo_warning "setting up postgres apt repo"
-	
     mkdir -p /etc/apt/trusted.gpg.d
     chmod 755 /etc/apt/trusted.gpg.d
     cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
     POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
-	
-	echo_warning "Checking to see if postgresql package is available for install..."
     add_postgresql_install_packages "POSTGRES_SERVER"
   fi
 
@@ -440,7 +438,13 @@ elif using_postgres; then
   touch ~/.pgpass
   chmod 0600 ~/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+  if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
+    PGPASS_HOSTNAME=localhost
+  else
+    PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
+  fi
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
+  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
 
   if [ ! -z "$opt_postgres" ]; then
     # postgres server install 
@@ -453,8 +457,8 @@ elif using_postgres; then
       aptget_detect; dpkg_detect; yum_detect;
       if [[ -n "$aptget" ]]; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
-      fi 
-
+      fi
+      postgres_installed=0 #postgres is being installed
       # don't need to restart postgres server unless the install script says we need to (by returning zero)
       if postgres_server_install; then
         postgres_restart >> $INSTALL_LOG_FILE
@@ -486,12 +490,23 @@ elif using_postgres; then
   # postgress db init end
   else
     echo_warning "Skipping init of database"
-  fi 
- 
+  fi
+  if [ $postgres_installed -eq 0 ]; then
+    postgres_server_detect
+    has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
+    if [ -n "$has_local_peer" ]; then
+      echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
+      sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
+    fi
+    #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
+    if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
+      if [ -f /root/.pgpass ]; then
+        echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
+        rm /root/.pgpass
+      fi
+    fi
+  fi
 fi
-
-
-
 
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER

@@ -24,6 +24,11 @@ import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.setup.helper.SCPersistenceManager;
+import com.intel.mtwilson.shiro.jdbi.LoginDAO;
+import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.shiro.jdbi.model.Status;
+import com.intel.mtwilson.shiro.jdbi.model.User;
+import com.intel.mtwilson.shiro.jdbi.model.UserLoginCertificate;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
@@ -176,8 +181,31 @@ public class BootstrapUser implements Command {
             client.setStatus("Approved");
             client.setEnabled(true);
             x509jpaController.edit(client);
-        }
-        catch(Exception e) {
+            
+            try(LoginDAO loginDAO = MyJdbi.authz()) {
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(fingerprint);
+                if (userLoginCertificate != null) {
+                    userLoginCertificate.setEnabled(true);
+                    userLoginCertificate.setStatus(Status.APPROVED);
+                    userLoginCertificate.setComment("Approved during setup");
+                    loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), userLoginCertificate.isEnabled(), 
+                            userLoginCertificate.getStatus(), userLoginCertificate.getComment());
+                }
+
+                User user = loginDAO.findUserByName(username);
+                if (user != null) {
+                    user.setEnabled(true);
+                    user.setStatus(Status.APPROVED);
+                    user.setComment("Approved during setup");
+                    loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
+                }
+            } catch (Exception ex) {
+                throw new SetupException("Error updating user and user certificate tables. " + ex.getMessage(), ex);
+            }
+            
+        } catch (SetupException se) {
+            throw se;
+        } catch(Exception e) {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }        
     }

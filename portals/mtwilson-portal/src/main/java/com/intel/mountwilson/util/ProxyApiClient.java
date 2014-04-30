@@ -85,33 +85,55 @@ public class ProxyApiClient extends ApiClient {
      * Facilitates integration of tag management UI into mtwilson-portal by
      * allowing it to access mtwilson APIs using the credentials of the 
      * portal user.
-     * See also V2Proxy.jsp
+     * See also V2Proxy.java
      * 
      * @param request
      * @param response
      * @throws Exception 
      */
     public void proxy(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String proxyUrl = request.getParameter("proxyUrl"); /*request.getPathInfo()*/
+        log.debug("path info: {}", request.getPathInfo()); // example:  path info: /configurations
+//        log.debug("context path: {}", request.getContextPath()); // example:   context path: /mtwilson-portal
+//        log.debug("path translated: {}", request.getPathTranslated()); // example:  path translated: /usr/share/glassfish4/glassfish/domains/domain1/applications/mtwilson-portal-2.0-SNAPSHOT/configurations  (assumes file on disk which of course doesn't make sense for an api unless we have some static content for some GET urls)
+//        log.debug("request uri: {}", request.getRequestURI()); // example: request uri: /mtwilson-portal/v2proxy/configurations
+//        log.debug("sevlet path: {}", request.getServletPath()); // example: servlet path: /v2proxy
+        log.debug("query string: {}", request.getQueryString());
+        
+        String proxyUrl  = request.getPathInfo();
         /*
-        if( proxyUrl.startsWith("/v2proxy") ) {
-            proxyUrl = proxyUrl.replaceFirst("/v2proxy", "");
-        }*/
+        String proxyUrl = request.getParameter("proxyUrl");
+//        if( proxyUrl.startsWith("/v2proxy") ) {
+//            proxyUrl = proxyUrl.replaceFirst("/v2proxy", "");
+//        }
+        */
         if( proxyUrl.startsWith("/") ) {
             proxyUrl = proxyUrl.replaceFirst("/", "");
         }
         
+        /*
         // reconstruct the query string without the proxyUrl parameter, instead of using  request.getQueryString() which would also include it
         // unfortunately because of the way the proxy is configured we get every parameter twice 
         MutableQuery query = new MutableQuery(request.getParameterMap());
         query.removeAll("proxyUrl");
         removeDuplicateParameters(query);
         String queryString = query.toString();
+        */
+        String queryString = request.getQueryString();
+        if( queryString == null ) { queryString = ""; }
+        if( queryString.startsWith("?") ) {
+            queryString = queryString.replaceFirst("?", "");
+        }
+        
         String querySeparator = "?";
         if( queryString.isEmpty()) { querySeparator = ""; }
             
         // TODO:  remove the requestUrl parameter from the query string before passing it on 
-        String urltext = String.format("%s://%s:%d/mtwilson/v2/%s%s%s", request.getScheme(), request.getLocalName(), request.getLocalPort(), proxyUrl, querySeparator, queryString);
+        log.debug("Request URI: {}", request.getRequestURI()); // looks like this:  /mtwilson-portal/v2proxy/configurations
+        log.debug("Request URL: {}", request.getRequestURL()); // looks like this:  https://10.1.71.49:8443/mtwilson-portal/v2proxy/configurations
+        int pathIndex = request.getRequestURL().toString().indexOf(request.getRequestURI());
+        String server = request.getRequestURL().toString().substring(0, pathIndex);
+//        String server = String.format("%s://%s:%d", request.getScheme(), request.getLocalName(), request.getLocalPort()); // this is wrong because if client sends https://192.168.1.100:8443  but the local /etc/hosts file has 192.168.1.100 mapped to "testserver"  then we would see here https://testserver:8443 which is fine for networking but will cause the signature on the original request to be unverifiable by the server (since the client signed the URL *they* used, not the URL we are rewriting - so we have to keep it the same)
+        String urltext = String.format("%s/mtwilson/v2/%s%s%s", server, proxyUrl, querySeparator, queryString);
         log.debug("Proxy URL: {}", urltext);
         log.debug("Proxy Content-Type: {}", request.getContentType()); // example:    application/json; charset=UTF-8
         //  MediaType.valueof(...)  can't handle the  parameters like "; charset=UTF-8"  so we have to strip them out ... TODO parse the content type and then use the MediaType constructor that accepts a map of already-parsed parameters,

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tag.dao;
 
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateRequestDAO;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.dao.jdbi.TpmPasswordDAO;
@@ -13,11 +14,12 @@ import com.intel.mtwilson.tag.dao.jdbi.SelectionKvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
+import com.intel.mtwilson.MyPersistenceManager;
+import com.intel.mtwilson.jooq.util.JooqContainer;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.RenderNameStyle;
@@ -30,38 +32,25 @@ import org.slf4j.LoggerFactory;
 public class TagJdbi {
 
     private static Logger log = LoggerFactory.getLogger(TagJdbi.class);
-    public static Connection conn = null;
     public static DataSource ds = null;
+    
+    synchronized public static void createDataSource() throws IOException {
+        if( ds == null ) {
+            ds = PersistenceManager.createDataSource(MyPersistenceManager.getASDataJpaProperties(My.configuration()));
+       }
+    }
 
-    public static DataSource getDataSource() {        
-        try {
-            if (ds == null) {
-                String driver = My.jdbc().driver();
-                String dbUrl = My.jdbc().url();                
-                BasicDataSource dataSource = new BasicDataSource();
-                dataSource.setDriverClassName(driver); // or com.mysql.jdbc.Driver  for mysql
-                dataSource.setUrl(dbUrl);
-                dataSource.setUsername(My.configuration().getDatabaseUsername());
-                dataSource.setPassword(My.configuration().getDatabasePassword());
-                ds = dataSource;
+    public static DataSource getDataSource() throws SQLException {        
+        if (ds == null) {
+            try {
+                createDataSource();
             }
-        } catch (Exception ex) {
-            log.error("Error connecting to the database. {}", ex.getMessage());
+            catch(IOException e) {
+                throw new SQLException(e);
+            }
         }
         return ds;
     }
-
-    public static Connection getConnection() {
-        try {
-            if (conn == null) {
-                conn = getDataSource().getConnection();
-            }
-            return conn;
-        } catch (Exception ex) {
-            log.error("Error connection to the database. {}", ex.getMessage());
-        }
-        return null;
-    }    
 
     public static KvAttributeDAO kvAttributeDao() throws SQLException {
         DBI dbi = new DBI(getDataSource());
@@ -104,14 +93,16 @@ public class TagJdbi {
         return dbi.open(FileDAO.class);
     }
 
-    public static DSLContext jooq() throws SQLException, IOException {
+    public static JooqContainer jooq() throws SQLException, IOException {
         // omits the schema name from generated sql ; when we connect to the database we already specify a schema so this settings avoid 
         // redundancy in the sql and allows the administrator to change the database name without breaking the application
         Settings settings = new Settings().withRenderSchema(false).withRenderNameStyle(RenderNameStyle.LOWER);
         SQLDialect dbDialect = getSqlDialect();
         // throws SQLException; Note that the DSLContext doesn't close the connection. We'll have to do that ourselves.
-        DSLContext jooq = DSL.using(TagJdbi.getConnection(), dbDialect, settings);
-        return jooq;
+        Connection connection = TagJdbi.getDataSource().getConnection();
+        DSLContext jooq = DSL.using(connection, dbDialect, settings);
+        
+        return new JooqContainer(jooq, connection);
     }
     
     public static SQLDialect getSqlDialect() throws IOException {
