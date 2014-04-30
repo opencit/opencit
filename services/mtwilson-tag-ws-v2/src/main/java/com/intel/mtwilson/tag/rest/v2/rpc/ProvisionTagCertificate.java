@@ -132,8 +132,7 @@ public class ProvisionTagCertificate  {
             }
         }
         if( selections == null ) {
-            // default empty selection, which will only work if someone has already generated the necessary certificate and ensured it will be found (below) by making it the only valid cert for that host for a specific time period
-            selections = SelectionBuilder.factory().selection().build();
+            throw new Exception("Invalid selections");
         }
         // if external ca is configured then we only save the request to the database and indicate async processing in our response
         if( configuration.isTagProvisionExternal() || isAsync(request) ) {
@@ -142,7 +141,12 @@ public class ProvisionTagCertificate  {
             return null;
         }
         // if always-generate / no-cache is enabled then generate it right now and return it - no need to check database for existing certs etc. 
-        if( configuration.isTagProvisionNoCache() ) {
+        String cacheMode = "on";
+        if( selections.getOptions() != null && selections.getOptions().getCache() != null && selections.getOptions().getCache().getMode() != null ) {
+            cacheMode = selections.getOptions().getCache().getMode().value();
+        }
+        
+        if( "on".equals(cacheMode) ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;

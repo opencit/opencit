@@ -196,10 +196,12 @@ public class TagCertificateAuthority {
                 }
             }
         }
-        // third search for default selection (no subjects declared) return the first one found
-        for (SelectionType selection : currentSelections.getSelection()) {
-            if (selection.getSubject().isEmpty()) {
-                return getInlineOrLookupSelection(selection);
+        // third search for default selection (no subjects declared)  
+        if( currentSelections.getDefault() != null ) {
+            for (SelectionType selection : currentSelections.getDefault().getSelection()) {
+                if (selection.getSubject().isEmpty()) {
+                    return getInlineOrLookupSelection(selection);
+                }
             }
         }
         /*

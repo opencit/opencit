@@ -38,7 +38,6 @@ public class TagConfiguration extends AbstractConfiguration {
 //    public static final String TAG_KEY_PASSWORD = "tag.key.password";
     public static final String TAG_ISSUER = "tag.issuer.dn"; // tag.certificate.dn 
     public static final String TAG_VALIDITY_SECONDS = "tag.validity.seconds";
-    public static final String TAG_ALWAYS_GENERATE_NEW_CERTIFICATE = "tag.provision.nocache";
     public static final String TAG_AUTO_IMPORT_TO_MTWILSON = "tag.provision.autoimport";
     public static final String TAG_PROVISION_EXTERNAL_CA = "tag.provision.external";
     public static final String TAG_PROVISION_SELECTION_DEFAULT = "tag.provision.selection.default";
@@ -56,10 +55,6 @@ public class TagConfiguration extends AbstractConfiguration {
     
     public boolean isTagProvisionAutoImport() {
         return getConfiguration().getBoolean(TAG_AUTO_IMPORT_TO_MTWILSON, true);
-    }
-    
-    public boolean isTagProvisionNoCache() {
-        return getConfiguration().getBoolean(TAG_ALWAYS_GENERATE_NEW_CERTIFICATE, true);
     }
     
     public boolean isTagProvisionExternal() {
