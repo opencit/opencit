@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@RPC("create_whitelist")
+@RPC("create-whitelist")
 @JacksonXmlRootElement(localName="create_whitelist")
 public class CreateWhiteListRunnable implements Runnable{
 

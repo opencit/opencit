@@ -28,78 +28,121 @@ public class Oss extends MtWilsonClient {
         super(url);
     }
 
-    /**     
-     * Initializes the <class>OSS</class> with the Mt.Wilson configuration properties.      * 
-     * @param properties Properties associated with the Mt.Wilson configuration. 
-     * Use the getClientProperties() of <class>MyConfiguration</class> for initializing.
-     * @throws Exception 
-     
-     * @param properties
-     * @throws Exception 
-     * 
-     */
     public Oss(Properties properties) throws Exception {
         super(properties);
     }
     
+     /**
+     * Creates an Os object with the specified parameters in the system. This would be used to associate with VMM/Hypervisor 
+     * MLE[Measured Launch Environment] during its creation. Both OS name and version are required parameters. Description field is optional.
+     * @param OS - Os object that needs to be created. Name and Version have to be specified by the caller. If the caller specifies the ID,
+     * it has to be a valid UUID. If not provided, it would be automatically generated.
+     * @return <code> Os </code> that is created.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oss:create
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType POST
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8443/mtwilson/v2/oss
+     * Input: {"name":"TestOS 1","description":"","version":"1.2.3"}
+     * Output: {"id":"e946ccec-4a55-4913-bdb6-5878c88a9e81","name":"TestOS1","version":"1.2.3","description":""}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Properties prop = My.configuration().getClientProperties();
+     *  Oss client = new Oss(prop);
+     *  Os newOs = new Os();
+     *  newOs.setName("TestOS1");
+     *  newOs.setVersion("1.2.3");
+     *  newOs.setDescription("");
+     *  newOs = client.createOs(newOs);
+     * </pre>
+     *      
+    */
+    public Os createOs(Os os) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Os newObj = getTarget().path("oss").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(os), Os.class);
+        return newObj;
+    }
+
+    /**
+     * Deletes the Os with the specified UUID from the system. An OS can be deleted only if it is not associated with any MLEs.
+     * @param uuid - UUID of the OS that has to be deleted.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oss:delete
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://10.1.71.234:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Properties prop = My.configuration().getClientProperties(); 
+     *  Oss client = new Oss(prop);
+     *  client.deleteOs("e946ccec-4a55-4913-bdb6-5878c88a9e81");
+     * </pre>
+     */
+    public void deleteOs(String uuid) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("id", uuid);
+        Response obj = getTarget().path("oss/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        log.debug(obj.toString());
+    }
+
+    /**
+     * Updates the details of the Os in the system. Only the description of the OS can be updated. 
+     * @param OS - Os object that needs to be updated. The caller needs to provide the ID of the object along with the description.
+     * @return <code> Os </code> that is updated.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oss:store
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType PUT
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8443/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
+     * Input: {"description":"Added description"}
+     * Output: {"id":"e946ccec-4a55-4913-bdb6-5878c88a9e81","description":"Added description"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     * Properties prop = My.configuration().getClientProperties();
+     * Oss client = new Oss(prop);  
+     * Os os = new Os();
+     * os.setId(UUID.valueOf("e946ccec-4a55-4913-bdb6-5878c88a9e81"));
+     * os.setDescription("Added description");
+     * os = client.editOs(os);
+     * </pre>     
+     */
+    public Os editOs(Os obj) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("id", obj.getId().toString());
+        Os newObj = getTarget().path("oss/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), Os.class);
+        return newObj;
+    }
      
      /**
-     * Searches for the OS's with the specified set of criteria
-     * @param criteria - <code> OsFilterCriteria </code> expressing the filter criteria
-     *      The possible search options include id, nameEqualTo and nameContains.
-     * @return <code> OsCollection </code> that meets the filter criteria
-     * The search always returns back a collection.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/oss?nameContains=VMWare
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   oss: [2]
-     *       0:  {
-     *           id: "d5b084f3-c0c0-11e3-bfb2-005056b5643f"
-     *           name: "VMWare"
-     *           version: "5.0"
-     *       }
-     *       1:  {
-     *           id: "b7acfc54-f37c-4630-aec7-0e9f22fee6ec"
-     *           name: "VMware_ESXi"
-     *           version: "5.5.0"
-     *       }
-     *   }
-     * 
-     */
-    public OsCollection searchOss(OsFilterCriteria criteria) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        OsCollection objCollection = getTargetPathWithQueryParams("oss", criteria).request(MediaType.APPLICATION_JSON).get(OsCollection.class);
-        return objCollection;
-    }
-    
-     /**
-     * Retrieves the OS with the specified uuid
-     * @param uuid - UUID of the US to be retrieved from the backend
-     * @return <code> OS </code> that is retrieved from the backend
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/oss/b7acfc54-f37c-4630-aec7-0e9f22fee6ec
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *  id: "b7acfc54-f37c-4630-aec7-0e9f22fee6ec"
-     *  name: "VMware_ESXi"
-     *  version: "5.5.0"
-     * }
-     * 
+     * Retrieves the Os with the specified uuid
+     * @param uuid - UUID of the Os to be retrieved
+     * @return <code> Os </code> matching the specified UUID.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oss:retrieve
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
+     * Output: {"id":"e946ccec-4a55-4913-bdb6-5878c88a9e81","name":"TestOS1","version":"1.2.3","description":"Added description"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     * Properties prop = My.configuration().getClientProperties();
+     * Oss client = new Oss(prop);  
+     * Os retrieveOs = client.retrieveOs("e946ccec-4a55-4913-bdb6-5878c88a9e81");
+     * </pre>
      */
     public Os retrieveOs(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -109,91 +152,33 @@ public class Oss extends MtWilsonClient {
         return obj;
     }
 
-     /**
-     * Creates an OS object with the specified parameters.
-     * 
-     * @param OS - OS object that needs to be created. It should be a non-null object with name and description.
-     * @return <code> OS </code> that is created in the database
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
-     * https://10.1.71.234:8443/mtwilson/v2/oss
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"name":"Test123","description":"Intel OEM","version":"v1.2.3"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *  id: "e946ccec-4a55-4913-bdb6-5878c88a9e81"
-     *  name: "Test123"
-     *  version: "v1.2.3"
-     *  description: "Intel OEM"
-     * }
-     *      
-    */
-    public Os createOs(Os os) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        Os newObj = getTarget().path("oss").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(os), Os.class);
-        return newObj;
-    }
-
-      /**
-     * Edits/Updates the OS in the database. 
-     * @param OS - OS that needs to be updated.
-     * @return <code> OS </code> post updation with the specified properties.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: PUT</i><br>
-     * https://10.1.71.234:8443/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"name":"Test1234","description":"Intel OEM updated"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     * id: "e946ccec-4a55-4913-bdb6-5878c88a9e81"
-     * name: "Test1234"
-     * description: "Intel OEM updated"
-     * }
-     *      
-     */
-    public Os editOs(Os obj) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", obj.getId().toString());
-        Os newObj = getTarget().path("oss/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), Os.class);
-        return newObj;
-    }
-
     /**
-     * Deletes the OS with the specified UUID from the database
-     * @param uuid - UUID of the OS that has to be deleted.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: DELETE</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
-     * <p>
-     * <i><u>Sample Output: NA </u></i><br>
-     * 
+     * Searches for the OS's with the specified set of criteria
+     * @param criteria - <code> OsFilterCriteria </code> expressing the filter criteria
+     *      The possible search options include id, nameEqualTo and nameContains.
+     * @return <code> OsCollection </code> that meets the filter criteria
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oss:search
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/oss?nameContains=VMWare
+     * Output: {"oss":[{"id":"2ffa07cf-ca9f-11e3-8449-005056b5643f","name":"VMWare","version":"5.0"}]}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     * Properties prop = My.configuration().getClientProperties();
+     * Oss client = new Oss(prop);  
+     * OsFilterCriteria criteria = new OsFilterCriteria();
+     * criteria.nameContains = "VMWare";
+     * OsCollection oss = client.searchOss(criteria);
+     * </pre>
      */
-    public void deleteOs(String uuid) {
+    public OsCollection searchOss(OsFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", uuid);
-        Response obj = getTarget().path("oss/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
-        log.debug(obj.toString());
+        OsCollection objCollection = getTargetPathWithQueryParams("oss", criteria).request(MediaType.APPLICATION_JSON).get(OsCollection.class);
+        return objCollection;
     }
     
 }

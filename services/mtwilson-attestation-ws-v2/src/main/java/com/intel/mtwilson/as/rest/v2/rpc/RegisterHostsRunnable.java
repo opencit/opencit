@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 // The same api can be used for both single host registration and bulk host registrations. For single host
 // registration the user will pass in the list with a single item.
-@RPC("register_hosts")
+@RPC("register-hosts")
 @JacksonXmlRootElement(localName="register_hosts")
 public class RegisterHostsRunnable implements Runnable{
     
