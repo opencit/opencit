@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmPasswordCollection, TpmPasswordFilterCriteria, TpmPasswordLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmPasswordRepository.class);
+    
 
     @Override
     @RequiresPermissions("tpm_passwords:search")         

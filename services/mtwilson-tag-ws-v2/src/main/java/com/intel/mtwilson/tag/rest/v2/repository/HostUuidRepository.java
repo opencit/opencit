@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
  */
 public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCollection, HostUuidFilterCriteria, HostUuidLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostUuidRepository.class);
+    
 
     @Override
     @RequiresPermissions("host_uuids:search")         

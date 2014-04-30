@@ -43,7 +43,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SelectionKvAttributeRepository implements SimpleRepository<SelectionKvAttribute, SelectionKvAttributeCollection, SelectionKvAttributeFilterCriteria, SelectionKvAttributeLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionKvAttributeRepository.class);
+    
 
     @Override
     @RequiresPermissions("tag_selection_kv_attributes:search")         

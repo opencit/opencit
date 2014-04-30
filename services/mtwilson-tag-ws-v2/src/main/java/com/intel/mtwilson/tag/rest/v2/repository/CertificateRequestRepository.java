@@ -40,7 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CertificateRequestRepository implements SimpleRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRequestRepository.class);
+    
 
     @Override
     @RequiresPermissions("tag_certificate_requests:search") 

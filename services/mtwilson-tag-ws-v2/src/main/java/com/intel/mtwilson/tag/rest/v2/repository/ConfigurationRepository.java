@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationRepository implements SimpleRepository<Configuration, ConfigurationCollection, ConfigurationFilterCriteria, ConfigurationLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationRepository.class);
+    
 
     @Override
     @RequiresPermissions("configurations:search")     

@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
 @Path("/files")
 public class Files extends AbstractJsonapiResource<File, FileCollection, FileFilterCriteria, NoLinks<File>, FileLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Files.class);
+
     private FileRepository repository;
     
     public Files() {

@@ -35,9 +35,8 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 public class CertificateRepository implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
-
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRepository.class);
+    
     @Override
     @RequiresPermissions("tag_certificates:search") 
     public CertificateCollection search(CertificateFilterCriteria criteria) {

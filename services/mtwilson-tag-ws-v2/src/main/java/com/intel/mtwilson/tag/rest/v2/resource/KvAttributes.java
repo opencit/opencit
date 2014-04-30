@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 @Path("/tag-kv-attributes")
 public class KvAttributes extends AbstractJsonapiResource<KvAttribute, KvAttributeCollection, KvAttributeFilterCriteria, NoLinks<KvAttribute>, KvAttributeLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KvAttributes.class);
+
     private KvAttributeRepository repository;
     
     public KvAttributes() {

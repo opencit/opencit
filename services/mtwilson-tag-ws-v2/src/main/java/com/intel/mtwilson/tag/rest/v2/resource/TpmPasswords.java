@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
 @Path("/host-tpm-passwords")
 public class TpmPasswords extends AbstractJsonapiResource<TpmPassword, TpmPasswordCollection, TpmPasswordFilterCriteria, NoLinks<TpmPassword>, TpmPasswordLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmPasswords.class);
+
     private TpmPasswordRepository repository;
     
     public TpmPasswords() {

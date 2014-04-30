@@ -45,7 +45,8 @@ import org.slf4j.LoggerFactory;
 @Path("/tag-certificate-requests")
 public class CertificateRequests extends AbstractJsonapiResource<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, NoLinks<CertificateRequest>, CertificateRequestLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRequests.class);
+
     private CertificateRequestRepository repository;
     
     public CertificateRequests() {

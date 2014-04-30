@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SelectionRepository implements SimpleRepository<Selection, SelectionCollection, SelectionFilterCriteria, SelectionLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionRepository.class);
+    
 
     @Override
     @RequiresPermissions("tag_selections:search")         

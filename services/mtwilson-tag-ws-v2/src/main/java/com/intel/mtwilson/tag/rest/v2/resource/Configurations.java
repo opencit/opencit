@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
 @Path("/configurations")
 public class Configurations extends AbstractJsonapiResource<Configuration, ConfigurationCollection, ConfigurationFilterCriteria, NoLinks<Configuration>, ConfigurationLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Configurations.class);
+
     private ConfigurationRepository repository;
     
     public Configurations() {

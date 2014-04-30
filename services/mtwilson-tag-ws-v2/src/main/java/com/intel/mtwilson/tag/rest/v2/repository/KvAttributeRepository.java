@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  */
 public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAttributeCollection, KvAttributeFilterCriteria, KvAttributeLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KvAttributeRepository.class);
+    
 
     @Override
     @RequiresPermissions("tag_kv_attributes:search")     
