@@ -35,8 +35,8 @@ public class CertificateResultMapper implements ResultSetMapper<Certificate> {
 //        certificate.setPcrEvent(pcrEvent);
         certificate.setSubject(rs.getString("subject"));
         certificate.setIssuer(rs.getString("issuer"));
-        certificate.setNotBefore(rs.getDate("notBefore"));
-        certificate.setNotAfter(rs.getDate("notAfter"));
+        certificate.setNotBefore(rs.getTimestamp("notBefore"));
+        certificate.setNotAfter(rs.getTimestamp("notAfter"));
         certificate.setRevoked(rs.getBoolean("revoked"));
         return certificate;
     }

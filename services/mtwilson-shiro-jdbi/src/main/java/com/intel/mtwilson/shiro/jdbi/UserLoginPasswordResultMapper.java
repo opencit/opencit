@@ -38,7 +38,7 @@ public class UserLoginPasswordResultMapper implements ResultSetMapper<UserLoginP
         userLoginPassword.setSalt(rs.getBytes("salt"));
         userLoginPassword.setIterations(rs.getInt("iterations"));
         userLoginPassword.setAlgorithm(rs.getString("algorithm"));
-        userLoginPassword.setExpires(rs.getDate("expires"));
+        userLoginPassword.setExpires(rs.getTimestamp("expires"));
         userLoginPassword.setEnabled(rs.getBoolean("enabled"));
         return userLoginPassword;
     }
