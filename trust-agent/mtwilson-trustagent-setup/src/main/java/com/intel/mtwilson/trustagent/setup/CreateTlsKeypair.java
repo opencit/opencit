@@ -23,6 +23,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -44,8 +45,8 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         dn = trustagentConfiguration.getTrustagentTlsCertDn();
         String keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
         // we need to know our own local ip addresses/hostname in order to add them to the ssl cert
-        ip = trustagentConfiguration.getTrustagentTlsCertIp();
-        dns = trustagentConfiguration.getTrustagentTlsCertDns();
+        ip = trustagentConfiguration.getTrustagentTlsCertIpArray();
+        dns = trustagentConfiguration.getTrustagentTlsCertDnsArray();
         if( dn == null || dn.isEmpty() ) { configuration("DN not configured"); }
         if( keystorePassword == null || keystorePassword.isEmpty() ) { configuration("Keystore password has not been generated"); }
         // NOTE: keystore file itself does not need to be checked, we will create it automatically in execute() if it does not exist
@@ -104,13 +105,17 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         //        by mtwilson's ca, and then the ssl policy for this host in 
         //        mtwilson could be "signed by trusted ca" instead of
         //        "that specific cert"
-        for(String san : ip) {
-            log.debug("Adding Subject Alternative Name (SAN) with IP address: {}", san);
-            builder.ipAlternativeName(san.trim());
+        if( ip != null ) {
+            for(String san : ip) {
+                log.debug("Adding Subject Alternative Name (SAN) with IP address: {}", san);
+                builder.ipAlternativeName(san.trim());
+            }
         }
-        for(String san : dns) {
-            log.debug("Adding Subject Alternative Name (SAN) with Domain Name: {}", san);
-            builder.dnsAlternativeName(san.trim());
+        if( dns != null ) {
+            for(String san : dns) {
+                log.debug("Adding Subject Alternative Name (SAN) with Domain Name: {}", san);
+                builder.dnsAlternativeName(san.trim());
+            }
         }
         X509Certificate tlscert = builder.build();
         // look for an existing tls keypair and delete it
@@ -129,6 +134,15 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         // store it in the keystore
         keystore.addKeyPairX509(keypair.getPrivate(), tlscert, TLS_ALIAS, keystorePassword);
         keystore.save();
+        
+        // save the settings in configuration
+        getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DN, dn);
+        if( ip != null ) {
+            getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_IP, StringUtils.join(ip, ","));
+        }
+        if( dns != null ) {
+            getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DNS, StringUtils.join(dns, ","));
+        }
     }
     
 }

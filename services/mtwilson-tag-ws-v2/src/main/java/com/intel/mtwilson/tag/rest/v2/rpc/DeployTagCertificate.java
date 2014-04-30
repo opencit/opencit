@@ -71,9 +71,12 @@ public class DeployTagCertificate implements Runnable{
             {
                 // verify the certificate validity first
                 Date today = new Date();
+                log.debug("Certificate not before {}", obj.getNotBefore());
+                log.debug("Certificate not after {}", obj.getNotAfter());
+                log.debug("Current date {}", today);
                 if (today.before(obj.getNotBefore()) || today.after(obj.getNotAfter())) {
                     log.error("Certificate with subject {} is expired/invalid. Will not be deployed.", obj.getSubject());
-                    throw new WebApplicationException("Certificate with subject is expired/invalid. Will not be deployed.", Response.Status.BAD_REQUEST);
+                    throw new WebApplicationException("Certificate is not currently valid; will not be deployed", Response.Status.BAD_REQUEST);
                 }
                 
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.

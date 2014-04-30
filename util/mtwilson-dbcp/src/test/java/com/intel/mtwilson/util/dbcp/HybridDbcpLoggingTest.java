@@ -7,6 +7,7 @@ package com.intel.mtwilson.util.dbcp;
 import com.intel.dcsg.cpg.util.jdbc.PoolingDataSource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.performance.AlarmClock;
+import com.intel.dcsg.cpg.util.jdbc.retry.RetryingConnection;
 import com.intel.mtwilson.My;
 import java.io.Closeable;
 import java.io.IOException;
@@ -132,7 +133,7 @@ public class HybridDbcpLoggingTest {
     @Test
     public void testMultipleConnectionOpenClose() throws Exception {
         AlarmClock alarm = new AlarmClock(5, TimeUnit.SECONDS);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             log.debug("testing connection {}", (i + 1));
             testLogConnectionOpenClose();
             //alarm.sleep();
@@ -258,7 +259,8 @@ public class HybridDbcpLoggingTest {
     @Test
     public void testLogConnectionOpenWaitRetry() throws SQLException {
         log.debug("opening connection");
-        try (Connection c = ds.getConnection()) {
+        //try (Connection c = ds.getConnection()) {
+        try(RetryingConnection c = new RetryingConnection(ds.getConnection(), ds)) {
             log.debug("trying first statement");
             try (Statement s = c.createStatement()) {
                 try (ResultSet rs = s.executeQuery("select id, name, description from mw_tag_selection")) {

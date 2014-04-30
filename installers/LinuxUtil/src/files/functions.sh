@@ -2196,6 +2196,8 @@ glassfish_running() {
   return 1
 }
 
+# you should call glassfish_clear and glassfish_detect before calling this
+# if you don't already have a $glassfish variable with the glassfish admin password
 glassfish_running_report() {
   echo -n "Checking Glassfish process... "
   if glassfish_running; then

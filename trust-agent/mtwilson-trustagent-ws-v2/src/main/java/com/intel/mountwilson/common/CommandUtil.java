@@ -4,15 +4,12 @@
  */
 package com.intel.mountwilson.common;
 
-import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.trustagent.datatype.IPAddress;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -26,61 +23,11 @@ public class CommandUtil {
     
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
 
-    public static List<String> runCommand(String commandLine, String[] envp) throws TAException, IOException {
-        if(StringUtils.isBlank(commandLine))
-            throw new TAException(ErrorCode.ERROR,"Command cannot be empty.");
-        
-        String[] command = commandLine.split(" ");
-        
-        if(new File(Config.getBinPath() + File.separator + command[0]).exists())
-            commandLine = Config.getBinPath() + File.separator + commandLine;
-
-        if(new File(Config.getBinPath() + File.separator + commandLine).exists())
-            commandLine = Config.getBinPath() + File.separator + commandLine;
-        
-        log.debug("Command to be executed is :" + commandLine);
-
-        Process p = Runtime.getRuntime().exec(commandLine, envp);
-
-        List<String> result = new ArrayList<String>();
-
-        readResults(p, result);
-        
-        //do a loop to wait for an exit value
-        boolean isRunning;
-        int timeout = 500000;
-        int countToTimeout = 0;
-        do {
-            countToTimeout++;
-            isRunning = false;
-            try {
-                p.exitValue();
-
-            } catch (IllegalThreadStateException e1) {
-                isRunning = true;
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e2) {
-                    isRunning = false;
-                }
-            }
-        } while (isRunning
-                && (countToTimeout < timeout));
-
-        if (countToTimeout
-                == timeout) {
-            log.info("Command is not responding.");
-            p.destroy();
-
-        }
-
-        checkError(p.exitValue(), commandLine);
-
-
-        return result;
+    public static CommandResult runCommand(String commandLine) throws TAException, IOException {
+        return runCommand(commandLine, null);
     }
     
-    public static List<String> runCommand(String commandLine) throws TAException, IOException {
+    public static CommandResult runCommand(String commandLine, String[] envp) throws TAException, IOException {
         
         if(StringUtils.isBlank(commandLine))
             throw new TAException(ErrorCode.ERROR,"Command cannot be empty.");
@@ -95,76 +42,47 @@ public class CommandUtil {
         
         log.debug("Command to be executed is :" + commandLine);
 
-        Process p = Runtime.getRuntime().exec(commandLine);
-
-        List<String> result = new ArrayList<String>();
-
-        readResults(p, result);
-
-//        if (Config.isDebug()) {
-//            log.log(Level.INFO, "Result Output \n{}", (result == null ) ? "null":result.toString());
-//        }
-
-        //do a loop to wait for an exit value
-        boolean isRunning;
-        int timeout = 500000;
-        int countToTimeout = 0;
-        do {
-            countToTimeout++;
-            isRunning = false;
-            try {
-                p.exitValue();
-
-            } catch (IllegalThreadStateException e1) {
-                isRunning = true;
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e2) {
-                    isRunning = false;
-                }
-            }
-        } while (isRunning
-                && (countToTimeout < timeout));
-
-        if (countToTimeout
-                == timeout) {
-            log.info("Command is not responding.");
-            p.destroy();
-
+        Process p;
+        if( envp == null ) {
+            p = Runtime.getRuntime().exec(commandLine);
         }
+        else {
+            p = Runtime.getRuntime().exec(commandLine, envp);
+        }
+        // read stdout
+        InputReader stdout = new InputReader(p.getInputStream());
+        Thread stdoutThread = new Thread(stdout);
+        stdoutThread.start();
+        // read stderr
+        InputReader stderr = new InputReader(p.getErrorStream());
+        Thread stderrThread = new Thread(stderr);
+        stderrThread.start();
+        CommandResult result = new CommandResult();
+        try {
+        // wait until the process exits
+        result.exitcode = p.waitFor();
+        // after the process exits the stdout and stderr threads will terminate
+        stdoutThread.join(); // throws InterruptedException
+        stderrThread.join(); // throws InterruptedException
+        }
+        catch(InterruptedException e) {
+            log.error("Interrupted", e);
+        }
+        
+        log.debug("stdout:\n{}", stdout.getResult());
+        log.debug("stderr:\n{}", stderr.getResult());
 
-        checkError(p.exitValue(), commandLine);
+        result.command = commandLine;
+        result.stdout = stdout.getResult();
+        result.stderr = stderr.getResult();
 
+        if( result.exitcode != 0 ) {
+            throw new TAException(ErrorCode.FATAL_ERROR, result.exitcode + ": Error while running command: " + commandLine);            
+        }
 
         return result;
     }
         
-    private static void checkError(int exitValue, String commandLine) throws TAException {
-        log.debug( "Return code {}", exitValue);
-
-        if (exitValue != 0) {
-            throw new TAException(ErrorCode.FATAL_ERROR, exitValue + ": Error while running command: " + commandLine);
-        }
-
-
-    }
-
-    private static void readResults(Process p, List<String> result) throws IOException {
-        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-
-        try {
-            String newLine;
-            while ((newLine = input.readLine()) != null) {
-                result.add(newLine);
-            }
-        } finally {
-            input.close();
-        }
-
-
-    }
-
     public static byte[] readfile(String fileName) throws TAException {
 
 
