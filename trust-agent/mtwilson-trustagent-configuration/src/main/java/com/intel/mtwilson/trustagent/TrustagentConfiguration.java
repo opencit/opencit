@@ -164,7 +164,10 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
     }
         
-    public String[] getTrustagentTlsCertIp() throws SocketException {
+    public String getTrustagentTlsCertIp() {
+        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "");
+    }
+    public String[] getTrustagentTlsCertIpArray() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
         String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "").split(",");
         if (TlsCertIPs != null && !TlsCertIPs[0].isEmpty()) {
@@ -180,7 +183,10 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         log.debug("Returning default IP address [127.0.0.1]");
         return new String[]{"127.0.0.1"};
     }
-    public String[] getTrustagentTlsCertDns() throws SocketException {
+    public String getTrustagentTlsCertDns() {
+        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "");
+    }
+    public String[] getTrustagentTlsCertDnsArray() throws SocketException {
 //        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
         String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
         if (TlsCertDNs != null && !TlsCertDNs[0].isEmpty()) {
