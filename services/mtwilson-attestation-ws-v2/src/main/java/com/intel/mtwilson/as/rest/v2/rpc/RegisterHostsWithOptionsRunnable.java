@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@RPC("register_hosts_with_options")
+@RPC("register-hosts-with-options")
 @JacksonXmlRootElement(localName="register_hosts_with_options")
 public class RegisterHostsWithOptionsRunnable implements Runnable{
 

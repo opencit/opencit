@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@RPC("create_whitelist_with_options")
+@RPC("create-whitelist-with-options")
 @JacksonXmlRootElement(localName="create_whitelist_with_options")
 public class CreateWhiteListWithOptionsRunnable implements Runnable {
 
