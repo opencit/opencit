@@ -112,6 +112,11 @@ trustagent_start() {
       java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server >>$TRUSTAGENT_HTTP_LOG_FILE 2>&1 &
       echo $! > $TRUSTAGENT_PID_FILE
     )
+    if trustagent_is_running; then
+      echo_success "Started trust agent"
+    else
+      echo_failure "Failed to start trust agent"
+    fi
 }
 
 # returns 0 if trust agent is running, 1 if not running
