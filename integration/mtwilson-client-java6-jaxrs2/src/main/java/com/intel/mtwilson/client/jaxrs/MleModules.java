@@ -28,156 +28,50 @@ public class MleModules extends MtWilsonClient {
         super(url);
     }
 
-     /**
-     * Constructor to create the <code> MleModules </code> object.
-     * @param properties <code> Properties </code> object to initialize the <code>MleModules</code> with Mt.Wilson properties 
-     * Use <code>MyConfiguration.getClientProperties()</code> to get the Properties to use for initialization
-     * @throws Exception 
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *   MleModules client = new MleModules(My.configuration().getClientProperties());
-     * }
-     */
     public MleModules(Properties properties) throws Exception {
         super(properties);
     }
     
-    
-     /**
-     * Search for MLEPcrs that match a specified Filter criteria.
-     * @param criteria <code> MleModuleFilterCriteria </code> used to specify the parameters of search. 
-     *  criteria can be one of indexEqualTo, valueEqualTo and id
-     * @return <code> MleModuleCollection</code>, list of the MlePcr's that match the specified collection.
-     * 
-     * The search always returns back a collection.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/modules?id=51bd39cc-24af-4780-91e5-d9bcfe13ec6f
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   mle_modules: [1]
-     *   0:  {
-     *       id: "51bd39cc-24af-4780-91e5-d9bcfe13ec6f"
-     *       mle_uuid: "51bd39cc-24af-4780-91e5-d9bcfe13ec6f"
-     *       module_name: "componentName.20_New one"
-     *       event_name: "Vim25Api.HostTpmSoftwareComponentEventDetails"
-     *       extended_to_pcr: "19"
-     *       package_name: "PackageName is so and so"
-     *       package_vendor: "VMware"
-     *       description: "API UPdate test"
-     *   }
-     *  }
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *      MleModules client = new MleModules(My.configuration().getClientProperties());
-     *      MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
-     *      criteria.mleUuid = UUID.valueOf("66e999af-e9eb-43cc-9cbf-dcb73af1963b");     *     
-     *      MleModuleCollection searchMleModules = client.searchMleModules(criteria);
-     * }
-     */
-    public MleModuleCollection searchMleModules(MleModuleFilterCriteria criteria) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", criteria.mleUuid);
-        MleModuleCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/modules", criteria)
-                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleModuleCollection.class);
-        return objCollection;
-    }
-    
     /**
-     * Retrieves the MLE Module with the specified mle id and Module ID
-     * @param mleUuid - UUID of the MLE To be retrieved
-     * @param uuid - UUID of the module to be retrieved.     * 
-     * 
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/modules/51bd39cc-24af-4780-91e5-d9bcfe13ec6f
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *       id: "51bd39cc-24af-4780-91e5-d9bcfe13ec6f"
-     *       mle_uuid: "51bd39cc-24af-4780-91e5-d9bcfe13ec6f"
-     *       module_name: "componentName.20_New one"
-     *       event_name: "Vim25Api.HostTpmSoftwareComponentEventDetails"
-     *       extended_to_pcr: "19"
-     *       package_name: "PackageName is so and so"
-     *       package_vendor: "VMware"
-     *       description: "API UPdate test"
-     *  }
-     * @return <code> MleModule </code> that is retrieved from the backend
-     *  
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *      MleModules client = new MleModules(My.configuration().getClientProperties());
-     *      MleModule obj = client.retrieveMleModule("66e999af-e9eb-43cc-9cbf-dcb73af1963b", "0a863b84-e65b-4a23-b281-545d0f4afaf8");
-     * }
-     */
-    public MleModule retrieveMleModule(String mleUuid, String uuid) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", mleUuid);
-        map.put("id", uuid);
-        MleModule obj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleModule.class);
-        return obj;
-    }
-
-    /**
-     * Creates the MLE Modules in the database.
-     * @param obj - MLE Module to be created
-     * @return - MLE Module post creation
-     *  
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/modules
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"module_name":"20_New one","module_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC","extended_to_pcr":"19","package_vendor":"VMware","package_name":"PackageName is so and so","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails","use_host_specific_digest":"false","description":"Another testing"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   id: "51bd39cc-24af-4780-91e5-d9bcfe13ec6f"
-     *   mle_uuid: "31021a8a-de64-4c5f-b314-8d3f077a55e5"
-     *   module_name: "20_New one"
-     *   module_value: "CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"
-     *   event_name: "Vim25Api.HostTpmSoftwareComponentEventDetails"
-     *   extended_to_pcr: "19"
-     *   package_name: "PackageName is so and so"
-     *   package_vendor: "VMware"
-     *   use_host_specific_digest: false
-     *   description: "Another testing"
-     *   }
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * Creates a new module white list for the Mle specified. Currently VMware ESXi and OpenSource Xen/KVM support
+     * module based attestation. When the Mle is created, for hypervisors supporting MODULE
+     * based attestation, PCR 19 would be set to empty. Using this API all the modules that get extended to PCR 19 should 
+     * be configured. Since Module based attestation is supported only for PCR 19, it is not applicable for BIOS type MLEs. <br>
+     * Creation of Module white lists could be automated using the RPC automation APIs .
+     * @param obj - MleModule object specifying the Module details and the Mle for which it has to be associated.
+     * For creating Module whitelists user has to specify the Name, Version, OsUUID (UUID of the OS that needs to be associated), ComponentName, DigestValue,
+     * EventName, ExtendedToPCR & UseHostSpecificDigest have to be specified. The PackageName, PackageVendor, PackageVersion, Description are optional.
+     * The UseHostSpecificDigest flag has to be set only for modules that vary across hosts (each host will have a unique value).
+     * @return - Created MleModule object.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_modules:create
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType POST
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules
+     * Input: {"module_name":"New Module 1","module_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC","extended_to_pcr":"19",
+     * "package_vendor":"VMware","package_name":"PackageName","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
+     * "use_host_specific_digest":"false","description":"Module addition testing"}
+     * Output: {"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"9a16973b-5b17-49a8-b508-3f5436c8f944","module_name":"New Module 1",
+     * "module_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
+     * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","use_host_specific_digest":false,"description":"Module addition testing"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *      MleModules client = new MleModules(My.configuration().getClientProperties());
      *      MleModule obj = new MleModule();
-     *      obj.setModuleName("20_sakljfaslf");
+     *      obj.setModuleName("New Module 1");
      *      obj.setModuleValue("CCCCCB19E793491B1C6EA0FD8B46CD9F32E592FC");
-     *      obj.setMleUuid("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
+     *      obj.setMleUuid("9a16973b-5b17-49a8-b508-3f5436c8f944");
      *      obj.setEventName("Vim25Api.HostTpmSoftwareComponentEventDetails");
      *      obj.setExtendedToPCR("19");
-     *      obj.setPackageName("net-bnx2");
+     *      obj.setPackageName("PackageName");
      *      obj.setPackageVendor("VMware");
-     *      obj.setPackageVersion("2.0.15g.v50.11-7vmw.510.0.0.799733");
      *      obj.setUseHostSpecificDigest(Boolean.FALSE);
-     *      obj.setDescription("Testing");
+     *      obj.setDescription("Module addition testing");
      *      MleModule createMleModule = client.createMleModule(obj);
-     * }
+     * </pre>
      */
     public MleModule createMleModule(MleModule obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -187,39 +81,55 @@ public class MleModules extends MtWilsonClient {
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), MleModule.class);
         return newObj;
     }
-
+    
+     /**
+     * Deletes the specified module white list for the Mle.
+     * @param mleUuid - UUID of the Mle for which the module whitelist has to be deleted.
+     * @param uuid - UUID Of the Mle Module to be deleted
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_modules:delete
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules/f4b25e23-9114-46f1-b0cb-8e2654514f5d
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *      MleModules client = new MleModules(My.configuration().getClientProperties());
+     *      client.deleteMleModule("66e999af-e9eb-43cc-9cbf-dcb73af1963b", "5ae636d0-e748-4d30-9660-f797956d4bb7");             * 
+     * </pre>
+     */
+    public void deleteMleModule(String mleUuid, String uuid) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("mle_id", mleUuid);
+        map.put("id", uuid); 
+        Response obj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        log.debug(obj.toString());
+    }
+    
     /**
-     * Update/Edits the MLE Modules in the database.
-     * @param obj - MLE Module to be updated
-     * @return - MLE Module post updation
-     *  
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: PUT</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/modules/51bd39cc-24af-4780-91e5-d9bcfe13ec6f
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"module_name":"20_New Updated","description":"API UPdate test"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   id: "51bd39cc-24af-4780-91e5-d9bcfe13ec6f"
-     *   mle_uuid: "31021a8a-de64-4c5f-b314-8d3f077a55e5"
-     *   module_name: "20_New Updated"
-     *   description: "API UPdate test"
-     * }
-     *  
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * Updates the module white list for the Mle specified. Only digest value and description fields are allowed to be updated..
+     * @param obj - MleModule to be updated
+     * @return - Updated MleModule object
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_modules:store
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType PUT
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules/f4b25e23-9114-46f1-b0cb-8e2654514f5d
+     * Input: {"description":"Module update testing"}
+     * Output: {"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"9a16973b-5b17-49a8-b508-3f5436c8f944","description":"Module update testing"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *      MleModules client = new MleModules(My.configuration().getClientProperties()); 
      *      MleModule obj = new MleModule();
-     *      obj.setMleUuid("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
-     *      obj.setId(UUID.valueOf("5ae636d0-e748-4d30-9660-f797956d4bb7"));
-     *      obj.setModuleValue("DDDDDB19E793491B1C6EA0FD8B46CD9F32E592FC");
-     *      obj.setDescription("Updating desc");
+     *      obj.setMleUuid("9a16973b-5b17-49a8-b508-3f5436c8f944");
+     *      obj.setId(UUID.valueOf("f4b25e23-9114-46f1-b0cb-8e2654514f5d"));
+     *      obj.setDescription("Module update testing");
      *      MleModule newObj = client.editMleModule(obj);
      *  }
      */
@@ -231,35 +141,69 @@ public class MleModules extends MtWilsonClient {
         MleModule newObj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), MleModule.class);
         return newObj;
     }
-
-     /**
-     * Deletes the MLE PCR with the specified UUID from the database
-     * @param mleUuid - MLE UUID of the MLE module  that has to be deleted.
-     * @param uuid - UUID Of the MLE MOdule to be deleted
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: DELETE</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/modules/51bd39cc-24af-4780-91e5-d9bcfe13ec6f
-     * <p>
-     * <i><u>Sample Output: NA </u></i><br>
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+    
+    /**
+     * Retrieves the details of the specified MleModule
+     * @param mleUuid - UUID of the associated Mle
+     * @param uuid - UUID of the module to be retrieved.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_modules:retrieve
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules/f4b25e23-9114-46f1-b0cb-8e2654514f5d
+     * Output: {"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"f4b25e23-9114-46f1-b0cb-8e2654514f5d",
+     * "module_name":"componentName.New Module 1","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
+     * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","description":"Module update testing"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *      MleModules client = new MleModules(My.configuration().getClientProperties());
-     *      client.deleteMleModule("66e999af-e9eb-43cc-9cbf-dcb73af1963b", "5ae636d0-e748-4d30-9660-f797956d4bb7");             * 
-     * }
+     *      MleModule obj = client.retrieveMleModule("9a16973b-5b17-49a8-b508-3f5436c8f944", "f4b25e23-9114-46f1-b0cb-8e2654514f5d");
+     * </pre>
      */
-    public void deleteMleModule(String mleUuid, String uuid) {
+    public MleModule retrieveMleModule(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("mle_id", mleUuid);
-        map.put("id", uuid); 
-        Response obj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
-        log.debug(obj.toString());
+        map.put("id", uuid);
+        MleModule obj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleModule.class);
+        return obj;
+    }
+    
+     /**
+     * Search for Module whitelist satisfying the specified filter criteria. 
+     * @param criteria <code> MleModuleFilterCriteria </code> used to specify the parameters of search. 
+     * Caller can search for the specified Mle based on the module name, value and id.
+     * @return <code> MleModuleCollection</code> having the list of MleModules matching the specified criteria.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_modules:search
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules?nameContains=New
+     * Output: {"mle_modules":[{"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"f4b25e23-9114-46f1-b0cb-8e2654514f5d",
+     * "module_name":"componentName.New Module 1","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
+     * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","description":"Module update testing"}]} 
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   MleModules client = new MleModules(My.configuration().getClientProperties());
+     *   MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
+     *   criteria.mleUuid = UUID.valueOf("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
+     *   criteria.nameContains = "New";
+     *   MleModuleCollection searchMleModules = client.searchMleModules(criteria);
+     * </pre>
+     */
+    public MleModuleCollection searchMleModules(MleModuleFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("mle_id", criteria.mleUuid);
+        MleModuleCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/modules", criteria)
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleModuleCollection.class);
+        return objCollection;
     }
     
 }
