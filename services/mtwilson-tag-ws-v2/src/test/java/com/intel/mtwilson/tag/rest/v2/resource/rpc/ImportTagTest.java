@@ -6,12 +6,7 @@ package com.intel.mtwilson.tag.rest.v2.resource.rpc;
 
 import com.intel.mtwilson.tag.rest.v2.resource.*;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.tag.model.*;
-import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
-import com.intel.mtwilson.tag.rest.v2.rpc.ApproveTagCertificateRequest;
 import com.intel.mtwilson.tag.rest.v2.rpc.MtWilsonImportTagCertificate;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 
 /**
