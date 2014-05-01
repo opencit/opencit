@@ -13,9 +13,9 @@ import com.intel.mtwilson.jersey.Document;
  * @author ssbangal
  */
 @JacksonXmlRootElement(localName="create_whitelist_rpc_input")
-public class CreateWhiteListRpcInput extends Document{
+public class CreateWhiteListRpcInput /*extends Document*/ {
     private TxtHostRecord host;
-    private boolean result;
+//    private boolean result;  // result should not in the input class ; 
 
     public TxtHostRecord getHost() {
         return host;
@@ -24,7 +24,7 @@ public class CreateWhiteListRpcInput extends Document{
     public void setHost(TxtHostRecord host) {
         this.host = host;
     }
-
+/*
     public boolean isResult() {
         return result;
     }
@@ -32,6 +32,6 @@ public class CreateWhiteListRpcInput extends Document{
     public void setResult(boolean result) {
         this.result = result;
     }
-
+*/
     
 }

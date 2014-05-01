@@ -25,8 +25,8 @@ public class CreateWhiteListRunnable implements Runnable{
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
-    public CreateWhiteListRpcInput rpcInput;
-    /*private TxtHostRecord host;
+//    public CreateWhiteListRpcInput rpcInput;
+    private TxtHostRecord host;
     private String result;
 
     public TxtHostRecord getHost() {
@@ -43,16 +43,16 @@ public class CreateWhiteListRunnable implements Runnable{
 
     public void setResult(String result) {
         this.result = result;
-    }*/
+    }
     
     @Override
     public void run() {
         try {
-            if (rpcInput != null && rpcInput.getHost() != null) {
-                log.debug("Starting to process white list creation using host {}.", rpcInput.getHost().HostName);
-                boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromHost(rpcInput.getHost());
-                rpcInput.setResult(configureWhiteListFromHost); //= Boolean.toString(configureWhiteListFromHost);
-                log.debug("Completed processing of the white list using host {} with result {}", rpcInput.getHost().HostName, rpcInput.isResult());
+            if (host != null) {
+                log.debug("Starting to process white list creation using host {}.", host.HostName);
+                boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromHost(host);
+                result = Boolean.toString(configureWhiteListFromHost);
+                log.debug("Completed processing of the white list using host {} with result {}", host.HostName, result);
             }
         } catch (ApiException aex) {
             throw new ASException(aex);

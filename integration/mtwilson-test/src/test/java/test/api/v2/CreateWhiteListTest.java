@@ -2,11 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.as.rest.v2.rpc;
+package test.api.v2;
 
+import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.mtwilson.agent.VendorHostAgentFactory;
+import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
+import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
+import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
+import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListRunnable;
+import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListWithOptionsRunnable;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -16,6 +24,20 @@ import org.junit.Test;
 public class CreateWhiteListTest {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateWhiteListTest.class);
+    
+    /**
+     * Avoid this exception: 
+     * <pre>
+     * java.lang.IllegalArgumentException: Cannot create Host Agent for 10.1.71.155: java.lang.UnsupportedOperationException: Unsupported host type: vmware
+     * </pre>
+     * 
+     */
+    @BeforeClass
+    public static void registerHostAgents() {
+        Extensions.register(VendorHostAgentFactory.class, VmwareHostAgentFactory.class);
+        Extensions.register(VendorHostAgentFactory.class, CitrixHostAgentFactory.class);
+        Extensions.register(VendorHostAgentFactory.class, IntelHostAgentFactory.class);
+    }
     
     @Test
     public void testCreateWhiteList() throws Exception {
@@ -29,7 +51,7 @@ public class CreateWhiteListTest {
         
         log.debug("Create white list status is {}", whiteListRunnable.getResult());
     }
-
+    
     @Test
     public void testCreateWhiteListWithOptions() throws Exception {
         HostConfigData wlObj = new HostConfigData();        
