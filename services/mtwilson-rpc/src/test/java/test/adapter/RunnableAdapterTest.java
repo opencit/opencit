@@ -35,23 +35,4 @@ public class RunnableAdapterTest {
         log.debug("result = {}", rpc.result);
     }
     
-    @Test
-    public void testInputMapping() {
-        String testInputJson = "{\"rpc_input\":{\"host\":{\"host_name\":\"10.1.71.155\",\"ipaddress\":null,\"port\":null,\"bios_name\":null,\"bios_version\":null,\"bios_oem\":null,\"vmm_name\":null,\"vmm_version\":null,\"vmm_osname\":null,\"vmm_osversion\":null,\"add_on_connection_string\":\"vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd\",\"description\":null,\"email\":null,\"location\":null,\"aik_certificate\":null,\"aik_public_key\":null,\"aik_sha1\":null,\"processor_info\":null},\"result\":false}}]]";
-        TxtHostRecord gkvHost = new TxtHostRecord();
-        gkvHost.HostName = "10.1.71.155";
-        gkvHost.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
-        CreateWhiteListRpcInput rpcInput = new CreateWhiteListRpcInput();
-        rpcInput.setHost(gkvHost);
-        
-        CreateWhiteListRunnable whiteListRunnable = new CreateWhiteListRunnable();
-        whiteListRunnable.rpcInput = rpcInput;
-        
-       // String testInputJson = "{\"rpc_input\":{\"host\":{\"host_name\":\"10.1.71.155\",\"ipaddress\":null,\"port\":null,\"bios_name\":null,\"bios_version\":null,\"bios_oem\":null,\"vmm_name\":null,\"vmm_version\":null,\"vmm_osname\":null,\"vmm_osversion\":null,\"add_on_connection_string\":\"vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd\",\"description\":null,\"email\":null,\"location\":null,\"aik_certificate\":null,\"aik_public_key\":null,\"aik_sha1\":null,\"processor_info\":null},\"result\":false}}";
-        String testInputJson2 = "{\"host\":{\"host_name\":\"10.1.71.155\",\"ipaddress\":null,\"port\":null,\"bios_name\":null,\"bios_version\":null,\"bios_oem\":null,\"vmm_name\":null,\"vmm_version\":null,\"vmm_osname\":null,\"vmm_osversion\":null,\"add_on_connection_string\":\"vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd\",\"description\":null,\"email\":null,\"location\":null,\"aik_certificate\":null,\"aik_public_key\":null,\"aik_sha1\":null,\"processor_info\":null},\"result\":false}}";
-        RunnableRpcAdapter adapter = new RunnableRpcAdapter(whiteListRunnable);
-        //adapter.invoke();
-        adapter.setInput(testInputJson);
-        
-    }
 }
