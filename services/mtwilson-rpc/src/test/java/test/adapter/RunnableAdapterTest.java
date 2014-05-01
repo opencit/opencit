@@ -4,9 +4,6 @@
  */
 package test.adapter;
 
-import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
-import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListRunnable;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.rpc.v2.resource.RunnableRpcAdapter;
 import org.junit.Test;
 
