@@ -120,8 +120,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                     throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid().toString());                    
                 }                
             } else {
-                log.error("UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid().toString());
-                throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid().toString());
+                log.error("UUID specified for BIOS MLE is not valid.");
+                throw new ASException(ErrorCode.AS_INVALID_INPUT);
             }
             
             if (item.getVmmMleUuid()!= null && !item.getVmmMleUuid().isEmpty()) {
@@ -137,8 +137,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                     throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());                    
                 }                
             } else {
-                log.error("UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid().toString());
-                throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());
+                log.error("UUID specified for VMM MLE is not valid.");
+                throw new ASException(ErrorCode.AS_INVALID_INPUT);
             }
             
             new HostBO().updateHost(new TxtHost(obj), null, null, item.getId().toString());

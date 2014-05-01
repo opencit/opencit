@@ -31,4 +31,5 @@ public class RunnableAdapterTest {
         adapter.invoke();
         log.debug("result = {}", rpc.result);
     }
+    
 }

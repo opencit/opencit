@@ -37,20 +37,20 @@ public class Host extends Document {
     private String aikPublicKey;  // may be null
     private String aikSha1;  // may be null
 
+    @Regex(RegexPatterns.IPADDR_FQDN)    
     public String getName() {
         return name;
     }
 
-    @Regex(RegexPatterns.IPADDR_FQDN)    
     public void setName(String name) {
         this.name = name;
     }
 
+    @Regex(RegexPatterns.ANY_VALUE)
     public String getConnectionUrl() {
         return connectionUrl;
     }
 
-    @Regex(RegexPatterns.ANY_VALUE)
     public void setConnectionUrl(String connectionUrl) {
         this.connectionUrl = connectionUrl;
     }
