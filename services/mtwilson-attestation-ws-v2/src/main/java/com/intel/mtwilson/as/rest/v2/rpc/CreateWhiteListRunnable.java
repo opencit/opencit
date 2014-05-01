@@ -25,7 +25,6 @@ public class CreateWhiteListRunnable implements Runnable{
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 
-//    public CreateWhiteListRpcInput rpcInput;
     private TxtHostRecord host;
     private String result;
 
