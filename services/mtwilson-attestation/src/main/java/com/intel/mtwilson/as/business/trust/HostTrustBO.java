@@ -1266,7 +1266,7 @@ public class HostTrustBO extends BaseBO {
 
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
-            TblHosts tblHost = hostBO.getHostByName(hostName);
+            TblHosts tblHost = new HostBO().getHostByName(hostName);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
