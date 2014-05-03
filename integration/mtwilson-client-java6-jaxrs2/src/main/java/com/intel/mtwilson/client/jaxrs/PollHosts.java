@@ -4,14 +4,12 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
-import com.intel.mtwilson.as.rest.v2.model.User;
-import com.intel.mtwilson.as.rest.v2.model.UserCollection;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,40 +29,33 @@ public class PollHosts extends MtWilsonClient {
         super(properties);
     }
     
-    public UserCollection searchUsers(String name) {
+    /**
+     * Retrieves the trust status of the list of hosts specified. This API is added for the OpenStack integration.
+     * @param OpenStackHostTrustLevelQuery object with the UUID of the host for which the attestation has to be done. 
+     * @return HostAttestation object with the details trust report. 
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions poll_hosts:retrieve
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType POST
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/integrations/openstack/PollHosts
+     * Input: {"hosts":["192.168.0.2"]} 
+     * Output: {"hosts":[{"host_name":"10.1.71.155","trust_lvl":"trusted","vtime":"Sat May 3 13:05:38 2014"}]}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   PollHosts client = new PollHosts(My.configuration().getClientProperties());
+     *   OpenStackHostTrustLevelQuery input = new OpenStackHostTrustLevelQuery();
+     *   input.setHosts(new String[] {"192.168.0.2"});
+     *   OpenStackHostTrustLevelReport openStackHostTrustReport = client.getOpenStackHostTrustReport(input);
+     * </pre>
+     */    
+    public OpenStackHostTrustLevelReport getOpenStackHostTrustReport(OpenStackHostTrustLevelQuery obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        UserCollection objCollection = getTarget().path("users").queryParam("nameContains", name).request(MediaType.APPLICATION_JSON).get(UserCollection.class);
-        return objCollection;
-    }
-    
-    public User retrieveUser(String id) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", id);
-        User obj = getTarget().path("users/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(User.class);
-        return obj;
-    }
-
-    public User createUser(User obj) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        User newObj = getTarget().path("users").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), User.class);
-        return newObj;
-    }
-
-    public User editUser(User obj) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", obj.getId().toString());
-        User newObj = getTarget().path("users/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), User.class);
-        return newObj;
-    }
-
-    public void deleteUser(String id) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", id);
-        Response obj = getTarget().path("users/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
-        log.debug(obj.toString());
+        OpenStackHostTrustLevelReport result = getTarget().path("integrations/openstack/PollHosts").request(MediaType.APPLICATION_JSON).
+                post(Entity.json(obj), OpenStackHostTrustLevelReport.class);
+        return result;
     }
     
 }
