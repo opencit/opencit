@@ -115,11 +115,16 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
         try {
             HostTrustBO asBO = new HostTrustBO();
             TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
-            TrustReport htr = new HostTrustBO().getTrustReportForHost(hostObj, hostObj.getName());            
-            item.setHostName(hostObj.getName());
-            item.setTrustReport(htr);
-            // Need to cache the attestation report
-            asBO.logTrustReport(hostObj, htr);
+            if (hostObj != null) {
+                TrustReport htr = new HostTrustBO().getTrustReportForHost(hostObj, hostObj.getName());            
+                item.setHostName(hostObj.getName());
+                item.setTrustReport(htr);
+                // Need to cache the attestation report
+                asBO.logTrustReport(hostObj, htr);
+            } else {
+                log.error("Specified host with UUID {} does not exist in the system.", item.getHostUuid());
+                throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, item.getHostUuid());
+            }
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
