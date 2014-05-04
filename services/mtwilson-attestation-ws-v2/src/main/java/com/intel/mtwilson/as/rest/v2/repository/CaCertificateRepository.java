@@ -6,13 +6,11 @@ package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.rest.v2.resource.*;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificate;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.resource.AbstractCertificateResource;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
