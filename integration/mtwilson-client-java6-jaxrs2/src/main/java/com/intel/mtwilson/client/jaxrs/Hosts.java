@@ -146,9 +146,6 @@ public class Hosts extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e
-     * </pre>
-     * @mtwSampleApiCall
-     * <pre>
      * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2", "connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
      * "bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985", "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
      * </pre>

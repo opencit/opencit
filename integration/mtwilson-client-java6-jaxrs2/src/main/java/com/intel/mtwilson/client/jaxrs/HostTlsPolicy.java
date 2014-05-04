@@ -31,91 +31,27 @@ public class HostTlsPolicy extends MtWilsonClient {
     }
     
      /**
-     * Searches for the TLS Policies of host with the specified set of criteria
-     * @param criteria - <code> HostTlsPolicyFilterCriteria </code> expressing the filter criteria
-     *      The possible search options include hostUuid specification
-     * @return <code> HostTlsPolicyCollection </code> that meets the filter criteria
-     * The search always returns back a collection.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e/tls-policy
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {"oems":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
-     * 
-     */
-    public HostTlsPolicyCollection searchHostTlsPolicy(HostTlsPolicyFilterCriteria criteria) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("host_id", criteria.hostUuid);
-        HostTlsPolicyCollection objCollection = getTargetPathWithQueryParams("hosts/{host_id}/tls-policy", criteria)
-                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostTlsPolicyCollection.class);
-        return objCollection;
-    }
-    
-     /**
-     * Retrieves the TLS Policy with the specified host uuid
-     * @param hostUuid - UUID of the Host to be retrieved from the backend
-     * @return <code>HostTlsPolicy</code> that is retrieved from the backend
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e/tls-policy
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   tls_policies: [1]
-     *   0:{
-     *   host_uuid: "2d026d64-ec08-4406-8a2d-3f90f2addd5e"
-     *   name: "TRUST_FIRST_CERTIFICATE"
-     *   }
-     *  }
-     */
-    public com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy retrieveHostTlsPolicy(String hostUuid) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("host_id", hostUuid);
-        // We are passing the host UUID to "id" also even though it will not be used (without this framework treats this call as a 
-        // search call instead of a retrieve call. Since there will be only one tlspolicy for a host, we can retrieve
-        // the tlspolicy for the host uniquely with the host uuid itself.
-        map.put("id", hostUuid); 
-        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
-                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy.class);
-        return obj;
-    }
-
-    
-     /**
-     * Edits/Updates the Host Tls Policy in the database. 
-     * @param HostTlsPolicy - Host Tls Policy that needs to be updated.
-     * @return <code> HostTlsPolicy </code> post updation with the specified properties.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: PUT</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e/tls-policy/2d026d64-ec08-4406-8a2d-3f90f2addd5e
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"name":"TRUST_FIRST_CERTIFICATE_CHGED"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     * host_uuid: "2d026d64-ec08-4406-8a2d-3f90f2addd5e"
-     * name: "TRUST_FIRST_CERTIFICATE_CHGED"
-     * }
-     *      
+     * Updates the host's TLS policy for the specified host in the system. 
+     * @param HostTlsPolicy that needs to be updated.
+     * @return Updated HostTlsPolicy object.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions host_tls_policies:store
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType PUT
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts/de07c08a-7fc6-4c07-be08-0ecb2f803681/tls-policy/de07c08a-7fc6-4c07-be08-0ecb2f803681
+     * Input: {"name":"INSECURE"}
+     * Output: {"host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681","name":"INSECURE"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     * HostTlsPolicy client = new HostTlsPolicy(My.configuration().getClientProperties());
+     * com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj = new com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy();
+     * obj.setHostUuid("de07c08a-7fc6-4c07-be08-0ecb2f803681");
+     * obj.setName("INSECURE");
+     * com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy editHostTlsPolicy = client.editHostTlsPolicy(obj);
+     * </pre>     
      */
     public com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy editHostTlsPolicy(com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -126,6 +62,68 @@ public class HostTlsPolicy extends MtWilsonClient {
                 .resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON)
                 .put(Entity.json(obj), com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy.class);
         return newObj;
+    }
+        
+     /**
+     * Retrieves the TLS policy associated with the specified host.
+     * @param hostUuid - UUID of the host.
+     * @return <code>HostTlsPolicy</code> that is retrieved from the system.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions host_tls_policies:retrieve
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts//de07c08a-7fc6-4c07-be08-0ecb2f803681/tls-policy/de07c08a-7fc6-4c07-be08-0ecb2f803681
+     * Output: {"tls_policies":[{"host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681","name":"TRUST_FIRST_CERTIFICATE"}]}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
+     *   com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy retrieveHostTlsPolicy = client.retrieveHostTlsPolicy("de07c08a-7fc6-4c07-be08-0ecb2f803681");
+     * </pre>
+     */
+    public com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy retrieveHostTlsPolicy(String hostUuid) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("host_id", hostUuid);
+        // We are passing the host UUID to "id" also even though it will not be used (without this framework treats this call as a 
+        // search call instead of a retrieve call. Since there will be only one tlspolicy for a host, we can retrieve
+        // the tlspolicy for the host uniquely with the host uuid itself.
+        map.put("id", hostUuid);
+        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy.class);
+        return obj;
+    }
+    
+     /**
+     * Searches for the TLS policy associated with the specified host.
+     * @param HostTlsPolicyFilterCriteria object specifying the filter criteria. The possible search options include host's uuid.
+     * @return <code> HostTlsPolicyCollection </code> that meets the filter criteria
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions host_tls_policies:search
+     * @mtwContentTypeReturned JSON/XML/YAML/SAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts/de07c08a-7fc6-4c07-be08-0ecb2f803681/tls-policy
+     * Output: {"tls_policies":[{"host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681","name":"TRUST_FIRST_CERTIFICATE"}]}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     * HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
+     * HostTlsPolicyFilterCriteria criteria = new HostTlsPolicyFilterCriteria();
+     * criteria.hostUuid = UUID.valueOf("de07c08a-7fc6-4c07-be08-0ecb2f803681");
+     * HostTlsPolicyCollection searchHostTlsPolicy = client.searchHostTlsPolicy(criteria);
+     * </pre>
+     */
+    public HostTlsPolicyCollection searchHostTlsPolicy(HostTlsPolicyFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("host_id", criteria.hostUuid);
+        HostTlsPolicyCollection objCollection = getTargetPathWithQueryParams("hosts/{host_id}/tls-policy", criteria)
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostTlsPolicyCollection.class);
+        return objCollection;
     }
     
 }
