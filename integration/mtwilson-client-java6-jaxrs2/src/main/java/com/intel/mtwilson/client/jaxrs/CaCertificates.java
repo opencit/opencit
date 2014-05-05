@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import java.net.URL;
 import java.security.cert.X509Certificate;

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificate;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateFilterCriteria;
