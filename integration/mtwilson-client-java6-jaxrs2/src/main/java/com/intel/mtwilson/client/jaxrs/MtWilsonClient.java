@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.client.jaxrs.common.JaxrsClient;
+import com.intel.mtwilson.client.jaxrs.common.JaxrsClientBuilder;
 import java.util.Properties;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;

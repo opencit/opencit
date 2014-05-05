@@ -2,8 +2,9 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.client.jaxrs;
+package com.intel.mtwilson.client.jaxrs.common;
 
+import com.intel.mtwilson.client.jaxrs.common.ReflectionUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import javax.ws.rs.client.Client;

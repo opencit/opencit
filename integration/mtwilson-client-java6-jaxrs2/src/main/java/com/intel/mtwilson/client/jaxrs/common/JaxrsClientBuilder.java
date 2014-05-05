@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.client.jaxrs;
+package com.intel.mtwilson.client.jaxrs.common;
 
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import java.net.URL;

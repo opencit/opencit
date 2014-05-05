@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.client.jaxrs;
+package com.intel.mtwilson.client.jaxrs.common;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
