@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 
 /**
@@ -13,6 +14,7 @@ import com.intel.dcsg.cpg.io.UUID;
  *
  * @author jbuhacoff
  */
+@JacksonXmlRootElement(localName="role")
 public class Role {
     private UUID id;
     private String roleName;

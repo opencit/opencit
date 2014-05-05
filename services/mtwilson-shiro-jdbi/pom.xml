@@ -86,7 +86,12 @@
             <artifactId>stringtemplate</artifactId>
             <version>3.2.1</version>
         </dependency>
-        
+	 <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <type>jar</type>
+        </dependency>                
         
         <!-- apache 2.0 license,  database connection pooling system -->
         <!--

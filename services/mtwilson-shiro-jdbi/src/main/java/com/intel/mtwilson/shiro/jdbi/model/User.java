@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 import java.util.Locale;
 
@@ -17,6 +18,7 @@ import java.util.Locale;
  *
  * @author jbuhacoff
  */
+@JacksonXmlRootElement(localName="user")
 public class User {
     private UUID id;
     private String username;

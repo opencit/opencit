@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 import java.util.Date;
 
@@ -20,6 +21,7 @@ import java.util.Date;
  *
  * @author jbuhacoff
  */
+@JacksonXmlRootElement(localName="user_login_certificate")
 public class UserLoginCertificate {
     private UUID id;
     private UUID userId;

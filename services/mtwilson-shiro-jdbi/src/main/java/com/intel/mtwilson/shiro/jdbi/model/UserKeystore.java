@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 
 /**
@@ -15,6 +16,7 @@ import com.intel.dcsg.cpg.io.UUID;
  *
  * @author jbuhacoff
  */
+@JacksonXmlRootElement(localName="user_keystore")
 public class UserKeystore {
     private UUID id;
     private UUID userId;
