@@ -45,7 +45,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
                     }
                 }                
             } else if (criteria.hostUuid != null) {
-                List<MwAssetTagCertificate> objList = jpaController.findAssetTagCertificatesByHostUUID(criteria.id.toString());
+                List<MwAssetTagCertificate> objList = jpaController.findAssetTagCertificatesByHostUUID(criteria.hostUuid.toString());
                 if (objList != null && !objList.isEmpty()) {
                     for(MwAssetTagCertificate obj : objList) {
                         objCollection.getTagCertificates().add(convert(obj));
