@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 
 /**
  *
@@ -28,13 +30,13 @@ public class CaCertificates extends MtWilsonClient {
     public CaCertificates(Properties properties) throws Exception {
         super(properties);
     }
-    /*
+    
     public CaCertificates(Configuration configuration) throws Exception {
         super(configuration);
     }
     public CaCertificates(Properties properties, TlsConnection tlsConnection) throws Exception {
         super(properties, tlsConnection);
-    }*/
+    }
         
     /**
      * Retrieves the details of the specified certificate from the system.
