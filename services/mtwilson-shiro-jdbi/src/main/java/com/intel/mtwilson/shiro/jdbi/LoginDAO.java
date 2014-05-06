@@ -4,7 +4,14 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.shiro.jdbi.model.*;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordRole;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.security.rest.v2.model.Role;
+import com.intel.mtwilson.security.rest.v2.model.RolePermission;
+import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;

@@ -4,6 +4,11 @@
  */
 package test.jdbi;
 
+import com.intel.mtwilson.security.rest.v2.model.RolePermission;
+import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.security.rest.v2.model.Role;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.security.rest.v2.model.Status;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
@@ -11,7 +16,6 @@ import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.*;
-import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;

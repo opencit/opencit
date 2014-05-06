@@ -4,6 +4,10 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.security.rest.v2.model.User;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;
@@ -15,7 +19,6 @@ import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
