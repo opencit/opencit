@@ -10,6 +10,8 @@ import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +45,11 @@ public class InitializeDB extends DatabaseSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        return;
+        try (Connection c = My.jdbc().connection()) {
+            // data migrated from these mtwilson 1.2 tables:
+            requireTable(c, "mw_role");
+            requireTable(c, "mw_role_permission");
+        }
     }
 
     /**
