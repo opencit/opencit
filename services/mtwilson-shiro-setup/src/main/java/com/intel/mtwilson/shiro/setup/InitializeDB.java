@@ -155,6 +155,13 @@ public class InitializeDB extends DatabaseSetupTask {
         } else if (roleName.equalsIgnoreCase(USER_MANAGER_ROLE)) {
 
             domainActions.put("users", "*");
+            domainActions.put("user_keystores", "*");
+            domainActions.put("user_login_certificates", "*");
+            domainActions.put("user_login_certificate_roles", "*");
+            domainActions.put("user_login_hmacs", "*");
+            domainActions.put("user_login_hmac_roles", "*");
+            domainActions.put("user_login_passwords", "*");
+            domainActions.put("user_login_password_roles", "*");
             domainActions.put("user_certificates", "*");
             
         } else if (roleName.equalsIgnoreCase(SERVER_MANAGER_ROLE)) {
