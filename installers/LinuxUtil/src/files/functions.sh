@@ -2403,7 +2403,7 @@ glassfish_create_ssl_cert() {
   local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
   if [ -n "$has_cert" ]; then
     echo "SSL Certificate for ${serverName} already exists"
-  else
+  elif [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     echo "Creating SSL Certificate for ${serverName}..."
     
     # Delete public insecure certs within keystore.jks and cacerts.jks
@@ -2792,7 +2792,7 @@ tomcat_create_ssl_cert() {
 
   if [ -n "$has_cert" ]; then
     echo "SSL Certificate for ${serverName} already exists"
-  else
+  elif [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     echo "Creating SSL Certificate for ${serverName}..."
     #$keytool -delete -alias tomcat  -keystore $keystore -storepass $keystorePassword
     local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
