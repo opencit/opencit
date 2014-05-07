@@ -164,6 +164,11 @@
 			<artifactId>mtwilson-saml-verifier</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.services</groupId>
+                    <artifactId>mtwilson-security-model</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
         
         
     </dependencies>  

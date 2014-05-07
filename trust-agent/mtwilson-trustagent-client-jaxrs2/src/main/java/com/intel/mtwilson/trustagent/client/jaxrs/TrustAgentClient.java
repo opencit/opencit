@@ -7,7 +7,7 @@ package com.intel.mtwilson.trustagent.client.jaxrs;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
-import com.intel.mtwilson.client.jaxrs.MtWilsonClient;
+import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.trustagent.model.*;
 import java.net.URL;

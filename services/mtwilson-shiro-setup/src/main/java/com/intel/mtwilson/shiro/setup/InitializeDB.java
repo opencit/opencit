@@ -4,10 +4,11 @@
  */
 package com.intel.mtwilson.shiro.setup;
 
+import com.intel.mtwilson.security.rest.v2.model.RolePermission;
+import com.intel.mtwilson.security.rest.v2.model.Role;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.shiro.jdbi.model.*;
 import com.intel.dcsg.cpg.io.UUID;
 import java.util.HashMap;
 import java.util.Map;
@@ -154,6 +155,13 @@ public class InitializeDB extends DatabaseSetupTask {
         } else if (roleName.equalsIgnoreCase(USER_MANAGER_ROLE)) {
 
             domainActions.put("users", "*");
+            domainActions.put("user_keystores", "*");
+            domainActions.put("user_login_certificates", "*");
+            domainActions.put("user_login_certificate_roles", "*");
+            domainActions.put("user_login_hmacs", "*");
+            domainActions.put("user_login_hmac_roles", "*");
+            domainActions.put("user_login_passwords", "*");
+            domainActions.put("user_login_password_roles", "*");
             domainActions.put("user_certificates", "*");
             
         } else if (roleName.equalsIgnoreCase(SERVER_MANAGER_ROLE)) {

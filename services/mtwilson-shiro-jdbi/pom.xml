@@ -32,6 +32,11 @@
             <artifactId>mtwilson-shiro-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-security-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- XXX TODO  dependency will need to be the other way... eventually this should be included in mtwilson-my and obtained by mtwilson-shiro using My.jdbi().authz() -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -86,7 +91,12 @@
             <artifactId>stringtemplate</artifactId>
             <version>3.2.1</version>
         </dependency>
-        
+	 <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <type>jar</type>
+        </dependency>                
         
         <!-- apache 2.0 license,  database connection pooling system -->
         <!--

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
@@ -28,134 +29,42 @@ public class Hosts extends MtWilsonClient {
         super(url);
     }
 
-    /**
-     * Constructor with properties object. 
-     * @param properties - <code> Properties </code> object to initialize the <code>Hosts</code> with Mt.Wilson properties 
-     * Use <code>MyConfiguration.getClientProperties()</code> to get the Properties to use for initialization
-     * @throws Exception 
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *  Properties prop = My.configuration().getClientProperties();
-     *  Hosts hosts = new Hosts(prop);
-     * }
-    */
     public Hosts(Properties properties) throws Exception {
         super(properties);
     }
     
     /**
-     * Searches for the hosts with the specified criteria.
-     * @param criteria - <code> HostFilterCriteria</code> object that specifies the search criteria.
-     * The possible search options include nameEqualTo, nameContains and descriptionContains.
-     * @return <code> HostCollection</code>, a list of Hosts that match the filter/search criteria.
-     *  * @return <code> Usercollection </code>, a list of users that satisfy the search criteria
-     *  <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/hosts?nameContains=10
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * hosts: 
-     * [1]0:  
-     * {
-     *  id: "2d026d64-ec08-4406-8a2d-3f90f2addd5e"
-     *  name: "10.1.71.57"
-     *  connection_url: "vmware:https://10.1.71.58:443/sdk;administrator@vsphere.local;P@ssw0rd"
-     *  bios_mle_uuid: "a4f855a9-4307-470d-8662-24ca23dd88ef"
-     *  vmm_mle_uuid: "d322f307-ab22-41f5-9b07-b99ef4b85b91"
-     * }
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *   Properties prop = My.configuration().getClientProperties();
-     *   Hosts hosts = new Hosts(prop);
-     *   HostFilterCriteria criteria = new HostFilterCriteria();
-     *   criteria.nameContains = "10";
-     *   HostCollection objCollection = hosts.searchHosts(criteria);
-     * }
-     */
-    public HostCollection searchHosts(HostFilterCriteria criteria) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HostCollection objCollection = getTargetPathWithQueryParams("hosts", criteria).request(MediaType.APPLICATION_JSON).get(HostCollection.class);
-        return objCollection;
-    }
-    
-    /**
-     * Retrieves the host with the specified UUID.
-     * @param uuid - UUID of the Host to be retrieved. UUID has to be non- null
-     * @return <code>Host</code> retrieved from the system with the specified UUID.
-     *   * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     *    https://10.1.71.234:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *  id: "2d026d64-ec08-4406-8a2d-3f90f2addd5e"
-     *  name: "10.1.71.57"
-     *  connection_url: "vmware:https://10.1.71.58:443/sdk;administrator@vsphere.local;P@ssw0rd"
-     *  bios_mle_uuid: "a4f855a9-4307-470d-8662-24ca23dd88ef"
-     *  vmm_mle_uuid: "d322f307-ab22-41f5-9b07-b99ef4b85b91"
-     * }
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *   Properties prop = My.configuration().getClientProperties();
-     *   Hosts hosts = new Hosts(prop);
-     *   Host retrieveHost = hosts.retrieveHost("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
-     * }
-    */
-    public Host retrieveHost(String uuid) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("id", uuid);
-        Host obj = getTarget().path("hosts/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Host.class);
-        return obj;
-    }
-
-    /**
-     * Creates the specified host
-     * @param obj - <code> Host</code> object with the values to be created in the system.
+     * Registers the specified host with the system. As part of registration, a host has to be associated with both BIOS and 
+     * VMM/Hypervisor MLEs. So, these MLEs have to be configured before host registration.
+     * @param Host object with the details of the host to be registered. The required parameters that specify
+     * the host details are the host_name and add_on_connection_string [Open Source Hosts: intel:https://192.168.1.201:1443, Citrix XenServer: 
+     * citrix:https://192.168.1.202:443/;root;pwd, VMware ESXi:vmware:https://192.168.1.222:443/sdk;Admin;password]. To associate 
+     * the host with the MLEs, both the OEM and OS UUIDs have to be specified. All other parameters are optional.
      * @return <code>Host</code> created in the system.
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
-     *    https://10.1.71.234:8181/mtwilson/v2/hosts/
-     * <p>
-     * <i><u>Sample Input:</u></i> <br>
-     * {"name":"10.1.71.175","connection_url":"https://10.1.71.162:443/sdk;Administrator;intel123!","bios_mle_uuid":"b14e5039-373d-4743-aa65-1e24c23dd249","vmm_mle_uuid":"3a4503a1-1632-433f-bca7-5655ccbafec4"} 
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *  id: "2d026d64-ec08-4406-8a2d-3f90f2addd5e"
-     *  name: "10.1.71.57"
-     *  connection_url: "vmware:https://10.1.71.58:443/sdk;administrator@vsphere.local;P@ssw0rd"
-     *  bios_mle_uuid: "a4f855a9-4307-470d-8662-24ca23dd88ef"
-     *  vmm_mle_uuid: "d322f307-ab22-41f5-9b07-b99ef4b85b91"
-     * }
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions hosts:create
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType POST
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts/
+     * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"6500f971-b712-4baa-83aa-2c72cc4dbb1e",
+     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"} 
+     * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2",
+     * "connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"6500f971-b712-4baa-83aa-2c72cc4dbb1e",
+     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *   Properties prop = My.configuration().getClientProperties();
-     *   Hosts hosts = new Hosts(prop);
+     *   Hosts client = new Hosts(prop);
      *   Host obj = new Host();
-     *   obj.setName("10.1.71.175");
-     *   obj.setConnectionUrl("https://10.1.71.162:443/sdk;Administrator;intel123!");
-     *   obj.setBiosMleUuid("b14e5039-373d-4743-aa65-1e24c23dd249");
-     *   obj.setVmmMleUuid("3a4503a1-1632-433f-bca7-5655ccbafec4");
-     *   Host createHost = hosts.createHost(obj);
-     * }
+     *   obj.setName("192.168.0.2");
+     *   obj.setConnectionUrl("https://192.168.0.1:443/sdk;admin;pwd");
+     *   obj.setBiosMleUuid("6500f971-b712-4baa-83aa-2c72cc4dbb1e");
+     *   obj.setVmmMleUuid("98101211-b617-4f59-8132-a5d05360acd6");
+     *   Host createHost = client.createHost(obj);
+     * </pre>
      */
     public Host createHost(Host obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -164,38 +73,60 @@ public class Hosts extends MtWilsonClient {
     }
 
     /**
-     * Updates the host with the updated attributes
-     * @param obj - <code> Host </code> object with the values to be updated in the system. 
-     * "id" of the Host is used as a key to fetch the object and it has to be a non-null value.
-     * @return Updated <code>Host</code> object.
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: PUT</i><br>
-     *    https://10.1.71.234:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e
-     * <p>
-     * <i><u>Sample Input:</u> </i><br>
-     * {"name":"10.1.71.175","connection_url":"https://10.1.71.162:443/sdk;Administrator;intel123!","bios_mle_uuid":"b14e5039-373d-4743-aa65-1e24c23dd249","vmm_mle_uuid":"3a4503a1-1632-433f-bca7-5655ccbafec4"}
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *  id: "2d026d64-ec08-4406-8a2d-3f90f2addd5e"
-     *  name: "10.1.71.57"
-     *  connection_url: "vmware:https://10.1.71.58:443/sdk;administrator@vsphere.local;P@ssw0rd"
-     *  bios_mle_uuid: "a4f855a9-4307-470d-8662-24ca23dd88ef"
-     *  vmm_mle_uuid: "d322f307-ab22-41f5-9b07-b99ef4b85b91"
-     * }
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * Deletes the host with the specified UUID.
+     * @param uuid - UUID of the host to be deleted from the system. 
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions hosts:delete
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts/e43424ca-9e00-4cb9-b038-9259d0307888
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *   Properties prop = My.configuration().getClientProperties();
-     *   Hosts hosts = new Hosts(prop);    
+     *   Hosts client = new Hosts(prop);  
+     *   client.deleteHost("e43424ca-9e00-4cb9-b038-9259d0307888");
+     * </pre>
+     */
+    public void deleteHost(String uuid) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("id", uuid);
+        Response obj = getTarget().path("hosts/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        log.debug(obj.toString());
+    }
+
+    /**
+     * Updates the host with the specified attributes. Except for the host name, all other attributes can be updated.
+     * @param Host object with the values to be updated. 
+     * @return Updated <code>Host</code> object.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions hosts:store
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType PUT
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts/e43424ca-9e00-4cb9-b038-9259d0307888
+     * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
+     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2",
+     * "connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
+     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   Properties prop = My.configuration().getClientProperties();
+     *   Hosts client = new Hosts(prop);    
      *   Host obj = new Host();
-     *   obj.setId(UUID.valueOf("6d0bbcf9-b662-4d59-bc71-7b360afeb94a"));
-     *   obj.setDescription("Updated the host");
-     *   Host editHost = hosts.editHost(obj
-     * }
+     *   obj.setId(UUID.valueOf("e43424ca-9e00-4cb9-b038-9259d0307888"));
+     *   obj.setName("192.168.0.2");
+     *   obj.setConnectionUrl("https://192.168.0.1:443/sdk;admin;pwd");
+     *   obj.setBiosMleUuid("823a4ae6-b8cd-4c14-b89b-2a3be2d13985"); // updating the BIOS
+     *   obj.setVmmMleUuid("98101211-b617-4f59-8132-a5d05360acd6");
+     *   Host editHost = client.editHost(obj);
+     * </pre>
      */
     public Host editHost(Host obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -206,30 +137,62 @@ public class Hosts extends MtWilsonClient {
     }
 
     /**
-     * Deletes the Host with the specified uuid.
-     * @param uuid - UUID of the host to be deleted from the system. The UUID has to be a non-null value.
-     *   * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: DELETE</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e
-     * <p>
-     * <i><u>Sample Output: NA </u></i><br>
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * Retrieves the details of the host with the specified UUID.
+     * @param uuid - UUID of the Host to be retrieved. 
+     * @return <code>Host</code> retrieved from the system with the specified UUID.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions hosts:retrieve
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts/2d026d64-ec08-4406-8a2d-3f90f2addd5e
+     * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2", "connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
+     * "bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985", "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *   Properties prop = My.configuration().getClientProperties();
-     *   Hosts hosts = new Hosts(prop);  
-     *   hosts.deleteHost("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
-     * }
-     */
-    public void deleteHost(String uuid) {
+     *   Hosts hosts = new Hosts(prop);
+     *   Host retrieveHost = hosts.retrieveHost("6d0bbcf9-b662-4d59-bc71-7b360afeb94a");
+     * </pre>
+    */
+    public Host retrieveHost(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", uuid);
-        Response obj = getTarget().path("hosts/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
-        log.debug(obj.toString());
+        Host obj = getTarget().path("hosts/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Host.class);
+        return obj;
+    }
+
+    /**
+     * Searches for the hosts with the specified criteria.
+     * @param HostFilterCriteria object that specifies the search criteria.
+     * The possible search options include id, nameEqualTo, nameContains and descriptionContains.
+     * @return <code> HostCollection</code> object with a list of Hosts that match the filter/search criteria.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions hosts:search
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts?nameContains=10
+     * Output: {"hosts":[{"id":"de07c08a-7fc6-4c07-be08-0ecb2f803681","name":"192.168.0.2", "connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
+     * "bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985","vmm_mle_uuid":"45c03402-e33d-4b54-9893-de3bbd1f1681"}]}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   Properties prop = My.configuration().getClientProperties();
+     *   Hosts client = new Hosts(prop);
+     *   HostFilterCriteria criteria = new HostFilterCriteria();
+     *   criteria.nameContains = "10";
+     *   HostCollection objCollection = client.searchHosts(criteria);
+     * </pre>
+     */
+    public HostCollection searchHosts(HostFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HostCollection objCollection = getTargetPathWithQueryParams("hosts", criteria).request(MediaType.APPLICATION_JSON).get(HostCollection.class);
+        return objCollection;
     }
     
 }
