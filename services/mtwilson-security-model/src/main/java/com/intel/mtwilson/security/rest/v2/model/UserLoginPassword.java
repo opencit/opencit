@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.security.rest.v2.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.Document;
 import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import java.util.Date;
 
@@ -22,7 +24,8 @@ import java.util.Date;
  *
  * @author jbuhacoff
  */
-public class UserLoginPassword implements HashedPassword {
+@JacksonXmlRootElement(localName="user_login_password")
+public class UserLoginPassword extends Document implements HashedPassword {
     private UUID id;
     private UUID userId;
     private byte[] passwordHash;

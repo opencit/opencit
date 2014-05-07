@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.security.rest.v2.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.Document;
 
 /**
   login_hmac_id uuid NOT NULL,
@@ -12,7 +14,8 @@ import com.intel.dcsg.cpg.io.UUID;
  *
  * @author jbuhacoff
  */
-public class UserLoginHmacRole {
+@JacksonXmlRootElement(localName="user_login_hmac_role")
+public class UserLoginHmacRole extends Document {
     private UUID loginHmacId;
     private UUID roleId;
 

@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.security.rest.v2.model;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.Document;
 import java.util.Date;
 
 /**
@@ -17,7 +19,8 @@ import java.util.Date;
  *
  * @author jbuhacoff
  */
-public class UserLoginHmac {
+@JacksonXmlRootElement(localName="user_login_hmac")
+public class UserLoginHmac extends Document {
     private UUID id;
     private UUID userId;
     private byte[] hmacKey;

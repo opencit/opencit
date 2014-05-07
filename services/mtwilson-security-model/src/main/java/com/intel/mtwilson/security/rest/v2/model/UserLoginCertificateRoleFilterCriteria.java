@@ -16,4 +16,6 @@ public class UserLoginCertificateRoleFilterCriteria implements FilterCriteria<Us
 
     @QueryParam("loginCertificateIdEqualTo")
     public UUID loginCertificateIdEqualTo;
+    @QueryParam("roleIdEqualTo")
+    public UUID roleIdEqualTo;
 }

@@ -18,4 +18,11 @@ public class UserLoginCertificateFilterCriteria implements FilterCriteria<UserLo
     public UUID id;
     @QueryParam("userIdEqualTo")
     public UUID userIdEqualTo;
+    @QueryParam("userNameEqualTo")
+    public String userNameEqualTo;
+    @QueryParam("sha1")
+    public byte[] sha1;
+    @QueryParam("sha256")
+    public byte[] sha256;
+    
 }

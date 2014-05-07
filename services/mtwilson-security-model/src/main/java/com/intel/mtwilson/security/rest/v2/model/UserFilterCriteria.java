@@ -18,10 +18,4 @@ public class UserFilterCriteria implements FilterCriteria<User> {
     public UUID id;
     @QueryParam("userNameEqualTo")
     public String userNameEqualTo;
-    @QueryParam("userNameContains")
-    public String userNameContains;
-    @QueryParam("enabled")
-    public Boolean enabled;
-    @QueryParam("status")
-    public String status;
 }

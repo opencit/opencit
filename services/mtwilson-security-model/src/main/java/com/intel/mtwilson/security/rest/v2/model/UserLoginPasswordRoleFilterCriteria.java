@@ -16,4 +16,7 @@ public class UserLoginPasswordRoleFilterCriteria implements FilterCriteria<UserL
 
     @QueryParam("loginPasswordIdEqualTo")
     public UUID loginPasswordIdEqualTo;
+    @QueryParam("roleIdEqualTo")
+    public UUID roleIdEqualTo;
+    
 }

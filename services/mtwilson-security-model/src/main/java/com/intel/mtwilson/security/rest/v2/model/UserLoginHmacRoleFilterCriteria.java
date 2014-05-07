@@ -16,4 +16,7 @@ public class UserLoginHmacRoleFilterCriteria implements FilterCriteria<UserLogin
 
     @QueryParam("loginHmacIdEqualTo")
     public UUID loginHmacIdEqualTo;
+    @QueryParam("roleIdEqualTo")
+    public UUID roleIdEqualTo;
+    
 }
