@@ -3494,12 +3494,12 @@ database_shutdown(){
 # determine database
 which_dbms(){
   echo "Please identify the database which will be used for the Mt Wilson server.
-The supported databases are m=MySQL | p=Postrges"
+The supported databases are m=MySQL | p=PostgreSQL"
   while true; do
     prompt_with_default DATABASE_CHOICE "Choose Database:" "p";
 
     if [ "$DATABASE_CHOICE" != 'm' ] && [ "$DATABASE_CHOICE" != 'p' ]; then
-      echo "Be serious.  Common, try again: "
+      echo "[m]ysql or [p]ostgresql: "
       DATABASE_CHOICE=
     else
       if [ "$DATABASE_CHOICE" = 'm' ]; then 
@@ -3521,7 +3521,7 @@ The supported servers are g=Glassfish | t=Tomcat"
     prompt_with_default WEBSERVER_CHOICE "Choose Web Server:" "t";
 
     if [ "$WEBSERVER_CHOICE" != 't' ] && [ "$WEBSERVER_CHOICE" != 'g' ]; then
-      echo "Be serious.  Common, try again: "
+      echo "[g]lassfish [t]omcat: "
       WEBSERVER_CHOICE=
     else
       if [ "$WEBSERVER_CHOICE" = 't' ]; then 
