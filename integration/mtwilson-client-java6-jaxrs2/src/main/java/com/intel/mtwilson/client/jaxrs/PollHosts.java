@@ -35,7 +35,7 @@ public class PollHosts extends MtWilsonClient {
      * @param OpenStackHostTrustLevelQuery object with the UUID of the host for which the attestation has to be done. 
      * @return HostAttestation object with the details trust report. 
      * @since Mt.Wilson 2.0
-     * @mtwRequiresPermissions poll_hosts:retrieve
+     * @mtwRequiresPermissions host_attestations:search,retrieve
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall

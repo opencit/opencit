@@ -66,7 +66,8 @@ public class PollHosts {
      * @return the trust status of the specified hosts
      */
     //@RolesAllowed({"Attestation","Report"})
-    @RequiresPermissions("poll_hosts:create,retrieve") 
+//    @RequiresPermissions("poll_hosts:create,retrieve") 
+    @RequiresPermissions("host_attestations:search,retrieve")
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
