@@ -156,7 +156,25 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("delete from mw_role_permission where role_id=:role_id and permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
     void deleteRolePermission(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);
     
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id=:role_id")
+    List<RolePermission> findAllRolePermissionsForRoleId(@Bind("role_id") UUID roleId);
+    
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id=:role_id and permit_domain=:permit_domain")
+    List<RolePermission> findAllRolePermissionsForRoleIdAndDomain(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain);
 
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id=:role_id and permit_action=:permit_action")
+    List<RolePermission> findAllRolePermissionsForRoleIdAndAction(@Bind("role_id") UUID roleId, @Bind("permit_action") String permitAction);    
+
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id=:role_id "
+            + "and permit_domain=:permit_domain and permit_action=:permit_action")
+    List<RolePermission> findAllRolePermissionsForRoleIdDomainAndAction(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, 
+    @Bind("permit_action") String permitAction);    
+
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id=:role_id "
+            + "and permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
+    RolePermission findAllRolePermissionsForRoleIdDomainActionAndSelection(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, 
+    @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);    
+    
     /**
   id uuid DEFAULT NULL,
   user_id uuid DEFAULT NULL,
@@ -262,13 +280,13 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
     void deleteUserLoginCertificateRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
     
-    @SqlQuery("select from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
+    @SqlQuery("select login_certificate_id, role_id from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
     List<UserLoginCertificateRole> findUserLoginCertificateRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
 
-    @SqlQuery("select from mw_user_login_certificate_role where role_id=:role_id")
+    @SqlQuery("select login_certificate_id, role_id from mw_user_login_certificate_role where role_id=:role_id")
     List<UserLoginCertificateRole> findUserLoginCertificateRolesByRoleId(@Bind("role_id") UUID roleId);
 
-    @SqlQuery("select from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id and role_id=:role_id")
+    @SqlQuery("select login_certificate_id, role_id from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id and role_id=:role_id")
     UserLoginCertificateRole findUserLoginCertificateRolesByRoleIdAndUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);
     
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_certificate_role on mw_role.id = mw_user_login_certificate_role.role_id where mw_user_login_certificate_role.login_certificate_id=:login_certificate_id")
