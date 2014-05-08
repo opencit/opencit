@@ -5,6 +5,7 @@
 package com.intel.mtwilson.security.rest.v2.model;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.DefaultFilterCriteria;
 import com.intel.mtwilson.jersey.FilterCriteria;
 import javax.ws.rs.QueryParam;
 
@@ -12,7 +13,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class UserFilterCriteria implements FilterCriteria<User> {
+public class UserFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<User> {
 
     @QueryParam("id")
     public UUID id;
