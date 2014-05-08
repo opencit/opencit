@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificate;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateFilterCriteria;
-import com.intel.mtwilson.client.jaxrs.TagCertificates;
+import com.intel.mtwilson.client.jaxrs.HostTagCertificates;
 import com.intel.mtwilson.tag.client.jaxrs.TagManagementClient;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.test.RemoteIntegrationTest;
@@ -29,8 +29,8 @@ public class ProvisionCertificateTest extends RemoteIntegrationTest {
 
     @Test
     public void testSearchCertificates() throws Exception {
-        TagCertificates client = new TagCertificates(testProperties);
-        TagCertificateCollection results = client.searchTagCertificates(new TagCertificateFilterCriteria());
+        HostTagCertificates client = new HostTagCertificates(testProperties);
+        TagCertificateCollection results = client.searchHostTagCertificates(new TagCertificateFilterCriteria());
         List<TagCertificate> list = results.getTagCertificates();
         for (TagCertificate tagcert : list) {
             log.debug("got cert {}", tagcert.getId().toString());

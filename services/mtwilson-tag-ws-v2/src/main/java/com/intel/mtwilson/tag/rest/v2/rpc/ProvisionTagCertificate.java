@@ -65,7 +65,8 @@ import org.slf4j.LoggerFactory;
 //@RPC("provision_tag_certificate")
 //@JacksonXmlRootElement(localName="provision_tag_certificate")
 public class ProvisionTagCertificate  {    
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProvisionTagCertificate.class);
+
 
    private CertificateRepository certificateRepository;
    private CertificateRequestRepository repository;

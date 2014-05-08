@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.MlePcr;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrCollection;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrFilterCriteria;
@@ -28,138 +29,38 @@ public class MlePcrs extends MtWilsonClient {
         super(url);
     }
 
-      /**
-     * Constructor to create the <code> MlePcrs </code> object.
-     * @param properties <code> Properties </code> object to initialize the <code>MlePcrs</code> with Mt.Wilson properties 
-     * Use <code>MyConfiguration.getClientProperties()</code> to get the Properties to use for initialization
-     * @throws Exception 
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
-     * }
-     */
     public MlePcrs(Properties properties) throws Exception {
         super(properties);
     }
     
-     /**
-     * Search for MLEPcrs that match a specified Filter criteria.
-     * @param criteria <code> MlePcrFilterCriteria </code> used to specify the parameters of search. 
-     *  criteria can be one of indexEqualTo, valueEqualTo and id
-     * @return <code> MlePcrCollection</code>, list of the MlePcr's that match the specified collection.
-     * 
-     * The search always returns back a collection.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs?indexEqualTo=18
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *       mle_pcrs: [1]
-     *       0:  {
-     *       id: "38a793f8-ca70-4c9e-91cc-0474585c286d"
-     *       mle_uuid: "38a793f8-ca70-4c9e-91cc-0474585c286d"
-     *       pcr_index: "18"
-     *       pcr_value: "2961d7d78606334bcf8ca891c0a60574a77f48b3"
-     *       }
-     * }
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
-     *   MlePcrFilterCriteria criteria = new MlePcrFilterCriteria();
-     *   criteria.mleUuid = UUID.valueOf("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
-     *   criteria.indexEqualTo = "21";
-     *   MlePcrCollection searchMlePcrs = client.searchMlePcrs(criteria);
-     * }
-     */
-    
-    public MlePcrCollection searchMlePcrs(MlePcrFilterCriteria criteria) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", criteria.mleUuid);
-        MlePcrCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/pcrs", criteria)
-                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MlePcrCollection.class);
-        return objCollection;
-    }
-    
     /**
-     * Retrieves the MLE with the specified uuid and PCR Index
-     * @param mleUuid - UUID of the MLE To be retrieved
-     * @param pcrIndex - INdex of the PCR to be retrieved.     * 
-     * 
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     *  {
-     *       id: "38a793f8-ca70-4c9e-91cc-0474585c286d"
-     *       mle_uuid: "38a793f8-ca70-4c9e-91cc-0474585c286d"
-     *       pcr_index: "18"
-     *       pcr_value: "2961d7d78606334bcf8ca891c0a60574a77f48b3"
-     *       }
-     *  
-     * @return <code> MlePcr </code> that is retrieved from the backend
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
-     *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
-     *   MlePcr obj = client.retrieveMlePcr("66e999af-e9eb-43cc-9cbf-dcb73af1963b", "21");
-     * }
-     */
-    public MlePcr retrieveMlePcr(String mleUuid, String pcrIndex) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", mleUuid);
-        map.put("id", pcrIndex);
-        MlePcr obj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MlePcr.class);
-        return obj;
-    }
-
-    /**
-     * Creates the MLE PCR in the database.
-     * @param obj - MLE PCR to be created
-     * @return - MLE PCR Created 
-     * <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"pcr_index":"20","pcr_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   id: "2100fc61-921f-405a-91af-b01dbeaf5c69"
-     *   mle_uuid: "31021a8a-de64-4c5f-b314-8d3f077a55e5"
-     *   pcr_index: "20"
-     *   pcr_value: "CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"
-     * }
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * Creates a new whitelist value in the system and associates with the Mle specified. Except for PCR 19 all whitelists
+     * for other PCRs should be configured using this method. For Citrix XenServer hosts even PCR 19 should be configured
+     * using this method. PCR based whitelists are compared directly to the PCR values retrieved from the host as against the
+     * Module based whitelists where individual modules are used for calculation of PCR 19. Currently only PCR 19 supports 
+     * Module based attestation (exception being Citrix XenServer).
+     * @param obj - MlePcr to be created
+     * @return - MlePcr Created 
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_pcrs:create
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType POST
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs
+     * Input: {"pcr_index":"20","pcr_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"}
+     * Output: {"id":"2100fc61-921f-405a-91af-b01dbeaf5c69","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
+     *   "pcr_index":"20","pcr_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   MlePcr obj = new MlePcr();
-     *   obj.setMleUuid("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
-     *   obj.setPcrIndex("21");
-     *   obj.setPcrValue("6CAB6F19330613513101F04B88BCB7B79A8F250E");
+     *   obj.setMleUuid("31021a8a-de64-4c5f-b314-8d3f077a55e5");
+     *   obj.setPcrIndex("20");
+     *   obj.setPcrValue("CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FC");
      *   client.createMlePcr(obj);     * 
-     * }
+     * </pre>
      */
     public MlePcr createMlePcr(MlePcr obj) {
         log.debug("target: {}", getTarget().getUri().toString());
@@ -169,36 +70,55 @@ public class MlePcrs extends MtWilsonClient {
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), MlePcr.class);
         return newObj;
     }
-
+    
+     /**
+     * Deletes the specified MlePcr whitelist for the specified Mle object
+     * @param mleUuid - UUID of the Mle with which the whitelist has been associated.
+     * @param pcrIndex - Index of the MLE PCR that has to be deleted.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_pcrs:delete
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
+     *   client.deleteMlePcr("31021a8a-de64-4c5f-b314-8d3f077a55e5", "18");        
+     * </pre>
+     */
+    public void deleteMlePcr(String mleUuid, String pcrIndex) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("mle_id", mleUuid);
+        map.put("id", pcrIndex); 
+        Response obj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        log.debug(obj.toString());
+    }
+    
     /**
-     * Updates the Specified MLE PCR.
-     * @param obj - MLE PCR to be updated
-     * @return  <code> MlePCR </code> post updation with the specified properties.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TOCHECK?
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML<br>
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: PUT</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs
-     * <p>
-     * <i>Sample Input</i><br>
-     *	{"pcr_index":"18","pcr_value":"CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FD"}
-     * <p>
-     * <i><u>Sample Output:</u></i><br>
-     * {
-     *   id: "38a793f8-ca70-4c9e-91cc-0474585c286d"
-     *   mle_uuid: "38a793f8-ca70-4c9e-91cc-0474585c286d"
-     *   pcr_index: "18"
-     *   pcr_value: "CCCCAAAAE793491B1C6EA0FD8B46CD9F32E592FD"
-     * }
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+     * Updates the value of the specified whitelist.
+     * @param obj - MlePcr to be updated
+     * @return  Updated <code> MlePCR </code>.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_pcrs:store
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType PUT
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs
+     * Input: {"pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
+     * Output: {"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
+     *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
      *   MlePcr obj = new MlePcr();
-     *   obj.setMleUuid("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
-     *   obj.setPcrIndex("21");
+     *   obj.setMleUuid("31021a8a-de64-4c5f-b314-8d3f077a55e5");
+     *   obj.setPcrIndex("18");
      *   obj.setPcrValue("AAAB6F19330613513101F04B88BCB7B79A8F250E");
      *   MlePcr newObj = client.editMlePcr(obj);     * 
      * }
@@ -211,35 +131,68 @@ public class MlePcrs extends MtWilsonClient {
         MlePcr newObj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), MlePcr.class);
         return newObj;
     }
-
-     /**
-     * Deletes the MLE PCR with the specified UUID from the database
-     * @param mleUuid - UUID of the MLE PCR  that has to be deleted.
-     * @param pcrIndex - Index of the MLE PCR that has to be deleted.
-     * <p>
-     * <i><u>Roles Needed:</u></i> TO CHECK
-     * <p>
-     * <i><u>Content type returned:</u></i>JSON/XML/YAML
-     * <p>
-     * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: DELETE</i><br>
-     * https://10.1.71.234:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
-     * <p>
-     * <i><u>Sample Output: NA </u></i><br>
-     * 
-     * <i><u>Sample Java API call :</u></i><br>
-     * {@code
+    
+    /**
+     * Retrieves the specified whitelist associated with the Mle.
+     * @param mleUuid - UUID of the Mle associated with the whitelist.
+     * @param pcrIndex - Index of the PCR whitelist to be retrieved. 
+     * @return PCR whitelist matching the specified criteria.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_pcrs:retrieve
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
+     * Output: {"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
+     *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
      *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
-     *   client.deleteMlePcr("66e999af-e9eb-43cc-9cbf-dcb73af1963b", "21");        
-     * }
+     *   MlePcr obj = client.retrieveMlePcr("31021a8a-de64-4c5f-b314-8d3f077a55e5", "18");
+     * </pre>
      */
-    public void deleteMlePcr(String mleUuid, String pcrIndex) {
+    public MlePcr retrieveMlePcr(String mleUuid, String pcrIndex) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("mle_id", mleUuid);
-        map.put("id", pcrIndex); 
-        Response obj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
-        log.debug(obj.toString());
+        map.put("id", pcrIndex);
+        MlePcr obj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MlePcr.class);
+        return obj;
     }
     
+     /**
+     * Searches for PCR whitelists matching the specified criteria.
+     * @param criteria <code> MlePcrFilterCriteria </code> used to specify the parameters of search. 
+     *  Criteria can be one of indexEqualTo, valueEqualTo and id
+     * @return <code> MlePcrCollection </code> having the list of the PCR whitelists that match the specified criteria.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_pcrs:search
+     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwMethodType GET
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs?indexEqualTo=18
+     * Output: {"mle_pcrs":[{"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
+     *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}]}
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   MlePcrs client = new MlePcrs(My.configuration().getClientProperties());
+     *   MlePcrFilterCriteria criteria = new MlePcrFilterCriteria();
+     *   criteria.mleUuid = UUID.valueOf("31021a8a-de64-4c5f-b314-8d3f077a55e5");
+     *   criteria.indexEqualTo = "18";
+     *   MlePcrCollection searchMlePcrs = client.searchMlePcrs(criteria);
+     * </pre>
+     */
+    
+    public MlePcrCollection searchMlePcrs(MlePcrFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<String,Object>();
+        map.put("mle_id", criteria.mleUuid);
+        MlePcrCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/pcrs", criteria)
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MlePcrCollection.class);
+        return objCollection;
+    }    
 }

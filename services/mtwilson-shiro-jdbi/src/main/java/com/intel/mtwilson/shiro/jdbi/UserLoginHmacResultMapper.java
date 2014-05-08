@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.shiro.jdbi.model.*;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginHmac;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.intel.dcsg.cpg.io.UUID;
@@ -34,7 +34,7 @@ public class UserLoginHmacResultMapper implements ResultSetMapper<UserLoginHmac>
         userLoginHmac.setUserId(UUID.valueOf(rs.getString("user_id"))); // works for postgresql  when using uuid field
         userLoginHmac.setHmacKey(rs.getBytes("hmac_key"));
         userLoginHmac.setProtection(rs.getString("protection"));
-        userLoginHmac.setExpires(rs.getDate("expires"));
+        userLoginHmac.setExpires(rs.getTimestamp("expires"));
         userLoginHmac.setEnabled(rs.getBoolean("enabled"));
         return userLoginHmac;
     }

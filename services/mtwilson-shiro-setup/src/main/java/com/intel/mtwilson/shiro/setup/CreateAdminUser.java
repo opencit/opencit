@@ -4,6 +4,12 @@
  */
 package com.intel.mtwilson.shiro.setup;
 
+import com.intel.mtwilson.security.rest.v2.model.RolePermission;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.security.rest.v2.model.Role;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
@@ -18,7 +24,6 @@ import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.shiro.jdbi.model.*;
 import java.io.File;
 import java.util.List;
 import org.apache.commons.io.FileUtils;

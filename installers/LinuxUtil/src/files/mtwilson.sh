@@ -390,7 +390,7 @@ case "$1" in
         #load_default_env 1>/dev/null
         if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
           echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
-          prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
+          prompt_with_default MC_FIRST_USERNAME "Mt Wilson Portal Admin Username:" "admin"
         fi
         export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@

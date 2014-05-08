@@ -15,23 +15,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@RPC("create_whitelist_with_options")
+@RPC("create-whitelist-with-options")
 @JacksonXmlRootElement(localName="create_whitelist_with_options")
 public class CreateWhiteListWithOptionsRunnable implements Runnable {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
-    private HostConfigData host;
+    private HostConfigData config;
     private String result;
 
-    public HostConfigData getHost() {
-        return host;
+    public HostConfigData getConfig() {
+        return config;
     }
 
-    public void setHost(HostConfigData host) {
-        this.host = host;
+    public void setConfig(HostConfigData config) {
+        this.config = config;
     }
-
+    
     public String getResult() {
         return result;
     }
@@ -42,10 +42,10 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     
     @Override
     public void run() {
-        log.debug("Starting to process white list creation using host {}.", host.getTxtHostRecord().HostName);
-        boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(host);
+        log.debug("Starting to process white list creation using host {}.", config.getTxtHostRecord().HostName);
+        boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(config);
         result = Boolean.toString(configureWhiteListFromHost);
-        log.debug("Completed processing of the white list using host {} with result {}", host.getTxtHostRecord().HostName, result);
+        log.debug("Completed processing of the white list using host {} with result {}", config.getTxtHostRecord().HostName, result);
     }
     
 }

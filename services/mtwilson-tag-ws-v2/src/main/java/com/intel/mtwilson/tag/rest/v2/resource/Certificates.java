@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 @Path("/tag-certificates")
 public class Certificates extends AbstractCertificateJsonapiResource<Certificate, CertificateCollection, CertificateFilterCriteria, NoLinks<Certificate>, CertificateLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Certificates.class);
+
     private CertificateRepository repository;
     
     public Certificates() {

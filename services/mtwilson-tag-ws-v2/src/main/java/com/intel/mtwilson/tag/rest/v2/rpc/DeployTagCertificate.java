@@ -38,7 +38,8 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="deploy_tag_certificate")
 public class DeployTagCertificate implements Runnable{
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeployTagCertificate.class);
+
        
     private UUID certificateId;
     private InternetAddress host;

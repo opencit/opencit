@@ -49,7 +49,8 @@ import org.slf4j.LoggerFactory;
 @Path("/tag-selections")
 public class Selections extends AbstractJsonapiResource<Selection, SelectionCollection, SelectionFilterCriteria, NoLinks<Selection>, SelectionLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName()); 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Selections.class);
+
     private SelectionRepository repository;
     
     public Selections() {

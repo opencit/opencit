@@ -33,7 +33,8 @@ import org.slf4j.LoggerFactory;
  */
 public class FileRepository implements SimpleRepository<File, FileCollection, FileFilterCriteria, FileLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileRepository.class);
+    
 
     @Override
     @RequiresPermissions("files:search")     

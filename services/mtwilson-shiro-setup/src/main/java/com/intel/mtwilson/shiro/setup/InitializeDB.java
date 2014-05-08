@@ -4,11 +4,14 @@
  */
 package com.intel.mtwilson.shiro.setup;
 
+import com.intel.mtwilson.security.rest.v2.model.RolePermission;
+import com.intel.mtwilson.security.rest.v2.model.Role;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.shiro.jdbi.model.*;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +27,7 @@ public class InitializeDB extends DatabaseSetupTask {
     public static final String ADMINISTRATOR_ROLE = "administrator";
     public static final String AUDITOR_ROLE = "auditor";
     public static final String ASSET_TAG_MANAGER_ROLE = "asset_tag_manager";
-    public static final String WHITE_LIST_MANAGER_ROLE = "white_list_manager";
+    public static final String WHITELIST_MANAGER_ROLE = "whitelist_manager";
     public static final String HOST_MANAGER_ROLE = "host_manager";
     public static final String CHALLENGER_ROLE = "challenger";
     public static final String USER_MANAGER_ROLE = "user_manager";
@@ -42,7 +45,11 @@ public class InitializeDB extends DatabaseSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        return;
+        try (Connection c = My.jdbc().connection()) {
+            // data migrated from these mtwilson 1.2 tables:
+            requireTable(c, "mw_role");
+            requireTable(c, "mw_role_permission");
+        }
     }
 
     /**
@@ -110,7 +117,7 @@ public class InitializeDB extends DatabaseSetupTask {
             domainActions.put("host_attestations", "*");
             domainActions.put("host_tls_certificates", "*");
             domainActions.put("host_tls_policies", "*");
-            domainActions.put("poll_hosts", "*");
+//            domainActions.put("poll_hosts", "*"); // use host_attestations:search,retrieve instead
             domainActions.put("oems", "search,retrieve");
             domainActions.put("oss", "search,retrieve");
             domainActions.put("mles", "search,retrieve");
@@ -124,13 +131,13 @@ public class InitializeDB extends DatabaseSetupTask {
         } else if (roleName.equalsIgnoreCase(AUDITOR_ROLE) || roleName.equalsIgnoreCase(AUDIT_ROLE)) {
             
             domainActions.put("*", "search,retrieve");
-            domainActions.put("audit_logs", "*");
+            //domainActions.put("audit_logs", "*");
             
         } else if (roleName.equalsIgnoreCase(REPORT_MANAGER_ROLE) || roleName.equalsIgnoreCase(REPORT_ROLE)) {
             
             domainActions.put("*", "search,retrieve");
 
-        } else if (roleName.equalsIgnoreCase(WHITE_LIST_MANAGER_ROLE) || roleName.equalsIgnoreCase(WHITE_LIST_ROLE)) {
+        } else if (roleName.equalsIgnoreCase(WHITELIST_MANAGER_ROLE) || roleName.equalsIgnoreCase(WHITE_LIST_ROLE)) {
 
             domainActions.put("oems", "*");
             domainActions.put("oss", "*");
@@ -139,11 +146,11 @@ public class InitializeDB extends DatabaseSetupTask {
             domainActions.put("mle_modules", "*");
             domainActions.put("mle_sources", "*");
             
-        } else if (roleName.equalsIgnoreCase(CHALLENGER_ROLE)) {
+        } else if (roleName.equalsIgnoreCase(CHALLENGER_ROLE) || roleName.equalsIgnoreCase(ATTESTATION_ROLE)) {
             
             domainActions.put("hosts", "search,retrieve");
             domainActions.put("host_attestations", "*");
-            domainActions.put("poll_hosts", "*");
+//            domainActions.put("poll_hosts", "*"); // use host_attestations:search,retrieve instead
             domainActions.put("oems", "search,retrieve");
             domainActions.put("oss", "search,retrieve");
             domainActions.put("mles", "search,retrieve");
@@ -154,12 +161,21 @@ public class InitializeDB extends DatabaseSetupTask {
         } else if (roleName.equalsIgnoreCase(USER_MANAGER_ROLE)) {
 
             domainActions.put("users", "*");
+            domainActions.put("user_keystores", "*");
+            domainActions.put("user_login_certificates", "*");
+            domainActions.put("user_login_certificate_roles", "*");
+            domainActions.put("user_login_hmacs", "*");
+            domainActions.put("user_login_hmac_roles", "*");
+            domainActions.put("user_login_passwords", "*");
+            domainActions.put("user_login_password_roles", "*");
             domainActions.put("user_certificates", "*");
             
         } else if (roleName.equalsIgnoreCase(SERVER_MANAGER_ROLE)) {
 
             domainActions.put("configurations", "*");
             domainActions.put("files", "*");
+            domainActions.put("roles", "*");
+            domainActions.put("role_permissions", "*");
             
         }         
         
@@ -175,7 +191,7 @@ public class InitializeDB extends DatabaseSetupTask {
             createRoleAndAssociatedPermissions(loginDAO, ADMINISTRATOR_ROLE, "", createDomainActionListForRole(ADMINISTRATOR_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, AUDITOR_ROLE, "", createDomainActionListForRole(AUDITOR_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, ASSET_TAG_MANAGER_ROLE, "", createDomainActionListForRole(ASSET_TAG_MANAGER_ROLE));
-            createRoleAndAssociatedPermissions(loginDAO, WHITE_LIST_MANAGER_ROLE, "", createDomainActionListForRole(WHITE_LIST_MANAGER_ROLE));
+            createRoleAndAssociatedPermissions(loginDAO, WHITELIST_MANAGER_ROLE, "", createDomainActionListForRole(WHITELIST_MANAGER_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, HOST_MANAGER_ROLE, "", createDomainActionListForRole(HOST_MANAGER_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, CHALLENGER_ROLE, "", createDomainActionListForRole(CHALLENGER_ROLE));
             createRoleAndAssociatedPermissions(loginDAO, REPORT_MANAGER_ROLE, "", createDomainActionListForRole(REPORT_MANAGER_ROLE));

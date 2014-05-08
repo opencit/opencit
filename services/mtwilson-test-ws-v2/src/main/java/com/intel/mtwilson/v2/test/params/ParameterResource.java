@@ -66,6 +66,8 @@ public class ParameterResource {
         @QueryParam("integer")
         public Integer integer;
         
+        @QueryParam("boolean")
+        public Boolean bool;
     }
     
     @GET

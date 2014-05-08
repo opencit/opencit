@@ -4,7 +4,14 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.shiro.jdbi.model.*;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordRole;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.security.rest.v2.model.Role;
+import com.intel.mtwilson.security.rest.v2.model.RolePermission;
+import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
@@ -22,6 +29,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateRole;
 import java.util.Set;
 import org.skife.jdbi.v2.sqlobject.BindBean;
 
@@ -96,7 +104,7 @@ public interface LoginDAO extends Closeable {
     void insertUserKeystore(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat, @Bind("comment") String comment);
 
     @SqlUpdate("update mw_user_keystore set keystore=:keystore, keystore_format=:keystore_format, comment=:comment WHERE id=:id")
-    void updateUser(@Bind("id") UUID id, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat,  @Bind("comment") String comment);
+    void updateUserKeystore(@Bind("id") UUID id, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat,  @Bind("comment") String comment);
     
     @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore")
     List<UserKeystore> findAllUserKeystores();
@@ -187,7 +195,7 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user_login_password_role (login_password_id, role_id) values (:login_password_id, :role_id)")
     void insertUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
 
-    @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id, role_id=:role_id")
+    @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id and role_id=:role_id")
     void deleteUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
 
     @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id")
@@ -195,6 +203,12 @@ public interface LoginDAO extends Closeable {
 
     @SqlQuery("select login_password_id, role_id from mw_user_login_password_role where login_password_id=:login_password_id")
     List<UserLoginPasswordRole> findUserLoginPasswordRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
+
+    @SqlQuery("select login_password_id, role_id from mw_user_login_password_role where role_id=:role_id")
+    List<UserLoginPasswordRole> findUserLoginPasswordRolesByRoleId(@Bind("role_id") UUID roleId);
+
+    @SqlQuery("select login_password_id, role_id from mw_user_login_password_role where login_password_id=:login_password_id and role_id=:role_id")
+    UserLoginPasswordRole findUserLoginPasswordRolesByUserLoginPasswordIdAndRoleId(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
 
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_password_role on mw_role.id = mw_user_login_password_role.role_id where mw_user_login_password_role.login_password_id=:login_password_id")
     List<Role> findRolesByUserLoginPasswordId(@Bind("login_password_id") UUID loginPasswordId);
@@ -247,7 +261,16 @@ public interface LoginDAO extends Closeable {
 
     @SqlUpdate("delete from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
     void deleteUserLoginCertificateRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
+    
+    @SqlQuery("select from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id")
+    List<UserLoginCertificateRole> findUserLoginCertificateRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
 
+    @SqlQuery("select from mw_user_login_certificate_role where role_id=:role_id")
+    List<UserLoginCertificateRole> findUserLoginCertificateRolesByRoleId(@Bind("role_id") UUID roleId);
+
+    @SqlQuery("select from mw_user_login_certificate_role where login_certificate_id=:login_certificate_id and role_id=:role_id")
+    UserLoginCertificateRole findUserLoginCertificateRolesByRoleIdAndUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId, @Bind("role_id") UUID roleId);
+    
     @SqlQuery("select id, role_name, description from mw_role join mw_user_login_certificate_role on mw_role.id = mw_user_login_certificate_role.role_id where mw_user_login_certificate_role.login_certificate_id=:login_certificate_id")
     List<Role> findRolesByUserLoginCertificateId(@Bind("login_certificate_id") UUID loginCertificateId);
 

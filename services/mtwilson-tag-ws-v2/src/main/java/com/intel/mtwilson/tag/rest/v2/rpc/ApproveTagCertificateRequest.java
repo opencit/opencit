@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="approve_tag_certificate_request")
 public class ApproveTagCertificateRequest implements Runnable{
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApproveTagCertificateRequest.class);
+
        
     private UUID certificateRequestId;
     private byte[] certificate;

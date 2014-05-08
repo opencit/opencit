@@ -29,7 +29,7 @@ public class TestResultMapper implements ResultSetMapper<TestClass> {
         test.setId(uuidMapper.getUUID(rs, sc, "id"));
         test.setName(rs.getString("name"));
         test.setLength(rs.getLong("length"));
-        test.setCreated(rs.getDate("created"));
+        test.setCreated(rs.getTimestamp("created")); // getTimestamp for date+time,  or getDate for just the date 
         test.setContent(rs.getBytes("content"));
         test.setFlag(rs.getBoolean("flag"));
         return test;

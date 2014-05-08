@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.client.jaxrs.MtWilsonClient;
+import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 import com.intel.mtwilson.shiro.jaxrs.PasswordLoginRequest;

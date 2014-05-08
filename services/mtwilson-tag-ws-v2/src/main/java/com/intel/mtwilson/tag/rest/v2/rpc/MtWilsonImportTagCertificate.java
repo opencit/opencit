@@ -30,7 +30,8 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="mtwilson_import_tag_certificate")
 public class MtWilsonImportTagCertificate implements Runnable{
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MtWilsonImportTagCertificate.class);
+
        
     private UUID certificateId;
 

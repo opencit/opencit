@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.shiro.jdbi.model.*;
+import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.intel.dcsg.cpg.io.UUID;
@@ -39,7 +40,7 @@ public class UserLoginCertificateResultMapper implements ResultSetMapper<UserLog
         userLoginCertificate.setCertificate(rs.getBytes("certificate"));
         userLoginCertificate.setSha1Hash(rs.getBytes("sha1_hash"));
         userLoginCertificate.setSha256Hash(rs.getBytes("sha256_hash"));
-        userLoginCertificate.setExpires(rs.getDate("expires"));
+        userLoginCertificate.setExpires(rs.getTimestamp("expires"));
         userLoginCertificate.setEnabled(rs.getBoolean("enabled"));
         userLoginCertificate.setStatus(Status.valueOf(rs.getString("status")));
         userLoginCertificate.setComment(rs.getString("comment"));
