@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.Document;
 import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import java.util.Date;
+import java.util.Set;
 
 /**
  *  salt should be 8 bytes long minimum recommended in PKCS5 standard
@@ -34,6 +35,8 @@ public class UserLoginPassword extends Document implements HashedPassword {
     private String algorithm;
     private Date expires;
     private boolean enabled;
+    private Status status;
+    private Set<String> roles;
 
     public UUID getId() {
         return id;
@@ -98,6 +101,22 @@ public class UserLoginPassword extends Document implements HashedPassword {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-    
-    
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
+        
 }
