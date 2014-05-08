@@ -18,8 +18,6 @@ public class RolePermissionFilterCriteria extends DefaultFilterCriteria implemen
 
     @PathParam("role_id")
     public UUID roleId;
-    @QueryParam("id")
-    public UUID id;
     @QueryParam("domainEqualTo")
     public String domainEqualTo;
     @QueryParam("actionEqualTo")
