@@ -78,6 +78,7 @@
     <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-whitelist</module>
     <module>mtwilson-security-model</module>
+	<module>mtwilson-security-ws-v2</module>
   </modules>
 
 </project>
