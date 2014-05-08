@@ -174,6 +174,8 @@ public class InitializeDB extends DatabaseSetupTask {
 
             domainActions.put("configurations", "*");
             domainActions.put("files", "*");
+            domainActions.put("roles", "*");
+            domainActions.put("role_permissions", "*");
             
         }         
         

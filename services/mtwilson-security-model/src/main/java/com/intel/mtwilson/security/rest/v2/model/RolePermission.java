@@ -6,6 +6,7 @@ package com.intel.mtwilson.security.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.Document;
 
 /**
   role_id uuid NOT NULL,
@@ -16,7 +17,7 @@ import com.intel.dcsg.cpg.io.UUID;
  * @author jbuhacoff
  */
 @JacksonXmlRootElement(localName="role_permission")
-public class RolePermission {
+public class RolePermission extends Document {
     private UUID roleId;
     private String permitDomain;
     private String permitAction;
