@@ -195,7 +195,7 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_user_login_password_role (login_password_id, role_id) values (:login_password_id, :role_id)")
     void insertUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
 
-    @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id, role_id=:role_id")
+    @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id and role_id=:role_id")
     void deleteUserLoginPasswordRole(@Bind("login_password_id") UUID loginPasswordId, @Bind("role_id") UUID roleId);
 
     @SqlUpdate("delete from mw_user_login_password_role where login_password_id=:login_password_id")
