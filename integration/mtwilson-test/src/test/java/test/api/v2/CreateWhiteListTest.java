@@ -68,7 +68,6 @@ public class CreateWhiteListTest {
         wlObj.setRegisterHost(false);
         
         CreateWhiteListWithOptionsRunnable whiteListRunnable = new CreateWhiteListWithOptionsRunnable();
-//        whiteListRunnable.setHost(wlObj);
         whiteListRunnable.setConfig(wlObj);
         whiteListRunnable.run();
         

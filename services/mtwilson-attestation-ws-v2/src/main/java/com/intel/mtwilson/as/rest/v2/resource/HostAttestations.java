@@ -14,6 +14,7 @@ import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.data.TblSamlAssertion;
 
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
@@ -67,8 +68,9 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     @Produces(OtherMediaType.APPLICATION_SAML)    
     public String searchCollectionSaml(@BeanParam HostAttestationFilterCriteria criteria) {
         try { log.debug("searchCollection: {}", mapper.writeValueAsString(criteria)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
-        ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-            /*    try {
+        ValidationUtil.validate(criteria); 
+        String samlAssertion = null;
+        try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             TblHosts obj = null;
             if (criteria.hostUuid != null) {
@@ -88,7 +90,19 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                 }
             } else return null;
             
-            samlAssertion = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), true);
+            // since we have found the host with the specified criteria lets check if there is a valid cached saml assertion
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getName());
+            if(tblSamlAssertion != null){
+                if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
+                    log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
+                    return tblSamlAssertion.getSaml();
+                }else{
+                    log.debug("Found assertion in cache with error set, returning that.");
+                   throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
+                }
+            } else {
+                return null;
+            }
             
         } catch (ASException aex) {
             throw aex;            
@@ -96,10 +110,6 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
             log.error("Error during retrieval of host attestation status from cache.", ex);
             throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
         }        
-        
-        return samlAssertion;*/
-
-        return null;
     }
 
     @POST

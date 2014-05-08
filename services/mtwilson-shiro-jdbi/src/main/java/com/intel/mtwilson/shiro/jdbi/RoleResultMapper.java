@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.shiro.jdbi.model.*;
+import com.intel.mtwilson.security.rest.v2.model.Role;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.intel.dcsg.cpg.io.UUID;

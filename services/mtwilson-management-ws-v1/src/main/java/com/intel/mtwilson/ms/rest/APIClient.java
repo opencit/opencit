@@ -99,7 +99,7 @@ public class APIClient {
      * @return an instance of java.lang.String
      */
     @Path("/availableRoles")
-    @RequiresPermissions("users:search")
+    @RequiresPermissions("users:search")   // TODO:  this is a separate resource, should  be roles:search  and for companion api's the actions retrieve,create,delete,store
     //@RolesAllowed({"Security"})
     @GET
     @Produces(MediaType.APPLICATION_JSON)
