@@ -15,6 +15,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.CertificateDocument;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
+import java.util.Set;
 
 /**
   id uuid DEFAULT NULL,
@@ -43,6 +44,7 @@ public class UserLoginCertificate extends CertificateDocument {
     private boolean enabled;
     private Status status;
     private String comment;
+    private Set<String> roles;
 
     public UUID getId() {
         return id;
@@ -120,6 +122,15 @@ public class UserLoginCertificate extends CertificateDocument {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+    
     
     @JsonIgnore
     @Override

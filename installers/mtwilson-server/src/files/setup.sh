@@ -687,8 +687,8 @@ MTWILSON_API_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER
 update_property_in_file "mtwilson.atag.url" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_URL"
 update_property_in_file "mtwilson.atag.mtwilson.baseurl" $CONFIG_DIR/mtwilson.properties "$MTWILSON_API_TAG_URL"
 
-prompt_with_default MTWILSON_TAG_ADMIN_USER "Mt Wilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USER:-tagadmin}
-prompt_with_default_password MTWILSON_TAG_ADMIN_PASS "Mt Wilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASS
+prompt_with_default MTWILSON_TAG_ADMIN_USERNAME "Mt Wilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin}
+prompt_with_default_password MTWILSON_TAG_ADMIN_PASSWORD "Mt Wilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASSWORD
 
 MTWILSON_TAG_API_USERNAME=tagservice
 MTWILSON_TAG_API_PASSWORD=$(generate_password 16)
@@ -696,10 +696,10 @@ update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.propert
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
 #prompt_with_default MTWILSON_TAG_KEYSTORE "Mt Wilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
-#prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mt Wilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
+#prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASSWORD "Mt Wilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASSWORD
 #prompt_with_default_password MTWILSON_TAG_KEY_PASSWORD "Mt Wilson Tag Key Password: " $MTWILSON_TAG_KEY_PASSWORD
 #update_property_in_file "mtwilson.atag.keystore" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
-#update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASS"
+#update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASSWORD"
 #update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASSWORD"
 
 MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
@@ -726,8 +726,8 @@ update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_IS
 #if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
 #  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
 #  keytool=${JAVA_HOME}/bin/keytool
-#  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASSWORD -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
-#  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS
+#  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASSWORD -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASSWORD -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
+#  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASSWORD
 #  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -outform pem >> $CONFIG_DIR/tag-cacerts.pem
 #fi
 
@@ -738,11 +738,11 @@ call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
-if [ -n "$MTWILSON_TAG_ADMIN_PASS" ]; then
-  export MTWILSON_TAG_ADMIN_PASS
-  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USER:-tagadmin} env:MTWILSON_TAG_ADMIN_PASS --permissions tag_certificates:create
+if [ -n "$MTWILSON_TAG_ADMIN_PASSWORD" ]; then
+  export MTWILSON_TAG_ADMIN_PASSWORD
+  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificates:create
 else
-  echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASS is not set"
+  echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASSWORD is not set"
 fi
 
 #user is approved directly in TagCreateMtWilsonClient now
