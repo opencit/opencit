@@ -258,7 +258,7 @@ public class TagCertificateAuthority {
         // if auto-import to mtwilson is enabled, do it here, but if there is an exception we only log it
         try {
             if (configuration.isTagProvisionAutoImport()) {
-                String url = My.configuration().getAssetTagMtwilsonBaseUrl();
+                String url = My.configuration().getAssetTagMtWilsonBaseUrl();
                 if (url != null && !url.isEmpty()) {
                     AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
                     request.setCertificate(attributeCertificateBytes);

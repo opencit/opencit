@@ -679,7 +679,7 @@ fi
 ##############################################################################################################################################################################
 ##tag service installation
 CONFIG_DIR=/opt/mtwilson/configuration
-prompt_with_default MTWILSON_TAG_SERVER_PRIVATE "Mtwilson Tag Private Server: " $MTWILSON_SERVER
+prompt_with_default MTWILSON_TAG_SERVER_PRIVATE "Mt Wilson Tag Private Server: " $MTWILSON_SERVER
 WEBSERVER_PREFIX=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $1}'`
 WEBSERVER_PORT=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $3}' | awk -F: '{print $2}'`
 MTWILSON_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER_PORT/mtwilson/v2"
@@ -687,38 +687,39 @@ MTWILSON_API_TAG_URL="$WEBSERVER_PREFIX//$MTWILSON_TAG_SERVER_PRIVATE:$WEBSERVER
 update_property_in_file "mtwilson.atag.url" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_URL"
 update_property_in_file "mtwilson.atag.mtwilson.baseurl" $CONFIG_DIR/mtwilson.properties "$MTWILSON_API_TAG_URL"
 
-prompt_with_default MTWILSON_TAG_ADMIN_USER "Mtwilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USER:-tagadmin}
-prompt_with_default_password MTWILSON_TAG_ADMIN_PASS "Mtwilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASS
+prompt_with_default MTWILSON_TAG_ADMIN_USER "Mt Wilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USER:-tagadmin}
+prompt_with_default_password MTWILSON_TAG_ADMIN_PASS "Mt Wilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASS
 
-MTWILSON_TAG_API_USER=tagservice
-MTWILSON_TAG_API_PASS=$(generate_password 16)
-update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USER"
-update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASS"
+MTWILSON_TAG_API_USERNAME=tagservice
+MTWILSON_TAG_API_PASSWORD=$(generate_password 16)
+update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USERNAME"
+update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
-#prompt_with_default MTWILSON_TAG_KEYSTORE "Mtwilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
-#prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mtwilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
-#prompt_with_default_password MTWILSON_TAG_KEY_PASS "Mtwilson Tag Key Password: " $MTWILSON_TAG_KEY_PASS
+#prompt_with_default MTWILSON_TAG_KEYSTORE "Mt Wilson Tag Keystore Path: " ${MTWILSON_TAG_KEYSTORE:-/opt/mtwilson/configuration/serverAtag.jks}
+#prompt_with_default_password MTWILSON_TAG_KEYSTORE_PASS "Mt Wilson Tag Keystore Password: " $MTWILSON_TAG_KEYSTORE_PASS
+#prompt_with_default_password MTWILSON_TAG_KEY_PASSWORD "Mt Wilson Tag Key Password: " $MTWILSON_TAG_KEY_PASSWORD
 #update_property_in_file "mtwilson.atag.keystore" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE"
 #update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASS"
-#update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASS"
+#update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASSWORD"
 
 MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
-prompt_with_default MTWILSON_TAG_HTML5_DIR "Mtwilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
-prompt_with_default MTWILSON_TAG_CERT_IMPORT_AUTO "Mtwilson Tag Certificate Auto Import: " ${MTWILSON_TAG_CERT_IMPORT_AUTO:-true}
+prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+prompt_with_default MTWILSON_TAG_CERT_IMPORT_AUTO "Mt Wilson Tag Certificate Auto Import: " ${MTWILSON_TAG_CERT_IMPORT_AUTO:-true}
 update_property_in_file "mtwilson.atag.html5.dir" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_HTML5_DIR"
 update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_CERT_IMPORT_AUTO"
 
 # remaining properties
 prompt_with_default TAG_PROVISION_EXTERNAL "Use external CA instead of the built-in CA? " ${TAG_PROVISION_EXTERNAL:-false}
+# TODO: remove the nocache option; client will specify with each request whether cached certificate is acceptable
 prompt_with_default TAG_PROVISION_NOCACHE "Always generate new certificates for incoming requests? " ${TAG_PROVISION_NOCACHE:-true}
-prompt_with_default TAG_PROVISION_XML_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_REQUIRED:-false}
+prompt_with_default TAG_PROVISION_XML_ENCRYPTION_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_ENCRYPTION_REQUIRED:-false}
 prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD:-$(generate_password 16)}
 #prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
 prompt_with_default TAG_VALIDITY_SECONDS "Tag certificate validity duration: " ${TAG_VALIDITY_SECONDS:-31536000}
 prompt_with_default TAG_ISSUER_DN "Tag issuer distinguished name: " ${TAG_ISSUER_DN:-"CN=mtwilson-tag-ca"}
 update_property_in_file "tag.provision.external" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_EXTERNAL"
 update_property_in_file "tag.provision.nocache" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_NOCACHE"
-update_property_in_file "tag.provision.xml.encryption.required" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_REQUIRED"
+update_property_in_file "tag.provision.xml.encryption.required" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_ENCRYPTION_REQUIRED"
 update_property_in_file "tag.provision.xml.encryption.password" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_XML_PASSWORD"
 #update_property_in_file "tag.provision.selection.default" $CONFIG_DIR/mtwilson.properties "$TAG_PROVISION_SELECTION_DEFAULT"
 update_property_in_file "tag.validity.seconds" $CONFIG_DIR/mtwilson.properties "$TAG_VALIDITY_SECONDS"
@@ -727,7 +728,7 @@ update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_IS
 #if [ ! -f $MTWILSON_TAG_KEYSTORE ]; then
 #  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
 #  keytool=${JAVA_HOME}/bin/keytool
-#  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASS -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
+#  $keytool -genkey -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -dname "CN=$MTWILSON_TAG_SERVER_PRIVATE" -keypass $MTWILSON_TAG_KEY_PASSWORD -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS -keyalg "RSA" -sigalg "MD5withRSA" -keysize 2048 -validity 3650
 #  $keytool -export -v -alias "$MTWILSON_TAG_SERVER_PRIVATE" -file $CONFIG_DIR/serverAtag.cer -keystore $MTWILSON_TAG_KEYSTORE -storepass $MTWILSON_TAG_KEYSTORE_PASS
 #  openssl x509 -inform der -in $CONFIG_DIR/serverAtag.cer -outform pem >> $CONFIG_DIR/tag-cacerts.pem
 #fi
@@ -738,7 +739,7 @@ call_tag_setupcommand initialize-db
 call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
-call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USER" --password="$MTWILSON_TAG_API_PASS"
+call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
 if [ -n "$MTWILSON_TAG_ADMIN_PASS" ]; then
   export MTWILSON_TAG_ADMIN_PASS
   call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USER:-tagadmin} env:MTWILSON_TAG_ADMIN_PASS --permissions tag_certificates:create

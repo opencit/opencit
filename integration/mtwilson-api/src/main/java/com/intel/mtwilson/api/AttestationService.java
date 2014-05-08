@@ -115,10 +115,10 @@ public interface AttestationService {
     boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException;
     
     //This method is currently not exposed to the external customers. There is another API, which would call this API.
-    // This function has not been added to Mtwilson.java since the javadoc would be created from it
+    // This function has not been added to MtWilson.java since the javadoc would be created from it
     HostResponse registerHostByFindingMLE(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
     
     //This method is currently not exposed to the external customers. There is another API, which would call this API.
-    // This function has not been added to Mtwilson.java since the javadoc would be created from it
+    // This function has not been added to MtWilson.java since the javadoc would be created from it
     String checkMatchingMLEExists(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
 }

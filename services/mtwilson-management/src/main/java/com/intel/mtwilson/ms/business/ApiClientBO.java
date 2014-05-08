@@ -4,14 +4,10 @@
  */
 package com.intel.mtwilson.ms.business;
 
-import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyJpa;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
@@ -31,20 +27,14 @@ import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.security.rest.v2.model.Status;
 import com.intel.mtwilson.security.rest.v2.model.User;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import java.io.FileInputStream;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.cert.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -79,6 +69,7 @@ public class ApiClientBO extends BaseBO {
             } catch (CertificateException e) {
                 throw new MSException(e, ErrorCode.MS_INVALID_CERTIFICATE_DATA, e.getMessage());
             }
+            log.debug("Validating api client create request");
             validate(apiClientRequest, x509Certificate);
             createApiClientAndRole(apiClientRequest, x509Certificate, userUuid, userCertUuid);
             
@@ -204,9 +195,7 @@ public class ApiClientBO extends BaseBO {
             //apiClientX509.setLocale(apiClientRequest.);
 
             new ApiClientX509JpaController(getMSEntityManagerFactory()).create(apiClientX509);
-
             setRolesForApiClient(apiClientX509, apiClientRequest.getRoles());
-            
             populateShiroUserTables(apiClientRequest, x509Certificate);
             
         } catch (Exception ex) {
@@ -219,9 +208,12 @@ public class ApiClientBO extends BaseBO {
     // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
     // we are populating all the tables now.
     private void populateShiroUserTables(ApiClientCreateRequest apiClientRequest, X509Certificate x509Certificate) {
+        log.debug("Adding new v2 user {}", x509Certificate.getSubjectX500Principal().getName());
         try(LoginDAO loginDAO = MyJdbi.authz()) {
+            log.debug("Looking for existing user");
             User user = loginDAO.findUserByName(getSimpleNameFromCert(x509Certificate));
             if (user == null) {
+                log.debug("No existing user, inserting record");
                 user = new User();
                 user.setId(new UUID());
                 user.setComment("");
@@ -230,9 +222,10 @@ public class ApiClientBO extends BaseBO {
                 user.setUsername(getSimpleNameFromCert(x509Certificate));
                 loginDAO.insertUser(user);
             }
-            
+            log.debug("Looking for existing certificate");
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
             if (userLoginCertificate == null) {                        
+                log.debug("No existing certificate, inserting record");
                 userLoginCertificate = new UserLoginCertificate();
                 userLoginCertificate.setId(new UUID());
                 userLoginCertificate.setCertificate(apiClientRequest.getCertificate());
@@ -244,6 +237,7 @@ public class ApiClientBO extends BaseBO {
                 userLoginCertificate.setSha256Hash(getFingerPrint(x509Certificate));//Sha256Digest.digestOf(apiClientRequest.getCertificate()).toByteArray());
                 userLoginCertificate.setStatus(Status.PENDING);
                 userLoginCertificate.setUserId(user.getId());
+                // TODO: there is another form we can use where we pass the complete object; that would be less repetitive
                 loginDAO.insertUserLoginCertificate(userLoginCertificate.getId(), userLoginCertificate.getUserId(), userLoginCertificate.getCertificate(), 
                         userLoginCertificate.getSha1Hash(), userLoginCertificate.getSha256Hash(), userLoginCertificate.getExpires(), 
                         userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
@@ -251,9 +245,12 @@ public class ApiClientBO extends BaseBO {
             }
             
             String[] roles = apiClientRequest.getRoles();
+            log.debug("New user roles are {}", (Object[])roles);
             for (String role : roles) {
+                log.debug("Looking for role {}", role);
                 com.intel.mtwilson.security.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
                 if (findRoleByName != null) {
+                    log.debug("Adding role {} to new user {}", role, userLoginCertificate.getUserId());
                     loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());
                 }
             }
@@ -265,12 +262,15 @@ public class ApiClientBO extends BaseBO {
 
     }
 
-    // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
+    // TODO XXX This function would become the main logic in this BO during the user registration. For backward compatibility
     // we are populating all the tables now.
     private void updateShiroUserTables(ApiClientUpdateRequest apiClientUpdateRequest, String userName) {
+        log.debug("Updating v2 user tables for {}", userName);
         try(LoginDAO loginDAO = MyJdbi.authz()) {
+            log.debug("Looking up user login certificate {}", Hex.encodeHexString(apiClientUpdateRequest.fingerprint));
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(apiClientUpdateRequest.fingerprint);
             if (userLoginCertificate != null) {
+                log.debug("Found user login certificate {}", userLoginCertificate.getId());
                 userLoginCertificate.setEnabled(apiClientUpdateRequest.enabled);
                 userLoginCertificate.setStatus(Status.valueOf(apiClientUpdateRequest.status));
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
@@ -278,9 +278,10 @@ public class ApiClientBO extends BaseBO {
                 loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), userLoginCertificate.isEnabled(), 
                         userLoginCertificate.getStatus(), userLoginCertificate.getComment());
             }
-            
+            log.debug("Looking up user {}", userName);
             User user = loginDAO.findUserByName(userName);
             if (user != null) {
+                log.debug("Found user {}", user.getId());
                 user.setEnabled(apiClientUpdateRequest.enabled);
                 user.setStatus(Status.valueOf(apiClientUpdateRequest.status));
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
@@ -288,18 +289,23 @@ public class ApiClientBO extends BaseBO {
                 loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
             }
             
+            log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);
             // Clear the existing roles and update it with the new ones only if specified by the user
             if (apiClientUpdateRequest.roles != null && apiClientUpdateRequest.roles.length > 0) {
                 // Let us first delete the existing roles
+                log.debug("Looking for existing roles for user login certificate {}", userLoginCertificate.getId());
                 List<com.intel.mtwilson.security.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
                 for (com.intel.mtwilson.security.rest.v2.model.Role roleMapping : rolesByUserLoginCertificateId) {
+                    log.debug("Removing role {} from user {}", roleMapping.getRoleName(), userName);
                     loginDAO.deleteUserLoginCertificateRole(userLoginCertificate.getId(), roleMapping.getId());
                 }
                 
                 // Let us add the new roles
+                log.debug("Adding roles");
                 for (String role : apiClientUpdateRequest.roles) {
                     com.intel.mtwilson.security.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
                     if (findRoleByName != null) {
+                        log.debug("Adding role {} to user {}", findRoleByName.getRoleName(), userName);
                         loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());
                     }
                 }
@@ -338,6 +344,7 @@ public class ApiClientBO extends BaseBO {
         ApiRoleX509JpaController apiRoleX509JpaController = new ApiRoleX509JpaController(getMSEntityManagerFactory());
         for (String role : roles) {
             try {
+                log.debug("Adding v1 role {} to new user {}", role, apiClientX509.getName());
                 ApiRoleX509 apiRoleX509 = new ApiRoleX509();
                 ApiRoleX509PK apiRoleX509PK = new ApiRoleX509PK(apiClientX509.getId(),
                         Role.valueOf(role).toString());
