@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
 import com.intel.mtwilson.security.rest.v2.model.User;
@@ -85,10 +84,6 @@ public class EraseUserAccounts implements Command {
         try(LoginDAO dao = MyJdbi.authz()) {
         List<User> users = dao.findAllUsers();
         for(User user : users) {
-            UserKeystore userKeystore = dao.findUserKeystoreByUserId(user.getId());
-            if( userKeystore != null ) {
-                dao.deleteUserKeystoreById(userKeystore.getId());
-            }
             UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUserId(user.getId());
             if( userLoginPassword != null ) {
                 dao.deleteUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
