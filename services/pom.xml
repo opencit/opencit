@@ -77,8 +77,9 @@
     <module>mtwilson-webservice-util</module>
     <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-whitelist</module>
-    <module>mtwilson-security-model</module>
-	<module>mtwilson-security-ws-v2</module>
+    <module>mtwilson-user-management-model</module>
+	<module>mtwilson-user-management-ws-v2</module>
+    <module>mtwilson-attestation-client-jaxrs2</module>
   </modules>
 
 </project>
