@@ -316,6 +316,11 @@
     <artifactId>mtwilson-jersey2-util</artifactId>
     <version>${project.version}</version>
 </dependency>
+<dependency>
+    <groupId>com.intel.mtwilson.integration</groupId>
+    <artifactId>mtwilson-client-java7-jaxrs2</artifactId>
+    <version>${project.version}</version>
+</dependency>
 
         <!-- end jersey  -->
         
