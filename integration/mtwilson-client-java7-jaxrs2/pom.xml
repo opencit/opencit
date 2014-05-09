@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mtwilson-client-java6-jaxrs2</artifactId>
+    <artifactId>mtwilson-client-java7-jaxrs2</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-client-java6-jaxrs2</name>
+    <name>mtwilson-client-java7-jaxrs2</name>
     <description>
         The API Client provides an easy-to-use programming interface to access 
         Mt Wilson services. Using the API Client, you can manage the Whitelist,
