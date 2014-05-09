@@ -10,9 +10,7 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
-import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
-import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
@@ -26,9 +24,7 @@ import com.intel.mtwilson.as.data.TblSamlAssertion;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.BaseBO;
-import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
@@ -36,7 +32,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -52,7 +48,6 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.intel.mtwilson.as.business.AssetTagCertBO;
 /**
  * All settings should be via setters, not via constructor, because this class
  * may be instantiated by a factory.
@@ -143,6 +138,12 @@ public class HostBO extends BaseBO {
                         }
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
+                            PublicKey publicKey = agent.getAik();
+                            String publicKeySha1 = Sha1Digest.valueOf(publicKey.getEncoded()).toString();
+                            if (My.jpa().mwHosts().findByAikPublicKeySha1(publicKeySha1) != null) {
+                                throw new ASException(ErrorCode.AS_DUPLICATE_AIK_PUBLIC_KEY, publicKeySha1);
+                            }
+
                                 // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
                                 setAikForHost(tblHosts, host, agent); 
                                 // Intel hosts return an X509 certificate for the AIK public key, signed by the privacy CA.  so we must verify the certificate is ok.
@@ -550,7 +551,8 @@ public class HostBO extends BaseBO {
                         String certPem = X509Util.encodePemCertificate(cert);
                         tblHosts.setAIKCertificate(certPem);
                         tblHosts.setAikPublicKey(RsaUtil.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
-                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
+                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
+                        tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                     }
                     catch(Exception e) {
                         log.error("Cannot encode AIK certificate: "+e.toString(), e);
@@ -561,7 +563,8 @@ public class HostBO extends BaseBO {
                     String pem = RsaUtil.encodePemPublicKey(publicKey); 
                     tblHosts.setAIKCertificate(null);
                     tblHosts.setAikPublicKey(pem);
-                    tblHosts.setAikSha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
+                    tblHosts.setAikSha1(null);
+                    tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
                 }
             }
  	}

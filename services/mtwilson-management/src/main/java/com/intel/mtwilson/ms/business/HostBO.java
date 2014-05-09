@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.api.*;
@@ -42,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -744,13 +746,19 @@ public class HostBO extends BaseBO {
                 
                 // We need to validate the AIK Certificate first if the the AIK CA is available. This would be applicable only for Trust Agent hosts. Both
                 // Citrix and VMware do not support this.
-                if (agent.isAikCaAvailable()) {
-                    X509Certificate cert = agent.getAikCertificate();
-                    cert.checkValidity(); // AIK certificate must be valid today
-                    boolean validCaSignature = isAikCertificateTrusted(cert);
-                    if( !validCaSignature ) {
-                        throw new MSException(ErrorCode.MS_INVALID_AIK_CERTIFICATE, gkvHost.HostName);
-                    }                    
+                if(agent.isAikAvailable()) { // INTEL and CITRIX
+                    // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
+                    setAikForHost(tblHosts, agent);
+                    // Intel hosts return an X509 certificate for the AIK public key, signed by the privacy CA.  so we must verify the certificate is ok.
+                    if (agent.isAikCaAvailable()) {
+                        // we have to check that the aik certificate was signed by a trusted privacy ca
+                        X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate()); //agent.getAikCertificate();
+                        hostAikCert.checkValidity(); // AIK certificate must be valid today
+                        boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
+                        if (!validCaSignature) {
+                            throw new MSException(ErrorCode.MS_INVALID_AIK_CERTIFICATE, gkvHost.HostName);
+                        }
+                    }
                 }
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
@@ -912,6 +920,30 @@ public class HostBO extends BaseBO {
         }
 
         return configStatus;
+    }
+    
+    private void setAikForHost(TblHosts tblHosts, HostAgent agent) {
+        if (agent.isAikAvailable()) {
+            if (agent.isAikCaAvailable()) {
+                X509Certificate cert = agent.getAikCertificate();
+                try {
+                    String certPem = X509Util.encodePemCertificate(cert);
+                    tblHosts.setAIKCertificate(certPem);
+                    tblHosts.setAikPublicKey(RsaUtil.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
+                    tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
+                    tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
+                } catch (Exception e) {
+                    log.error("Cannot encode AIK certificate: " + e.toString(), e);
+                }
+            } else {
+                PublicKey publicKey = agent.getAik();
+                String pem = RsaUtil.encodePemPublicKey(publicKey);
+                tblHosts.setAIKCertificate(null);
+                tblHosts.setAikPublicKey(pem);
+                tblHosts.setAikSha1(null);
+                tblHosts.setAikPublicKeySha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
+            }
+        }
     }
     
     /**
