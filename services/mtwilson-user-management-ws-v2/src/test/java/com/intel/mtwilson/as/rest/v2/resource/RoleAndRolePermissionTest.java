@@ -5,13 +5,13 @@
 package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.RoleCollection;
-import com.intel.mtwilson.security.rest.v2.model.RoleFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.RoleLocator;
-import com.intel.mtwilson.security.rest.v2.model.RolePermission;
-import com.intel.mtwilson.security.rest.v2.model.RolePermissionCollection;
-import com.intel.mtwilson.security.rest.v2.model.RolePermissionFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.repository.RolePermissionRepository;
 import com.intel.mtwilson.user.management.rest.v2.repository.RoleRepository;
 import org.junit.Test;

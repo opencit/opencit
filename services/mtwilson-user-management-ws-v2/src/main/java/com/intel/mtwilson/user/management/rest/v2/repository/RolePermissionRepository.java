@@ -5,10 +5,10 @@
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.security.rest.v2.model.RolePermission;
-import com.intel.mtwilson.security.rest.v2.model.RolePermissionCollection;
-import com.intel.mtwilson.security.rest.v2.model.RolePermissionFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.RolePermissionLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;

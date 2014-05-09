@@ -5,13 +5,13 @@
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmac;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmacCollection;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmacFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmacLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmac;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
-import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import javax.ws.rs.WebApplicationException;

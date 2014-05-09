@@ -14,7 +14,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.rest.v2.repository.CaCertificateRepository;
-import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;

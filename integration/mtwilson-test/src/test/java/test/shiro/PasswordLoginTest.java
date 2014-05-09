@@ -5,7 +5,7 @@
 package test.shiro;
 
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;

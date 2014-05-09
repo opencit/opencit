@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.resource;
 
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmac;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmacCollection;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmacFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginHmacLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmac;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginHmacRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;

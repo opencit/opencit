@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.resource;
 
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserCollection;
-import com.intel.mtwilson.security.rest.v2.model.UserFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.UserLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
