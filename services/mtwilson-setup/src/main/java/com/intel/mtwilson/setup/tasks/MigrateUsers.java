@@ -19,7 +19,6 @@ import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.security.rest.v2.model.Role;
 import com.intel.mtwilson.security.rest.v2.model.Status;
 import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateRole;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
@@ -219,15 +218,6 @@ public class MigrateUsers extends DatabaseSetupTask {
             user.setComment(String.format("%s\nmw_portal_user.id=%d\nmw_portal_user.uuid=%s", (portalUser.getComment() == null ? "" : portalUser.getComment()), portalUser.getId(), portalUser.getUuid_hex()));
 
             loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.isEnabled(), user.getStatus(), user.getComment());
-
-            // create new user keystore  record
-            UserKeystore userKeystore = new UserKeystore();
-            userKeystore.setId(new UUID());
-            userKeystore.setUserId(user.getId());
-            userKeystore.setKeystore(portalUser.getKeystore());
-            userKeystore.setKeystoreFormat("jks");
-            userKeystore.setComment("Imported from mw_portal_user.keystore");
-            loginDAO.insertUserKeystore(userKeystore.getId(), userKeystore.getUserId(), userKeystore.getKeystore(), userKeystore.getKeystoreFormat(), userKeystore.getComment());
 
             // create new password login record  --  will be disabled because we don't know the user's password
             UserLoginPassword userLoginPassword = new UserLoginPassword();

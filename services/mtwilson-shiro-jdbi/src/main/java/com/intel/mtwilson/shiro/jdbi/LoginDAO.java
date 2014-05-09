@@ -11,7 +11,6 @@ import com.intel.mtwilson.security.rest.v2.model.Role;
 import com.intel.mtwilson.security.rest.v2.model.RolePermission;
 import com.intel.mtwilson.security.rest.v2.model.User;
 import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
@@ -45,7 +44,7 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
  */
 @UseStringTemplate3StatementLocator
 @RegisterArgumentFactory({UUIDArgument.class, DateArgument.class, LocaleArgument.class, StatusArgument.class})
-@RegisterMapper({UserResultMapper.class,UserKeystoreResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
+@RegisterMapper({UserResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
 public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
     // use the .sql scripts in mtwilson-postgresql and mtwilson-mysql instead.  
@@ -91,33 +90,7 @@ public interface LoginDAO extends Closeable {
     
     @SqlUpdate("delete from mw_user where id=:id")
     void deleteUser(@Bind("id") UUID id);
-    
-    /**
-  id uuid NOT NULL,
-  user_id uuid NOT NULL,
-  keystore bytea NOT NULL,
-  keystore_format character varying(128) NOT NULL DEFAULT 'jks',
-  comment text DEFAULT NULL,
-     * 
-     */
-    @SqlUpdate("insert into mw_user_keystore (id, user_id, keystore, keystore_format, comment) values (:id, :user_id, :keystore, :keystore_format, :comment)")
-    void insertUserKeystore(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat, @Bind("comment") String comment);
-
-    @SqlUpdate("update mw_user_keystore set keystore=:keystore, keystore_format=:keystore_format, comment=:comment WHERE id=:id")
-    void updateUserKeystore(@Bind("id") UUID id, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat,  @Bind("comment") String comment);
-    
-    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore")
-    List<UserKeystore> findAllUserKeystores();
-    
-    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore where id=:id")
-    UserKeystore findUserKeystoreById(@Bind("id") UUID id);
-    
-    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore where user_id=:user_id")
-    UserKeystore findUserKeystoreByUserId(@Bind("user_id") UUID userId);
-    
-    @SqlUpdate("delete from mw_user_keystore where id=:id")
-    void deleteUserKeystoreById(@Bind("id") UUID id);
-    
+        
     /**
      * 
   id uuid NOT NULL,
