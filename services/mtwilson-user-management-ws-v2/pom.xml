@@ -24,6 +24,12 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-shiro</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency> 
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
