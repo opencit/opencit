@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.intel.dcsg.cpg.io.UUID;

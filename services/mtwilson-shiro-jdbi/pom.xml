@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-security-model</artifactId>
+            <artifactId>mtwilson-user-management-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- XXX TODO  dependency will need to be the other way... eventually this should be included in mtwilson-my and obtained by mtwilson-shiro using My.jdbi().authz() -->

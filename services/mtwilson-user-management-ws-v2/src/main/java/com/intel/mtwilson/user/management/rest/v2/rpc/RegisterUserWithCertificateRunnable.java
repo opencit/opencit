@@ -14,9 +14,10 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.rest.v2.repository.CaCertificateRepository;
-import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
+import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertificate;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
 import java.io.FileInputStream;
@@ -38,52 +39,42 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterUserWithCertificateRunnable.class);
 
-    private User user;
-    private String result;
+    private RegisterUserWithCertificate input;
 
-    public User getUser() {
-        return user;
+    public RegisterUserWithCertificate getInput() {
+        return input;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setInput(RegisterUserWithCertificate input) {
+        this.input = input;
     }
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
+    
     
     @Override
     public void run() {
         
         UserRepository userRepo = new UserRepository();
         UserLoginCertificateRepository userLoginCertRepo = new UserLoginCertificateRepository();
-        CaCertificateRepository caCertRepo = new CaCertificateRepository();
         
-        try {
-            if (user != null) {
-                log.debug("Starting to process the user registration with certificate for {}.", user.getUsername());
-                UUID userId = new UUID();
-                User userObj = new User();
-                userObj.setId(userId);
-                userObj.setUsername(user.getUsername());
-                if (user.getLocale() == null)
-                    userObj.setLocale(Locale.US);
-                else
-                    userObj.setLocale(user.getLocale());
-                userObj.setComment(user.getComment());
-                                
-                
-                log.debug("Completed processing user registration with certificate for {} with result {}", user.getUsername(), result);
-            }
-        } catch (Exception ex) {
-            throw new ASException(ex);
-        }
+//        try {
+//            if (input != null && input.getInput().) {
+//                log.debug("Starting to process the user registration with certificate for {}.", user.getUsername());
+//                UUID userId = new UUID();
+//                User userObj = new User();
+//                userObj.setId(userId);
+//                userObj.setUsername(user.getUsername());
+//                if (user.getLocale() == null)
+//                    userObj.setLocale(Locale.US);
+//                else
+//                    userObj.setLocale(user.getLocale());
+//                userObj.setComment(user.getComment());
+//                                
+//                
+//                log.debug("Completed processing user registration with certificate for {} with result {}", user.getUsername(), result);
+//            }
+//        } catch (Exception ex) {
+//            throw new ASException(ex);
+//        }
     }
     
 }

@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.resource;
 
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.RoleCollection;
-import com.intel.mtwilson.security.rest.v2.model.RoleFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.RoleLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.RoleRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;

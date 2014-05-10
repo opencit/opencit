@@ -104,7 +104,12 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java6-jaxrs2</artifactId>
+            <artifactId>mtwilson-client-java7-jaxrs2</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -276,7 +281,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-security-model</artifactId>
+            <artifactId>mtwilson-user-management-model</artifactId>
             <version>${project.version}</version>
         </dependency>
     

@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -5,13 +5,13 @@
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.RoleCollection;
-import com.intel.mtwilson.security.rest.v2.model.RoleFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.RoleLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
-import com.intel.mtwilson.security.rest.v2.model.RolePermissionFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionFilterCriteria;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;

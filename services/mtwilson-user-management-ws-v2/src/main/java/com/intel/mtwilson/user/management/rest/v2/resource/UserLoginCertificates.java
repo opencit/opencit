@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.resource;
 
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateCollection;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;

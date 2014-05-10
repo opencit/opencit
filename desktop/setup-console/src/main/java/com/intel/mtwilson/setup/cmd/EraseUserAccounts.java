@@ -4,9 +4,9 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
-import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;

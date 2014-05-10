@@ -5,15 +5,15 @@
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserCollection;
-import com.intel.mtwilson.security.rest.v2.model.UserFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.UserLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

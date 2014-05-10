@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.resource;
 
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordCollection;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordFilterCriteria;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordCollection;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginPasswordRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
