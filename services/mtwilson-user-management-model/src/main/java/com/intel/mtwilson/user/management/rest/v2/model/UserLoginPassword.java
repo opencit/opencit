@@ -36,6 +36,7 @@ public class UserLoginPassword extends Document implements HashedPassword {
     private Date expires;
     private boolean enabled;
     private Status status;
+    private String comment;
     private Set<String> roles;
 
     public UUID getId() {
@@ -110,6 +111,15 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.status = status;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    
     public Set<String> getRoles() {
         return roles;
     }

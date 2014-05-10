@@ -8,6 +8,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
@@ -40,6 +41,8 @@ public class UserLoginPasswordResultMapper implements ResultSetMapper<UserLoginP
         userLoginPassword.setAlgorithm(rs.getString("algorithm"));
         userLoginPassword.setExpires(rs.getTimestamp("expires"));
         userLoginPassword.setEnabled(rs.getBoolean("enabled"));
+        userLoginPassword.setStatus(Status.valueOf(rs.getString("status")));
+        userLoginPassword.setComment(rs.getString("comment"));
         return userLoginPassword;
     }
     

@@ -20,6 +20,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleFil
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.WebApplicationException;
@@ -104,8 +105,10 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
                 if (item.getSalt() != null)
                     obj.setSalt(item.getSalt());
                 obj.setEnabled(item.isEnabled());
-                                
-                loginDAO.updateUserLoginPassword(obj.getPasswordHash(), obj.getSalt(), obj.getIterations(), obj.getAlgorithm(), obj.getExpires(), obj.isEnabled(), obj.getId());
+                obj.setStatus(item.getStatus());
+                obj.setComment(item.getComment());
+                loginDAO.updateUserLoginPassword(obj.getPasswordHash(), obj.getSalt(), obj.getIterations(), obj.getAlgorithm(), obj.getExpires(), 
+                        obj.isEnabled(), obj.getId(), obj.getStatus(), obj.getComment());
                 log.debug("UserLoginPassword:Store - Updated the user login password with id {} successfully.", obj.getId());
 
                 // Before we add the roles we need to delete the existing ones
@@ -157,9 +160,11 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
                 obj.setExpires(item.getExpires());
                 obj.setIterations(item.getIterations());
                 obj.setSalt(item.getSalt());
-                obj.setEnabled(item.isEnabled());
+                obj.setEnabled(false);
+                obj.setStatus(Status.PENDING);
+                obj.setComment(item.getComment());
                 loginDAO.insertUserLoginPassword(obj.getId(), obj.getUserId(), obj.getPasswordHash(), obj.getSalt(), obj.getIterations(), obj.getAlgorithm(),
-                        obj.getExpires(), obj.isEnabled());
+                        obj.getExpires(), obj.isEnabled(), obj.getStatus(), obj.getComment());
                 log.debug("UserLoginPassword:Create - Created the user login password for user with id {} successfully.", obj.getUserId());
             } else {
                 log.error("UserLoginPassword:Create - User login password for user with Id {} will not be created since a duplicate already exists.", obj.getUserId());

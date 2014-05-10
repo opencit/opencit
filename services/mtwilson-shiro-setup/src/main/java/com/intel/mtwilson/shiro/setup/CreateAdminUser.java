@@ -245,7 +245,11 @@ public class CreateAdminUser extends DatabaseSetupTask {
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
             userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
-            loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.APPROVED);
+            userLoginPassword.setComment("automatically created by setup");            
+            loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
             // now we have to store the password somewhere so the admin can read it and know it; but it doesn't belong in the server configuration so we save it in a file which the admin can read and delete (or the setup application can automatically delete it)
             storeAdminPassword();
         }
