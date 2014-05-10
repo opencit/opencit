@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.attestation.client.jaxrs.HostAttestations;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;

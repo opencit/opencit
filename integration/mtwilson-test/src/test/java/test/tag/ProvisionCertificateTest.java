@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificate;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateFilterCriteria;
-import com.intel.mtwilson.client.jaxrs.HostTagCertificates;
+import com.intel.mtwilson.attestation.client.jaxrs.HostTagCertificates;
 import com.intel.mtwilson.tag.client.jaxrs.TagManagementClient;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.test.RemoteIntegrationTest;

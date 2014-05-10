@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.attestation.client.jaxrs.CaCertificates;
 import com.intel.mtwilson.My;
 import java.security.cert.X509Certificate;
 import org.junit.BeforeClass;

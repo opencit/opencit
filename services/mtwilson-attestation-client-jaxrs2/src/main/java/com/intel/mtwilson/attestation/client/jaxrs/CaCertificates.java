@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.client.jaxrs;
+package com.intel.mtwilson.attestation.client.jaxrs;
 
 import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.jersey.http.OtherMediaType;

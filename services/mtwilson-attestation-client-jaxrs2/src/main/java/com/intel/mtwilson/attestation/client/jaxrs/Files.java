@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.client.jaxrs;
+package com.intel.mtwilson.attestation.client.jaxrs;
 
 import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.File;
