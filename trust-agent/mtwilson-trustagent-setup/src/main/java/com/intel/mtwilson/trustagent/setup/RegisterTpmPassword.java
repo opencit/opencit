@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
-import com.intel.mtwilson.client.jaxrs.HostTpmPassword;
+import com.intel.mtwilson.attestation.client.jaxrs.HostTpmPassword;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.attestation.client.jaxrs.PollHosts;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;

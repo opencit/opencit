@@ -4,6 +4,11 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.mtwilson.attestation.client.jaxrs.Oems;
+import com.intel.mtwilson.attestation.client.jaxrs.MleSources;
+import com.intel.mtwilson.attestation.client.jaxrs.Oss;
+import com.intel.mtwilson.attestation.client.jaxrs.MlePcrs;
+import com.intel.mtwilson.attestation.client.jaxrs.Mles;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;

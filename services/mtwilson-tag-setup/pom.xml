@@ -39,7 +39,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-user-management-model</artifactId>
-            <!--<artifactId>mtwilson-security-model</artifactId>-->
             <version>${project.version}</version>
         </dependency>
 

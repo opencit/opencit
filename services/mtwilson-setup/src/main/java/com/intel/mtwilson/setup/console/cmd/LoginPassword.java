@@ -162,7 +162,11 @@ public class LoginPassword implements Command {
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
             userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
-            dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.APPROVED);
+            userLoginPassword.setComment("Automatically created during setup.");
+            dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
             log.debug("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
         } else {
             userLoginPassword.setUserId(user.getId());
@@ -171,7 +175,11 @@ public class LoginPassword implements Command {
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
             userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
-            dao.updateUserLoginPasswordWithUserId(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.APPROVED);
+            userLoginPassword.setComment("Automatically created during setup.");
+            dao.updateUserLoginPasswordWithUserId(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
             log.debug("Updated UserLoginPassword with ID: {}", userLoginPassword.getId());
         }
         log.debug("finding role by username");

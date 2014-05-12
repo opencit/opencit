@@ -229,8 +229,11 @@ public class MigrateUsers extends DatabaseSetupTask {
             userLoginPassword.setIterations(iterations);
             userLoginPassword.setPasswordHash(new byte[0]); // we don't know the password right now 
             userLoginPassword.setSalt(new byte[0]); // will be generated at the time the password is set
-
-            loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.PENDING);
+            userLoginPassword.setComment(user.getComment());
+            loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
 
             // look up the user's certificates and  permissions
             List<ApiClientX509> apiClients = My.jpa().mwApiClientX509().findApiClientX509ByNameLike(String.format("CN=%s", user.getUsername()));
