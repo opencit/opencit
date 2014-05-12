@@ -18,7 +18,7 @@
     <dependencies>
     <dependency>
     	<groupId>com.intel.mtwilson.integration</groupId>
-    	<artifactId>mtwilson-client-java6-jaxrs2</artifactId>
+    	<artifactId>mtwilson-client-java7-jaxrs2</artifactId>
         <version>${project.version}</version>
     </dependency>
 

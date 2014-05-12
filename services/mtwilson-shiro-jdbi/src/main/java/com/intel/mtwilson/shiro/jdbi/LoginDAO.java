@@ -4,14 +4,13 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordRole;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.RolePermission;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
@@ -29,7 +28,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateRole;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import java.util.Set;
 import org.skife.jdbi.v2.sqlobject.BindBean;
 
@@ -45,7 +44,7 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
  */
 @UseStringTemplate3StatementLocator
 @RegisterArgumentFactory({UUIDArgument.class, DateArgument.class, LocaleArgument.class, StatusArgument.class})
-@RegisterMapper({UserResultMapper.class,UserKeystoreResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
+@RegisterMapper({UserResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
 public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
     // use the .sql scripts in mtwilson-postgresql and mtwilson-mysql instead.  
@@ -91,33 +90,7 @@ public interface LoginDAO extends Closeable {
     
     @SqlUpdate("delete from mw_user where id=:id")
     void deleteUser(@Bind("id") UUID id);
-    
-    /**
-  id uuid NOT NULL,
-  user_id uuid NOT NULL,
-  keystore bytea NOT NULL,
-  keystore_format character varying(128) NOT NULL DEFAULT 'jks',
-  comment text DEFAULT NULL,
-     * 
-     */
-    @SqlUpdate("insert into mw_user_keystore (id, user_id, keystore, keystore_format, comment) values (:id, :user_id, :keystore, :keystore_format, :comment)")
-    void insertUserKeystore(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat, @Bind("comment") String comment);
-
-    @SqlUpdate("update mw_user_keystore set keystore=:keystore, keystore_format=:keystore_format, comment=:comment WHERE id=:id")
-    void updateUserKeystore(@Bind("id") UUID id, @Bind("keystore") byte[] keystore, @Bind("keystore_format") String keystoreFormat,  @Bind("comment") String comment);
-    
-    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore")
-    List<UserKeystore> findAllUserKeystores();
-    
-    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore where id=:id")
-    UserKeystore findUserKeystoreById(@Bind("id") UUID id);
-    
-    @SqlQuery("select id,user_id,keystore,keystore_format,comment from mw_user_keystore where user_id=:user_id")
-    UserKeystore findUserKeystoreByUserId(@Bind("user_id") UUID userId);
-    
-    @SqlUpdate("delete from mw_user_keystore where id=:id")
-    void deleteUserKeystoreById(@Bind("id") UUID id);
-    
+        
     /**
      * 
   id uuid NOT NULL,
@@ -186,26 +159,26 @@ public interface LoginDAO extends Closeable {
   enabled boolean NOT NULL DEFAULT '0',
      * 
      */
-    @SqlQuery("select id, user_id, password_hash, salt, iterations, algorithm, expires, enabled from mw_user_login_password where id=:id")
+    @SqlQuery("select id, user_id, password_hash, salt, iterations, algorithm, expires, enabled, status, comment from mw_user_login_password where id=:id")
     UserLoginPassword findUserLoginPasswordById(@Bind("id") UUID id);
 
-    @SqlQuery("select id, user_id, password_hash, salt, iterations, algorithm, expires, enabled from mw_user_login_password where user_id=:user_id")
+    @SqlQuery("select id, user_id, password_hash, salt, iterations, algorithm, expires, enabled, status, comment from mw_user_login_password where user_id=:user_id")
     UserLoginPassword findUserLoginPasswordByUserId(@Bind("user_id") UUID userId);
     
-    @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username")
+    @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled, mw_user_login_password.status as status, mw_user_login_password.comment as comment from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username")
     UserLoginPassword findUserLoginPasswordByUsername(@Bind("username") String username);
     
-    @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username and mw_user_login_password.enabled=:enabled")
+    @SqlQuery("select mw_user_login_password.id as id, user_id, password_hash, salt, iterations, algorithm, expires, mw_user_login_password.enabled as enabled, mw_user_login_password.status as status, mw_user_login_password.comment as comment from mw_user join mw_user_login_password on mw_user.id=mw_user_login_password.user_id where mw_user.username=:username and mw_user_login_password.enabled=:enabled")
     UserLoginPassword findUserLoginPasswordByUsernameEnabled(@Bind("username") String username, @Bind("enabled") boolean enabled);
     
-    @SqlUpdate("insert into mw_user_login_password (id, user_id, password_hash, salt, iterations, algorithm, expires, enabled) values (:id, :user_id, :password_hash, :salt, :iterations, :algorithm, :expires, :enabled)")
-    void insertUserLoginPassword(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled);
+    @SqlUpdate("insert into mw_user_login_password (id, user_id, password_hash, salt, iterations, algorithm, expires, enabled, status, comment) values (:id, :user_id, :password_hash, :salt, :iterations, :algorithm, :expires, :enabled, :status, :comment)")
+    void insertUserLoginPassword(@Bind("id") UUID id, @Bind("user_id") UUID userId, @Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
 
-    @SqlUpdate("update mw_user_login_password set user_id=:user_id, password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled where id=:id")
-    void updateUserLoginPasswordWithUserId(@Bind("id") UUID id, @Bind("user_id") UUID user_id, @Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled);
+    @SqlUpdate("update mw_user_login_password set user_id=:user_id, password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled, status=:status, comment=:comment where id=:id")
+    void updateUserLoginPasswordWithUserId(@Bind("id") UUID id, @Bind("user_id") UUID user_id, @Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
     
-    @SqlUpdate("update mw_user_login_password set password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled where id=:id")
-    void updateUserLoginPassword(@Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("id") UUID id);
+    @SqlUpdate("update mw_user_login_password set password_hash=:password_hash, salt=:salt, iterations=:iterations, algorithm=:algorithm, expires=:expires, enabled=:enabled, status=:status, comment=:comment  where id=:id")
+    void updateUserLoginPassword(@Bind("password_hash") byte[] password_hash, @Bind("salt") byte[] salt, @Bind("iterations") int iterations, @Bind("algorithm") String algorithm, @Bind("expires") Date expires, @Bind("enabled") boolean enabled, @Bind("id") UUID id, @Bind("status") Status status, @Bind("comment") String comment);
 
     @SqlUpdate("delete from mw_user_login_password where id=:id")
     void deleteUserLoginPasswordById(@Bind("id") UUID id);

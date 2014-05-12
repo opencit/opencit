@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.shiro.setup;
 
-import com.intel.mtwilson.security.rest.v2.model.RolePermission;
-import com.intel.mtwilson.security.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;

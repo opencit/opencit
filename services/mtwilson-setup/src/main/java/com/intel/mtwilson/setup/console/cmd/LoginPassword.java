@@ -10,14 +10,14 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import org.apache.commons.configuration.Configuration;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword; // file.model.UserPassword;
-import com.intel.mtwilson.security.rest.v2.model.RolePermission; // file.model.UserPermission;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword; // file.model.UserPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission; // file.model.UserPermission;
 import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPasswordRole;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -162,7 +162,11 @@ public class LoginPassword implements Command {
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
             userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
-            dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.APPROVED);
+            userLoginPassword.setComment("Automatically created during setup.");
+            dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
             log.debug("Stored UserLoginPassword with ID: {}", userLoginPassword.getId());
         } else {
             userLoginPassword.setUserId(user.getId());
@@ -171,7 +175,11 @@ public class LoginPassword implements Command {
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
             userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
-            dao.updateUserLoginPasswordWithUserId(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.APPROVED);
+            userLoginPassword.setComment("Automatically created during setup.");
+            dao.updateUserLoginPasswordWithUserId(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
             log.debug("Updated UserLoginPassword with ID: {}", userLoginPassword.getId());
         }
         log.debug("finding role by username");

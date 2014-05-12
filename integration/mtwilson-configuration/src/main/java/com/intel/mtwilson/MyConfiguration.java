@@ -454,7 +454,7 @@ public class MyConfiguration {
         return getMtWilsonRoleString().split(",");
     }
     
-    // use this to instantiate a client  from mtwilson-client-java6-jaxrs2
+    // use this to instantiate a client  from mtwilson-client-java7-jaxrs2
     public Properties getClientProperties() throws MalformedURLException {
         Properties properties = new Properties();
         properties.setProperty("mtwilson.api.url", getMtWilsonURL().toString());

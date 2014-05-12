@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jdbi;
 
-import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.skife.jdbi.v2.StatementContext;

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblHosts.findById", query = "SELECT t FROM TblHosts t WHERE t.id = :id"),
     @NamedQuery(name = "TblHosts.findByName", query = "SELECT t FROM TblHosts t WHERE t.name = :name"),
     @NamedQuery(name = "TblHosts.findByAikSha1", query = "SELECT t FROM TblHosts t WHERE t.aikSha1 = :aikSha1"), // XXX TODO NEED TO ADD A COLUMN TO DATABASE, AND POPULATE IT WITH SHA1(AIK) WHENEVER WE UPDATE THE AIK ITSELF
+    @NamedQuery(name = "TblHosts.findByAikPublicKeySha1", query = "SELECT t FROM TblHosts t WHERE t.aikPublicKeySha1 = :aikPublicKeySha1"),
     @NamedQuery(name = "TblHosts.findByIPAddress", query = "SELECT t FROM TblHosts t WHERE t.iPAddress = :iPAddress"),
     @NamedQuery(name = "TblHosts.findByPort", query = "SELECT t FROM TblHosts t WHERE t.port = :port"),
     @NamedQuery(name = "TblHosts.findByDescription", query = "SELECT t FROM TblHosts t WHERE t.description = :description"),
@@ -99,12 +100,15 @@ public class TblHosts implements Serializable {
     @Column(name = "AIK_Certificate")
     private String aikCertificate;
 
+    @Column(name = "AIK_SHA1")
+    private String aikSha1;
+    
     @Lob
     @Column(name = "AIK_PublicKey")
     private String aikPublicKey;
     
-    @Column(name = "AIK_SHA1")
-    private String aikSha1;
+    @Column(name = "aik_publickey_sha1")
+    private String aikPublicKeySha1;
     
     @Column(name = "TlsPolicy")
     private String tlsPolicyName;
@@ -266,6 +270,9 @@ public class TblHosts implements Serializable {
     public String getAikSha1() {
         return aikSha1;
     }
+    public String getAikPublicKeySha1() {
+        return aikPublicKeySha1;
+    }
     
     /**
      * You should set this anytime you set the AIK Public Key.
@@ -278,6 +285,9 @@ public class TblHosts implements Serializable {
      */
     public void setAikSha1(String aikSha1) {
         this.aikSha1 = aikSha1;
+    }
+    public void setAikPublicKeySha1(String aikPublicKeySha1) {
+        this.aikPublicKeySha1 = aikPublicKeySha1;
     }
     
     public String getTlsPolicyName() { return tlsPolicyName; }

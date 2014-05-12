@@ -345,8 +345,32 @@ public class TblHostsJpaController implements Serializable {
 
         return host;
 
-    }    
+    }
+    
+    public TblHosts findByAikPublicKeySha1(String fingerprint) {
 
+        TblHosts host = null;
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("TblHosts.findByAikPublicKeySha1");
+
+            query.setParameter("aikPublicKeySha1", fingerprint);
+          
+
+            List<TblHosts> list = query.getResultList();
+
+            if (list != null && list.size() > 0) {
+                host = list.get(0);
+            }
+        } finally {
+                em.close();
+        }
+
+        return host;
+
+    }
+    
       public TblHosts findByIPAddress(String ipAddress) {
 
         TblHosts host = null;

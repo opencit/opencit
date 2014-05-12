@@ -4,11 +4,11 @@
  */
 package test.jdbi;
 
-import com.intel.mtwilson.security.rest.v2.model.RolePermission;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
-import com.intel.mtwilson.security.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
@@ -91,7 +91,10 @@ public class RepositoryTest {
         userLoginPassword.setAlgorithm("SHA256");
         userLoginPassword.setEnabled(true);
         userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
-        dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+        userLoginPassword.setStatus(Status.APPROVED);
+        userLoginPassword.setComment("Testing");
+        dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), 
+                userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
         
         // add a role for the user
         Role root = dao.findRoleByName("root");
@@ -116,7 +119,11 @@ public class RepositoryTest {
         userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
         userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         userLoginPassword.setEnabled(true);
-        dao.updateUserLoginPassword(userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getId());
+        userLoginPassword.setStatus(Status.APPROVED);
+        userLoginPassword.setComment("Testing");
+        dao.updateUserLoginPassword(userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), 
+                userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled(), userLoginPassword.getId(),
+                userLoginPassword.getStatus(), userLoginPassword.getComment());
         }
     }
     

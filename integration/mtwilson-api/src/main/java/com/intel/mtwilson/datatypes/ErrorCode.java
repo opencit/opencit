@@ -77,7 +77,8 @@ public enum ErrorCode {
     AS_INVALID_VMM_MLE(1035, "VMM MLE specified is not valid. %s"),
     AS_INVALID_INPUT(1036, "Input specified is not valid."),
     AS_TLS_KEYSTORE_ERROR(1037, "Error reading TLS key from keystore."),
-    AS_NOT_EDITABLE_PARAMETER(1037, "Specified parameter %s cannot be updated"),
+    AS_NOT_EDITABLE_PARAMETER(1038, "Specified parameter %s cannot be updated"),
+    AS_DUPLICATE_AIK_PUBLIC_KEY(1039, "AIK public key with fingerprint '%s' already exists"),
  
 
     // Below error codes are for general white list service errors
@@ -217,6 +218,7 @@ public enum ErrorCode {
     MS_HOST_CONFIGURATION_ERROR(3210, "Unable to retrieve the host configuration details. Please verify the host information."),
     MS_MLE_CONFIGURATION_NOT_FOUND(3211, "BIOS or Hypervisor MLE is not configured correctly."),
     MS_INVALID_AIK_CERTIFICATE(3212, "Cannot validate AIK for '%s' against known Privacy CAs"),
+    MS_DUPLICATE_AIK_PUBLIC_KEY(3213, "AIK public key with fingerprint '%s' already exists"),
     
     TLS_COMMMUNICATION_ERROR(4001, "Cannot establish secure connection to '%s': %s"),
     ETC_ERROR(9999, "Unknown Error");

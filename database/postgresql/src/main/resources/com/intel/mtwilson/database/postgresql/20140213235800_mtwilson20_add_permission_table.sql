@@ -61,6 +61,8 @@ CREATE TABLE mw_user_login_password (
   algorithm character varying(128) NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
+  status varchar(128) NOT NULL DEFAULT 'Pending',
+  comment text,
   PRIMARY KEY (id)
 ); 
 
@@ -82,6 +84,8 @@ CREATE TABLE mw_user_login_hmac (
   protection character varying(128) NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
+  status varchar(128) NOT NULL DEFAULT 'Pending',
+  comment text,
   PRIMARY KEY (id)
 ); 
 

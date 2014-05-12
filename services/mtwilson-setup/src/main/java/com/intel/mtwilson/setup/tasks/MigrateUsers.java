@@ -16,13 +16,12 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserKeystore;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificateRole;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginPassword;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -220,15 +219,6 @@ public class MigrateUsers extends DatabaseSetupTask {
 
             loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.isEnabled(), user.getStatus(), user.getComment());
 
-            // create new user keystore  record
-            UserKeystore userKeystore = new UserKeystore();
-            userKeystore.setId(new UUID());
-            userKeystore.setUserId(user.getId());
-            userKeystore.setKeystore(portalUser.getKeystore());
-            userKeystore.setKeystoreFormat("jks");
-            userKeystore.setComment("Imported from mw_portal_user.keystore");
-            loginDAO.insertUserKeystore(userKeystore.getId(), userKeystore.getUserId(), userKeystore.getKeystore(), userKeystore.getKeystoreFormat(), userKeystore.getComment());
-
             // create new password login record  --  will be disabled because we don't know the user's password
             UserLoginPassword userLoginPassword = new UserLoginPassword();
             userLoginPassword.setId(new UUID());
@@ -239,8 +229,11 @@ public class MigrateUsers extends DatabaseSetupTask {
             userLoginPassword.setIterations(iterations);
             userLoginPassword.setPasswordHash(new byte[0]); // we don't know the password right now 
             userLoginPassword.setSalt(new byte[0]); // will be generated at the time the password is set
-
-            loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), userLoginPassword.isEnabled());
+            userLoginPassword.setStatus(Status.PENDING);
+            userLoginPassword.setComment(user.getComment());
+            loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
+                    userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
+                    userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
 
             // look up the user's certificates and  permissions
             List<ApiClientX509> apiClients = My.jpa().mwApiClientX509().findApiClientX509ByNameLike(String.format("CN=%s", user.getUsername()));
