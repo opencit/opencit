@@ -643,9 +643,11 @@ public class HostBO extends BaseBO {
         } catch (MSException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
-
+        } catch (ASException ae) {
+            log.error("Error during white list configuration. " + ae.getErrorCode() + " :" + ae.getErrorMessage());
+            throw ae;
         } catch (Exception ex) {
-            log.error("Unexpected errror during white list configuration. ",  ex);
+            log.error("Unexpected error during white list configuration. ",  ex);
             throw new MSException(ErrorCode.MS_WHITELIST_CONFIG_ERROR, ex.getClass().getSimpleName());
         }
 
@@ -914,8 +916,11 @@ public class HostBO extends BaseBO {
         } catch (MSException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
+        } catch (ASException ae) {
+            log.error("Error during white list configuration. " + ae.getErrorCode() + " :" + ae.getErrorMessage());
+            throw ae;
         } catch (Exception ex) {
-            log.error("Unexpected errror during white list configuration. ", ex);
+            log.error("Unexpected error during white list configuration. ", ex);
             throw new MSException(ErrorCode.MS_WHITELIST_CONFIG_ERROR, ex.getClass().getSimpleName());
         }
 
