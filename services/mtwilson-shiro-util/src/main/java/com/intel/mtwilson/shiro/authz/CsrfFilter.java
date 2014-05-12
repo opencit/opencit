@@ -151,6 +151,7 @@ public class CsrfFilter extends AuthorizationFilter {
         Subject subject = getSubject(request,response);
         log.debug("got subject");
         for(Object p : subject.getPrincipals().asList()) { log.debug("principal: {}", p.getClass().getName()); }
+        // TODO:  remove direct use of Username because the subject might be authenticated in a way that doesn't provide a Username principal... maybe make this more general by being able to encode all principals in the token 
         Username username = subject.getPrincipals().oneByType(Username.class);
         log.debug("got username: {}", username.getUsername());
 
