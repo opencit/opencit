@@ -192,13 +192,6 @@ public class BootstrapUser implements Command {
                             userLoginCertificate.getStatus(), userLoginCertificate.getComment());
                 }
 
-                User user = loginDAO.findUserByName(username);
-                if (user != null) {
-                    user.setEnabled(true);
-                    user.setStatus(Status.APPROVED);
-                    user.setComment("Approved during setup");
-                    loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
-                }
             } catch (Exception ex) {
                 throw new SetupException("Error updating user and user certificate tables. " + ex.getMessage(), ex);
             }
