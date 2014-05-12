@@ -31,8 +31,6 @@ public class UserResultMapper implements ResultSetMapper<User> {
         if( rs.getString("locale") != null ) {
             user.setLocale(LocaleUtil.forLanguageTag(rs.getString("locale")));
         }
-        user.setEnabled(rs.getBoolean("enabled"));
-        user.setStatus(Status.valueOf(rs.getString("status")));
         return user;
     }
     

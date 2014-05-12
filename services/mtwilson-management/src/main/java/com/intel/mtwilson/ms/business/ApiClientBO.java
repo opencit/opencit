@@ -217,10 +217,8 @@ public class ApiClientBO extends BaseBO {
                 user = new User();
                 user.setId(new UUID());
                 user.setComment("");
-                user.setEnabled(false);
-                user.setStatus(Status.PENDING);
                 user.setUsername(getSimpleNameFromCert(x509Certificate));
-                loginDAO.insertUser(user);
+                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
             }
             log.debug("Looking for existing certificate");
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
@@ -282,11 +280,9 @@ public class ApiClientBO extends BaseBO {
             User user = loginDAO.findUserByName(userName);
             if (user != null) {
                 log.debug("Found user {}", user.getId());
-                user.setEnabled(apiClientUpdateRequest.enabled);
-                user.setStatus(Status.valueOf(apiClientUpdateRequest.status));
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
                     user.setComment(apiClientUpdateRequest.comment);
-                loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
+                loginDAO.updateUser(user.getId(), user.getLocale(), user.getComment());
             }
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);

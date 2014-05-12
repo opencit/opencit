@@ -31,8 +31,6 @@ public class UserTest {
         User user = new User();
         user.setId(userId);
         user.setUsername("superadmin1");
-        user.setStatus(Status.PENDING); 
-        user.setEnabled(false);
         user.setLocale(Locale.US);
         user.setComment("Need to manage user accounts."); 
         repo.create(user);
@@ -40,18 +38,16 @@ public class UserTest {
         UserLocator locator = new UserLocator();
         locator.id = userId;
         User retrieve = repo.retrieve(locator);
-        log.debug("Retrieved user name {} with id = {}, status = {}, locale = {}.", retrieve.getUsername(), retrieve.getId().toString(), retrieve.getStatus(), retrieve.getLocale());
+        log.debug("Retrieved user name {} with id = {}, locale = {}.", retrieve.getUsername(), retrieve.getId().toString(), retrieve.getLocale());
         
         user.setComment("Roles granted");
-        user.setEnabled(true);
-        user.setStatus(Status.APPROVED);
         repo.store(user);
 
         UserFilterCriteria criteria = new UserFilterCriteria();
         criteria.id = userId;
         UserCollection search = repo.search(criteria);
         for (User obj : search.getUsers()) {
-            log.debug("Retrieved user name {} with id = {}, status = {}, locale = {}.", obj.getUsername(), obj.getId().toString(), obj.getStatus(), obj.getLocale());
+            log.debug("Retrieved user name {} with id = {}, locale = {}.", obj.getUsername(), obj.getId().toString(), obj.getLocale());
         }                
 
         repo.delete(locator);

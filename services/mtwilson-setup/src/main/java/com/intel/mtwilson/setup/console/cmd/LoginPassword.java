@@ -140,14 +140,10 @@ public class LoginPassword implements Command {
             user = new User();
             user.setId(new UUID());
             //user.setComment("automatically created by setup");
-            user.setEnabled(true);
-            user.setStatus(Status.APPROVED);
             user.setUsername(username);
             dao.insertUser(user);
             log.info("Created user {}", username);
         } else {
-            user.setEnabled(true);
-            user.setStatus(Status.APPROVED);
             dao.updateUser(user);
             log.debug("Updated User: {}", username);
         }

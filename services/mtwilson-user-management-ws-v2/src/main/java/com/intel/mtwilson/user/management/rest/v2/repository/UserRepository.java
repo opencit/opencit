@@ -85,8 +85,6 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
             User user = loginDAO.findUserById(item.getId());
             if (user != null) {
                 user.setComment(item.getComment());
-                user.setEnabled(item.isEnabled());
-                user.setStatus(item.getStatus());
                 loginDAO.updateUser(user);
                 log.debug("User:Store - Updated the user {} successfully.", user.getUsername());
             } else {
@@ -113,9 +111,7 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
                 user.setId(item.getId());
                 user.setUsername(item.getUsername());
                 user.setComment(item.getComment());
-                user.setEnabled(false);
-                user.setStatus(Status.PENDING);
-                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.isEnabled(), user.getStatus(), user.getComment());
+                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
                 log.debug("User:Create - Created the user {} successfully.", item.getUsername());
             } else {
                 log.error("User:Create - User {} will not be created since a duplicate user already exists.", item.getUsername());

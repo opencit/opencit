@@ -115,7 +115,6 @@ public class TagCreateMtWilsonClient extends TagCommand {
         try {
             approveMtWilsonClient(rsaCredentialX509.identity());
             try (LoginDAO loginDAO = MyJdbi.authz()) {
-                ApproveUser(loginDAO, mtwilsonClientKeystoreUsername);
                 ApproveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
             }
             System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
@@ -144,12 +143,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }
     }
-    
-    private void ApproveUser(LoginDAO loginDAO, String username) {
-        User user = loginDAO.findUserByName(username);
-        loginDAO.enableUser(user.getId(), true, Status.APPROVED, "");
-    }
-    
+        
     private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");
