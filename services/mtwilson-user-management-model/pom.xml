@@ -53,8 +53,8 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
-
         <dependency>
             <groupId>com.intel.mtwilson.common</groupId>
             <artifactId>mtwilson-crypto</artifactId>

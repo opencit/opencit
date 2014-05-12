@@ -4,12 +4,12 @@
  */
 package com.intel.mtwilson.user.management.client.jaxrs;
 
-import com.intel.mtwilson.user.management.client.jaxrs.Users;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
+import java.util.Locale;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,45 +29,32 @@ public class UserTest {
     }
     
     @Test
-    public void testSearchCollection() {
+    public void testUser() {
+        
+        UUID userId = new UUID();
+        String userName = "TestUser999";
+        
+        User createUser = new User();
+        createUser.setId(userId);
+        createUser.setUsername(userName);
+        createUser.setLocale(Locale.US);
+        createUser.setComment("Access needed for testing");
+        client.createUser(createUser);
+        
+        User retrievUser = client.retrieveUser(userId.toString());
+        log.debug("Retrieved user name is {}, locale is {} and comments is {}", retrievUser.getUsername(), retrievUser.getLocale().toString(), retrievUser.getComment());
+        
+        createUser.setComment("Access approved");
+        client.editUser(createUser);
+        
         UserFilterCriteria criteria = new UserFilterCriteria();
-        //criteria.id = new UUID();
-//        criteria.nameContains = "ibm";
-        //criteria.nameEqualTo = "nameequalto";
+        criteria.filter = false;
         UserCollection users = client.searchUsers(criteria);
         for(User user : users.getUsers()) {
-//            log.debug("User name {}", user.getName());
+            log.debug("Searched user name is {}, locale is {} and comments is {}", user.getUsername(), user.getLocale().toString(), user.getComment());
         }
+        
+        client.deleteUser(userId.toString());
     }
-    
-    @Test
-    public void testCreate() {
-        User user = new User();
-//        user.setName("APIOEM");
-//        user.setDescription("API Created OEM");
-        User createUser = client.createUser(user);
-        log.debug("New OEM created with UUID {}.", createUser.getId().toString());
-    }
-    
-    @Test
-    public void testRetrieve() {
-        User retrieveUser = client.retrieveUser("27ae76f0-e678-4224-92fc-a91ebbf761b8");
-//        log.debug(retrieveUser.getName() + ":::" + retrieveUser.getDescription());
-    }
-
-    @Test
-    public void testEdit() {
-        User user = new User();
-//        user.setId(UUID.valueOf("27ae76f0-e678-4224-92fc-a91ebbf761b8"));
-//        user.setDescription("Updated description");
-//        user = client.editUser(user);
-//        log.debug(user.getName() + "--" + user.getId().toString());
-    }
-
-    @Test
-    public void testDelete() {
-        client.deleteUser("27ae76f0-e678-4224-92fc-a91ebbf761b8");
-        log.debug("Deleted the OEM successfully");
-    }
-    
+     
 }
