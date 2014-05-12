@@ -57,35 +57,35 @@ public interface LoginDAO extends Closeable {
   id uuid NOT NULL,
   username character varying(255) NOT NULL,
   locale character varying(8) NULL,
-  enabled boolean NOT NULL DEFAULT '0',
-  status varchar(128) NOT NULL DEFAULT 'Pending',
+//  enabled boolean NOT NULL DEFAULT '0',
+//  status varchar(128) NOT NULL DEFAULT 'Pending',
   comment text DEFAULT NULL,
      */
-    @SqlUpdate("insert into mw_user (id, username, locale, enabled, status, comment) values (:id, :username, :locale, :enabled, :status, :comment)")
-    void insertUser(@Bind("id") UUID id, @Bind("username") String username, @Bind("locale") Locale locale, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
+    @SqlUpdate("insert into mw_user (id, username, locale, comment) values (:id, :username, :locale, :comment)")
+    void insertUser(@Bind("id") UUID id, @Bind("username") String username, @Bind("locale") Locale locale, @Bind("comment") String comment);
 
-    @SqlUpdate("insert into mw_user (id, username, locale, enabled, status, comment) values (:id, :username, :locale, :enabled, :status, :comment)")
+    @SqlUpdate("insert into mw_user (id, username, locale, comment) values (:id, :username, :locale, :comment)")
     void insertUser(@BindBean User user);
     
     @SqlUpdate("update mw_user set locale=:locale, comment=:comment WHERE id=:id")
     void updateUser(@Bind("id") UUID id, @Bind("locale") Locale locale, @Bind("comment") String comment);
     
-    @SqlUpdate("update mw_user set id=:id, username=:username, locale=:locale, enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
+    @SqlUpdate("update mw_user set id=:id, username=:username, locale=:locale, comment=:comment WHERE id=:id")
     void updateUser(@BindBean User user);
 
-    @SqlUpdate("update mw_user set enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
-    void enableUser(@Bind("id") UUID id, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
+//    @SqlUpdate("update mw_user set enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
+//    void enableUser(@Bind("id") UUID id, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);
 
-    @SqlQuery("select id,username,locale,enabled,status,comment from mw_user")
+    @SqlQuery("select id,username,locale,comment from mw_user")
     List<User> findAllUsers();
     
-    @SqlQuery("select id,username,locale,enabled,status,comment from mw_user where id=:id")
+    @SqlQuery("select id,username,locale,comment from mw_user where id=:id")
     User findUserById(@Bind("id") UUID id);
     
-    @SqlQuery("select id,username,locale,enabled,status,comment from mw_user where id=:id and enabled=:enabled")
-    User findUserByIdEnabled(@Bind("id") UUID id, @Bind("enabled") boolean enabled);
+//    @SqlQuery("select id,username,locale,comment from mw_user where id=:id and enabled=:enabled")
+//    User findUserByIdEnabled(@Bind("id") UUID id, @Bind("enabled") boolean enabled);
     
-    @SqlQuery("select id,username,locale,enabled,status,comment from mw_user where username=:username")
+    @SqlQuery("select id,username,locale,comment from mw_user where username=:username")
     User findUserByName(@Bind("username") String username);
     
     @SqlUpdate("delete from mw_user where id=:id")

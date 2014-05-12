@@ -10,6 +10,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
 import org.apache.shiro.realm.Realm;
+import org.apache.shiro.subject.PrincipalCollection;
 
 /**
  * Example message when the tokens are not suitable for the authentication realm:
@@ -36,6 +37,14 @@ public class LoggingAtLeastOneSuccessfulStrategy extends AtLeastOneSuccessfulStr
     @Override
     public AuthenticationInfo afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate) throws AuthenticationException {
         log.debug("afterAllAttempts {}", token.getPrincipal().getClass().getName());
+        PrincipalCollection principalCollection = aggregate.getPrincipals();
+        for(String realm : principalCollection.getRealmNames()) {
+            log.debug("subject has principals from realm {}", realm);
+            Collection principals = principalCollection.fromRealm(realm);
+            for(Object principal : principals) {
+                log.debug("subject has principal {} from realm {}", principal.getClass().getName(), realm);
+            }
+        }
         return super.afterAllAttempts(token, aggregate);
     }
 

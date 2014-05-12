@@ -103,7 +103,7 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-math</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
         -->

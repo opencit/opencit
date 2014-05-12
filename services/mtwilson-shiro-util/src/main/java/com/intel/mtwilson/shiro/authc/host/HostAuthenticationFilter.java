@@ -20,7 +20,10 @@ public class HostAuthenticationFilter extends AuthenticationFilter {
 
     @Override
     protected boolean isAuthenticationRequest(ServletRequest request) {
-        return true;
+        if( request instanceof HttpServletRequest ) {
+            return true;
+        }
+        return false;
     }
 
     @Override
