@@ -128,7 +128,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
         SimplePrincipalCollection principals = new SimplePrincipalCollection();
         principals.add(new UserId(userLoginCertificate.getUserId()), getName());
         principals.add(new Username(user.getUsername()), getName());
-        principals.add(new LoginCertificateId(userLoginCertificate.getUserId(), userLoginCertificate.getId()), getName());
+        principals.add(new LoginCertificateId(user.getUsername(), userLoginCertificate.getUserId(), userLoginCertificate.getId()), getName());
         // should we add the Fingerprint principal?  or is it enough to use LoginCertificateId ?
         X509AuthenticationInfo info = new X509AuthenticationInfo();
         info.setPrincipals(principals);

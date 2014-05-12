@@ -11,6 +11,8 @@ import java.security.cert.X509Certificate;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.CertificateDocument;
 import java.security.cert.CertificateEncodingException;
@@ -46,10 +48,12 @@ public class UserLoginCertificate extends CertificateDocument {
     private String comment;
     private Set<String> roles;
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public void setId(UUID id) {
         this.id = id;
     }
@@ -155,6 +159,8 @@ public class UserLoginCertificate extends CertificateDocument {
         }
         try {
             this.certificate = certificate.getEncoded();
+            this.sha1Hash = Sha1Digest.digestOf(this.certificate).toByteArray();
+            this.sha256Hash = Sha256Digest.digestOf(this.certificate).toByteArray();
         }
         catch(CertificateEncodingException ce) {
             log.error("Error decoding certificat.", ce);
