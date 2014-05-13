@@ -15,11 +15,6 @@ import com.intel.mtwilson.tag.model.Certificate;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The "import" link next to each certificate in the UI calls this RPC

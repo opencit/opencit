@@ -5,6 +5,7 @@
 package com.intel.mtwilson.tag.model;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.DefaultFilterCriteria;
 import com.intel.mtwilson.jersey.FilterCriteria;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -13,7 +14,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class KvAttributeFilterCriteria implements FilterCriteria<KvAttribute>{
+public class KvAttributeFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<KvAttribute>{
     
     @QueryParam("id")
     public UUID id;
