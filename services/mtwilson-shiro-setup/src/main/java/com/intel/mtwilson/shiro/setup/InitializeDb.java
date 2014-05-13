@@ -21,9 +21,9 @@ import java.util.Map;
  * 
  * @author jbuhacoff
  */
-public class InitializeDB extends DatabaseSetupTask {
+public class InitializeDb extends DatabaseSetupTask {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InitializeDB.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InitializeDb.class);
     public static final String ADMINISTRATOR_ROLE = "administrator";
     public static final String AUDITOR_ROLE = "auditor";
     public static final String ASSET_TAG_MANAGER_ROLE = "asset_tag_manager";
