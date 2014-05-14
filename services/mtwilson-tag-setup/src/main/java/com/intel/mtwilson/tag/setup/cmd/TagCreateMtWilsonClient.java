@@ -147,13 +147,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         
     private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
-        loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");
-        
-        // XXX TODO: Remove this workaround once fix is put in place for 'call_tag_setupcommand initialize-db'
-        Role adminRole = loginDAO.findRoleByName("administrator");
-        if (adminRole != null) {
-            loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), adminRole.getId());
-        }
+        loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");        
     }
             
     

@@ -734,7 +734,7 @@ update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_IS
 #fi
 
 #call_setupcommand create-database
-call_tag_setupcommand initialize-db
+call_tag_setupcommand setup-manager initialize-db --force
 
 call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
