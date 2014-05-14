@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.tag.model.TpmPasswordCollection;
 import com.intel.mtwilson.tag.model.TpmPasswordFilterCriteria;
