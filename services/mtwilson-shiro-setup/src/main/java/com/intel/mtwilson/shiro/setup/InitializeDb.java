@@ -21,9 +21,9 @@ import java.util.Map;
  * 
  * @author jbuhacoff
  */
-public class InitializeDB extends DatabaseSetupTask {
+public class InitializeDb extends DatabaseSetupTask {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InitializeDB.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InitializeDb.class);
     public static final String ADMINISTRATOR_ROLE = "administrator";
     public static final String AUDITOR_ROLE = "auditor";
     public static final String ASSET_TAG_MANAGER_ROLE = "asset_tag_manager";
@@ -74,13 +74,15 @@ public class InitializeDB extends DatabaseSetupTask {
             String domain = entry.getKey();
             String actions = entry.getValue();
             
-            RolePermission rolePerm = new RolePermission();
-            rolePerm.setRoleId(role.getId());
-            rolePerm.setPermitDomain(domain);
-            rolePerm.setPermitAction(actions);
-            rolePerm.setPermitSelection("*"); // Since we are currently not using this, we will set it to *
-            
-            loginDAO.insertRolePermission(rolePerm.getRoleId(), rolePerm.getPermitDomain(), rolePerm.getPermitAction(), rolePerm.getPermitSelection());
+            RolePermission rolePerm = loginDAO.findAllRolePermissionsForRoleIdDomainActionAndSelection(role.getId(), domain, actions, "*");
+            if (rolePerm == null) {
+                rolePerm = new RolePermission();
+                rolePerm.setRoleId(role.getId());
+                rolePerm.setPermitDomain(domain);
+                rolePerm.setPermitAction(actions);
+                rolePerm.setPermitSelection("*"); // Since we are currently not using this, we will set it to *
+                loginDAO.insertRolePermission(rolePerm.getRoleId(), rolePerm.getPermitDomain(), rolePerm.getPermitAction(), rolePerm.getPermitSelection());
+            }            
         }
     }
     
@@ -212,5 +214,4 @@ public class InitializeDB extends DatabaseSetupTask {
     protected void validate() throws Exception {
         return;
     }
-    
 }

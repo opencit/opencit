@@ -382,8 +382,12 @@
             <artifactId>joda-time</artifactId>
         </dependency>
         <!-- end saml verification -->
-    
-    
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-configuration</artifactId>
+            <version>0.2-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>  
 
     <profiles>

@@ -103,7 +103,7 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         try (LoginDAO dao = MyJdbi.authz()) {
             userLoginPassword = dao.findUserLoginPasswordByUsernameEnabled(username, true);
             if( userLoginPassword != null && userLoginPassword.isEnabled() ) {
-                user = dao.findUserByIdEnabled(userLoginPassword.getUserId(),true);
+                user = dao.findUserById(userLoginPassword.getUserId());
             }
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);

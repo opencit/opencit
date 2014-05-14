@@ -41,37 +41,46 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
         log.debug("UserLoginCertificate:Search - Got request to search for the users login certificates.");        
         UserLoginCertificateCollection objCollection = new UserLoginCertificateCollection();
         try (LoginDAO loginDAO = MyJdbi.authz()) {
-            if (criteria.id != null) {
-                UserLoginCertificate obj = loginDAO.findUserLoginCertificateById(criteria.id);
+            if (criteria.userUuid != null) {
+                UserLoginCertificate obj = loginDAO.findUserLoginCertificateByUserId(criteria.userUuid);
                 if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
-                    objCollection.getUserLoginCertificates().add(obj);
+                    if (criteria.id != null) {
+                        if (obj.getId().equals(criteria.id)) {
+                            obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                            objCollection.getUserLoginCertificates().add(obj);
+                        }
+                    } else if (criteria.enabled != null && criteria.status != null) {
+                        if (obj.isEnabled() == criteria.enabled && obj.getStatus().equals(criteria.status)) {
+                            obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                            objCollection.getUserLoginCertificates().add(obj);
+                        }
+                    } else if (criteria.enabled != null) {
+                        if (obj.isEnabled() == criteria.enabled) {
+                            obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                            objCollection.getUserLoginCertificates().add(obj);
+                        }
+                    } else if (criteria.status != null) {
+                        if (obj.getStatus().equals(criteria.status)) {
+                            obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                            objCollection.getUserLoginCertificates().add(obj);
+                        }
+                    } else if (criteria.sha1 != null) {
+                        if (obj.getSha1Hash().equals(criteria.sha1)) {
+                            obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                            objCollection.getUserLoginCertificates().add(obj);
+                        }
+                    } else if (criteria.sha256 != null) {
+                        if (obj.getSha256Hash().equals(criteria.sha256)) {
+                            obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                            objCollection.getUserLoginCertificates().add(obj);
+                        }
+                    } else {
+                        obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                        objCollection.getUserLoginCertificates().add(obj);                        
+                    }
                 }
-            } else if (criteria.userIdEqualTo != null) {
-                UserLoginCertificate obj = loginDAO.findUserLoginCertificateByUserId(criteria.userIdEqualTo);
-                if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
-                    objCollection.getUserLoginCertificates().add(obj);
-                }
-            } else if (criteria.userNameEqualTo != null && !criteria.userNameEqualTo.isEmpty()) {
-                UserLoginCertificate obj = loginDAO.findUserLoginCertificateByUsername(criteria.userNameEqualTo);
-                if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
-                    objCollection.getUserLoginCertificates().add(obj);
-                }                
-            } else if (criteria.sha1 != null) {
-                UserLoginCertificate obj = loginDAO.findUserLoginCertificateBySha1(criteria.sha1);
-                if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
-                    objCollection.getUserLoginCertificates().add(obj);
-                }                
-            } else if (criteria.sha256 != null) {
-                UserLoginCertificate obj = loginDAO.findUserLoginCertificateBySha256(criteria.sha256);
-                if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
-                    objCollection.getUserLoginCertificates().add(obj);
-                }                
-            } 
+            }
+            
         } catch (Exception ex) {
             log.error("Error during user keystore search.", ex);
             throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());

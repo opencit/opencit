@@ -40,9 +40,7 @@ public class CertificateLoginTest {
         user = new User();
         user.setId(new UUID());
         user.setComment("automatically created by setup");
-        user.setEnabled(true);
         user.setUsername(username);
-        user.setStatus(Status.APPROVED);
         keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
         certificate = X509Builder.factory().selfSigned(String.format("CN=%s", username), keyPair).expires(365, TimeUnit.DAYS).build();
         userLoginCertificate = new UserLoginCertificate();

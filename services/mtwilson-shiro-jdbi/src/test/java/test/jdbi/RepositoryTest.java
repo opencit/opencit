@@ -74,10 +74,8 @@ public class RepositoryTest {
         User user = new User();
         user.setId(new UUID());
         user.setUsername(My.configuration().getKeystoreUsername());
-        user.setStatus(Status.APPROVED);
-        user.setEnabled(true);
         user.setComment("test");
-        dao.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.isEnabled(), user.getStatus(), user.getComment());
+        dao.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
 
         log.debug("Created username {} with id {}", user.getUsername(), user.getId()); // for example: Created username jonathan with id 84ff12f4-6a68-495c-a70d-174cb07e45ce
 

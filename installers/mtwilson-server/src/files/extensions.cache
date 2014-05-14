@@ -192,7 +192,7 @@ com.intel.mtwilson.shiro.setup.CreateAdminUser
 com.intel.mtwilson.setup.ui.console.IntegerInput
 com.intel.mtwilson.shiro.jdbi.JdbcCertificateRealm
 com.intel.mtwilson.as.rest.v2.repository.HostAikCertificateRepository
-com.intel.mtwilson.shiro.setup.InitializeDB
+com.intel.mtwilson.shiro.setup.InitializeDb
 com.intel.mtwilson.tag.model.FileLocator
 com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator
 com.intel.mtwilson.shiro.setup.UpdateSslPort

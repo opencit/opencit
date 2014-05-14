@@ -15,11 +15,7 @@ import com.intel.mtwilson.tag.model.Certificate;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This would be called from the "revoke" link next to each certificate in the

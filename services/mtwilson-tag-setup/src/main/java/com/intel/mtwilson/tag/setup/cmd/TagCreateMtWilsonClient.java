@@ -20,6 +20,7 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
@@ -115,7 +116,6 @@ public class TagCreateMtWilsonClient extends TagCommand {
         try {
             approveMtWilsonClient(rsaCredentialX509.identity());
             try (LoginDAO loginDAO = MyJdbi.authz()) {
-                ApproveUser(loginDAO, mtwilsonClientKeystoreUsername);
                 ApproveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
             }
             System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
@@ -144,15 +144,16 @@ public class TagCreateMtWilsonClient extends TagCommand {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }
     }
-    
-    private void ApproveUser(LoginDAO loginDAO, String username) {
-        User user = loginDAO.findUserByName(username);
-        loginDAO.enableUser(user.getId(), true, Status.APPROVED, "");
-    }
-    
+        
     private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");
+        
+        // XXX TODO: Remove this workaround once fix is put in place for 'call_tag_setupcommand initialize-db'
+        Role adminRole = loginDAO.findRoleByName("administrator");
+        if (adminRole != null) {
+            loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), adminRole.getId());
+        }
     }
             
     

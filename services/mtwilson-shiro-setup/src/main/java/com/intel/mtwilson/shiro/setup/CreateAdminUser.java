@@ -214,8 +214,8 @@ public class CreateAdminUser extends DatabaseSetupTask {
             user = new User();
             user.setId(new UUID());
             user.setComment("automatically created by setup");
-            user.setEnabled(true);
-            user.setStatus(Status.APPROVED);
+//            user.setEnabled(true);
+//            user.setStatus(Status.APPROVED);
             user.setUsername(username);
             loginDAO.insertUser(user);
         }

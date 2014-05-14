@@ -49,13 +49,12 @@
     </build>
     <dependencies>
 
-        <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
--->
         <!-- for ErrorCode -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>

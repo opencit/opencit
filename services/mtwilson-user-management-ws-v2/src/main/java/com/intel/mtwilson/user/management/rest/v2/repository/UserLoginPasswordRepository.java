@@ -42,23 +42,33 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
         log.debug("UserLoginPassword:Search - Got request to search for the users login passwords.");        
         UserLoginPasswordCollection objCollection = new UserLoginPasswordCollection();
         try (LoginDAO loginDAO = MyJdbi.authz()) {
-            if (criteria.id != null) {
-                UserLoginPassword obj = loginDAO.findUserLoginPasswordById(criteria.id);
+            if (criteria.userUuid != null) {
+                UserLoginPassword obj = loginDAO.findUserLoginPasswordByUserId(criteria.userUuid);
                 if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
-                    objCollection.getUserLoginPasswords().add(obj);
-                }
-            } else if (criteria.userIdEqualTo != null) {
-                UserLoginPassword obj = loginDAO.findUserLoginPasswordByUserId(criteria.userIdEqualTo);
-                if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
-                    objCollection.getUserLoginPasswords().add(obj);
-                }
-            } else if (criteria.userNameEqualTo != null && !criteria.userNameEqualTo.isEmpty()) {
-                UserLoginPassword obj = loginDAO.findUserLoginPasswordByUsername(criteria.userNameEqualTo);
-                if (obj != null) {
-                    obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
-                    objCollection.getUserLoginPasswords().add(obj);
+                    if (criteria.id != null) {
+                        if (obj.getId().equals(criteria.id)) {
+                            obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
+                            objCollection.getUserLoginPasswords().add(obj);
+                        }
+                    } else if (criteria.enabled != null && criteria.status != null) {
+                        if (obj.isEnabled() == criteria.enabled && obj.getStatus().equals(criteria.status)) {
+                            obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
+                            objCollection.getUserLoginPasswords().add(obj);
+                        }
+                    } else if (criteria.enabled != null) {
+                        if (obj.isEnabled() == criteria.enabled) {
+                            obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
+                            objCollection.getUserLoginPasswords().add(obj);
+                        }
+                    } else if (criteria.status != null) {
+                        if (obj.getStatus().equals(criteria.status)) {
+                            obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
+                            objCollection.getUserLoginPasswords().add(obj);
+                        }
+                    } else {
+                        obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
+                        objCollection.getUserLoginPasswords().add(obj);                        
+                    }
                 }
             }
         } catch (Exception ex) {

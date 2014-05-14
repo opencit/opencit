@@ -207,17 +207,10 @@ public class MigrateUsers extends DatabaseSetupTask {
             User user = new User();
             user.setId(new UUID());
             user.setUsername(portalUser.getUsername());
-            user.setEnabled(portalUser.getEnabled());
             user.setLocale(LocaleUtil.forLanguageTag(portalUser.getLocale()));
-            try {
-                user.setStatus(Status.valueOf(portalUser.getStatus()));
-            } catch (IllegalArgumentException e) {
-                log.debug("Invalid mw_portal_user status: {}", portalUser.getStatus());
-                user.setStatus(Status.PENDING);
-            }
             user.setComment(String.format("%s\nmw_portal_user.id=%d\nmw_portal_user.uuid=%s", (portalUser.getComment() == null ? "" : portalUser.getComment()), portalUser.getId(), portalUser.getUuid_hex()));
 
-            loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.isEnabled(), user.getStatus(), user.getComment());
+            loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
 
             // create new password login record  --  will be disabled because we don't know the user's password
             UserLoginPassword userLoginPassword = new UserLoginPassword();
@@ -253,16 +246,9 @@ public class MigrateUsers extends DatabaseSetupTask {
                 user = new User();
                 user.setId(new UUID());
                 user.setComment(String.format("Automatically created for existing mw_api_client_x509: %s", apiClient.getName()));
-                user.setEnabled(apiClient.getEnabled());
                 user.setLocale(LocaleUtil.forLanguageTag(apiClient.getLocale()));
                 user.setUsername(apiClient.getUserNameFromName());
-                try {
-                    user.setStatus(Status.valueOf(apiClient.getStatus()));
-                } catch (IllegalArgumentException e) {
-                    log.debug("Invalid mw_api_client_x509 status: {}", apiClient.getStatus());
-                    user.setStatus(Status.PENDING);
-                }
-                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.isEnabled(), user.getStatus(), user.getComment());
+                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
 
             } else {
                 userLoginPassword = loginDAO.findUserLoginPasswordByUserId(user.getId());            // we'll use this later when adding roles

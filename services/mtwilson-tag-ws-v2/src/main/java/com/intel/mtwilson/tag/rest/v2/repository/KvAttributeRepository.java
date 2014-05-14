@@ -9,7 +9,6 @@ import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUT
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
-import com.intel.mtwilson.jooq.util.UUIDConverter;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
@@ -18,7 +17,6 @@ import com.intel.mtwilson.tag.model.KvAttributeLocator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.jooq.Converter;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
@@ -26,8 +24,6 @@ import org.jooq.SelectQuery;
 //import org.restlet.data.Status;
 //import org.restlet.resource.ResourceException;
 //import org.restlet.resource.ServerResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -47,22 +43,26 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
             
              SelectQuery sql = jooq.select().from(MW_TAG_KVATTRIBUTE).getQuery();
 //            SelectQuery sql = jooq.select(MW_TAG_KVATTRIBUTE.ID.coerce(byte[].class), MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE).from(MW_TAG_KVATTRIBUTE).getQuery();
-            if( criteria.id != null ) {
-    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-            }
-            if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equalIgnoreCase(criteria.nameEqualTo));
-            }
-            if( criteria.nameContains != null  && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.lower().contains(criteria.nameContains.toLowerCase()));
-            }
-            if( criteria.valueEqualTo != null  && criteria.valueEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equalIgnoreCase(criteria.valueEqualTo));
-            }
-            if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.lower().contains(criteria.valueContains.toLowerCase()));
-            }
+             // We will process the filter criteria only if required. If the user has explicity set the filter to false, then we will return back
+             // all the data.
+             if (criteria.filter) {
+                if( criteria.id != null ) {
+        //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                }
+                if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equalIgnoreCase(criteria.nameEqualTo));
+                }
+                if( criteria.nameContains != null  && criteria.nameContains.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.lower().contains(criteria.nameContains.toLowerCase()));
+                }
+                if( criteria.valueEqualTo != null  && criteria.valueEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equalIgnoreCase(criteria.valueEqualTo));
+                }
+                if( criteria.valueContains != null  && criteria.valueContains.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.lower().contains(criteria.valueContains.toLowerCase()));
+                }
+             }
             sql.addOrderBy(MW_TAG_KVATTRIBUTE.NAME, MW_TAG_KVATTRIBUTE.VALUE);
             log.debug("Opening tag-value dao");
             log.debug("Fetching records using JOOQ");
