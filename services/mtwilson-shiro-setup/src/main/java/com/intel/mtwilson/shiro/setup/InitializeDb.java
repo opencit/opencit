@@ -74,13 +74,15 @@ public class InitializeDb extends DatabaseSetupTask {
             String domain = entry.getKey();
             String actions = entry.getValue();
             
-            RolePermission rolePerm = new RolePermission();
-            rolePerm.setRoleId(role.getId());
-            rolePerm.setPermitDomain(domain);
-            rolePerm.setPermitAction(actions);
-            rolePerm.setPermitSelection("*"); // Since we are currently not using this, we will set it to *
-            
-            loginDAO.insertRolePermission(rolePerm.getRoleId(), rolePerm.getPermitDomain(), rolePerm.getPermitAction(), rolePerm.getPermitSelection());
+            RolePermission rolePerm = loginDAO.findAllRolePermissionsForRoleIdDomainActionAndSelection(role.getId(), domain, actions, "*");
+            if (rolePerm == null) {
+                rolePerm = new RolePermission();
+                rolePerm.setRoleId(role.getId());
+                rolePerm.setPermitDomain(domain);
+                rolePerm.setPermitAction(actions);
+                rolePerm.setPermitSelection("*"); // Since we are currently not using this, we will set it to *
+                loginDAO.insertRolePermission(rolePerm.getRoleId(), rolePerm.getPermitDomain(), rolePerm.getPermitAction(), rolePerm.getPermitSelection());
+            }            
         }
     }
     
