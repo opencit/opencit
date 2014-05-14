@@ -20,6 +20,7 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
@@ -147,6 +148,12 @@ public class TagCreateMtWilsonClient extends TagCommand {
     private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");
+        
+        // XXX TODO: Remove this workaround once fix is put in place for 'call_tag_setupcommand initialize-db'
+        Role adminRole = loginDAO.findRoleByName("administrator");
+        if (adminRole != null) {
+            loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), adminRole.getId());
+        }
     }
             
     

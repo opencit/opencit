@@ -212,5 +212,4 @@ public class InitializeDb extends DatabaseSetupTask {
     protected void validate() throws Exception {
         return;
     }
-    
 }
