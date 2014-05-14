@@ -4,7 +4,7 @@
  */
 package test.shiro;
 
-import com.intel.mtwilson.jersey.DocumentCollection;
+import com.intel.mtwilson.jaxrs2.DocumentCollection;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;

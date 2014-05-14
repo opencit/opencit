@@ -6,7 +6,7 @@ package com.intel.mtwilson.v2.vm.attestation.resource;
 
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignatureInput;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignature;
 import javax.servlet.http.HttpServletResponse;

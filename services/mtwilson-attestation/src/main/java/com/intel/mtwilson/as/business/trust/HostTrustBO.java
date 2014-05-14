@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.business.trust;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;

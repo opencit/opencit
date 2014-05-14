@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.v2.test.errors;
 
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.util.MWException;
 import javax.ws.rs.GET;

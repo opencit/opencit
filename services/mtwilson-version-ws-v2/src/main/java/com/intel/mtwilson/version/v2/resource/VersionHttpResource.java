@@ -5,7 +5,7 @@
 package com.intel.mtwilson.version.v2.resource;
 
 import com.intel.mtwilson.version.v2.model.Version;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;

@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.rfc822.Message;
 import com.intel.dcsg.cpg.util.MultivaluedHashMap;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.rpc.v2.model.Rpc;

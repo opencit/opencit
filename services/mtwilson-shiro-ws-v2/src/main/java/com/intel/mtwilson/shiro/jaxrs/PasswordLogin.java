@@ -6,7 +6,7 @@ package com.intel.mtwilson.shiro.jaxrs;
 
 import com.intel.mtwilson.shiro.EncryptedTokenContent;
 import com.intel.dcsg.cpg.authz.token.TokenFactory;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.UserId;

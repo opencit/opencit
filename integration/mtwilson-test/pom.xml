@@ -103,8 +103,8 @@
             <version>${project.version}</version>        
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java7-jaxrs2</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2-client</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -319,8 +319,8 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jaxrs-util</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 import com.intel.mtwilson.shiro.jaxrs.PasswordLoginRequest;
@@ -107,7 +107,7 @@ public class ShiroClientAuthorizationTest {
         String token = "AVZxbyEjWkG2gqT4UCZi5Ja7VSvikxhD2z8coYA2sN7PmpTpaLR9GOX1QA8wWGl6bVhopIl+mRUTSVXiqRTvB3EEFYGLTsOyCsLHLIBt66QYMmT1NDZA6UmzoAMVSm6WGqTbskJ3ppW7QEIiv07MmHlYaWxqDA4sGeU75sxUonQBd9F76dJhRtrguBL1Fz/nQF2Z6UPrkx85CyGittAB5UBJQBlW/hFv0Njgkr50GLkpUWw6sj02JfGf1GTBNXuw2ghwC/9sCROKosEqNCgD+f8VyKmtiYWCuq59jJX2h0beUJb88XEGEa/Jt3cyK8olrrMbfYoEjKGkP1LlELU43ncfUOS4B+GGMXE5fbRZq39ufeafyAdw/8ijVlI2P5yfsLqWREq0XBBC5QumgOfxeslfC1Glclpz/hnhNF//e2htcoue5YNTCu7F0EyfSIXwQbeM8Qk0mMILw2ENlcpCDNUOfRBlS9hQpHgAD2h/h7Ujon0EgVeIJbcwBgVhRQnsRcuCjpwDb+tRefir1Y1vLBZ5c6pF1a7pfaZdf+ARaTX/Ar/3Lv3N0tacqUGkst8rsTcejVp9FTlvwep2BttvIdjkYd1fW95JPrXPgmGUxZig0lOJB39hDK6p2Fmq0+H71NV9G6mfZOQ5NAloWlWHmB50K4dkbrQnwgDf9Y+ypQrX6v6T5/+7pYcG22UJDUKtIhQj0tjj";
         String baseurl = My.configuration().getClientProperties().getProperty("mtwilson.api.url"); // for example "http://localhost:8080/v2"
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
+        clientConfig.register(com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider.class);
         clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
         Client client = ClientBuilder.newClient(clientConfig);
         client.register(new TokenRequestFilter(token));

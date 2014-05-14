@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.model.HostUuid;
 import com.intel.mtwilson.tag.model.HostUuidCollection;

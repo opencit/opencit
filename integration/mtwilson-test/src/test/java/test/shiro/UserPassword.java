@@ -5,7 +5,7 @@
 package test.shiro;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.intel.mtwilson.jersey.Document;
+import com.intel.mtwilson.jaxrs2.Document;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**

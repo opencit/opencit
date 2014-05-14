@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.privacyca.v2.resource;
 
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeResponse;

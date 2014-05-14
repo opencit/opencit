@@ -176,6 +176,11 @@
     <name>SnakeYAML repository</name>
     <url>http://oss.sonatype.org/content/groups/public/</url>
   </repository>
+        <!-- for org.opensaml:xmltooling:1.4.1 -->
+<repository>
+    <id>sonatype-releases</id>
+    <url>https://oss.sonatype.org/content/repositories/releases/</url>
+  </repository>
   <repository>
     <id>Restlet-public</id>
     <name>Restlet maven repository</name>

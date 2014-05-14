@@ -8,7 +8,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblOem;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.wlm.helper.BaseBO;
 import com.intel.dcsg.cpg.io.UUID;

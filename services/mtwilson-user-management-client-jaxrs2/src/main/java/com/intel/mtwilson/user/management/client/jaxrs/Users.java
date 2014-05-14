@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.user.management.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.User;

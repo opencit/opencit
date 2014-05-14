@@ -15,11 +15,11 @@ import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.rest.v2.model.HostLocator;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;

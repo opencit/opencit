@@ -238,6 +238,12 @@
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- for ErrorCode -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>

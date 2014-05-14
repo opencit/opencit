@@ -4,9 +4,9 @@
  */
 package test.shiro;
 
-import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jersey.NoLinks;
+import com.intel.mtwilson.jaxrs2.NoLinks;
 import javax.ws.rs.Path;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 

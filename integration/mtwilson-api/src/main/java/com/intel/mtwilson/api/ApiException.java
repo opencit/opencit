@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.api;
 
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 
 /**
  *

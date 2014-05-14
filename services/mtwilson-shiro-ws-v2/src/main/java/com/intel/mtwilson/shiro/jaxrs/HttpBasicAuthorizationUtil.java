@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.shiro.jaxrs;
 
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.nio.charset.Charset;
 import javax.ws.rs.BeanParam;

@@ -23,7 +23,23 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-classpath</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-extensions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-performance</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
@@ -34,6 +50,12 @@
             <artifactId>cpg-validation</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+                
 		
         <!-- logging -->
         <dependency>

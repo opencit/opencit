@@ -9,7 +9,7 @@ package com.intel.mtwilson.util;
 import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.i18n.ErrorMessage;
 import javax.ws.rs.WebApplicationException;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import java.util.Locale;
 /**
  *

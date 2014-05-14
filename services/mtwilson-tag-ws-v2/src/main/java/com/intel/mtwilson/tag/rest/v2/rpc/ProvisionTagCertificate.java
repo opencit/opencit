@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.PlaintextFilenameFilter;
 import com.intel.mtwilson.tag.TagCertificateAuthority;
