@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2.provider;
 
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 //import org.codehaus.jackson.map.ObjectMapper;
@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -33,7 +34,7 @@ import javax.ws.rs.core.MediaType;
  * @author jbuhacoff
  */
 @Provider
-@Produces({OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML,MediaType.TEXT_PLAIN})
+@Produces({DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML,MediaType.TEXT_PLAIN})
 public class JacksonYamlObjectMapperProvider implements ContextResolver<ObjectMapper> {
  
     private final ObjectMapper defaultObjectMapper;

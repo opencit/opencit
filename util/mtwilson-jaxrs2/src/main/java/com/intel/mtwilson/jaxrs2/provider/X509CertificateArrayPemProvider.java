@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2.provider;
 
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -37,15 +37,15 @@ import org.apache.commons.lang3.StringUtils;
  * @author jbuhacoff
  */
 @Provider
-@Consumes({OtherMediaType.APPLICATION_X_PEM_FILE,MediaType.TEXT_PLAIN})
-@Produces({OtherMediaType.APPLICATION_X_PEM_FILE,MediaType.TEXT_PLAIN})
+@Consumes({CryptoMediaType.APPLICATION_X_PEM_FILE,MediaType.TEXT_PLAIN})
+@Produces({CryptoMediaType.APPLICATION_X_PEM_FILE,MediaType.TEXT_PLAIN})
 public class X509CertificateArrayPemProvider implements
       MessageBodyWriter<X509Certificate[]>,
       MessageBodyReader<X509Certificate[]> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return X509Certificate[].class.isAssignableFrom(type) && ( mediaType.toString().equals(OtherMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
+        return X509Certificate[].class.isAssignableFrom(type) && ( mediaType.toString().equals(CryptoMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
     }
 
     @Override
@@ -70,7 +70,7 @@ public class X509CertificateArrayPemProvider implements
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return X509Certificate[].class.isAssignableFrom(type) && ( mediaType.toString().equals(OtherMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
+        return X509Certificate[].class.isAssignableFrom(type) && ( mediaType.toString().equals(CryptoMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
     }
 
     @Override

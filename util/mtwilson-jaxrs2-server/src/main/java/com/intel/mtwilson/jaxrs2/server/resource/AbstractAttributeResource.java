@@ -6,7 +6,7 @@ package com.intel.mtwilson.jaxrs2.server.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.server.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
@@ -21,6 +21,7 @@ import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import com.intel.mtwilson.jaxrs2.Locator;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.BeanParam;
@@ -51,8 +52,8 @@ import javax.ws.rs.core.Response;
  *
  * @author jbuhacoff
  */
-@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
 public abstract class AbstractAttributeResource<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractAttributeResource.class);
@@ -148,7 +149,7 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
      */
 //    @Path("/{id}")
     @PATCH
-    @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
+    @Consumes({DataMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
     public T patchOne(@BeanParam L locator, Patch<T, F, P>[] patchArray) {
         try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("patchOne: cannot serialize locator: {}", e.getMessage()); }
         T item = getRepository().retrieve(locator); // subclass is responsible for validating id

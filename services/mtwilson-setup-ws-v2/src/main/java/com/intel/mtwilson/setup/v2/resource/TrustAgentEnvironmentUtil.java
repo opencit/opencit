@@ -9,7 +9,8 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.File;
 import java.io.FileInputStream;
@@ -110,8 +111,8 @@ public class TrustAgentEnvironmentUtil {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML})
     @RequiresPermissions("files:create")
     public TrustagentEnvFileOutput generateTrustagentEnvFile(BasicAuthorizationInput input, @Context HttpServletRequest request) throws Exception {
         TrustagentEnvFileOutput output = new TrustagentEnvFileOutput();

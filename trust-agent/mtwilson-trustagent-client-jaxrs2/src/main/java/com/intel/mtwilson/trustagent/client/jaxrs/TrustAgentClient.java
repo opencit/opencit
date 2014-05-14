@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.trustagent.model.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -32,7 +32,7 @@ public class TrustAgentClient extends MtWilsonClient {
         X509Certificate aik = getTarget()
                 .path("/aik")
                 .request()
-                .accept(OtherMediaType.APPLICATION_PKIX_CERT)
+                .accept(CryptoMediaType.APPLICATION_PKIX_CERT)
                 .get(X509Certificate.class);
         return aik;
     }
@@ -42,7 +42,7 @@ public class TrustAgentClient extends MtWilsonClient {
         X509Certificate aik = getTarget()
                 .path("/aik/ca")
                 .request()
-                .accept(OtherMediaType.APPLICATION_PKIX_CERT)
+                .accept(CryptoMediaType.APPLICATION_PKIX_CERT)
                 .get(X509Certificate.class);
         return aik;
     }

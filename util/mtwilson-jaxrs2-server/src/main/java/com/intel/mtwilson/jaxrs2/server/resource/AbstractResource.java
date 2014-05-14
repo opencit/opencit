@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2.server.resource;
 
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.server.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
@@ -18,6 +18,7 @@ import com.intel.mtwilson.jaxrs2.DocumentCollection;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import java.util.List;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -180,7 +181,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @GET
 //    @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
-    @Produces({OtherMediaType.APPLICATION_VND_API_JSON, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({DataMediaType.APPLICATION_VND_API_JSON, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public C searchCollection(@BeanParam F criteria) {
         log.debug("searchCollection");
         ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
@@ -199,8 +200,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      * @return
      */
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public T createOne(T item) {
         log.debug("create");
         ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
@@ -237,7 +238,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public T retrieveOne(@PathParam("id") String id) {
         log.debug("retrieve");
         T item = retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
@@ -262,8 +263,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @PUT
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public T storeOne(@PathParam("id") String id, T item) {
         log.debug("store");
         ValidationUtil.validate(item);
@@ -292,8 +293,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @PATCH
-    @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes({DataMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public T patchOne(@PathParam("id") String id, Patch<T, F, L>[] patchArray) {
         log.debug("patch");
         T item = retrieve(id); // subclass is responsible for validating id
@@ -331,8 +332,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      * @return
      */
     @POST
-    @Consumes({OtherMediaType.APPLICATION_VND_API_JSON})
-    @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
+    @Consumes({DataMediaType.APPLICATION_VND_API_JSON})
+    @Produces({DataMediaType.APPLICATION_VND_API_JSON})
     public C createCollection(C collection) {
         log.debug("createCollection");
         ValidationUtil.validate(collection);
@@ -357,7 +358,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @GET
-    @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
+    @Produces({DataMediaType.APPLICATION_VND_API_JSON})
     public C retrieveCollection(@PathParam("id") String id) { // misnomer, what we really mean is "retrieve one but wrapped ina  collection for jsonapi"
         log.debug("retrieveCollection");
         T item = retrieve(id); // subclass is responsible for validating id
@@ -382,8 +383,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @PUT
-    @Consumes(OtherMediaType.APPLICATION_VND_API_JSON)
-    @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
+    @Consumes(DataMediaType.APPLICATION_VND_API_JSON)
+    @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C storeCollection(@PathParam("id") String id, C collection) {// misnomer, what we really mean is "store one but wrapped ina  collection for jsonapi"
         log.debug("storeCollection");
         ValidationUtil.validate(collection);
@@ -414,8 +415,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @PATCH
-    @Consumes(OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
-    @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
+    @Consumes(DataMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
+    @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C patchCollection(@PathParam("id") String id /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
         // TODO  ValidationUtil.validate(patchCollection)

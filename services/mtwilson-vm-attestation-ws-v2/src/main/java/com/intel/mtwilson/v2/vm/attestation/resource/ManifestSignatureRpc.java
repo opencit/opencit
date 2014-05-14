@@ -6,7 +6,7 @@ package com.intel.mtwilson.v2.vm.attestation.resource;
 
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignatureInput;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignature;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +21,7 @@ import com.intel.mtwilson.My;
 import java.io.File;
 import java.io.IOException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import javax.ws.rs.Consumes;
@@ -52,8 +53,8 @@ public class ManifestSignatureRpc {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManifestSignatureRpc.class);
     
     @POST
-    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
     public ManifestSignature signImageManifest(ManifestSignatureInput input) throws Exception {
         
         // TODO: validate the input

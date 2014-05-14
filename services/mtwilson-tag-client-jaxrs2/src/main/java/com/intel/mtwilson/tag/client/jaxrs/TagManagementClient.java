@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.tag.model.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;

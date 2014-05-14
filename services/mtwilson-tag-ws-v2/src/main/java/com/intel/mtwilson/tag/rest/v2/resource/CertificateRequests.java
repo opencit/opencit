@@ -10,7 +10,8 @@ import com.intel.mtwilson.tag.model.CertificateRequestCollection;
 import com.intel.mtwilson.tag.model.CertificateRequestFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateRequestLocator;
 import com.intel.mtwilson.jaxrs2.NoLinks;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.Util;
@@ -98,7 +99,7 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     }
     
     @Path("/{id}/content")
-    @Produces({MediaType.APPLICATION_JSON, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     @GET
     @RequiresPermissions("tag_certificate_requests:retrieve")         
     public String retrieveOneSelectionJson(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {

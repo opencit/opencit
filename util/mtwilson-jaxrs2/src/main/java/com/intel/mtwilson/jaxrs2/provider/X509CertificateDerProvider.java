@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2.provider;
 
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -34,15 +34,15 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 @Provider
-@Consumes({MediaType.APPLICATION_OCTET_STREAM,OtherMediaType.APPLICATION_PKIX_CERT})
-@Produces({MediaType.APPLICATION_OCTET_STREAM,OtherMediaType.APPLICATION_PKIX_CERT})
+@Consumes({MediaType.APPLICATION_OCTET_STREAM,CryptoMediaType.APPLICATION_PKIX_CERT})
+@Produces({MediaType.APPLICATION_OCTET_STREAM,CryptoMediaType.APPLICATION_PKIX_CERT})
 public class X509CertificateDerProvider implements
       MessageBodyWriter<X509Certificate>,
       MessageBodyReader<X509Certificate> {
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return X509Certificate.class.isAssignableFrom(type) && ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(OtherMediaType.APPLICATION_PKIX_CERT) );
+        return X509Certificate.class.isAssignableFrom(type) && ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(CryptoMediaType.APPLICATION_PKIX_CERT) );
     }
 
     @Override
@@ -67,7 +67,7 @@ public class X509CertificateDerProvider implements
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return X509Certificate.class.isAssignableFrom(type) && ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(OtherMediaType.APPLICATION_PKIX_CERT) );
+        return X509Certificate.class.isAssignableFrom(type) && ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(CryptoMediaType.APPLICATION_PKIX_CERT) );
     }
 
     @Override

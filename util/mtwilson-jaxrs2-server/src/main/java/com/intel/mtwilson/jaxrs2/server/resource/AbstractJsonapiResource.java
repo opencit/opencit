@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2.server.resource;
 
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.server.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
@@ -19,6 +19,7 @@ import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import com.intel.mtwilson.jaxrs2.Locator;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import java.util.List;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -59,7 +60,7 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
     }*/
 
     @GET
-    @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
+    @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C searchJsonapiCollection(@BeanParam F criteria) {
         log.debug("searchJsonapiCollection");
         ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
@@ -78,8 +79,8 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
      * @return
      */
     @POST
-    @Consumes({OtherMediaType.APPLICATION_VND_API_JSON})
-    @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
+    @Consumes({DataMediaType.APPLICATION_VND_API_JSON})
+    @Produces({DataMediaType.APPLICATION_VND_API_JSON})
     public C createJsonapiCollection(C collection) {
         log.debug("createCollection");
         ValidationUtil.validate(collection);
@@ -104,7 +105,7 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
      */
     @Path("/{id}")
     @GET
-    @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
+    @Produces({DataMediaType.APPLICATION_VND_API_JSON})
     public C retrieveJsonapiCollection(@BeanParam L locator) { // misnomer, what we really mean is "retrieve one but wrapped ina  collection for jsonapi"
         log.debug("retrieveCollection");
         T item = getRepository().retrieve(locator); // subclass is responsible for validating id
@@ -129,8 +130,8 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
      */
     @Path("/{id}")
     @PUT
-    @Consumes(OtherMediaType.APPLICATION_VND_API_JSON)
-    @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
+    @Consumes(DataMediaType.APPLICATION_VND_API_JSON)
+    @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C storeJsonapiCollection(@BeanParam L locator, C collection) {// misnomer, what we really mean is "store one but wrapped ina  collection for jsonapi"
         log.debug("storeCollection");
         ValidationUtil.validate(collection);
@@ -162,8 +163,8 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
      */
     @Path("/{id}")
     @PATCH
-    @Consumes(OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
-    @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
+    @Consumes(DataMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
+    @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C patchJsonapiCollection(@BeanParam L locator /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
         // TODO  ValidationUtil.validate(patchCollection)

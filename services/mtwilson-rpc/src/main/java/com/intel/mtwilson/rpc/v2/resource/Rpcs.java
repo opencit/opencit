@@ -11,7 +11,7 @@ import com.intel.mtwilson.rpc.v2.model.RpcCollection;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractSimpleResource;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;

@@ -12,7 +12,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -31,7 +32,7 @@ import javax.ws.rs.core.MediaType;
  * @author jbuhacoff
  */
 @Provider
-@Produces({MediaType.APPLICATION_JSON,OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON,OtherMediaType.APPLICATION_VND_API_JSON,OtherMediaType.APPLICATION_JSON_PATCH})
+@Produces({MediaType.APPLICATION_JSON,DataMediaType.APPLICATION_RELATIONAL_PATCH_JSON,DataMediaType.APPLICATION_VND_API_JSON,DataMediaType.APPLICATION_JSON_PATCH})
 public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JacksonObjectMapperProvider.class);
 

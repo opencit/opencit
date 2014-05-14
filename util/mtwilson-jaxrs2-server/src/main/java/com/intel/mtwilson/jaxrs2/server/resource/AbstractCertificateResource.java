@@ -11,7 +11,7 @@ import com.intel.mtwilson.jaxrs2.DocumentCollection;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import com.intel.mtwilson.jaxrs2.Locator;
 import com.intel.mtwilson.jaxrs2.PatchLink;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import javax.ws.rs.BeanParam;
@@ -32,7 +32,7 @@ public abstract class AbstractCertificateResource<T extends CertificateDocument,
     
     // XXX TODO find a mediatype/structure for list of DER-encoded certs...   could use APPLICATION_ZIP  but then we'd need to name the files inside! could use cert hashes...
     @GET
-    @Produces({ OtherMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
+    @Produces({ CryptoMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
     public X509Certificate[] searchX509CertificateCollection(@BeanParam F criteria) {
         log.debug("searchX509CertificateCollection");
         ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
@@ -47,7 +47,7 @@ public abstract class AbstractCertificateResource<T extends CertificateDocument,
 
     @Path("/{id}")
     @GET
-    @Produces({MediaType.APPLICATION_OCTET_STREAM, OtherMediaType.APPLICATION_PKIX_CERT, OtherMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
     public X509Certificate retrieveOneX509Certificate(@BeanParam L locator) {
         log.debug("retrieveOneX509Certificate");
         T item = getRepository().retrieve(locator);

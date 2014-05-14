@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.privacyca.v2.resource;
 
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeRequest;
@@ -41,8 +42,8 @@ public class IdentityRequestGetChallengeResource {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public IdentityChallenge identityChallengeRequest(IdentityChallengeRequest identityChallengeRequest) throws Exception {
         IdentityRequestGetChallenge rpc = new IdentityRequestGetChallenge();
         rpc.setIdentityRequest(identityChallengeRequest.getIdentityRequest());

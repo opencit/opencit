@@ -6,7 +6,8 @@ package com.intel.mtwilson.shiro.jaxrs;
 
 import com.intel.mtwilson.shiro.EncryptedTokenContent;
 import com.intel.dcsg.cpg.authz.token.TokenFactory;
-import com.intel.mtwilson.jaxrs2.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.UserId;
@@ -82,8 +83,8 @@ public class PasswordLogin {
 
     @RequiresGuest
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public PasswordLoginResponse loginRequest(@Context final HttpServletRequest request, @Context final HttpServletResponse response, PasswordLoginRequest loginForm) throws GeneralSecurityException {
         log.debug("loginRequest username {} password {}", loginForm.getUsername(), loginForm.getPassword());
         log.debug("request from {}", request.getRemoteHost());
