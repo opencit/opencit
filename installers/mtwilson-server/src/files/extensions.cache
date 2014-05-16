@@ -421,3 +421,9 @@ com.intel.mtwilson.setup.cmd.ListApiClients
 com.intel.mtwilson.tag.model.SelectionFilterCriteria
 com.intel.mtwilson.tag.setup.cmd.TagCreateCaKey
 com.intel.mtwilson.jersey.provider.X509CertificateArrayPemProvider
+com.intel.mtwilson.user.management.rest.v2.resource.Users
+com.intel.mtwilson.user.management.rest.v2.resource.Roles
+com.intel.mtwilson.user.management.rest.v2.resource.RolePermissions
+com.intel.mtwilson.user.management.rest.v2.resource.UserLoginCertificates
+com.intel.mtwilson.user.management.rest.v2.resource.UserLoginPasswords
+com.intel.mtwilson.user.management.rest.v2.rpc.RegisterUserWithCertificateRunnable

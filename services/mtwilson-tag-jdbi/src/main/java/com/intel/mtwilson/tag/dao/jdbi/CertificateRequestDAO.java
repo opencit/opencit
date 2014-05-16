@@ -47,7 +47,7 @@ public interface CertificateRequestDAO extends Closeable{
     @SqlUpdate("delete from mw_tag_certificate_request where id=:id")
     void deleteById(@Bind("id") UUID id);
     
-    @SqlQuery("select id, subject, status from mw_tag_certificate_request where id=:id")
+    @SqlQuery("select id, subject, status, content, contentType from mw_tag_certificate_request where id=:id")
     CertificateRequest findById(@Bind("id") UUID id);
     
     @SqlQuery("select id, subject, status from mw_tag_certificate_request where subject=:subject")
