@@ -38,6 +38,12 @@
 	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
+    <!-- for ErrorCode -->
+	<dependency>
+	    <groupId>com.intel.mtwilson.util</groupId>
+	    <artifactId>mtwilson-i18n</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
 
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
@@ -94,7 +100,7 @@
 			<artifactId>commons-lang</artifactId>
 		</dependency>
 	<dependency>
-			<groupId>commons-math</groupId>
+			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 		</dependency>
 -->
@@ -112,7 +118,6 @@
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.servlet</artifactId>
-			<version>3.1.1</version>
 			<scope>provided</scope>
 		</dependency>
         <!--

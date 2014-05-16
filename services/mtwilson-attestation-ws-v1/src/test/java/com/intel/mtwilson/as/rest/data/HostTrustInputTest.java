@@ -2,7 +2,7 @@ package com.intel.mtwilson.as.rest.data;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.model.*;
 //import static com.jayway.restassured.path.json.JsonPath.with;

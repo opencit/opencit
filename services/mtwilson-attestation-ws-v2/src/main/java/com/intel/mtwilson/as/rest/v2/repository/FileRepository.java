@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.FileLocator;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**

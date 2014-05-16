@@ -50,11 +50,11 @@ import org.apache.shiro.web.filter.PathMatchingFilter;
 public abstract class AuthenticationFilter extends PathMatchingFilter {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthenticationFilter.class);
     
-    private boolean skipAuthenticated = false;
+    private boolean skipAuthenticated = true;
     private boolean permissive = true;
     
     /**
-     * Default value is false;  set  .skipAuthenticated=true in shiro.ini to
+     * Default value is true;  set  .skipAuthenticated=false in shiro.ini to
      * change it.
      * 
      * @return true if this filter will skip processing for subjects that are already authenticated
@@ -70,9 +70,7 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
     /**
      * Permissive mode allows chaining of authentication filters so that
      * clients can choose one of a number of ways to authenticate; each
-     * filter in permissive mode allows processing to continue to other filters
-     * UNLESS the user is trying to authenticate with that filter and the
-     * authentication fails
+     * filter in permissive mode allows processing to continue to other filters.
      * 
      * @return true if processing should continue when the subject is not attempting to login in a way that this filter understands
      */
@@ -115,11 +113,25 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
             log.debug("Subject is authenticated; skipping {}", getClass().getName()); // and multifactor authentication is not enabled");
             return true;
         }
-        if( isAuthenticationRequest(request) ) {
-            log.debug("Detected authentication request for {}", getClass().getName());
-            return authenticate(request, response, mappedValue);
+        try {
+            if( isAuthenticationRequest(request) ) {
+                log.debug("Detected authentication request for {}", getClass().getName());
+                if( authenticate(request, response, mappedValue) ) {
+                    log.debug("Authentication ok");
+                    return true;
+                }
+            }
+            if( isPermissive() ) {
+                // in permissive mode we let the request continue (default true) - a "user" filter later on or an authorization check will stop the request if it cannot continue without being authenticated
+                return true;
+            }
+            // TODO: should add the challenge header to the response   by calling TODO new method challenge(request,response) with default no-op implementation and subclasses would add the WWW-Authenticate header with their authentication method
+            return false;
         }
-        return isPermissive(); // in permissive mode we let the request continue (default true) - a "user" filter later on or an authorization check will stop the request if it cannot continue without being authenticated
+        catch(Exception e) {
+            log.debug("Unexpected error while authenticating request", e);
+            return false; // an internal error in the authentication system should cause the request to be rejected
+        }
     }
     
     protected boolean authenticate(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
@@ -132,16 +144,20 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
         try {
             Subject subject = SecurityUtils.getSubject();
             subject.login(token);
-            return onLoginSuccess(token, subject, request, response);
+            log.debug("login success for filter {}", getClass().getName());
+            onLoginSuccess(token, subject, request, response);
+            return true;
         }
         catch(AuthenticationException e) {
-            return onLoginFailure(token, e, request, response);
+            log.debug("login failure for filter {}", getClass().getName());
+            onLoginFailure(token, e, request, response);
+            return false;
         }
     }
     
     /**
      * 
-     * @return true if the request contains elements that are recognized as an authentication attempt for this filter, such as an Authorization header with a specific protocol, or a cookie, etc.;  false if the request does not contain an authentication attempt recognized by this filter
+     * @return true if the request contains elements that are recognized as an authentication attempt for this filter, such as an Authorization header with a specific protocol, or a cookie, etc. implying that an authentication token can be created from the request;  false if the request does not contain an authentication attempt recognized by this filter
      */
     abstract protected boolean isAuthenticationRequest(ServletRequest request);
     

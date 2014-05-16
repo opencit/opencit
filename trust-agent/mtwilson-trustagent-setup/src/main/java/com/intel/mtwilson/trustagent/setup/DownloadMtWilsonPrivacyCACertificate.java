@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.AnyProtocolSelector;
-import com.intel.mtwilson.client.jaxrs.CaCertificates;
+import com.intel.mtwilson.attestation.client.jaxrs.CaCertificates;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;

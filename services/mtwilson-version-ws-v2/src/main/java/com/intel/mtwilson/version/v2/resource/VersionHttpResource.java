@@ -5,7 +5,8 @@
 package com.intel.mtwilson.version.v2.resource;
 
 import com.intel.mtwilson.version.v2.model.Version;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -26,7 +27,7 @@ public class VersionHttpResource {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VersionHttpResource.class);
     
     @GET
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
     public Version queryVersion(@Context final HttpServletResponse response) {
         log.debug("retrieve version");
         return new Version();

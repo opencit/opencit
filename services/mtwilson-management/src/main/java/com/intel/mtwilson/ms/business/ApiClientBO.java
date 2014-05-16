@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
@@ -24,9 +25,9 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.BaseBO;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.ArrayList;
@@ -217,10 +218,8 @@ public class ApiClientBO extends BaseBO {
                 user = new User();
                 user.setId(new UUID());
                 user.setComment("");
-                user.setEnabled(false);
-                user.setStatus(Status.PENDING);
                 user.setUsername(getSimpleNameFromCert(x509Certificate));
-                loginDAO.insertUser(user);
+                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
             }
             log.debug("Looking for existing certificate");
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
@@ -248,7 +247,7 @@ public class ApiClientBO extends BaseBO {
             log.debug("New user roles are {}", (Object[])roles);
             for (String role : roles) {
                 log.debug("Looking for role {}", role);
-                com.intel.mtwilson.security.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
+                com.intel.mtwilson.user.management.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
                 if (findRoleByName != null) {
                     log.debug("Adding role {} to new user {}", role, userLoginCertificate.getUserId());
                     loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());
@@ -282,11 +281,9 @@ public class ApiClientBO extends BaseBO {
             User user = loginDAO.findUserByName(userName);
             if (user != null) {
                 log.debug("Found user {}", user.getId());
-                user.setEnabled(apiClientUpdateRequest.enabled);
-                user.setStatus(Status.valueOf(apiClientUpdateRequest.status));
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
                     user.setComment(apiClientUpdateRequest.comment);
-                loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
+                loginDAO.updateUser(user.getId(), user.getLocale(), user.getComment());
             }
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);
@@ -294,8 +291,8 @@ public class ApiClientBO extends BaseBO {
             if (apiClientUpdateRequest.roles != null && apiClientUpdateRequest.roles.length > 0) {
                 // Let us first delete the existing roles
                 log.debug("Looking for existing roles for user login certificate {}", userLoginCertificate.getId());
-                List<com.intel.mtwilson.security.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
-                for (com.intel.mtwilson.security.rest.v2.model.Role roleMapping : rolesByUserLoginCertificateId) {
+                List<com.intel.mtwilson.user.management.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+                for (com.intel.mtwilson.user.management.rest.v2.model.Role roleMapping : rolesByUserLoginCertificateId) {
                     log.debug("Removing role {} from user {}", roleMapping.getRoleName(), userName);
                     loginDAO.deleteUserLoginCertificateRole(userLoginCertificate.getId(), roleMapping.getId());
                 }
@@ -303,7 +300,8 @@ public class ApiClientBO extends BaseBO {
                 // Let us add the new roles
                 log.debug("Adding roles");
                 for (String role : apiClientUpdateRequest.roles) {
-                    com.intel.mtwilson.security.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
+                    log.debug("Adding role {}", role);
+                    com.intel.mtwilson.user.management.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
                     if (findRoleByName != null) {
                         log.debug("Adding role {} to user {}", findRoleByName.getRoleName(), userName);
                         loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());

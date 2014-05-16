@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.business;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.My;

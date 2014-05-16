@@ -12,9 +12,10 @@ import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
 import com.intel.mtwilson.tag.model.SelectionLocator;
-import com.intel.mtwilson.jersey.NoLinks;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
-import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.jaxrs2.NoLinks;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.TagConfiguration;
 import com.intel.mtwilson.tag.Util;
@@ -71,7 +72,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @GET
     @RequiresPermissions("tag_selections:retrieve")         
-    @Produces({OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})   
+    @Produces({DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})   
     public Selection retrieveOne(@BeanParam SelectionLocator locator) {
         return super.retrieveOne(locator); 
     }
@@ -140,7 +141,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
 
     @GET
     @Path("/{id}")
-    @Produces(OtherMediaType.MESSAGE_RFC822)   
+    @Produces(CryptoMediaType.MESSAGE_RFC822)   
     @RequiresPermissions("tag_selections:retrieve")         
     public String retrieveOneEncryptedXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         String xml = retrieveOneXml(locator);

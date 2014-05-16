@@ -10,7 +10,9 @@ import com.intel.dcsg.cpg.net.InternetAddress;
 import java.util.HashSet;
 
 /**
- *
+ * By default the allow lists are empty. 
+ * Must pass a non-empty string to the constructor in order to set the allow
+ * list. 
  * @author jbuhacoff
  */
 public class HostAllowCsvFilter implements HostFilter {
@@ -21,9 +23,14 @@ public class HostAllowCsvFilter implements HostFilter {
     private HashSet<String> allowHost = new HashSet<>();
     
     public HostAllowCsvFilter(String allow) {
+        if( allow == null || allow.isEmpty() ) { return; }
         setAllow(allow);
     }
     
+    /**
+     * 
+     * @param csv must not be null 
+     */
     private void setAllow(String csv) {
         this.allow = csv;
         String[] list = csv.replace(" ", "").split(",");

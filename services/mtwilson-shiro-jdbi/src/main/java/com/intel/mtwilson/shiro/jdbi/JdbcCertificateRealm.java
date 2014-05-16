@@ -15,10 +15,10 @@ import com.intel.mtwilson.shiro.authc.x509.X509AuthenticationInfo;
 import com.intel.mtwilson.shiro.authc.x509.X509AuthenticationToken;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.security.rest.v2.model.Role;
-import com.intel.mtwilson.security.rest.v2.model.RolePermission;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.security.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.Role;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,7 +110,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
                     log.error("Unsupported digest length {}", fingerprint.getBytes().length);
                 }
                 if(userLoginCertificate != null && userLoginCertificate.isEnabled() ) {
-                    user = dao.findUserByIdEnabled(userLoginCertificate.getUserId(),true);
+                    user = dao.findUserById(userLoginCertificate.getUserId());
                 }
     //            xToken.
     //            userLoginCertificate = dao.findUserLoginCertificateByUsername(username);
@@ -128,7 +128,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
         SimplePrincipalCollection principals = new SimplePrincipalCollection();
         principals.add(new UserId(userLoginCertificate.getUserId()), getName());
         principals.add(new Username(user.getUsername()), getName());
-        principals.add(new LoginCertificateId(userLoginCertificate.getUserId(), userLoginCertificate.getId()), getName());
+        principals.add(new LoginCertificateId(user.getUsername(), userLoginCertificate.getUserId(), userLoginCertificate.getId()), getName());
         // should we add the Fingerprint principal?  or is it enough to use LoginCertificateId ?
         X509AuthenticationInfo info = new X509AuthenticationInfo();
         info.setPrincipals(principals);

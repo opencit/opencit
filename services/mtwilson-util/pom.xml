@@ -126,7 +126,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-math</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
         <dependency>
@@ -134,7 +134,11 @@
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
       	
     </dependencies>  
 </project>

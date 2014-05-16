@@ -37,8 +37,6 @@ CREATE TABLE mw_user (
   id CHAR(36) NOT NULL,
   username varchar(255) NOT NULL,
   locale varchar(8) NULL,
-  enabled bit(1) NOT NULL DEFAULT b'0',
-  status varchar(128) NOT NULL DEFAULT 'Pending',
   comment text DEFAULT NULL,
   PRIMARY KEY (id)
 ); 
@@ -62,6 +60,8 @@ CREATE TABLE mw_user_login_password (
   algorithm varchar(128) NOT NULL,
   expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',
+  status varchar(128) NOT NULL DEFAULT 'Pending',
+  comment text,
   PRIMARY KEY (id)
 ); 
 
@@ -83,6 +83,8 @@ CREATE TABLE mw_user_login_hmac (
   protection varchar(128) NOT NULL,
   expires datetime DEFAULT NULL,
   enabled bit(1) NOT NULL DEFAULT b'0',
+  status varchar(128) NOT NULL DEFAULT 'Pending',
+  comment text,
   PRIMARY KEY (id)
 ); 
 

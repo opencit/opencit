@@ -26,9 +26,9 @@ import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.setup.helper.SCPersistenceManager;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.security.rest.v2.model.Status;
-import com.intel.mtwilson.security.rest.v2.model.User;
-import com.intel.mtwilson.security.rest.v2.model.UserLoginCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.Status;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
@@ -192,13 +192,6 @@ public class BootstrapUser implements Command {
                             userLoginCertificate.getStatus(), userLoginCertificate.getComment());
                 }
 
-                User user = loginDAO.findUserByName(username);
-                if (user != null) {
-                    user.setEnabled(true);
-                    user.setStatus(Status.APPROVED);
-                    user.setComment("Approved during setup");
-                    loginDAO.enableUser(user.getId(), user.isEnabled(), user.getStatus(), user.getComment());
-                }
             } catch (Exception ex) {
                 throw new SetupException("Error updating user and user certificate tables. " + ex.getMessage(), ex);
             }

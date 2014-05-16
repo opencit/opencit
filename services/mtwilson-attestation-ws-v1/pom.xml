@@ -182,7 +182,7 @@
             <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-math</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
                 
@@ -367,7 +367,13 @@
             <version>${project.version}</version>
         </dependency>
         
-        
+        <!-- for ErrorCode -->
+       <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+         
         <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
         <!--
         <dependency>

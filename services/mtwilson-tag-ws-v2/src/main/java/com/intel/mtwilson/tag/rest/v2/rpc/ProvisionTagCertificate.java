@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.PlaintextFilenameFilter;
 import com.intel.mtwilson.tag.TagCertificateAuthority;
@@ -218,7 +218,7 @@ public class ProvisionTagCertificate  {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
         Certificate certificate = createOneJson(locator, json, request, response);
@@ -258,7 +258,7 @@ public class ProvisionTagCertificate  {
      */
     @POST
     @Consumes(MediaType.APPLICATION_XML)
-    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
         Certificate certificate = createOneXml(locator, xml, request, response);
@@ -297,8 +297,8 @@ public class ProvisionTagCertificate  {
      * @param request 
      */
     @POST
-    @Consumes(OtherMediaType.MESSAGE_RFC822)
-    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @Consumes(CryptoMediaType.MESSAGE_RFC822)
+    @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());

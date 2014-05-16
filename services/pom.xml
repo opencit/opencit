@@ -24,7 +24,6 @@
 	<module>mtwilson-http-servlets</module>
 	<module>mtwilson-intel-hostagent</module>
 	<module>mtwilson-jackson-util</module>
-	<module>mtwilson-jaxrs-util</module>
 	<module>mtwilson-jdbi-util</module>
 	<module>mtwilson-jersey2-util</module>
 	<module>mtwilson-jooq-util</module>
@@ -77,8 +76,10 @@
     <module>mtwilson-webservice-util</module>
     <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-whitelist</module>
-    <module>mtwilson-security-model</module>
-	<module>mtwilson-security-ws-v2</module>
+    <module>mtwilson-user-management-model</module>
+	<module>mtwilson-user-management-ws-v2</module>
+    <module>mtwilson-attestation-client-jaxrs2</module>
+    <module>mtwilson-user-management-client-jaxrs2</module>
   </modules>
 
 </project>

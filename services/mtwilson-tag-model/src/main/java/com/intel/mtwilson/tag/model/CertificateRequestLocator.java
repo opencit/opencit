@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.model;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jersey.Locator;
+import com.intel.mtwilson.jaxrs2.Locator;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 

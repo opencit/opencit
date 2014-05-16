@@ -13,9 +13,9 @@ import com.intel.mtwilson.as.rest.v2.model.Os;
 import com.intel.mtwilson.as.rest.v2.model.OsCollection;
 import com.intel.mtwilson.as.rest.v2.model.OsFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OsLocator;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OsData;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.OsBO;
 
 import java.util.List;

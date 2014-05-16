@@ -6,7 +6,7 @@ import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.HostResponse;
@@ -81,7 +81,7 @@ public class BulkHostTrust {
                 }
                 if (hosts == null || hosts.length() == 0) {
 
-                        throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
+                        throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT,
                                 "hosts");
                 }
 
@@ -120,7 +120,7 @@ public class BulkHostTrust {
 
                 ValidationUtil.validate(hosts);
                 if (hosts == null || hosts.length() == 0) {
-                        throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
+                        throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT,
                                 "hosts");
                 }
 
@@ -148,7 +148,7 @@ public class BulkHostTrust {
             TxtHostRecordList newHostRecords = new TxtHostRecordList();
             for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
             if(host.HostName.isEmpty() || host.HostName == null)
-                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
+                throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT,
                                 "host");
             else
                 newHostRecords.getHostRecords().add(host);
@@ -179,7 +179,7 @@ public class BulkHostTrust {
               TxtHostRecordList newHostRecords = new TxtHostRecordList();
             for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
             if(host.HostName.isEmpty() || host.HostName == null)
-                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,"host");
+                throw new ASException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT,"host");
             else
                 newHostRecords.getHostRecords().add(host);
             }

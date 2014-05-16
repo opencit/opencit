@@ -13,9 +13,9 @@ import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OemLocator;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OemData;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.OemBO;
 
 import java.util.List;

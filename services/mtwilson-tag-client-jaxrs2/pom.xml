@@ -14,13 +14,58 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
+            <configuration>
+                <excludePackageNames>com.intel.mtwilson.client.jaxrs.common</excludePackageNames>
+                <noqualifier>all</noqualifier>
+                <tags>
+                    <tag>
+                        <name>mtwRequiresPermissions</name>
+                        <placement>aoptcmf</placement>
+                        <head>Requires permissions:</head>
+                    </tag>
+                    <tag>
+                        <name>mtwContentTypeReturned</name>
+                        <placement>aoptcmf</placement>
+                        <head>Content type returned:</head>
+                    </tag>
+                    <tag>
+                        <name>mtwMethodType</name>
+                        <placement>aoptcmf</placement>
+                        <head>Method Type:</head>
+                    </tag>
+                    <tag>
+                        <name>mtwSampleRestCall</name>
+                        <placement>aoptcmf</placement>
+                        <head>Sample REST call:</head>
+                    </tag>
+                    <tag>
+                        <name>mtwSampleApiCall</name>
+                        <placement>aoptcmf</placement>
+                        <head>Sample API call:</head>
+                    </tag>
+                    <tag>
+                        <name>mtwPreRequisite</name>
+                        <placement>aoptcmf</placement>
+                        <head>Pre-requisite:</head>
+                    </tag>                                
+                </tags>
+            </configuration>
+        </plugin>                    
+    </plugins>      
+    </build>
 
     <dependencies>
-    <dependency>
-    	<groupId>com.intel.mtwilson.integration</groupId>
-    	<artifactId>mtwilson-client-java6-jaxrs2</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2-client</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -90,11 +135,11 @@
             <version>1.2</version>
         </dependency>
 
-<dependency>
-    <groupId>com.intel.mtwilson.services</groupId>
-    <artifactId>mtwilson-jaxrs-util</artifactId>
-    <version>${project.version}</version>
-</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- end jersey  -->
         
