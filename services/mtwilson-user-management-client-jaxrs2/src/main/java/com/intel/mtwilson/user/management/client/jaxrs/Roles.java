@@ -40,15 +40,14 @@ public class Roles extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8443/mtwilson/v2/roles
-     * Input: {"role_name":"developer"}
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * Input: {"role_name":"MTW_Admin"}
+     * Output: {"id":"17dbfd48-12a4-4328-85af-43b0d5adfee3","role_name":"MTW_Admin"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Roles client = new Roles(My.configuration().getClientProperties());
      *  Role role = new Role();
-     *  role.setName("Intel");
-     *  role.setDescription("Intel OEM");
+     *  role.setRoleName("MTW_Admin");
      *  Role createRole = client.createRole(role);
      * </pre>
      */
@@ -68,12 +67,12 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/31741556-f5c7-4eb6-a713-338a23e43b93
+     * https://server.com:8443/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Roles client = new Roles(My.configuration().getClientProperties());
-     *  client.deleteRole("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  client.deleteRole("17dbfd48-12a4-4328-85af-43b0d5adfee3");
      * </pre>
      */
     public void deleteRole(String uuid) {
@@ -93,16 +92,16 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/31741556-f5c7-4eb6-a713-338a23e43b93
-     * Input: {"comments":"Need access for development."}
-     * Output: {"id": "31741556-f5c7-4eb6-a713-338a23e43b93","description": "Intel OEM updated" }
+     * https://server.com:8443/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
+     * Input: {"description":"MTW Admin role"}
+     * Output: {"id":"17dbfd48-12a4-4328-85af-43b0d5adfee3","description":"MTW Admin role"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Roles client = new Roles(My.configuration().getClientProperties());
      *  Role role = new Role();
-     *  role.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
-     *  role.setDescription("Intel OEM updated");
+     *  role.setId(UUID.valueOf("17dbfd48-12a4-4328-85af-43b0d5adfee3"));
+     *  role.setDescription("MTW Admin role");
      *  role = client.editRole(role);
      * </pre>
      */
@@ -124,13 +123,13 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/31741556-f5c7-4eb6-a713-338a23e43b93
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8443/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
+     * Output: {"id":"17dbfd48-12a4-4328-85af-43b0d5adfee3","role_name":"MTW_Admin","description":"MTW Admin role"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Roles client = new Roles(My.configuration().getClientProperties());
-     *  Role retrieveRole = client.retrieveRole("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  Role retrieveRole = client.retrieveRole("17dbfd48-12a4-4328-85af-43b0d5adfee3");
      * </pre>
      */
     public Role retrieveRole(String uuid) {
@@ -154,14 +153,15 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles?roleNameEqualTo=admin
-     * Output: {"roles":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
+     * https://server.com:8443/mtwilson/v2/roles?filter=false
+     * Output: {"roles":[{"id":"0199a936-9a49-482a-8c63-cfe7a9412d7e","role_name":"server_manager"},
+     * {"id":"177b1d3c-b0aa-4543-8509-92fde907a4a9","role_name":"admin","description":"user created role"}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Roles client = new Roles(My.configuration().getClientProperties());
      *  RoleFilterCriteria criteria = new RoleFilterCriteria();
-     *  criteria.nameContains = "intel";
+     *  criteria.filter = false;
      *  RoleCollection roles = client.searchRoles(criteria);
      * </pre>
      */

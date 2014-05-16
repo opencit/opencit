@@ -39,7 +39,7 @@ public class RoleTest {
         createRole.setDescription("Admin role");
         client.createRole(createRole);
         
-        Role retrievRole = client.retrieveRole(roleId.toString());
+        Role retrievRole = client.retrieveRole(createRole.getId().toString());
         log.debug("Retrieved role name is {}, and description is {}", retrievRole.getRoleName(), retrievRole.getDescription());
         
         createRole.setDescription("Updated Admin role description.");
