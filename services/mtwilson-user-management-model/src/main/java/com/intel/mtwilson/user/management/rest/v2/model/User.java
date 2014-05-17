@@ -26,10 +26,12 @@ public class User extends Document{
     private Locale locale;
     private String comment;
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public void setId(UUID id) {
         this.id = id;
     }

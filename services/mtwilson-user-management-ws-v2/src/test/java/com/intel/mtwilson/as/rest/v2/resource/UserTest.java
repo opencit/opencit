@@ -23,6 +23,16 @@ public class UserTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserTest.class);
     
     @Test
+    public void testSearchAllUsers() throws Exception {
+        UserFilterCriteria criteria = new UserFilterCriteria();
+        UserRepository repo = new UserRepository();
+        UserCollection search = repo.search(criteria);
+        for (User obj : search.getUsers()) {
+            log.debug("Retrieved user name {} with id = {}, locale = {}.", obj.getUsername(), obj.getId().toString(), obj.getLocale());
+        }                        
+    }
+    
+    @Test
     public void testUser() throws Exception {
         
         UUID userId = new UUID();
