@@ -40,7 +40,6 @@ public class RegisterUserWithCertTest {
         
         KeyPair keyPair;
         X509Certificate certificate;
-        RegisterUserWithCertificate input = new RegisterUserWithCertificate();
         
         UUID userId = new UUID();        
         UUID userCertId = new UUID();
@@ -63,16 +62,11 @@ public class RegisterUserWithCertTest {
         userLoginCertificate.setExpires(certificate.getNotAfter());
         userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(certificate.getEncoded()).toByteArray());
         userLoginCertificate.setSha256Hash(Sha256Digest.digestOf(certificate.getEncoded()).toByteArray());
-        
-        input.setUser(user);
-        input.setUserCertificate(userLoginCertificate);
-        
+                
         RegisterUserWithCertificateRunnable rpcRunnable = new RegisterUserWithCertificateRunnable();
-        rpcRunnable.setRpcUserWithCert(input);
-        rpcRunnable.run();
-        boolean result = rpcRunnable.getRpcUserWithCert().getResult();
-        log.debug("Result of user certificate login creation is {}", result);
-        
+        rpcRunnable.setUser(user);
+        rpcRunnable.setUserLoginCertificate(userLoginCertificate);
+        rpcRunnable.run();        
     }    
     
 }
