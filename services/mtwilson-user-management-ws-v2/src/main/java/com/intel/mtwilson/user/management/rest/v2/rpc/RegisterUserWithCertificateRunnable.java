@@ -26,16 +26,24 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterUserWithCertificateRunnable.class);
 
-    private RegisterUserWithCertificate rpcUserWithCert;
+    private User user;
+    private UserLoginCertificate userLoginCertificate;
 
-    public RegisterUserWithCertificate getRpcUserWithCert() {
-        return rpcUserWithCert;
+    public User getUser() {
+        return user;
     }
 
-    public void setRpcUserWithCert(RegisterUserWithCertificate rpcUserWithCert) {
-        this.rpcUserWithCert = rpcUserWithCert;
+    public void setUser(User user) {
+        this.user = user;
     }
 
+    public UserLoginCertificate getUserLoginCertificate() {
+        return userLoginCertificate;
+    }
+
+    public void setUserLoginCertificate(UserLoginCertificate userLoginCertificate) {
+        this.userLoginCertificate = userLoginCertificate;
+    }
     
     
     @Override
@@ -45,8 +53,8 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
         UserLoginCertificateRepository userLoginCertRepo = new UserLoginCertificateRepository();
         
         try {
-            if (rpcUserWithCert != null && rpcUserWithCert.getUser() != null && rpcUserWithCert.getUserCertificate() != null) {
-                log.debug("Starting to process the user registration with certificate for {}.", rpcUserWithCert.getUser().getUsername());
+            if (getUser() != null && getUserLoginCertificate() != null) {
+                log.debug("Starting to process the user registration with certificate for {}.", getUser().getUsername());
 
                 User userObj = new User();
                 UserLoginCertificate userCertObj = new UserLoginCertificate();                
@@ -54,26 +62,24 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
                 UUID userCertId = new UUID();
                 
                 userObj.setId(userId);
-                userObj.setUsername(rpcUserWithCert.getUser().getUsername());
-                if (rpcUserWithCert.getUser().getLocale() == null)
+                userObj.setUsername(getUser().getUsername());
+                if (getUser().getLocale() == null)
                     userObj.setLocale(Locale.US);
                 else
-                    userObj.setLocale(rpcUserWithCert.getUser().getLocale());
-                userObj.setComment(rpcUserWithCert.getUser().getComment());
+                    userObj.setLocale(getUser().getLocale());
+                userObj.setComment(getUser().getComment());
                 userRepo.create(userObj);
                 
                 userCertObj.setId(userCertId);
                 userCertObj.setUserId(userId);
-                userCertObj.setCertificate(rpcUserWithCert.getUserCertificate().getCertificate());
-                userCertObj.setSha1Hash(rpcUserWithCert.getUserCertificate().getSha1Hash());
-                userCertObj.setSha256Hash(rpcUserWithCert.getUserCertificate().getSha256Hash());
-                userCertObj.setComment(rpcUserWithCert.getUser().getComment());
-                userCertObj.setExpires(rpcUserWithCert.getUserCertificate().getExpires());
+                userCertObj.setCertificate(getUserLoginCertificate().getCertificate());
+                userCertObj.setSha1Hash(getUserLoginCertificate().getSha1Hash());
+                userCertObj.setSha256Hash(getUserLoginCertificate().getSha256Hash());
+                userCertObj.setComment(getUser().getComment());
+                userCertObj.setExpires(getUserLoginCertificate().getExpires());
                 userLoginCertRepo.create(userCertObj);
                 
-                rpcUserWithCert.setResult(Boolean.TRUE);
-                log.debug("Completed processing user registration with certificate for {} with result {}", 
-                        rpcUserWithCert.getUser().getUsername(), rpcUserWithCert.getResult());
+                log.debug("Completed processing user registration with certificate for {}.", getUser().getUsername());
             }
         } catch (Exception ex) {
             throw new ASException(ex);
