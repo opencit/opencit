@@ -553,9 +553,6 @@ public class KeystoreUtil {
             UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
             userLoginCertificate.setCertificate(rsaCredential.getCertificate().getEncoded());
             userLoginCertificate.setComment(comments);
-            userLoginCertificate.setExpires(rsaCredential.getCertificate().getNotAfter());
-            userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(rsaCredential.getCertificate().getEncoded()).toByteArray());
-            userLoginCertificate.setSha256Hash(Sha256Digest.digestOf(rsaCredential.getCertificate().getEncoded()).toByteArray());
             
             rpcUserWithCert.setUser(newUser);
             rpcUserWithCert.setUserLoginCertificate(userLoginCertificate);
