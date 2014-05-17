@@ -128,7 +128,8 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
                 log.error("No tags in selection");
                 return null;
             }
-            SelectionBuilder builder = SelectionBuilder.factory().selection();
+            // NOTE: we are exporting the selected attributes as a "default" selection in the xml file.
+            SelectionBuilder builder = SelectionBuilder.factory().defaultSelection();
             for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
                 builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
             } 
