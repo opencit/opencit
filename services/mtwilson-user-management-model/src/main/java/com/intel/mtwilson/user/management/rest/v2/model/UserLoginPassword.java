@@ -39,10 +39,12 @@ public class UserLoginPassword extends Document implements HashedPassword {
     private String comment;
     private Set<String> roles;
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public void setId(UUID id) {
         this.id = id;
     }
