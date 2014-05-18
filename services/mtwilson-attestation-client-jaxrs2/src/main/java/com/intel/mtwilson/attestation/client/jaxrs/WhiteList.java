@@ -127,7 +127,7 @@ public class WhiteList extends MtWilsonClient {
      */
     public LinkedHashMap createWhitelistWithOptions(CreateWhiteListWithOptionsRpcInput obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        Object result = getTarget().path("rpc/create-whitelist").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
+        Object result = getTarget().path("rpc/create-whitelist-with-options").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
         if (result.getClass().equals(LinkedHashMap.class))
             return ((LinkedHashMap)(result));
         else 
