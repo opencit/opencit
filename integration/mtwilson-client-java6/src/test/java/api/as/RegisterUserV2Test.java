@@ -31,7 +31,8 @@ public class RegisterUserV2Test {
         URL server = new URL("https://10.1.71.234:8181/mtwilson/v2/");
         
         ByteArrayResource certResource = new ByteArrayResource();
-        SimpleKeystore keystore = KeystoreUtil.createUserInResourceV2(certResource, userName, password, server, "Admin role needed");
+        //SimpleKeystore keystore = KeystoreUtil.createUserInResourceV2(certResource, userName, password, server, "Admin role needed");
+        SimpleKeystore keystore = KeystoreUtil.createUserInDirectoryV2(new java.io.File("c:\\intel\\mtwilson"), userName, password, server, "Admin role needed");
         
     }
      
