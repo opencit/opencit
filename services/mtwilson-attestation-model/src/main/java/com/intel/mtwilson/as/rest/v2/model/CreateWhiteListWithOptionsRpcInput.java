@@ -13,15 +13,15 @@ import com.intel.mtwilson.datatypes.HostConfigData;
  */
 @JacksonXmlRootElement(localName="create_whitelist_with_options_rpc_input")
 public class CreateWhiteListWithOptionsRpcInput {
-    private HostConfigData config;
-
-    public HostConfigData getConfig() {
-        return config;
-    }
-
-    public void setConfig(HostConfigData config) {
-        this.config = config;
-    }
-
     
+    private WhitelistConfigurationData wlConfig;
+
+    public WhitelistConfigurationData getWlConfig() {
+        return wlConfig;
+    }
+
+    public void setWlConfig(WhitelistConfigurationData wlConfig) {
+        this.wlConfig = wlConfig;
+    }
+
 }

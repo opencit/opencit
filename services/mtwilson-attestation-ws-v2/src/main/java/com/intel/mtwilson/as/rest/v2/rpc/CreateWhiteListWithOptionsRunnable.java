@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
@@ -21,15 +22,15 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
-    private HostConfigData config;
+    private WhitelistConfigurationData wlConfig;
     private String result;
 
-    public HostConfigData getConfig() {
-        return config;
+    public WhitelistConfigurationData getWlConfig() {
+        return wlConfig;
     }
 
-    public void setConfig(HostConfigData config) {
-        this.config = config;
+    public void setWlConfig(WhitelistConfigurationData wlConfig) {
+        this.wlConfig = wlConfig;
     }
     
     public String getResult() {
@@ -42,10 +43,10 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     
     @Override
     public void run() {
-        log.debug("Starting to process white list creation using host {}.", config.getTxtHostRecord().HostName);
-        boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(config);
+        log.debug("Starting to process white list creation using host {}.", wlConfig.getTxtHostRecord().HostName);
+        boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
         result = Boolean.toString(configureWhiteListFromHost);
-        log.debug("Completed processing of the white list using host {} with result {}", config.getTxtHostRecord().HostName, result);
+        log.debug("Completed processing of the white list using host {} with result {}", wlConfig.getTxtHostRecord().HostName, result);
     }
     
 }
