@@ -648,5 +648,42 @@ public class TblMleJpaController implements Serializable {
         
         return mleList;        
     }
+
+    public List<TblMle> findBiosMleByVersion(String mleVersion, String oemName) {
+        List<TblMle> mleList = new ArrayList<>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findBiosMleByVersion");            
+            query.setParameter("version", mleVersion);
+            query.setParameter("oemName", oemName);
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }        
+        return mleList;        
+    }
+
+    public List<TblMle> findVmmMleByVersion(String mleVersion, String osName, String osVersion) {
+        List<TblMle> mleList = new ArrayList<>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findVmmMleByVersion");            
+            query.setParameter("version", mleVersion);
+            query.setParameter("osName", osName);
+            query.setParameter("osVersion", osVersion);
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }        
+        return mleList;        
+    }
     
 }
