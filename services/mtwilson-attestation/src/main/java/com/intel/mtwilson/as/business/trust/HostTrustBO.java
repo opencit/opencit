@@ -1851,16 +1851,18 @@ public class HostTrustBO extends BaseBO {
             if (biosPCRs != null && !biosPCRs.isEmpty()) {
                 // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
                 // numeric extensions if any.
-                List<TblMle> biosMLEList = mleJpa.findBIOSMLEByNameSearchCriteria((hostObj.BIOS_Name));
+                //List<TblMle> biosMLEList = mleJpa.findBIOSMLEByNameSearchCriteria((hostObj.BIOS_Name));
+                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with version {} for OEM {} for matching the whitelists.", hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                List<TblMle> biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
                 if (biosMLEList != null && !biosMLEList.isEmpty()) {
                     for (TblMle biosMLE : biosMLEList) {
                         log.debug("checkMatchingMLEExists: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
                         // Now that we have a matching BIOS MLE, we need to verify the version againist the host BIOS version as well 
                         // since the BIOS name would be same for different versions also.
-                        if (!biosMLE.getVersion().equals(hostObj.BIOS_Version)) {                        
-                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as it does not match the version on the host.", biosMLE.getName(), biosMLE.getVersion());
-                            continue;
-                        } 
+//                        if (!biosMLE.getVersion().equals(hostObj.BIOS_Version)) {                        
+//                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as it does not match the version on the host.", biosMLE.getName(), biosMLE.getVersion());
+//                            continue;
+//                        } 
 
                         // If the list of bios PCRs that need to be configured does not match the list of the MLE in the DB, we have to create a new MLE
                         // So, we can skip the current one and check the remaining if exists.
@@ -1918,7 +1920,8 @@ public class HostTrustBO extends BaseBO {
             
             if (vmmPCRs != null && !vmmPCRs.isEmpty()) {
                 // First let us find the matching VMM MLEs for the host that is configured in the system.
-                List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(hostObj.VMM_Name);
+                //List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(hostObj.VMM_Name);
+                List<TblMle> vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
                 if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
                     for (TblMle vmmMLE : vmmMLEList) {
 
@@ -1926,10 +1929,10 @@ public class HostTrustBO extends BaseBO {
 
                         // Now that we have a matching VMM MLE, we need to verify the version againist the version the host is running 
                         // since the VMM name would be same for different versions.
-                        if (!vmmMLE.getVersion().equals(hostObj.VMM_Version)) {                      
-                            log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as it does not match the version on the whitelisting host.", vmmMLE.getName(), vmmMLE.getVersion());                       
-                            continue;
-                        } 
+//                        if (!vmmMLE.getVersion().equals(hostObj.VMM_Version)) {                      
+//                            log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as it does not match the version on the whitelisting host.", vmmMLE.getName(), vmmMLE.getVersion());                       
+//                            continue;
+//                        } 
 
                         // If the list of bios PCRs that need to be configured does not match the list of the MLE in the DB, we have to create a new MLE
                         // So, we can skip the current one and check the remaining if exists.
