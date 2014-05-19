@@ -28,10 +28,12 @@ public class UserLoginHmac extends Document {
     private Date expires;
     private boolean enabled;
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public void setId(UUID id) {
         this.id = id;
     }

@@ -21,10 +21,12 @@ public class Role extends Document {
     private String roleName;
     private String description;
 
+    @Override
     public UUID getId() {
         return id;
     }
 
+    @Override
     public void setId(UUID id) {
         this.id = id;
     }

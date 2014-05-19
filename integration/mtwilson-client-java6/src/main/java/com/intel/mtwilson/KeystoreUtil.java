@@ -33,6 +33,18 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.mtwilson.attestation.client.jaxrs.CaCertificates;
+import com.intel.mtwilson.user.management.client.jaxrs.RegisterUsers;
+import com.intel.mtwilson.user.management.client.jaxrs.UserLoginCertificates;
+import com.intel.mtwilson.user.management.client.jaxrs.Users;
+import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertificate;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.logging.Level;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -494,6 +506,97 @@ public class KeystoreUtil {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
         ApiClient c = new ApiClient(server, rsaCredential, keystore, tlsPolicy);
         return c;        
+    }
+    
+    public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
+            URL server, String comments) throws IOException, ApiException, CryptographyException, ClientException {
+        return createUserInResourceV2(resource, username, password, server, new InsecureTlsPolicy(), comments, Locale.US);
+    }
+    
+    public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
+            URL server, TlsPolicy tlsPolicy, String comments, Locale locale) throws IOException, ApiException, CryptographyException, ClientException {
+        return createUserInResourceV2(resource, username, password, server, tlsPolicy, comments, locale, "TLS");
+    }
+    
+    public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
+            URL server, TlsPolicy tlsPolicy, String comments, Locale locale, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
+        
+        URL baseUrl = new URL(server.getProtocol() + "://" + server.getAuthority());
+        SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
+        
+        log.debug("URL Protocol: {}", baseUrl.getProtocol());        
+        if( "https".equals(baseUrl.getProtocol()) ) {
+            TlsUtil.addSslCertificatesToKeystore(keystore, baseUrl, tlsProtocol); //CryptographyException, IOException            
+        }
+
+        try {
+            String[] aliases = keystore.aliases();
+            for(String alias : aliases) {
+                log.debug("Certificate: "+keystore.getX509Certificate(alias).getSubjectX500Principal().getName());
+            }
+        }
+        catch(Exception e) {
+            log.debug("cannot display keystore: "+e.toString());
+        }
+        
+        try {
+            
+            RegisterUsers client = new RegisterUsers(My.configuration().getClientProperties());
+            
+            RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate();            
+            User newUser = new User();
+            newUser.setUsername(username);
+            newUser.setLocale(locale);
+            newUser.setComment(comments);
+            
+            RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);            
+            UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
+            userLoginCertificate.setCertificate(rsaCredential.getCertificate().getEncoded());
+            userLoginCertificate.setComment(comments);
+            userLoginCertificate.setExpires(rsaCredential.getCertificate().getNotAfter());
+            userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(rsaCredential.getCertificate().getEncoded()).toByteArray());
+            userLoginCertificate.setSha256Hash(Sha256Digest.digestOf(rsaCredential.getCertificate().getEncoded()).toByteArray());
+            
+            rpcUserWithCert.setUser(newUser);
+            rpcUserWithCert.setUserLoginCertificate(userLoginCertificate);
+            LinkedHashMap result = client.registerUserWithCertificate(rpcUserWithCert);
+            
+        } catch (Exception ex) {
+            log.error("Error during creation of user.", ex);
+        }
+        
+        try {
+            
+            CaCertificates certClient = new CaCertificates(My.configuration().getClientProperties());
+            X509Certificate rootCertificate = certClient.retrieveCaCertificate("root");
+            X509Certificate samlCertificate = certClient.retrieveCaCertificate("saml");
+            X509Certificate privacyCertificate = certClient.retrieveCaCertificate("privacy");
+            
+            log.debug("Adding CA Certificate with alias {} from server {}", rootCertificate.getSubjectX500Principal().getName(), server.getHost());
+            keystore.addTrustedCaCertificate(rootCertificate, rootCertificate.getSubjectX500Principal().getName());
+
+            log.debug("Adding Privacy CA Certificate with alias {} from server {}", privacyCertificate.getSubjectX500Principal().getName(), server.getHost());
+            keystore.addTrustedCaCertificate(privacyCertificate, privacyCertificate.getSubjectX500Principal().getName());
+            
+            if (samlCertificate.getBasicConstraints() == -1) { // -1 indicates the cert is not a CA cert
+                log.debug("Adding SAML Certificate with alias {} from server {}", samlCertificate.getSubjectX500Principal().getName(), server.getHost());
+                keystore.addTrustedSamlCertificate(samlCertificate, samlCertificate.getSubjectX500Principal().getName());
+
+            } else {
+                log.debug("Adding SAML Certificate as CA cert with alias {} from server {}", samlCertificate.getSubjectX500Principal().getName(), server.getHost());
+                keystore.addTrustedCaCertificate(samlCertificate, samlCertificate.getSubjectX500Principal().getName());                
+            }
+        } catch (Exception ex) {
+            log.error("Error during retrieval of certificates for writing to the key store.", ex);
+        }
+                                
+        try {
+            keystore.save();
+            return keystore;
+        }
+        catch(Exception e) {
+            throw new CryptographyException("Cannot save keystore to resource: "+e.toString(), e);
+        }
     }
     
     

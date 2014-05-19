@@ -19,7 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- *
+ * @since 2.0
  * @author ssbangal
  */
 public class Certificates  extends MtWilsonClient {

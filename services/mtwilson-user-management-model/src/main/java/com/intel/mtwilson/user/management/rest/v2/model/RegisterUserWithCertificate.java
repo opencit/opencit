@@ -5,9 +5,6 @@
 package com.intel.mtwilson.user.management.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.Document;
-import java.util.Locale;
 
 /**
   id uuid NOT NULL,
@@ -23,8 +20,7 @@ import java.util.Locale;
 public class RegisterUserWithCertificate {
 
     private User user;
-    private UserLoginCertificate userCertificate;
-    private Boolean result;
+    private UserLoginCertificate userLoginCertificate;
 
     public User getUser() {
         return user;
@@ -34,21 +30,12 @@ public class RegisterUserWithCertificate {
         this.user = user;
     }
 
-    public UserLoginCertificate getUserCertificate() {
-        return userCertificate;
+    public UserLoginCertificate getUserLoginCertificate() {
+        return userLoginCertificate;
     }
 
-    public void setUserCertificate(UserLoginCertificate userCertificate) {
-        this.userCertificate = userCertificate;
+    public void setUserLoginCertificate(UserLoginCertificate userLoginCertificate) {
+        this.userLoginCertificate = userLoginCertificate;
     }
 
-    public Boolean getResult() {
-        return result;
-    }
-
-    public void setResult(Boolean result) {
-        this.result = result;
-    }
-    
-    
 }
