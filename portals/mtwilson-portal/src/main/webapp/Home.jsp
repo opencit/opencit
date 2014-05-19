@@ -108,6 +108,7 @@
                             <ul>
                                 <li><a href="javascript:getAssetTagPage()" data-i18n="link.create_asset_tag">Tag Creation</a></li> <!-- was "Register Host" under Management Console automation -->
                                 <li><a href="javascript:getAssetSelectionPage()" data-i18n="link.select_asset_tag">Tag Selection</a></li>
+				<li><a href="javascript:getTagProvisioningPage()" data-i18n="link.tag_provisioning">Provision Tags</a></li>
                                 <li><a href="javascript:getAssetCertificatePage()" data-i18n="link.certificate_management">Certificate Management</a></li>
                                 <!--li><a href="javascript:getAssetSettingsPage()">Settings</a></li>
                                 <li><a href="javascript:getAssetLogPage()">Log</a></li>

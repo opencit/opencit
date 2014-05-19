@@ -47,6 +47,7 @@ mtwilson.atag = mtwilson.atag || {};
             'rdfTriples': [],
             'configurations': [],
             'files': [],
+			'hosts': [],
             'selection_details': [],
             'currentConfiguration': {}
         };
@@ -151,6 +152,7 @@ mtwilson.atag = mtwilson.atag || {};
     ajax.resources.configurations = {uri: '/mtwilson-portal/v2proxy/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.files = {uri: '/files', datapath: 'files', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.uuid = {uri: '/host-uuids', datapath: 'uuid', idkey: null};
+	ajax.resources.hosts = {uri: '/mtwilson-portal/v2proxy/hosts.json', datapath: 'hosts', elementsName: 'hosts', idkey: 'id'};
 //    mtwilson.atag.data = data; 
 //    log.debug("again, data = "+Object.toJSON(mtwilson.atag.data));
 // UTILITIES
@@ -670,6 +672,7 @@ mtwilson.atag = mtwilson.atag || {};
                         disable_sel_render = false;
                         break;
                 }
+				selectedSelectionXML = '';
                 data.selections.clear();
                 for (var i = 0; i < data.selection_details.length; i++) {
                         if(tmp_dictionary[data.selection_details[i].selection_id] == null) {
@@ -681,6 +684,15 @@ mtwilson.atag = mtwilson.atag || {};
                                 tmp_dictionary[data.selection_details[i].selection_id] = true;
                         }
                 }
+                break;
+			            case 'hosts':
+                jQuery('#my-select').multiSelect({'dblClick': true, 'selectionFooter': '<div class="custom-header">Servers to provision</div>', 'selectableFooter': '<div class="custom-header">Available servers</div>',
+                        afterSelect: function(value){
+                                addElement2SelectedHosts(value[0]);
+                        },
+                        afterDeselect: function(value){
+                                removeElement2SelectedHosts(value[0]);
+                        }});
                 break;
             case 'uuid':
                 
@@ -1400,3 +1412,179 @@ function enableClickableAlerts(){
         this.hide();
     });*/
 }
+
+mtwilson.atag.loadHostsForProvisioning = function(input) {
+    ajax.json.get('hosts', {'nameContains':'10'});
+};
+
+
+function addElement2SelectedHosts(host_id) {
+   for(var loop = 0; loop < mtwilson.atag.data.selected_hosts.length; loop++) {
+      if(mtwilson.atag.data.selected_hosts[loop].subject == host_id)
+         return true;
+   }
+   mtwilson.atag.data.selected_hosts.push({subject: host_id, status: 'Queued'});
+}
+
+function removeElement2SelectedHosts(host_id) {
+   for(var loop = 0; loop < mtwilson.atag.data.selected_hosts.length; loop++) {
+      if(mtwilson.atag.data.selected_hosts[loop].subject == host_id) 
+         mtwilson.atag.data.selected_hosts.splice(loop, 1);
+   }
+}
+
+var selectedSelectionXML = '';
+var fileContentsRead = false;
+
+function getFileContents() {
+	var file = document.getElementById("fileForUpload").files[0];
+	if (file) {
+	    var reader = new FileReader();
+	    reader.readAsText(file, "UTF-8");
+	    reader.onload = function (evt) {
+        	var xml = evt.target.result;
+		parseSelectionXML(xml);
+		fileContentsRead = true;
+	    };
+	    reader.onerror = function (evt) {
+	        //document.getElementById("fileContents").innerHTML = "error reading file";
+    	    };
+	} else {
+	    var fileContents = ieReadFile(file);
+	    try{
+        	var xml = evt.target.result;
+		parseSelectionXML(xml);
+		fileContentsRead = true;
+	    }catch(Exception){
+		//document.getElementById("fileContents").innerHTML = "error reading file";
+		alert('Please select the tag XML to be provisioned.');
+		return false;
+	    }
+	}
+}
+
+function ieReadFile(filename) 
+{
+    try
+    {
+        var fso  = new ActiveXObject("Scripting.FileSystemObject"); 
+        var fh = fso.OpenTextFile(filename, 1); 
+        var contents = fh.ReadAll(); 
+        fh.Close();
+	fileContentsRead = true;
+        return contents;
+    }
+    catch (Exception)
+    {
+        return "Cannot open file :(";
+    }
+}
+
+function parseSelectionXML(xml) {
+	if (window.DOMParser)
+	{
+		parser=new DOMParser();
+		xmlDoc=parser.parseFromString(xml, "text/xml");
+	} else { // Internet Explorer
+		xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.async=false;
+		xmlDoc.loadXML(xml); 
+	}
+
+	mtwilson.atag.data.selection_details = [];
+	var attributes = xmlDoc.getElementsByTagName('attribute');
+	for(var loop = 0; loop < attributes.length; loop++) {
+		var text = (attributes[loop].getElementsByTagName('text')[0].innerHTML);
+		var split_vals = text.split('=');
+		mtwilson.atag.data.selection_details.push({
+			id: loop,
+			kv_attribute_name: split_vals[0],
+			kv_attribute_value: split_vals[1]
+		});
+	}
+	selectedSelectionXML= xml;
+        mtwilson.rivets.views['provision-sel-details'].sync();
+}
+
+var hostProvFailed = false;
+var hostProvRespCount = 0;
+
+function provisionTags() {
+	hostProvFailed = false;
+	hostProvRespCount = 0;
+
+	var selected_hosts = mtwilson.atag.data.selected_hosts;
+	if(selected_hosts.length == 0) {
+		alert('Select at least one server to provision the tags');
+		return false;
+	}
+
+	if(selectedSelectionXML == '') {
+		alert('Upload a tag XML or choose a selection to provision');
+		return false;
+	}
+        mtwilson.rivets.views['provision-sel-table'].sync();
+	$('provisionTagFormDiv').toggle();
+	$('provisionTagProgDiv').toggle();
+	for(var loop = 0; loop < selected_hosts.length; loop++) {
+                ajax.custom.post('certificateRequests', selectedSelectionXML, {app: selected_hosts[loop].subject, contentType: 'application/xml', accept: 'application/pkix-cert', func: 'bulk_provisioning'}, {subject: selected_hosts[loop].subject});
+		updateHostProvisioningStatus(selected_hosts[loop].subject, 'Reuqest sent', true);
+	}
+}
+
+function updateHostProvisioningStatus(subject, status_str, dontUpdateCount) {
+	if(typeof dontUpdateCount == 'undefined') {
+		dontUpdateCount = false;
+	}
+	var selected_hosts = mtwilson.atag.data.selected_hosts;
+	for(var loop = 0; loop < selected_hosts.length; loop++) {
+		if(selected_hosts[loop].subject == subject) {
+			mtwilson.atag.data.selected_hosts[loop].status = status_str;
+			if(dontUpdateCount == false)
+				hostProvRespCount++;
+			break;
+		}
+	}
+
+	if( hostProvRespCount == selected_hosts.length) {
+		messageStr = 'Done!';
+		document.getElementById('hostProgressMessage').style.color = 'green';
+		if(hostProvFailed) {
+			document.getElementById('hostProgressMessage').style.color = 'red';
+			messageStr = 'Done with errors. Please retry';
+		}
+		document.getElementById('hostProgressMessage').innerHTML = messageStr;
+		$('hostProgressMessage').toggle();
+	}
+}
+
+function openProvisionSelectionOptions(id) {
+	selectedSelectionXML = '';
+	mtwilson.atag.data.selection_details = [];
+	jQuery('.prov_sel_option').hide();
+	jQuery('#'+ id).show();
+	jQuery('.prov_choose_sel_link').removeClass('prov_choose_sel_link_selected');
+	jQuery('#'+ id + '_link').addClass('prov_choose_sel_link_selected');
+	jQuery('.selection_entry').removeClass('highlightSelectedSelection');
+	var fileControl = jQuery('#fileForUpload');
+	fileControl.replaceWith(fileControl.clone());
+}
+
+function getSelectedSelectionDetails(selection_id) {
+	disable_sel_render=true; 
+	selectedSelectionXML="";
+        mtwilson.atag.data.selection_details = [];
+	xmlhttp=new XMLHttpRequest();
+	xmlhttp.onreadystatechange=function() {
+		if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+			var requestObject = xmlhttp.responseText;
+			parseSelectionXML(requestObject);
+			jQuery('.selection_entry').removeClass('highlightSelectedSelection');
+			jQuery('#' + selection_id).addClass('highlightSelectedSelection');
+		}
+	};
+	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml",true);
+	xmlhttp.send();            
+
+}
+

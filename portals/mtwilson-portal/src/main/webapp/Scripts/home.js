@@ -148,6 +148,11 @@ function getAssetCertificatePage() {
         $('#AssetCertificatePage').html('<iframe  scrolling="no" frameborder="0" src="tag/index.html5?tab=certificates" width="100%" height="1000" > </iframe>');
 }
 
+function getTagProvisioningPage() {
+        $('#mainContainer').html('<div id="TagProvisionPage"></div>');
+        $('#TagProvisionPage').html('<iframe  scrolling="no" frameborder="0" src="tag/index.html5?tab=provisionTag" width="100%" height="1000" > </iframe>');
+}
+
 function getAssetSettingsPage() {
 	$('#mainContainer').html('<div id="AssetSettingsPage"></div>');
         //$('#AssetSettingsPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/settings.html" + '" width="100%" height="1500" > </iframe>');
