@@ -40,6 +40,7 @@
         "create_asset_tag": "Tag Creation (es-MX)",
         "select_asset_tag": "Tag Selection (es-MX)",
         "certificate_management": "Certificate Management (es-MX)",
+        "tag_provisioning": "Provision Tags (es-MX)",
         "administration": "Administration (es-MX)",
         "pending_requests": "Pending Requests (es-MX)",
         "list_users": "List Users (es-MX)",
