@@ -16,6 +16,7 @@ public class HostTlsPolicy extends Document {
     
     private String hostUuid;
     private String name;
+    private Boolean insecure;
     private byte[] keyStore;
 
     public String getHostUuid() {
@@ -32,6 +33,14 @@ public class HostTlsPolicy extends Document {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public Boolean getInsecure() {
+        return insecure;
+    }
+
+    public void setInsecure(Boolean insecure) {
+        this.insecure = insecure;
     }
 
     public byte[] getKeyStore() {

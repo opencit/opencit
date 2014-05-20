@@ -161,6 +161,11 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
             obj.AddOn_Connection_String = item.getConnectionUrl();
             obj.Description = item.getDescription();
             obj.Email = item.getEmail();
+            log.error(item.getTlsPolicy().toString());
+            log.error(item.getTlsPolicy().getName());
+            log.error(item.getTlsPolicy().getHostUuid());
+            log.error(item.getTlsPolicy().getInsecure().toString());
+            log.error(item.getTlsPolicy().getKeyStore().toString());
 
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object
