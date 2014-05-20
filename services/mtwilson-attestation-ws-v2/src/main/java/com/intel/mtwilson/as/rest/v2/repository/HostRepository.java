@@ -4,11 +4,15 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -24,9 +28,15 @@ import com.intel.mtwilson.datatypes.HostResponse;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateFactorySpi;
+import java.security.cert.X509Certificate;
 
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.bouncycastle.jce.provider.JDKKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,13 +225,24 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 HostTlsPolicy tlsPolicyItem = new HostTlsPolicy();
                 tlsPolicyItem.setHostUuid(hostObj.getUuid_hex());
                 tlsPolicyItem.setName(My.configuration().getDefaultTlsPolicyName());
-                if(item.getTlsPolicy() != null && !(item.getTlsPolicy().getInsecure()) && item.getTlsPolicy().getCertificates() == null) {
+                if(item.getTlsPolicy() != null && (item.getTlsPolicy().getInsecure()) && item.getTlsPolicy().getCertificates() == null) {
                     // If TlsPolicy does not exist or the value is set to false, set the TLS Policy to INSECURE
                     tlsPolicyItem.setName(TLSPolicy.INSECURE.toString());
                 } else if(item.getTlsPolicy() != null && item.getTlsPolicy().getCertificates() != null){
                     // If Certificates is not null, then create the keystore and set the values appropriately
-                    tlsPolicyItem.setName(TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString());   
+                    tlsPolicyItem.setName(TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString());
+                    TlsUtil.addSslCertificatesToKeystore(null, null);
+                    Resource resource = hostObj.getTlsKeystoreResource();
+                    SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
+                    for (String certificate : item.getTlsPolicy().getCertificates()) {
+                        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                        X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
+                        //X509Certificate cert = X509Certificate.getInstance(certificate.getBytes());
+                        clientKeystore.addTrustedSslCertificate(cert, obj.HostName + "TLS-Cert");
+                    }
                     // Create the keystore appropriately
+                    clientKeystore.save();
+                    //tlsPolicyItem.setKeyStore(clientKeystore);
                 }
                 tlsRepo.store(tlsPolicyItem);
                 
