@@ -16,10 +16,13 @@ public class UserLoginCertificateLocator implements Locator<UserLoginCertificate
 
     @PathParam("id")
     public UUID id;
+    @PathParam("user_id")
+    public UUID userId;
 
     @Override
     public void copyTo(UserLoginCertificate item) {
         item.setId(id);
+        item.setUserId(userId);
     }
     
 }

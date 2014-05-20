@@ -14,6 +14,8 @@ import javax.ws.rs.PathParam;
  */
 public class UserLoginHmacLocator implements Locator<UserLoginHmac> {
 
+    @PathParam("user_id")
+    public UUID userId;
     @PathParam("id")
     public UUID id;
 
