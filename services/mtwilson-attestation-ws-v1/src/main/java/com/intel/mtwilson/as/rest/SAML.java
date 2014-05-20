@@ -4,7 +4,7 @@ import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mountwilson.as.common.ValidationException;

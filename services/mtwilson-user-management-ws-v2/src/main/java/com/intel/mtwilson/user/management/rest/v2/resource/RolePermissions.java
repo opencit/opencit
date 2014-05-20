@@ -9,8 +9,8 @@ import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionCollection
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.RolePermissionRepository;
-import com.intel.mtwilson.jersey.NoLinks;
-import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.jaxrs2.NoLinks;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
 import javax.ws.rs.Path;

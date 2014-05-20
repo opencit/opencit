@@ -2,7 +2,7 @@ package com.intel.mtwilson.agent.vmware;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsClient;

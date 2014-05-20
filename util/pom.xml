@@ -17,6 +17,12 @@
   
   <modules>
 	<module>mtwilson-dbcp</module>
+	<module>mtwilson-i18n</module>
+	<module>mtwilson-jackson</module>
+	<module>mtwilson-jaxrs2</module>
+	<module>mtwilson-jaxrs2-client</module>
+	<module>mtwilson-jaxrs2-server</module>
+	<module>mtwilson-patch</module>
   </modules>
 
 </project>

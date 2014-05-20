@@ -3,7 +3,7 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.security.annotations.*;

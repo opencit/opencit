@@ -6,7 +6,7 @@ package com.intel.mtwilson.configuration.v2.model;
 
 import com.intel.mtwilson.configuration.v2.model.*;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.intel.mtwilson.jersey.Document;
+import com.intel.mtwilson.jaxrs2.Document;
 import java.util.HashMap;
 
 /**

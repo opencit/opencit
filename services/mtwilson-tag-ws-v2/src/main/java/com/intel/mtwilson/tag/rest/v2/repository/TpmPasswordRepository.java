@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.mtwilson.tag.dao.jdbi.TpmPasswordDAO;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.tag.model.TpmPasswordCollection;

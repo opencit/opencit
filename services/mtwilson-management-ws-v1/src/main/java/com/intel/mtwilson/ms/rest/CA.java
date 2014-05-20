@@ -8,7 +8,7 @@ import com.intel.mtwilson.as.data.MwCertificateX509;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.ms.business.CertificateAuthorityBO;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;

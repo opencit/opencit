@@ -37,7 +37,7 @@ from the classpath defaults if it's not found.
         <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
     </listener>
     <listener>
-        <listener-class>com.intel.mtwilson.jersey2.BackgroundTaskRunner</listener-class>
+        <listener-class>com.intel.mtwilson.servlet.listener.BackgroundTaskRunner</listener-class>
     </listener>
     
     <filter>
@@ -78,7 +78,7 @@ INFO: Registering the Jersey servlet application, named javax.ws.rs.core.Applica
 l.jackson.jaxrs.xml.JacksonJaxbXMLProvider, class com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper, class com.fasterxml.jackson.jaxrs.xml.JsonParseExce
 ptionMapper, class com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider, class org.glassfish.jersey.client.filter.HttpDigestAuthFilter, class com.intel.mtwilson.j
 ersey.provider.JacksonXmlMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider, class com.fasterxml.jackson.jaxrs.json.JsonMappingExcep
-tionMapper, class com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper, class com.intel.mtwilson.util.LocalizedExceptionMapper, class com.intel.mtwilson.
+tionMapper, class com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper, class com.intel.mtwilson.
 jersey.provider.JacksonObjectMapperProvider, class com.intel.mtwilson.as.rest.v2.resource.Hosts, class com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMappe
 r, class org.glassfish.jersey.server.wadl.internal.WadlResource, class com.intel.mtwilson.as.rest.v2.resource.Files, class com.intel.mtwilson.jersey.provider.Ja
 cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider, class com.fasterxml.jackson.jaxrs.json.JsonParseExceptionMapper]

@@ -305,7 +305,11 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-http-security</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-user-management-model</artifactId>
+            <version>${project.version}</version>
         </dependency>
     
         <dependency>

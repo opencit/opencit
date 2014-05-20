@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.PlaintextFilenameFilter;
 import com.intel.mtwilson.tag.TagCertificateAuthority;
@@ -133,8 +133,7 @@ public class ProvisionTagCertificate  {
             }
         }
         if( selections == null ) {
-            // default empty selection, which will only work if someone has already generated the necessary certificate and ensured it will be found (below) by making it the only valid cert for that host for a specific time period
-            selections = SelectionBuilder.factory().selection().build();
+            throw new Exception("Invalid selections");
         }
         // if external ca is configured then we only save the request to the database and indicate async processing in our response
         if( configuration.isTagProvisionExternal() || isAsync(request) ) {
@@ -143,7 +142,12 @@ public class ProvisionTagCertificate  {
             return null;
         }
         // if always-generate / no-cache is enabled then generate it right now and return it - no need to check database for existing certs etc. 
-        if( configuration.isTagProvisionNoCache() ) {
+        String cacheMode = "on";
+        if( selections.getOptions() != null && selections.getOptions().getCache() != null && selections.getOptions().getCache().getMode() != null ) {
+            cacheMode = selections.getOptions().getCache().getMode().value();
+        }
+        
+        if( "on".equals(cacheMode) ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
@@ -214,7 +218,7 @@ public class ProvisionTagCertificate  {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
         Certificate certificate = createOneJson(locator, json, request, response);
@@ -254,7 +258,7 @@ public class ProvisionTagCertificate  {
      */
     @POST
     @Consumes(MediaType.APPLICATION_XML)
-    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
         Certificate certificate = createOneXml(locator, xml, request, response);
@@ -293,8 +297,8 @@ public class ProvisionTagCertificate  {
      * @param request 
      */
     @POST
-    @Consumes(OtherMediaType.MESSAGE_RFC822)
-    @Produces(OtherMediaType.APPLICATION_PKIX_CERT)
+    @Consumes(CryptoMediaType.MESSAGE_RFC822)
+    @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
     public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());

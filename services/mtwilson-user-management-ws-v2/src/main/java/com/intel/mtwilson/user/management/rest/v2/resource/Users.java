@@ -9,8 +9,8 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
-import com.intel.mtwilson.jersey.NoLinks;
-import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.jaxrs2.NoLinks;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
 import javax.ws.rs.Path;

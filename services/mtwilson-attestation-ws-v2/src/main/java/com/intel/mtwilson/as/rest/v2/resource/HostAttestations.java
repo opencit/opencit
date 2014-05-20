@@ -22,10 +22,11 @@ import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.as.rest.v2.repository.HostAttestationRepository;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.NoLinks;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
-import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.i18n.ErrorCode;
+import com.intel.mtwilson.jaxrs2.NoLinks;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -64,8 +65,8 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     }
     
     @GET
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces(OtherMediaType.APPLICATION_SAML)    
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces(CryptoMediaType.APPLICATION_SAML)    
     public String searchCollectionSaml(@BeanParam HostAttestationFilterCriteria criteria) {
         try { log.debug("searchCollection: {}", mapper.writeValueAsString(criteria)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(criteria); 
@@ -113,8 +114,8 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces(OtherMediaType.APPLICATION_SAML)    
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces(CryptoMediaType.APPLICATION_SAML)    
     @SuppressWarnings("empty-statement")
     public String createSamlAssertion(HostAttestation item) {
         log.debug("Entering the creation of SAML assertion function.");

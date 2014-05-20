@@ -1,5 +1,7 @@
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.i18n.ErrorCode;
+
 
 /**
  *

@@ -8,10 +8,10 @@ import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.repository.MleSourceRepository;
-import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLocator;
-import com.intel.mtwilson.jersey.NoLinks;
+import com.intel.mtwilson.jaxrs2.NoLinks;
 import javax.ws.rs.Path;
 /**
  *

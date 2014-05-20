@@ -133,6 +133,7 @@ public class ReadXmlTest {
         mapXmlToJson("/selection-xml-examples/selection10.xml");
         mapXmlToJson("/selection-xml-examples/selection11.xml");
         mapXmlToJson("/selection-xml-examples/selection12.xml");
+        mapXmlToJson("/selection-xml-examples/selection13.xml");
     }
 
     @Test

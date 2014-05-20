@@ -7,7 +7,7 @@ package com.intel.mtwilson.tag.rest.v2.repository;
 import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.KvAttribute;

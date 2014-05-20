@@ -8,7 +8,8 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmac;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacLocator;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.i18n.ErrorCode;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 

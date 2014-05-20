@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.privacyca.v2.model.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -44,7 +44,7 @@ public class PrivacyCA extends MtWilsonClient {
         X509Certificate ec = getTarget()
                 .path("/privacyca/tpm-endorsement")
                 .request()
-                .accept(OtherMediaType.APPLICATION_PKIX_CERT)
+                .accept(CryptoMediaType.APPLICATION_PKIX_CERT)
                 .post(Entity.entity(ekModulus, MediaType.APPLICATION_OCTET_STREAM), X509Certificate.class);
         return ec;
     }

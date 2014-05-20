@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import java.net.MalformedURLException;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;

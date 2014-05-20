@@ -46,7 +46,7 @@ public class Jersey2Application1 extends AbstractJerseyPluginApplication {
         super();
         
 //register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
-register(com.intel.mtwilson.jersey.provider.V1JacksonObjectMapperProvider.class);
+register(com.intel.mtwilson.jaxrs2.provider.V1JacksonObjectMapperProvider.class);
 register(com.intel.mtwilson.util.ASLocalizationFilter.class);
         
         // now get the list of classes that implement @V1 and @Path

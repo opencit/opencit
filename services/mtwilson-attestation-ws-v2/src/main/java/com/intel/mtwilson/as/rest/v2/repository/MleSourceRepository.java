@@ -14,8 +14,8 @@ import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLocator;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.i18n.ErrorCode;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 

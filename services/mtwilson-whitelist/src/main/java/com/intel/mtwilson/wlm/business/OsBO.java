@@ -9,7 +9,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblOs;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.wlm.helper.BaseBO;
 import java.util.ArrayList;

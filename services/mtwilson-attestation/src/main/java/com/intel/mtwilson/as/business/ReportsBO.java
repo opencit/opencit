@@ -10,7 +10,7 @@ import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.business.trust.Util;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.BaseBO;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 //import com.intel.mtwilson.model;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;

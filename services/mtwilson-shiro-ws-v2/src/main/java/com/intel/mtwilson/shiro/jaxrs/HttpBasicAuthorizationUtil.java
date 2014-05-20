@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.shiro.jaxrs;
 
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.nio.charset.Charset;
 import javax.ws.rs.BeanParam;
@@ -59,8 +60,8 @@ public class HttpBasicAuthorizationUtil {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML})
     public BasicAuthorizationOutput generateBasicAuthorizationHeader(BasicAuthorizationInput input) {
         BasicAuthorizationOutput output = new BasicAuthorizationOutput();
         output.authorization = generateBasicAuthorizationHeaderText(input);

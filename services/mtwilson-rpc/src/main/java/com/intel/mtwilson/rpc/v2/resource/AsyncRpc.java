@@ -11,7 +11,8 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.rfc822.Message;
 import com.intel.dcsg.cpg.util.MultivaluedHashMap;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
@@ -85,7 +86,7 @@ public class AsyncRpc extends AbstractRpc {
     @Path("/{name}")
     @POST
     @Consumes(MediaType.WILDCARD)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public Rpc invokeAsyncRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
         // make sure we have an extension to handle this rpc
         RpcAdapter adapter = getAdapter(name);

@@ -6,9 +6,9 @@ package com.intel.mtwilson.util;
 
 import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.i18n.ErrorMessage;
-import com.intel.mtwilson.i18n.Message;
+import com.intel.dcsg.cpg.i18n.Message;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import java.util.Locale;
 
 /**

@@ -134,7 +134,11 @@
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
       	
     </dependencies>  
 </project>

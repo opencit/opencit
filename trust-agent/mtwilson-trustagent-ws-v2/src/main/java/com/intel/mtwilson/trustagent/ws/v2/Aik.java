@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.TrustagentRepository;
@@ -46,7 +46,7 @@ public class Aik {
     }
     
     @GET
-    @Produces({OtherMediaType.APPLICATION_PKIX_CERT, OtherMediaType.APPLICATION_X_PEM_FILE})
+    @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
     public X509Certificate getIdentity(@Context HttpServletResponse response) throws IOException, CertificateException {
         TrustagentConfiguration configuration = getConfiguration();
         if( configuration.isDaaEnabled() ) {
@@ -67,7 +67,7 @@ public class Aik {
  
     @GET
     @Path("/ca")
-    @Produces({OtherMediaType.APPLICATION_PKIX_CERT, OtherMediaType.APPLICATION_X_PEM_FILE})
+    @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
     public X509Certificate getIdentityCA(@Context HttpServletResponse response) throws Exception {
         TrustagentConfiguration configuration = getConfiguration();
         File keystoreFile = configuration.getTrustagentKeystoreFile();
