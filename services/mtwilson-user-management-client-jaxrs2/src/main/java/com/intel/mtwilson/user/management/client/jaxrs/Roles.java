@@ -77,7 +77,7 @@ public class Roles extends MtWilsonClient {
      */
     public void deleteRole(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response role = getTarget().path("roles/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
     }
@@ -107,7 +107,7 @@ public class Roles extends MtWilsonClient {
      */
     public Role editRole(Role role) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", role.getId().toString());
         Role newRole = getTarget().path("roles/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(role), Role.class);
         return newRole;
@@ -134,7 +134,7 @@ public class Roles extends MtWilsonClient {
      */
     public Role retrieveRole(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Role role = getTarget().path("roles/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Role.class);
         return role;
@@ -167,7 +167,6 @@ public class Roles extends MtWilsonClient {
      */
     public RoleCollection searchRoles(RoleFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        //RoleCollection roles = getTarget().path("roles").queryParam("nameContains", name).request(MediaType.APPLICATION_JSON).get(RoleCollection.class);
         RoleCollection roles = getTargetPathWithQueryParams("roles", criteria).request(MediaType.APPLICATION_JSON).get(RoleCollection.class);
         return roles;
     }
