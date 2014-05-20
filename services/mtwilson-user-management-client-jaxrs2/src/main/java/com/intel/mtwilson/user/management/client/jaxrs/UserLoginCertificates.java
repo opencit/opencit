@@ -30,10 +30,10 @@ public class UserLoginCertificates extends MtWilsonClient {
     }
     
      /**
-     * Stores the details of the user's password in the system for user to login using password mechanism. Using
-     * the algorithm, salt and the iterations specified the password hash would be calculated and stored in the
-     * system.
-     * @param userLoginPassword - UserLoginCertificate object that needs to be created. 
+     * Stores the details of the user's certificate in the system for allowing the user to login using certificate mechanism. The 
+     * request would be created in the disabled and pending state. Once the access is approved with the roles, users would be able
+     * to login.
+     * @param UserLoginCertificate object that needs to be created. 
      * @return Created UserLoginCertificate object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_certificates:create
@@ -41,17 +41,19 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
-     * Input: {"userLoginPassword_name":"developer"}
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
+     * Input: {"certificate":"MIICrzCCAZegAwIB.....LX+ukqAKQDdqfiSkV+Bw==","comment":"Need to manage user accounts."}
+     * Output: {"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4",
+     * "certificate":"MIICrzCCAZegAwIBAgIJAJ9cWj....LX+ukqAKQDdqfiSkV+Bw==","enabled":false,"comment":"Need to manage user accounts."}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginCertificates client = new UserLoginCertificates(My.configuration().getClientProperties());
-     *  UserLoginCertificate userLoginPassword = new UserLoginCertificate();
-     *  userLoginPassword.setName("Intel");
-     *  userLoginPassword.setDescription("Intel OEM");
-     *  UserLoginCertificate createUserLoginCertificate = client.createUserLoginCertificate(userLoginPassword);
+     *  UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
+     *  userLoginCertificate.setUserId(UUID.valueOf("cdec55c3-206d-4abb-8ba3-83b819e0b256");
+     *  userLoginCertificate.setComment("Need to manage user accounts.");
+     *  userLoginCertificate.setCertificate(certificate.getEncoded()); // assuming the user has created a x509Certificate
+     *  UserLoginCertificate createUserLoginCertificate = client.createUserLoginCertificate(userLoginCertificate);
      * </pre>
      */
     public UserLoginCertificate createUserLoginCertificate(UserLoginCertificate obj) {
@@ -65,6 +67,7 @@ public class UserLoginCertificates extends MtWilsonClient {
     
     /**
      * Deletes the UserLoginCertificate with the specified UUID from the system. 
+     * @param userUuid - UUID of the User with which the certificate request is associated
      * @param uuid - UUID of the UserLoginCertificate that has to be deleted.
      * @return N/A
      * @since Mt.Wilson 2.0
@@ -73,12 +76,12 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
+     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginCertificates client = new UserLoginCertificates(My.configuration().getClientProperties());
-     *  client.deleteUserLoginCertificate("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  client.deleteUserLoginCertificate("cdec55c3-206d-4abb-8ba3-83b819e0b256","574874bd-2d5c-4190-b724-d69f2b4c89b4");
      * </pre>
      */
     public void deleteUserLoginCertificate(String userUuid, String uuid) {
@@ -99,17 +102,21 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-certificates
-     * Input: {"comments":"Need access for development."}
-     * Output: {"id": "31741556-f5c7-4eb6-a713-338a23e43b93","description": "Intel OEM updated" }
+     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
+     * Input: {"enabled":"true","status":"APPROVED","roles":["security","whitelist"]}
+     * Output: {"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","enabled":true,"status":"APPROVED","roles":["security","whitelist"]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginCertificates client = new UserLoginCertificates(My.configuration().getClientProperties());
-     *  UserLoginCertificate userLoginPassword = new UserLoginCertificate();
-     *  userLoginPassword.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
-     *  userLoginPassword.setDescription("Intel OEM updated");
-     *  userLoginPassword = client.editUserLoginCertificate(userLoginPassword);
+     *  UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
+     *  userLoginCertificate.setId(UUID.valueOf("574874bd-2d5c-4190-b724-d69f2b4c89b4");
+     *  userLoginCertificate.setUserId(UUID.valueOf("cdec55c3-206d-4abb-8ba3-83b819e0b256");
+     *  userLoginCertificate.setEnabled(true);
+     *  userLoginCertificate.setStatus(Status.APPROVED);
+     *  List<String> roleSet = new ArrayList<>(Arrays.asList("security", "whitelist"));
+     *  userLoginCertificate.setRoles(roleSet);
+     *  userLoginCertificate = client.editUserLoginCertificate(userLoginPassword);
      * </pre>
      */
     public UserLoginCertificate editUserLoginCertificate(UserLoginCertificate obj) {
@@ -132,13 +139,16 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-certificates
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
+     * Output: {"user_login_certificates":[{"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","user_id":"cdec55c3-206d-4abb-8ba3-83b819e0b256",
+     * "certificate":"MIICrzCCAZegAwIB....==","sha1_hash":"5vv7fVyDVD6fGdi/AfAmoieTRfo=","sha256_hash":"b5v2UPacu4zkDnmxXCXrbFBsmHOiUhwES5Olrd+TKC4=",
+     * "expires":1432106266000,"enabled":false,"status":"PENDING","comment":"Need to manage user accounts."}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginCertificates client = new UserLoginCertificates(My.configuration().getClientProperties());
-     *  UserLoginCertificate retrieveUserLoginCertificate = client.retrieveUserLoginCertificate("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  UserLoginCertificate retrieveUserLoginCertificate = client.retrieveUserLoginCertificate("cdec55c3-206d-4abb-8ba3-83b819e0b256",
+     * "574874bd-2d5c-4190-b724-d69f2b4c89b4");
      * </pre>
      */
     public UserLoginCertificate retrieveUserLoginCertificate(String userUuid, String uuid) {
@@ -157,30 +167,33 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @param UserLoginCertificateFilterCriteria object specifying the filter criteria. The search options include
      * id, sha1, sha256, status and enabled. If the user just provides the user_id without any filter criteria, then the user login certificate
      * for that user_id would be retrieved.
-     * @return <code> UserLoginCertificateCollection </code> with the UserLoginCertificates that meet the specified filter criteria
+     * @return UserLoginCertificateCollection with the UserLoginCertificates that meet the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_certificates:search
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
-     * Output: {"userLoginPasswords":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
+     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
+     * Output: {"user_login_certificates":[{"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","user_id":"cdec55c3-206d-4abb-8ba3-83b819e0b256",
+     * "certificate":"MIICrzCCAZegAwIBAgIJAJ9cWj/....LX+ukqAKQDdqfiSkV+Bw==","sha1_hash":"5vv7fVyDVD6fGdi/AfAmoieTRfo=",
+     * "sha256_hash":"b5v2UPacu4zkDnmxXCXrbFBsmHOiUhwES5Olrd+TKC4=","expires":1432106266000,"enabled":true,
+     * "status":"APPROVED","comment":"Need to manage user accounts.","roles":["Security","Whitelist"]}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginCertificates client = new UserLoginCertificates(My.configuration().getClientProperties());
      *  UserLoginCertificateFilterCriteria criteria = new UserLoginCertificateFilterCriteria();
-     *  criteria.nameContains = "intel";
-     *  UserLoginCertificateCollection userLoginPasswords = client.searchUserLoginCertificates(criteria);
+     *  criteria.userUuid = UUID.valueOf("cdec55c3-206d-4abb-8ba3-83b819e0b256");
+     *  UserLoginCertificateCollection userLoginCertificates = client.searchUserLoginCertificates(criteria);
      * </pre>
      */
     public UserLoginCertificateCollection searchUserLoginCertificates(UserLoginCertificateFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
-        map.put("user_id", criteria.id);
+        map.put("user_id", criteria.userUuid);
         UserLoginCertificateCollection userLoginPasswords = getTargetPathWithQueryParams("/users/{user_id}/login-certificates", criteria)
-                .request(MediaType.APPLICATION_JSON).get(UserLoginCertificateCollection.class);
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(UserLoginCertificateCollection.class);
         return userLoginPasswords;
     }
 }

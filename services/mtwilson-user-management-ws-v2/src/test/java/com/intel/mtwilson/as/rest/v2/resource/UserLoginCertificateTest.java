@@ -17,8 +17,10 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateLoca
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -64,7 +66,7 @@ public class UserLoginCertificateTest {
 
         userLoginCertificate.setEnabled(true);
         userLoginCertificate.setStatus(Status.APPROVED);
-        Set<String> roleSet = new HashSet<>(Arrays.asList("administrator", "tagadmin"));
+        List<String> roleSet = new ArrayList<>(Arrays.asList("administrator", "tagadmin"));
         userLoginCertificate.setRoles(roleSet);
         repo.store(userLoginCertificate);
         

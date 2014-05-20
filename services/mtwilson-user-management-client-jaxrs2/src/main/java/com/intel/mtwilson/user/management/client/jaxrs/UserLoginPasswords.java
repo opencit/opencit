@@ -180,7 +180,7 @@ public class UserLoginPasswords extends MtWilsonClient {
         HashMap<String,Object> map = new HashMap<>();
         map.put("user_id", criteria.id);
         UserLoginPasswordCollection userLoginPasswords = getTargetPathWithQueryParams("/users/{user_id}/login-passwords", criteria)
-                .request(MediaType.APPLICATION_JSON).get(UserLoginPasswordCollection.class);
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(UserLoginPasswordCollection.class);
         return userLoginPasswords;
     }
 }
