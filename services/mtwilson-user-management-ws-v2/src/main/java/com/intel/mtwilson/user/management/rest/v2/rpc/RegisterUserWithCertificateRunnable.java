@@ -31,6 +31,7 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
 
     private User user;
     private UserLoginCertificate userLoginCertificate;
+    private boolean result;
 
     public User getUser() {
         return user;
@@ -47,11 +48,19 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
     public void setUserLoginCertificate(UserLoginCertificate userLoginCertificate) {
         this.userLoginCertificate = userLoginCertificate;
     }
+
+    public boolean isResult() {
+        return result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
+    }
     
     
     @Override
     public void run() {
-        
+        result = false;
         UserRepository userRepo = new UserRepository();
         UserLoginCertificateRepository userLoginCertRepo = new UserLoginCertificateRepository();
         
@@ -72,6 +81,7 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
                     userObj.setLocale(getUser().getLocale());
                 userObj.setComment(getUser().getComment());
                 userRepo.create(userObj);
+                log.debug("Added the user {} with id {} successfully.", getUser().getUsername(), userId);
                 
                 userCertObj.setId(userCertId);
                 userCertObj.setUserId(userId);
@@ -82,9 +92,12 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
                 userCertObj.setExpires(getUserLoginCertificate().getX509Certificate().getNotAfter());
                 userLoginCertRepo.create(userCertObj);
                 
+                result = true;
+                
                 log.debug("Completed processing user registration with certificate for {}.", getUser().getUsername());
             }
         } catch (Exception ex) {
+            log.error("Exception during registration of user with certificate.", ex);
             throw new ASException(ex);
         }
     }
