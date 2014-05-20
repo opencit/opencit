@@ -127,7 +127,8 @@ public class RolePermissions extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
         map.put("role_id", criteria.roleId);
-        RolePermissionCollection rolePermissions = getTargetPathWithQueryParams("roles/{role_id}/permissions", criteria).request(MediaType.APPLICATION_JSON).get(RolePermissionCollection.class);
+        RolePermissionCollection rolePermissions = getTargetPathWithQueryParams("roles/{role_id}/permissions", criteria)
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(RolePermissionCollection.class);
         return rolePermissions;
     }
 }
