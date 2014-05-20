@@ -349,7 +349,7 @@ case "$1" in
         if [ $# -gt 1 ]; then
           shift
           # first look for known old setup commands:
-          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ] || [ "$1" = "EncryptDatabase" ] || [ "$1" = "ImportConfig" ] || [ "$1" = "ExportConfig" ] || [ "$1" = "V2" ]; then
+          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ] || [ "$1" = "EncryptDatabase" ] || [ "$1" = "ImportConfig" ] || [ "$1" = "ExportConfig" ] || [ "$1" = "V2" ] || [ "$1" = "ApproveUserLoginCertificateRequest" ]; then
             call_setupcommand $@
           else            
             # for everything else, try the new setup commands first,
