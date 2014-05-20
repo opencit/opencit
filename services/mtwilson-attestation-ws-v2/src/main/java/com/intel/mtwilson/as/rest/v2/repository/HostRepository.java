@@ -8,6 +8,7 @@ import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -213,13 +214,13 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 HostTlsPolicyRepository tlsRepo = new HostTlsPolicyRepository();
                 HostTlsPolicy tlsPolicyItem = new HostTlsPolicy();
                 tlsPolicyItem.setHostUuid(hostObj.getUuid_hex());
+                tlsPolicyItem.setName(My.configuration().getDefaultTlsPolicyName());
                 if(item.getTlsPolicy() != null && !(item.getTlsPolicy().getInsecure()) && item.getTlsPolicy().getCertificates() == null) {
                     // If TlsPolicy does not exist or the value is set to false, set the TLS Policy to INSECURE
                     tlsPolicyItem.setName(TLSPolicy.INSECURE.toString());
                 } else if(item.getTlsPolicy() != null && item.getTlsPolicy().getCertificates() != null){
                     // If Certificates is not null, then create the keystore and set the values appropriately
-                    tlsPolicyItem.setName(TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString());
-                    
+                    tlsPolicyItem.setName(TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString());   
                     // Create the keystore appropriately
                 }
                 tlsRepo.store(tlsPolicyItem);
