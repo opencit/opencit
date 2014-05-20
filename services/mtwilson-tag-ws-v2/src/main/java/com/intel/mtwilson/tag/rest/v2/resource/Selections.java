@@ -118,25 +118,26 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     }
     
     private SelectionsType getSelectionData(Selection selectionObj) throws SQLException{
-        SelectionKvAttributeDAO attrDao = TagJdbi.selectionKvAttributeDao();
+        try(SelectionKvAttributeDAO attrDao = TagJdbi.selectionKvAttributeDao()) {
 
-        if( selectionObj == null ) {
-            return null;
+            if( selectionObj == null ) {
+                return null;
+            }
+            List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(selectionObj.getId());
+            if( selectionKvAttributes == null || selectionKvAttributes.isEmpty() ) {
+                log.error("No tags in selection");
+                return null;
+            }
+            // NOTE: we are exporting the selected attributes as a "default" selection in the xml file.
+            SelectionBuilder builder = SelectionBuilder.factory().defaultSelection();
+            for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
+                builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
+            } 
+            // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
+            SelectionsType selectionsType = builder.build();
+
+            return selectionsType;
         }
-        List<SelectionKvAttribute> selectionKvAttributes = attrDao.findBySelectionIdWithValues(selectionObj.getId());
-        if( selectionKvAttributes == null || selectionKvAttributes.isEmpty() ) {
-            log.error("No tags in selection");
-            return null;
-        }
-        SelectionBuilder builder = SelectionBuilder.factory().selection();
-        for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
-            builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
-        } 
-        // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
-        SelectionsType selectionsType = builder.build();
-        
-        return selectionsType;
-        
     }
 
     @GET
