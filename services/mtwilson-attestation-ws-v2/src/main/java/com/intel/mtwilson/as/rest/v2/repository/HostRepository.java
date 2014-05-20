@@ -222,7 +222,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                     
                     // Create the keystore appropriately
                 }
-                tlsRepo.create(tlsPolicyItem);
+                tlsRepo.store(tlsPolicyItem);
                 
                 new HostResponse(ErrorCode.OK);
             }
