@@ -14,11 +14,14 @@ import javax.ws.rs.PathParam;
  */
 public class UserLoginPasswordLocator implements Locator<UserLoginPassword> {
 
+    @PathParam("user_id")
+    public UUID userId;
     @PathParam("id")
     public UUID id;
 
     @Override
     public void copyTo(UserLoginPassword item) {
+        item.setUserId(userId);
         item.setId(id);
     }
     
