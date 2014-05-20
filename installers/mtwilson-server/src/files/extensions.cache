@@ -427,3 +427,4 @@ com.intel.mtwilson.user.management.rest.v2.resource.RolePermissions
 com.intel.mtwilson.user.management.rest.v2.resource.UserLoginCertificates
 com.intel.mtwilson.user.management.rest.v2.resource.UserLoginPasswords
 com.intel.mtwilson.user.management.rest.v2.rpc.RegisterUserWithCertificateRunnable
+com.intel.mtwilson.setup.cmd.ApproveUserLoginCertificateRequest

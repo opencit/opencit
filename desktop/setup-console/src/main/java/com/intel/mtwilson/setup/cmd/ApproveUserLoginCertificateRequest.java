@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.setup.console.cmd;
+package com.intel.mtwilson.setup.cmd;
 
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.io.UUID;
