@@ -10,10 +10,11 @@ import com.intel.mtwilson.as.rest.v2.model.RegisterHostsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsWithOptionsRpcInput;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostConfigDataList;
+import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
-import java.util.LinkedHashMap;
+import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,7 +43,7 @@ public class RegisterHostTest {
         
         RegisterHostsRpcInput rpcInput = new RegisterHostsRpcInput();
         rpcInput.setHosts(hostList);
-        LinkedHashMap rpcOutput = client.registerHosts(rpcInput);
+        List<HostConfigResponse> rpcOutput = client.registerHosts(rpcInput);
         log.debug(rpcOutput.toString());
     }
 
@@ -61,7 +62,7 @@ public class RegisterHostTest {
         
         RegisterHostsWithOptionsRpcInput rpcInput = new RegisterHostsWithOptionsRpcInput();
         rpcInput.setHosts(hostConfigDataList);
-        LinkedHashMap rpcOutput = client.registerHostsWithOptions(rpcInput);
+        List<HostConfigResponse> rpcOutput = client.registerHostsWithOptions(rpcInput);
         log.debug(rpcOutput.toString());
     }
 

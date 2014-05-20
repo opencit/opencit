@@ -34,9 +34,9 @@ public class WhiteList extends MtWilsonClient {
      * For Open Source (Xen/KVM) & Citrix XenServer hosts, PCRs 0, 17 & 18 are selected by default. For VMware ESXi hosts, PCRs
      * 0, 17, 18, 19 & 20 are selected by default. The default white list target for both BIOS and VMM would be set to OEM. <br>
      * If the user wants to change any of the default selections, then custom white list API should be used.     
-     * @param oem - Oem object that needs to be created having the name and description. If the caller specifies the ID,
-     * it has to be a valid UUID. If not provided, it would be automatically generated.
-     * @return <code> CreateWhiteListRpcInput </code> that is created.
+     * @param CreateWhiteListRpcInput object having the IP address and the connection string of the host from which the white list has
+     * to be created.
+     * @return boolean value indicating whether the whitelist was successfully created or not.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oems:create,oss:create,mles:create,mle_pcrs:create,mle_pcrs:store,mle_modules:create,mle_sources:create
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -61,16 +61,21 @@ public class WhiteList extends MtWilsonClient {
      *  gkvHost.AddOn_Connection_String = "vmware:https://192.168.0.1:443/sdk;admin;pwd";
      *  CreateWhiteListRpcInput rpcInput = new CreateWhiteListRpcInput();
      *  rpcInput.setHost(gkvHost);        
-     *  LinkedHashMap result = client.createWhitelist(rpcInput);
+     *  boolean result = client.createWhitelist(rpcInput);
      * </pre>
      */
-    public LinkedHashMap createWhitelist(CreateWhiteListRpcInput obj) {
+    public boolean createWhitelist(CreateWhiteListRpcInput obj) {
+        boolean isWhiteListCreated = false;
         log.debug("target: {}", getTarget().getUri().toString());
         Object result = getTarget().path("rpc/create-whitelist").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        if (result.getClass().equals(LinkedHashMap.class))
-            return ((LinkedHashMap)(result));
-        else 
-            return null;
+        if (result.getClass().equals(LinkedHashMap.class)) {
+            LinkedHashMap resultMap = (LinkedHashMap)result;
+            if (resultMap.containsKey("result")) {
+                isWhiteListCreated = (boolean) resultMap.get("result");
+                log.debug("Result of whitelist creation is {}.", isWhiteListCreated);
+            }
+        }
+        return isWhiteListCreated;
     }
 
     /**
@@ -88,8 +93,11 @@ public class WhiteList extends MtWilsonClient {
      * white lists in the database if the Overwrite_Whitelist flag is set to true. Otherwise, if the MLE already exists and the
      * white lists matches, new MLE will not be created. If in case the white list does not match (because of new modules, 
      * new tBoot version etc), then a new MLE will be created with a numeric extension (_001, 002).
-     * @param obj
-     * @return <code> CreateWhiteListRpcInput </code> that is created.
+     * Users can also specify any custom name that they want to use for the MLE names. If none is provided, then the default name
+     * would be created by the system using the OEM/OS names and version.
+     * @param CreateWhiteListWithOptionsRpcInput object with the host details that would be used to create the white list and the
+     * customization options.
+     * @return boolean value indicating whether the whitelist was successfully created or not.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oems:create,oss:create,mles:create,mle_pcrs:create,mle_pcrs:store,mle_modules:create,mle_sources:create
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -98,7 +106,7 @@ public class WhiteList extends MtWilsonClient {
      * <pre>
      * https://server.com:8443/mtwilson/v2/rpc/create-whitelist-with-options
      * Input: {"config":{"add_bios_white_list":true,"add_vmm_white_list":true,"bios_white_list_target":"BIOS_OEM",
-     * "vmm_white_list_target":"VMM_OEM","bios_pcrs":"0","vmm_pcrs":"18,19,20","register_host":true,"overwrite_whitelist":false,
+     * "vmm_white_list_target":"VMM_OEM","bios_pcrs":"0","vmm_pcrs":"18,19,20","register_host":true,"overwrite_whitelist":false,"bios_mle_name":"","vmm_mle_name":"",
      * "txt_host_record":{"host_name":"192.168.0.2","add_on_connection_string":"vmware:https://192.168.0.1:443/sdk;admin;pwd"}}}
      * 
      * Output: {"config":{"add_bios_white_list":true,"add_vmm_white_list":true,"bios_white_list_target":"BIOS_OEM",
@@ -122,16 +130,20 @@ public class WhiteList extends MtWilsonClient {
      *  config.setTxtHostRecord(gkvHost);
      *  CreateWhiteListWithOptionsRpcInput rpcInput = new CreateWhiteListWithOptionsRpcInput();
      *  rpcInput.setConfig(config);        
-     *  LinkedHashMap rpcOutput = client.createWhitelistWithOptions(rpcInput);
+     *  boolean rpcOutput = client.createWhitelistWithOptions(rpcInput);
      * </pre>
      */
-    public LinkedHashMap createWhitelistWithOptions(CreateWhiteListWithOptionsRpcInput obj) {
+    public boolean createWhitelistWithOptions(CreateWhiteListWithOptionsRpcInput obj) {
+        boolean isWhiteListCreated = false;
         log.debug("target: {}", getTarget().getUri().toString());
         Object result = getTarget().path("rpc/create-whitelist-with-options").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        if (result.getClass().equals(LinkedHashMap.class))
-            return ((LinkedHashMap)(result));
-        else 
-            return null;
+        if (result.getClass().equals(LinkedHashMap.class)) {
+            LinkedHashMap resultMap = (LinkedHashMap)result;
+            if (resultMap.containsKey("result")) {
+                isWhiteListCreated = (boolean) resultMap.get("result");
+                log.debug("Result of whitelist creation is {}.", isWhiteListCreated);
+            }
+        }
+        return isWhiteListCreated;
     }
-    
 }
