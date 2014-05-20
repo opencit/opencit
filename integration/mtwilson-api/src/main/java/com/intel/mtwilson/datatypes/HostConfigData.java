@@ -34,6 +34,20 @@ public class HostConfigData {
         this.overWriteWhiteList = false;
     }
     
+    public HostConfigData(HostConfigData obj) {
+        this.biosWhiteList = obj.biosWhiteList;
+        this.vmmWhiteList = obj.vmmWhiteList;
+        this.biosWLTarget = obj.biosWLTarget;
+        this.vmmWLTarget = obj.vmmWLTarget;
+        this.biosPCRs = obj.biosPCRs;
+        this.vmmPCRs = obj.vmmPCRs;
+        this.hostLocation = obj.hostLocation;
+        this.registerHost = obj.isRegisterHost();
+        this.hostVmmType = obj.hostVmmType;
+        this.txtHostRecord = obj.txtHostRecord;
+        this.overWriteWhiteList = obj.getOverWriteWhiteList();        
+    }
+    
     @JsonProperty("Host_VMM_Type")
     public HostVMMType getHostVmmType() {
         return hostVmmType;

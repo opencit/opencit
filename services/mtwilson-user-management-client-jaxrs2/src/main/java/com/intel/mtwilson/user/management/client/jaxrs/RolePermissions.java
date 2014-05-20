@@ -33,7 +33,9 @@ public class RolePermissions extends MtWilsonClient {
      * Creates an new RolePermission mapping in the system. Permissions have 3 parts : Domain, Action and Selection.
      * Domains are basically resources on which the permissions would apply (Ex: Oems, Mles, etc). Action is basically
      * create, store, retrieve, search and delete. There can be sometimes special actions based on the resources like
-     * import & export in case of certificates. Selection : TODO
+     * import & export in case of certificates. Multiple actions for a single domain can be separated by comma.Selection : TODO
+     * User can provide "*" as the option for any combination of domain, action and selection. * indicates everything. 
+     * Example: An administrator would have * for all the 3 options.
      * @param rolePermission - RolePermission object that needs to be created. 
      * @return Created RolePermission object.
      * @since Mt.Wilson 2.0
@@ -42,16 +44,19 @@ public class RolePermissions extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/{role_id}/permissions
-     * Input: {"rolePermission_name":"developer"}
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8443/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions
+     * Input: {"permit_domain":"user_mgmt","permit_action":"add,delete","permit_selection":"*"}
+     * Output: {"id":"9b35b89c-c5f0-4ffb-8f94-a7f73eef8f76","role_id":"05f80052-2642-480a-8504-880e27ce8b57",
+     * "permit_domain":"user_mgmt","permit_action":"add,delete","permit_selection":"*"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  RolePermissions client = new RolePermissions(My.configuration().getClientProperties());
      *  RolePermission rolePermission = new RolePermission();
-     *  rolePermission.setName("Intel");
-     *  rolePermission.setDescription("Intel OEM");
+     *  rolePermission.setRoleId("05f80052-2642-480a-8504-880e27ce8b57");
+     *  rolePermission.setPermitDomain("user_mgmt");
+     *  rolePermission.setPermitAction("add,delete");
+     *  rolePermission.setPermitSelection("*");
      *  RolePermission createRolePermission = client.createRolePermission(rolePermission);
      * </pre>
      */
@@ -74,12 +79,15 @@ public class RolePermissions extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/{role_id}/permissions
+     * https://server.com:8443/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions?actionEqualTo=*
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  RolePermissions client = new RolePermissions(My.configuration().getClientProperties());
-     *  client.deleteRolePermission("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  RolePermissionFilterCriteria criteria = new RolePermissionFilterCriteria();
+     *  criteria.roleId = roleId;
+     *  criteria.actionEqualTo = "*";
+     *  client.deleteRolePermission(criteria);
      * </pre>
      */
     public void deleteRolePermission(RolePermissionFilterCriteria criteria) {
@@ -102,14 +110,16 @@ public class RolePermissions extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/{role_id}/permissions
-     * Output: {"rolePermissions":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
+     * https://server.com:8443/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions?actionEqualTo=*
+     * Output: {"role_permissions":[{"role_id":"05f80052-2642-480a-8504-880e27ce8b57","permit_domain":"user_mgmt",
+     * "permit_action":"*","permit_selection":"*"}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  RolePermissions client = new RolePermissions(My.configuration().getClientProperties());
      *  RolePermissionFilterCriteria criteria = new RolePermissionFilterCriteria();
-     *  criteria.nameContains = "intel";
+     *  criteria.roleId = roleId;
+     *  criteria.actionEqualTo = "*";
      *  RolePermissionCollection rolePermissions = client.searchRolePermissions(criteria);
      * </pre>
      */
@@ -117,7 +127,8 @@ public class RolePermissions extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
         map.put("role_id", criteria.roleId);
-        RolePermissionCollection rolePermissions = getTargetPathWithQueryParams("roles/{role_id}/permissions", criteria).request(MediaType.APPLICATION_JSON).get(RolePermissionCollection.class);
+        RolePermissionCollection rolePermissions = getTargetPathWithQueryParams("roles/{role_id}/permissions", criteria)
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(RolePermissionCollection.class);
         return rolePermissions;
     }
 }

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.MSComponentFactory;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
@@ -108,7 +109,16 @@ public class HostBOTest {
         wlObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
         wlObj.setRegisterHost(false);
         HostBO instance = MSComponentFactory.getHostBO();
-        boolean result = instance.configureWhiteListFromCustomData(wlObj);
+        WhitelistConfigurationData newCustomObj = new WhitelistConfigurationData(wlObj);
+        newCustomObj.setBiosMleName("");
+        newCustomObj.setVmmMleName("");
+        HostConfigData newHCData = new HostConfigData(newCustomObj);
+        System.out.println(newHCData.toString());
+        HostConfigData newHCData2 = newCustomObj;
+        newHCData2.setBiosPCRs("0,1,2,17");
+        System.out.println(newHCData2.toString());
+        newCustomObj = (WhitelistConfigurationData) newHCData2;
+        boolean result = instance.configureWhiteListFromCustomData(newCustomObj);
         System.out.println(result);
     }
 

@@ -14,12 +14,12 @@ import javax.ws.rs.PathParam;
  */
 public class RolePermissionLocator implements Locator<RolePermission> {
 
-    @PathParam("id")
-    public UUID id;
+    @PathParam("role_id")
+    public UUID roleId;
 
     @Override
     public void copyTo(RolePermission item) {
-        item.setRoleId(id);
+        item.setRoleId(roleId);
     }
     
 }

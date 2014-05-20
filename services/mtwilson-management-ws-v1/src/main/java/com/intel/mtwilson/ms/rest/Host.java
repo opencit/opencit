@@ -14,6 +14,7 @@ import com.intel.mtwilson.ms.common.MSException;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import java.util.ArrayList;
 import java.util.List;
 //import javax.ejb.Stateless;
@@ -120,7 +121,8 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
-        boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(hostConfigObj);
+        WhitelistConfigurationData wlConfigData = new WhitelistConfigurationData(hostConfigObj);
+        boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(wlConfigData);
         return Boolean.toString(result);
     }
 

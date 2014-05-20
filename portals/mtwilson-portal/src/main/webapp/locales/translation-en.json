@@ -116,6 +116,7 @@
         "create_asset_tag": "Tag Creation",
         "select_asset_tag": "Tag Selection",
         "certificate_management": "Certificate Management",
+        "tag_provisioning": "Provision Tags",
         "administration": "Administration",
         "pending_requests": "Pending Requests",
         "list_users": "List Users",

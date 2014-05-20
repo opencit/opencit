@@ -7,7 +7,6 @@ package com.intel.mtwilson.as.rest.v2.rpc;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.api.ApiException;
-import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;

@@ -43,13 +43,18 @@ public class RegisterUsers extends MtWilsonClient {
      * <pre>
      * </pre>
      */
-    public LinkedHashMap registerUserWithCertificate(RegisterUserWithCertificate obj) {
+    public boolean registerUserWithCertificate(RegisterUserWithCertificate obj) {
+        boolean isUserRegistered = false;
         log.debug("target: {}", getTarget().getUri().toString());
         Object result = getTarget().path("rpc/register-user-with-certificate").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        if (result.getClass().equals(LinkedHashMap.class))
-            return ((LinkedHashMap)(result));
-        else 
-            return null;
+        if (result.getClass().equals(LinkedHashMap.class)) {
+            LinkedHashMap resultMap = (LinkedHashMap)result;
+            if (resultMap.containsKey("result")) {
+                isUserRegistered = (boolean) resultMap.get("result");
+                log.debug("Result of user registration with certificate is {}.", isUserRegistered);
+            }
+        }
+        return isUserRegistered;
     }
     
 }

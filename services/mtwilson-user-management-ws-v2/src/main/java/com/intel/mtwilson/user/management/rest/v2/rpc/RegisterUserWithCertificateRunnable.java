@@ -5,6 +5,8 @@
 package com.intel.mtwilson.user.management.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
@@ -13,6 +15,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertific
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
+import java.security.cert.X509Certificate;
 import java.util.Locale;
 
 
@@ -28,6 +31,7 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
 
     private User user;
     private UserLoginCertificate userLoginCertificate;
+    private boolean result;
 
     public User getUser() {
         return user;
@@ -44,11 +48,19 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
     public void setUserLoginCertificate(UserLoginCertificate userLoginCertificate) {
         this.userLoginCertificate = userLoginCertificate;
     }
+
+    public boolean isResult() {
+        return result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
+    }
     
     
     @Override
     public void run() {
-        
+        result = false;
         UserRepository userRepo = new UserRepository();
         UserLoginCertificateRepository userLoginCertRepo = new UserLoginCertificateRepository();
         
@@ -69,19 +81,23 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
                     userObj.setLocale(getUser().getLocale());
                 userObj.setComment(getUser().getComment());
                 userRepo.create(userObj);
+                log.debug("Added the user {} with id {} successfully.", getUser().getUsername(), userId);
                 
                 userCertObj.setId(userCertId);
                 userCertObj.setUserId(userId);
                 userCertObj.setCertificate(getUserLoginCertificate().getCertificate());
-                userCertObj.setSha1Hash(getUserLoginCertificate().getSha1Hash());
-                userCertObj.setSha256Hash(getUserLoginCertificate().getSha256Hash());
+                userCertObj.setSha1Hash(Sha1Digest.digestOf(getUserLoginCertificate().getCertificate()).toByteArray());
+                userCertObj.setSha256Hash(Sha256Digest.digestOf(getUserLoginCertificate().getCertificate()).toByteArray());
                 userCertObj.setComment(getUser().getComment());
-                userCertObj.setExpires(getUserLoginCertificate().getExpires());
+                userCertObj.setExpires(getUserLoginCertificate().getX509Certificate().getNotAfter());
                 userLoginCertRepo.create(userCertObj);
+                
+                result = true;
                 
                 log.debug("Completed processing user registration with certificate for {}.", getUser().getUsername());
             }
         } catch (Exception ex) {
+            log.error("Exception during registration of user with certificate.", ex);
             throw new ASException(ex);
         }
     }

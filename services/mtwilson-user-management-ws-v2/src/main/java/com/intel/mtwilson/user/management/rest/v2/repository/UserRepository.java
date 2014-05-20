@@ -13,7 +13,6 @@ import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

@@ -7,8 +7,11 @@ package com.intel.mtwilson.attestation.client.jaxrs;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsWithOptionsRpcInput;
+import com.intel.mtwilson.datatypes.HostConfigResponse;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -37,7 +40,7 @@ public class RegisterHosts extends MtWilsonClient {
      * then the custom host registration function has to be used or else an error would be returned back to the caller.
      * @param RegisterHostsRpcInput object with the list of all the hosts to be registered. Only the host name and the connection string
      * parameters are required for each of the hosts.
-     * @return Hashmap having the list of hosts created and their associated status.
+     * @return HostConfigResponse list having the list of hosts created and their associated status.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:create,hosts:store
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -65,16 +68,22 @@ public class RegisterHosts extends MtWilsonClient {
      *  hostList.getHostRecords().add(host);
      *  RegisterHostsRpcInput rpcInput = new RegisterHostsRpcInput();
      *  rpcInput.setHosts(hostList);
-     *  LinkedHashMap rpcOutput = client.registerHosts(rpcInput);
+     *  List<HostConfigResponse> rpcOutput = client.registerHosts(rpcInput);
      * </pre>
      */
-    public LinkedHashMap registerHosts(RegisterHostsRpcInput obj) {
+    public List<HostConfigResponse> registerHosts(RegisterHostsRpcInput obj) {
+        List<HostConfigResponse> hostRecords = new ArrayList<>();
         log.debug("target: {}", getTarget().getUri().toString());
         Object result = getTarget().path("rpc/register-hosts").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        if (result.getClass().equals(LinkedHashMap.class))
-            return ((LinkedHashMap)(result));
-        else 
-            return null;
+        if (result.getClass().equals(LinkedHashMap.class)) {
+            LinkedHashMap resultMap = (LinkedHashMap)result;
+            if (resultMap.containsKey("result")) {
+                LinkedHashMap outputHashMap = (LinkedHashMap) resultMap.get("result");
+                hostRecords = (List<HostConfigResponse>) outputHashMap.get("host_records");
+                log.debug(hostRecords.toString());
+            }
+        }
+        return hostRecords;
     }
 
     /**
@@ -88,7 +97,7 @@ public class RegisterHosts extends MtWilsonClient {
      * @param RegisterHostsWithOptionsRpcInput object with the list of all the hosts to be registered. Only the host name and the connection string
      * parameters are required for each of the hosts. For each of the hosts, the user can specify whether it has to be associated with which BIOS Mle
      * (BIOS_OEM,BIOS_GLOBAL,or BIOS_HOST) and which VMM Mle (VMM_OEM, VMM_GLOBAL or VMM_HOST).
-     * @return Hashmap having the list of hosts created and their associated status.
+     * @return HostConfigResponse list having the list of hosts created and their associated status.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:create,hosts:store
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -123,16 +132,22 @@ public class RegisterHosts extends MtWilsonClient {
      *  hostConfigDataList.getHostRecords().add(config);
      *  RegisterHostsWithOptionsRpcInput rpcInput = new RegisterHostsWithOptionsRpcInput();
      *  rpcInput.setHosts(hostConfigDataList);
-     *  LinkedHashMap rpcOutput = client.registerHostsWithOptions(rpcInput);
+     *  List<HostConfigResponse> rpcOutput = client.registerHostsWithOptions(rpcInput);
      * </pre>
      */
-    public LinkedHashMap registerHostsWithOptions(RegisterHostsWithOptionsRpcInput obj) {
+    public List<HostConfigResponse> registerHostsWithOptions(RegisterHostsWithOptionsRpcInput obj) {
+        List<HostConfigResponse> hostRecords = new ArrayList<>();
         log.debug("target: {}", getTarget().getUri().toString());
         Object result = getTarget().path("rpc/register-hosts-with-options").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        if (result.getClass().equals(LinkedHashMap.class))
-            return ((LinkedHashMap)(result));
-        else 
-            return null;
+        if (result.getClass().equals(LinkedHashMap.class)) {
+            LinkedHashMap resultMap = (LinkedHashMap)result;
+            if (resultMap.containsKey("result")) {
+                LinkedHashMap outputHashMap = (LinkedHashMap) resultMap.get("result");
+                hostRecords = (List<HostConfigResponse>) outputHashMap.get("host_records");
+                log.debug(hostRecords.toString());
+            }
+        }
+        return hostRecords;
     }
     
 }

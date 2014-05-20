@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
@@ -20,8 +22,8 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleFilterCriteria;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -133,7 +135,7 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
                 repo.delete(criteria);
                 
                 // Now we need to add the roles requested by the user
-                Set<String> roles = item.getRoles();
+                List<String> roles = item.getRoles();
                 for (String role : roles) {
                     // Let us verify if the role exists, if it does, then we will map the role to the user login password entry
                     Role roleInSystem = loginDAO.findRoleByName(role);
@@ -175,9 +177,9 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
                 obj.setCertificate(item.getCertificate());
                 obj.setComment(item.getComment());
                 obj.setEnabled(false);
-                obj.setExpires(item.getExpires());
-                obj.setSha1Hash(item.getSha1Hash());
-                obj.setSha256Hash(item.getSha256Hash());
+                obj.setExpires(item.getX509Certificate().getNotAfter());
+                obj.setSha1Hash(Sha1Digest.digestOf(item.getCertificate()).toByteArray());
+                obj.setSha256Hash(Sha256Digest.digestOf(item.getCertificate()).toByteArray());
                 obj.setStatus(Status.PENDING);
                 loginDAO.insertUserLoginCertificate(obj.getId(), obj.getUserId(), obj.getCertificate(), obj.getSha1Hash(), obj.getSha256Hash(),
                         obj.getExpires(), obj.isEnabled(), obj.getStatus(), obj.getComment());
@@ -232,8 +234,8 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
      * @param id
      * @return 
      */
-    private Set<String> getAssociateRolesForLoginCertificateId(UUID id) {
-        Set<String> associatedRoles = new HashSet<>();
+    private List<String> getAssociateRolesForLoginCertificateId(UUID id) {
+        List<String> associatedRoles = new ArrayList<>();
 
         UserLoginCertificateRoleRepository repo = new UserLoginCertificateRoleRepository();
         RoleRepository roleRepo = new RoleRepository();

@@ -230,6 +230,13 @@
             <artifactId>mtwilson-trust-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util-shiro</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>                        
+        
     </dependencies>
     
 </project>

@@ -593,7 +593,8 @@ public class TblModuleManifestJpaController implements Serializable {
             return componentId;
             
         } catch(NoResultException e){
-        	log.error(String.format("Module Manifest for MLE %d Component %s Event %s  Not found in Database ", mleId,componentName, eventId), e);
+                //log.error(String.format("Module Manifest for MLE %d Component %s Event %s  Not found in Database ", mleId,componentName, eventId), e);            
+        	log.info("Module Manifest for MLE {}, Component {} & Event {} not found in Database ", mleId, componentName, eventId);
         	return null;
         } finally {
             em.close();

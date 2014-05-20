@@ -4,15 +4,19 @@
  */
 package com.intel.mtwilson.user.management.client.jaxrs;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertificate;
-import com.intel.mtwilson.user.management.rest.v2.model.Role;
-import com.intel.mtwilson.user.management.rest.v2.model.RoleCollection;
-import com.intel.mtwilson.user.management.rest.v2.model.RoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
-import java.util.LinkedHashMap;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,7 +36,7 @@ public class RegisterUsersTest {
     }
     
     @Test
-    public void testRegisterUsers() {
+    public void testRegisterUserWithoutCert() {
 
         User createUser = new User();
         createUser.setUsername("Testing111");
@@ -40,9 +44,35 @@ public class RegisterUsersTest {
 
         RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate(); 
         rpcUserWithCert.setUser(createUser);
-        LinkedHashMap registerUserWithCertificate = client.registerUserWithCertificate(rpcUserWithCert);
-        log.debug(registerUserWithCertificate.toString());
-        
+        boolean registerUserWithCertificate = client.registerUserWithCertificate(rpcUserWithCert);
+        log.debug("Status of user registration is {}.", registerUserWithCertificate);
     }
-     
+
+    @Test
+    public void testRegisterUserWithCert() throws Exception {
+        
+        KeyPair keyPair;
+        X509Certificate certificate;
+        
+        String userName = "superadmin99";
+        
+        User user = new User();
+        user.setUsername(userName);
+        user.setLocale(Locale.US);
+        user.setComment("Need to manage user accounts."); 
+        
+        keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
+        certificate = X509Builder.factory().selfSigned(String.format("CN=%s", userName), keyPair).expires(365, TimeUnit.DAYS).build();
+        
+        UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
+        userLoginCertificate.setCertificate(certificate.getEncoded());
+        userLoginCertificate.setComment("Self signed cert.");
+                
+        RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate(); 
+        rpcUserWithCert.setUser(user);
+        rpcUserWithCert.setUserLoginCertificate(userLoginCertificate);
+        boolean registerUserWithCertificate = client.registerUserWithCertificate(rpcUserWithCert);
+        log.debug("Status of user registration is {}.", registerUserWithCertificate);
+    }    
+    
 }
