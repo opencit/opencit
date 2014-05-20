@@ -5,6 +5,8 @@
 package com.intel.mtwilson.user.management.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
@@ -13,6 +15,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertific
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
+import java.security.cert.X509Certificate;
 import java.util.Locale;
 
 
@@ -26,27 +29,44 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterUserWithCertificateRunnable.class);
 
-    private RegisterUserWithCertificate rpcUserWithCert;
+    private User user;
+    private UserLoginCertificate userLoginCertificate;
+    private boolean result;
 
-    public RegisterUserWithCertificate getRpcUserWithCert() {
-        return rpcUserWithCert;
+    public User getUser() {
+        return user;
     }
 
-    public void setRpcUserWithCert(RegisterUserWithCertificate rpcUserWithCert) {
-        this.rpcUserWithCert = rpcUserWithCert;
+    public void setUser(User user) {
+        this.user = user;
     }
 
+    public UserLoginCertificate getUserLoginCertificate() {
+        return userLoginCertificate;
+    }
+
+    public void setUserLoginCertificate(UserLoginCertificate userLoginCertificate) {
+        this.userLoginCertificate = userLoginCertificate;
+    }
+
+    public boolean isResult() {
+        return result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
+    }
     
     
     @Override
     public void run() {
-        
+        result = false;
         UserRepository userRepo = new UserRepository();
         UserLoginCertificateRepository userLoginCertRepo = new UserLoginCertificateRepository();
         
         try {
-            if (rpcUserWithCert != null && rpcUserWithCert.getUser() != null && rpcUserWithCert.getUserCertificate() != null) {
-                log.debug("Starting to process the user registration with certificate for {}.", rpcUserWithCert.getUser().getUsername());
+            if (getUser() != null && getUserLoginCertificate() != null) {
+                log.debug("Starting to process the user registration with certificate for {}.", getUser().getUsername());
 
                 User userObj = new User();
                 UserLoginCertificate userCertObj = new UserLoginCertificate();                
@@ -54,28 +74,30 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
                 UUID userCertId = new UUID();
                 
                 userObj.setId(userId);
-                userObj.setUsername(rpcUserWithCert.getUser().getUsername());
-                if (rpcUserWithCert.getUser().getLocale() == null)
+                userObj.setUsername(getUser().getUsername());
+                if (getUser().getLocale() == null)
                     userObj.setLocale(Locale.US);
                 else
-                    userObj.setLocale(rpcUserWithCert.getUser().getLocale());
-                userObj.setComment(rpcUserWithCert.getUser().getComment());
+                    userObj.setLocale(getUser().getLocale());
+                userObj.setComment(getUser().getComment());
                 userRepo.create(userObj);
+                log.debug("Added the user {} with id {} successfully.", getUser().getUsername(), userId);
                 
                 userCertObj.setId(userCertId);
                 userCertObj.setUserId(userId);
-                userCertObj.setCertificate(rpcUserWithCert.getUserCertificate().getCertificate());
-                userCertObj.setSha1Hash(rpcUserWithCert.getUserCertificate().getSha1Hash());
-                userCertObj.setSha256Hash(rpcUserWithCert.getUserCertificate().getSha256Hash());
-                userCertObj.setComment(rpcUserWithCert.getUser().getComment());
-                userCertObj.setExpires(rpcUserWithCert.getUserCertificate().getExpires());
+                userCertObj.setCertificate(getUserLoginCertificate().getCertificate());
+                userCertObj.setSha1Hash(Sha1Digest.digestOf(getUserLoginCertificate().getCertificate()).toByteArray());
+                userCertObj.setSha256Hash(Sha256Digest.digestOf(getUserLoginCertificate().getCertificate()).toByteArray());
+                userCertObj.setComment(getUser().getComment());
+                userCertObj.setExpires(getUserLoginCertificate().getX509Certificate().getNotAfter());
                 userLoginCertRepo.create(userCertObj);
                 
-                rpcUserWithCert.setResult(Boolean.TRUE);
-                log.debug("Completed processing user registration with certificate for {} with result {}", 
-                        rpcUserWithCert.getUser().getUsername(), rpcUserWithCert.getResult());
+                result = true;
+                
+                log.debug("Completed processing user registration with certificate for {}.", getUser().getUsername());
             }
         } catch (Exception ex) {
+            log.error("Exception during registration of user with certificate.", ex);
             throw new ASException(ex);
         }
     }

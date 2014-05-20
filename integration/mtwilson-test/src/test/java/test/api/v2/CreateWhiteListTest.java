@@ -9,6 +9,7 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
+import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListRunnable;
 import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListWithOptionsRunnable;
 import com.intel.mtwilson.datatypes.HostConfigData;
@@ -54,7 +55,7 @@ public class CreateWhiteListTest {
     
     @Test
     public void testCreateWhiteListWithOptions() throws Exception {
-        HostConfigData wlObj = new HostConfigData();        
+        WhitelistConfigurationData wlObj = new WhitelistConfigurationData();        
         TxtHostRecord gkvHost = new TxtHostRecord();
         gkvHost.HostName = "10.1.71.155";
         gkvHost.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
@@ -68,7 +69,7 @@ public class CreateWhiteListTest {
         wlObj.setRegisterHost(false);
         
         CreateWhiteListWithOptionsRunnable whiteListRunnable = new CreateWhiteListWithOptionsRunnable();
-        whiteListRunnable.setConfig(wlObj);
+        whiteListRunnable.setWlConfig(wlObj);
         whiteListRunnable.run();
         
         log.debug("Create white list status is {}", whiteListRunnable.getResult());

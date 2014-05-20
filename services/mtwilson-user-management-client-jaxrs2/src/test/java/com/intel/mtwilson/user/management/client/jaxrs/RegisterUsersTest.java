@@ -2,51 +2,61 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.as.rest.v2.resource;
+package com.intel.mtwilson.user.management.client.jaxrs;
 
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertificate;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.user.management.rest.v2.rpc.RegisterUserWithCertificateRunnable;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import com.intel.dcsg.cpg.util.shiro.Login;
-import org.junit.Test;
 import org.junit.BeforeClass;
-
+import org.junit.Test;
 
 /**
  *
  * @author ssbangal
  */
-public class RegisterUserWithCertTest {
-    
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterUserWithCertTest.class);
+public class RegisterUsersTest {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterUsersTest.class);
+
+    private static RegisterUsers client = null;
     
     @BeforeClass
-    public static void login() throws Exception {
-        Login.superuser();
+    public static void init() throws Exception {
+        client = new RegisterUsers(My.configuration().getClientProperties());
     }
     
+    @Test
+    public void testRegisterUserWithoutCert() {
+
+        User createUser = new User();
+        createUser.setUsername("Testing111");
+        createUser.setComment("Access needed for testing");
+
+        RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate(); 
+        rpcUserWithCert.setUser(createUser);
+        boolean registerUserWithCertificate = client.registerUserWithCertificate(rpcUserWithCert);
+        log.debug("Status of user registration is {}.", registerUserWithCertificate);
+    }
+
     @Test
     public void testRegisterUserWithCert() throws Exception {
         
         KeyPair keyPair;
         X509Certificate certificate;
         
-        UUID userId = new UUID();        
-        UUID userCertId = new UUID();
-        String userName = "superadmin2";
+        String userName = "superadmin99";
         
         User user = new User();
-        user.setId(userId);
         user.setUsername(userName);
         user.setLocale(Locale.US);
         user.setComment("Need to manage user accounts."); 
@@ -55,18 +65,14 @@ public class RegisterUserWithCertTest {
         certificate = X509Builder.factory().selfSigned(String.format("CN=%s", userName), keyPair).expires(365, TimeUnit.DAYS).build();
         
         UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
-        userLoginCertificate.setId(userCertId);
-        userLoginCertificate.setUserId(userId);
         userLoginCertificate.setCertificate(certificate.getEncoded());
         userLoginCertificate.setComment("Self signed cert.");
-        userLoginCertificate.setExpires(certificate.getNotAfter());
-        userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(certificate.getEncoded()).toByteArray());
-        userLoginCertificate.setSha256Hash(Sha256Digest.digestOf(certificate.getEncoded()).toByteArray());
                 
-        RegisterUserWithCertificateRunnable rpcRunnable = new RegisterUserWithCertificateRunnable();
-        rpcRunnable.setUser(user);
-        rpcRunnable.setUserLoginCertificate(userLoginCertificate);
-        rpcRunnable.run();        
+        RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate(); 
+        rpcUserWithCert.setUser(user);
+        rpcUserWithCert.setUserLoginCertificate(userLoginCertificate);
+        boolean registerUserWithCertificate = client.registerUserWithCertificate(rpcUserWithCert);
+        log.debug("Status of user registration is {}.", registerUserWithCertificate);
     }    
     
 }

@@ -22,6 +22,7 @@
         <link rel="stylesheet" type="text/css" href="CSS/home.css" />
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
+        <link href="CSS/JQueryHelperCSS/multi-select.css" media="screen" rel="stylesheet" type="text/css">
         
         <!-- Workaround for IE8 issue: Console object does not exist and hence console.log errors out with an exception -->
         <script type="text/javascript">
@@ -39,6 +40,7 @@
         <script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
         <script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
+        <script src="Scripts/JQuery/jquery.multi-select.js" type="text/javascript"></script>
           
      
         <script src="watch.js" type="text/javascript"></script> <!-- required to use rivets -->
@@ -186,6 +188,7 @@ function isNumber(n) {
                                 <li ><a href="#tags">Tag Creation</a></li>  
                                 <li ><a href="#selections">Tag Selection</a></li>
                                 <li ><a href="#certificates">Certificate Management</a></li>			
+                                <li ><a href="#provisionTag">Provision Tag</a></li>			
                                 <!--<li ><a href="#configure">Settings</a></li>-->
                                 <li ><a href="#log">Log</a></li>
                             </ul>
@@ -303,7 +306,7 @@ function isNumber(n) {
                             <!--div id="nameOfPage" class="NameHeader">Search Tags</div> 
                             <div class="singleDiv" style="height: 45px;"></div-->
                             <div id="nameOfPage" class="NameHeader">Browse Tags&nbsp;&nbsp; 
-				<a href="javascript:toggleElementVisibility('tag-search-form')" style='font-size: 0.8em'>(Search)</a></div> 
+				<a href="javascript:toggljQueryElementVisibility('tag-search-form')" style='font-size: 0.8em'>(Search)</a></div> 
 
                             <form id="tag-search-form" action="#" onsubmit="return false;" style="display: none">
                                     <div class="singleDiv">
@@ -954,6 +957,59 @@ function isNumber(n) {
 
 
                         </div> <!-- end certificates tab -->
+
+                        <div id="provisionTag"> <!-- Begin Tag Provisioning div -->
+			<div id='provisionTagFormDiv'>
+                            <form id="tag-prov-form" style="display: block;" onsubmit="return false;">
+			    	<div class='provisionStep'>Step 1: Select the servers to provision the tags</div>
+				<select multiple="multiple" id="my-select" name='my-select-inp'>
+				   <option data-bind-each-item="global.hosts" data-bind-value="item.name" data-bind-text="item.name"></option> 
+    				</select>
+				<small><i>Double click on the element to toggle the status</i></small>
+
+			    	<div class='provisionStep'>Step 2: Choose the Tag selection</div>
+				<div class='tagSelectionsDiv' id='tagSelectionsDiv'>
+				&nbsp;&nbsp;<a class='prov_choose_sel_link prov_choose_sel_link_selected' href='javascript:openProvisionSelectionOptions("availSelectionsDiv")' id="availSelectionsDiv_link">Available Selections</a>&nbsp;<a class='prov_choose_sel_link' href='javascript:openProvisionSelectionOptions("selectionFileDiv")' id="selectionFileDiv_link">Upload XML</a><br />
+					<div id='selectionFileDiv' class='prov_sel_option'>
+						<input id='fileForUpload' type='file' name='userFile' onChange='getFileContents()'>
+					</div>
+					<div class='tagSelectionsDiv prov_sel_option' id='availSelectionsDiv'>
+						<table name='provision-sel-details' id='provision-avail-sel' class='ms-list tableDisplayBind' cellspacing=0 cellpadding=0>
+                                                	<tr  data-bind-each-item='global.selections' style='height: 30px'>
+								<td align="center" data-bind-text="item.name" data-bind-selId="item.id" class='ms-elem-selectable selection_entry' data-bind-id='item.id' onClick='getSelectedSelectionDetails(this.getAttribute("selId"))'></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div class='tagSelectionsDiv' id='tagSelectionsDetailsDiv'>
+					<table style='width: 100%; height: 100%' name='provision-sel-details' id='provision-sel-details' class='ms-list tableDisplayBind' cellspacing=0 cellpadding=0>
+                                                <tr  data-bind-each-item='global.selection_details'>
+							<td align="center" data-bind-text="item.kv_attribute_name" class='ms-elem-selectable attribute_name'></td>
+							<td align="center" data-bind-text="item.kv_attribute_value" class='ms-elem-selectable attribute_value'></td>
+						</tr>
+					</table>
+				</div>
+
+				<hr style='clear:both' />
+                                <input type="submit" class="uploadButton" value="Provision" onClick="provisionTags(); return false">
+			    </form>
+			</div>
+			<div id='provisionTagProgDiv' style="display: none">
+			    <div class='provisionStep'>Status: Tag Provisioning</div><br />
+			    <table class="tableDisplayBind" id='provision-sel-table' name='provision-sel-table'  style="width: 800px;" cellpadding=0 cellspacing=0>
+				<thead>
+                                        <th class="col_tag_names">Server IP/Name</th>
+                                        <th class="col_tag_names">Status</th>
+				</thead>
+				<tbody>
+				<tr data-bind-each-item="selected_hosts" class="evenRow">
+					<td class="col_auto" data-bind-text='item.subject'></td>
+					<td style='border-right: 1px solid black' data-bind-text='item.status'></td>
+				</tr></tbody>
+			    </table>
+			    <div id='hostProgressMessage' style='display: none; margin: 15px; font-size: 18px; font-weight: bold'><div>
+			</div>
+			</div><!-- End of Tag Provisioning div -->
                    
                         <div id="configure" style="display: none;">
 
@@ -1150,6 +1206,27 @@ function isNumber(n) {
             navTabs.setActiveTab( (""+document.location).toQueryParams().tab );
 
             $('certificate-provision-form').hide();
+
+	/*function provisionTags() {
+		alert('IN here');
+ $.ajaxFileUpload({
+        url: 'getData/getUploadedFileContents.html',
+        secureuri: false,
+        fileElementId: 'fileToUpload',
+        dataType: 'jsonp',
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
+        success: function(data, status) {
+            fnuploadSuccess(data);
+        },
+        error: function(data, status, e) {
+            $('#successMessage').html('<div class="errorMessage">* Error authenticating the user.</div>');
+        }
+    });
+  }*/
+
+
         </script>
 
 
@@ -1170,7 +1247,6 @@ function isNumber(n) {
             // make sure all dom elements are loaded before initializing the web layer
 	    /*$('certificates').show(function() {
 	    });*/
-            
             document.observe('dom:loaded', function() {
                 ws.initialize({
                     options: {
@@ -1236,8 +1312,9 @@ function isNumber(n) {
                 ws.searchTags('tag-search-form');
                 // ws.searchRdfTriples('rdf-triple-search-form');
                 ws.searchSelections('selection-search-form');
-                ws.searchConfigurations('configuration-search-form');
+//                ws.searchConfigurations('configuration-search-form');
                 ws.loadCaCerts();
+		ws.loadHostsForProvisioning();
 //                ws.retrieveMainConfiguration();
             
             });

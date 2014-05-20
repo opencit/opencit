@@ -40,16 +40,16 @@ public class Users extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users
-     * Input: {"user_name":"developer"}
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8181/mtwilson/v2/users
+     * Input: {"username":"Developer1","comment":"Access needed for Project1"}
+     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","comment":"Access needed for Project1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
      *  User user = new User();
-     *  user.setName("Intel");
-     *  user.setDescription("Intel OEM");
+     *  user.setUsername("Developer1");
+     *  user.setComment("Access needed for Project1");
      *  User createUser = client.createUser(user);
      * </pre>
      */
@@ -69,12 +69,12 @@ public class Users extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/31741556-f5c7-4eb6-a713-338a23e43b93
+     * https://server.com:8181/mtwilson/v2/users/e6c9337c-e709-4b38-9f04-3b61b8a84667
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
-     *  client.deleteUser("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  client.deleteUser("e6c9337c-e709-4b38-9f04-3b61b8a84667");
      * </pre>
      */
     public void deleteUser(String uuid) {
@@ -94,16 +94,16 @@ public class Users extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/31741556-f5c7-4eb6-a713-338a23e43b93
-     * Input: {"comments":"Need access for development."}
-     * Output: {"id": "31741556-f5c7-4eb6-a713-338a23e43b93","description": "Intel OEM updated" }
+     * https://server.com:8181/mtwilson/v2/users/e6c9337c-e709-4b38-9f04-3b61b8a84667
+     * Input: {"comment":"Access granted for Project1"}
+     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","comment":"Access granted for Project1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
      *  User user = new User();
-     *  user.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
-     *  user.setDescription("Intel OEM updated");
+     *  user.setId(UUID.valueOf("e6c9337c-e709-4b38-9f04-3b61b8a84667"));
+     *  user.comment("Access granted for Project1");
      *  user = client.editUser(user);
      * </pre>
      */
@@ -125,13 +125,13 @@ public class Users extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/31741556-f5c7-4eb6-a713-338a23e43b93
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8181/mtwilson/v2/users/e6c9337c-e709-4b38-9f04-3b61b8a84667
+     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","comment":"Access needed for Project1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
-     *  User retrieveUser = client.retrieveUser("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  User retrieveUser = client.retrieveUser("e6c9337c-e709-4b38-9f04-3b61b8a84667");
      * </pre>
      */
     public User retrieveUser(String uuid) {
@@ -155,14 +155,15 @@ public class Users extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users?userNameEqualTo=admin
-     * Output: {"users":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
+     * https://server.com:8181/mtwilson/v2/users?filter=false
+     * Output: {"users":[{"id":"3f2442cd-33d5-4d2b-8897-9c79a5dee0c4","username":"tagservice"},
+     * {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","comment":"Access granted for Project1"}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
      *  UserFilterCriteria criteria = new UserFilterCriteria();
-     *  criteria.nameContains = "intel";
+     *  criteria.filter = false;
      *  UserCollection users = client.searchUsers(criteria);
      * </pre>
      */

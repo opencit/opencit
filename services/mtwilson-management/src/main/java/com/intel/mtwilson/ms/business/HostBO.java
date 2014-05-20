@@ -30,6 +30,7 @@ import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.BaseBO;
@@ -602,14 +603,14 @@ public class HostBO extends BaseBO {
      * @return : true if the white list is configured successfully.
      */
     public boolean configureWhiteListFromHost(TxtHostRecord gkvHost) throws ApiException {
-        HostConfigData hostConfigObj = null;
+        WhitelistConfigurationData hostConfigObj = null;
         boolean configStatus = false;
 
         try {
            
             if (gkvHost != null) {
 
-                hostConfigObj = new HostConfigData();                
+                hostConfigObj = new WhitelistConfigurationData();                
                 String vmmPCRs = "";                
                 TxtHost tempHostObj = new TxtHost(gkvHost);
                 
@@ -667,7 +668,7 @@ public class HostBO extends BaseBO {
      * @param hostConfigObj : White List configuration object having all the details.
      * @return : true on success.
      */
-    public boolean configureWhiteListFromCustomData(HostConfigData hostConfigObj) {
+    public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
 
         boolean configStatus = false;
         String attestationReport;
@@ -780,8 +781,8 @@ public class HostBO extends BaseBO {
                     throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                 }
                 
-                hostConfigObj = calibrateMLENames(hostConfigObj, true);
-                hostConfigObj = calibrateMLENames(hostConfigObj, false);
+                hostConfigObj = (WhitelistConfigurationData) calibrateMLENames(hostConfigObj, true);
+                hostConfigObj = (WhitelistConfigurationData) calibrateMLENames(hostConfigObj, false);
                 if (hostConfigObj.addBiosWhiteList())
                     reqdManifestList = hostConfigObj.getBiosPCRs();
                 if (hostConfigObj.addVmmWhiteList()) {
@@ -849,10 +850,14 @@ public class HostBO extends BaseBO {
                 
                 // The reason we are updating the hostConfigObj flags is because when the attestation report is getting uploaded to the
                 // DB, these flags are checked before making the DB transaction.
-                if (hostConfigObj.addBiosWhiteList() && biosMLEExists)
+                if (hostConfigObj.addBiosWhiteList() && biosMLEExists) {
                     hostConfigObj.setBiosWhiteList(false);
-                if (hostConfigObj.addVmmWhiteList() && vmmMLEExists)
+                    log.info("BIOS MLE already exists with the matching whitelist (name might be different). So, now new BIOS MLE would be created.");
+                }
+                if (hostConfigObj.addVmmWhiteList() && vmmMLEExists) {
                     hostConfigObj.setVmmWhiteList(false);
+                    log.info("VMM MLE already exists with the matching whitelist (name might be different). So, now new VMM MLE would be created.");
+                }
                 
                 // Now that we have retrieved the details of the host, let us configure the BIOS MLE if needed
                 if (hostConfigObj.addBiosWhiteList()) {
@@ -1035,7 +1040,7 @@ public class HostBO extends BaseBO {
      * be configured.
      * @return : A boolean indicating if the BIOS MLE was created or it already existed.
      */
-    private boolean configureBIOSMLE(HostConfigData hostConfigObj) {
+    private boolean configureBIOSMLE(WhitelistConfigurationData hostConfigObj) {
         boolean biosMLEAlreadyExists = false;
 
         try {
@@ -1045,6 +1050,10 @@ public class HostBO extends BaseBO {
                 TblMleJpaController mleJpa = My.jpa().mwMle();
 
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();  
+                
+                // If the user has provided the name, let us use it.
+                if (hostConfigObj.getBiosMleName() != null && !hostConfigObj.getBiosMleName().isEmpty())
+                    hostObj.BIOS_Name = hostConfigObj.getBiosMleName();
                 
                 // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
                 // white list of the existing MLE
@@ -1118,7 +1127,7 @@ public class HostBO extends BaseBO {
      * be configured.
      * @return : A boolean indicating if the VMM MLE was created or it already existed.
      */
-    private boolean configureVMMMLE(HostConfigData hostConfigObj) {
+    private boolean configureVMMMLE(WhitelistConfigurationData hostConfigObj) {
         String attestationType = "";
         boolean vmmMLEAlreadyExists = false;
         try {
@@ -1128,6 +1137,10 @@ public class HostBO extends BaseBO {
 
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
                 
+                // If the user has provided the name, let us use it.
+                if (hostConfigObj.getVmmMleName()!= null && !hostConfigObj.getVmmMleName().isEmpty())
+                    hostObj.VMM_Name = hostConfigObj.getVmmMleName();
+
                 // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
                 // white list of the existing MLE
                 if (!hostConfigObj.getOverWriteWhiteList())
