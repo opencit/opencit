@@ -18,6 +18,9 @@ import com.intel.mtwilson.as.rest.v2.model.HostLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
+import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy;
+import com.intel.mtwilson.datatypes.HostResponse;
+import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 
@@ -161,11 +164,6 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
             obj.AddOn_Connection_String = item.getConnectionUrl();
             obj.Description = item.getDescription();
             obj.Email = item.getEmail();
-            log.error(item.getTlsPolicy().toString());
-            log.error(item.getTlsPolicy().getName());
-            log.error(item.getTlsPolicy().getHostUuid());
-            log.error(item.getTlsPolicy().getInsecure().toString());
-            log.error(item.getTlsPolicy().getKeyStore().toString());
 
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object
@@ -202,7 +200,31 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());
             }
             
-            new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
+            //new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
+            // Create the hosts entry in TblHosts
+            com.intel.mtwilson.datatypes.HostResponse resp = new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
+            
+            // If host entry is successfully created, create the TlsPolicy
+            if(resp.getErrorCode().equals(ErrorCode.OK.toString())) {
+                // Host Object successfully created. Now set the TlsPolicy and Keystore values
+                TblHostsJpaController jpaController = My.jpa().mwHosts();
+                TblHosts hostObj = jpaController.findByName(obj.HostName);
+                
+                HostTlsPolicyRepository tlsRepo = new HostTlsPolicyRepository();
+                HostTlsPolicy tlsPolicyItem = new HostTlsPolicy();
+                tlsPolicyItem.setHostUuid(hostObj.getUuid_hex());
+                if(item.getTlsPolicy() != null && !(item.getTlsPolicy().getInsecure()) && item.getTlsPolicy().getCertificates() == null) {
+                    // If TlsPolicy does not exist or the value is set to false, set the TLS Policy to INSECURE
+                    tlsPolicyItem.setName(TLSPolicy.INSECURE.toString());
+                } else if(item.getTlsPolicy() != null && item.getTlsPolicy().getCertificates() != null){
+                    // If Certificates is not null, then create the keystore and set the values appropriately
+                    tlsPolicyItem.setName(TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString());
+                    
+                    // Create the keystore appropriately
+                }
+                
+                new HostResponse(ErrorCode.OK);
+            }
                         
         } catch (ASException aex) {
             throw aex;            

@@ -43,6 +43,14 @@ public class HostTlsPolicy extends Document {
     public void setInsecure(Boolean insecure) {
         this.insecure = insecure;
     }
+    
+    public String getCertificates() {
+        return certificates;
+    }
+
+    public void setCertificates(String certificates) {
+        this.certificates = certificates;
+    }
 
     public byte[] getKeyStore() {
         return keyStore;
