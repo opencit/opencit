@@ -563,7 +563,7 @@ public class KeystoreUtil {
             
             rpcUserWithCert.setUser(newUser);
             rpcUserWithCert.setUserLoginCertificate(userLoginCertificate);
-            LinkedHashMap result = client.registerUserWithCertificate(rpcUserWithCert);
+            boolean result = client.registerUserWithCertificate(rpcUserWithCert);
             
         } catch (Exception ex) {
             log.error("Error during creation of user.", ex);
