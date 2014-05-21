@@ -20,14 +20,14 @@ import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.rest.v2.model.HostLocator;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy;
 import com.intel.mtwilson.datatypes.HostResponse;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateFactorySpi;
@@ -211,7 +211,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());
             }
                
-	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
+//	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
+	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
            
         } catch (ASException aex) {
             throw aex;            
