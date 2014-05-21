@@ -67,5 +67,9 @@
         <description>Cleans up Persistence factory.</description>
         <listener-class>com.intel.mountwilson.common.MCPersistenceManager</listener-class>
     </listener>
+    
+    <error-page>
+        <location>/Error.jsp</location>
+    </error-page>
 
 </web-app>
