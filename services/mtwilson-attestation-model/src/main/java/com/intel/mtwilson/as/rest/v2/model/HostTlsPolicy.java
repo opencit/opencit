@@ -16,8 +16,8 @@ public class HostTlsPolicy extends Document {
     
     private String hostUuid;
     private String name;
-    private Boolean insecure;
-    private String[] certificates;
+    private Boolean insecure = false;
+    private String[] certificates = null;;
     private byte[] keyStore;
 
     public String getHostUuid() {

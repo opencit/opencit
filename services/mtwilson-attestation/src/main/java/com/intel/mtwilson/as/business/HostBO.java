@@ -36,6 +36,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.Object;
 import java.net.MalformedURLException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -92,7 +93,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -113,7 +114,10 @@ public class HostBO extends BaseBO {
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+
+			String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
+	    		String[] certificates = tlsObjects.length > 1 ? (String[])tlsObjects[1] : new String[1];
+                        tblHosts.setTlsPolicyName(tlsPolicyName);
                         tblHosts.setTlsKeystore(null);
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());

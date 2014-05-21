@@ -211,44 +211,20 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());
             }
             
-            //new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
-            // Create the hosts entry in TblHosts
-            com.intel.mtwilson.datatypes.HostResponse resp = new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
-            
-            // If host entry is successfully created, create the TlsPolicy
-            if(resp.getErrorCode().equals(ErrorCode.OK.toString())) {
-                // Host Object successfully created. Now set the TlsPolicy and Keystore values
-                TblHostsJpaController jpaController = My.jpa().mwHosts();
-                TblHosts hostObj = jpaController.findByName(obj.HostName);
-                
-                HostTlsPolicyRepository tlsRepo = new HostTlsPolicyRepository();
-                HostTlsPolicy tlsPolicyItem = new HostTlsPolicy();
-                tlsPolicyItem.setHostUuid(hostObj.getUuid_hex());
-                tlsPolicyItem.setName(My.configuration().getDefaultTlsPolicyName());
-                if(item.getTlsPolicy() != null && (item.getTlsPolicy().getInsecure()) && item.getTlsPolicy().getCertificates() == null) {
-                    // If TlsPolicy does not exist or the value is set to false, set the TLS Policy to INSECURE
-                    tlsPolicyItem.setName(TLSPolicy.INSECURE.toString());
-                } else if(item.getTlsPolicy() != null && item.getTlsPolicy().getCertificates() != null){
-                    // If Certificates is not null, then create the keystore and set the values appropriately
-                    tlsPolicyItem.setName(TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString());
-                    TlsUtil.addSslCertificatesToKeystore(null, null);
-                    Resource resource = hostObj.getTlsKeystoreResource();
-                    SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
-                    for (String certificate : item.getTlsPolicy().getCertificates()) {
-                        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                        X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
-                        //X509Certificate cert = X509Certificate.getInstance(certificate.getBytes());
-                        clientKeystore.addTrustedSslCertificate(cert, obj.HostName + "TLS-Cert");
-                    }
-                    // Create the keystore appropriately
-                    clientKeystore.save();
-                    //tlsPolicyItem.setKeyStore(clientKeystore);
-                }
-                tlsRepo.store(tlsPolicyItem);
-                
-                new HostResponse(ErrorCode.OK);
-            }
-                        
+            String tlsPolicyName = My.configuration().getDefaultTlsPolicyName();
+	    String[] tlsCerts = null;
+	    if(item.getTlsPolicy() != null)  {
+		    if (item.getTlsPolicy().getInsecure()) {
+                    	tlsPolicyName = TLSPolicy.INSECURE.toString();
+		    }
+		    if(item.getTlsPolicy().getCertificates() != null) {
+                    	tlsPolicyName = TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString();
+			// Create the keystore here
+			tlsCerts = item.getTlsPolicy().getCertificates();
+		    }
+	    }
+	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
+           
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
