@@ -4,10 +4,15 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -15,14 +20,23 @@ import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.rest.v2.model.HostLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
+import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy;
+import com.intel.mtwilson.datatypes.HostResponse;
+import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateFactorySpi;
+import java.security.cert.X509Certificate;
 
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.bouncycastle.jce.provider.JDKKeyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,9 +210,9 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 log.error("UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid().toString());
                 throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());
             }
-            
-            new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
-                        
+               
+	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
+           
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
