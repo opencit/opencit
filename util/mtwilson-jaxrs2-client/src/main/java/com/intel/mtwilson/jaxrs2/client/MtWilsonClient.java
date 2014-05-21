@@ -8,6 +8,7 @@ import java.util.Properties;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import java.net.URL;
+
 /**
  *
  * @author jbuhacoff
@@ -15,10 +16,6 @@ import java.net.URL;
 public class MtWilsonClient extends JaxrsClient {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MtWilsonClient.class);
-    
-    public MtWilsonClient(JaxrsClient client) {
-        super(client);
-    }
     
     public MtWilsonClient(URL url) throws Exception {
         super(JaxrsClientBuilder.factory().url(url).build());

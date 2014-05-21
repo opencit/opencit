@@ -27,7 +27,16 @@ import org.glassfish.jersey.filter.LoggingFilter;
 import com.intel.mtwilson.jaxrs2.feature.JacksonFeature;
 
 /**
- *
+ * Examples:
+ * 
+ * <pre>
+ * JaxrsClient client = JaxrsClientBuilder.factory().url(url).build();
+ * JaxrsClient client = JaxrsClientBuilder.factory().configuration(properties).build();
+ * JaxrsClient client = JaxrsClientBuilder.factory().configuration(configuration).build();
+ * JaxrsClient client = JaxrsClientBuilder.factory().tlsConnection(tlsConnection).build();
+ * JaxrsClient client = JaxrsClientBuilder.factory().url(url).tlsPolicy(tlsPolicy).build();
+ * </pre>
+ * 
  * @author jbuhacoff
  */
 public class JaxrsClientBuilder {
