@@ -30,10 +30,10 @@ public class UserLoginPasswords extends MtWilsonClient {
     }
     
      /**
-     * Stores the details of the user's password in the system for user to login using password mechanism. Using
-     * the algorithm, salt and the iterations specified the password hash would be calculated and stored in the
-     * system.
-     * @param userLoginPassword - UserLoginPassword object that needs to be created. 
+     * Stores the details of the user's password in the system for user to login using password mechanism. The caller
+     * is expected to provide the hashed value along with the salt, algorithm and the iterations that were used
+     * to calculate the hash.
+     * @param UserLoginPassword object that needs to be created. 
      * @return Created UserLoginPassword object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_passwords:create
@@ -41,16 +41,23 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
-     * Input: {"userLoginPassword_name":"developer"}
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8443/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords
+     * Input: {"password_hash":"RZMrrSt/PvKvdqs1OgR0id0bDE0dvF4XbPKV7sF+oDg=","salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256",
+     * "comment":"Access needed for development"}
+     * Output: {"id":"610cc4fc-0148-4788-bc9c-633d61fbeb4e","user_id":"9116f3ed-5496-42b3-a9ee-4e89b1d533bc",
+     * "password_hash":"RZMrrSt/PvKvdqs1OgR0id0bDE0dvF4XbPKV7sF+oDg=","salt":"a9gDma0hUF8=","iterations":1,
+     * "algorithm":"SHA256","enabled":false,"comment":"Access needed for development"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginPasswords client = new UserLoginPasswords(My.configuration().getClientProperties());
      *  UserLoginPassword userLoginPassword = new UserLoginPassword();
-     *  userLoginPassword.setName("Intel");
-     *  userLoginPassword.setDescription("Intel OEM");
+     *  loginPasswordInfo.setUserId(UUID.valueOf("9116f3ed-5496-42b3-a9ee-4e89b1d533bc"));
+     *  loginPasswordInfo.setAlgorithm("SHA256");
+     *  loginPasswordInfo.setIterations(1);
+     *  loginPasswordInfo.setSalt("salt".getBytes(Charset.forName("UTF-8")));
+     *  loginPasswordInfo.setPasswordHash(hashedpassword); // here it is assumed that the user would pass in the password hashed using the algorithm, salt & iterations.
+     *  loginPasswordInfo.setComment("Access needed for development");
      *  UserLoginPassword createUserLoginPassword = client.createUserLoginPassword(userLoginPassword);
      * </pre>
      */
@@ -90,8 +97,12 @@ public class UserLoginPasswords extends MtWilsonClient {
     }
 
     /**
-     * Updates the details of the UserLoginPassword in the system. Only the comments can be updated.
-     * @param userLoginPassword - UserLoginPassword object details that needs to be updated.
+     * Updates the details of the UserLoginPassword in the system. It is assumed that the caller
+     * would verify the existing password before updating it with the new one using this method. 
+     * Similar to the create method, the caller is expected to pass in the already hashed value 
+     * of the password along with the details of the mechanism of hashing. Administrator can use
+     * this method even just to approve the access with the specified roles.
+     * @param UserLoginPassword object details that needs to be updated.
      * @return Updated userLoginPassword object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_passwords:store
@@ -99,16 +110,21 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
-     * Input: {"comments":"Need access for development."}
-     * Output: {"id": "31741556-f5c7-4eb6-a713-338a23e43b93","description": "Intel OEM updated" }
+     * https://server.com:8443/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
+     * Input: {"status":"APPROVED","enabled":true,"roles":["security","whitelist"]}
+     * Output: {"id":"610cc4fc-0148-4788-bc9c-633d61fbeb4e","user_id":"9116f3ed-5496-42b3-a9ee-4e89b1d533bc",
+     * "enabled":true,"status":"APPROVED","roles":["security","whitelist"]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginPasswords client = new UserLoginPasswords(My.configuration().getClientProperties());
      *  UserLoginPassword userLoginPassword = new UserLoginPassword();
-     *  userLoginPassword.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
-     *  userLoginPassword.setDescription("Intel OEM updated");
+     *  loginPasswordInfo.setUserId(UUID.valueOf("9116f3ed-5496-42b3-a9ee-4e89b1d533bc"));
+     *  userLoginPassword.setId(UUID.valueOf("610cc4fc-0148-4788-bc9c-633d61fbeb4e"));
+     *  loginPasswordInfo.setEnabled(true);
+     *  loginPasswordInfo.setStatus(Status.APPROVED);
+     *  List<String> roleSet = new ArrayList<>(Arrays.asList("administrator"));
+     *  loginPasswordInfo.setRoles(roleSet);
      *  userLoginPassword = client.editUserLoginPassword(userLoginPassword);
      * </pre>
      */
@@ -123,22 +139,25 @@ public class UserLoginPasswords extends MtWilsonClient {
     }
     
      /**
-     * Retrieves the UserLoginPassword object with the specified UUID
-     * @param uuid - UUID of the UserLoginPassword to be retrieved
-     * @return <code> UserLoginPassword </code> matching the specified UUID.
+     * Retrieves the UserLoginPassword object with the specified userUuid and id.
+     * @param userUuid - UUID of the associated user
+     * @param uuid - UUID of the UserLoginPassword
+     * @return UserLoginPassword matching the specified UUID.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_passwords:retrieve
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
-     * Output: {"id":"31741556-f5c7-4eb6-a713-338a23e43b93","name":"Intel","description":"Intel OEM"}
+     * https://server.com:8443/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
+     * Output: {"id":"610cc4fc-0148-4788-bc9c-633d61fbeb4e","user_id":"9116f3ed-5496-42b3-a9ee-4e89b1d533bc",
+     * "password_hash":"i4bjqvom3KwEwAMpMpcAZRW8R8IUbi3apS0J9zCBl6c=",
+     * "salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256","enabled":true,"status":"APPROVED","roles":["Security","Whitelist"]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginPasswords client = new UserLoginPasswords(My.configuration().getClientProperties());
-     *  UserLoginPassword retrieveUserLoginPassword = client.retrieveUserLoginPassword("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  UserLoginPassword retrieveUserLoginPassword = client.retrieveUserLoginPassword("9116f3ed-5496-42b3-a9ee-4e89b1d533bc","610cc4fc-0148-4788-bc9c-633d61fbeb4e");
      * </pre>
      */
     public UserLoginPassword retrieveUserLoginPassword(String userUuid, String uuid) {
@@ -155,23 +174,25 @@ public class UserLoginPasswords extends MtWilsonClient {
     /**
      * Searches for the User's login password entries with the specified set of criteria.
      * @param UserLoginPasswordFilterCriteria object specifying the filter criteria. The search options include
-     * id, status and enabled. If the user just provides the user_id without any filter criteria, then the user login password entry
+     * userUuid, id, status and enabled. If the user just provides the user_id without any filter criteria, then the user login password entry
      * for that user_id would be retrieved.
-     * @return <code> UserLoginPasswordCollection </code> with the UserLoginPasswords that meet the specified filter criteria
+     * @return UserLoginPasswordCollection with the UserLoginPasswords that meet the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_passwords:search
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
-     * Output: {"userLoginPasswords":[{"id":"f310b4e3-1f9c-4687-be60-90260262afd9","name":"Intel Corporation","description":"Intel Corporation"}]}
+     * https://server.com:8443/mtwilson/v2/users/981d5993-d380-4623-9f8b-1c6131ee8234/login-passwords
+     * Output: {"user_login_passwords":[{"id":"db108831-96d7-4a3c-afd6-5521e2defcbf","user_id":"981d5993-d380-4623-9f8b-1c6131ee8234",
+     * "password_hash":"RZMrrSt/PvKvdqs1OgR0id0bDE0dvF4XbPKV7sF+oDg=","salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256",
+     * "enabled":true,"status":"APPROVED","comment":"Automatically created during setup.","roles":["admin","administrator"]}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginPasswords client = new UserLoginPasswords(My.configuration().getClientProperties());
      *  UserLoginPasswordFilterCriteria criteria = new UserLoginPasswordFilterCriteria();
-     *  criteria.nameContains = "intel";
+     *  criteria.userUuid = UUID.valueOf("981d5993-d380-4623-9f8b-1c6131ee8234");
      *  UserLoginPasswordCollection userLoginPasswords = client.searchUserLoginPasswords(criteria);
      * </pre>
      */

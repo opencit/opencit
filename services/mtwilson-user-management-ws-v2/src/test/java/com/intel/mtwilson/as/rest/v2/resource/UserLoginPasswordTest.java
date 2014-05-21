@@ -4,24 +4,18 @@
  */
 package com.intel.mtwilson.as.rest.v2.resource;
 
-import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
-import com.intel.mtwilson.user.management.rest.v2.model.User;
-import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
-import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
-import com.intel.mtwilson.user.management.rest.v2.model.UserLocator;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordLocator;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginPasswordRepository;
-import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.List;
 import org.junit.Test;
 
 /**
@@ -42,8 +36,9 @@ public class UserLoginPasswordTest {
         loginPasswordInfo.setUserId(UUID.valueOf("8d29aa87-386d-490d-9491-ab0be4f5e7f9"));
         loginPasswordInfo.setAlgorithm("SHA256");
         loginPasswordInfo.setIterations(1);
-        loginPasswordInfo.setSalt(RandomUtil.randomByteArray(8));
-        loginPasswordInfo.setPasswordHash(RandomUtil.randomByteArray(8)); //"password".getBytes(Charset.forName("UTF-8"));
+        loginPasswordInfo.setSalt("password".getBytes(Charset.forName("UTF-8")));
+        loginPasswordInfo.setPasswordHash(PasswordCredentialsMatcher.passwordHash(("password".getBytes(Charset.forName("UTF-8"))), loginPasswordInfo));
+        //loginPasswordInfo.setPasswordHash(RandomUtil.randomByteArray(8)); //"password".getBytes(Charset.forName("UTF-8"));
         loginPasswordInfo.setEnabled(false);
         repo.create(loginPasswordInfo);
         
@@ -55,7 +50,8 @@ public class UserLoginPasswordTest {
         }
 
         loginPasswordInfo.setEnabled(true);
-        Set<String> roleSet = new HashSet<>(Arrays.asList("administrator", "tagadmin"));
+        loginPasswordInfo.setStatus(Status.APPROVED);
+        List<String> roleSet = new ArrayList<>(Arrays.asList("administrator", "tagadmin"));
         loginPasswordInfo.setRoles(roleSet);
         repo.store(loginPasswordInfo);
         
