@@ -64,6 +64,13 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                         objCollection.getHosts().add(convert(obj));
                     }
                 }                
+            }  else {
+                List<TblHosts> objList = jpaController.findTblHostsEntities();
+                if (objList != null && !objList.isEmpty()) {
+                    for(TblHosts obj : objList) {
+                        objCollection.getHosts().add(convert(obj));
+                    }
+                }
             }
         } catch (ASException aex) {
             throw aex;            
