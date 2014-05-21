@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.setup.cmd;
+package com.intel.mtwilson.setup.console.cmd;
 
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.io.UUID;
@@ -164,13 +164,23 @@ public class ApproveUserLoginCertificateRequest implements Command {
                     }
                     
                     // associate the custom role to the user
-                    dao.insertUserLoginCertificateRole(userLoginCertificate.getId(), customRole.getId());
+                    if (!isRoleAssociatedToUserLoginCertificate(dao, customRole, userLoginCertificate)) {
+                        dao.insertUserLoginCertificateRole(userLoginCertificate.getId(), customRole.getId());
+                    }
                     log.debug("Added the custom role {} to user login certificate for user {}", customRoleName, username);
                 }
             }
-        } catch (Exception ex) {
-            
-        }        
+        }
+    }
+    
+    private boolean isRoleAssociatedToUserLoginCertificate(LoginDAO dao, Role role, UserLoginCertificate userLoginCertificate) {
+        List<Role> roleList = dao.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+        for (Role r : roleList) {
+            if (r.getId().toString().equals(role.getId().toString())) {
+                return true;
+            }
+        }
+        return false;
     }
         
 }

@@ -2,14 +2,11 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.cmd;
+package com.intel.mtwilson.setup.console.cmd;
 
 import com.intel.dcsg.cpg.console.ExtendedOptions;
-import com.intel.mtwilson.setup.cmd.ApproveUserLoginCertificateRequest;
 import java.util.Arrays;
-import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
 import org.junit.Test;
 
 /**
