@@ -404,7 +404,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
