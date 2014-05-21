@@ -6,6 +6,8 @@ package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.jersey.Document;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 
 /**
  *
@@ -44,6 +46,7 @@ public class HostTlsPolicy extends Document {
         this.insecure = insecure;
     }
     
+    @Regex(RegexPatterns.ANY_VALUE)
     public String[] getCertificates() {
         return certificates;
     }
