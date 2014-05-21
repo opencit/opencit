@@ -8,6 +8,12 @@ import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.configuration.Configuration;
 
 /**
+ * To use an Apache Commons Configuration instance:
+ * 
+ * <pre>
+ * instance.setConfiguration(new CommonsConfigurationAdapter(configuration));
+ * </pre>
+ * 
  * @author jbuhacoff
  */
 public class AbstractConfiguration implements Configurable {

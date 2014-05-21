@@ -507,24 +507,26 @@ public class KeystoreUtil {
         ApiClient c = new ApiClient(server, rsaCredential, keystore, tlsPolicy);
         return c;        
     }
-    
+    /*
+    // TODO: move to mtwilson-client-java7 : com.intel.mtwilson.v2.client.MwClientUtil
     public static SimpleKeystore createUserInDirectoryV2(File directory, String username, String password, URL server, String comments) throws IOException, ApiException, CryptographyException, ClientException {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
         return createUserInResourceV2(resource, username, password, server, comments);
     }
-    
+    */
+    // TODO: move to mtwilson-client-java7 : com.intel.mtwilson.v2.client.MwClientUtil
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, String comments) throws IOException, ApiException, CryptographyException, ClientException {
         return createUserInResourceV2(resource, username, password, server, new InsecureTlsPolicy(), comments, Locale.US);
     }
-    
+    // TODO: move to mtwilson-client-java7 : com.intel.mtwilson.v2.client.MwClientUtil
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, TlsPolicy tlsPolicy, String comments, Locale locale) throws IOException, ApiException, CryptographyException, ClientException {
         return createUserInResourceV2(resource, username, password, server, tlsPolicy, comments, locale, "TLS");
     }
-    
+    // TODO: move to mtwilson-client-java7 : com.intel.mtwilson.v2.client.MwClientUtil
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, TlsPolicy tlsPolicy, String comments, Locale locale, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
         

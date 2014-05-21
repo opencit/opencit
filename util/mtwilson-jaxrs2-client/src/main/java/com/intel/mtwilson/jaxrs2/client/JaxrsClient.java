@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.jaxrs2.client;
 
-import com.intel.mtwilson.jaxrs2.client.ReflectionUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import javax.ws.rs.client.Client;
@@ -18,10 +17,24 @@ public class JaxrsClient {
     private Client client;
     private WebTarget target;
     
+    /**
+     * Creates a client using an existing configured JAX-RS client and a
+     * specified web target.
+     * 
+     * @param client
+     * @param target 
+     */
     public JaxrsClient(Client client, WebTarget target) {
         this.client = client;
         this.target = target;
     }
+    
+    /**
+     * Creates a new client instance using an existing configured client and
+     * web target combination.
+     * 
+     * @param jaxrsClient 
+     */
     public JaxrsClient(JaxrsClient jaxrsClient) {
         this.client = jaxrsClient.getClient();
         this.target = jaxrsClient.getTarget();
@@ -48,7 +61,7 @@ public class JaxrsClient {
         return addQueryParams(getTarget().path(path), bean);
     }
     
-    protected WebTarget addQueryParams(WebTarget target, Object bean) {
+    public static WebTarget addQueryParams(WebTarget target, Object bean) {
         try {
             Map<String, Object> properties = ReflectionUtil.getQueryParams(bean);
             for (Map.Entry<String, Object> queryParam : properties.entrySet()) {

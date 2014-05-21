@@ -144,8 +144,8 @@ public class KvAttributes extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
         map.put("id", uuid);
-        KvAttribute role = getTarget().path("tag-kv-attributes/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(KvAttribute.class);
-        return role;
+        KvAttribute obj = getTarget().path("tag-kv-attributes/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(KvAttribute.class);
+        return obj;
     }
 
     
