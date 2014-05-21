@@ -22,6 +22,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
+import com.intel.mtwilson.datatypes.TLSPolicy;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASComponentFactory;
@@ -127,11 +128,18 @@ public class HostBO extends BaseBO {
 			Resource resource = tblHosts.getTlsKeystoreResource();
                         SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
 			if (tlsCertificates != null) {
-	                        for (String certificate : tlsCertificates) {
-        	                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                	            X509Certificate x509Cert = X509Util.decodePemCertificate(new String(Base64.decodeBase64(certificate)));
-                        	    clientKeystore.addTrustedSslCertificate(x509Cert, host.getHostName().toString());
-	                        }
+				try {
+		                        for (String certificate : tlsCertificates) {
+        		                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                		            X509Certificate x509Cert = X509Util.decodePemCertificate(new String(Base64.decodeBase64(certificate)));
+                        		    clientKeystore.addTrustedSslCertificate(x509Cert, host.getHostName().toString());
+	                        	}
+				} catch(Exception e) {
+					// If the certificates are not properly encoded or there is any other error, ever the TLS Policy to INSECURE
+					// Check with JB if this is behaviorally right.
+					tlsPolicyName = TLSPolicy.INSECURE.toString();
+				}
+			
 			}
                         clientKeystore.save();
                         //tblHosts.setTlsKeystore(null);
