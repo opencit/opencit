@@ -211,8 +211,20 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid().toString());
             }
                
-//	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
-	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
+	    String tlsPolicyName = My.configuration().getDefaultTlsPolicyName();
+	    String[] tlsCerts = null;
+	    if(item.getTlsPolicy() != null)  {
+		    if (item.getTlsPolicy().getInsecure()) {
+                    	tlsPolicyName = TLSPolicy.INSECURE.toString();
+		    }
+		    if(item.getTlsPolicy().getCertificates() != null) {
+                    	tlsPolicyName = TLSPolicy.TRUST_CA_VERIFY_HOSTNAME.toString();
+			// Create the keystore here
+			tlsCerts = item.getTlsPolicy().getCertificates();
+		    }
+	    }
+	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
+//	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
            
         } catch (ASException aex) {
             throw aex;            
