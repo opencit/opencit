@@ -14,13 +14,13 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.policy.TrustReport;
 
 import java.util.Date;

@@ -20,7 +20,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
 import java.io.IOException;

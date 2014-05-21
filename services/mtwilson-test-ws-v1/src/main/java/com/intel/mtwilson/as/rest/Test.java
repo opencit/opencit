@@ -12,7 +12,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.PermitAll;

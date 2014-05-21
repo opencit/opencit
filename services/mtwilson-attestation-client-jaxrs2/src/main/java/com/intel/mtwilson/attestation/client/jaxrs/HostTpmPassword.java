@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;

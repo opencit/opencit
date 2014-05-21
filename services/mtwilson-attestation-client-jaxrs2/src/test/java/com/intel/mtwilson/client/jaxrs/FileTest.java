@@ -4,21 +4,16 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.ReflectionUtil;
+import com.intel.mtwilson.jaxrs2.client.ReflectionUtil;
 import com.intel.mtwilson.attestation.client.jaxrs.Files;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
-import java.util.Properties;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.beanutils.PropertyUtils;
 
 /**
  *

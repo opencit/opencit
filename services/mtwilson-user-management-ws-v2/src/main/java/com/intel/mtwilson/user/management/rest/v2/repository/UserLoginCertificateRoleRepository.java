@@ -9,8 +9,8 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleLocator;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.i18n.ErrorCode;
+import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;

@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;

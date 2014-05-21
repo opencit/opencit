@@ -14,6 +14,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * Example:
  * 
         SelectionsType selections = SelectionBuilder.factory()
+        *       .cacheMode("off")
                 .selection()
                 .textAttributeKV("Country", "US")
                 .textAttributeKV("State", "CA")
@@ -26,14 +27,57 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class SelectionBuilder {
     public static SelectionBuilder factory() { return new SelectionBuilder(); }
     
+    private OptionsType options = null;
     private SelectionsType selections = new SelectionsType();
+    private DefaultType defaultSelections = new DefaultType();
     private SelectionType currentSelection = null;
+    private boolean defaultSelection = false;
+    
+    public SelectionBuilder options() {
+         if( options == null ) {
+             options = new OptionsType();
+         }
+         return this;
+    }
+    
+    /**
+     * 
+     * @param value case-sensitive; must be either "on" or "off"
+     * @return 
+     */
+    public SelectionBuilder cacheMode(String value) {
+        CacheModeAttribute cacheMode = CacheModeAttribute.fromValue(value);
+        CacheType cache = new CacheType();
+        cache.setMode(cacheMode);
+        options();
+        options.setCache(cache);
+        return this;
+    }
+    
+    private void closeSelection() {
+        if( defaultSelection ) {
+            defaultSelections.getSelection().add(currentSelection);
+        }
+        else {
+            selections.getSelection().add(currentSelection);            
+        }
+    }
+    
+    public SelectionBuilder defaultSelection() {
+        if( currentSelection != null ) {
+            closeSelection();
+        }
+        currentSelection = new SelectionType();
+        defaultSelection = true;
+        return this;
+    }
     
     public SelectionBuilder selection() {
         if( currentSelection != null ) {
-            selections.getSelection().add(currentSelection);
+            closeSelection();
         }
         currentSelection = new SelectionType();
+        defaultSelection = false;
         return this;
     }
     
@@ -205,8 +249,14 @@ public class SelectionBuilder {
     
     public SelectionsType build() {
         if( currentSelection != null ) {
-            selections.getSelection().add(currentSelection);
+            closeSelection();
             currentSelection = null;
+        }
+        if( defaultSelections != null ) {
+            selections.setDefault(defaultSelections);
+        }
+        if( options != null ) {
+            selections.setOptions(options);
         }
         return selections;
     }

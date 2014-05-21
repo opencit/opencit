@@ -1,7 +1,7 @@
 package com.intel.mountwilson.as.helper;
 
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;

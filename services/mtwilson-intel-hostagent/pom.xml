@@ -34,10 +34,10 @@
             <version>${project.version}</version>
         </dependency>                
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-client-java7-jaxrs2</artifactId>
-            <version>${project.version}</version>
-        </dependency>                
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2-client</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
@@ -60,6 +60,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

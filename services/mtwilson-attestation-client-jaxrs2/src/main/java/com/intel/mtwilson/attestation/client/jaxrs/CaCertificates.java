@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -79,7 +79,7 @@ public class CaCertificates extends MtWilsonClient {
         //  {id} can be:  "root", "saml", "tls", "privacy"
         HashMap<String,Object> map = new HashMap<>();
         map.put("id", certificateId);
-        X509Certificate certificate = getTargetPath("ca-certificates/{id}").resolveTemplates(map).request(OtherMediaType.APPLICATION_PKIX_CERT).get(X509Certificate.class);
+        X509Certificate certificate = getTargetPath("ca-certificates/{id}").resolveTemplates(map).request(CryptoMediaType.APPLICATION_PKIX_CERT).get(X509Certificate.class);
         return certificate;
     }
        

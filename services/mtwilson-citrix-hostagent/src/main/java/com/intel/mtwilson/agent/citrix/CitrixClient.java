@@ -10,7 +10,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;

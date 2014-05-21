@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.business;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;

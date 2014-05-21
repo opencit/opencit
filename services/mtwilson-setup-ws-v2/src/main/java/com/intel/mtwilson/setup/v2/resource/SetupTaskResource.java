@@ -6,8 +6,8 @@ package com.intel.mtwilson.setup.v2.resource;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.mtwilson.setup.v2.model.*;
-import com.intel.mtwilson.jersey.NoLinks;
-import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.jaxrs2.NoLinks;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.V2;

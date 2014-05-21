@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListWithOptionsRpcInput;
 import java.net.URL;

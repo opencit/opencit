@@ -5,7 +5,7 @@
 package com.intel.mtwilson.user.management.rest.v2.model;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jersey.Locator;
+import com.intel.mtwilson.jaxrs2.Locator;
 import javax.ws.rs.PathParam;
 
 /**
@@ -14,11 +14,14 @@ import javax.ws.rs.PathParam;
  */
 public class UserLoginPasswordLocator implements Locator<UserLoginPassword> {
 
+    @PathParam("user_id")
+    public UUID userId;
     @PathParam("id")
     public UUID id;
 
     @Override
     public void copyTo(UserLoginPassword item) {
+        item.setUserId(userId);
         item.setId(id);
     }
     

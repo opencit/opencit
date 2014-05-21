@@ -4,11 +4,11 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
@@ -159,7 +159,7 @@ public class HostAttestations extends MtWilsonClient {
      */    
     public String createHostAttestationSaml(HostAttestation obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        String samlAssertion = getTarget().path("host-attestations").request(OtherMediaType.APPLICATION_SAML).post(Entity.json(obj), String.class);
+        String samlAssertion = getTarget().path("host-attestations").request(CryptoMediaType.APPLICATION_SAML).post(Entity.json(obj), String.class);
         return samlAssertion;
     }
     
@@ -287,7 +287,7 @@ public class HostAttestations extends MtWilsonClient {
      */    
     public String searchHostAttestationsSaml(HostAttestationFilterCriteria criteria) {        
         log.debug("target: {}", getTarget().getUri().toString());
-        String hostSaml = getTargetPathWithQueryParams("host-attestations", criteria).request(OtherMediaType.APPLICATION_SAML).get(String.class);
+        String hostSaml = getTargetPathWithQueryParams("host-attestations", criteria).request(CryptoMediaType.APPLICATION_SAML).get(String.class);
         return hostSaml;
     }
     

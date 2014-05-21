@@ -5,9 +5,9 @@
 package test.i18n;
 
 import com.intel.mtwilson.datatypes.AuthResponse;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.i18n.Localizable;
-import com.intel.mtwilson.i18n.Message;
+import com.intel.dcsg.cpg.i18n.Message;
 import java.util.Locale;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -26,9 +26,14 @@ public class TestLocalizationFilter {
         assertTrue( response instanceof Localizable );
     }
     
+    public static class AttestationMessage extends Message {
+        public AttestationMessage(String name, Object... args) { super(name,args); }
+        public String getBundleName() { return "MtWilsonStrings"; }
+    }
+    
     @Test
     public void testMessage() {
-        Message m = new Message(ErrorCode.OK.name());
+        Message m = new AttestationMessage(ErrorCode.OK.name());
         log.debug("Message with default locale: {}", m.toString());
         log.debug("Message with en: {}", m.toString(new Locale("en"))); // works, loads "en_US"
         log.debug("Message with es: {}", m.toString(new Locale("es"))); // works, loads "es"
@@ -47,7 +52,7 @@ public class TestLocalizationFilter {
     
     @Test
     public void testMyMessage() {
-        Message m = new Message("myprpoertyname");
+        Message m = new AttestationMessage("myprpoertyname");
 //        m.toString(m.toString(new Locale("fr"));
     }
 }

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.intel.mtwilson.tag.selection.xml.AttributeType;
+import com.intel.mtwilson.tag.selection.xml.CacheModeAttribute;
+import com.intel.mtwilson.tag.selection.xml.DefaultType;
 import com.intel.mtwilson.tag.selection.xml.SelectionType;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
 import com.intel.mtwilson.tag.selection.xml.TextAttributeType;
@@ -32,7 +34,9 @@ public class TagSelectionModule extends Module {
 
     @Override
     public void setupModule(SetupContext sc) {
+        sc.setMixInAnnotations(CacheModeAttribute.class, CacheModeAttributeMixIn.class);
         sc.setMixInAnnotations(SelectionsType.class, SelectionsTypeMixIn.class);
+        sc.setMixInAnnotations(DefaultType.class, DefaultTypeMixIn.class);
         sc.setMixInAnnotations(SelectionType.class, SelectionTypeMixIn.class);
         sc.setMixInAnnotations(AttributeType.class, AttributeTypeMixIn.class);
         sc.setMixInAnnotations(TextAttributeType.class, TextAttributeTypeMixIn.class);

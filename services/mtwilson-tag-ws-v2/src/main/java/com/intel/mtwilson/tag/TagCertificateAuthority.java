@@ -79,6 +79,22 @@ public class TagCertificateAuthority {
             }
             valid.getSelection().add(selection);
         }
+        // repeat the same action for the default selections
+        if( selections.getDefault() != null ) {
+            valid.setDefault(new DefaultType());
+            for (SelectionType selection : selections.getDefault().getSelection()) {
+                // skip if the selection is not currently valid (notBefore<today<notAfter) ; if notBefore or notAfter are not defined, then validity is assumed
+                if (selection.getNotBefore() != null && today.before(selection.getNotBefore().toGregorianCalendar())) {
+                    log.debug("skipping selection because of notBefore date");
+                    continue;
+                }
+                if (selection.getNotAfter() != null && today.after(selection.getNotAfter().toGregorianCalendar())) {
+                    log.debug("skipping selection because of notAfter date");
+                    continue;
+                }
+                valid.getDefault().getSelection().add(selection);
+            }
+        }
         return valid;
     }
 
@@ -197,9 +213,10 @@ public class TagCertificateAuthority {
             }
         }
         // third search for default selection (no subjects declared) return the first one found
-        for (SelectionType selection : currentSelections.getSelection()) {
-            if (selection.getSubject().isEmpty()) {
-                return getInlineOrLookupSelection(selection);
+        if( currentSelections.getDefault() != null ) {
+            for (SelectionType selection : currentSelections.getDefault().getSelection()) {
+                log.debug("Using first currently valid default selection");
+                return getInlineOrLookupSelection(selection); // get first default
             }
         }
         /*

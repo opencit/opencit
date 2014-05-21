@@ -10,6 +10,7 @@ package com.intel.mtwilson.agent.intel;
  */
 
 //import com.intel.mountwilson.as.common.*;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.ClientRequestType;

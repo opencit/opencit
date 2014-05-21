@@ -65,8 +65,8 @@ This error message indicates you need a jersey implementation like org.glassfish
     <dependencies>
 
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jaxrs-util</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

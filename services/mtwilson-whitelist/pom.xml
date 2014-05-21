@@ -58,6 +58,12 @@
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- for ErrorCode -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
             <artifactId>mtwilson-postgresql</artifactId>

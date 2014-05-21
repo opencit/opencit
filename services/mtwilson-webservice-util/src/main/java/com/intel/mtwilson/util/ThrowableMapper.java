@@ -5,10 +5,10 @@
 package com.intel.mtwilson.util;
 
 import com.intel.dcsg.cpg.i18n.Localizable;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 //import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.i18n.ErrorMessage;
-import com.intel.mtwilson.jersey.http.Util;
+import com.intel.mtwilson.jaxrs2.server.Util;
 import java.util.Locale;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;

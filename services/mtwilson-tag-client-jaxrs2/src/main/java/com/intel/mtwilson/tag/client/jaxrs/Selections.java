@@ -5,8 +5,8 @@
 package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -198,7 +198,7 @@ public class Selections extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
-        String encryptedXml = getTarget().path("tag-selections/{id}").resolveTemplates(map).request(OtherMediaType.MESSAGE_RFC822).get(String.class);
+        String encryptedXml = getTarget().path("tag-selections/{id}").resolveTemplates(map).request(CryptoMediaType.MESSAGE_RFC822).get(String.class);
         return encryptedXml;
     }
 

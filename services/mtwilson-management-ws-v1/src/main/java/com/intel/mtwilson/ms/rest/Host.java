@@ -148,7 +148,7 @@ public class Host {
         
         for (HostConfigData host : hostRecords.getHostRecords().toArray(new HostConfigData[0])) {
             if (host.getTxtHostRecord().HostName.isEmpty() || host.getTxtHostRecord().HostName == null) {
-                throw new MSException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT, "host");
+                throw new MSException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT, "host");
             } else {
                 newHostRecords.getHostRecords().add(host.getTxtHostRecord());
             }

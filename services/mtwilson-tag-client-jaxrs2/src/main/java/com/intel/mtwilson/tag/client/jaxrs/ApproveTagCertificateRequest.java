@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.client.jaxrs.common.MtWilsonClient;
+import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import java.net.URL;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;

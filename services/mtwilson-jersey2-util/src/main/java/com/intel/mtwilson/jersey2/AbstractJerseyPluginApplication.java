@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.jersey2;
 
+import com.intel.mtwilson.jaxrs2.feature.JacksonFeature;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -76,7 +77,7 @@ register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class);
         // ContainerResponseFilter) can be registered here but
         // the ShiroFilter must be declared in web.xml instead.
         log.debug("Registering exception mappers and filters");
-register(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
+//register(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
 register(com.intel.mtwilson.util.ThrowableMapper.class);
 register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // jersey2 equivalent of com.sun.jersey.api.container.filter.PostReplaceFilter
 //register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
@@ -86,7 +87,7 @@ register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // 
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
 register(com.intel.mtwilson.shiro.AuthorizationExceptionMapper.class);
 //register(com.intel.mtwilson.util.ASLocalizationFilter.class);
-register(com.intel.mtwilson.jersey.filter.ErrorLogFilter.class);
+register(com.intel.mtwilson.jaxrs2.server.filter.ErrorLogFilter.class);
         log.debug("Registering other resources");
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
 

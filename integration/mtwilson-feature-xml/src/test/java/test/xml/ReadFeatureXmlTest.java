@@ -6,7 +6,6 @@ package test.xml;
  */
 
 
-import com.intel.mtwilson.api.ApiException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -21,22 +20,6 @@ import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.NamedNodeMap;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * 

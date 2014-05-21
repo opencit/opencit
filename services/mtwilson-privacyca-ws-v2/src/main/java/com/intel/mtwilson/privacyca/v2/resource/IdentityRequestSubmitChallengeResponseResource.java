@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.privacyca.v2.resource;
 
-import com.intel.mtwilson.jersey.http.OtherMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeResponse;
@@ -33,8 +34,8 @@ public class IdentityRequestSubmitChallengeResponseResource {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     public IdentityBlob identityChallengeResponse(IdentityChallengeResponse challengeResponse) throws Exception {
         IdentityRequestSubmitResponse rpc = new  IdentityRequestSubmitResponse();
         rpc.setChallengeResponse(challengeResponse.getChallengeResponse());

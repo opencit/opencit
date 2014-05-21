@@ -7,7 +7,32 @@
 
     <xs:complexType name="selectionsType">
         <xs:sequence>
+            <xs:element name="options" type="optionsType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="default" type="defaultType" minOccurs="0" maxOccurs="1"/>
             <xs:element name="selection" type="selectionType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="optionsType">
+        <xs:sequence>
+            <xs:element name="cache" type="cacheType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="cacheModeAttribute">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="cacheType">
+        <xs:attribute name="mode" type="cacheModeAttribute"/>
+    </xs:complexType>
+
+    <xs:complexType name="defaultType">
+        <xs:sequence>
+            <xs:element name="selection" type="selectionType" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 

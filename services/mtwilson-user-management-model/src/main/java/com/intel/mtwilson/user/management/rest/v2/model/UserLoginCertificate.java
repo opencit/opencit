@@ -9,15 +9,15 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jersey.CertificateDocument;
+import com.intel.mtwilson.jaxrs2.CertificateDocument;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 /**
   id uuid DEFAULT NULL,
@@ -46,7 +46,7 @@ public class UserLoginCertificate extends CertificateDocument {
     private boolean enabled;
     private Status status;
     private String comment;
-    private Set<String> roles;
+    private List<String> roles;
 
     @Override
     public UUID getId() {
@@ -85,8 +85,6 @@ public class UserLoginCertificate extends CertificateDocument {
     public byte[] getSha256Hash() {
         return sha256Hash;
     }
-    
-    
 
     public void setSha256Hash(byte[] sha256Hash) {
         this.sha256Hash = sha256Hash;
@@ -127,11 +125,11 @@ public class UserLoginCertificate extends CertificateDocument {
         this.comment = comment;
     }
 
-    public Set<String> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
     

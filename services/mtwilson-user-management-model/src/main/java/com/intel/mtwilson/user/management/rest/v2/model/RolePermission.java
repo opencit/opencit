@@ -6,7 +6,9 @@ package com.intel.mtwilson.user.management.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jersey.Document;
+import com.intel.mtwilson.jaxrs2.Document;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 
 /**
   role_id uuid NOT NULL,
@@ -31,6 +33,7 @@ public class RolePermission extends Document {
         this.roleId = roleId;
     }
 
+    @Regex(RegexPatterns.ANY_VALUE)
     public String getPermitDomain() {
         return permitDomain;
     }
@@ -39,6 +42,7 @@ public class RolePermission extends Document {
         this.permitDomain = permitDomain;
     }
 
+    @Regex(RegexPatterns.ANY_VALUE)
     public String getPermitAction() {
         return permitAction;
     }
@@ -47,6 +51,7 @@ public class RolePermission extends Document {
         this.permitAction = permitAction;
     }
 
+    @Regex(RegexPatterns.ANY_VALUE)
     public String getPermitSelection() {
         return permitSelection;
     }

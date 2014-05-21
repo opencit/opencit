@@ -32,7 +32,7 @@ import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;

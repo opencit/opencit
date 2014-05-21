@@ -6,7 +6,7 @@ package com.intel.mtwilson.user.management.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jersey.Document;
+import com.intel.mtwilson.jaxrs2.Document;
 
 /**
   id uuid NOT NULL,

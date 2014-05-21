@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 //import org.codehaus.jackson.annotate.JsonProperty;
 

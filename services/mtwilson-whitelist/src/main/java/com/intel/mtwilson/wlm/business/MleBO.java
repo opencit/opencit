@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.wlm.business;
 
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;

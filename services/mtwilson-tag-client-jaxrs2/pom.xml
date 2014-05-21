@@ -61,11 +61,11 @@
     </build>
 
     <dependencies>
-    <dependency>
-    	<groupId>com.intel.mtwilson.integration</groupId>
-    	<artifactId>mtwilson-client-java7-jaxrs2</artifactId>
-        <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2-client</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -135,11 +135,11 @@
             <version>1.2</version>
         </dependency>
 
-<dependency>
-    <groupId>com.intel.mtwilson.services</groupId>
-    <artifactId>mtwilson-jaxrs-util</artifactId>
-    <version>${project.version}</version>
-</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- end jersey  -->
         

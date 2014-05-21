@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package com.intel.mountwilson.as.common;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 
 /**
  *

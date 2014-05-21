@@ -23,7 +23,7 @@ import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;

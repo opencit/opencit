@@ -8,7 +8,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostTrust;
 import java.util.ArrayList;
 import java.util.HashSet;

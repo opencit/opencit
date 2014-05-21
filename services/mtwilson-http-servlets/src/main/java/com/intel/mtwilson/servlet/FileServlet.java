@@ -86,12 +86,9 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     }
 
     // read the file and send to the client
-    try {
-        FileInputStream in = new FileInputStream(file);
-        ServletOutputStream out = response.getOutputStream();
+    try(FileInputStream in = new FileInputStream(file);
+        ServletOutputStream out = response.getOutputStream()) {
         IOUtils.copy(in, out);
-        in.close();
-        out.close();
     }
     catch (FileNotFoundException e) {
         log.info("File not found: {}", file.getAbsolutePath());
