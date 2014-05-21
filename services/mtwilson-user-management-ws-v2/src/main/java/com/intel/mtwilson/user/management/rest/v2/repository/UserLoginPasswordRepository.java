@@ -17,12 +17,11 @@ import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleFilterCriteria;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -110,7 +109,7 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
                     obj.setAlgorithm(item.getAlgorithm());
                 if (item.getExpires() != null)
                     obj.setExpires(item.getExpires());
-                if (item.getIterations() != 0)
+                if (item.getIterations() > 0)
                     obj.setIterations(item.getIterations());
                 if (item.getSalt() != null)
                     obj.setSalt(item.getSalt());
@@ -121,26 +120,30 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
                         obj.isEnabled(), obj.getId(), obj.getStatus(), obj.getComment());
                 log.debug("UserLoginPassword:Store - Updated the user login password with id {} successfully.", obj.getId());
 
-                // Before we add the roles we need to delete the existing ones
-                UserLoginPasswordRoleRepository repo = new UserLoginPasswordRoleRepository();
-                
-                UserLoginPasswordRoleFilterCriteria criteria = new UserLoginPasswordRoleFilterCriteria();
-                criteria.loginPasswordIdEqualTo = item.getId();
-                repo.delete(criteria);
-                
-                // Now we need to add the roles requested by the user
-                Set<String> roles = item.getRoles();
-                for (String role : roles) {
-                    // Let us verify if the role exists, if it does, then we will map the role to the user login password entry
-                    Role roleInSystem = loginDAO.findRoleByName(role);
-                    if (roleInSystem != null) {
-                        UserLoginPasswordRole userLoginPasswordRole = new UserLoginPasswordRole();
-                        userLoginPasswordRole.setLoginPasswordId(item.getId());
-                        userLoginPasswordRole.setRoleId(roleInSystem.getId());
-                        repo.create(userLoginPasswordRole);
+                // We need not check for the length here since the admin might want to delete all the roles
+                if (item.getRoles() != null){
+                    // Before we add the roles we need to delete the existing ones
+                    UserLoginPasswordRoleRepository repo = new UserLoginPasswordRoleRepository();
+
+                    UserLoginPasswordRoleFilterCriteria criteria = new UserLoginPasswordRoleFilterCriteria();
+                    criteria.loginPasswordIdEqualTo = item.getId();
+                    repo.delete(criteria);
+
+                    // Now we need to add the roles requested by the user
+                    List<String> roles = item.getRoles();
+                    if (roles != null && roles.size() > 0) {
+                        for (String role : roles) {
+                            // Let us verify if the role exists, if it does, then we will map the role to the user login password entry
+                            Role roleInSystem = loginDAO.findRoleByName(role);
+                            if (roleInSystem != null) {
+                                UserLoginPasswordRole userLoginPasswordRole = new UserLoginPasswordRole();
+                                userLoginPasswordRole.setLoginPasswordId(item.getId());
+                                userLoginPasswordRole.setRoleId(roleInSystem.getId());
+                                repo.create(userLoginPasswordRole);
+                            }
+                        }
                     }
-                }
-                
+                }                
             } else {
                 log.error("UserLoginPassword:Store - User login password will not be updated since it does not exist.");
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -165,7 +168,7 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
                 obj = new UserLoginPassword();
                 obj.setId(item.getId());
                 obj.setUserId(item.getUserId());
-                obj.setPasswordHash(PasswordCredentialsMatcher.passwordHash(item.getPasswordHash(), item));
+                obj.setPasswordHash(item.getPasswordHash());
                 obj.setAlgorithm(item.getAlgorithm());
                 obj.setExpires(item.getExpires());
                 obj.setIterations(item.getIterations());
@@ -226,8 +229,8 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
      * @param id
      * @return 
      */
-    private Set<String> getAssociateRolesForLoginPasswordId(UUID id) {
-        Set<String> associatedRoles = new HashSet<>();
+    private List<String> getAssociateRolesForLoginPasswordId(UUID id) {
+        List<String> associatedRoles = new ArrayList<>();
 
         UserLoginPasswordRoleRepository repo = new UserLoginPasswordRoleRepository();
         RoleRepository roleRepo = new RoleRepository();

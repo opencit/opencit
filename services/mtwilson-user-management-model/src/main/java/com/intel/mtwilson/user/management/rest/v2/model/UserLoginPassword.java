@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,7 +38,7 @@ public class UserLoginPassword extends Document implements HashedPassword {
     private boolean enabled;
     private Status status;
     private String comment;
-    private Set<String> roles;
+    private List<String> roles;
 
     @Override
     public UUID getId() {
@@ -57,6 +58,7 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.userId = userId;
     }
 
+    @Override
     public byte[] getPasswordHash() {
         return passwordHash;
     }
@@ -65,6 +67,7 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.passwordHash = passwordHash;
     }
 
+    @Override
     public byte[] getSalt() {
         return salt;
     }
@@ -73,6 +76,7 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.salt = salt;
     }
 
+    @Override
     public int getIterations() {
         return iterations;
     }
@@ -81,6 +85,7 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.iterations = iterations;
     }
 
+    @Override
     public String getAlgorithm() {
         return algorithm;
     }
@@ -121,14 +126,12 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.comment = comment;
     }
 
-    
-    public Set<String> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
-
-        
+    
 }

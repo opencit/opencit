@@ -28,6 +28,8 @@ import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.as.BaseBO;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
@@ -37,8 +39,10 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.Object;
 import java.net.MalformedURLException;
 import java.security.PublicKey;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +51,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -93,7 +98,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -114,8 +119,22 @@ public class HostBO extends BaseBO {
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-                        tblHosts.setTlsKeystore(null);
+
+			String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
+	    		String[] tlsCertificates = tlsObjects.length > 1 ? (String[])tlsObjects[1] : new String[1];
+                        tblHosts.setTlsPolicyName(tlsPolicyName);
+
+			Resource resource = tblHosts.getTlsKeystoreResource();
+                        SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
+			if (tlsCertificates != null) {
+	                        for (String certificate : tlsCertificates) {
+        	                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                	            X509Certificate x509Cert = X509Util.decodePemCertificate(new String(Base64.decodeBase64(certificate)));
+                        	    clientKeystore.addTrustedSslCertificate(x509Cert, host.getHostName().toString());
+	                        }
+			}
+                        clientKeystore.save();
+                        //tblHosts.setTlsKeystore(null);
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         

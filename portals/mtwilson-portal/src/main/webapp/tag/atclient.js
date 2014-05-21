@@ -323,6 +323,10 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.searchSelections('selection-search-form');
                 break;
             case 'certificateRequests':
+                if(event.memo.resource.func == 'bulk_provisioning') {
+                        updateHostProvisioningStatus(event.memo.resource.app, 'Success');
+                        break;
+                }
                 mtwilson.atag.notify({text: 'Created certificate request',clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
                 mtwilson.atag.searchCertificates($('searchCertButton'))
@@ -672,7 +676,7 @@ mtwilson.atag = mtwilson.atag || {};
                         disable_sel_render = false;
                         break;
                 }
-				selectedSelectionXML = '';
+                selectedSelectionXML = '';
                 data.selections.clear();
                 for (var i = 0; i < data.selection_details.length; i++) {
                         if(tmp_dictionary[data.selection_details[i].selection_id] == null) {
@@ -684,8 +688,9 @@ mtwilson.atag = mtwilson.atag || {};
                                 tmp_dictionary[data.selection_details[i].selection_id] = true;
                         }
                 }
+                data.selection_details = [];
                 break;
-			            case 'hosts':
+            case 'hosts':
                 jQuery('#my-select').multiSelect({'dblClick': true, 'selectionFooter': '<div class="custom-header">Servers to provision</div>', 'selectableFooter': '<div class="custom-header">Available servers</div>',
                         afterSelect: function(value){
                                 addElement2SelectedHosts(value[0]);
@@ -1414,7 +1419,7 @@ function enableClickableAlerts(){
 }
 
 mtwilson.atag.loadHostsForProvisioning = function(input) {
-    ajax.json.get('hosts', {'nameContains':'10'});
+    ajax.json.get('hosts', {'filter':'false'});
 };
 
 
