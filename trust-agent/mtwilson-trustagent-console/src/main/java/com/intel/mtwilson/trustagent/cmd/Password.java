@@ -14,7 +14,7 @@ import java.io.File;
 import org.apache.commons.configuration.Configuration;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -102,7 +102,7 @@ public class Password implements Command {
         userPassword.setAlgorithm("SHA256");
         userPassword.setIterations(1);
         userPassword.setSalt(RandomUtil.randomByteArray(8));
-        byte[] hashedPassword = PasswordCredentialsMatcher.passwordHash(password.getBytes(Charset.forName("UTF-8")), userPassword);
+        byte[] hashedPassword = PasswordUtil.hash(password.getBytes(Charset.forName("UTF-8")), userPassword);
         userPassword.setUsername(username);
         userPassword.setPasswordHash(hashedPassword);
         removeUser(username);

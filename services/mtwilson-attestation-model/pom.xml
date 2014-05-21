@@ -84,10 +84,12 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-jpa</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
@@ -96,6 +98,7 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
@@ -115,12 +118,14 @@
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
-     
+        -->
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
@@ -164,7 +169,6 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
-            <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -188,6 +192,7 @@
             <!-- <scope>test</scope> this was supposed to be for test but now xercesImpl is in the production artifact so this is required too -->
             <type>jar</type>
         </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-audit-handler</artifactId>
@@ -198,6 +203,7 @@
             <artifactId>mtwilson-audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
 
         <!-- used by AsAuthenticationFilter -->        
         <dependency>
@@ -252,13 +258,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.3.0</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.3.0</version>
             <optional>true</optional>
         </dependency>
         

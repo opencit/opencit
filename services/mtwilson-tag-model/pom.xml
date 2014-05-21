@@ -176,16 +176,20 @@
             <version>${project.version}</version>
         </dependency>
         <!-- for ErrorCode -->
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
+        <!--
     <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>

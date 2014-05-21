@@ -7,6 +7,7 @@ package com.intel.mtwilson.shiro.jdbi;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.UserId;
 import com.intel.mtwilson.shiro.Username;
+import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
@@ -119,10 +120,21 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         principals.add(new Username(username), getName());
         principals.add(new LoginPasswordId(user.getUsername(), userLoginPassword.getUserId(), userLoginPassword.getId()), getName());
 
+        HashedPassword hashedPassword = new HashedPassword();
+        
         PasswordAuthenticationInfo info = new PasswordAuthenticationInfo();
         info.setPrincipals(principals);
-        info.setCredentials(userLoginPassword);
+        info.setCredentials(toHashedPassword(userLoginPassword));
 
         return info;
+    }
+    
+    private HashedPassword toHashedPassword(UserLoginPassword userLoginPassword) {
+        HashedPassword hashedPassword = new HashedPassword();
+        hashedPassword.setAlgorithm(userLoginPassword.getAlgorithm());
+        hashedPassword.setSalt(userLoginPassword.getSalt());
+        hashedPassword.setIterations(userLoginPassword.getIterations());
+        hashedPassword.setPasswordHash(userLoginPassword.getPasswordHash());
+        return hashedPassword;
     }
 }

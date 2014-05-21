@@ -10,18 +10,12 @@ import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.shiro.jdbi.*;
-import java.nio.charset.Charset;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +82,7 @@ public class RepositoryTest {
         userLoginPassword.setIterations(1000);
         userLoginPassword.setAlgorithm("SHA256");
         userLoginPassword.setEnabled(true);
-        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
+        userLoginPassword.setPasswordHash(PasswordUtil.hash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         userLoginPassword.setStatus(Status.APPROVED);
         userLoginPassword.setComment("Testing");
         dao.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), userLoginPassword.getSalt(), userLoginPassword.getIterations(), 
@@ -115,7 +109,7 @@ public class RepositoryTest {
             throw new IllegalArgumentException("No such user: "+My.configuration().getKeystoreUsername());
         }
         userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-        userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
+        userLoginPassword.setPasswordHash(PasswordUtil.hash(My.configuration().getKeystorePassword().getBytes(), userLoginPassword));
         userLoginPassword.setEnabled(true);
         userLoginPassword.setStatus(Status.APPROVED);
         userLoginPassword.setComment("Testing");

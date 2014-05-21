@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.setup.LocalSetupTask;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.shiro.file.LoginDAO;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
@@ -76,7 +76,7 @@ public class CreateAdminUser extends LocalSetupTask {
             user.setAlgorithm("SHA256");
             user.setIterations(1);
             user.setSalt(RandomUtil.randomByteArray(8));
-            user.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), user));
+            user.setPasswordHash(PasswordUtil.hash(password.getBytes(), user));
             loginDAO.createUser(user);
             loginDAO.addPermission(username, "tpm:provision");
             loginDAO.addPermission(username, "tpm:quote");

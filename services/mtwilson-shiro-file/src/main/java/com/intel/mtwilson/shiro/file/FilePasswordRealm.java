@@ -5,6 +5,7 @@
 package com.intel.mtwilson.shiro.file;
 
 import com.intel.mtwilson.shiro.Username;
+import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
@@ -103,8 +104,18 @@ public class FilePasswordRealm extends AuthorizingRealm {
 
         PasswordAuthenticationInfo info = new PasswordAuthenticationInfo();
         info.setPrincipals(principals);
-        info.setCredentials(userLoginPassword);
+        info.setCredentials(toHashedPassword(userLoginPassword));
 
         return info;
     }
+
+    private HashedPassword toHashedPassword(UserPassword userLoginPassword) {
+        HashedPassword hashedPassword = new HashedPassword();
+        hashedPassword.setAlgorithm(userLoginPassword.getAlgorithm());
+        hashedPassword.setSalt(userLoginPassword.getSalt());
+        hashedPassword.setIterations(userLoginPassword.getIterations());
+        hashedPassword.setPasswordHash(userLoginPassword.getPasswordHash());
+        return hashedPassword;
+    }
+
 }

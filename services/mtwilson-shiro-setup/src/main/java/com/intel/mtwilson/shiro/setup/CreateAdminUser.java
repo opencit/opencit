@@ -20,8 +20,8 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.io.File;
@@ -243,7 +243,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             userLoginPassword.setAlgorithm("SHA256");
             userLoginPassword.setIterations(1);
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setPasswordHash(PasswordUtil.hash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
             userLoginPassword.setStatus(Status.APPROVED);
             userLoginPassword.setComment("automatically created by setup");            

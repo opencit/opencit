@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.x509.X509CertificateEncodingException;
+import com.intel.dcsg.cpg.x509.X509CertificateFormatException;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.CertificateDocument;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateEncodingException;
@@ -19,8 +19,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -139,9 +137,10 @@ public class Certificate extends CertificateDocument{
             log.debug("Certificate bytes length {}", certificate.length);
             return X509Util.decodeDerCertificate(certificate);
         }
-        catch(CertificateException ce) {
+        catch(CertificateException e) {
             //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ce, ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+//            throw new ASException(ce, ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName()); // XXX TODO:   i18n should have keys for specific exception types instead of error codes;  so MS_CERTIFICATE_ENCODING_ERROR  becomes com.intel.dscg.cpg.x509.X509CertificateFormatException
+            throw new X509CertificateFormatException(e, certificate);
         }
     }
 
@@ -155,10 +154,11 @@ public class Certificate extends CertificateDocument{
         try {
             this.certificate = certificate.getEncoded();
         }
-        catch(CertificateEncodingException ce) {
-            log.error("Error decoding certificat.", ce);
+        catch(CertificateEncodingException e) {
+            log.error("Error decoding certificate.", e);
             //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+//            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+            throw new X509CertificateEncodingException(e, certificate);
         }
     }
     

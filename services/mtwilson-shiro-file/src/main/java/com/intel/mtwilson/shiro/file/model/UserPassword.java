@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.shiro.file.model;
 
-import com.intel.mtwilson.shiro.authc.password.HashedPassword;
+import com.intel.mtwilson.crypto.password.HashProtection;
+
 
 /**
  *  salt should be 8 bytes long minimum recommended in PKCS5 standard
@@ -18,7 +19,7 @@ import com.intel.mtwilson.shiro.authc.password.HashedPassword;
  *
  * @author jbuhacoff
  */
-public class UserPassword implements HashedPassword {
+public class UserPassword implements HashProtection {
     private String username;
     private byte[] passwordHash;
     private byte[] salt;

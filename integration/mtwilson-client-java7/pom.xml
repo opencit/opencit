@@ -170,11 +170,12 @@
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-io</artifactId>
 		</dependency>
+        <!--
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-rfc822</artifactId>
 		</dependency>
-
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-saml-verifier</artifactId>
@@ -213,10 +214,12 @@
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
@@ -259,7 +262,7 @@
         </dependency>
     
         <!-- begin httpclient  -->
-   
+        <!--
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
@@ -272,6 +275,7 @@
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
         </dependency>
+        -->
         <!-- end httpclient -->
         
         
@@ -324,11 +328,13 @@
             <artifactId>mtwilson-jaxrs2-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
 <dependency>
     <groupId>com.intel.mtwilson.services</groupId>
     <artifactId>mtwilson-jersey2-util</artifactId>
     <version>${project.version}</version>
 </dependency>
+    -->
 
         <!-- end jersey  -->
         
