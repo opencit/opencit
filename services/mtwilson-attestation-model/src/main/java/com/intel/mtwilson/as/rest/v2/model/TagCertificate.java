@@ -6,9 +6,9 @@ package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.x509.X509CertificateEncodingException;
+import com.intel.dcsg.cpg.x509.X509CertificateFormatException;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.CertificateDocument;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -44,8 +44,7 @@ public class TagCertificate extends CertificateDocument{
             return X509Util.decodeDerCertificate(certificate);
         }
         catch(CertificateException ce) {
-            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+            throw new X509CertificateFormatException(ce, certificate);
         }
     }
 
@@ -60,9 +59,7 @@ public class TagCertificate extends CertificateDocument{
             this.certificate = certificate.getEncoded();
         }
         catch(CertificateEncodingException ce) {
-            log.error("Error decoding certificat.", ce);
-            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+            throw new X509CertificateEncodingException(ce, certificate);
         }
     }
     

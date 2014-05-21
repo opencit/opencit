@@ -82,13 +82,13 @@
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-
+        -->
+        <!-- mtwilson-attestation-jpa is required for com.intel.mtwilson.as.data.TblHosts which is used by HostAgentFactory; TODO refactor getHostAgent(TblHosts record) to use a model class that is not in a jpa project -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
-        </dependency> -->
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tls-policy</artifactId>

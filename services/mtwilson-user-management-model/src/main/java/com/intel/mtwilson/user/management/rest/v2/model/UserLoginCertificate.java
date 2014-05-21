@@ -8,12 +8,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intel.dcsg.cpg.x509.X509Util;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.x509.X509CertificateEncodingException;
+import com.intel.dcsg.cpg.x509.X509CertificateFormatException;
 import com.intel.mtwilson.jaxrs2.CertificateDocument;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
@@ -143,8 +143,7 @@ public class UserLoginCertificate extends CertificateDocument {
             return X509Util.decodeDerCertificate(certificate);
         }
         catch(CertificateException ce) {
-            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+            throw new X509CertificateFormatException(ce, certificate);
         }
     }
 
@@ -161,9 +160,7 @@ public class UserLoginCertificate extends CertificateDocument {
             this.sha256Hash = Sha256Digest.digestOf(this.certificate).toByteArray();
         }
         catch(CertificateEncodingException ce) {
-            log.error("Error decoding certificat.", ce);
-            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
+            throw new X509CertificateEncodingException(ce, certificate);
         }
     }
     
