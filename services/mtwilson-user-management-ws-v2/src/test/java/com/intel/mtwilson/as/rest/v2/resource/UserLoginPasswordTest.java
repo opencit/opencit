@@ -5,7 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordCollection;
@@ -37,7 +37,7 @@ public class UserLoginPasswordTest {
         loginPasswordInfo.setAlgorithm("SHA256");
         loginPasswordInfo.setIterations(1);
         loginPasswordInfo.setSalt("password".getBytes(Charset.forName("UTF-8")));
-        loginPasswordInfo.setPasswordHash(PasswordCredentialsMatcher.passwordHash(("password".getBytes(Charset.forName("UTF-8"))), loginPasswordInfo));
+        loginPasswordInfo.setPasswordHash(PasswordUtil.hash(("password".getBytes(Charset.forName("UTF-8"))), loginPasswordInfo));
         //loginPasswordInfo.setPasswordHash(RandomUtil.randomByteArray(8)); //"password".getBytes(Charset.forName("UTF-8"));
         loginPasswordInfo.setEnabled(false);
         repo.create(loginPasswordInfo);

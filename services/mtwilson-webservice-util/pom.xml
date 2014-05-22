@@ -27,6 +27,11 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-i18n</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>4.0.7</version>
+        </dependency>
         <!--
     <dependency>
             <groupId>com.sun.jersey</groupId>

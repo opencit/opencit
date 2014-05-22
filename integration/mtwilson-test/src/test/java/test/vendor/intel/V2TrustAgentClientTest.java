@@ -47,6 +47,7 @@ public class V2TrustAgentClientTest {
     public void testHostInfoCommand() throws Exception {
         HostInfo hostInfo = client.getHostInfo();
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
         log.debug(mapper.writeValueAsString(hostInfo));
     }
     

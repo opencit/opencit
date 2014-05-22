@@ -4,7 +4,7 @@
  */
 package test.shiro;
 
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -74,7 +74,7 @@ public class PasswordLoginTest {
         // "01350d1c-b7e2-464a-8999-6b816a70904c";"7034e288f6b7066343def75417878c2d18c1abecf46c2c9bd21ca3335862ddaf";"a5abcfdea3ca6860"
 //        loginPasswordInfo.setPasswordHash(Hex.decodeHex("7034e288f6b7066343def75417878c2d18c1abecf46c2c9bd21ca3335862ddaf".toCharArray()));
         loginPasswordInfo.setSalt(Hex.decodeHex("cb1be6f69c713d9f".toCharArray()));
-        byte[] hashed = PasswordCredentialsMatcher.passwordHash(bytes, loginPasswordInfo);
+        byte[] hashed = PasswordUtil.hash(bytes, loginPasswordInfo);
         log.debug("hashed: {}", Hex.encodeHexString(hashed));
         
         assertEquals("82dd31c5e03f0a94c84dd478f6a5264d0eff9af46af30d1b49ad02e6a17caebc", Hex.encodeHexString(hashed));

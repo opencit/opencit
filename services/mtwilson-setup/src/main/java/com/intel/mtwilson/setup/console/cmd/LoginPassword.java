@@ -10,9 +10,9 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import org.apache.commons.configuration.Configuration;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword; // file.model.UserPassword;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermission; // file.model.UserPermission;
-import com.intel.mtwilson.shiro.authc.password.PasswordCredentialsMatcher;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
@@ -156,7 +156,7 @@ public class LoginPassword implements Command {
             userLoginPassword.setAlgorithm("SHA256");
             userLoginPassword.setIterations(1);
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setPasswordHash(PasswordUtil.hash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
             userLoginPassword.setStatus(Status.APPROVED);
             userLoginPassword.setComment("Automatically created during setup.");
@@ -169,7 +169,7 @@ public class LoginPassword implements Command {
             userLoginPassword.setAlgorithm("SHA256");
             userLoginPassword.setIterations(1);
             userLoginPassword.setSalt(RandomUtil.randomByteArray(8));
-            userLoginPassword.setPasswordHash(PasswordCredentialsMatcher.passwordHash(password.getBytes(), userLoginPassword));
+            userLoginPassword.setPasswordHash(PasswordUtil.hash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
             userLoginPassword.setStatus(Status.APPROVED);
             userLoginPassword.setComment("Automatically created during setup.");

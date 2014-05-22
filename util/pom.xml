@@ -16,6 +16,7 @@
 	</parent>
   
   <modules>
+	<module>mtwilson-crypto-password</module>
 	<module>mtwilson-dbcp</module>
 	<module>mtwilson-i18n</module>
 	<module>mtwilson-jackson</module>

@@ -87,6 +87,11 @@ public class HostInfoCmd implements ICommand {
         log.debug("OS Version: " + context.getOsVersion());
 
     }
+    
+    private String trim(String text) {
+        if( text == null ) { return null; }
+        return text.trim();
+    }
 
     /*
      * Sample response of dmidecode -s bios-vendor -> Intel Corp. Sample
@@ -96,12 +101,12 @@ public class HostInfoCmd implements ICommand {
 
         // TODO: multline output is ignored, we just use the "first" string. whic his the only line anyway.
         CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
-        context.setBiosOem(result.getStdout());
+        context.setBiosOem(trim(result.getStdout()));
         log.debug("Bios OEM: " + context.getBiosOem());
 
 
         CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
-        context.setBiosVersion(result2.getStdout());
+        context.setBiosVersion(trim(result2.getStdout()));
         log.debug("Bios Version: " + context.getBiosVersion());
 
 
@@ -188,7 +193,7 @@ public class HostInfoCmd implements ICommand {
           String hostUUID = result.getStdout();
           // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
           
-          context.setHostUUID(hostUUID);
+          context.setHostUUID(trim(hostUUID));
           log.info("Context set with host UUID info: " + context.getHostUUID());
           
       }

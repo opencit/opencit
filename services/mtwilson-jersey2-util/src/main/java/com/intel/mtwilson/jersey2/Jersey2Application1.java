@@ -44,6 +44,7 @@ public class Jersey2Application1 extends AbstractJerseyPluginApplication {
     
     public Jersey2Application1() {
         super();
+register(com.intel.mtwilson.util.ThrowableMapperV1.class); // returns an application/json structure like { "error_code": 0, "error_message": "OK" }
         
 //register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
 register(com.intel.mtwilson.jaxrs2.provider.V1JacksonObjectMapperProvider.class);

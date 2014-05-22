@@ -71,7 +71,18 @@ public class CheckLoginController extends AbstractController {
             //}
             //stdalex 1/15 jks2db!disk
             MwPortalUserJpaController keystoreJpa = My.jpa().mwPortalUser();
-            MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
+            
+            // workaround for connection pool returning stale connections after being idle too long; when the connection pool is fixed this will work on the first try
+            MwPortalUser tblKeystore;
+            try {
+                tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
+            }
+            catch(Exception e) {
+                log.debug("Got exception [{}] while looking up user '{}', retrying", e.getMessage(), keyAliasName);
+                tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
+            }
+            
+            
             if(tblKeystore == null){
                 view.addObject("message", "Username or Password does not match or the user is not enabled.");                
                 view.addObject("result", false);

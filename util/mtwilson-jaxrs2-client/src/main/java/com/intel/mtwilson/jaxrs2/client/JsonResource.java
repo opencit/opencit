@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -20,6 +21,9 @@ import javax.ws.rs.core.Response;
  * methods for each resource, but where implemented the methods here should
  * be a convenient short-hand for accessing them.
  * 
+ * We expect that the server will provide localized error messages in the status line
+ * or an Error header if it encounters a problem.
+ * 
  * @author jbuhacoff
  */
 public class JsonResource<T extends Document, C extends DocumentCollection<T>> {
@@ -28,14 +32,18 @@ public class JsonResource<T extends Document, C extends DocumentCollection<T>> {
     private Class<C> collectionClass;
     private WebTarget target;
 
+    protected JsonResource() {
+        this.itemClass = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0]; // itemClass;
+        this.collectionClass = (Class<C>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[1]; //collectionClass;
+    }
+    
     /**
      * 
      * @param target representing a URL with a resource path like /mtwilson/v2/reports
      */
-    public JsonResource(WebTarget target, Class<T> itemClass, Class<C> collectionClass) {
+    public JsonResource(WebTarget target/*, Class<T> itemClass, Class<C> collectionClass*/) {
+        this();
         this.target = target;
-        this.itemClass = itemClass;
-        this.collectionClass = collectionClass;
     }
     
     /**
@@ -46,10 +54,8 @@ public class JsonResource<T extends Document, C extends DocumentCollection<T>> {
      * @param target representing a URL with a base path like /mtwilson/v2
      * @param path for example "users", "hosts", "reports" 
      */
-    public JsonResource(WebTarget target, String path, Class<T> clazz, Class<C> collectionClass) {
-        this.target = target.path(path);
-        this.itemClass = clazz;
-        this.collectionClass = collectionClass;
+    public JsonResource(WebTarget target, String path/*, Class<T> clazz, Class<C> collectionClass*/) {
+        this(target.path(path));
     }
 
     public WebTarget getTarget() {

@@ -884,7 +884,7 @@ public class ConnectionString {
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
+                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility;  TODO: in future major version of Mt Wilson change default to 1443
                 System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }

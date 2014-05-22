@@ -140,9 +140,9 @@ public class PatchUtil {
      * 
      * This method assumes the objects are flat -- it does not support
      * objects having arrays, lists, etc.  maybe a future version will.
-     * so currently any object taht is present will replace the previous
+     * so currently any object that is present will replace the previous
      * value completely, which means changes to arrays or maps require the
-     * full arra/map to be sent
+     * full array/map to be sent
      * 
      * This function wraps PropertyUtils.describe and excludes the "class"
      * attribute which ends up in the described object.

@@ -6,6 +6,7 @@ package com.intel.mtwilson.shiro.authc.password;
 
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.mtwilson.crypto.password.PasswordUtil;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -39,27 +40,13 @@ public class PasswordCredentialsMatcher implements CredentialsMatcher {
             throw new IllegalArgumentException("Null password credential"); // TODO:  error code  /  i18n  ; empty passwords length==0 are allowed
         }
         
-        byte[] hashedTokenBytes = passwordHash(tokenBytes, userLoginPasswordHash);
+        byte[] hashedTokenBytes = PasswordUtil.hash(tokenBytes, userLoginPasswordHash);
         if( Arrays.equals(hashedTokenBytes, userLoginPasswordHash.getPasswordHash()) ) {
             return true;
         }
         return false;
     }
 
-    public static byte[] passwordHash(byte[] inputPasswordBytes, HashedPassword storedPassword) {
-        // SHA-256 is the standard Java name but we also accept SHA256 
-        if( "SHA-256".equalsIgnoreCase(storedPassword.getAlgorithm()) ||  "SHA256".equalsIgnoreCase(storedPassword.getAlgorithm()) ) {
-            // first iteration is mandatory
-            Sha256Digest digest = Sha256Digest.digestOf(ByteArray.concat(storedPassword.getSalt(), inputPasswordBytes));
-            int max = storedPassword.getIterations() - 1; // -1 because we just completed the first iteration
-            for(int i=0; i<max; i++) {
-                digest = Sha256Digest.digestOf(digest.toByteArray());
-            }
-            return digest.toByteArray();
-        }
-        throw new UnsupportedOperationException("Algorithm not supported: "+storedPassword.getAlgorithm()); // TODO:  i18n
-    }
-    
     /**
      * Convert the input password from String or char[] into byte[] 
      * Assumes UTF-8 encoding 

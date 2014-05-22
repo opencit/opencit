@@ -132,9 +132,13 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <version>${project.version}</version>
         </dependency> -->
 
-    <dependency>
+        <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>

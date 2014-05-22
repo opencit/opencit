@@ -25,14 +25,16 @@ import org.slf4j.LoggerFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.Vendor;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Use this class to instantiate the appropriate agent or client for a given
  * host. It looks primarily at the "AddOn_Connection_String".
+ * 
+ * Use of the TblHosts object: getName(), getPort(), getTlsPolicyName(), 
+ * getTlsPolicyResource().
+ * 
  * @throws UnuspportedOperationException if the appropriate agent type cannot be determined from the given host
  * @author jbuhacoff
  */
@@ -68,6 +70,8 @@ public class HostAgentFactory {
      * but its functionality needs to be moved somewhere else - the trust utils
      * library should not know about the mt wilson database structure.
      * This implementation is a combination of getHostAgent and code from the original getManifest.
+     * XXX as of May 2014 this is not being used at all.
+     * @deprecated in mtwilson 2.0, use implementations of HostAgent instead
      * @param host
      * @return 
      */

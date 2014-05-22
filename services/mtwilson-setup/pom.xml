@@ -45,6 +45,11 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-crypto-password</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>

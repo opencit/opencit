@@ -6,8 +6,6 @@ package com.intel.mtwilson.trustagent.ws.v2;
 
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -21,15 +19,13 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import javax.servlet.http.HttpServletResponse;
+//import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import org.apache.commons.io.FileUtils;
 
 /**
  * This was previously called create_identity
@@ -47,7 +43,7 @@ public class Aik {
     
     @GET
     @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
-    public X509Certificate getIdentity(@Context HttpServletResponse response) throws IOException, CertificateException {
+    public X509Certificate getIdentity() throws IOException, CertificateException {
         TrustagentConfiguration configuration = getConfiguration();
         if( configuration.isDaaEnabled() ) {
             log.debug("daa is currently not supported");
@@ -68,13 +64,14 @@ public class Aik {
     @GET
     @Path("/ca")
     @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
-    public X509Certificate getIdentityCA(@Context HttpServletResponse response) throws Exception {
+    public X509Certificate getIdentityCA() throws Exception {
         TrustagentConfiguration configuration = getConfiguration();
         File keystoreFile = configuration.getTrustagentKeystoreFile();
         if( !keystoreFile.exists() ) {
             log.error("Missing keystore file: {}", keystoreFile.getAbsolutePath());
-            response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
-            return null;
+//            response.setStatus(Response.Status.NOT_FOUND.getStatusCode());
+//            return null;
+            throw new WebApplicationException(Response.serverError().header("Error", "Missing CA keystore file").build());
         }
         try {
             SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), configuration.getTrustagentKeystorePassword());

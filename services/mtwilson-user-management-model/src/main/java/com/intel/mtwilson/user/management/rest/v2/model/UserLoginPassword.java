@@ -6,11 +6,10 @@ package com.intel.mtwilson.user.management.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.crypto.password.HashProtection;
 import com.intel.mtwilson.jaxrs2.Document;
-import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  *  salt should be 8 bytes long minimum recommended in PKCS5 standard
@@ -27,7 +26,7 @@ import java.util.Set;
  * @author jbuhacoff
  */
 @JacksonXmlRootElement(localName="user_login_password")
-public class UserLoginPassword extends Document implements HashedPassword {
+public class UserLoginPassword extends Document implements HashProtection {
     private UUID id;
     private UUID userId;
     private byte[] passwordHash;
@@ -58,7 +57,6 @@ public class UserLoginPassword extends Document implements HashedPassword {
         this.userId = userId;
     }
 
-    @Override
     public byte[] getPasswordHash() {
         return passwordHash;
     }

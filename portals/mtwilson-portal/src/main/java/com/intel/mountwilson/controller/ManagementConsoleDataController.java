@@ -1304,6 +1304,8 @@ public class ManagementConsoleDataController extends MultiActionController {
             } else if (e.getMessage().toLowerCase().contains("Cannot parse response")) {
                 responseView.addObject("parseError", true);
                 responseView.addObject("message", "There was a error parsing the response from the server.  Please reload the page to fix this issue");
+            } else {
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             }
             return responseView;
         }

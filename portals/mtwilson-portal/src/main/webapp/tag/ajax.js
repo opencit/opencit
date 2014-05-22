@@ -203,6 +203,10 @@ ajax.json = {
                     _log.debug("ERROR: 401 "+message);
                     ajax.event.fire("httpPostFailure", {resource:my, content: postObject, response: null, message: message, unauthorized:true});
                 }
+                else if( transport.getHeader("Content-Type") === "text/plain" && transport.responseText ) {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: transport, message: transport.responseText});
+                }
                 else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
@@ -214,6 +218,10 @@ ajax.json = {
                         _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
                         ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
                     }
+                }
+                else {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
                 }
             }
         });
@@ -284,6 +292,10 @@ ajax.json = {
                     _log.debug("ERROR: 401 "+message);
                     ajax.event.fire("httpGetFailure", {resource:my, params: params, response: null, message: message, unauthorized:true});
                 }
+                else if( transport.getHeader("Content-Type") === "text/plain" && transport.responseText ) {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpGetFailure", {resource: my, content: postObject, response: transport, message: transport.responseText});
+                }
                 else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
@@ -295,6 +307,10 @@ ajax.json = {
                         _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
                         ajax.event.fire("httpGetFailure", {resource: my, params: params, response: transport, message: transport.statusText});
                     }
+                }
+                else {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpGetFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
                 }
             }
             /*,
@@ -385,6 +401,10 @@ ajax.json = {
                     _log.debug("ERROR: 401 "+message);
                     ajax.event.fire("httpPutFailure", {resource:my, content: putObject, response: null, message: message, unauthorized:true});
                 }
+                else if( transport.getHeader("Content-Type") === "text/plain" && transport.responseText ) {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpPutFailure", {resource: my, content: postObject, response: transport, message: transport.responseText});
+                }
                 else if (transport.responseText) {
                     var json = transport.responseJSON;
                     // some apis return metadata in an outer object and the content inside a 'data' field
@@ -396,6 +416,10 @@ ajax.json = {
                         _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
                         ajax.event.fire("httpPutFailure", {resource: my, content: putObject, response: transport, message: transport.statusText});
                     }
+                }
+                else {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpPutFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
                 }
             }
         });
@@ -437,10 +461,14 @@ ajax.json = {
             onFailure: function(transport) {
                 var response = transport.responseText || "no response text";
                 _log.debug("Failure! "+transport.status+"\n\n" + response);
-                if( response.transport === 401 ) {
+                if( transport.status === 401 ) {
                     var message = transport.statusText || "Unauthorized";
                     _log.debug("ERROR: 401 "+message);
                     ajax.event.fire("httpDeleteFailure", {resource:my, content: deleteObject, response: null, message: message, unauthorized:true});
+                }
+                else if( transport.getHeader("Content-Type") === "text/plain" && transport.responseText ) {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpDeleteFailure", {resource: my, content: postObject, response: transport, message: transport.responseText});
                 }
                 else if (transport.responseText) {
                     var json = transport.responseJSON;
@@ -453,6 +481,10 @@ ajax.json = {
                         _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
                         ajax.event.fire("httpDeleteFailure", {resource: my, content: deleteObject, response: transport, message: transport.statusText});
                     }
+                }
+                else {
+                    // no content in response, so show the status "reason phrase"
+                    ajax.event.fire("httpDeleteFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
                 }
             }
         });

@@ -66,6 +66,11 @@
             <artifactId>mtwilson-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-crypto-password</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.common</groupId>
@@ -76,10 +81,12 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-jpa</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
@@ -88,6 +95,7 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
@@ -118,6 +126,7 @@
             <artifactId>opensaml</artifactId>
             <version>2.5.1-1</version>
         </dependency>
+        -->
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -156,7 +165,6 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
-            <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -180,6 +188,7 @@
             <!-- <scope>test</scope> this was supposed to be for test but now xercesImpl is in the production artifact so this is required too -->
             <type>jar</type>
         </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-audit-handler</artifactId>
@@ -190,12 +199,11 @@
             <artifactId>mtwilson-audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        -->
         <!-- used by AsAuthenticationFilter -->        
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
         </dependency>
 
         <dependency>
@@ -239,21 +247,20 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.3.0</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.3.0</version>
             <optional>true</optional>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-util</artifactId>
-            <version>2.0-SNAPSHOT</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
+        -->
     </dependencies>
     <properties />
     

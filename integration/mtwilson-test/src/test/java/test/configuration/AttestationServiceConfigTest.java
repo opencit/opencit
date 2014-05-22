@@ -1,12 +1,11 @@
-package com.intel.mountwilson.as.common;
+package test.configuration;
 
+import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.DefaultConfigurationBuilder;
-import org.apache.commons.configuration.ConfigurationException;
 
 import org.junit.Test;
 import static org.junit.Assert.*;

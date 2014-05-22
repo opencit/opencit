@@ -205,7 +205,7 @@ public enum ErrorCode {
     MS_EXPIRED_CERTIFICATE(3101, "Client certificate has already expired. %s"),
     MS_CERTIFICATE_NOT_YET_VALID(3102, "Client certificate is not yet valid. Validity date is in the future. %s"),
     MS_DUPLICATE_CERTIFICATE(3103, "Certificate already registered in the system."),
-    MS_CERTIFICATE_ENCODING_ERROR(3104, "Error in certificate encoding. Cannot generate fingerprint. %s"),
+    MS_CERTIFICATE_ENCODING_ERROR(3104, "Error in certificate encoding. %s"), // TODO: replace with cpg-crypto X509CertificateFormatError (bytes->cert) or X509CertificateEncodingError (cert->bytes)
     MS_BAD_CERTIFICATE_FILE(3105,"Certificate file is not valid."),
     MS_MISSING_CERTIFICATE_FILE(3106, "Certificate file is missing."),
     MS_UN_SUPPORTED_HASH_ALGORITHM(3107, "Error generating fingerprint. Hash algorithm not supported. %s"),

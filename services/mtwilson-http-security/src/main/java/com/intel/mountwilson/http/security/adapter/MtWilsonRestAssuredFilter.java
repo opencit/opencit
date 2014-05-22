@@ -13,10 +13,8 @@ import com.jayway.restassured.specification.FilterableRequestSpecification;
 import com.jayway.restassured.specification.FilterableResponseSpecification;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Requires the restassured java library and the groovyx.net.http library (can
@@ -26,6 +24,9 @@ import org.apache.commons.lang.StringUtils;
  * Http request method is a little sketchy... javadoc shows a
  * "getRequestMethod()" on FilterContext but it's not available here
  *
+ * The restassured dependency is marked optional; you must add it specifically
+ * to your project when using this class.
+ * 
  * @author jbuhacoff
  */
 public class MtWilsonRestAssuredFilter implements Filter {
