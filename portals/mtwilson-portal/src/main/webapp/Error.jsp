@@ -8,7 +8,7 @@
     </head>
     <body>
         <div class="container">
-            <div class="title"><h1>Mt. Wilson Error</h1></div>
+            <div class="title"><h1>Mt. Wilson Portal Error</h1></div>
             <div>Mt. Wilson encountered an error. Please check the server log for more details.</div>
         </div>
     </body>

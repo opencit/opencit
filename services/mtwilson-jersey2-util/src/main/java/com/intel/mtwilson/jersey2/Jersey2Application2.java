@@ -46,6 +46,7 @@ public class Jersey2Application2 extends AbstractJerseyPluginApplication {
     
     public Jersey2Application2() {
         super();
+register(com.intel.mtwilson.util.ThrowableMapper.class); // returns localized error messages in an "Error" header;  api's that have detailed error reporting would explicitly set a status code and output format which the client would expect, whereas the Error header is for unexpected errors (like client expecting x509 certificate but getting error instead)
         
 register(com.intel.mtwilson.jaxrs2.provider.JacksonXmlMapperProvider.class); 
 register(com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider.class);

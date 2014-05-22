@@ -28,7 +28,7 @@ function populateHostTrustDetails(responsJSON) {
                      *get the users pw to be able to open his keystore
                      */
                     $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
-                }else if(responseJSON.parseError){
+                }else if(responsJSON.parseError){
                     $('#errorMessage').html('<span class="errorMessage">There was a error reading the servers response.  Pleaes refresh this page.</span>');
                 }else{
                     $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');

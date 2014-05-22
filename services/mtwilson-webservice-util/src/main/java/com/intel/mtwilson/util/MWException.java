@@ -84,5 +84,12 @@ public class MWException extends WebApplicationException implements Localizable 
         errorMessage.setLocale(locale);
 //        this.locale = locale;
     }
+
+    @Override
+    public String toString() {
+        log.debug("MWException toString: {}", errorMessage.toString());
+        return errorMessage.toString();
+    }
+    
     
 }
