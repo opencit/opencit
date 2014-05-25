@@ -52,7 +52,8 @@ public class TrustAgentClient extends MtWilsonClient {
         HostInfo hostInfo = getTarget()
                 .path("/host")
                 .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_XML)
+//                .accept(MediaType.APPLICATION_JSON)
                 .get(HostInfo.class);
         return hostInfo;
     }

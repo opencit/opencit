@@ -74,7 +74,7 @@ if [ -n "$xml" ]; then
     wget --no-proxy $xml -O $XML_FILE_LOCATION
 fi
 
-WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --auth-no-challenge"
+WGET="wget --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username --auth-no-challenge"
 UUID=`dmidecode |grep UUID | awk '{print $2}'`
 tagChoice=""
 tagFile=""
@@ -200,6 +200,25 @@ function provisionCert() {
  if [ -z "$server" ]; then 
    server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  fi
+
+ rm "$tpaDir/tempStatus"
+ $WGET -q -O "$tpaDir/tempStatus" "$server/version"
+ if [ ! -s "$tpaDir/tempStatus" ]; then
+   $WGET --secure-protocol=TLSv1 -q -O "$tpaDir/tempStatus" "$server/version"
+   if [ -s "$tpaDir/tempStatus" ]; then
+     export WGET="WGET --secure-protocol=TLSv1"
+   else
+     $WGET --secure-protocol=SSLv3 -q -O "$tpaDir/tempStatus" "$server/version"
+     if [ -s "$tpaDir/tempStatus" ]; then
+       export WGET="WGET --secure-protocol=SSLv3"
+     else
+       dialog --stdout --backtitle "$TITLE" --msgbox 'A SSL/TLS connection could not be established with the server. Please verify settings and try again.' 6 20
+       echo "A SSL/TLS connection could not be established with the server. Please verify settings and try again." > "$tpaDir/completion"
+       exit -1;
+     fi
+   fi
+ fi
+ 
  if [ $isUsingXml == 0 ]; then
    # if [ $autoSelect != 1 ]; then
     if [ -z "$selectionName" ]; then
