@@ -5,7 +5,9 @@
 package com.intel.mtwilson.i18n;
 
 /**
- *
+ * XXX this class should be deprecated because it doesn't work with a plugin
+ * architecture
+ * 
  * @author jbuhacoff
  */
 public enum BundleName {

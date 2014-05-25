@@ -155,8 +155,8 @@ create_privacyca_keys() {
    #        the setup console does not have the same classpath as the mtwilson app;
    #        when the plugin work is complete they will have the same classpath
    #        so these errors would not be thrown
-   mtwilson setup setup-manager create-endorsement-ca >> /dev/null 2>&1
-   mtwilson setup setup-manager create-privacy-ca >> /dev/null 2>&1
+   mtwilson setup-manager create-endorsement-ca >> /dev/null 2>&1
+   mtwilson setup-manager create-privacy-ca >> /dev/null 2>&1
 }
 
 # The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
@@ -175,7 +175,7 @@ protect_privacyca_files() {
 
 update_ssl_port() {
   configure_api_baseurl "${package_config_filename}"
-  mtwilson setup setup-manager update-ssl-port >> /dev/null 2>&1
+  mtwilson setup-manager update-ssl-port >> /dev/null 2>&1
 }
 
 setup_interactive_install() {

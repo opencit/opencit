@@ -20,12 +20,9 @@ public class MSCUConfig  {
     private static final Logger log = LoggerFactory.getLogger(MSCUConfig.class);
     private static final MSCUConfig global = new MSCUConfig();
     
-    public static Configuration getConfiguration() { try {
+    public static Configuration getConfiguration() {
         return My.configuration().getConfiguration();
-    } catch(IOException e) {
-        log.error("Cannot load configuration: "+e.toString(), e);
-        return null;
-    }}
+    }
         
 
     public Properties getDefaults() {

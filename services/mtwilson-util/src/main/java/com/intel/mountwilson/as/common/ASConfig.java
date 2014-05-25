@@ -1,7 +1,6 @@
 package com.intel.mountwilson.as.common;
 
 import com.intel.mtwilson.My;
-import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -26,12 +25,10 @@ import org.slf4j.LoggerFactory;
 public class ASConfig  {
     
     private static final ASConfig global = new ASConfig();
-    public static Configuration getConfiguration() { try {
+    
+    public static Configuration getConfiguration() {
         return My.configuration().getConfiguration();
-    } catch(IOException e) {
-        log.error("Cannot load configuration: "+e.toString(), e);
-        return null;
-    }}
+    }
     
     private static final Logger log = LoggerFactory.getLogger(ASConfig.class);
     

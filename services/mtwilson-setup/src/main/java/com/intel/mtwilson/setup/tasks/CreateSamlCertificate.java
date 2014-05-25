@@ -142,14 +142,14 @@ public class CreateSamlCertificate extends LocalSetupTask {
         try {
             PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
             log.debug("Read cakey {} from {}", cakey.getAlgorithm(), My.configuration().getCaKeystoreFile().getAbsolutePath());
-        } catch (CryptographyException | IOException e) {
+        } catch (CryptographyException e) {
             log.debug("Cannot read private key from {}", My.configuration().getCaKeystoreFile().getAbsolutePath(), e);
             configuration("Cannot read private key from: %s", My.configuration().getCaKeystoreFile().getAbsolutePath());
         }
         try {
             X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
             log.debug("Read cacert {} from {}", cacert.getSubjectX500Principal().getName(), My.configuration().getCaKeystoreFile().getAbsolutePath());
-        } catch (CertificateException | IOException e) {
+        } catch (CertificateException e) {
             log.debug("Cannot read certificate from {}", My.configuration().getCaKeystoreFile().getAbsolutePath(), e);
             configuration("Cannot read certificate from: %s", My.configuration().getCaKeystoreFile().getAbsolutePath());
         }

@@ -24,6 +24,7 @@
 	<module>mtwilson-citrix-attestation</module>
 	<module>mtwilson-intel-attestation</module>
 	<module>mtwilson-server</module>
+	<module>mtwilson-localization-es</module>
   </modules>
 
 </project>

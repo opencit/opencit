@@ -2,7 +2,6 @@ package com.intel.mtwilson.audit.helper;
 
 
 import com.intel.mtwilson.My;
-import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -28,14 +27,12 @@ import org.slf4j.LoggerFactory;
  */
 public class AuditConfig  {
 
-    public static Configuration getConfiguration() { try {
-        return My.configuration().getConfiguration();
-    } catch(IOException e) {
-        log.error("Cannot load configuration: "+e.toString(), e);
-        return null;
-    }}
     private static final Logger log = LoggerFactory.getLogger(AuditConfig.class);
 
+    public static Configuration getConfiguration() {
+        return My.configuration().getConfiguration();
+    }
+    
     public static boolean isAsyncEnabled() {
         if(getConfiguration().getString("mountwilson.audit.async", "false").equalsIgnoreCase("true") )
                 return true;

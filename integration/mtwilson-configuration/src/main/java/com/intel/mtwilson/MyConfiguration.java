@@ -77,7 +77,7 @@ public class MyConfiguration {
     private HashMap<String,String> keySourceMap = new HashMap<String,String>();
     
     // look in default locations
-    public MyConfiguration() throws IOException {
+    public MyConfiguration() {
         /*
         File directory = getDirectory();
         if( !directory.exists() && !directory.mkdirs() ) {

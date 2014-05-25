@@ -4,7 +4,10 @@
  */
 package com.intel.mtwilson.jaxrs2.server;
 
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.i18n.BundleName;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -34,37 +37,54 @@ public class Util {
         return acceptableMediaTypes.get(0);
     }
     
-    public static Locale getAcceptableLocale(List<Locale> acceptableLanguages) {
+    /**
+     * Tries to satisfy the client's acceptable language list in the order
+     * provided by the client. The server's list is not ordered. If a match
+     * cannot be determined the server's default locale is chosen.
+     * 
+     * It would be ideal if the web server could negotiate this automatically,
+     * as some web servers do for static resources. Automatic negotiation would
+     * require a way for the application to advertise which locales it has
+     * available for dynamically-generated responses. If such a facility 
+     * exists or comes into existence it should replace this utility function.
+     * 
+     * @param acceptableLanguages list provided by client in Accept-Language header
+     * @param availableLocales configured or detected on server
+     * @return the best available locale on the server for the client's request, or the server's default locale
+     */
+    public static Locale getAcceptableLocale(List<Locale> acceptableLanguages, String[] availableLocales) {
 //        ArrayList<Locale> list = new ArrayList<Locale>();
-        Locale locale = null;
 //        Enumeration<Locale> locales = request.getLocales(); // in priority order based on the accept language header in the request; if request doesn't specify then it contains the server's default locale (java-provided, not mtwilson-configured)
 //        while( locales.hasMoreElements() ) {
 //            list.add(locales.nextElement());
 //        }
-        if( acceptableLanguages.isEmpty() ) {
+        if( acceptableLanguages == null || acceptableLanguages.isEmpty() ) {
 //            list.add(Locale.getDefault()); // should never happen since the enumeration includes the platform default at the end
-            locale = Locale.getDefault();
+            return Locale.getDefault();
         }
-        else if( acceptableLanguages.size() == 1 ) {
-            // simple case: either user specified just one language or no language at all
-            locale = acceptableLanguages.get(0);
-        }
-        else if( acceptableLanguages.size() > 1 ) {
-            // check each locale to see if we have a bundle for it
+        else {
+            HashSet<String> available = new HashSet<>(Arrays.asList(availableLocales));
+            Locale locale = null;
             int i;
-            int max = acceptableLanguages.size() - 1; // no need to evaluate the last locale, it will be our default
-            for(i=0; i<max && locale==null; i++) {
+            int max = acceptableLanguages.size();
+            // 1. look for exact match
+            for(i=0; i<max; i++) {
                 locale = acceptableLanguages.get(i);
-                ResourceBundle bundle = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), locale);
-                if( bundle.getLocale().equals(Locale.getDefault())) {
-                    locale = null; // reset for next iteration
+                if( available.contains(LocaleUtil.toLanguageTag(locale)) ) {
+                    return locale;
                 }
             }
-            if( locale == null ) {
-                locale = acceptableLanguages.get(i); // last element
+            // 2. look for just language code without region
+            for(i=0; i<max; i++) {
+                locale = acceptableLanguages.get(i);
+                if( available.contains(locale.getLanguage()) ) {
+                    return locale;
+                }
             }
+            // 3. return default locale
+            return Locale.getDefault();
         }
-        return locale;
+
     }
         
 }

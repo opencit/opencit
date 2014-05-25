@@ -58,7 +58,7 @@ public class My {
     
     public static void reset() { config = null; jpa = null; }
     
-    public static MyConfiguration configuration() throws IOException { 
+    public static MyConfiguration configuration() { 
         if( config == null ) {
              config = new MyConfiguration();
         }

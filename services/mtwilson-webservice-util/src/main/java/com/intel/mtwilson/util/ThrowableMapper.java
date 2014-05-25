@@ -4,10 +4,7 @@
  */
 package com.intel.mtwilson.util;
 
-import com.intel.dcsg.cpg.i18n.Localizable;
-import com.intel.mtwilson.i18n.ErrorCode;
-//import com.intel.mtwilson.datatypes.ErrorResponse;
-import com.intel.mtwilson.i18n.ErrorMessage;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.jaxrs2.server.Util;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
@@ -15,7 +12,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -43,7 +39,7 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
         log.debug("ThrowableMapper toResponse", exception);
-        Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages());
+        Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages(), My.configuration().getAvailableLocales());
 
         String localizedMessage;
         if( exception instanceof MWException ) {

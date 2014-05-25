@@ -226,7 +226,7 @@ else
 fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
-update_property_in_file "mtwilson.locales" /etc/intel/cloudsecurity/mtwilson.properties "en,en-US,es,es-MX"
+update_property_in_file "mtwilson.locales" /etc/intel/cloudsecurity/mtwilson.properties "en,en-US"
 
 #Save variables to properties file
 if using_mysql; then   
@@ -732,6 +732,7 @@ update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_IS
 #fi
 
 #call_setupcommand create-database
+call_tag_setupcommand setup-manager update-extensions-cache-file 2> /dev/null
 call_tag_setupcommand setup-manager initialize-db --force
 
 call_tag_setupcommand tag-init-database

@@ -4,11 +4,10 @@
  */
 package com.intel.mtwilson.util;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.i18n.ErrorMessage;
 import com.intel.mtwilson.jaxrs2.server.Util;
 import java.util.Locale;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,7 +21,7 @@ public class ThrowableMapperV1 extends ThrowableMapper {
     @Override
     public Response toResponse(Throwable exception) {
         log.debug("ThrowableMapperV1 toResponse", exception);
-        Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages());
+        Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages(), My.configuration().getAvailableLocales());
         
         /*
         MediaType mediaType = Util.getAcceptableMediaType(headers.getAcceptableMediaTypes()); 

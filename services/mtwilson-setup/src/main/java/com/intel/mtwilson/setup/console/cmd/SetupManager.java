@@ -4,13 +4,7 @@
  */
 package com.intel.mtwilson.setup.console.cmd;
 
-import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
-import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
-import com.intel.dcsg.cpg.configuration.MutableCompositeConfiguration;
-import com.intel.dcsg.cpg.configuration.MutableConfiguration;
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
-import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
@@ -18,8 +12,6 @@ import com.intel.dcsg.cpg.util.PascalCaseNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
 import com.intel.mtwilson.setup.ConfigurationException;
@@ -37,8 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import org.apache.commons.collections.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**

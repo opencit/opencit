@@ -38,7 +38,6 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-//import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.My;
@@ -46,7 +45,6 @@ import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
-//import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Inet4Address;
@@ -120,14 +118,7 @@ public class TAHelper {
 //            opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
             aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
         }
-        try {
-            quoteWithIPAddress = My.configuration().getConfiguration().getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
-        }
-        catch(IOException e) {
-            log.warn("Cannot read service configuration: {}", e.getMessage());
-//            log.info("Cannot read service configuration; enabling quote with IP address by default");
-            quoteWithIPAddress = true;
-        }
+        quoteWithIPAddress = My.configuration().getConfiguration().getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
         boolean foundAllRequiredFiles = true;
         String required[] = new String[]{ aikverifyCmd, aikverifyhomeData};
         for (String filename : required) {

@@ -21,15 +21,65 @@
   
     <profiles>
         <profile>
+            <id>java-classes</id>
             <activation>
                 <file>
-                    <exists>dist/zip</exists>
+                    <exists>src/main/java-resources</exists>
                 </file>
             </activation>
-	
             <build>
                 <plugins>
-		
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>copy-java-resources</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/java-resources</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>compile</phase> <!-- was: install -->
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<classesDirectory>${project.build.directory}/classes</classesDirectory>
+									<outputDirectory>${project.build.directory}/feature/java</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+                    </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>java-dependencies</id>
+            <activation>
+                <file>
+                    <exists>dist/java</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
@@ -45,6 +95,21 @@
                             </execution>
                         </executions>
                     </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>zip</id>
+            <activation>
+                <file>
+                    <exists>dist/zip</exists>
+                </file>
+            </activation>
+	
+            <build>
+                <plugins>
+		
 		
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
