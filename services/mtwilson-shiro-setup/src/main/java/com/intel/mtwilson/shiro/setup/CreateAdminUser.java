@@ -17,6 +17,7 @@ import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.MyFilesystem;
@@ -47,6 +48,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.sql.Connection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -217,7 +219,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
 //            user.setEnabled(true);
 //            user.setStatus(Status.APPROVED);
             user.setUsername(username);
-            loginDAO.insertUser(user);
+            loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(Locale.US), user.getComment());
         }
         return user;
     }
