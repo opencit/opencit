@@ -6,7 +6,6 @@ package com.intel.mtwilson.setup.tasks;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
@@ -20,13 +19,10 @@ import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
-import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -210,7 +206,7 @@ public class MigrateUsers extends DatabaseSetupTask {
             user.setLocale(LocaleUtil.forLanguageTag(portalUser.getLocale()));
             user.setComment(String.format("%s\nmw_portal_user.id=%d\nmw_portal_user.uuid=%s", (portalUser.getComment() == null ? "" : portalUser.getComment()), portalUser.getId(), portalUser.getUuid_hex()));
 
-            loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
+            loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
 
             // create new password login record  --  will be disabled because we don't know the user's password
             UserLoginPassword userLoginPassword = new UserLoginPassword();
@@ -248,7 +244,7 @@ public class MigrateUsers extends DatabaseSetupTask {
                 user.setComment(String.format("Automatically created for existing mw_api_client_x509: %s", apiClient.getName()));
                 user.setLocale(LocaleUtil.forLanguageTag(apiClient.getLocale()));
                 user.setUsername(apiClient.getUserNameFromName());
-                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
+                loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
 
             } else {
                 userLoginPassword = loginDAO.findUserLoginPasswordByUserId(user.getId());            // we'll use this later when adding roles
