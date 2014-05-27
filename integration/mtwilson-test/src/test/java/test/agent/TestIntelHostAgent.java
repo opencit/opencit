@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.vendor.intel;
+package test.agent;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;

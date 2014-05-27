@@ -6,7 +6,8 @@
 # SCRIPT CONFIGURATION:
 share_dir=/usr/local/share/mtwilson/util
 apiclient_dir=/usr/local/share/mtwilson/apiclient
-setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+#setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+setupconsole_dir=/opt/mtwilson/java
 apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
@@ -222,6 +223,13 @@ setup_env() {
   echo "DEFAULT_API_PORT=$DEFAULT_API_PORT"
 }
 
+print_help() {
+        echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
+          "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
+          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+          "\t\trestart|setup|start|status|stop|uninstall|version}"
+}
+
 RETVAL=0
 
 # See how we were called.
@@ -348,16 +356,9 @@ case "$1" in
   setup)
         if [ $# -gt 1 ]; then
           shift
-          # first look for known old setup commands:
-          if [ "$1" = "InitDatabase" ] || [ "$1" = "BootstrapUser" ] || [ "$1" = "EncryptDatabase" ] || [ "$1" = "ImportConfig" ] || [ "$1" = "ExportConfig" ] || [ "$1" = "V2" ]; then
-            call_setupcommand $@
-          else            
-            # for everything else, try the new setup commands first,
-            # if there return code is 1 it means  the command was not found,
-            # and in that case we try the old setup commands
-            call_tag_setupcommand $@
-            if [ $? == 1 ]; then call_setupcommand $@; fi
-          fi
+          # old setup commands are here
+          # new setup commands invoked via "mtwilson setup-manager <command>" which is handled by the *) case at the bottom of this script
+          call_setupcommand $@
         else
           if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup
@@ -457,13 +458,15 @@ case "$1" in
         fi
         ;;
   help)
-        ;&
+        print_help
+        ;;
   *)
-        echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
-          "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
-          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
-          "\t\trestart|setup|start|status|stop|uninstall|version}"
-        exit 1
+        if [ $# -eq 0 ]; then
+          print_help
+        else
+          call_tag_setupcommand $@
+          if [ $? == 1 ]; then print_help; fi
+        fi
 esac
 
 exit $RETVAL

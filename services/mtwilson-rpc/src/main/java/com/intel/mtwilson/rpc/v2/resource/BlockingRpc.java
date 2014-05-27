@@ -121,8 +121,9 @@ public class BlockingRpc extends AbstractRpc {
             if (faults != null && faults.size() > 0) {
                 // Since there are errors, we will capture the error details and throw an exception.
                 for (Fault fault : faults) {
-                    log.error("Error during RPC execution : {}", fault.toString());
+                    log.error("Error during RPC execution: {}", fault.toString());
                 }
+                // TODO: create a specific exception class that can take a List<Fault> argument so the API layer can make it available to the client
                 throw new Exception("Error during RPC execution"); // this will get converted to the web application exception in the catch block.
             }
 //            ((Runnable)inputObject).run();

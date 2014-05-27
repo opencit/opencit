@@ -11,6 +11,8 @@ import javax.ws.rs.Path;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
+ * NOTE:  this is just a test class;  in mtwilson 2.0 domains must be plural like "hosts" and "user_passwords"
+ * 
  * Just a sample resource for testing
  * 
  * @author jbuhacoff

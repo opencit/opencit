@@ -10,12 +10,14 @@ import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.shiro.jdbi.*;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +71,7 @@ public class RepositoryTest {
         user.setId(new UUID());
         user.setUsername(My.configuration().getKeystoreUsername());
         user.setComment("test");
-        dao.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
+        dao.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(Locale.US), user.getComment());
 
         log.debug("Created username {} with id {}", user.getUsername(), user.getId()); // for example: Created username jonathan with id 84ff12f4-6a68-495c-a70d-174cb07e45ce
 

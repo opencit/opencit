@@ -20,6 +20,8 @@ import org.apache.shiro.realm.RealmFactory;
 import org.junit.Test;
 
 /**
+ * NOTE:  this is just a test class;  in mtwilson 2.0 domains must be plural like "hosts" and "user_passwords"
+ * 
  * References:
  * 
  * http://shiro.apache.org/architecture.html

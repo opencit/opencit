@@ -1272,7 +1272,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public List<ApiClientInfo> listPendingAccessRequests() throws IOException, ApiException, SignatureException {        
         ApiClientSearchCriteria criteria = new ApiClientSearchCriteria();
         criteria.enabledEqualTo = false;
-        criteria.statusEqualTo = "Pending"; // XXX TODO status codes should be in enum in datatypes project
+        criteria.statusEqualTo = "Pending"; // XXX TODO status codes should be in enum in datatypes project ; see com.intel.mtwilson.user.management.rest.v2.model.Status enum for v2
         return searchApiClients(criteria);
     }
 

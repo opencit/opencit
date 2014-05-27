@@ -324,8 +324,20 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
             case 'certificateRequests':
                 if(event.memo.resource.func == 'bulk_provisioning') {
-                        updateHostProvisioningStatus(event.memo.resource.app, 'Success');
-                        break;
+                    updateHostProvisioningStatus(event.memo.resource.app, 'Tag Certificate Created. Certificate being deployed');
+
+                    var provisionObject = {
+                            certificate_id: jQuery(event.memo.response).find('id')[0].innerHTML,
+                            host: event.memo.resource.app
+                    };
+                    ajax.json.post('provision-certificate', provisionObject,
+                    {
+                        'uri': '/mtwilson-portal/v2proxy/rpc/deploy-tag-certificate',
+                        'datapath': null,
+                        'func': 'bulk_provisioning'
+                    });
+
+                    break;
                 }
                 mtwilson.atag.notify({text: 'Created certificate request',clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
@@ -335,6 +347,10 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Created certificate',clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'provision-certificate':
+                if(event.memo.resource.func == 'bulk_provisioning') {
+                    updateHostProvisioningStatus(event.memo.content.host, 'Deployed successfully');
+                    break;
+                }
                 mtwilson.atag.notify({text: 'Provisioned certificate',clearAfter: 'AUTO', status: 'INFO'});
                 $('certificate-provision-host').clear();
                 $('certificate-provision-form').hide();
@@ -389,12 +405,20 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Create selection failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
+                if(event.memo.resource.func == 'bulk_provisioning') {
+                    updateHostProvisioningStatus(event.memo.resource.app, 'Failed');
+                    break;
+                }
                 mtwilson.atag.notify({text: 'Create certificate request failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificates':
                 mtwilson.atag.notify({text: 'Create certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'provision-certificate':
+                if(event.memo.resource.func == 'bulk_provisioning') {
+                    updateHostProvisioningStatus(event.memo.resource.app, 'Failed');
+                    break;
+                }
                 mtwilson.atag.notify({text: 'Provision certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'deploy-certificate':
@@ -691,6 +715,13 @@ mtwilson.atag = mtwilson.atag || {};
                 data.selection_details = [];
                 break;
             case 'hosts':
+                for(var i = data.hosts.length-1; i >= 0; i--) {
+                    if(data.hosts[i].connection_url.indexOf('vmware') != -1) {// && data.hosts[i].connection_url.indexOf('vmware') == -1) {
+                        data.hosts.splice(i, 1);
+                    }
+                }
+                ajax.view.sync();
+
                 jQuery('#my-select').multiSelect({'dblClick': true, 'selectionFooter': '<div class="custom-header">Servers to provision</div>', 'selectableFooter': '<div class="custom-header">Available servers</div>',
                         afterSelect: function(value){
                                 addElement2SelectedHosts(value[0]);
@@ -1532,8 +1563,8 @@ function provisionTags() {
 	$('provisionTagFormDiv').toggle();
 	$('provisionTagProgDiv').toggle();
 	for(var loop = 0; loop < selected_hosts.length; loop++) {
-                ajax.custom.post('certificateRequests', selectedSelectionXML, {app: selected_hosts[loop].subject, contentType: 'application/xml', accept: 'application/pkix-cert', func: 'bulk_provisioning'}, {subject: selected_hosts[loop].subject});
-		updateHostProvisioningStatus(selected_hosts[loop].subject, 'Reuqest sent', true);
+            ajax.custom.post('certificateRequests', selectedSelectionXML, {app: selected_hosts[loop].subject, contentType: 'application/xml', accept: '*/*', func: 'bulk_provisioning', next_action: 'deployCertificates'}, {subject: selected_hosts[loop].subject});
+            updateHostProvisioningStatus(selected_hosts[loop].subject, 'Reuqest sent', true);
 	}
 }
 
@@ -1550,7 +1581,7 @@ function updateHostProvisioningStatus(subject, status_str, dontUpdateCount) {
 			break;
 		}
 	}
-
+        return;
 	if( hostProvRespCount == selected_hosts.length) {
 		messageStr = 'Done!';
 		document.getElementById('hostProgressMessage').style.color = 'green';

@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.vendor.citrix;
+package test.agent;
 
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import org.apache.commons.codec.binary.Base64;

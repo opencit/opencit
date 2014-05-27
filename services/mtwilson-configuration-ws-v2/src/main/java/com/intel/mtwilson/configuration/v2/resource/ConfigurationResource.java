@@ -69,8 +69,8 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
                     configuration.getProperties().put(key, value);
                 }
             }
-            catch(IOException e) {
-                throw new WebApplicationException("Cannot load configuration"); // XXX TODO c reate  ErrorCode for this and throw an i18n exception
+            catch(Exception e) {
+                throw new WebApplicationException("Cannot load configuration"); // XXX TODO create specific exception for this (for i18n)
             }
         }
         else if( "my".equals(id) ) {

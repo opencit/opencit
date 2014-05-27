@@ -847,6 +847,11 @@ reference : https://java.net/jira/browse/JERSEY-2325
                 <artifactId>eclipselink</artifactId>
                 <version>2.5.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>javax.persistence</artifactId>
+                <version>2.1.0</version>
+            </dependency>
         
         
             <!-- jackson 1.x -->

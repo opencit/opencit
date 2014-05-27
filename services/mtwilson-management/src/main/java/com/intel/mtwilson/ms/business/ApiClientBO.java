@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.business;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -219,7 +220,7 @@ public class ApiClientBO extends BaseBO {
                 user.setId(new UUID());
                 user.setComment("");
                 user.setUsername(getSimpleNameFromCert(x509Certificate));
-                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
+                loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
             }
             log.debug("Looking for existing certificate");
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
@@ -283,7 +284,7 @@ public class ApiClientBO extends BaseBO {
                 log.debug("Found user {}", user.getId());
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
                     user.setComment(apiClientUpdateRequest.comment);
-                loginDAO.updateUser(user.getId(), user.getLocale(), user.getComment());
+                loginDAO.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
             }
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);

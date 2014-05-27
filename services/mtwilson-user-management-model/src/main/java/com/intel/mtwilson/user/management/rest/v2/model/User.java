@@ -13,8 +13,6 @@ import java.util.Locale;
   id uuid NOT NULL,
   username character varying(255) NOT NULL,
   locale character varying(8) NOT NULL,
-  enabled boolean NOT NULL DEFAULT '0',
-  status varchar(128) NOT NULL DEFAULT 'Pending',
   comment text DEFAULT NULL,
  *
  * @author jbuhacoff

@@ -59,7 +59,7 @@ CREATE TABLE mw_user_login_password (
   algorithm character varying(128) NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
-  status varchar(128) NOT NULL DEFAULT 'Pending',
+  status varchar(128) NOT NULL DEFAULT 'PENDING',
   comment text,
   PRIMARY KEY (id)
 ); 
@@ -82,7 +82,7 @@ CREATE TABLE mw_user_login_hmac (
   protection character varying(128) NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
-  status varchar(128) NOT NULL DEFAULT 'Pending',
+  status varchar(128) NOT NULL DEFAULT 'PENDING',
   comment text,
   PRIMARY KEY (id)
 ); 
@@ -101,7 +101,7 @@ CREATE TABLE mw_user_login_certificate (
   sha256_hash bytea NOT NULL,
   expires timestamp DEFAULT NULL,
   enabled boolean NOT NULL DEFAULT '0',
-  status varchar(128) NOT NULL DEFAULT 'Pending',
+  status varchar(128) NOT NULL DEFAULT 'PENDING',
   comment text,
   PRIMARY KEY (id)
 ); 

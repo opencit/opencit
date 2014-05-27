@@ -7,20 +7,16 @@
 package com.intel.mountwilson.trustagent.commands;
 
 import com.intel.mountwilson.common.CommandUtil;
-import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mountwilson.common.CommandResult;
 import com.intel.mountwilson.common.TAConfig;
-import java.io.PrintWriter;
-import org.apache.commons.lang.StringUtils;
 
 
 
@@ -31,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
 public class SetAssetTag implements ICommand{
    Logger log = LoggerFactory.getLogger(getClass().getName());
     private TADataContext context;
-    private final static String index ="0x40000010";
+    private final static String index = "0x40000010";
     
     public SetAssetTag(TADataContext context) {
         this.context = context;
@@ -40,10 +36,11 @@ public class SetAssetTag implements ICommand{
     @Override
     public void execute() throws TAException{
         try {
-            
+            log.debug("SetAssetTag execute");
             //String password = "ffffffffffffffffffffffffffffffffffffffff";  //No longer needed, read it from props file in createIndex()
             String tpmNvramPass = generateRandomPass();
             
+            log.debug("SetAssetTag generated nvram password {}", tpmNvramPass);
             //create the index if needed
             boolean iExists = indexExists();
             if(iExists){  // if it exists we need to get the password from the service for the nvram

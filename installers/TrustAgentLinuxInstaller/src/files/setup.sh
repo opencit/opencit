@@ -67,7 +67,6 @@ if [ -f /etc/monit/conf.d/ta.monit ]; then
 fi
 
 # bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
-# if there's already a previous version installed, uninstall it
 # But if trust agent is already installed and running, stop it now (and start the new one later)
 existing_tagent=`which tagent 2>/dev/null`
 if [ -f "$existing_tagent" ]; then
@@ -292,7 +291,6 @@ return_dir=`pwd`
   fi
   cd ..
   # create trustagent.version file
-  mkdir -p $package_version_filename
   datestr=`date +%Y-%m-%d.%H%M`
   touch $package_version_filename
   chmod 600 $package_version_filename

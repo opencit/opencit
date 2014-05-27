@@ -21,6 +21,7 @@
   
 	<profiles>
 	<profile>
+	<id>zip</id>
 	<activation>
 	<file>
 	<exists>dist/zip</exists>

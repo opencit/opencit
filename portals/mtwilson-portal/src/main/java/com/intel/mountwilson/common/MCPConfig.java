@@ -20,12 +20,9 @@ public class MCPConfig  {
     private static final Logger log = LoggerFactory.getLogger(MCPConfig.class);
     private static final MCPConfig global = new MCPConfig();
 
-    public static Configuration getConfiguration() { try {
+    public static Configuration getConfiguration() {
         return My.configuration().getConfiguration();
-    } catch(IOException e) {
-        log.error("Cannot load configuration: "+e.toString(), e);
-        return null;
-    }}
+    }
 
     public Properties getDefaults() {
         Properties defaults = new Properties();

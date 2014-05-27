@@ -105,7 +105,7 @@ public class InitializeDb extends DatabaseSetupTask {
             domainActions.put("configurations", "search,retrieve");
             domainActions.put("tag_kv_attributes", "*");
             domainActions.put("tag_selections", "*");
-            domainActions.put("selection_kv_attributes", "*");
+            domainActions.put("tag_selection_kv_attributes", "*");
             domainActions.put("files", "search,retrieve");
             domainActions.put("tpm_passwords", "*");
             domainActions.put("host_uuids", "*");

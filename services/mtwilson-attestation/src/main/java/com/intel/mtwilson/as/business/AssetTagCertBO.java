@@ -166,8 +166,11 @@ public class AssetTagCertBO extends BaseBO{
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
                 // below code is for debugging.. we will delete it later.
                 // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
-                if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                    log.error("mapAssetTagCertToHost : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                if (atagCerts.isEmpty() ) {
+                    log.error("mapAssetTagCertToHost: The asset tag certificate does not exist");
+                    throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
+                } else if (atagCerts.size() > 1) {
+                    log.error("mapAssetTagCertToHost: There were multiple matches for the specified hash");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
                 } else {
                     MwAssetTagCertificate atagCert = atagCerts.get(0);
@@ -221,8 +224,12 @@ public class AssetTagCertBO extends BaseBO{
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
                 // below code is for debugging.. we will delete it later.
                 // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
-                if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                    log.error("mapAssetTagCertToHostById : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                if (atagCerts.isEmpty() ) {
+                    log.error("mapAssetTagCertToHostById: The asset tag certificate does not exist");
+                    throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
+                }
+                else if( atagCerts.size() > 1) {
+                    log.error("mapAssetTagCertToHostById: There were multiple matches for the specified hash");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
                 } else {
                     // Now that we have the asset tag identified, let us update the entry with the host ID for which it has

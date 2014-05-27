@@ -21,12 +21,9 @@ public class WLMPConfig  {
     private static final WLMPConfig global = new WLMPConfig();
 //        private final static Properties defaults = new Properties();
 
-    public static Configuration getConfiguration() { try {
+    public static Configuration getConfiguration() {
         return My.configuration().getConfiguration();
-    } catch(IOException e) {
-        log.error("Cannot load configuration: "+e.toString(), e);
-        return null;
-    }}
+    }
        
     public Properties getDefaults() {
         Properties defaults = new Properties();

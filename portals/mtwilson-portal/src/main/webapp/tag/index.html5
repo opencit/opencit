@@ -849,6 +849,7 @@ function isNumber(n) {
                                         </select>
 
                                         <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" placeholder="Date" onblur='$(this).value = Date.parse($(this).value).toISOString();'/>
+                                        <script>document.getElementById('certificate-search-valid').value = Date.parse('today').toISOString()</script>
                                         <span class="help">Try "today", "next tuesday", or most reasonable date formats</span>
 
                                     </div>
@@ -881,7 +882,7 @@ function isNumber(n) {
                                         <input type="hidden" id="certificate-search-revoked-criteria" value=""/>
                                         <select class="ddlBox_small_Border" id="certificate-search-revoked">
                                             <option value="">Any</option>
-                                            <option value="false">Active</option>
+                                            <option value="false" selected>Active</option>
                                             <option value="true">Revoked</option>
                                         </select>
 

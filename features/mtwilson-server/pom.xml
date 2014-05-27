@@ -64,11 +64,13 @@
       <version>${project.version}</version>
     </dependency>
 	<!-- end database support -->
+    
     <dependency>
       <groupId>com.intel.mtwilson.desktop</groupId>
       <artifactId>mtwilson-console</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
 	<!-- todo: a separate feature with asset tag components -->
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>

@@ -172,7 +172,7 @@ public class JaxrsClientBuilder {
 //        client = ClientBuilder.newClient(clientConfig);
         // TODO: if URL is http and not https then we should skip the ssl configuration
         Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).withConfig(clientConfig).build();
-        if( configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", false) ) {
+        if( configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true) ) {
             client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));
         }
         else {
