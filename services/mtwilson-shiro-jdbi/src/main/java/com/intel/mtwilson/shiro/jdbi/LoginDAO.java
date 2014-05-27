@@ -16,13 +16,9 @@ import com.intel.mtwilson.jdbi.util.DateArgument;
 import java.io.Closeable;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
-import org.skife.jdbi.v2.sqlobject.SqlBatch;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
-import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
@@ -30,7 +26,6 @@ import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import java.util.Set;
-import org.skife.jdbi.v2.sqlobject.BindBean;
 
 /**
  * References:
@@ -62,16 +57,16 @@ public interface LoginDAO extends Closeable {
   comment text DEFAULT NULL,
      */
     @SqlUpdate("insert into mw_user (id, username, locale, comment) values (:id, :username, :locale, :comment)")
-    void insertUser(@Bind("id") UUID id, @Bind("username") String username, @Bind("locale") Locale locale, @Bind("comment") String comment);
+    void insertUser(@Bind("id") UUID id, @Bind("username") String username, @Bind("locale") String locale, @Bind("comment") String comment);
 
-    @SqlUpdate("insert into mw_user (id, username, locale, comment) values (:id, :username, :locale, :comment)")
-    void insertUser(@BindBean User user);
+//    @SqlUpdate("insert into mw_user (id, username, locale, comment) values (:id, :username, :locale, :comment)")
+//    void insertUser(@BindBean User user);
     
     @SqlUpdate("update mw_user set locale=:locale, comment=:comment WHERE id=:id")
-    void updateUser(@Bind("id") UUID id, @Bind("locale") Locale locale, @Bind("comment") String comment);
+    void updateUser(@Bind("id") UUID id, @Bind("locale") String locale, @Bind("comment") String comment);
     
-    @SqlUpdate("update mw_user set id=:id, username=:username, locale=:locale, comment=:comment WHERE id=:id")
-    void updateUser(@BindBean User user);
+//    @SqlUpdate("update mw_user set id=:id, username=:username, locale=:locale, comment=:comment WHERE id=:id")
+//    void updateUser(@BindBean User user);
 
 //    @SqlUpdate("update mw_user set enabled=:enabled, status=:status, comment=:comment WHERE id=:id")
 //    void enableUser(@Bind("id") UUID id, @Bind("enabled") boolean enabled, @Bind("status") Status status, @Bind("comment") String comment);

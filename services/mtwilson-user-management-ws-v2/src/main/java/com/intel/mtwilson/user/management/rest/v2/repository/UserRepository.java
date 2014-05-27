@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
@@ -14,6 +15,7 @@ import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
+import java.util.Locale;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -84,7 +86,9 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
             User user = loginDAO.findUserById(item.getId());
             if (user != null) {
                 user.setComment(item.getComment());
-                loginDAO.updateUser(user);
+                if (item.getLocale() != null)
+                    user.setLocale(item.getLocale());
+                loginDAO.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
                 log.debug("User:Store - Updated the user {} successfully.", user.getUsername());
             } else {
                 log.error("User:Store - User {} will not be updated since it does not exist.");
@@ -110,7 +114,11 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
                 user.setId(item.getId());
                 user.setUsername(item.getUsername());
                 user.setComment(item.getComment());
-                loginDAO.insertUser(user.getId(), user.getUsername(), user.getLocale(), user.getComment());
+                if (item.getLocale() != null)
+                    user.setLocale(item.getLocale());
+                else
+                    user.setLocale(Locale.US);
+                loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
                 log.debug("User:Create - Created the user {} successfully.", item.getUsername());
             } else {
                 log.error("User:Create - User {} will not be created since a duplicate user already exists.", item.getUsername());

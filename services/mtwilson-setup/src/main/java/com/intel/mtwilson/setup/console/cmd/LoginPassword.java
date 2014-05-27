@@ -7,6 +7,7 @@ package com.intel.mtwilson.setup.console.cmd;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import org.apache.commons.configuration.Configuration;
@@ -23,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 /**
  * Usage examples:
@@ -141,10 +143,10 @@ public class LoginPassword implements Command {
             user.setId(new UUID());
             //user.setComment("automatically created by setup");
             user.setUsername(username);
-            dao.insertUser(user);
+            dao.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(Locale.US), ""); // setting the default user with locale set to US
             log.info("Created user {}", username);
         } else {
-            dao.updateUser(user);
+            dao.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
             log.debug("Updated User: {}", username);
         }
         
