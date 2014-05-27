@@ -465,7 +465,7 @@ case "$1" in
           print_help
         else
           call_tag_setupcommand $@
-          if [ $? == 1 ]; then print_help; fi
+          #if [ $? -eq 1 ]; then print_help; fi
         fi
 esac
 
