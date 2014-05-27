@@ -223,7 +223,7 @@ else
 fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
-update_property_in_file "mtwilson.locales" /etc/intel/cloudsecurity/mtwilson.properties "en,en-US"
+update_property_in_file "mtwilson.locales" /etc/intel/cloudsecurity/mtwilson.properties "en-US"
 
 #Save variables to properties file
 if using_mysql; then   
