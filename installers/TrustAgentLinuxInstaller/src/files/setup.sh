@@ -291,7 +291,6 @@ return_dir=`pwd`
   fi
   cd ..
   # create trustagent.version file
-  mkdir -p $package_version_filename
   datestr=`date +%Y-%m-%d.%H%M`
   touch $package_version_filename
   chmod 600 $package_version_filename
