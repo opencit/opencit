@@ -26,7 +26,7 @@ export AUTO_UPDATE_ON_UNTRUST=false
 export WEBSERVICE_USERNAME=admin
 export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
-cat /dev/null > $INSTALL_LOG_FILE
+date > $INSTALL_LOG_FILE
 
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
@@ -188,17 +188,14 @@ auto_install "Installer requirements" "APICLIENT"
 
 
 # api client: ensure destination exists and clean it before copying
-mkdir -p /usr/local/share/mtwilson/apiclient/java
-rm -rf /usr/local/share/mtwilson/apiclient/java/*
-#unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
-unzip mtwilson-client-java6*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
+#mkdir -p /usr/local/share/mtwilson/apiclient/java
+#rm -rf /usr/local/share/mtwilson/apiclient/java/*
+#unzip mtwilson-client-java6*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
 
 # setup console: create folder and copy the executable jar
-mkdir -p /opt/intel/cloudsecurity/setup-console
-#rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
-rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
-#cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
-cp mtwilson-console*.jar /opt/intel/cloudsecurity/setup-console
+#mkdir -p /opt/intel/cloudsecurity/setup-console
+#rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
+#cp mtwilson-console*.jar /opt/intel/cloudsecurity/setup-console
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
@@ -541,9 +538,24 @@ if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
   . /etc/environment
 fi
 
-echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
+
+echo "Installing Mt Wilson application code..." | tee -a $INSTALL_LOG_FILE
+ZIP_PACKAGE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
+unzip -o $ZIP_PACKAGE -d /opt/mtwilson >> $INSTALL_LOG_FILE  2>&1
+mkdir -p /opt/mtwilson/var
+#chown -R $MTWILSON_OWNER:$MTWILSON_OWNER /opt/mtwilson
+#chown -R root /opt/mtwilson/bin
+#chown -R root /opt/mtwilson/java
+#chown -R root /opt/mtwilson/configuration
+#mkdir -p /var/log/mtwilson
+#chown $MTWILSON_OWNER:$MTWILSON_OWNER /var/log/mtwilson
+chmod -R 770 /opt/mtwilson/bin
+mkdir -p /opt/mtwilson/env.d
+#chown -R root /opt/mtwilson/env.d
+
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
@@ -634,21 +646,6 @@ elif using_tomcat; then
     echo_warning "Skipping webservice init"
   fi
  
-fi
-
-echo "Adding symlink for /opt/mtwilson/java..."
-if using_glassfish; then
-  # temp symlink -- SAVY added 2014-02-04
-  if [[ ! -h "/opt/mtwilson/java" ]]; then
-    mkdir -p /opt/mtwilson
-    ln -s "$GLASSFISH_HOME/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
-  fi
-elif using_tomcat; then
-  # temp symlink -- SAVY added 2014-02-04
-  if [[ ! -h "/opt/mtwilson/java" ]]; then
-    mkdir -p /opt/mtwilson
-    ln -s "$TOMCAT_HOME/webapps/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
-  fi
 fi
 
 
