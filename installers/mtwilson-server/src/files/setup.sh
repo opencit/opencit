@@ -544,7 +544,7 @@ echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
 echo "Installing Mt Wilson application code..." | tee -a $INSTALL_LOG_FILE
 ZIP_PACKAGE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
-unzip -o $ZIP_PACKAGE -d /opt/mtwilson >> $INSTALL_LOG_FILE  2>&1
+unzip -DD -o $ZIP_PACKAGE -d /opt/mtwilson >> $INSTALL_LOG_FILE  2>&1
 mkdir -p /opt/mtwilson/var
 #chown -R $MTWILSON_OWNER:$MTWILSON_OWNER /opt/mtwilson
 #chown -R root /opt/mtwilson/bin
