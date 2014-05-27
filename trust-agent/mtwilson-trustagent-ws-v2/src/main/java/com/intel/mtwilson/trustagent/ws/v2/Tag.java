@@ -25,15 +25,19 @@ import org.apache.commons.codec.binary.Hex;
 @V2
 @Path("/tag")
 public class Tag {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tag.class);
     
     @POST
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     public void writeTag(TagWriteRequest tagInfo, @Context HttpServletResponse response) throws TAException {
         // TODO:  confirm that the uuid in the tag request matches our own host hardware uuid, reject the request if they don't match 
+        log.debug("writeTag uuid {} sha1 {}", tagInfo.getHardwareUuid(), Hex.encodeHexString(tagInfo.getTag()));
         TADataContext context = new TADataContext();
         context.setAssetTagHash(Hex.encodeHexString(tagInfo.getTag()));
         new SetAssetTag(context).execute();
+        log.debug("writeTag returning 204 status");
         response.setStatus(Response.Status.NO_CONTENT.getStatusCode());
+        log.debug("writeTag done");
     }
     
 }

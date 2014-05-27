@@ -13,38 +13,44 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class AssetTagCertAssociateRequest {
     
-    private byte[]  sha1OfAssetCert;
-    private int     hostID;
+    /**
+     * A tag is the 20-byte sha1 digest of the asset certificate
+     */
+    private byte[]  tag;
+    private int     hostId;
 
     public AssetTagCertAssociateRequest() {
-        this.sha1OfAssetCert = null;
-        this.hostID = 0;
+        this.tag = null;
+        this.hostId = 0;
     }
             
     public AssetTagCertAssociateRequest(byte[] sha1OfAssetCert, int hostID) {
-        this.sha1OfAssetCert = sha1OfAssetCert;
-        this.hostID = hostID;
+        this.tag = sha1OfAssetCert;
+        this.hostId = hostID;
     }
 
-    
+    // TODO:  should be "tag"
     @JsonProperty("SHA1Hash")
     public byte[] getSha1OfAssetCert() {
-        return sha1OfAssetCert;
+        return tag;
     }
 
+    // TODO:  should be "tag"
     @JsonProperty("SHA1Hash")
     public void setSha1OfAssetCert(byte[] sha1OfAssetCert) {
-        this.sha1OfAssetCert = sha1OfAssetCert;
+        this.tag = sha1OfAssetCert;
     }
 
+    // TODO: should be "host_id" ; or allow the mapping framework to do it based on the default rules which would result in host_id
     @JsonProperty("Host_ID")
     public int getHostID() {
-        return hostID;
+        return hostId;
     }
 
+    // TODO: should be "host_id" ; or allow the mapping framework to do it based on the default rules which would result in host_id
     @JsonProperty("Host_ID")
     public void setHostID(int hostID) {
-        this.hostID = hostID;
+        this.hostId = hostID;
     }    
     
 }

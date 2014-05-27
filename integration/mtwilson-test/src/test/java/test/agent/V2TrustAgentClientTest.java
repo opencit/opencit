@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.vendor.intel;
+package test.agent;
 
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
@@ -35,7 +35,7 @@ public class V2TrustAgentClientTest {
     
     @BeforeClass
     public static void createClient() throws Exception {
-        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.96:1443/v2"), new InsecureTlsPolicy());
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.171:1443/v2"), new InsecureTlsPolicy());
         Properties properties = new Properties();
         properties.setProperty("mtwilson.api.username", "mtwilson");
         properties.setProperty("mtwilson.api.password", "");
@@ -51,7 +51,7 @@ public class V2TrustAgentClientTest {
         log.debug(mapper.writeValueAsString(hostInfo));
     }
     
-//    @Test
+    @Test
     public void testSetAssetTagCommand() throws IOException, DecoderException {
         String hash = "8f110749fd76cc35526c2ed30c95ed113fd0220a";
         String uuid = "f4b17194-cae7-11df-b40b-001517fa9844";

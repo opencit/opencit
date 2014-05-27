@@ -1,4 +1,4 @@
-package test.vendor.intel;
+package test.agent;
 
 
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;

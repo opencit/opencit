@@ -2,11 +2,10 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.vendor.citrix;
+package test.agent;
 
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import test.vendor.intel.*;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;

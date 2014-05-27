@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.vendor.intel;
+package test.agent;
 
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;

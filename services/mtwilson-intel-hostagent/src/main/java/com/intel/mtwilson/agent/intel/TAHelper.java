@@ -369,6 +369,14 @@ public class TAHelper {
             String decodedEventLog = new String(eventLogBytes);
             log.debug("Event log retrieved from the host consists of: " + decodedEventLog);
 
+            /*
+             * Example output:
+             * <pre>
+  2014-05-27 11:40:49,089 DEBUG [http-listener-2(15)] c.i.m.a.i.TAHelper [TAHelper.java:464] Event log retrieved from the host consists of: <measureLog><txt><txtStatus>1</txtStatus><osSinitDataCapabilities>00000000</osSinitDataCapabilities><sinitMleData><version>8</version><sinitHash>fee3650237e216da2159d6f4ef85d33b3b8d3bbe</sinitHash><mleHash>03721dc24915743302f9648b7e82c559d5bdfc6b</mleHash><biosAcmId>800000002010120400003400ffffffffffffffff</biosAcmId><msegValid>0</msegValid><stmHash>0000000000000000000000000000000000000000</stmHash><policyControl>00000000</policyControl><lcpPolicyHash>0000000000000000000000000000000000000000</lcpPolicyHash><processorSCRTMStatus>00000001</processorSCRTMStatus><edxSenterFlags>00000000</edxSenterFlags></sinitMleData><modules><module><pcrNumber>17</pcrNumber><name>tb_policy</name><value>c3438497fda827be3b321c5309a204f0c9e53943</value></module><module><pcrNumber>18</pcrNumber><name>xen.gz</name><value>7a7262b37b255ec484c274a6b2e6a94591e2fdce</value></module><module><pcrNumber>19</pcrNumber><name>vmlinuz</name><value>d70e9875afa574c58348f25ef1249671e396cbc6</value></module><module><pcrNumber>19</pcrNumber><name>initrd</name><value>06c2db1b1050a3347f3f69616f9735da2089effa</value></module><module><pcrNumber>22</pcrNumber><name>asset-tag</name><value>4fd9fdab06ce10c7360b87478232cc3fc1a45249</value></module></modules></txt></measureLog>]]
+  *          * </pre>
+             * 
+             */
+
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             log.info("Got PCR map");
