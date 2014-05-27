@@ -202,12 +202,15 @@ function provisionCert() {
  fi
 
  rm "$tpaDir/tempStatus"
+ echo "$WGET -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
  $WGET -q -O "$tpaDir/tempStatus" "$server/version"
  if [ ! -s "$tpaDir/tempStatus" ]; then
+   echo "$WGET --secure-protocol=TLSv1 -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
    $WGET --secure-protocol=TLSv1 -q -O "$tpaDir/tempStatus" "$server/version"
    if [ -s "$tpaDir/tempStatus" ]; then
      export WGET="WGET --secure-protocol=TLSv1"
    else
+     echo "$WGET --secure-protocol=SSLv3 -q -O $tpaDir/tempStatus $server/version" >> $cmdFile
      $WGET --secure-protocol=SSLv3 -q -O "$tpaDir/tempStatus" "$server/version"
      if [ -s "$tpaDir/tempStatus" ]; then
        export WGET="WGET --secure-protocol=SSLv3"
@@ -269,6 +272,7 @@ function provisionCert() {
  fi
  if [ $resp -eq 0 ]; then
   # Retrieve password if TA, else generate new passwords and take ownership
+  echo "$WGET $server/host-tpm-passwords/$UUID.json -q -O $tpaDir/tpmPassword" >> $cmdFile
   $WGET $server/host-tpm-passwords/$UUID.json -q -O $tpaDir/tpmPassword
   #export ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
   export ownerPass=`cat $tpaDir/tpmPassword | awk -F'"password":' '{print $2}' | awk -F'"' '{print $2}'`
