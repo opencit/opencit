@@ -185,10 +185,14 @@ function getRemoteTag() {
 function getTagOption() {
  functionReturn=0
  if [ -z "$selection" ]; then
-   # tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
-   tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
-   if [ $? -eq 1 ]; then
-     exit 0;
+   if [ -z "$xml" ]; then
+     # tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off 3 "Automatic" off)
+     tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
+     if [ $? -eq 1 ]; then
+       exit 0;
+     fi
+   else
+     tagChoice=2
    fi
  else
   tagChoice=1
@@ -215,7 +219,7 @@ function provisionCert() {
      if [ -s "$tpaDir/tempStatus" ]; then
        export WGET="WGET --secure-protocol=SSLv3"
      else
-       dialog --stdout --backtitle "$TITLE" --msgbox 'A SSL/TLS connection could not be established with the server. Please verify settings and try again.' 6 20
+       dialog --stdout --backtitle "$TITLE" --msgbox 'A SSL/TLS connection could not be established with the server. Please verify settings and try again.' 10 60
        echo "A SSL/TLS connection could not be established with the server. Please verify settings and try again." > "$tpaDir/completion"
        exit -1;
      fi
