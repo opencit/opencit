@@ -290,7 +290,10 @@ public class ApiClientBO extends BaseBO {
                 log.debug("Found user {}", user.getId());
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
                     user.setComment(apiClientUpdateRequest.comment);
-                loginDAO.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
+                String localeTag = null;
+                if (user.getLocale() != null)
+                    localeTag = LocaleUtil.toLanguageTag(user.getLocale());
+                loginDAO.updateUser(user.getId(), localeTag, user.getComment());
             }
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);

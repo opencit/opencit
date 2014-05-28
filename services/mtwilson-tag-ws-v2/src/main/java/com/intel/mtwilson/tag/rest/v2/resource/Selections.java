@@ -89,16 +89,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     public String retrieveOneJson(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         Selection obj = super.retrieveOne(locator); 
         SelectionsType selectionsType = getSelectionData(obj);
-        // If there are no tags associated with the selection, then the above call would
-        // return a null value.
-        String jsonStr = null;
-        if (selectionsType != null) {
-            jsonStr = Util.toJson(selectionsType);
-        } else {
-            ObjectMapper mapper = new ObjectMapper();
-            jsonStr = mapper.writeValueAsString(obj);
-        }
-        
+        String jsonStr = Util.toJson(selectionsType);        
         log.debug("Generated tag selection json: {}", jsonStr);
         return jsonStr;
         
@@ -125,17 +116,7 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
 //        // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
 //        SelectionsType selectionsType = builder.build();
         SelectionsType selectionsType = getSelectionData(obj);
-        String xml = null;
-        if (selectionsType != null) {
-            xml = Util.toXml(selectionsType);
-//        } else {
-//            JAXB jaxb = new JAXB();
-//            try {
-//                xml = jaxb.write(jaxb);
-//            } catch (JAXBException ex) {
-//                log.error("Error during xml creation.", ex);
-//            }
-        }
+        String xml = Util.toXml(selectionsType);
         log.debug("Generated tag selection xml: {}", xml);
         return xml;
     }

@@ -519,7 +519,7 @@ public class KeystoreUtil {
     // TODO: move to mtwilson-client-java7 : com.intel.mtwilson.v2.client.MwClientUtil
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, String comments) throws IOException, ApiException, CryptographyException, ClientException {
-        return createUserInResourceV2(resource, username, password, server, new InsecureTlsPolicy(), comments, Locale.US);
+        return createUserInResourceV2(resource, username, password, server, new InsecureTlsPolicy(), comments, null);
     }
     // TODO: move to mtwilson-client-java7 : com.intel.mtwilson.v2.client.MwClientUtil
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
