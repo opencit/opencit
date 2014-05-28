@@ -44,7 +44,7 @@ public class DeployTagCertificate extends MtWilsonClient {
      * @mtwSampleApiCall
      * <pre>
      *  DeployTagCertificate client = new DeployTagCertificate(My.configuration().getClientProperties());
-     *  client.deployTagCertificate("a6544ff4-6dc7-4c74-82be-578592e7e3ba");
+     *  client.deployTagCertificate(UUID.valueOf("a6544ff4-6dc7-4c74-82be-578592e7e3ba"));
      * </pre>
      */
     public void deployTagCertificate(UUID certificateId, String host) {

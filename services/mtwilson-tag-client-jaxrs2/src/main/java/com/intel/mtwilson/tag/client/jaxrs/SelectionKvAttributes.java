@@ -45,14 +45,14 @@ public class SelectionKvAttributes extends MtWilsonClient {
      * <pre>
      * https://server.com:8181/mtwilson/v2/tag-selection-kv-attributes
      * Input: {"selection_name":"Test","kv_attribute_id":"a847262e-8afe-4020-b40c-ce89dacb2b60"}
-     * Output: {"id":"e404ee8a-b114-40cc-b75f-a99d82fc11d7","name":"Test","description":"Test selection"}
+     * Output: {"id":"3910e752-4645-4caf-b78c-098458710a1e","kv_attribute_id":"97e1a998-0a9b-4004-bacc-5158c0288e00","selection_name":"Test"}
      * @mtwSampleApiCall
      * <pre>
      *  SelectionKvAttributes client = new SelectionKvAttributes(My.configuration().getClientProperties());
-     *  SelectionKvAttribute selObj = new SelectionKvAttribute();
-     *  selObj.setName("Intel");
-     *  selObj.setDescription("Intel OEM");
-     *  SelectionKvAttribute createdSelObj = client.createSelectionKvAttribute(selObj);
+     *  SelectionKvAttribute skvObj = new SelectionKvAttribute();
+     *  skvObj.setSelectionName("Test");
+     *  skvObj.setKvAttributeId("97e1a998-0a9b-4004-bacc-5158c0288e00");
+     *  skvObj = client.createSelectionKvAttribute(skvObj);
      * </pre>
      */
     public SelectionKvAttribute createSelectionKvAttribute(SelectionKvAttribute obj) {
@@ -97,13 +97,14 @@ public class SelectionKvAttributes extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8181/mtwilson/v2/tag-selection-kv-attributes/129ceab1-7c63-4eeb-b1b8-ccc7b5039836
-     * Output: {"id":"129ceab1-7c63-4eeb-b1b8-ccc7b5039836","selection_id":"a92c6e0c-1bf8-4646-9eb4-9fbd582d7eae","kv_attribute_id":"a847262e-8afe-4020-b40c-ce89dacb2b60"}
+     * https://server.com:8181/mtwilson/v2/tag-selection-kv-attributes/3910e752-4645-4caf-b78c-098458710a1e
+     * Output: {"id":"3910e752-4645-4caf-b78c-098458710a1e","selection_id":"24246b8a-b039-4fb2-9e4c-cee56e0a5893",
+     * "kv_attribute_id":"97e1a998-0a9b-4004-bacc-5158c0288e00"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  SelectionKvAttributes client = new SelectionKvAttributes(My.configuration().getClientProperties());
-     *  SelectionKvAttribute retrieveSelectionKvAttribute = client.retrieveSelectionKvAttribute("129ceab1-7c63-4eeb-b1b8-ccc7b5039836");
+     *  SelectionKvAttribute retrieveSelectionKvAttribute = client.retrieveSelectionKvAttribute(UUID.valueOf("3910e752-4645-4caf-b78c-098458710a1e"));
      * </pre>
      */
     public SelectionKvAttribute retrieveSelectionKvAttribute(UUID uuid) {

@@ -6,7 +6,6 @@ package com.intel.mtwilson.tag.client.jaxrs;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.mtwilson.tag.model.TpmPassword;
 import java.net.URL;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
@@ -46,7 +45,7 @@ public class RevokeTagCertificate extends MtWilsonClient {
      * @mtwSampleApiCall
      * <pre>
      *  RevokeTagCertificate client = new RevokeTagCertificate(My.configuration().getClientProperties());
-     *  client.revokeTagCertificate("a6544ff4-6dc7-4c74-82be-578592e7e3ba");
+     *  client.revokeTagCertificate(UUID.valueOf("a6544ff4-6dc7-4c74-82be-578592e7e3ba"));
      * </pre>
      */
     public void revokeTagCertificate(UUID certificateId) {

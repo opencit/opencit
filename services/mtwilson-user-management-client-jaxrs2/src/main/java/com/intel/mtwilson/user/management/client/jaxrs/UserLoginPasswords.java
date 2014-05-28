@@ -41,7 +41,7 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords
+     * https://server.com:8181/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords
      * Input: {"password_hash":"RZMrrSt/PvKvdqs1OgR0id0bDE0dvF4XbPKV7sF+oDg=","salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256",
      * "comment":"Access needed for development"}
      * Output: {"id":"610cc4fc-0148-4788-bc9c-633d61fbeb4e","user_id":"9116f3ed-5496-42b3-a9ee-4e89b1d533bc",
@@ -71,7 +71,8 @@ public class UserLoginPasswords extends MtWilsonClient {
     }
     
     /**
-     * Deletes the UserLoginPassword with the specified UUID from the system. 
+     * Deletes the User's Login password entry with the specified UUID from the system. All the associated roles would
+     * also be deleted.
      * @param uuid - UUID of the UserLoginPassword that has to be deleted.
      * @return N/A
      * @since Mt.Wilson 2.0
@@ -80,12 +81,12 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/{user_id}/login-passwords
+     * https://server.com:8181/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  UserLoginPasswords client = new UserLoginPasswords(My.configuration().getClientProperties());
-     *  client.deleteUserLoginPassword("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  client.deleteUserLoginPassword("9116f3ed-5496-42b3-a9ee-4e89b1d533bc","610cc4fc-0148-4788-bc9c-633d61fbeb4e");
      * </pre>
      */
     public void deleteUserLoginPassword(String userUuid, String uuid) {
@@ -97,7 +98,7 @@ public class UserLoginPasswords extends MtWilsonClient {
     }
 
     /**
-     * Updates the details of the UserLoginPassword in the system. It is assumed that the caller
+     * Updates the details of the User's Login Password in the system. It is assumed that the caller
      * would verify the existing password before updating it with the new one using this method. 
      * Similar to the create method, the caller is expected to pass in the already hashed value 
      * of the password along with the details of the mechanism of hashing. Administrator can use
@@ -110,7 +111,7 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
+     * https://server.com:8181/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
      * Input: {"status":"APPROVED","enabled":true,"roles":["security","whitelist"]}
      * Output: {"id":"610cc4fc-0148-4788-bc9c-633d61fbeb4e","user_id":"9116f3ed-5496-42b3-a9ee-4e89b1d533bc",
      * "enabled":true,"status":"APPROVED","roles":["security","whitelist"]}
@@ -139,7 +140,7 @@ public class UserLoginPasswords extends MtWilsonClient {
     }
     
      /**
-     * Retrieves the UserLoginPassword object with the specified userUuid and id.
+     * Retrieves the User's Login Password details with the specified userUuid and id.
      * @param userUuid - UUID of the associated user
      * @param uuid - UUID of the UserLoginPassword
      * @return UserLoginPassword matching the specified UUID.
@@ -149,7 +150,7 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
+     * https://server.com:8181/mtwilson/v2/users/9116f3ed-5496-42b3-a9ee-4e89b1d533bc/login-passwords/610cc4fc-0148-4788-bc9c-633d61fbeb4e
      * Output: {"id":"610cc4fc-0148-4788-bc9c-633d61fbeb4e","user_id":"9116f3ed-5496-42b3-a9ee-4e89b1d533bc",
      * "password_hash":"i4bjqvom3KwEwAMpMpcAZRW8R8IUbi3apS0J9zCBl6c=",
      * "salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256","enabled":true,"status":"APPROVED","roles":["Security","Whitelist"]}
@@ -183,7 +184,7 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/981d5993-d380-4623-9f8b-1c6131ee8234/login-passwords
+     * https://server.com:8181/mtwilson/v2/users/981d5993-d380-4623-9f8b-1c6131ee8234/login-passwords
      * Output: {"user_login_passwords":[{"id":"db108831-96d7-4a3c-afd6-5521e2defcbf","user_id":"981d5993-d380-4623-9f8b-1c6131ee8234",
      * "password_hash":"RZMrrSt/PvKvdqs1OgR0id0bDE0dvF4XbPKV7sF+oDg=","salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256",
      * "enabled":true,"status":"APPROVED","comment":"Automatically created during setup.","roles":["admin","administrator"]}]}

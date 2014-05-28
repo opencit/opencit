@@ -41,14 +41,15 @@ public class Users extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/users
-     * Input: {"username":"Developer1","comment":"Access needed for Project1"}
-     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","comment":"Access needed for Project1"}
+     * Input: {"username":"Developer1","locale":"en-US","comment":"Access needed for Project1"}
+     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","locale":"en-us","comment":"Access needed for Project1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
      *  User user = new User();
      *  user.setUsername("Developer1");
+     *  user.setLocale(Locale.US);
      *  user.setComment("Access needed for Project1");
      *  User createUser = client.createUser(user);
      * </pre>
@@ -60,7 +61,8 @@ public class Users extends MtWilsonClient {
     }
     
     /**
-     * Deletes the User with the specified UUID from the system. 
+     * Deletes the User with the specified UUID from the system. When the user is deleted, all the associated
+     * certificate,hmac and password login information would also be deleted from the system.
      * @param uuid - UUID of the User that has to be deleted.
      * @return N/A
      * @since Mt.Wilson 2.0
@@ -79,13 +81,13 @@ public class Users extends MtWilsonClient {
      */
     public void deleteUser(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response user = getTarget().path("users/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
     }
 
     /**
-     * Updates the details of the User in the system. Only the comments can be updated.
+     * Updates the details of the User in the system. The locale and the comments fields can be updated.
      * @param user - User object details that needs to be updated.
      * @return Updated user object.
      * @since Mt.Wilson 2.0
@@ -95,21 +97,22 @@ public class Users extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/users/e6c9337c-e709-4b38-9f04-3b61b8a84667
-     * Input: {"comment":"Access granted for Project1"}
-     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","comment":"Access granted for Project1"}
+     * Input: {"locale":"fr","comment":"Access granted for Project1"}
+     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","locale":"fr","comment":"Access granted for Project1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  Users client = new Users(My.configuration().getClientProperties());
      *  User user = new User();
      *  user.setId(UUID.valueOf("e6c9337c-e709-4b38-9f04-3b61b8a84667"));
+     *  user.setLocale(Locale.FRENCH);
      *  user.comment("Access granted for Project1");
      *  user = client.editUser(user);
      * </pre>
      */
     public User editUser(User user) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", user.getId().toString());
         User newUser = getTarget().path("users/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(user), User.class);
         return newUser;
@@ -126,7 +129,7 @@ public class Users extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/users/e6c9337c-e709-4b38-9f04-3b61b8a84667
-     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","comment":"Access needed for Project1"}
+     * Output: {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","locale":"en-us","comment":"Access needed for Project1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -136,7 +139,7 @@ public class Users extends MtWilsonClient {
      */
     public User retrieveUser(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         User user = getTarget().path("users/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(User.class);
         return user;
@@ -156,8 +159,8 @@ public class Users extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/users?filter=false
-     * Output: {"users":[{"id":"3f2442cd-33d5-4d2b-8897-9c79a5dee0c4","username":"tagservice"},
-     * {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","comment":"Access granted for Project1"}]}
+     * Output: {"users":[{"id":"3f2442cd-33d5-4d2b-8897-9c79a5dee0c4","username":"tagservice","locale":"en-us"},
+     * {"id":"e6c9337c-e709-4b38-9f04-3b61b8a84667","username":"Developer1","locale":"fr","comment":"Access granted for Project1"}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>

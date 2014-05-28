@@ -51,22 +51,17 @@ public class RegisterUsersTest {
     @Test
     public void testRegisterUserWithCert() throws Exception {
         
-        KeyPair keyPair;
-        X509Certificate certificate;
-        
         String userName = "superadmin99";
-        
         User user = new User();
         user.setUsername(userName);
         user.setLocale(Locale.US);
         user.setComment("Need to manage user accounts."); 
         
-        keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
-        certificate = X509Builder.factory().selfSigned(String.format("CN=%s", userName), keyPair).expires(365, TimeUnit.DAYS).build();
+        KeyPair keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
+        X509Certificate certificate = X509Builder.factory().selfSigned(String.format("CN=%s", userName), keyPair).expires(365, TimeUnit.DAYS).build();
         
         UserLoginCertificate userLoginCertificate = new UserLoginCertificate();
         userLoginCertificate.setCertificate(certificate.getEncoded());
-        userLoginCertificate.setComment("Self signed cert.");
                 
         RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate(); 
         rpcUserWithCert.setUser(user);

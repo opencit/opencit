@@ -45,7 +45,7 @@ public class MtWilsonImportTagCertificate extends MtWilsonClient {
      * @mtwSampleApiCall
      * <pre>
      *  MtWilsonImportTagCertificate client = new MtWilsonImportTagCertificate(My.configuration().getClientProperties());
-     *  client.mtwilsonImportTagCertificate("a6544ff4-6dc7-4c74-82be-578592e7e3ba");
+     *  client.mtwilsonImportTagCertificate(UUID.valueOf("a6544ff4-6dc7-4c74-82be-578592e7e3ba"));
      * </pre>
      */
     public void mtwilsonImportTagCertificate(UUID certificateId) {
