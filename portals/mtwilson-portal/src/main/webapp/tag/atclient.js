@@ -1563,7 +1563,7 @@ function provisionTags() {
 	$('provisionTagFormDiv').toggle();
 	$('provisionTagProgDiv').toggle();
 	for(var loop = 0; loop < selected_hosts.length; loop++) {
-            ajax.custom.post('certificateRequests', selectedSelectionXML, {app: selected_hosts[loop].subject, contentType: 'application/xml', accept: '*/*', func: 'bulk_provisioning', next_action: 'deployCertificates'}, {subject: selected_hosts[loop].subject});
+            ajax.custom.post('certificateRequests', selectedSelectionXML, {app: selected_hosts[loop].subject, contentType: 'application/xml', accept: 'application/xml', func: 'bulk_provisioning', next_action: 'deployCertificates'}, {subject: selected_hosts[loop].subject});
             updateHostProvisioningStatus(selected_hosts[loop].subject, 'Reuqest sent', true);
 	}
 }
