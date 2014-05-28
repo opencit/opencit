@@ -41,7 +41,13 @@ public class RegisterUsers extends MtWilsonClient {
      * <pre>
      * https://server.com:8181/mtwilson/v2/rpc/register-user-with-certificate
      * Input: {"user":{"username":"superadmin99","locale":"en_US","comment":"Need to manage user accounts."},
-     * "user_login_certificate":{"certificate":"MIICrjCCAZagAwIBAgIIEGqMm0g6T4YwDQYJKoZIhvcNAQELBQAwFzEVMBMGA1UEAxMMc3VwZXJhZG1pbjk5MB4XDTE0MDUyODA1NTA1OFoXDTE1MDUyODA1NTA1OFowFzEVMBMGA1UEAxMMc3VwZXJhZG1pbjk5MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu7WANgGPK651vxXjuNvqjwxiFtzJyTlBzTnCw4Xg7/s8LdS8Ak/ZRO/SfimdQEQn608IOyLnzJtuWgSw83qN0xOFPnUb0Am7XXtKNOtK9IMTB4Dh9IU7D0BAQU/IDThha42hBhGsCX5ilhKJpjhZ7z4eGrILo7HqhclfZjS32lvO4lyhRk1ZZcBcjRJtXIeC7NGj5rT6XuY0amUm7FlgubFg0n1Fo7DIJquuZWBkKzNqHlmMZi+uKrGpECNWhPuWzJ/0g8rfQvl3V1WX9o2a68608GzDCQtHqwHbG2jEX4iWrfzda8lvVEK4ESbvZ+l+Xy5GO0K2AwPst+Rev+JnPwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQA4SXqbZfRmqL6sC7ljbrg1zNK7edhlQUE8qQZuTVRcHOKzB/wEgSPoPypUsezXqsdmJEP3AoyZO3/LlN7l//RlrmVGN2CXoW4/W1z9sDpUzUO1BO5vjdo6KZfLk8s1zX5vqKDGdlcp/0R1TIQcm0bwAtIOJ11LCriChCaeukAOnxT4yctbA0kdxCPSb/wJMJqYaQZ7+0psuzNkRvfSALIx1o2JTe2mGlA0wq0Ur3FgzSSf2mvFhaBbCZ5e4e7UO4B8xONSBy8FOdbix6F3AKdNmn/mHfCzMpBJhjBmHEzkI+5wfli/5zpSd5ZgnYfl2Y1AA758E1yqXLtyU8JHQkKT"}}
+     * "user_login_certificate":{"certificate":"MIICrjCCAZagAwIBAgIIEGqMm0g6T4YwDQYJKoZIhvcNAQELBQAwFzEVMBMGA1UEAxMMc3VwZXJhZG1pbjk5MB4XDTE0MDUyODA1NTA1OFoXDTE1M
+     * DUyODA1NTA1OFowFzEVMBMGA1UEAxMMc3VwZXJhZG1pbjk5MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu7WANgGPK651vxXjuNvqjwxiFtzJyTlBzTnCw4Xg7/s8LdS8Ak/ZRO/SfimdQEQn
+     * 608IOyLnzJtuWgSw83qN0xOFPnUb0Am7XXtKNOtK9IMTB4Dh9IU7D0BAQU/IDThha42hBhGsCX5ilhKJpjhZ7z4eGrILo7HqhclfZjS32lvO4lyhRk1ZZcBcjRJtXIeC7NGj5rT6XuY0amUm7FlgubFg0n1
+     * Fo7DIJquuZWBkKzNqHlmMZi+uKrGpECNWhPuWzJ/0g8rfQvl3V1WX9o2a68608GzDCQtHqwHbG2jEX4iWrfzda8lvVEK4ESbvZ+l+Xy5GO0K2AwPst+Rev+JnPwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQA
+     * 4SXqbZfRmqL6sC7ljbrg1zNK7edhlQUE8qQZuTVRcHOKzB/wEgSPoPypUsezXqsdmJEP3AoyZO3/LlN7l//RlrmVGN2CXoW4/W1z9sDpUzUO1BO5vjdo6KZfLk8s1zX5vqKDGdlcp/0R1TIQcm0bwAtIOJ11
+     * LCriChCaeukAOnxT4yctbA0kdxCPSb/wJMJqYaQZ7+0psuzNkRvfSALIx1o2JTe2mGlA0wq0Ur3FgzSSf2mvFhaBbCZ5e4e7UO4B8xONSBy8FOdbix6F3AKdNmn/mHfCzMpBJhjBmHEzkI+5wfli/5zpSd5Z
+     * gnYfl2Y1AA758E1yqXLtyU8JHQkKT"}}
      * Output: {"user":{"username":"superadmin99","locale":"en_US","comment":"Need to manage user accounts."},
      * "user_login_certificate":{"certificate":"MIICrjCCAZa.....yqXLtyU8JHQkKT","enabled":false},"result":true}
      * </pre>

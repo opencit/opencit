@@ -13,8 +13,6 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import com.intel.mtwilson.tag.rest.v2.repository.SelectionKvAttributeRepository;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *

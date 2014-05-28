@@ -47,15 +47,15 @@ public class KvAttributes extends MtWilsonClient {
      * <pre>
      * https://server.com:8181/mtwilson/v2/tag-kv-attributes
      * Input: {"name":"department","value":"finance"}
-     * Output: {}
+     * Output: {"id":"97e1a998-0a9b-4004-bacc-5158c0288e00","name":"department","value":"finance"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
-     *  KvAttribute kvObj = new KvAttribute();
-     *  role.setName("Intel");
-     *  role.setDescription("Intel OEM");
-     *  Role createRole = client.createRole(role);
+     *  KvAttribute kvAttrib = new KvAttribute();
+     *  kvAttrib.setName("department");
+     *  kvAttrib.setValue("finance");        
+     *  kvAttrib = client.createKvAttribute(kvAttrib);
      * </pre>
      */
     public KvAttribute createKvAttribute(KvAttribute obj) {
@@ -101,17 +101,17 @@ public class KvAttributes extends MtWilsonClient {
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType PUT
      * @mtwSampleRestCall
-     * https://server.com:8181/mtwilson/v2/tag-kv-attributes/a6544ff4-6dc7-4c74-82be-578592e7e3ba
-     * Input: {"comments":"Need access for development."}
-     * Output: {"id": "31741556-f5c7-4eb6-a713-338a23e43b93","description": "Intel OEM updated" }
+     * https://server.com:8181/mtwilson/v2/tag-kv-attributes/97e1a998-0a9b-4004-bacc-5158c0288e00
+     * Input: {"value":"HR"}
+     * Output: {"id":"97e1a998-0a9b-4004-bacc-5158c0288e00","value":"HR"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
-     *  Role role = new Role();
-     *  role.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
-     *  role.setDescription("Intel OEM updated");
-     *  role = client.editRole(role);
+     *  KvAttribute kvAttrib = new KvAttribute();
+     *  kvAttrib.setId(UUID.valueOf("97e1a998-0a9b-4004-bacc-5158c0288e00"));
+     *  kvAttrib.setValue("HR");        
+     *  kvAttrib = client.editKvAttribute(kvAttrib);
      * </pre>
      */
     public KvAttribute editKvAttribute(KvAttribute obj) {
@@ -132,17 +132,18 @@ public class KvAttributes extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8181/mtwilson/v2/tag-kv-attributes/008f2918-92d7-46c4-9b12-c3acbdd08b11
+     * https://server.com:8181/mtwilson/v2/tag-kv-attributes/97e1a998-0a9b-4004-bacc-5158c0288e00
+     * Output: {"id":"97e1a998-0a9b-4004-bacc-5158c0288e00","name":"department","value":"HR"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
-     *  Role retrieveRole = client.retrieveRole("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  KvAttribute obj = client.retrieveKvAttribute(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
      * </pre>
      */
     public KvAttribute retrieveKvAttribute(UUID uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         KvAttribute obj = getTarget().path("tag-kv-attributes/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(KvAttribute.class);
         return obj;
