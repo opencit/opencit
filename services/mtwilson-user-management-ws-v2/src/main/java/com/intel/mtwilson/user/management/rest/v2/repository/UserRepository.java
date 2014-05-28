@@ -14,6 +14,10 @@ import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateLocator;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordFilterCriteria;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordLocator;
 import java.util.List;
 import java.util.Locale;
 import javax.ws.rs.WebApplicationException;
@@ -32,27 +36,29 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
     @Override
     @RequiresPermissions("users:search")        
     public UserCollection search(UserFilterCriteria criteria) {
-        log.debug("User:Search - Got request to search for the users.");        
+        log.debug("User:Search - Got request to search for the users. Filter criteria is {}", criteria.filter);        
         UserCollection userCollection = new UserCollection();
         try (LoginDAO loginDAO = MyJdbi.authz()) {
-            if (!criteria.filter) {
+            if (criteria.filter) {
+                if (criteria.id != null) {
+                    User user = loginDAO.findUserById(criteria.id);
+                    if (user != null) {
+                        userCollection.getUsers().add(user);
+                    }
+                } else if (criteria.userNameEqualTo != null && !criteria.userNameEqualTo.isEmpty()) {
+                    User user = loginDAO.findUserByName(criteria.userNameEqualTo);
+                    if (user != null) {
+                        userCollection.getUsers().add(user);
+                    }
+                }
+            } else {
                 List<User> findAllUsers = loginDAO.findAllUsers();
                 if (findAllUsers != null && findAllUsers.size() > 0) {
                     for (User user : findAllUsers) {
                         userCollection.getUsers().add(user);
                     }
                 }                
-            } else if (criteria.id != null) {
-                User user = loginDAO.findUserById(criteria.id);
-                if (user != null) {
-                    userCollection.getUsers().add(user);
-                }
-            } else if (criteria.userNameEqualTo != null && !criteria.userNameEqualTo.isEmpty()) {
-                User user = loginDAO.findUserByName(criteria.userNameEqualTo);
-                if (user != null) {
-                    userCollection.getUsers().add(user);
-                }
-            } 
+            }
         } catch (Exception ex) {
             log.error("Error during user search.", ex);
             throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
@@ -140,6 +146,19 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
         try (LoginDAO loginDAO = MyJdbi.authz()) {
             User user = loginDAO.findUserById(locator.id);
             if (user != null ) {
+                // First we need to delete the user's associated logins (certificate/password/hmac)
+                UserLoginCertificateRepository certRepo = new UserLoginCertificateRepository();
+                UserLoginCertificateFilterCriteria certCriteria = new UserLoginCertificateFilterCriteria();
+                certCriteria.userUuid = user.getId();
+                certRepo.delete(certCriteria);
+                log.debug("User:Delete - Deleted the user {} login certificate entries successfully.", user.getUsername());
+                
+                UserLoginPasswordRepository passwordRepo = new UserLoginPasswordRepository();
+                UserLoginPasswordFilterCriteria passwordCriteria = new UserLoginPasswordFilterCriteria();
+                passwordCriteria.userUuid = user.getId();
+                passwordRepo.delete(passwordCriteria);
+                log.debug("User:Delete - Deleted the user {} login password entries successfully.", user.getUsername());
+                
                 loginDAO.deleteUser(locator.id);
                 log.debug("User:Delete - Deleted the user {} successfully.", user.getUsername());
             } else {
