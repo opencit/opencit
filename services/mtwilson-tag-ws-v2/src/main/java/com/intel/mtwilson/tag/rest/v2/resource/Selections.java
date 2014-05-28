@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.tag.rest.v2.resource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
@@ -31,11 +33,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBException;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
@@ -85,7 +89,16 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     public String retrieveOneJson(@BeanParam SelectionLocator locator) throws SQLException, IOException {
         Selection obj = super.retrieveOne(locator); 
         SelectionsType selectionsType = getSelectionData(obj);
-        String jsonStr = Util.toJson(selectionsType);
+        // If there are no tags associated with the selection, then the above call would
+        // return a null value.
+        String jsonStr = null;
+        if (selectionsType != null) {
+            jsonStr = Util.toJson(selectionsType);
+        } else {
+            ObjectMapper mapper = new ObjectMapper();
+            jsonStr = mapper.writeValueAsString(obj);
+        }
+        
         log.debug("Generated tag selection json: {}", jsonStr);
         return jsonStr;
         
@@ -112,7 +125,17 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
 //        // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
 //        SelectionsType selectionsType = builder.build();
         SelectionsType selectionsType = getSelectionData(obj);
-        String xml = Util.toXml(selectionsType);
+        String xml = null;
+        if (selectionsType != null) {
+            xml = Util.toXml(selectionsType);
+//        } else {
+//            JAXB jaxb = new JAXB();
+//            try {
+//                xml = jaxb.write(jaxb);
+//            } catch (JAXBException ex) {
+//                log.error("Error during xml creation.", ex);
+//            }
+        }
         log.debug("Generated tag selection xml: {}", xml);
         return xml;
     }
