@@ -41,7 +41,7 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
+     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
      * Input: {"certificate":"MIICrzCCAZegAwIB.....LX+ukqAKQDdqfiSkV+Bw==","comment":"Need to manage user accounts."}
      * Output: {"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4",
      * "certificate":"MIICrzCCAZegAwIBAgIJAJ9cWj....LX+ukqAKQDdqfiSkV+Bw==","enabled":false,"comment":"Need to manage user accounts."}
@@ -66,7 +66,8 @@ public class UserLoginCertificates extends MtWilsonClient {
     }
     
     /**
-     * Deletes the UserLoginCertificate with the specified UUID from the system. 
+     * Deletes the User's Login Certificate with the specified UUID from the system. All the associated roles would
+     * also be deleted
      * @param userUuid - UUID of the User with which the certificate request is associated
      * @param uuid - UUID of the UserLoginCertificate that has to be deleted.
      * @return N/A
@@ -76,7 +77,7 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
+     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -93,7 +94,9 @@ public class UserLoginCertificates extends MtWilsonClient {
     }
 
     /**
-     * Updates the details of the UserLoginCertificate in the system. Only the comments can be updated.
+     * Updates the details of the User's Login Certificate in the system. Only the roles and comments can be updated.
+     * Note that during access request, user would just specify the reason for access as part of the comments section.
+     * It is up to the administrator approving the access to identify the roles required for the user.
      * @param userLoginPassword - UserLoginCertificate object details that needs to be updated.
      * @return Updated userLoginPassword object.
      * @since Mt.Wilson 2.0
@@ -102,7 +105,7 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
+     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
      * Input: {"enabled":"true","status":"APPROVED","roles":["security","whitelist"]}
      * Output: {"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","enabled":true,"status":"APPROVED","roles":["security","whitelist"]}
      * </pre>
@@ -130,16 +133,17 @@ public class UserLoginCertificates extends MtWilsonClient {
     }
     
      /**
-     * Retrieves the UserLoginCertificate object with the specified UUID
+     * Retrieves the User's Login Certificate details with the specified userUuid and id.
+     * @param userUuid - UUID of the associated user
      * @param uuid - UUID of the UserLoginCertificate to be retrieved
-     * @return <code> UserLoginCertificate </code> matching the specified UUID.
+     * @return UserLoginCertificate object matching the specified UUID.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions user_login_certificates:retrieve
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
+     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates/574874bd-2d5c-4190-b724-d69f2b4c89b4
      * Output: {"user_login_certificates":[{"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","user_id":"cdec55c3-206d-4abb-8ba3-83b819e0b256",
      * "certificate":"MIICrzCCAZegAwIB....==","sha1_hash":"5vv7fVyDVD6fGdi/AfAmoieTRfo=","sha256_hash":"b5v2UPacu4zkDnmxXCXrbFBsmHOiUhwES5Olrd+TKC4=",
      * "expires":1432106266000,"enabled":false,"status":"PENDING","comment":"Need to manage user accounts."}]}
@@ -174,7 +178,7 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
+     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
      * Output: {"user_login_certificates":[{"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","user_id":"cdec55c3-206d-4abb-8ba3-83b819e0b256",
      * "certificate":"MIICrzCCAZegAwIBAgIJAJ9cWj/....LX+ukqAKQDdqfiSkV+Bw==","sha1_hash":"5vv7fVyDVD6fGdi/AfAmoieTRfo=",
      * "sha256_hash":"b5v2UPacu4zkDnmxXCXrbFBsmHOiUhwES5Olrd+TKC4=","expires":1432106266000,"enabled":true,

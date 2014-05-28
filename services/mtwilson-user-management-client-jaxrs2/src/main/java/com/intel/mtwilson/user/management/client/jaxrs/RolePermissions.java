@@ -30,10 +30,12 @@ public class RolePermissions extends MtWilsonClient {
     }
     
      /**
-     * Creates an new RolePermission mapping in the system. Permissions have 3 parts : Domain, Action and Selection.
+     * Creates an new Role Permission mapping in the system. Permissions have 3 parts : Domain, Action and Selection.
      * Domains are basically resources on which the permissions would apply (Ex: Oems, Mles, etc). Action is basically
      * create, store, retrieve, search and delete. There can be sometimes special actions based on the resources like
-     * import & export in case of certificates. Multiple actions for a single domain can be separated by comma.Selection : TODO
+     * import & export in case of certificates. Multiple actions for a single domain can be separated by comma.
+     * Selection : This is currently not being used. By default it would be set to "*". This is for future purpose where
+     * user's can specify certain conditions which if evaluates to true would get the required permissions.
      * User can provide "*" as the option for any combination of domain, action and selection. * indicates everything. 
      * Example: An administrator would have * for all the 3 options.
      * @param rolePermission - RolePermission object that needs to be created. 
@@ -44,7 +46,7 @@ public class RolePermissions extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions
+     * https://server.com:8181/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions
      * Input: {"permit_domain":"user_mgmt","permit_action":"add,delete","permit_selection":"*"}
      * Output: {"id":"9b35b89c-c5f0-4ffb-8f94-a7f73eef8f76","role_id":"05f80052-2642-480a-8504-880e27ce8b57",
      * "permit_domain":"user_mgmt","permit_action":"add,delete","permit_selection":"*"}
@@ -70,7 +72,7 @@ public class RolePermissions extends MtWilsonClient {
     }
     
     /**
-     * Deletes the RolePermission(s) with the specified search criteria. 
+     * Deletes the RolePermission(s) matching the specified search criteria. 
      * @param RolePermissionFilterCriteria object specifying the search criteria.
      * @return N/A
      * @since Mt.Wilson 2.0
@@ -79,7 +81,7 @@ public class RolePermissions extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions?actionEqualTo=*
+     * https://server.com:8181/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions?actionEqualTo=*
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -102,15 +104,16 @@ public class RolePermissions extends MtWilsonClient {
      * @param RolePermissionFilterCriteria object specifying the filter criteria. The search options include
      * id and rolePermissionNameEqualTo. Also, if the caller wants to retrieve the list of all the registered
      * rolePermissions, the filter option can be disabled by setting the filter criteria to false. By default
-     * the filter criteria is true. [Ex: /v2/rolePermissions?filter=false retrieves the list of all the rolePermissions]
-     * @return <code> RolePermissionCollection </code> with the RolePermissions that meet the specified filter criteria
+     * the filter criteria is true. [Ex: /v2/roles/{role_id}/permissions?filter=false retrieves the list of all the 
+     * for the specified role]
+     * @return RolePermissionCollection with the list of RolePermissions that meet the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions role_permissions:search
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions?actionEqualTo=*
+     * https://server.com:8181/mtwilson/v2/roles/05f80052-2642-480a-8504-880e27ce8b57/permissions?actionEqualTo=*
      * Output: {"role_permissions":[{"role_id":"05f80052-2642-480a-8504-880e27ce8b57","permit_domain":"user_mgmt",
      * "permit_action":"*","permit_selection":"*"}]}
      * </pre>
@@ -118,7 +121,7 @@ public class RolePermissions extends MtWilsonClient {
      * <pre>
      *  RolePermissions client = new RolePermissions(My.configuration().getClientProperties());
      *  RolePermissionFilterCriteria criteria = new RolePermissionFilterCriteria();
-     *  criteria.roleId = roleId;
+     *  criteria.roleId = UUID.valueOf("05f80052-2642-480a-8504-880e27ce8b57");
      *  criteria.actionEqualTo = "*";
      *  RolePermissionCollection rolePermissions = client.searchRolePermissions(criteria);
      * </pre>

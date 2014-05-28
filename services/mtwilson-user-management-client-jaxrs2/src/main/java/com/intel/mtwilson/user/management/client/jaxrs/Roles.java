@@ -39,7 +39,7 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles
+     * https://server.com:8181/mtwilson/v2/roles
      * Input: {"role_name":"MTW_Admin"}
      * Output: {"id":"17dbfd48-12a4-4328-85af-43b0d5adfee3","role_name":"MTW_Admin"}
      * </pre>
@@ -58,7 +58,8 @@ public class Roles extends MtWilsonClient {
     }
     
     /**
-     * Deletes the Role with the specified UUID from the system. 
+     * Deletes the Role with the specified UUID from the system. All the associated permissions would also
+     * be deleted.
      * @param uuid - UUID of the Role that has to be deleted.
      * @return N/A
      * @since Mt.Wilson 2.0
@@ -67,7 +68,7 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
+     * https://server.com:8181/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -92,7 +93,7 @@ public class Roles extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
+     * https://server.com:8181/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
      * Input: {"description":"MTW Admin role"}
      * Output: {"id":"17dbfd48-12a4-4328-85af-43b0d5adfee3","description":"MTW Admin role"}
      * </pre>
@@ -116,14 +117,14 @@ public class Roles extends MtWilsonClient {
      /**
      * Retrieves the Role object with the specified UUID
      * @param uuid - UUID of the Role to be retrieved
-     * @return <code> Role </code> matching the specified UUID.
+     * @return Role object matching the specified UUID.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions roles:retrieve
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
+     * https://server.com:8181/mtwilson/v2/roles/17dbfd48-12a4-4328-85af-43b0d5adfee3
      * Output: {"id":"17dbfd48-12a4-4328-85af-43b0d5adfee3","role_name":"MTW_Admin","description":"MTW Admin role"}
      * </pre>
      * @mtwSampleApiCall
@@ -146,14 +147,14 @@ public class Roles extends MtWilsonClient {
      * id and roleNameEqualTo. Also, if the caller wants to retrieve the list of all the registered
      * roles, the filter option can be disabled by setting the filter criteria to false. By default
      * the filter criteria is true. [Ex: /v2/roles?filter=false retrieves the list of all the roles]
-     * @return <code> RoleCollection </code> with the Roles that meet the specified filter criteria
+     * @return RoleCollection with the Roles that meet the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions roles:search
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8443/mtwilson/v2/roles?filter=false
+     * https://server.com:8181/mtwilson/v2/roles?filter=false
      * Output: {"roles":[{"id":"0199a936-9a49-482a-8c63-cfe7a9412d7e","role_name":"server_manager"},
      * {"id":"177b1d3c-b0aa-4543-8509-92fde907a4a9","role_name":"admin","description":"user created role"}]}
      * </pre>
