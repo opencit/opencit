@@ -225,7 +225,13 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
     @Override
     @RequiresPermissions("user_login_certificates:delete,search")        
     public void delete(UserLoginCertificateFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("UserLoginCertificate:Delete - Got request to delete login certificates by search criteria.");        
+        UserLoginCertificateCollection objList = search(criteria);
+        for (UserLoginCertificate obj : objList.getUserLoginCertificates()) {
+            UserLoginCertificateLocator locator = new UserLoginCertificateLocator();
+            locator.id = obj.getId();
+            delete(locator);
+        }
     }
     
     /**

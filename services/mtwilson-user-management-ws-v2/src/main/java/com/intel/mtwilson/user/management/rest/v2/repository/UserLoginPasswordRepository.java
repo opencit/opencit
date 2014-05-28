@@ -220,7 +220,13 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
     @Override
     @RequiresPermissions("user_login_passwords:delete,search")        
     public void delete(UserLoginPasswordFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("UserLoginPassword:Delete - Got request to delete login passwords by search criteria.");        
+        UserLoginPasswordCollection objList = search(criteria);
+        for (UserLoginPassword obj : objList.getUserLoginPasswords()) {
+            UserLoginPasswordLocator locator = new UserLoginPasswordLocator();
+            locator.id = obj.getId();
+            delete(locator);
+        }
     }
     
     /**
