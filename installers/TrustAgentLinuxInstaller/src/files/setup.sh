@@ -91,7 +91,7 @@ groupadd trustagent >> $logfile  2>&1
 useradd -d /opt/trustagent -r -s /bin/false -G trustagent trustagent >> $logfile  2>&1
 
 mkdir -p /opt/trustagent
-unzip -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
+unzip -DD -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
 mkdir -p /opt/trustagent/var
 chown -R trustagent:trustagent /opt/trustagent
 chown -R root /opt/trustagent/bin

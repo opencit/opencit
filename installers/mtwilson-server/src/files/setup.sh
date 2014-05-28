@@ -544,7 +544,7 @@ echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
 echo "Installing Mt Wilson application code..." | tee -a $INSTALL_LOG_FILE
 ZIP_PACKAGE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
-unzip -o $ZIP_PACKAGE -d /opt/mtwilson >> $INSTALL_LOG_FILE  2>&1
+unzip -DD -o $ZIP_PACKAGE -d /opt/mtwilson >> $INSTALL_LOG_FILE  2>&1
 mkdir -p /opt/mtwilson/var
 #chown -R $MTWILSON_OWNER:$MTWILSON_OWNER /opt/mtwilson
 #chown -R root /opt/mtwilson/bin
@@ -738,7 +738,7 @@ call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-c
 call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
 if [ -n "$MTWILSON_TAG_ADMIN_PASSWORD" ]; then
   export MTWILSON_TAG_ADMIN_PASSWORD
-  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificates:create
+  call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificates:create tag_certificates:deploy tag_certificates:import hosts:search
 else
   echo_warning "Skipping creation of tag admin user because MTWILSON_TAG_ADMIN_PASSWORD is not set"
 fi
