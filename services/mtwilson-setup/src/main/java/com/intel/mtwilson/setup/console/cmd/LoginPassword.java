@@ -140,10 +140,15 @@ public class LoginPassword implements Command {
                 user.setId(new UUID());
                 //user.setComment("automatically created by setup");
                 user.setUsername(username);
-                dao.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(Locale.US), ""); // setting the default user with locale set to US
+                dao.insertUser(user.getId(), user.getUsername(), null, ""); 
                 log.info("Created user {}", username);
             } else {
-                dao.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
+
+                String localeTag = null;
+                if (user.getLocale() != null)
+                    localeTag = LocaleUtil.toLanguageTag(user.getLocale());
+                
+                dao.updateUser(user.getId(), localeTag, user.getComment());
                 log.debug("Updated User: {}", username);
             }
 

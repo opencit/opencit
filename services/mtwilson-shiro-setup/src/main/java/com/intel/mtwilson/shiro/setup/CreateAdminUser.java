@@ -219,7 +219,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
 //            user.setEnabled(true);
 //            user.setStatus(Status.APPROVED);
             user.setUsername(username);
-            loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(Locale.US), user.getComment());
+            loginDAO.insertUser(user.getId(), user.getUsername(), null, user.getComment()); // setting the default locale to null
         }
         return user;
     }

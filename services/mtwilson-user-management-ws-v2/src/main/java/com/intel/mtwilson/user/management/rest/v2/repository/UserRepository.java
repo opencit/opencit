@@ -120,11 +120,10 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
                 user.setId(item.getId());
                 user.setUsername(item.getUsername());
                 user.setComment(item.getComment());
+                String localeTag = null;
                 if (item.getLocale() != null)
-                    user.setLocale(item.getLocale());
-                else
-                    user.setLocale(Locale.US);
-                loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
+                    localeTag = LocaleUtil.toLanguageTag(user.getLocale());
+                loginDAO.insertUser(user.getId(), user.getUsername(), localeTag, user.getComment());
                 log.debug("User:Create - Created the user {} successfully.", item.getUsername());
             } else {
                 log.error("User:Create - User {} will not be created since a duplicate user already exists.", item.getUsername());
