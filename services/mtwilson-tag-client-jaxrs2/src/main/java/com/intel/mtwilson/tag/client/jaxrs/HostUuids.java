@@ -29,7 +29,7 @@ public class HostUuids extends MtWilsonClient {
     /**
      * Given the IP address, this helper function retrieves the hardware UUID of the host. Only constraint is that the
      * host should already be registered with the system.
-     * @param HostUuidFilterCriteria object specifying the filter criteria. The 
+     * @param criteria HostUuidFilterCriteria object specifying the filter criteria. The 
      * only search option currently supported is the hostId, which is either the IP address or the FQDN name of the host. Note that
      * this name has to match with what is being registered with the system.
      * @return HostUuidCollection object with the hardware uuid of the host matching the specified filter criteria. 

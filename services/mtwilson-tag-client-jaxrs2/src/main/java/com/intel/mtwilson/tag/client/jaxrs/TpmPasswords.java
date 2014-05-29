@@ -32,8 +32,8 @@ public class TpmPasswords extends MtWilsonClient {
         super(properties);
     }    
     /**
-     * Creates a new TPM password entry for the host. The 
-     * @param TpmPassword object that needs to be created. ID that should be specified to create the
+     * Creates a new TPM password entry for the host.  
+     * @param obj - TpmPassword object that needs to be created. ID that should be specified to create the
      * entry should be the host's hardware UUID. The hardware UUID can be obtained by running the
      * dmidecode command.
      * @return Created TpmPassword object.
@@ -45,15 +45,16 @@ public class TpmPasswords extends MtWilsonClient {
      * <pre>
      * https://server.com:8181/mtwilson/v2/host-tpm-passwords
      * Input: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","password":"Password"}
-     * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","password":"Password"}
+     * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","etag":"52bfe4be78b4f7e83afcc516311450dd18d89e8c",
+     * "modified_on":1401305674274,"password":"Password"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
-     *  TpmPassword kvObj = new TpmPassword();
-     *  role.setName("Intel");
-     *  role.setDescription("Intel OEM");
-     *  Role createRole = client.createRole(role);
+     *  TpmPassword obj = new TpmPassword();
+     *  obj.setId("07217f9c-f625-4c5a-a538-73f1880abdda");
+     *  obj.setPassword("Password");
+     *  obj = client.createTpmPassword(obj);
      * </pre>
      */
     public TpmPassword createTpmPassword(TpmPassword obj) {
@@ -65,7 +66,6 @@ public class TpmPasswords extends MtWilsonClient {
     /**
      * Deletes the TPM password entry for the specified ID. 
      * @param uuid - UUID of the host tpm password entry that has to be deleted.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tpm_passwords:delete
      * @mtwContentTypeReturned N/A
@@ -77,7 +77,7 @@ public class TpmPasswords extends MtWilsonClient {
      * @mtwSampleApiCall
      * <pre>
      *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
-     *  client.deleteTpmPassword("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  client.deleteTpmPassword(UUID.valueOf("07217f9c-f625-4c5a-a538-73f1880abdda"));
      * </pre>
      */
     public void deleteTpmPassword(UUID uuid) {
@@ -90,7 +90,7 @@ public class TpmPasswords extends MtWilsonClient {
     /**
      * Allows the user to update the TPM password for the specified ID, which is the
      * host's hardware UUID. 
-     * @param role - TpmPassword object having the value that needs to be updated. 
+     * @param obj TpmPassword object having the value that needs to be updated. 
      * @return Updated TpmPassword object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tpm_passwords:store
@@ -98,17 +98,17 @@ public class TpmPasswords extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * https://server.com:8181/mtwilson/v2/host-tpm-passwords/07217f9c-f625-4c5a-a538-73f1880abdda
-     * <p>
-     * <i>Sample Input</i><br>
-     * "password":"Password123"
+     * Input: {"password":"P@ssword123"}
+     * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","etag":"8b393a8404a47817ed94317171c90a6d1d326b6b",
+     * "modified_on":1401306205577,"password":"P@ssword123"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
-     *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
-     *  Role role = new Role();
-     *  role.setId(UUID.valueOf("31741556-f5c7-4eb6-a713-338a23e43b93"));
-     *  role.setDescription("Intel OEM updated");
-     *  role = client.editRole(role);
+     *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
+     *  TpmPassword obj = new TpmPassword();
+     *  obj.setId("07217f9c-f625-4c5a-a538-73f1880abdda");
+     *  obj.setPassword("P@ssword123");
+     *  obj = obj.editTpmPassword(obj);
      * </pre>
      */
     public TpmPassword editTpmPassword(TpmPassword obj) {
@@ -121,7 +121,7 @@ public class TpmPasswords extends MtWilsonClient {
 
     /**
      * Retrieves the TPM password value for the specified ID. 
-     * @param uuid - UUID of the host tpm password that needs to be retrieved
+     * @param uuid - UUID of the host for which the tpm password needs to be retrieved
      * @return TpmPassword object matching the specified UUID.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tpm_passwords:retrieve
@@ -134,8 +134,8 @@ public class TpmPasswords extends MtWilsonClient {
      * </pre>
      * @mtwSampleApiCall
      * <pre>
-     *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
-     *  Role retrieveRole = client.retrieveRole("31741556-f5c7-4eb6-a713-338a23e43b93");
+     *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
+     *  TpmPassword obj = client.retrieveTpmPassword(UUID.valueOf("07217f9c-f625-4c5a-a538-73f1880abdda"));
      * </pre>
      */
     public TpmPassword retrieveTpmPassword(UUID uuid) {
@@ -147,10 +147,12 @@ public class TpmPasswords extends MtWilsonClient {
     }
 
     /**
-     * Retrieves the TPM password based on the search criteria specified. 
-     * @param TpmPasswordFilterCriteria object specifying the filter criteria. The 
+     * Retrieves the TPM password based on the search criteria specified. Note that the output does not include the password. The
+     * user need to have the tpm_passwords:retrieve permission and call into the retrieve method to get the password.
+     * @param criteria - TpmPasswordFilterCriteria object specifying the filter criteria. The 
      * only search option currently supported is the ID.  
-     * @return TpmPasswordCollection object with the list of all the TpmPassword objects matching the specified filter criteria
+     * @return TpmPasswordCollection object with the list of all the TpmPassword objects matching the specified filter criteria. Since
+     * the criteria that is currently supported is just ID, the collection would always have either 0 or 1 entry.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tpm_passwords:search
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -158,14 +160,14 @@ public class TpmPasswords extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/host-tpm-passwords?id=07217f9c-f625-4c5a-a538-73f1880abdda
-     * Output: {"id":"07217f9c-f625-4c5a-a538-73f1880abdda","password":"Password"}
+     * Output: {"tpm_passwords":[{"id":"07217f9c-f625-4c5a-a538-73f1880abdda"}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
-     *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
-     *  KvAttributeFilterCriteria criteria = new KvAttributeFilterCriteria();
-     *  criteria.nameEqualTo = "country";
-     *  KvAttributeCollection kvAttrs = client.searchKvAttributes(criteria);
+     *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
+     *  TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
+     *  criteria.id = UUID.valueOf("07217f9c-f625-4c5a-a538-73f1880abdda");
+     *  TpmPasswordCollection objCollection = client.searchTpmPasswords(criteria);
      * </pre>
      */
     public TpmPasswordCollection searchTpmPasswords(TpmPasswordFilterCriteria criteria) {

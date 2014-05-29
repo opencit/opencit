@@ -31,7 +31,8 @@ public class DeployTagCertificate extends MtWilsonClient {
     /**
      * This function verifies whether the certificate was created for the specified host and deploys the
      * certificate on the host if there is a match. 
-     * @param UUID of the certificate that needs to be deployed on to the host.
+     * @param certificateId UUID of the certificate that needs to be deployed on to the host.
+     * @param host IP address or the FQDN name of the host for which the certificate has to be deployed.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_certificates:deploy,hosts:search
      * @mtwContentTypeReturned JSON/XML/YAML

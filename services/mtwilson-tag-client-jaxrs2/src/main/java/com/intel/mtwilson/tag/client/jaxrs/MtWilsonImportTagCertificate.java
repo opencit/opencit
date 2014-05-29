@@ -32,7 +32,7 @@ public class MtWilsonImportTagCertificate extends MtWilsonClient {
     /**
      * This function imports the specified certificate into Mt.Wilson. If the host is 
      * already registered with Mt.Wilson, the certificate would be automatically mapped to the host.
-     * @param UUID of the certificate that needs to be imported.
+     * @param certificateId UUID of the certificate that needs to be imported.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_certificates:import
      * @mtwContentTypeReturned JSON/XML/YAML
