@@ -19,6 +19,7 @@ import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.configuration.Configuration;
@@ -34,20 +35,25 @@ import org.slf4j.LoggerFactory;
 public class EraseUserAccounts implements Command {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-  
     private MSPersistenceManager pm;
     private EntityManagerFactory em;
-
     private Configuration options = null;
+    private HashSet<String> keepUsers = new HashSet<>();
 
     @Override
     public void setOptions(Configuration options) {
         this.options = options;
     }
 
+    public boolean isDeleteAll() {
+        return options.getBoolean("all", false);
+    }
+
     /**
      * Deletes all user accounts EXCEPT the admin user and the
-     * ManagementServiceAutomation user
+     * ManagementServiceAutomation user, unless you specify --all and then
+     * it will delete admin users too, or specify --user to delete only a
+     * specific user instead of all users.
      *
      * @param args
      * @throws Exception
@@ -57,61 +63,90 @@ public class EraseUserAccounts implements Command {
         //Configuration serviceConf = MSConfig.getConfiguration();
         pm = new MSPersistenceManager();
         em = pm.getEntityManagerFactory("MSDataPU");
-        if(options.containsKey("user")) {
+        if (options.containsKey("user")) {
             String username = options.getString("user");
             System.out.println("deleting user " + username);
-            deleteUser(username);
+            deletePortalUser(username);
             deleteApiClient(username);
-        }else {
+            deleteUser(username);
+        } else {
+            if (!isDeleteAll()) {
+                Configuration serviceConf = MSConfig.getConfiguration();
+                if( System.getenv("MC_FIRST_USERNAME") != null ) { keepUsers.add(System.getenv("MC_FIRST_USERNAME")); }
+                if( serviceConf.getString("mtwilson.api.key.alias") != null ) { keepUsers.add(serviceConf.getString("mtwilson.api.key.alias")); }
+                keepUsers.add("ManagementServiceAutomation");
+                keepUsers.add("admin");
+                keepUsers.add("tagadmin");
+                keepUsers.add("tagservice");
+            }
+
             deletePortalUsers();
             deleteApiClients();
             deleteUsers();
         }
     }
 
-    private void deleteUser(String username) {
+    private void deletePortalUser(String username) {
         try {
-             MwPortalUserJpaController jpa  = new MwPortalUserJpaController(em); //My.jpa().mwPortalUser();
-             MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
-             jpa.destroy(portalUser.getId());
+            MwPortalUserJpaController jpa = new MwPortalUserJpaController(em); //My.jpa().mwPortalUser();
+            MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
+            jpa.destroy(portalUser.getId());
 //             System.out.println("Deleted " + portalUser.getUsername());
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             System.err.println("Exception occured: \r\n\r\n" + ex.getMessage());
         }
     }
-    
+
     private void deleteUsers() throws Exception {
-        try(LoginDAO dao = MyJdbi.authz()) {
-        List<User> users = dao.findAllUsers();
-        for(User user : users) {
+        try (LoginDAO dao = MyJdbi.authz()) {
+            List<User> users = dao.findAllUsers();
+            int count = 0;
+            for (User user : users) {
+                if (isDeleteAll() || (!isDeleteAll() && !keepUserName(user.getUsername()))) {
+                    UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUserId(user.getId());
+                    if (userLoginPassword != null) {
+                        dao.deleteUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
+                        dao.deleteUserLoginPasswordById(userLoginPassword.getId());
+                    }
+                    UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateByUserId(user.getId());
+                    if (userLoginCertificate != null) {
+                        dao.deleteUserLoginCertificateRolesByUserLoginCertificateId(userLoginCertificate.getId());
+                        dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
+                    }
+                    dao.deleteUser(user.getId());
+                    count++;
+                }
+            }
+            System.out.println(count+ " v2 user records deleted");
+        }
+    }
+
+    private void deleteUser(String name) throws Exception {
+        try (LoginDAO dao = MyJdbi.authz()) {
+            User user = dao.findUserByName(name);
             UserLoginPassword userLoginPassword = dao.findUserLoginPasswordByUserId(user.getId());
-            if( userLoginPassword != null ) {
+            if (userLoginPassword != null) {
                 dao.deleteUserLoginPasswordRolesByUserLoginPasswordId(userLoginPassword.getId());
                 dao.deleteUserLoginPasswordById(userLoginPassword.getId());
             }
             UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateByUserId(user.getId());
-            if( userLoginCertificate != null ) {
+            if (userLoginCertificate != null) {
                 dao.deleteUserLoginCertificateRolesByUserLoginCertificateId(userLoginCertificate.getId());
                 dao.deleteUserLoginCertificateById(userLoginCertificate.getId());
             }
             dao.deleteUser(user.getId());
         }
-        }
     }
-    
+
     private void deletePortalUsers() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException {
         try {
-            boolean deleteAll = options.getBoolean("all", false);
             boolean verbose = options.getBoolean("verbose", false);
             MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
             List<MwPortalUser> list = jpa.findMwPortalUserEntities();
-            Configuration serviceConf = MSConfig.getConfiguration();
-            String msUser = serviceConf.getString("mtwilson.api.key.alias");
-            String adminUser = System.getenv("MC_FIRST_USERNAME");
 
             int count = 0;
             for (MwPortalUser record : list) {
-                if (deleteAll || (!deleteAll && !record.getUsername().equals(msUser) && !record.getUsername().equals(adminUser))) {
+                if (isDeleteAll() || (!isDeleteAll() && !keepUserName(record.getUsername()))) {
                     jpa.destroy(record.getId());
                     count++;
                     if (verbose) {
@@ -125,20 +160,30 @@ public class EraseUserAccounts implements Command {
         }
     }
 
+    private boolean keepUserName(String username) {
+        return keepUsers.contains(username);
+    }
+
+    private boolean keepUserCN(String cn) {
+        for (String username : keepUsers) {
+            String keepcn = String.format("CN=%s", username);
+            if (cn.equals(keepcn)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void deleteApiClients() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
         try {
-            boolean deleteAll = options.getBoolean("all", false);
             boolean verbose = options.getBoolean("verbose", false);
             ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
             ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
             List<ApiClientX509> list = jpa.findApiClientX509Entities();
-            Configuration serviceConf = MSConfig.getConfiguration();
-            String msUser = serviceConf.getString("mtwilson.api.key.alias");
-            String adminUser = System.getenv("MC_FIRST_USERNAME");
 
             int count = 0;
             for (ApiClientX509 record : list) {
-                if (deleteAll || (!deleteAll && !record.getName().contains("CN=" + msUser + ",") && !record.getName().contains("CN=" + adminUser + ","))) {
+                if (isDeleteAll() || (!isDeleteAll() && !keepUserCN(record.getName()))) {
                     Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
                     for (ApiRoleX509 role : roles) {
                         rolejpa.destroy(role.getApiRoleX509PK());
@@ -153,10 +198,10 @@ public class EraseUserAccounts implements Command {
             }
             System.out.println(count + " API clients deleted.");
         } catch (Exception ex) {
-            System.err.println("Exception occured: \r\n\r\n" + ex.toString());  
+            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
         }
     }
-    
+
     private void deleteApiClient(String username) throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
         try {
             //boolean deleteAll = options.getBoolean("all", false);
