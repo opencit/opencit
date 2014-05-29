@@ -215,10 +215,6 @@ public class ApiClientBO extends BaseBO {
         try(LoginDAO loginDAO = MyJdbi.authz()) {
             log.debug("Looking for existing user");
             User user = loginDAO.findUserByName(getSimpleNameFromCert(x509Certificate));
-            String localeTag = null;
-            if (user.getLocale() != null) {
-                localeTag = LocaleUtil.toLanguageTag(user.getLocale());
-            }
             if (user == null) {
                 log.debug("No existing user, inserting record");
                 user = new User();
@@ -226,7 +222,7 @@ public class ApiClientBO extends BaseBO {
 //                user.setLocale(Locale.US);
                 user.setComment("");
                 user.setUsername(getSimpleNameFromCert(x509Certificate));
-                loginDAO.insertUser(user.getId(), user.getUsername(), localeTag, user.getComment());
+                loginDAO.insertUser(user.getId(), user.getUsername(), null, user.getComment());
             }
             log.debug("Looking for existing certificate");
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
