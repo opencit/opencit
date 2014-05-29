@@ -34,7 +34,7 @@ public class SelectionKvAttributes extends MtWilsonClient {
     
     /**
      * Creates a new mapping between the selection and the key-value pair specified. 
-     * @param SelectionKvAttribute object that needs to be created. User needs to specify the selection name
+     * @param obj SelectionKvAttribute object that needs to be created. User needs to specify the selection name
      * and the UUID of the key-value (KvAttribute) object.
      * @return Created SelectionKvAttribute object.
      * @since Mt.Wilson 2.0
@@ -65,7 +65,6 @@ public class SelectionKvAttributes extends MtWilsonClient {
     /**
      * Deletes an existing mapping between the Selection and the key-value pair.
      * @param uuid - UUID of the mapping entry that has to be deleted.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_selection_kv_attributes:delete
      * @mtwContentTypeReturned N/A
@@ -119,7 +118,7 @@ public class SelectionKvAttributes extends MtWilsonClient {
     /**
      * Retrieves the list of mappings between the selection and the associated key-value pairs based on the 
      * search criteria specified.  
-     * @param SelectionKvAttributeFilterCriteria object specifying the filter criteria. The possible search options 
+     * @param criteria SelectionKvAttributeFilterCriteria object specifying the filter criteria. The possible search options 
      * include nameEqualTo, nameContains, attrNameEqualTo, attrNameContains, attrValueContains, and attrValueEqualTo.  
      * User can retrieve all the selections by setting the filter criteria to false. By default this filter
      * criteria would be set to true. [Ex: /v2/tag-selection-kv-attributes?filter=false]

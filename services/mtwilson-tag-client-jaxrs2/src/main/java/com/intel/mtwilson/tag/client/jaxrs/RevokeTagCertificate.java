@@ -32,7 +32,7 @@ public class RevokeTagCertificate extends MtWilsonClient {
         
     /**
      * This function revokes the specified certificate and sends the revocation information to Mt.Wilson. 
-     * @param UUID of the certificate that needs to be revoked.
+     * @param certificateId UUID of the certificate that needs to be revoked.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_certificates:delete
      * @mtwContentTypeReturned JSON/XML/YAML

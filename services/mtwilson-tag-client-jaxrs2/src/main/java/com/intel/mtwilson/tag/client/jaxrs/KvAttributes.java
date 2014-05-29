@@ -37,7 +37,7 @@ public class KvAttributes extends MtWilsonClient {
      * message would be returned back to the caller. The user can specify the ID, which should be a valid
      * UUID to be used as the primary key. If not specified, a new UUID would be automatically generated.
      * After successful execution the caller would be returned back the new object created.
-     * @param role - KvAttribute (Key-Value Attribute) object that needs to be created. 
+     * @param obj KvAttribute (Key-Value Attribute) object that needs to be created. 
      * @return Created KvAttribute object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_kv_attributes:create
@@ -66,8 +66,7 @@ public class KvAttributes extends MtWilsonClient {
 
     /**
      * Deletes the key value pair with the specified ID. 
-     * @param uuid - UUID of the key value pair that has to be deleted.
-     * @return N/A
+     * @param uuid UUID of the key value pair that has to be deleted.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_kv_attributes:delete
      * @mtwContentTypeReturned N/A
@@ -94,7 +93,7 @@ public class KvAttributes extends MtWilsonClient {
      * pair can be edited. The user has to specify the ID on the query string and the value to be updated
      * in the body. If the specified ID does not exist in the system, appropriate error would be returned
      * back to the caller. 
-     * @param role - KvAttribute object having the value that needs to be updated. 
+     * @param obj KvAttribute object having the value that needs to be updated. 
      * @return Updated KvAttribute object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_kv_attributes:store
@@ -152,7 +151,7 @@ public class KvAttributes extends MtWilsonClient {
     
     /**
      * Retrieves the key-value pairs based on the search criteria specified.  
-     * @param KvAttributeFilterCriteria object specifying the filter criteria. Possible search options include 
+     * @param criteria KvAttributeFilterCriteria object specifying the filter criteria. Possible search options include 
      * nameEqualTo, nameContains, valueEqualTo and valueContains.  If in case the caller needs the list of all 
      * the key value attributes, then the filter option has to be set to false. [Ex: /v2/tag-kv-attributes?filter=false]
      * @return KvAttributeCollection object with the list of all the KvAttribute objects matching the specified filter criteria
