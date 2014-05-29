@@ -215,14 +215,18 @@ public class ApiClientBO extends BaseBO {
         try(LoginDAO loginDAO = MyJdbi.authz()) {
             log.debug("Looking for existing user");
             User user = loginDAO.findUserByName(getSimpleNameFromCert(x509Certificate));
+            String localeTag = null;
+            if (user.getLocale() != null) {
+                localeTag = LocaleUtil.toLanguageTag(user.getLocale());
+            }
             if (user == null) {
                 log.debug("No existing user, inserting record");
                 user = new User();
                 user.setId(new UUID());
-                user.setLocale(Locale.US);
+//                user.setLocale(Locale.US);
                 user.setComment("");
                 user.setUsername(getSimpleNameFromCert(x509Certificate));
-                loginDAO.insertUser(user.getId(), user.getUsername(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
+                loginDAO.insertUser(user.getId(), user.getUsername(), localeTag, user.getComment());
             }
             log.debug("Looking for existing certificate");
             UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(getSimpleNameFromCert(x509Certificate));
@@ -286,7 +290,10 @@ public class ApiClientBO extends BaseBO {
                 log.debug("Found user {}", user.getId());
                 if (apiClientUpdateRequest.comment != null && !apiClientUpdateRequest.comment.isEmpty())
                     user.setComment(apiClientUpdateRequest.comment);
-                loginDAO.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
+                String localeTag = null;
+                if (user.getLocale() != null)
+                    localeTag = LocaleUtil.toLanguageTag(user.getLocale());
+                loginDAO.updateUser(user.getId(), localeTag, user.getComment());
             }
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);
