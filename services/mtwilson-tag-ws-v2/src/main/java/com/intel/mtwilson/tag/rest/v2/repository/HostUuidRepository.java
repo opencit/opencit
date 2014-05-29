@@ -15,10 +15,6 @@ import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,17 +29,15 @@ public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCo
     @RequiresPermissions("host_uuids:search")         
     public HostUuidCollection search(HostUuidFilterCriteria criteria) {
         HostUuidCollection objCollection = new HostUuidCollection();
-        
+        log.debug("HostUuid:Search - Got request to search for the host UUID.");  
         try {
-            String ip = criteria.id.toString();
-            log.debug("made it into actionAutomation! got ip of " + ip);
-            //String ip = getQuery().getFirstValue("ipaddress");
+            String ip = criteria.hostId;
             List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip,true);
             if(hostList == null || hostList.size() < 1) {
                 log.debug("host uuid didn't return back any results");
                 throw new Exception("No host records found");
             }
-            log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
+            log.debug("Search for host uuid returned " + hostList.get(0).Hardware_Uuid);
             HostUuid obj = new HostUuid();
             obj.setHardwareUuid(hostList.get(0).Hardware_Uuid);
             objCollection.getHostUuids().add(obj);

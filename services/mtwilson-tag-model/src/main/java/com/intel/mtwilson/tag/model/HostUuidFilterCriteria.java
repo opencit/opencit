@@ -16,5 +16,7 @@ public class HostUuidFilterCriteria implements FilterCriteria<HostUuid>{
     
     @QueryParam("id")
     public UUID id;
+    @QueryParam("hostId")
+    public String hostId;
     
 }
