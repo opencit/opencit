@@ -96,7 +96,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
                     certObj.setSha1(Sha1Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA1)));
                     certObj.setSha256(Sha256Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA256)));
                     certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
-                    log.debug("Created certificate record {}", certObj.getId().toString());
+                    log.debug("Created certificate record in search result {}", certObj.getId().toString());
                     objCollection.getCertificates().add(certObj);
                 }
                 catch(Exception e) {

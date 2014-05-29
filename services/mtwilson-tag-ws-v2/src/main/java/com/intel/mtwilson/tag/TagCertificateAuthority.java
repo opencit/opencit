@@ -274,12 +274,14 @@ public class TagCertificateAuthority {
 
         // if auto-import to mtwilson is enabled, do it here, but if there is an exception we only log it
         try {
+            log.debug("Tag certificate auto-import enabled: {}", configuration.isTagProvisionAutoImport());
             if (configuration.isTagProvisionAutoImport()) {
                 String url = My.configuration().getAssetTagMtWilsonBaseUrl();
+                log.debug("Mt Wilson URL: {}", url);
                 if (url != null && !url.isEmpty()) {
                     AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
                     request.setCertificate(attributeCertificateBytes);
-                    log.debug("import cert to MTW ");
+                    log.debug("Importing tag certificate to Mt Wilson");
                     Global.mtwilson().importAssetTagCertificate(request);
                 }
             }
