@@ -231,7 +231,8 @@ function provisionCert() {
     if [ -z "$selectionName" ]; then
       selectionName=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter Tag Selection Name:" 8 50)
     fi
-    json='{"selections":[{"name":"'$selectionName'"}]}'
+#    json='{"selections":[{"name":"'$selectionName'"}]}'
+    json='{"options":{"cache":{"mode":"off"}},"default":{"selections":[{"name":"'"$selectionName"'"}]}}'
    # fi
    echo "$WGET --header=\"Content-Type: application/json\" --header=\"Accept: application/pkix-cert\" --post-data=\"$json\" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --header="Accept: application/pkix-cert" --post-data="$json" $server/tag-certificate-requests-rpc/provision?subject=$UUID -O $certFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }'
