@@ -19,6 +19,7 @@ import com.intel.mtwilson.tag.TagCertificateAuthority;
 import com.intel.mtwilson.tag.TagConfiguration;
 import com.intel.mtwilson.tag.Util;
 import com.intel.mtwilson.tag.common.Global;
+import com.intel.mtwilson.tag.common.X509AttrBuilder;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.tag.model.CertificateCollection;
 import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
@@ -28,6 +29,8 @@ import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRepository;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRequestRepository;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
+import com.intel.mtwilson.tag.selection.xml.AttributeType;
+import com.intel.mtwilson.tag.selection.xml.SelectionType;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -48,8 +52,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 
 import org.slf4j.Logger;
@@ -147,9 +153,12 @@ public class ProvisionTagCertificate  {
             cacheMode = selections.getOptions().getCache().getMode().value();
         }
         
+        // first figure out which selection will be used for the given subject - also filters selections to ones that are currently valid or not marked with validity period
+        SelectionType targetSelection = ca.findCurrentSelectionForSubject(UUID.valueOf(subject), selections); // throws exception if there is no matching selection and no matching default selection
+        
         log.debug("Cache mode {}", cacheMode);
         if( "off".equals(cacheMode) ) {
-            byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
+            byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), targetSelection);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
         }
@@ -160,10 +169,13 @@ public class ProvisionTagCertificate  {
         // if there is an existing currently valid certificate we return it
         CertificateFilterCriteria criteria = new CertificateFilterCriteria();
         criteria.subjectEqualTo = subject;
-        CertificateCollection results = certificateRepository.search(criteria); // DONE: TODO:  order by creation date so we get most recent first, and we pick the most recently created cert that is currently valid. 
+        criteria.revoked = false;
+        criteria.validOn = new Date(); 
+        CertificateCollection results = certificateRepository.search(criteria);
         Date today = new Date();
         Certificate latestCert = null;
         BigInteger latestCreateTime = BigInteger.ZERO;
+        //  pick the most recently created cert that is currently valid and has the same attributes specified in the selection.  we evaluate the notBefore and notAfter fields of the certificate itself even though we already narrowed the search to currently valid certs using the search criteria. 
         if( !results.getCertificates().isEmpty() ) {
             for (Certificate certificate : results.getCertificates()) {
                 X509AttributeCertificate attributeCertificate = X509AttributeCertificate.valueOf(certificate.getCertificate());
@@ -173,27 +185,66 @@ public class ProvisionTagCertificate  {
                 if (today.after(attributeCertificate.getNotAfter())) {
                     continue;
                 }
-                
+                if( !certificateAttributesEqual(attributeCertificate, targetSelection)) {
+                    continue;
+                }
                 // While creating the certificates we are storing the create time in the serial number field
+                // And here we want to return the latest certificate so we keep track as we look through the results.
                 if (latestCreateTime.compareTo(attributeCertificate.getSerialNumber()) <= 0) {
                     latestCreateTime = attributeCertificate.getSerialNumber();
                     latestCert = certificate;
-                } else {
-                    continue;
                 }
-                // We won't return the first certificate found. Instead we return back the latest certificate.
-                //return certificate;  // we return the first certificate (most recent, see TODO above) that is currently valid
             }
         }
         // Check if a valid certificate was found during the search.
-        if (latestCert != null)
+        if (latestCert != null) {
             return latestCert;
+        }
         
         // no cached certificate so generate a new certificate
-            byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
+            byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), targetSelection);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
         
+    }
+    
+    /**
+     * Check that the attributes in the certificate are the same as the attributes in the given selection.
+     * The order is not considered so they do not have to be in the same order.
+     * 
+     * The given selection must have inline attributes (not requiring any lookup by id or name).
+     * 
+     * @return true if the attribute certificate has exactly the same attributes as in the given selection
+     */
+    protected boolean certificateAttributesEqual(X509AttributeCertificate certificate, SelectionType selection) throws IOException {
+        List<Attribute> certAttributes = certificate.getAttribute();
+        boolean certAttrMatch[] = new boolean[certAttributes.size()]; // initialized with all false, later we mark individual elements true if they are found within the given selection, so that if any are left false at the end we know that there are attributes in the cert that were not in the selection
+        // for every attribute in the selection, check if it's present in the certificate 
+        for (AttributeType xmlAttribute:  selection.getAttribute()) {
+            X509AttrBuilder.Attribute oidAndValue = Util.toAttributeOidValue(xmlAttribute);
+            // look through the certificate for same oid and value
+            boolean found = false;
+            for(int i=0; i<certAttrMatch.length; i++) {
+                if( Arrays.equals(certAttributes.get(i).getAttrType().getDEREncoded(), oidAndValue.oid.getDEREncoded()) ) {
+                    if( Arrays.equals(certAttributes.get(i).getAttributeValues()[0].getDEREncoded(), oidAndValue.value.getDEREncoded()) ) {
+                        certAttrMatch[i] = true;
+                        found = true;
+                    }
+                }
+            }
+            if( !found ) {
+                log.debug("Certificate does not have attribute oid {} and value {}", Hex.encodeHexString(oidAndValue.oid.getDEREncoded()), Hex.encodeHexString(oidAndValue.value.getDEREncoded()));
+                return false;
+            }
+        }
+        // check if the certificate has any attributes that are not in the selection 
+        for(int i=0; i<certAttrMatch.length; i++) {
+            if( !certAttrMatch[i] ) {
+                log.debug("Selection does not have attribute oid {} and value {}", Hex.encodeHexString(certAttributes.get(i).getAttrType().getDEREncoded()), Hex.encodeHexString(certAttributes.get(i).getAttributeValues()[0].getDEREncoded()));
+                return false;
+            }
+        }
+        return true; // certificate and selection have same set of attribute (oid,value) pairs
     }
     
     /**

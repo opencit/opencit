@@ -9,6 +9,7 @@ import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.BuilderModel;
+import java.io.IOException;
 import org.bouncycastle.asn1.ASN1Encodable;
 import java.math.BigInteger;
 import java.security.PrivateKey;
@@ -34,6 +35,7 @@ import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * This class requires Bouncy Castle
  * 
- * XXX TODO this class may be moved to cpg-crypto if the OID and AttributeOidAndValue classes either also move or
- * this is rewritten not to use them. OID may be easily moved to cpg-io.  AttributeOidAndValue may need revision and
- * renaming before moving.
+ * XXX TODO this class may be moved to cpg-crypto 
  *
  * @since 0.1
  * @author jbuhacoff
@@ -64,7 +64,7 @@ public class X509AttrBuilder extends BuilderModel {
     private X500Name subjectName = null;
     private Date notBefore = null;
     private Date notAfter = null;
-    private ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+    private ArrayList<Attribute> attributes = new ArrayList<>();
 
     public static class Attribute {
         public ASN1ObjectIdentifier oid;
@@ -194,6 +194,11 @@ public class X509AttrBuilder extends BuilderModel {
         attributes.add(new Attribute(oid, value));
         return this;
     }
+    
+    public X509AttrBuilder attribute(Attribute attribute) {
+        attributes.add(attribute);
+        return this;
+    }
 
     public byte[] build() {
         if (notBefore == null || notAfter == null) {
@@ -235,7 +240,7 @@ public class X509AttrBuilder extends BuilderModel {
                 return cert.getEncoded(); //X509AttributeCertificate.valueOf(cert.getEncoded());            
             }
             return null;
-        } catch (Exception e) {
+        } catch (IOException | OperatorCreationException e) {
             fault(e, "cannot sign certificate");
             return null;
         } finally {

@@ -32,8 +32,13 @@ public class TagManagementClient extends MtWilsonClient {
     
     public Certificate createOneXml(UUID hostHardwareUuid, String selectionXml) {
         log.debug("target: {}", getTarget().getUri().toString());
+        return createOneXml(hostHardwareUuid.toString(), selectionXml);
+    }
+
+    public Certificate createOneXml(String hostUuidOrIp, String selectionXml) {
+        log.debug("target: {}", getTarget().getUri().toString());
         CertificateRequestLocator locator = new CertificateRequestLocator();
-        locator.subject = hostHardwareUuid.toString();
+        locator.subject = hostUuidOrIp;
         Certificate certificate = 
                 getTargetPathWithQueryParams("/tag-certificate-requests-rpc/provision", locator)
                 .request()
@@ -41,7 +46,6 @@ public class TagManagementClient extends MtWilsonClient {
                 .post(Entity.entity(selectionXml, MediaType.APPLICATION_XML), Certificate.class);
         return certificate;
     }
-
 
 
 }

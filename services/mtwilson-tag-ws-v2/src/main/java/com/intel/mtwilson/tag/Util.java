@@ -6,12 +6,17 @@ package com.intel.mtwilson.tag;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.tag.common.X509AttrBuilder;
+import com.intel.mtwilson.tag.model.x509.UTF8NameValueMicroformat;
 import com.intel.mtwilson.tag.selection.json.TagSelectionModule;
+import com.intel.mtwilson.tag.selection.xml.AttributeType;
 import com.intel.mtwilson.tag.selection.xml.ObjectFactory;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
 import java.io.IOException;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
  * Wraps JAXB and XML exceptions in IOException. to present a uniform
@@ -69,4 +74,32 @@ java.io.IOException: javax.xml.bind.JAXBException: Provider com.sun.xml.bind.v2.
             throw new IOException(e);
         }
     }
+    
+    
+    /**
+     * Converts the xml attribute element to a pair of OID and ASN1 encoding
+     * of the attribute value.
+     * @param attribute
+     * @return the same attribute in a representation that can be used with X509AttrBuilder
+     * @throws IOException if the attribute value is der-encoded but cannot be parsed into an ASN1Object
+     * @throws UnsupportedOperationException if the attribute OID is not supported or a text format was given for which a parser is not available
+     */
+    public static X509AttrBuilder.Attribute toAttributeOidValue(AttributeType attribute) throws IOException {
+        // TODO:  oid support extensions
+        if (attribute.getDer() != null) {
+            ASN1Object asn1 = ASN1Object.fromByteArray(attribute.getDer().getValue()); // throws IOException
+            return new X509AttrBuilder.Attribute(new ASN1ObjectIdentifier(attribute.getOid()), asn1);
+        } else if (attribute.getOid().equals("2.5.4.789.1") && attribute.getText() != null) {
+            // TODO: move to a text parser for this oid
+            String[] parts = attribute.getText().getValue().split("=");  // name=value
+            return new X509AttrBuilder.Attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(parts[0], parts[1]));
+        } else if (attribute.getOid().equals("2.5.4.789.2") && attribute.getText() != null) {
+            throw new UnsupportedOperationException("text format not implemented yet for 2.5.4.789.2"); // typically 2.5.4.789.2 would use der format anyway...
+        } else {
+            throw new UnsupportedOperationException("text format not implemented yet for " + attribute.getOid());
+        }
+        
+    }
+    
+    
 }

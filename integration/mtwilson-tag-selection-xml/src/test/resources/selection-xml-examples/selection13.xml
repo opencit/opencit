@@ -12,9 +12,6 @@
     </default>
     <selection id="8ed9140b-e6a1-41b2-a8d4-258948633153" name="California">
         <subject><ip>192.168.1.101</ip></subject>
-        <attribute oid="2.5.4.789.1"><text>Country=US</text></attribute>
-        <attribute oid="2.5.4.789.1"><text>State=CA</text></attribute>
-        <attribute oid="2.5.4.789.1"><text>City=Folsom</text></attribute>
     </selection>
     <selection id="24e7d7be-f337-47f7-a1af-9a4dbdaeb69d">
         <subject><ip>192.168.1.102</ip></subject>
@@ -36,9 +33,11 @@ Demonstrates the default and options elements.
 The "default" element may contain one or more selection elements. 
 Selection elements inside the "default" section can be differentiated by
 date using notBefore/notAfter. 
+Selection elements inside the "default" section must have any "subject" 
+elements - if they do the server will ignore them or deny the request.
 The "options" element supports only one option at this time, the "cache" option.
 The "cache" element must have a "mode" attribute with a value of "on" or "off"
-(these are NOT case sensitive).
+(these are NOT case sensitive). The default value is "on".
 Any provided options apply only to the current request and are not applicaable to 
 other requests. 
 In this example, if a server is provided as the subject of the request which
