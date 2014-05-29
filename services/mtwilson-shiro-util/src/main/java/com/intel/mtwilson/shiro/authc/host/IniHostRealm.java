@@ -35,8 +35,8 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 public class IniHostRealm extends AuthorizingRealm {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IniHostRealm.class);
-    private String allow;
-    private HostAllowCsvFilter hostAllowCsvFilter;
+    private String allow = null;
+    private HostAllowCsvFilter hostAllowCsvFilter = null;
 
     public void setAllow(String allow) {
         this.allow = allow;
@@ -57,7 +57,10 @@ public class IniHostRealm extends AuthorizingRealm {
         for (String realmName : pc.getRealmNames()) {
             log.debug("doGetAuthorizationInfo for realm: {}", realmName);
         }
-        // for informational purposes only:
+        if( hostAllowCsvFilter == null ) {
+            log.warn("IniHostRealm.allow is not set; host-based authorization disabled");
+            return authzInfo;
+        }
         Collection<LoginHostPrincipal> principals = pc.byType(LoginHostPrincipal.class);
         for (LoginHostPrincipal principal : principals) {
             log.debug("doGetAuthorizationInfo for host: {}", principal.getHost());
@@ -82,6 +85,10 @@ public class IniHostRealm extends AuthorizingRealm {
 
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        if( hostAllowCsvFilter == null ) {
+            log.warn("IniHostRealm.allow is not set; host-based authentication disabled");
+            return null;
+        }
         if (token instanceof HostToken) {
             HostToken xToken = (HostToken) token;
             String address = xToken.getHost();

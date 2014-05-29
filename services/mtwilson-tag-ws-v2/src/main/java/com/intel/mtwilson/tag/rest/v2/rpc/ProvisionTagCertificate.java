@@ -141,13 +141,14 @@ public class ProvisionTagCertificate  {
             storeAsyncRequest(subject, selections, response);
             return null;
         }
-        // if always-generate / no-cache is enabled then generate it right now and return it - no need to check database for existing certs etc. 
+        // if always-generate/no-cache (cache mode off) is enabled then generate it right now and return it - no need to check database for existing certs etc. 
         String cacheMode = "on";
         if( selections.getOptions() != null && selections.getOptions().getCache() != null && selections.getOptions().getCache().getMode() != null ) {
             cacheMode = selections.getOptions().getCache().getMode().value();
         }
         
-        if( "on".equals(cacheMode) ) {
+        log.debug("Cache mode {}", cacheMode);
+        if( "off".equals(cacheMode) ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), selections);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
