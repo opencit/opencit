@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:mtwilson-tag-selection">
+    <options>
+        <cache mode="off"/>
+    </options>
+    <default>
+        <selection name="existing_selection_name"/>
+    </default>
+</selections>
+<!--
+Demonstrates the default and options elements. 
+The "default" element may contain one or more selection elements. 
+Selection elements inside the "default" section can be differentiated by
+date using notBefore/notAfter. 
+The "options" element supports only one option at this time, the "cache" option.
+The "cache" element must have a "mode" attribute with a value of "on" or "off"
+(these are NOT case sensitive).
+Any provided options apply only to the current request and are not applicaable to 
+other requests. 
+-->

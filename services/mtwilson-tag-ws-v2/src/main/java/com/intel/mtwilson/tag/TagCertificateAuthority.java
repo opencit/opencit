@@ -18,6 +18,7 @@ import com.intel.mtwilson.tag.dao.jdbi.*;
 import com.intel.mtwilson.tag.model.*;
 import com.intel.mtwilson.tag.model.x509.UTF8NameValueMicroformat;
 import com.intel.mtwilson.tag.selection.SelectionBuilder;
+import com.intel.mtwilson.tag.selection.SelectionUtil;
 import com.intel.mtwilson.tag.selection.xml.*;
 import java.io.IOException;
 import java.security.PrivateKey;
@@ -60,56 +61,18 @@ public class TagCertificateAuthority {
     }
 
     /**
-     * Returns a new SelectionsType instance with only the selections that are
-     * valid today.
-     */
-    protected SelectionsType getCurrentSelections(SelectionsType selections) {
-        GregorianCalendar today = new GregorianCalendar();
-        today.setTime(new Date()); // http://docs.oracle.com/javase/7/docs/api/java/util/GregorianCalendar.html
-        SelectionsType valid = new SelectionsType();
-        for (SelectionType selection : selections.getSelection()) {
-            // skip if the selection is not currently valid (notBefore<today<notAfter) ; if notBefore or notAfter are not defined, then validity is assumed
-            if (selection.getNotBefore() != null && today.before(selection.getNotBefore().toGregorianCalendar())) {
-                log.debug("skipping selection because of notBefore date");
-                continue;
-            }
-            if (selection.getNotAfter() != null && today.after(selection.getNotAfter().toGregorianCalendar())) {
-                log.debug("skipping selection because of notAfter date");
-                continue;
-            }
-            valid.getSelection().add(selection);
-        }
-        // repeat the same action for the default selections
-        if( selections.getDefault() != null ) {
-            valid.setDefault(new DefaultType());
-            for (SelectionType selection : selections.getDefault().getSelection()) {
-                // skip if the selection is not currently valid (notBefore<today<notAfter) ; if notBefore or notAfter are not defined, then validity is assumed
-                if (selection.getNotBefore() != null && today.before(selection.getNotBefore().toGregorianCalendar())) {
-                    log.debug("skipping selection because of notBefore date");
-                    continue;
-                }
-                if (selection.getNotAfter() != null && today.after(selection.getNotAfter().toGregorianCalendar())) {
-                    log.debug("skipping selection because of notAfter date");
-                    continue;
-                }
-                valid.getDefault().getSelection().add(selection);
-            }
-        }
-        return valid;
-    }
-
-    /**
      * Looks up hardware uuid of host in mtwilson; host already be registered.
      *
      * @param ip address or hostname
      * @return
      */
     public String findSubjectHardwareUuid(String ip) throws Exception {
+        log.debug("Querying host {} in Mt Wilson", ip);
         List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip, true);
-        if (hostList == null || hostList.size() < 1) {
-            log.debug("host uuid didn't return back any results");
+        if (hostList == null || hostList.isEmpty()) {
+            log.debug("host uuid lookup didn't return back any results");
             //throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.")); // TODO: i18n  similar to  ErrorCode.AS_HOST_NOT_FOUND but with this custom message
-            log.warn("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.");
+            log.warn("No host records found for {}, please verify your host is in mtwilson or provide a hardware uuid in the subject field", ip);
             return null;
         }
         log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
@@ -161,14 +124,23 @@ public class TagCertificateAuthority {
 
     protected SelectionType getInlineOrLookupSelection(SelectionType selection) throws SQLException {
         if (selection.getAttribute().isEmpty()) {
-            if (selection.getName() != null) {
-                return findSelectionByName(selection.getName());
-            } else if (selection.getId() != null) {
-                return findSelectionById(selection.getName());
-            } else {
-                // did not find a selection on the server and the selection xml is broken (selection/>)
-                throw new IllegalArgumentException("Invalid selection");
+            log.debug("Selection does not have inline attributes");
+            if (selection.getId() != null) {
+                SelectionType found = findSelectionById(selection.getId());
+                if (found != null) {
+                    log.debug("Found selection by id {}", selection.getId());
+                    return found;
+                }
             }
+            if (selection.getName() != null) {
+                SelectionType found = findSelectionByName(selection.getName());
+                if (found != null) {
+                    log.debug("Found selection by name {}", selection.getName());
+                    return found;
+                }
+            }
+            // did not find a selection on the server and the selection xml is broken (selection/>)
+            throw new IllegalArgumentException("Invalid selection");
         }
         // if it's not empty we use the included attributes and do not need to look anything up on the server
         return selection;
@@ -183,13 +155,14 @@ public class TagCertificateAuthority {
      * a selection could not be found.
      *
      */
-    protected SelectionType findSelectionForSubject(UUID targetSubject, SelectionsType selections) throws Exception {
-        SelectionsType currentSelections = getCurrentSelections(selections);
-        // first search by uuid
+    public SelectionType findCurrentSelectionForSubject(UUID targetSubject, SelectionsType selections) throws Exception {
+        log.debug("findSelectionForSubject {}", targetSubject.toString());
+        SelectionsType currentSelections = SelectionUtil.copySelectionsValidOn(selections, new Date());
+        // first search by host uuid
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
                 if (subject.getUuid() != null) {
-                    log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),subject.getUuid().getValue().toLowerCase());
+                    log.debug("comparing to selection subject uuid {}", subject.getUuid().getValue().toLowerCase());
                     if (targetSubject.toString().equalsIgnoreCase(subject.getUuid().getValue().toLowerCase())) {
                         // found a selection with the target subject uuid
                         return getInlineOrLookupSelection(selection);
@@ -197,13 +170,14 @@ public class TagCertificateAuthority {
                 }
             }
         }
-        // second search by ip or name
+        // second search by host ip or host name
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
                 if (subject.getIp() != null) {
+                    log.debug("looking up uuid for host with ip {}", subject.getIp().getValue());
                     String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
                     if (uuid != null) {
-                        log.debug("Does targetSubject [{}] = selectionSubject [{}]?", targetSubject.toString(),uuid);
+                        log.debug("comparing to found selection subject uuid {}", uuid);
                         if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
                             // found a selection with the target subject uuid
                             return getInlineOrLookupSelection(selection);
@@ -213,23 +187,53 @@ public class TagCertificateAuthority {
             }
         }
         // third search for default selection (no subjects declared) return the first one found
-        if( currentSelections.getDefault() != null ) {
+        if (currentSelections.getDefault() != null) {
             for (SelectionType selection : currentSelections.getDefault().getSelection()) {
                 log.debug("Using first currently valid default selection");
                 return getInlineOrLookupSelection(selection); // get first default
             }
         }
         /*
-        // fourth look for a server default selection - disabling this for now because it may be confusing to customers to have a server default behind their own selections file default because if they choose not to supply a default in their file they may still get one from the server.
-        String defaultSelectionName = configuration.getTagProvisionSelectionDefault();
-        if (defaultSelectionName != null && !defaultSelectionName.isEmpty()) {
-            return findSelectionByName(defaultSelectionName);
-        }
-        */
+         // fourth look for a server default selection - disabling this for now because it may be confusing to customers to have a server default behind their own selections file default because if they choose not to supply a default in their file they may still get one from the server.
+         String defaultSelectionName = configuration.getTagProvisionSelectionDefault();
+         if (defaultSelectionName != null && !defaultSelectionName.isEmpty()) {
+         return findSelectionByName(defaultSelectionName);
+         }
+         */
         throw new IllegalArgumentException("No matching selection");
     }
 
+    /**
+     * Finds the best matching selection for the give subject in the provided
+     * selections object, based on validity dates and specified subjects and
+     * using the default selections if provided and no better match can be
+     * found.
+     *
+     * @param subject
+     * @param selections representing an entire "xml selections file"
+     * @return
+     * @throws Exception
+     */
     public byte[] createTagCertificate(UUID subject, SelectionsType selections) throws Exception {
+        SelectionType selection = findCurrentSelectionForSubject(subject, selections);
+        return createTagCertificate(subject, selection);
+    }
+    
+
+    /**
+     * Does not attempt to match the subject to the selection. Do not call
+     * directly unless you have already verified that you want to create a
+     * certificate for the given subject with the given selection with no
+     * further checks.
+     *
+     * @param subject
+     * @param selection element representing a set of host attributes by
+     * reference via the selection uuid or selection name or inline via the
+     * attribute elements
+     * @return
+     * @throws Exception
+     */
+    public byte[] createTagCertificate(UUID subject, SelectionType selection) throws Exception {
         // check if we have a private key to use for signing
         PrivateKey cakey = Global.cakey();
         X509Certificate cakeyCert = Global.cakeyCert();
@@ -243,25 +247,9 @@ public class TagCertificateAuthority {
                 .subjectUuid(subject)
                 .expires(configuration.getTagValiditySeconds(), TimeUnit.SECONDS);
 
-        SelectionType selection = findSelectionForSubject(subject, selections);
         for (AttributeType attribute : selection.getAttribute()) {
-            // TODO:  oid support extensions
-            if (attribute.getDer() != null) {
-                ASN1Object asn1 = ASN1Object.fromByteArray(attribute.getDer().getValue());
-                builder.attribute(new ASN1ObjectIdentifier(attribute.getOid()), asn1);
-            } else if (attribute.getOid().equals("2.5.4.789.1")) {
-                if (attribute.getText() != null) {
-                    // TODO: move to a text parser for this oid
-                    String[] parts = attribute.getText().getValue().split("=");  // name=value
-                    builder.attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(parts[0], parts[1]));
-                }
-            } else if (attribute.getOid().equals("2.5.4.789.2")) {
-                if (attribute.getText() != null) {
-                    throw new UnsupportedOperationException("text format not implemented yet for 2.5.4.789.2"); // typically 2.5.4.789.2 would use der format anyway...
-                }
-            } else {
-                throw new UnsupportedOperationException("text format not implemented yet for " + attribute.getOid());
-            }
+            X509AttrBuilder.Attribute oidAndValue = Util.toAttributeOidValue(attribute);
+            builder.attribute(oidAndValue.oid, oidAndValue.value);
         }
         byte[] attributeCertificateBytes = builder.build();
         if (attributeCertificateBytes == null) {
