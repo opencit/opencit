@@ -97,7 +97,10 @@ public abstract class HttpAuthenticationFilter extends AuthenticationFilter {
 
     @Override
     protected boolean onLoginFailure(AuthenticationToken token, AuthenticationException authenticationException, ServletRequest request, ServletResponse response) {
-        log.debug("onLoginFailure token: {} exception: {}", token, authenticationException.getMessage());
+        log.debug("onLoginFailure token: {} exception: {}: {}", token, authenticationException.getClass().getName(), authenticationException.getMessage());
+        if( authenticationException.getCause() != null ) {
+            log.debug("authentication exception cause", authenticationException.getCause());
+        }
         try {
             sendChallenge(request, response);
         }
