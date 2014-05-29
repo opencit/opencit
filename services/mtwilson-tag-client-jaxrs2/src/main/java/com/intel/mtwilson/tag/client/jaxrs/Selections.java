@@ -32,7 +32,7 @@ public class Selections extends MtWilsonClient {
     
     /**
      * Creates a new selection using the specified name and description. 
-     * @param Selection object that needs to be created. 
+     * @param obj Selection object that needs to be created. 
      * @return Created Selection object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_selections:create
@@ -63,7 +63,6 @@ public class Selections extends MtWilsonClient {
      * Deletes the Selection with the specified ID. Note that when the selection is deleted
      * all the associated key/attribute - values would also be deleted.
      * @param uuid - UUID of the selection that has to be deleted.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_selections:delete
      * @mtwContentTypeReturned N/A
@@ -88,7 +87,7 @@ public class Selections extends MtWilsonClient {
     /**
      * Allows the user to edit an existing selection. Note that only the description of the selection
      * can be edited.  
-     * @param Selection object having the value that needs to be updated. 
+     * @param obj Selection object having the value that needs to be updated. 
      * @return Updated Selection object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_selections:store
@@ -116,41 +115,11 @@ public class Selections extends MtWilsonClient {
                 .request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), Selection.class);
         return updatedSelObj;
     }
-    
-    /**
-     * Retrieves the details of the selection with the specified ID.  
-     * @param uuid - UUID of the selection to be retrieved
-     * @return Selection object matching the specified UUID.
-     * @since Mt.Wilson 2.0
-     * @mtwRequiresPermissions tag_selections:retrieve
-     * @mtwContentTypeReturned YAML
-     * @mtwMethodType GET
-     * @mtwSampleRestCall
-     * <pre>
-     * https://server.com:8181/mtwilson/v2/tag-selections/f9dfff4f-ac19-4c71-9b95-116e2f0dabc2
-     * Output: 
-     * ---
-     * id: "f9dfff4f-ac19-4c71-9b95-116e2f0dabc2"
-     * name: "default"
-     * description: "default selections"
-     * </pre>
-     * @mtwSampleApiCall
-     * <pre>
-     *  Selections client = new Selections(My.configuration().getClientProperties());
-     *  Selection retrieveSelection = client.retrieveSelection("f9dfff4f-ac19-4c71-9b95-116e2f0dabc2");
-     * </pre>
-     */
-    public Selection retrieveSelection(UUID uuid) {
-        log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<>();
-        map.put("id", uuid);
-        Selection role = getTarget().path("tag-selections/{id}").resolveTemplates(map).request(DataMediaType.APPLICATION_YAML).get(Selection.class);
-        return role;
-    }
-    
+        
     /**
      * Retrieves the details of the selection with the specified ID. This function retrieves the details
-     * of all the associated mappings with the key-value pairs in the XML format. 
+     * of all the associated mappings with the key-value pairs in the XML format. If the selection is 
+     * not associated with any key-value pairs, this function would return a null value.
      * @param uuid - UUID of the selection to be retrieved
      * @return Selection object matching the specified UUID.
      * @since Mt.Wilson 2.0
@@ -186,7 +155,8 @@ public class Selections extends MtWilsonClient {
 
     /**
      * Retrieves the details of the selection with the specified ID. This function retrieves the details
-     * of all the associated mappings with the key-value pairs in the JSON format. 
+     * of all the associated mappings with the key-value pairs in the JSON format. If the selection is 
+     * not associated with any key-value pairs, this function would return a null value.
      * @param uuid - UUID of the selection to be retrieved
      * @return Selection object matching the specified UUID.
      * @since Mt.Wilson 2.0
@@ -217,8 +187,9 @@ public class Selections extends MtWilsonClient {
     
     /**
      * Retrieves the details of the selection with the specified ID. This function retrieves the details
-     * of all the associated mappings with the key-value pairs as well in an encrypted XML format. Users
-     * calling into the REST API directly should set the accept header to "message/rfc822". 
+     * of all the associated mappings with the key-value pairs as well in an encrypted XML format. If the 
+     * selection is not associated with any key-value pairs, this function would return a null value.
+     * Users calling into the REST API directly should set the accept header to "message/rfc822". 
      * @param uuid - UUID of the selection to be retrieved
      * @return Selection object matching the specified UUID.
      * @since Mt.Wilson 2.0
@@ -268,7 +239,7 @@ public class Selections extends MtWilsonClient {
 
     /**
      * Retrieves the list of selections based on the search criteria specified. 
-     * @param SelectionFilterCriteria object specifying the filter criteria. The 
+     * @param criteria - SelectionFilterCriteria object specifying the filter criteria. The 
      * possible search options include nameEqualTo, nameContains, descriptionEqualTo and descriptionContains.  
      * User can retrieve all the selections by setting the filter criteria to false. By default this filter
      * criteria would be set to true. [Ex: /v2/tag-selections?filter=false]

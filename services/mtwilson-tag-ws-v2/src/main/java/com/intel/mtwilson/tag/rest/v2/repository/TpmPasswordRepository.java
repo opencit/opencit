@@ -15,11 +15,6 @@ import java.util.Date;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -34,6 +29,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     @RequiresPermissions("tpm_passwords:search")         
     public TpmPasswordCollection search(TpmPasswordFilterCriteria criteria) {
         TpmPasswordCollection objCollection = new TpmPasswordCollection();
+        log.debug("TpmPassword:Search - Got request to search for the TpmPasswords.");  
         
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             if (criteria.id == null) {
@@ -61,6 +57,8 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     @RequiresPermissions("tpm_passwords:retrieve")         
     public TpmPassword retrieve(TpmPasswordLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
+        log.debug("TpmPassword:Retrieve - Got request to retrieve TpmPassword with id {}.", locator.id);
+        
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
             TpmPassword obj = dao.findById(locator.id);
@@ -81,6 +79,8 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     @Override
     @RequiresPermissions("tpm_passwords:store")         
     public void store(TpmPassword item) {
+        log.debug("TpmPassword:Store - Got request to update TpmPassword with id {}.", item.getId().toString());        
+        
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
             TpmPassword obj = dao.findById(item.getId());
@@ -105,7 +105,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     @Override
     @RequiresPermissions("tpm_passwords:create")         
     public void create(TpmPassword item) {
-        
+        log.debug("TpmPassword:Create - Got request to create a new TpmPassword.");
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
             TpmPassword obj = dao.findById(item.getId());
@@ -130,7 +130,7 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     @RequiresPermissions("tpm_passwords:delete")         
     public void delete(TpmPasswordLocator locator) {
         if( locator == null || locator.id == null ) { return; }
-        
+        log.debug("TpmPassword:Delete - Got request to delete TpmPassword with id {}.", locator.id.toString());        
         try(TpmPasswordDAO dao = TagJdbi.tpmPasswordDao()) {
             
             dao.delete(locator.id);
