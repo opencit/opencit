@@ -25,6 +25,7 @@ public class JdbcUtil {
     public static Connection conn = null;
     public static DataSource ds = null;
 
+    // XXX currently only used by getConnection in this class, which itself is not being used
     public static DataSource getDataSource() {        
         try {
             if (ds == null) {
@@ -43,6 +44,7 @@ public class JdbcUtil {
         return ds;
     }
 
+    // XXX not currently used 
     public static Connection getConnection() {
         try {
             if (conn == null) {

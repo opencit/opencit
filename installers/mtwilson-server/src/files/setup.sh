@@ -150,10 +150,10 @@ fi
 if using_mysql ; then
   mysqlconnector_file=`ls ~ -1 2>/dev/null | grep -i "^mysql-connector-java"`
   if [ -n "$mysqlconnector_file" ]; then
-    mkdir -p /opt/intel/cloudsecurity/setup-console
-    cp ~/$mysqlconnector_file /opt/intel/cloudsecurity/setup-console
+    mkdir -p /opt/mtwilson/java
+    cp ~/$mysqlconnector_file /opt/mtwilson/java
   fi
-  mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/setup-console/* 2>/dev/null | grep -i mysql`
+  mysqlconnector_file=`ls -1 /opt/mtwilson/java/* 2>/dev/null | grep -i mysql`
   if [ -z "$mysqlconnector_file" ]; then
     echo_failure "Cannot find MySQL Connector/J"
     echo "Recommended steps:"
@@ -231,6 +231,12 @@ if using_mysql; then
 elif using_postgres; then
   postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 fi
+
+# default connection pool settings
+update_property_in_file "dbcp.validation.query" /etc/intel/cloudsecurity/mtwilson.properties "select 1"
+update_property_in_file "dbcp.validation.on.borrow" /etc/intel/cloudsecurity/mtwilson.properties "true"
+update_property_in_file "dbcp.validation.on.return" /etc/intel/cloudsecurity/mtwilson.properties "false"
+
 
 # copy default logging settings to /etc
 chmod 700 logback.xml
