@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.dao.jdbi;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.tag.dao.JdbcUtil;
+import com.intel.mtwilson.jdbi.util.JdbcUtil;
 import com.intel.mtwilson.tag.model.SelectionKvAttribute;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,7 +25,7 @@ public class SelectionKvAttributeResultMapper implements ResultSetMapper<Selecti
     @Override
     public SelectionKvAttribute map(int i, ResultSet rs, StatementContext sc) throws SQLException {
         log.debug("mapping row {}", i);
-        JdbcUtil.describeResultSet(rs);
+        if( log.isDebugEnabled() ) { JdbcUtil.describeResultSet(rs); }
         SelectionKvAttribute result = new SelectionKvAttribute();
         result.setId(UUID.valueOf(rs.getString("id")));
         result.setKvAttributeId(UUID.valueOf(rs.getString("kvAttributeId")));
