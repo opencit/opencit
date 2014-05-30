@@ -226,7 +226,7 @@ setup_env() {
 print_help() {
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
           "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
-          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat-sslcert|tomcat-status|\n" \
           "\t\trestart|setup|start|status|stop|uninstall|version}"
 }
 
@@ -327,7 +327,7 @@ case "$1" in
         tomcat_running_report
         tomcat_sslcert_report
         ;;
-  tomcat_sslcert)
+  tomcat-sslcert)
         tomcat_create_ssl_cert_prompt
         ;;  
   mysql-detect)
