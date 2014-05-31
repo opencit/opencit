@@ -48,7 +48,7 @@ public class JooqUtil {
     public static class SelectionResultMapper<Selection> implements ResultMapper {
         @Override
         public boolean isRelated(Record one, Record two) {
-            return one != null && two != null && one.getValue(MW_TAG_SELECTION.ID) == two.getValue(MW_TAG_SELECTION.ID);
+            return one != null && two != null && one.getValue(MW_TAG_SELECTION.ID).equals(two.getValue(MW_TAG_SELECTION.ID));
         }
 
         @Override
