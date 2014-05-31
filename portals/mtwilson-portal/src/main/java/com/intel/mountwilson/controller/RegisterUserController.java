@@ -11,6 +11,8 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+import static com.intel.mountwilson.controller.CheckLoginController.USERNAME_REGEX;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.net.URL;
@@ -55,6 +57,12 @@ public class RegisterUserController extends AbstractController {
                 //Getting User Name and Password from request object.
                 username = req.getParameter("userNameTXT");
                 password = req.getParameter("passwordTXT");
+            }
+            
+            if( !ValidationUtil.isValidWithRegex(username, USERNAME_REGEX) ) {
+                view.addObject("result", false);
+                view.addObject("message", "User Name is invalid");
+                return view;
             }
 
             // Get locale from js
