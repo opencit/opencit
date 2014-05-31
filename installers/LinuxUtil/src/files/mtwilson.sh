@@ -226,7 +226,7 @@ setup_env() {
 print_help() {
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
           "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
-          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+          "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat-sslcert|tomcat-status|\n" \
           "\t\trestart|setup|start|status|stop|uninstall|version}"
 }
 
@@ -327,7 +327,7 @@ case "$1" in
         tomcat_running_report
         tomcat_sslcert_report
         ;;
-  tomcat_sslcert)
+  tomcat-sslcert)
         tomcat_create_ssl_cert_prompt
         ;;  
   mysql-detect)
@@ -390,7 +390,7 @@ case "$1" in
   erase-users)
         #load_default_env 1>/dev/null
         if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
-          echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
+          echo_warning "Please specify the admin username."
           prompt_with_default MC_FIRST_USERNAME "Mt Wilson Portal Admin Username:" "admin"
         fi
         export MC_FIRST_USERNAME=$MC_FIRST_USERNAME

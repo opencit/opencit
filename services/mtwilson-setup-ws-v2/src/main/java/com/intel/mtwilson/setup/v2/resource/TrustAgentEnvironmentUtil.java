@@ -124,6 +124,6 @@ public class TrustAgentEnvironmentUtil {
     @Produces(MediaType.TEXT_HTML)
     @RequiresPermissions("files:retrieve")
     public String getForm() {
-        return "<html><body><form method=\"post\" action=\"trustagent-env-file.txt\"><input type=\"text\" name=\"username\"/><input type=\"password\" name=\"password\"/><input type=\"submit\"/></form></body></html>";
+        return "<html><body><form method=\"post\" action=\"trustagent-env-file.txt\"><table><tr><td><label>mtwilson API username: </label></td><td><input type=\"text\" name=\"username\"/></td></tr><tr><td><label>mtwilson API password: </label></td><td><input type=\"password\" name=\"password\"/></td></tr><tr><td>&nbsp;</td></tr><tr><td><input type=\"submit\"/></td></tr></table></form></body></html>";
     }
 }
