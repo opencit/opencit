@@ -267,7 +267,7 @@ function isNumber(n) {
                             <form id="tag-create-form">
 
                                     <div class="singleDiv">
-                                    <div class="labelDiv">Tag name : </div>
+                                    <div class="labelDiv">Tag name:</div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="tag-create-name" data-bind-value="input.name" placeholder="Tag name">
                                         <span class="requiredField">*</span>
@@ -283,7 +283,7 @@ function isNumber(n) {
 
 
                                     <div class="singleDiv" style="height: 66px;">
-                                        <div class="labelDiv">Tag values</div> 
+                                        <div class="labelDiv">Tag value:</div> 
                                         <div class="valueDiv">
                                             <input type="text" class="textBox_Border" id="tag-create-values" placeholder="Value"  data-validator="tag_create_form_validateValues">
                                         </div>
@@ -487,7 +487,7 @@ function isNumber(n) {
                             <form id="selection-create-form" action="#" onsubmit="return false;">
 
                                 <div class="singleDiv">
-                                    <div class="labelDiv">Name : </div>
+                                    <div class="labelDiv">Name:</div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="selection-create-name" name="name" data-bind-value="input.name" placeholder="Name of this selection">
                                         <span class="requiredField">*</span>
@@ -495,7 +495,7 @@ function isNumber(n) {
                                 </div>
 
                                 <div class="singleDiv">
-                                    <div class="labelDiv">Description : </div>
+                                    <div class="labelDiv">Description:</div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="selection-create-desc" name="desc" data-bind-value="input.desc" placeholder="Selection description">
                                     </div>
