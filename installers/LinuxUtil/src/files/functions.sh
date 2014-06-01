@@ -3218,13 +3218,14 @@ print_env_summary_report() {
 mtwilson_running() {
   echo "Checking if mtwilson is running." >> $INSTALL_LOG_FILE
   if using_glassfish; then
-    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8181/mtwilson/v1"}
+    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8181/mtwilson/v2"}
   else
-    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8443/mtwilson/v1"}
+    MTWILSON_API_BASEURL=${MTWILSON_API_BASEURL:-"https://127.0.0.1:8443/mtwilson/v2"}
   fi
   MTWILSON_RUNNING=""
-
-  MTWILSON_RUNNING=`wget $MTWILSON_API_BASEURL/ManagementService/resources/msstatus -O - -q --no-check-certificate --no-proxy`
+  
+  MTWILSON_API_BASEURL_V2=`echo $MTWILSON_API_BASEURL | sed 's/\/mtwilson\/v1/\/mtwilson\/v2/'`
+  MTWILSON_RUNNING=`wget $MTWILSON_API_BASEURL_V2/version -O - -q --no-check-certificate --no-proxy`
 }
 
 mtwilson_running_report() {
