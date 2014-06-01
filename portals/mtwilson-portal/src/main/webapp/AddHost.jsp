@@ -56,7 +56,7 @@
 			<div class="singleDiv" id="hostPortDisplayDiv">
 				<div class="labelDiv" data-i18n="input.host_port">Host Port:</div>
 				<div class="valueDiv" >
-                                    <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="9999"-->
+                                    <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="1443"-->
 				</div>
 			</div>
 						            

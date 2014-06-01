@@ -150,7 +150,7 @@ function SetRequired(element) {
 		});
 		$('#vcenterStringElement').hide();
 		$('#citrixStringElement').hide();
-                $('#MainContent_tbHostPort').val("9999");
+                $('#MainContent_tbHostPort').val("1443");
 	}else if(isVmware == 1){  // VMWARE
         
 		$('#vcenterStringElement').find('input').each(function() {
