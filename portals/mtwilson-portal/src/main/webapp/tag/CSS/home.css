@@ -262,9 +262,9 @@ h5, h6
 }
 
 .tableDisplayScroll_big { 
-    overflow-x: hide; 
+    overflow-x: hide;
     overflow-y: auto;
-    height: 650px;
+    height: 450px;
 }
 
 .tableDisplayBind thead {

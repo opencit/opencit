@@ -306,7 +306,7 @@ function isNumber(n) {
                             <!--div id="nameOfPage" class="NameHeader">Search Tags</div> 
                             <div class="singleDiv" style="height: 45px;"></div-->
                             <div id="nameOfPage" class="NameHeader">Browse Tags&nbsp;&nbsp; 
-				<a href="javascript:toggljQueryElementVisibility('tag-search-form')" style='font-size: 0.8em'>(Search)</a></div> 
+				<a href="javascript:toggleElementVisibility('tag-search-form')" style='font-size: 0.8em'>(Search)</a></div>
 
                             <form id="tag-search-form" action="#" onsubmit="return false;" style="display: none">
                                     <div class="singleDiv">
@@ -351,17 +351,21 @@ function isNumber(n) {
                             <div class="singleDiv" style="height: 8px;"></div>
 
 
-                            <div  class="tableDisplayScroll_small">
+                            <div>
+                                <table class="tableDisplayBind" style="width: 800px;" cellpadding=0 cellspacing=0>
+                                    <thead>
+                                        <tr>
+                                            <th class="col_tag_names">Tag name</th>
+                                            <th class="row9 tagOIDDiv">Tag OID</th>
+                                            <th class="row_tag_values">Tag values</th>
+                                            <th class="col_del_link" style='border-right: 1px solid #3A4F63' ></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div style="overflow-x: hidden; overflow-y: auto; width: 800px; max-height: 590px;">
+                            <!-- <div  class="tableDisplayScroll_small"> -->
                             <table id="tag-browse-table" class="tableDisplayBind" style="width: 800px;" cellpadding=0 cellspacing=0>
-                                <thead>
-                                    <tr>
-                                        <th class="col_tag_names">Tag name</th>
-                                        <th class="row9 tagOIDDiv">Tag OID</th>
-                                        <th class="row_tag_values">Tag values</th>
-                                        <th class="col_del_link" style='border-right: 1px solid #3A4F63' ></th>
-                                    </tr>
-                                </thead>
-
                                 <tbody>
                                     <tr class="evenRow" data-bind-each-item="tags">
                                         <td align="center" class="col_tag_names" data-bind-text="item.name"></td>
@@ -513,26 +517,32 @@ function isNumber(n) {
 
                                 <div class="singleDiv" style="height: 10px;"></div>
 
-                                    <div id="tableDisplayScroll_small" style="display: none"> <!-- class="tableDisplayScroll_small" -->
-                                    <table id="selection-create-tags-table" class="tableDisplay" style="width: 800px;" cellspacing=0 cellpadding=0>
-                                        <thead>
-                                            <tr>
-                                                <th class="col_tag_names">Tag name</th>
-                                                <th class="col_auto">Tag Value</th>
-                                                <th class="col_auto">Tag ID</th>
-                                                <th class="col_del_link"></th>
-                                            </tr>
-                                        </thead>
-                               
-                                        <tbody>
-                                            <tr class="evenRow" data-bind-each-item="input.selection">
-                                                <td align="center" class="col_tag_names" data-bind-text="item.tag.name"></td>
-                                                <td align="center" class="col_auto" data-bind-text="item.value"></td>
-                                                <td align="center" class="col_auto" data-bind-text="item.tag.id"></td>
-                                                <td align="center" style='border-right: 1px solid #3A4F63' class="col_del_link"> <a data-bind-tagOid="item.tag.oid" data-bind-tagValue="item.value" href="#" onclick="javascript:selection_create_form_removeValue(this.getAttribute('tagOid'),this.getAttribute('tagValue'));">remove</a></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div id="tableDisplayScroll_small" style="display: none;">
+                                    <div>
+                                        <table class="tableDisplay" style="width: 800px;" cellspacing=0 cellpadding=0>
+                                            <thead>
+                                                <tr>
+                                                    <th class="col_tag_names">Tag name</th>
+                                                    <th class="col_auto">Tag Value</th>
+                                                    <th class="col_auto">Tag ID</th>
+                                                    <th class="col_del_link"></th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <div style="overflow-x: hidden; overflow-y: auto; width: 800px; max-height: 185px;">
+                                    <!-- <div id="tableDisplayScroll_small" style="display: none" class="tableDisplayScroll_small" -->
+                                        <table id="selection-create-tags-table" class="tableDisplay" style="width: 800px;" cellspacing=0 cellpadding=0>
+                                            <tbody>
+                                                <tr class="evenRow" data-bind-each-item="input.selection">
+                                                    <td align="center" class="col_tag_names" data-bind-text="item.tag.name"></td>
+                                                    <td align="center" class="col_auto" data-bind-text="item.value"></td>
+                                                    <td align="center" class="col_auto" data-bind-text="item.tag.id"></td>
+                                                    <td align="center" style='border-right: 1px solid #3A4F63' class="col_del_link"> <a data-bind-tagOid="item.tag.oid" data-bind-tagValue="item.value" href="#" onclick="javascript:selection_create_form_removeValue(this.getAttribute('tagOid'),this.getAttribute('tagValue'));">remove</a></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                     <input type="submit" value="Save" onclick="ws.createSelection(this); return false;"/>
                                 </div>
                                 <div id="table_view_sel_details" class="tableDisplayScroll_small" style="display: none; height: auto !important">
@@ -625,20 +635,26 @@ function isNumber(n) {
 	                            <div class="singleDiv" style="height: 10px;"></div>
                             </form>
 
-                            <div class="tableDisplayScroll_small" style="clear:both">
+                            <div class="singleDiv" style="height: 10px;"></div>
+                            <div>
+                                <table class="tableDisplayBind" style="width: 800px;" cellspacing=0 cellpadding=0>
+                                    <thead>
+                                        <tr>
+                                            <th class="col_tag_names">Selection Name</th>
+                                            <th class="col_auto" style="width: 175px;">Description</th>
+                                            <th class="col_del_link"></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div style="clear:both; overflow-x: hidden; overflow-y: auto; width: 800px; max-height: 280px;">
+                            <!--<div class="tableDisplayScroll_small" style="clear:both">-->
                             <table id="selection-browse-table" class="tableDisplayBind" style="width: 800px;" cellspacing=0 cellpadding=0>
                             <!--table id="selection-browse-table" class="dataview"-->
-                                <thead>
-                                    <tr>
-                                        <th class="col_tag_names">Selection Name</th>
-                                        <th class="col_auto" style="width: 175px;">Description</th>
-                                        <th class="col_del_link"></th>
-                                    </tr>
-                                </thead>
                                 <tbody>
                                     <tr class="evenRow" data-bind-each-item="selections">
                                         <td align="center" class="col_tag_names" data-bind-text="item.name"></td>
-                                        <td align="center" class="last_col col_auto" data-bind-text="item.description"></td>
+                                        <td align="center" class="col_auto" style="width: 175px;" data-bind-text="item.description"></td>
                                         <!--td align="center" class="col_auto">
                                             <table cellspacing=0 cellpadding=0>
                                                 <thead>
@@ -919,31 +935,34 @@ function isNumber(n) {
                                 </ul>
                             </form>
 
-
-                            <div  class="tableDisplayScroll_big">
+                            <div>
+                                <table class="tableDisplayBind" cellpadding=0 cellspacing=0>
+                                    <thead>
+                                        <tr>
+                                            <th class="row9">Subject (Host ID)</th>
+                                            <th class="row9">Issuer</th>
+                                            <th class="row9">Not Before</th>
+                                            <th class="row9">Not After</th>
+                                            <th class="row9">Status</th>
+                                            <th class="row9">Fingerprint (SHA-1)</th>
+                                            <th class="row9">Fingerprint (SHA256)</th>
+                                            <th class="row9"></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tableDisplayScroll_big">
                             <table id="certificate-browse-table" class="tableDisplayBind" cellpadding=0 cellspacing=0>
-                                <thead>
-                                    <tr>
-                                        <th class="row9">Subject (Host ID)</th>
-                                        <th class="row9">Issuer</th>
-                                        <th class="row9">Not Before</th>
-                                        <th class="row9">Not After</th>
-                                        <th class="row9">Status</th>
-                                        <th class="row9">Fingerprint (SHA-1)</th>
-                                        <th class="row9">Fingerprint (SHA256)</th>
-                                        <th class="row12"></th>
-                                    </tr>
-                                </thead>
                                 <tbody>
                                     <tr class="evenRow" data-bind-each-item="certificates">
-                                        <td align="center" data-bind-text="item.subject"></td>
-                                        <td align="center" data-bind-text="item.issuer"></td>
-                                        <td align="center" data-bind-text="item.not_before | date"></td>
-                                        <td align="center" data-bind-text="item.not_after | date"></td>
-                                        <td align="center" data-bind-text="item.status"></td>
-                                        <td align="center" data-bind-text="item.sha1 | wrap 16"></td>
-                                        <td align="center" data-bind-text="item.sha256 | wrap 16"></td>
-                                        <td align="center">
+                                        <td class="row9" align="center" data-bind-text="item.subject"></td>
+                                        <td class="row9" align="center" data-bind-text="item.issuer"></td>
+                                        <td class="row9" align="center" data-bind-text="item.not_before | date"></td>
+                                        <td class="row9" align="center" data-bind-text="item.not_after | date"></td>
+                                        <td class="row9" align="center" data-bind-text="item.status"></td>
+                                        <td class="row9" align="center" data-bind-text="item.sha1 | wrap 16"></td>
+                                        <td class="row9" align="center" data-bind-text="item.sha256 | wrap 16"></td>
+                                        <td class="row9 last_col" align="center">
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show();  $('certificate-provision-host').focus(); return false;">Deploy</a> &nbsp;
                                             <a href="" onmouseover="$(this).download = $(this).getAttribute('filename') + '.crt';$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);"  data-bind-filename="item.subject">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
