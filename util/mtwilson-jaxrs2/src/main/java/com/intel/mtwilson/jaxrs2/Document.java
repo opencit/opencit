@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.UUID;
@@ -16,10 +17,17 @@ import java.util.Map;
 
 /**
  *
+ * When using Jackson to serialize a Document subclass, the default behavior
+ * is to omit null or empty fields. When using Jackson to de-serialize a
+ * Document subclass, the default behavior is to ignore unknown fields. 
+ * The combination is intended to facilitate backward-compatible future changes
+ * in the API.
+ * 
  * @author jbuhacoff
  */
 //@JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY) // jackson 1.9
 @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
+@JsonIgnoreProperties(ignoreUnknown=true)
 public abstract class Document {
     private UUID id;
     private URL href;

@@ -17,7 +17,6 @@ function fnRetriveHostSuccess(responseJSON) {
 
 		$('#approveRegisterHostTable').show();
 		var str="";
-                
                 // Add the list of all the roles to the global variable
                 roleList = responseJSON.allRoles;
                 
@@ -47,6 +46,8 @@ function fnGetRequestDetails(element) {
 	sendHTMLAjaxRequest(false, 'getView/getApproveRejectPage.html', null, fnApproveRequestDataPolulate, null,'mainLoadingDiv',data);
 }
 
+// the administrator must explicitly approve all roles, so instead of populate any defaults requested by the user,
+// we only highlight the roles requested by the user and the administrator must still check each of the boxes.
 function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
         //alert("Coming into the function");
 	$('#'+elementIDToBePublised).html(response);
@@ -59,7 +60,7 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
         for (var globalRole in roleList) {
             var index = findIndex(roleList[globalRole], apiRoles);
             if (index != -1) {
-                str+='<input type="checkbox" role="'+ roleList[globalRole] +'" checked="checked"><span class="requestedRolesDispaly" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';               
+                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';               
             } else {
                 str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';
             }
@@ -74,10 +75,15 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 
 //Add by Soni on 4th oct for bug 462
 function fnApproveSelectedRequest() {
-	var data = fnGetRequestVOForApprovalOrReject();
+	var vo = fnGetRequestVOForApprovalOrReject();
+    if( vo.requestedRoles.length === 0 ) {
+        $('#approveRejectButtonFeedback').html('<span style="color:red">At least one role must be granted</span>');
+        return false;
+    }
+    var data = $.toJSON(vo);
 	if($('#mainApiClient_Comments').val()){
 	   if(!fnvalidateComments('mainApiClient_Comments'))
-	   { $('#mainApiClient_Comments').parent().append('<span style="color:red">Invalid Characters "<" or ">"in the Comment field.</span>');
+	   { $('#approveRejectButtonFeedback').html('<span style="color:red">Invalid Characters "<" or ">"in the Comment field.</span>');
 	   return false;
 	   }}
 	
@@ -99,7 +105,8 @@ function fnGetRequestVOForApprovalOrReject() {
 	vo.comments= $('#mainApiClient_Comments').val();
 	//alert(vo.comments);
 	
-	return $.toJSON(vo);
+	//return $.toJSON(vo);
+    return vo;
 }
 
 function approveSelectedRequestSuccess(responseJSON) {
@@ -108,7 +115,8 @@ function approveSelectedRequestSuccess(responseJSON) {
 }
 
 function fnRejectSelectedRequest() {
-	var data = fnGetRequestVOForApprovalOrReject();
+	var vo = fnGetRequestVOForApprovalOrReject();
+    var data = $.toJSON(vo);
 	$('#mainLoadingDiv').prepend(disabledDiv);
 	sendJSONAjaxRequest(false, 'getData/rejectSelectedRequest.html', "requestVO="+data, rejectSelectedRequestSuccess, null);
 }
