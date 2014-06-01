@@ -503,7 +503,7 @@ elif using_postgres; then
       sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
     fi
     #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
-    if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
+    if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
       if [ -f /root/.pgpass ]; then
         echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
         rm /root/.pgpass
