@@ -9,6 +9,7 @@ import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mountwilson.util.ProxyApiClient;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckLoginController extends AbstractController {
     private Logger log = LoggerFactory.getLogger(getClass());
-	
+	public static final String USERNAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
 	// variable declaration used during Processing data. 
             
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
@@ -55,6 +56,12 @@ public class CheckLoginController extends AbstractController {
             if (isNullOrEmpty(keyAliasName) || isNullOrEmpty(keyPassword)) {
                 view.addObject("result", false);
                 view.addObject("message", "User Name and Password cannot be empty");
+                return view;
+            }
+            
+            if( !ValidationUtil.isValidWithRegex(keyAliasName, USERNAME_REGEX) ) {
+                view.addObject("result", false);
+                view.addObject("message", "User Name is invalid");
                 return view;
             }
 

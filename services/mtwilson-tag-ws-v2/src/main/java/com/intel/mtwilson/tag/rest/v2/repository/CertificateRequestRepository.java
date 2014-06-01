@@ -73,7 +73,7 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
             log.debug("Got {} records", result.size());
             UUID c = new UUID(); // id of the current certificate request object built, used to detect when it's time to build the next one
             for(Record r : result) {
-                if( UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)) != c ) {
+                if( !UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)).equals(c) ) {
                     c = UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID));
                     CertificateRequest obj = new CertificateRequest();
                     obj.setId(UUID.valueOf(r.getValue(MW_TAG_CERTIFICATE_REQUEST.ID)));
