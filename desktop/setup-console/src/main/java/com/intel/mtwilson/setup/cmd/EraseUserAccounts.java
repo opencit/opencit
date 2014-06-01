@@ -16,11 +16,17 @@ import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
+import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -72,18 +78,53 @@ public class EraseUserAccounts implements Command {
         } else {
             if (!isDeleteAll()) {
                 Configuration serviceConf = MSConfig.getConfiguration();
+                // possible user configurations
                 if( System.getenv("MC_FIRST_USERNAME") != null ) { keepUsers.add(System.getenv("MC_FIRST_USERNAME")); }
                 if( serviceConf.getString("mtwilson.api.key.alias") != null ) { keepUsers.add(serviceConf.getString("mtwilson.api.key.alias")); }
+                // hard-coded mtwilson defaults
                 keepUsers.add("ManagementServiceAutomation");
                 keepUsers.add("admin");
                 keepUsers.add("tagadmin");
                 keepUsers.add("tagservice");
+                // auto-detected superuser accounts
+                keepUsers.addAll(findSuperuserAccounts());
             }
 
             deletePortalUsers();
             deleteApiClients();
             deleteUsers();
         }
+    }
+    
+    private Set<String> findSuperuserAccounts() {
+        HashSet<String> superusers = new HashSet<>();
+        try (LoginDAO dao = MyJdbi.authz()) {
+            List<RolePermission> rolePermissions = dao.findAllRolePermissionsForDomainActionAndSelection("*", "*", "*");
+            for(RolePermission rolePermission : rolePermissions) {
+                UUID roleId = rolePermission.getRoleId();
+                // find users by certificate logins with superuser permissions
+                List<UserLoginCertificateRole> userLoginCertificateRoles = dao.findUserLoginCertificateRolesByRoleId(roleId);
+                for(UserLoginCertificateRole userLoginCertificateRole : userLoginCertificateRoles) {
+                    UUID userLoginCertificateId = userLoginCertificateRole.getLoginCertificateId();
+                    UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateById(userLoginCertificateId);
+                    User user = dao.findUserById(userLoginCertificate.getUserId());
+                    superusers.add(user.getUsername());
+                }
+                // find users by password logins with superuser permissions
+                List<UserLoginPasswordRole> userLoginPasswordRoles = dao.findUserLoginPasswordRolesByRoleId(roleId);
+                for(UserLoginPasswordRole userLoginPasswordRole : userLoginPasswordRoles) {
+                    UUID userLoginPasswordId = userLoginPasswordRole.getLoginPasswordId();
+                    UserLoginPassword userLoginPassword = dao.findUserLoginPasswordById(userLoginPasswordId);
+                    User user = dao.findUserById(userLoginPassword.getUserId());
+                    superusers.add(user.getUsername());
+                }
+            }
+        }
+        catch(Exception e) {
+            log.error("Cannot auto-detect superuser accounts");
+            log.debug("Cannot auto-detect superuser accounts", e);
+        }
+        return superusers;
     }
 
     private void deletePortalUser(String username) {

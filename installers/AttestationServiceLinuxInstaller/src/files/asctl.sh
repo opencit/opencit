@@ -279,7 +279,7 @@ case "$1" in
         tomcat_clear
         tomcat_detect > /dev/null
       fi
-        webservice_running_report "${webservice_application_name}"
+        webservice_running_report_wait "${webservice_application_name}"
         ;;
   restart)
         webservice_stop_report "${webservice_application_name}"

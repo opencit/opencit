@@ -142,6 +142,11 @@ public interface LoginDAO extends Closeable {
             + "and permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
     RolePermission findAllRolePermissionsForRoleIdDomainActionAndSelection(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, 
     @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);    
+
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where "
+            + " permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
+    List<RolePermission> findAllRolePermissionsForDomainActionAndSelection(@Bind("permit_domain") String permitDomain, 
+    @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);    
     
     /**
   id uuid DEFAULT NULL,

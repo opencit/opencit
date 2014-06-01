@@ -2705,8 +2705,7 @@ tomcat_stop() {
     echo_warning "Tomcat already stopped."
   elif [ -n "$tomcat" ]; then
     echo -n "Waiting for Tomcat services to shutdown..."
-    ($tomcat stop &) 2>&1 > /dev/null
-    sleep 5
+    $tomcat stop 2>&1 > /dev/null
     while tomcat_running; do
       tomcat_shutdown 2>&1 > /dev/null
       sleep 3
