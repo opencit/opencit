@@ -214,37 +214,6 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
     }
 
     /**
-     *
-     * @param timestamp
-     * @return // check if the request has expired by looking at the HTTP Date
-     * header... but only if it was signed. if(
-     * signatureBlock.headers.containsKey("Date") ) { Date requestDate =
-     * Rfc822Date.parse(signatureBlock.headers.get("Date")); if(
-     * isRequestExpired(requestDate) ) {
-     * log.error("X509CertificateAuthorization: Request expired;
-     * date="+requestDate); throw new IllegalArgumentException("Request
-     * expired"); //; current time is "+Iso8601Date.format(new Date())); } }
-     * else { throw new IllegalArgumentException("Missing date header in
-     * request"); }
-     *
-     */
-    // XXX should this be in the matcher? because at this point here we can't verify the signature yet so we can't reall ytrust the time to know that it's not been tampered with to stay within the window...
-    private boolean isRequestExpired(Date timestamp) {
-        // request expiration policy
-        Calendar expirationTime = Calendar.getInstance();
-        expirationTime.setTime(timestamp);
-        expirationTime.add(Calendar.MILLISECOND, expiresAfter);
-        Calendar currentTime = Calendar.getInstance();
-
-        if (currentTime.after(expirationTime)) {
-            long diff = currentTime.getTimeInMillis() - expirationTime.getTimeInMillis();
-            log.warn("Request expired: {}", DurationFormatUtils.formatDurationHMS(diff));
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Standardizes signature algorithm names to the Java name.
      * "SHA256withRSA".equals(signatureAlgorithm("RSA-SHA256")); // true
      *

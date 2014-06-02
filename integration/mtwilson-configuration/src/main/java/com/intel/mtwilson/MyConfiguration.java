@@ -844,4 +844,11 @@ public class MyConfiguration {
     public File getCaCertsFile() {
         return new File(getMtWilsonConf() + File.separator + "cacerts.pem");
     }
+    
+    ///////////////////////// anti-replay protection //////////////////////////////////
+    
+    public int getAntiReplayProtectionWindowMilliseconds() {
+        return conf.getInt("mtwilson.security.x509.request.expires", 60*60*1000); // default 1 hour
+    }
+    
 }
