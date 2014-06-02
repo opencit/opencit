@@ -565,6 +565,12 @@ h5, h6
 	padding-right: 20px;
 	float: left;
 }
+.valueHintDiv{
+	margin-left: 200px;
+	padding-left: 20px;
+    padding-bottom: 10px;
+}
+
 .dropDown{
 	height:20px;width:258px;
 }
@@ -828,6 +834,9 @@ text-align: center;
 
 .requestedRolesDispaly{ 
 	margin-right: 7px;
+}
+.requestedRoleHighlight {
+    background-color: #FFFF00;
 }
 #successMessage{
 	float: left;

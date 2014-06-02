@@ -99,7 +99,7 @@ chown -R root /opt/trustagent/java
 chown -R root /opt/trustagent/configuration
 mkdir -p /var/log/trustagent
 chown trustagent:trustagent /var/log/trustagent
-chmod -R 770 /opt/trustagent/bin
+chmod -R 755 /opt/trustagent/bin
 mkdir -p /opt/trustagent/env.d
 chown -R root /opt/trustagent/env.d
 
@@ -268,7 +268,7 @@ return_dir=`pwd`
     # we have precompiled binaries for citrix-xen
     echo "Installing TPM commands... "
     cd commands-citrix-xen
-    chmod +x aikquote NIARL_TPM_Module openssl.sh
+    chmod 755 aikquote NIARL_TPM_Module openssl.sh
     cp aikquote NIARL_TPM_Module openssl.sh ${package_dir}/bin
     cd ..
   else
@@ -279,13 +279,14 @@ return_dir=`pwd`
     make 2>&1 > /dev/null
     # identity and takeownership commands not needed with NIARL PRIVACY CA
     if [ -e aikquote ]; then
+      chmod 755 aikquote
       cp aikquote ${package_dir}/bin
       COMPILE_OK=yes
       echo_success "OK"
     else
       echo_failure "FAILED"
     fi
-    chmod +x aikquote NIARL_TPM_Module openssl.sh
+    chmod 755 aikquote NIARL_TPM_Module openssl.sh
     cp aikquote NIARL_TPM_Module openssl.sh ${package_dir}/bin
     cd ..
   fi

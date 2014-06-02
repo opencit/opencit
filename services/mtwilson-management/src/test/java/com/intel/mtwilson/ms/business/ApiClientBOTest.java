@@ -1,9 +1,15 @@
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.ms.business.ApiClientBO;
+//import com.fasterxml.jackson.annotation.JsonInclude;
+//import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,9 +22,11 @@ import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientInfo;
 import com.intel.mtwilson.datatypes.ApiClientSearchCriteria;
 import com.intel.mtwilson.datatypes.Role;
+import java.util.HashSet;
 import java.util.List;
 
 public class ApiClientBOTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApiClientBOTest.class);
     
     @Test
     public void getApiClientList() {
@@ -77,5 +85,28 @@ public class ApiClientBOTest {
             
         }
 	
+//        @JacksonXmlRootElement(localName="user_comment")
+//        @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
+//        @JsonIgnoreProperties(ignoreUnknown=true)
+        public static class UserComment {
+            public HashSet<String> roles = new HashSet<>();
+        }
+    private ObjectMapper createDefaultMapper() {
+        YAMLFactory yamlFactory = new YAMLFactory();
+        yamlFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+        yamlFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+        ObjectMapper mapper = new ObjectMapper(yamlFactory);
+        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        return mapper;
+    }
+        
+        @Test
+        public void testRequestedRolesInComment() throws JsonProcessingException {
+            UserComment comment = new UserComment();
+            comment.roles.add("Attestation");
+            comment.roles.add("Whitelist");
+            ObjectMapper mapper = createDefaultMapper();
+            log.debug(mapper.writeValueAsString(comment));
+        }
 	
 }

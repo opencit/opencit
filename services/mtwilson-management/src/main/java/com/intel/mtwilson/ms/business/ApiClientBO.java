@@ -4,6 +4,12 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
@@ -28,6 +34,7 @@ import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
+import com.intel.mtwilson.user.management.rest.v2.model.UserComment;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
@@ -35,9 +42,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -51,8 +60,9 @@ public class ApiClientBO extends BaseBO {
 
     private Logger log = LoggerFactory.getLogger(getClass());
     Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.USER_CONFIGURATION.getValue());
-    
+    private final ObjectMapper yaml;
     public ApiClientBO() {
+        yaml = createYamlMapper();
     }
 
     public void create(ApiClientCreateRequest apiClientRequest) {
@@ -193,6 +203,7 @@ public class ApiClientBO extends BaseBO {
             apiClientX509.setName(x509Certificate.getSubjectX500Principal().getName());
             apiClientX509.setSerialNumber(x509Certificate.getSerialNumber().intValue());
             apiClientX509.setStatus(ApiClientStatus.PENDING.toString());
+            apiClientX509.setComment(commentWithRequestedRoles(apiClientRequest.getRoles()));
             // XXX SAVY TODO api client set Uuid and Locale
             //apiClientX509.setUuid_hex(null);
             //apiClientX509.setLocale(apiClientRequest.);
@@ -207,6 +218,23 @@ public class ApiClientBO extends BaseBO {
             // throw new MSException(ex,ErrorCode.MS_API_CLIENT_CREATE_ERROR);
         }
     }
+    
+    private String commentWithRequestedRoles(String[] roles) throws JsonProcessingException {
+        UserComment comment = new UserComment();
+        comment.roles = new HashSet<>();
+        comment.roles.addAll(Arrays.asList(roles));
+        return yaml.writeValueAsString(comment);
+    }
+    
+    private ObjectMapper createYamlMapper() {
+        YAMLFactory yamlFactory = new YAMLFactory();
+        yamlFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+        yamlFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+        ObjectMapper mapper = new ObjectMapper(yamlFactory);
+        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        return mapper;
+    }
+    public ObjectMapper getUserCommentMapper() { return yaml; }
     
     // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
     // we are populating all the tables now.
@@ -231,7 +259,7 @@ public class ApiClientBO extends BaseBO {
                 userLoginCertificate = new UserLoginCertificate();
                 userLoginCertificate.setId(new UUID());
                 userLoginCertificate.setCertificate(apiClientRequest.getCertificate());
-                userLoginCertificate.setComment("");
+                userLoginCertificate.setComment(commentWithRequestedRoles(apiClientRequest.getRoles()));
                 userLoginCertificate.setEnabled(false);
                 userLoginCertificate.setExpires(x509Certificate.getNotAfter());
                 userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(apiClientRequest.getCertificate()).toByteArray());
@@ -246,6 +274,8 @@ public class ApiClientBO extends BaseBO {
                 log.debug("Created user login certificate with sha256 {}", Sha256Digest.valueOf(userLoginCertificate.getSha256Hash()).toHexString());
             }
             
+            // administrator must explicitly assign roles (implemented by updateShiroUserTables),  do not add them here. it's unsafe to automatically assign roles to a registration request which is essentially unvalidated user input.
+            /*
             String[] roles = apiClientRequest.getRoles();
             log.debug("New user roles are {}", (Object[])roles);
             for (String role : roles) {
@@ -256,6 +286,7 @@ public class ApiClientBO extends BaseBO {
                     loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());
                 }
             }
+            */
             
         } catch (Exception ex) {
             log.error("Error while populating Shiro tables during API Client registration. ", ex);

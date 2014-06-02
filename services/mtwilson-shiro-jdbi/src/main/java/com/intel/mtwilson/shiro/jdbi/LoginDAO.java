@@ -24,8 +24,10 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 import com.intel.mtwilson.jdbi.util.UUIDArgument;
+import com.intel.mtwilson.shiro.RequestLogEntry;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import java.util.Set;
+import org.skife.jdbi.v2.sqlobject.BindBean;
 
 /**
  * References:
@@ -39,7 +41,7 @@ import java.util.Set;
  */
 @UseStringTemplate3StatementLocator
 @RegisterArgumentFactory({UUIDArgument.class, DateArgument.class, LocaleArgument.class, StatusArgument.class})
-@RegisterMapper({UserResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class})
+@RegisterMapper({UserResultMapper.class,RoleResultMapper.class,RolePermissionResultMapper.class,UserLoginPasswordResultMapper.class,UserLoginPasswordRoleResultMapper.class,UserLoginHmacResultMapper.class,UserLoginHmacRoleResultMapper.class,UserLoginCertificateResultMapper.class,UserLoginCertificateRoleResultMapper.class,RequestLogEntryMapper.class})
 public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
     // use the .sql scripts in mtwilson-postgresql and mtwilson-mysql instead.  
@@ -141,6 +143,11 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id=:role_id "
             + "and permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
     RolePermission findAllRolePermissionsForRoleIdDomainActionAndSelection(@Bind("role_id") UUID roleId, @Bind("permit_domain") String permitDomain, 
+    @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);    
+
+    @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where "
+            + " permit_domain=:permit_domain and permit_action=:permit_action and permit_selection=:permit_selection")
+    List<RolePermission> findAllRolePermissionsForDomainActionAndSelection(@Bind("permit_domain") String permitDomain, 
     @Bind("permit_action") String permitAction, @Bind("permit_selection") String permitSelection);    
     
     /**
@@ -263,5 +270,11 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select role_id, permit_domain, permit_action, permit_selection from mw_role_permission where role_id in ( <role_ids> )")
     List<RolePermission> findRolePermissionsByCertificateRoleIds(@BindIn("role_ids") Set<String> roleIds);
         
+    @SqlUpdate("insert into mw_request_log (instance,received,source,digest,content) values (:instance,:received,:source,:digest,:content)")
+    void insertRequestLogEntry(@BindBean RequestLogEntry requestLogEntry);
+    @SqlQuery("select instance, received, source, digest from mw_request_log where digest=:digest")
+    List<RequestLogEntry> findRequestLogEntryByDigest(@BindIn("digest") String digestBase64);
+    @SqlQuery("select instance, received, source, digest from mw_request_log where received is not null order by received asc limit 1")
+    RequestLogEntry findRequestLogEntryByEarliestDate();
     
 }

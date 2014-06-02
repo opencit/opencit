@@ -32,16 +32,16 @@ public class ManagementConsoleViewController extends MultiActionController{
 		ModelAndView modelAndView = new ModelAndView("WhiteListConfiguration");
 		try {
 			
-			List<String> hostNameList = new ArrayList<String>();
+			List<String> hostNameList = new ArrayList<>();
 			
 			HostVMMType[] hostVMMTypes = HostVMMType.values();
 			for (HostVMMType hostVMMType : hostVMMTypes) {
 				hostNameList.add(hostVMMType.getValue());
 			}
 					
-			List<Map<String, Object>> hostList = new ArrayList<Map<String,Object>>(); 
+			List<Map<String, Object>> hostList = new ArrayList<>(); 
 			for (String hostName : hostNameList) {
-				Map<String, Object> map = new HashMap<String, Object>();
+				Map<String, Object> map = new HashMap<>();
 				boolean isVmm = false;
 				if (hostName.toLowerCase().contains(HelperConstant.VMWARE_TYPE.toLowerCase())) {
 					isVmm = true;
@@ -52,12 +52,12 @@ public class ManagementConsoleViewController extends MultiActionController{
 				hostList.add(map);
 			}
 			modelAndView.addObject("hostTypeList",hostList);
-			List<String> wlBiosList = new ArrayList<String>();
+			List<String> wlBiosList = new ArrayList<>();
 			wlBiosList.add(HostWhiteListTarget.BIOS_OEM.getValue());
 			wlBiosList.add(HostWhiteListTarget.BIOS_HOST.getValue());
 			modelAndView.addObject("BIOSWhiteList",wlBiosList);
 			
-			List<String> wlVMMList = new ArrayList<String>();
+			List<String> wlVMMList = new ArrayList<>();
 			wlVMMList.add(HostWhiteListTarget.VMM_OEM.getValue());
 			wlVMMList.add(HostWhiteListTarget.VMM_HOST.getValue());
 			wlVMMList.add(HostWhiteListTarget.VMM_GLOBAL.getValue());			

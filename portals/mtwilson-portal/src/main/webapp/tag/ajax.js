@@ -30,7 +30,7 @@
  log.js
  merge.js
  findx.js
- 
+ date.js
  
  The library currently assumes the following resource style:
  
@@ -100,11 +100,40 @@ ajax.options.baseurl = "";  // optional, prepends a url like "/api/v2" to all re
 
 ajax.requests = []; // active requests; new requests are pushed here, completed requests are removed
 
+// time synchronization: the timeDelta is automatically calculated after every server response
+// and can be used by the application as needed in order to synchronize requests. for example,
+// if one request creates a resource that has a validity period from that instant (server generated) to
+// 5 minutes into the future, and a second request searches for currently available resources, 
+// the newly created resource should be found. however if the second request is searching for
+// currently available resources based on the client's clock and the client is 10 seconds behind the server,
+// the new resource would not be found until 10 seconds later when the client's clock catches up to the server clock time
+// when the resource was created and the request is sent again.
+// to overcome that issue, the client can use the timeDelta to automatically adjust the "current time" sent
+// in the search request by 10 seconds, compensating for the difference in clocks and resulting in 
+// a successful search.
+// an application must explicitly make use of the timeDelta,  it cannot be applied automatically to
+// requests because it is only useful in situations involving the idea of "now" where the client
+// must send a specific time to the server to represent "now" (instead of a keyword representing "now").
+// default value is zero.
+ajax.timeDelta = 0; // in milliseconds, computed as timeDelta = server time - client time
+
 
 // draft to encapsulate api styles... keys are style names, values are functions that return resource definition given some input (currently the resource name is the only input)
 ajax.apistyles = {
     'resourceCollectionWithId': function(resourceName) {
         return {uri: '/' + resourceName, datapath: resourceName, idkey: 'id'}
+    }
+};
+
+ajax.util = {
+    'calculateTimeDelta': function(response) {
+        log.debug("Response date: "+response.getHeader("Date"));
+        log.debug("Parsed response date: "+Date.parse(response.getHeader("Date")).toISOString());
+        log.debug("Response timestamp: "+Date.parse(response.getHeader("Date")).getTime());
+        log.debug("Current date: "+Date.today().toISOString());
+        log.debug("Current timestamp: "+Date.now());
+        ajax.timeDelta = Date.parse(response.getHeader("Date")).getTime() - Date.now(); // network delay is in here but not server processing time        
+        log.debug("Time delta: "+ajax.timeDelta);
     }
 };
 
@@ -166,6 +195,7 @@ ajax.json = {
             requestHeaders: { 'Accept': 'application/json' },
             postBody: Object.toJSON(postObject),
             onSuccess: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
                 if (transport.responseText) {
@@ -196,6 +226,7 @@ ajax.json = {
                 ajax.view.sync();
             },
             onFailure: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Failure! "+transport.status+" \n\n" + response);
                 if( transport.status === 401 ) {
@@ -238,6 +269,7 @@ ajax.json = {
 			headers: { "AuthorizationToken": authorizationToken },
             parameters: params || {},
             onSuccess: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
                 if (transport.responseText) {
@@ -285,6 +317,7 @@ ajax.json = {
                 ajax.view.sync();
             },
             onFailure: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Failure! "+transport.status+"\n\n" + response);
                 if( transport.status === 401 ) {
@@ -346,6 +379,7 @@ ajax.json = {
             contentType: 'application/json',
             postBody: Object.toJSON(putObject),
             onSuccess: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
                 if (transport.responseText) {
@@ -394,6 +428,7 @@ ajax.json = {
                 ajax.view.sync();
             },
             onFailure: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Failure! "+transport.status+"\n\n" + response);
                 if( transport.status === 401 ) {
@@ -433,6 +468,7 @@ ajax.json = {
             method: 'delete',
 			headers: { "AuthorizationToken": authorizationToken },
             onSuccess: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
                 if (transport.responseText) {
@@ -459,6 +495,7 @@ ajax.json = {
 //                ajax.view.sync();
             },
             onFailure: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Failure! "+transport.status+"\n\n" + response);
                 if( transport.status === 401 ) {
@@ -557,6 +594,7 @@ ajax.custom = {
             //postBody: Object.toJSON(postObject),
             postBody: postObject,
             onSuccess: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
                 if (transport.responseText) {
@@ -569,6 +607,7 @@ ajax.custom = {
                 ajax.view.sync();
             },
             onFailure: function(transport) {
+                ajax.util.calculateTimeDelta(transport);
                 var response = transport.responseText || "no response text";
                 _log.debug("Failure! "+transport.status+"\n\n" + response);
                 if (transport.responseText) {

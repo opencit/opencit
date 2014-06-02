@@ -119,7 +119,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         log.debug("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
         req.getSession().removeAttribute("hostVO");
         ModelAndView responseView = new ModelAndView(new JSONView());
-        List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
+        List<HostDetails> listOfRegisterHost = new ArrayList<>();
 
         log.debug("Action is :{}", req.getMethod());
         log.debug("Content type is {}", req.getContentType());

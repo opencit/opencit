@@ -31,6 +31,9 @@
 			<div class="valueDiv" id="mainApiClient_Roles">
 				
 			</div>
+            <div class="valueHintDiv">
+            <span style="color: #555555; font-size: 0.9em">Roles requested by the user are highlighted.</span>
+            </div>
 		</div>
 		<div class="singleDiv">
 			<div class="labelDiv" data-i18n="input.expires">Expires:</div>
@@ -51,7 +54,9 @@
 			<div class="valueDiv">
 				<input type="button" value="Approve" onclick="fnApproveSelectedRequest()" data-i18n="[value]button.approve">
 				<input type="button" value="Reject" onclick="fnRejectSelectedRequest()" data-i18n="[value]button.reject">
+                <br/>
 			</div>
+            <div class="valueHintDiv" id="approveRejectButtonFeedback"></div>
 		</div>
 	</div>
 </body>

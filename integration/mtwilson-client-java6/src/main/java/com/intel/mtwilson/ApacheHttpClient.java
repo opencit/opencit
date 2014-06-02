@@ -52,6 +52,9 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.rfc822.Headers;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
+import java.util.Calendar;
+import java.util.Date;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +81,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     private Locale locale = null;
     private ApacheHttpAuthorization authority = null; // can be any implementation - Hmac256 or RSA
     protected static final ObjectMapper mapper = new ObjectMapper();
+    private int timeDeltaMs = 0; // the difference in time between the client and the server, computed  timeDeltaMs = serverDate - clientDate;  when client sends a request to server,  client sends requestDate = clientDate + timeDeltaMs which should match serverDate;  the timeDeltaMs is updated after every response received from the server
 
     /**
      * If you don't have a specific configuration, you can pass in
@@ -358,7 +362,23 @@ public class ApacheHttpClient implements java.io.Closeable {
         return MediaType.APPLICATION_OCTET_STREAM_TYPE;
     }
 
+    /**
+     * 
+     * Typically the HttpEntity is NOT chunked, is streaming, and is not repeatable:
+     * <pre>
+2014-06-01 23:42:11,041 DEBUG [http-bio-8443-exec-17] c.i.m.ApacheHttpClient [ApacheHttpClient.java:354] We got Content-Type: text/plain
+2014-06-01 23:42:11,041 DEBUG [http-bio-8443-exec-17] c.i.m.ApacheHttpClient [ApacheHttpClient.java:371] HttpEntity Content Length = 2
+2014-06-01 23:42:11,041 DEBUG [http-bio-8443-exec-17] c.i.m.ApacheHttpClient [ApacheHttpClient.java:372] HttpEntity is chunked? false
+2014-06-01 23:42:11,041 DEBUG [http-bio-8443-exec-17] c.i.m.ApacheHttpClient [ApacheHttpClient.java:373] HttpEntity is streaming? true
+2014-06-01 23:42:11,041 DEBUG [http-bio-8443-exec-17] c.i.m.ApacheHttpClient [ApacheHttpClient.java:374] HttpEntity is repeatable? false
+     * </pre>
+     * 
+     * @param response
+     * @return
+     * @throws IOException 
+     */
     private ApiResponse readResponse(HttpResponse response) throws IOException {
+        calculateTimeDelta(response);
         MediaType contentType = createMediaType(response);
         byte[] content = null;
         HttpEntity entity = response.getEntity();
@@ -376,6 +396,13 @@ public class ApacheHttpClient implements java.io.Closeable {
         return new ApiResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), contentType, content);
     }
 
+    private void calculateTimeDelta(HttpResponse response) {
+        Calendar now = Calendar.getInstance();
+        Date serverTime = Rfc822Date.parse(response.getFirstHeader("Date").getValue());
+        timeDeltaMs = (int)(serverTime.getTime() - now.getTimeInMillis());
+        log.debug("calculated time delta {} = server time {} - client time {}", timeDeltaMs, serverTime, now.getTime());
+    }
+    
     private void addHeaders(HttpRequestBase request, Headers headers) {
         for (String name : headers.names()) {
             // skip "content-length" as org.apache.http.client.HttpClient.execute method needs to set it and will cause an error if it's already set
@@ -387,6 +414,19 @@ public class ApacheHttpClient implements java.io.Closeable {
             }
         }
     }
+    
+    private void addLocaleHeader(HttpRequestBase request) {
+        if (locale != null) {
+            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
+    }
+    private void setDateHeader(HttpRequestBase request) {
+        log.debug("current time is {}", new Date());
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.MILLISECOND, timeDeltaMs);
+        request.setHeader("Date", Rfc822Date.format(now.getTime()));
+        log.debug("set date header to {} using time delta {}", request.getFirstHeader("Date").getValue(), timeDeltaMs);
+    }
 
     public ApiResponse get(String requestURL) throws IOException, ApiException, SignatureException {
         return get(requestURL, null);
@@ -395,9 +435,8 @@ public class ApacheHttpClient implements java.io.Closeable {
     public ApiResponse get(String requestURL, Headers headers) throws IOException, ApiException, SignatureException {
         log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
-        if (locale != null) {
-            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
-        }
+        addLocaleHeader(request);
+        setDateHeader(request);
         if (headers != null) {
             addHeaders(request, headers);
         }
@@ -418,9 +457,8 @@ public class ApacheHttpClient implements java.io.Closeable {
     public ApiResponse delete(String requestURL, Headers headers) throws IOException, SignatureException {
         log.debug("DELETE url: {}", requestURL);
         HttpDelete request = new HttpDelete(requestURL);
-        if (locale != null) {
-            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
-        }
+        addLocaleHeader(request);
+        setDateHeader(request);
         if (headers != null) {
             addHeaders(request, headers);
         }
@@ -445,9 +483,8 @@ public class ApacheHttpClient implements java.io.Closeable {
         if (message != null && message.content != null) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
-        if (locale != null) {
-            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
-        }
+        addLocaleHeader(request);
+        setDateHeader(request);
         if (headers != null) {
             addHeaders(request, headers);
         }
@@ -474,9 +511,8 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         //System.out.println("XXX debug|HTTP POST message content: " + message.content);
 
-        if (locale != null) {
-            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
-        }
+        addLocaleHeader(request);
+        setDateHeader(request);
         if (headers != null) {
             addHeaders(request, headers);
         }

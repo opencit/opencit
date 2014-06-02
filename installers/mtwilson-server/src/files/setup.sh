@@ -373,10 +373,11 @@ MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
 echo "Configuring Mt Wilson Server Name..."
 echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
 This address will be used in the server SSL certificate and in all Mt Wilson URLs.
-For example, if you enter localhost then the Mt Wilson URL is https://localhost:${DATABASE_PORTNUM}
+For example, if you enter '$MTWILSON_SERVER_IP_ADDRESS' then the Mt Wilson URL is 
+https://$MTWILSON_SERVER_IP_ADDRESS:8181 (for Glassfish deployments) or 
+https://$MTWILSON_SERVER_IP_ADDRESS:8443 (for Tomcat deployments)
 Detected the following options on this server:"
-#IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
-for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ " `hostname`
+for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ "`hostname`
 prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
 export MTWILSON_SERVER
 
@@ -502,7 +503,7 @@ elif using_postgres; then
       sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
     fi
     #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
-    if [ "$POSTGRESQL_KEEP_PGPASS" == "false" ]; then
+    if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
       if [ -f /root/.pgpass ]; then
         echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
         rm /root/.pgpass

@@ -28,6 +28,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-crypto-password</artifactId>
             <version>${project.version}</version>

@@ -389,11 +389,12 @@ case "$1" in
         ;;
   erase-users)
         #load_default_env 1>/dev/null
-        if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
-          echo_warning "Please specify the admin username."
-          prompt_with_default MC_FIRST_USERNAME "Mt Wilson Portal Admin Username:" "admin"
-        fi
-        export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
+        ### the EraseUserAccounts command now detects superusers automatically by looking for users with permission *:*:* 
+        #if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
+        #  echo_warning "Please specify the admin username."
+        #  prompt_with_default MC_FIRST_USERNAME "Mt Wilson Portal Admin Username:" "admin"
+        #fi
+        #export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
   change-db-pass)

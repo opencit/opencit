@@ -1,5 +1,10 @@
 package com.intel.mountwilson.Service;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.intel.mountwilson.common.MCPConfig;
 import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mountwilson.common.ManagementConsolePortalException;
@@ -17,6 +22,7 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.dcsg.cpg.x500.DN;
+import com.intel.mtwilson.user.management.rest.v2.model.UserComment;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
 import java.net.MalformedURLException;
@@ -39,12 +45,14 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
     private MCPersistenceManager mcManager;
     private MwPortalUserJpaController keystoreJpa;
     private ApiClientX509JpaController apiClientJpa;
+    private final ObjectMapper yaml;
 
     
     public ManagementConsoleServicesImpl() {
         mcManager = new MCPersistenceManager();
         keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU")); // fix bug 677,  MwPortalUser is in MSDataPU, not in ASDataPU
         apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));
+        yaml = createYamlMapper();
     }
     
     /**
@@ -369,7 +377,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
     @Override
     public List<ApiClientDetails> getApiClients(ApiClient apiObj, ApiClientListType apiType) throws ManagementConsolePortalException {
         log.info("ManagementConsoleServicesImpl.getApprovedRequest >>");
-        List<ApiClientDetails> apiClientList = new ArrayList<ApiClientDetails>();
+        List<ApiClientDetails> apiClientList = new ArrayList<>();
         List<ApiClientInfo> apiListFromDB = null;
 
         try {
@@ -424,10 +432,22 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                     apiClientDetailObj.setName(apiClientObj.name);
                     apiClientDetailObj.setFingerprint(new String(Hex.encodeHex(apiClientObj.fingerprint)));
                     apiClientDetailObj.setExpires(apiClientObj.expires);
-                    apiClientDetailObj.setRequestedRoles(Arrays.asList(apiClientObj.roles));
+//                    apiClientDetailObj.setRequestedRoles(Arrays.asList(apiClientObj.roles));
                     apiClientDetailObj.setIssuer(apiClientObj.issuer);
                     apiClientDetailObj.setStatus(apiClientObj.status);
-                    apiClientDetailObj.setComment(apiClientObj.comment);
+//                    apiClientDetailObj.setComment(apiClientObj.comment);
+                    try {
+                        if( apiClientObj.comment != null ) {
+                            UserComment comment = yaml.readValue(apiClientObj.comment, UserComment.class);
+                            apiClientDetailObj.setRequestedRoles(new ArrayList<String>(comment.roles));
+                            apiClientDetailObj.setComment("");
+                        }
+                    }
+                    catch(Exception e) {
+                        log.error("Cannot parse user comment: {}", apiClientObj.comment, e);
+                        apiClientDetailObj.setRequestedRoles(new ArrayList<String>());
+                        apiClientDetailObj.setComment("");
+                    }
 
                     apiClientList.add(apiClientDetailObj);
                 }
@@ -437,6 +457,17 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
             throw ConnectionUtil.handleManagementConsoleException(e);
         }
         return apiClientList;
+    }
+    
+    // SEE ALSO: ApiClientBO.creatYamlMapper() in mtwilson-management
+    // TODO: consolidate in a common library
+    private ObjectMapper createYamlMapper() {
+        YAMLFactory yamlFactory = new YAMLFactory();
+        yamlFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+        yamlFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
+        ObjectMapper mapper = new ObjectMapper(yamlFactory);
+        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        return mapper;
     }
 
     /**
