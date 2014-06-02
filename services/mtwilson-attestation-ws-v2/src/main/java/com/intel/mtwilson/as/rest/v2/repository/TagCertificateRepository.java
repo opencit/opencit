@@ -70,7 +70,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
         try {
             MwAssetTagCertificateJpaController jpaController = My.jpa().mwAssetTagCertificate();
             List<MwAssetTagCertificate> objList = jpaController.findAssetTagCertificatesByUuid(id);
-            if (objList != null & !objList.isEmpty()) {
+            if (!objList.isEmpty()) { // since the jpa controller either returns valida data or an empty list
                 TagCertificate convObj = convert(objList.get(0)); // there should always be only one row matching.
                 return convObj;
             }

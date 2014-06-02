@@ -62,7 +62,7 @@ public class AssetTagCert {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String revokeAssetTagCertificate(AssetTagCertRevokeRequest atagObj)  {
-        boolean result = true;
+        boolean result;
         AssetTagCertBO object = new AssetTagCertBO();
         result = object.revokeAssetTagCertificate(atagObj, null);
         return Boolean.toString(result);
