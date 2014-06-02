@@ -864,8 +864,8 @@ function isNumber(n) {
                                             <option value="After">after</option>
                                         </select>
 
-                                        <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" placeholder="Date" onblur='$(this).value = Date.parse($(this).value).toISOString();'/>
-                                        <script>document.getElementById('certificate-search-valid').value = Date.parse('now').toISOString()</script>
+                                        <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" placeholder="Date" onblur='(function(){var currentValue = $(this).value; if( currentValue ) { var parsedValue = Date.parse(currentValue); if( parsedValue ) { $(this).value = parsedValue.toISOString(); }}})()'/>
+                                        <script>console.log("timedelta is "+ajax.timeDelta); document.getElementById('certificate-search-valid').value = Date.parse('now').addMilliseconds(ajax.timeDelta).toISOString()</script>
                                         <span class="help">Try "today", "next tuesday", or most reasonable date formats</span>
 
                                     </div>
@@ -886,7 +886,7 @@ function isNumber(n) {
                                 </div>
 
                                 <div class="singleDiv">
-                                    <div class="labelDiv">PCR Even: </div> 
+                                    <div class="labelDiv">PCR Event: </div> 
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-pcrEvent" name="pcrEvent" placeholder="Hex (40 characters)"/>
                                     </div>

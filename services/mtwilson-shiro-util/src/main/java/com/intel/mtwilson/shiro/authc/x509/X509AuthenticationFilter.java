@@ -65,6 +65,11 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
         try {
             HttpServletRequest httpRequest = WebUtils.toHttp(request);
             Authorization authorization = getAuthorization(httpRequest);
+            // clients MUST include a Date header in the request covered by a signature (we compare it to the anti-replay protection window)
+            if(!ArrayUtils.contains(authorization.headerNames, "Date")) {
+                throw new IllegalArgumentException("Request must include Date header"); // TODO: i18n
+            }
+            
             RsaSignatureInput signatureInput = getSignatureInputFromHttpRequest(httpRequest, authorization);
             String content = signatureInput.toString(); // may throw IllegalArgumentException if any required field is null or invalid
             log.debug("Document content (signature input):\n'{}'\n", content);
@@ -75,7 +80,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
 
             byte[] digest = getDigest(document, signatureAlgorithm); // example: 3031300d060960864801650304020105000420 8373ed7ae4a499534f3eb02fb898a0eafea48a334e2f0a5703e7dc474360786a   the space between the two hex parts shows where the alg id ends and the sha256 digest of the document itself begins
             log.debug("Digest with alg id included is: {}", Hex.encodeHexString(digest));
-            X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), request.getRemoteAddr());
+            X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), signatureInput, request.getRemoteAddr());
             log.debug("createToken: returning X509AuthenticationToken");
             return token;
         } catch (NoSuchAlgorithmException e) {

@@ -163,12 +163,13 @@ public class RsaAuthorization {
         String timestamp;
         if( headers.containsKey("Date") ) {
             timestamp = headers.get("Date");
+            log.debug("request already contains date header: {}", timestamp);
         }
         else {
             timestamp = Rfc822Date.format(new Date());    
+            log.debug("creating new date header for request: {}", timestamp);
             headers.put("Date", timestamp);
         }
-        
         
         RsaSignatureInput signatureBlock = new RsaSignatureInput();
         signatureBlock.httpMethod = httpMethod;
@@ -178,8 +179,6 @@ public class RsaAuthorization {
         log.debug("signature input body is {} bytes:\n'{}'\n", (signatureBlock.body==null?0:signatureBlock.body.length()), signatureBlock.body);
         signatureBlock.signatureAlgorithm = credential.algorithm();
         
-        headers.put("X-Nonce", nonce);
-        headers.put("Date", timestamp);
         signatureBlock.headers = headers;
         signatureBlock.headerNames = new String[] { "X-Nonce", "Date" };
 
@@ -255,8 +254,8 @@ public class RsaAuthorization {
         String headerNamesCSV = StringUtils.join(headerNames, ",");
         String[] input = new String[] { realm,   username,  headerNamesCSV,  signatureAlgorithm,  signatureBase64 };
         String[] label = new String[] {"realm", "fingerprint", "headers", "algorithm", "signature"};
-        ArrayList<String> errors = new ArrayList<String>();
-        ArrayList<String> params = new ArrayList<String>();
+        ArrayList<String> errors = new ArrayList<>();
+        ArrayList<String> params = new ArrayList<>();
         for(int i=0; i<input.length; i++) {
             if( input[i] != null && input[i].contains("\"") ) { errors.add(String.format("%s contains quotes", label[i])); }
             if( input[i] != null ) { params.add(String.format("%s=\"%s\"", label[i], encodeHeaderAttributeValue(input[i]))); }

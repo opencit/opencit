@@ -341,6 +341,11 @@ mtwilson.atag = mtwilson.atag || {};
                 }
                 mtwilson.atag.notify({text: 'Created certificate request',clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
+                
+                log.debug("automatically setting current time for follow-up search");
+                log.debug("timedelta is "+ajax.timeDelta);
+                $('certificate-search-valid').value = Date.parse('now').addMilliseconds(ajax.timeDelta).toISOString();
+                
                 mtwilson.atag.searchCertificates($('searchCertButton'))
                 break;
             case 'certificates':
@@ -446,27 +451,71 @@ mtwilson.atag = mtwilson.atag || {};
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Deleted tag', clearAfter: 'AUTO', status: 'INFO'});
+                var i;
+                for (i = data.tags.length - 1; i >= 0; i--) {
+                    if (('id' in data.tags[i]) && data.tags[i].id == event.memo.content.id) {
+                        data.tags.splice(i, 1); 
+                    }
+                }
+                //view.sync();
+                mtwilson.rivets.views['tag-browse-table'].sync();
                 mtwilson.atag.searchTags('tag-search-form');
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
                 mtwilson.atag.notify({text: 'Deleted RDF triple', clearAfter: 'AUTO', status: 'INFO'});
+                log.debug("delete rdf triples after notify: "+event.memo.content.uuid);
+                var i;
+                for (i = data.rdfTriples.length - 1; i >= 0; i--) {
+                    if (('uuid' in data.rdfTriples[i]) && data.rdfTriples[i].uuid == event.memo.content.uuid) {
+                        data.rdfTriples.splice(i, 1);
+                    }
+                }
+        //        view.sync();
+                mtwilson.rivets.views['rdf-triple-browse-table'].sync();
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
-                log.debug("deleted selection notification...");
+//                log.debug("deleted selection notification...");
                 mtwilson.atag.notify({text: 'Deleted selection', clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("deleted selection input merge...");
+                var i;
+                for (i = data.selections.length - 1; i >= 0; i--) {
+                    if (data.selections[i].id == event.memo.content.id) {
+                        data.selections.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                    }
+                }
+        //        view.sync();
+                mtwilson.rivets.views['selection-browse-table'].sync();
                 mtwilson.atag.searchSelections('selection-search-form');
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
                 mtwilson.atag.notify({text: 'Deleted certificate request', clearAfter: 'AUTO', status: 'INFO'});
+                log.debug("delete certificate requests after notify: "+event.memo.content.uuid);
+                var i;
+                for (i = data.certificateRequests.length - 1; i >= 0; i--) {
+                    if (('uuid' in data.certificateRequests[i]) && data.certificateRequests[i].uuid == event.memo.content.uuid) {
+                        data.certificateRequests.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                        //					return;
+                    }
+                }
+                //view.sync();
+                mtwilson.rivets.views['certificate-request-browse-table'].sync();
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 mtwilson.atag.searchCertificates($('searchCertButton'))
                 break;
             case 'certificates':
                 mtwilson.atag.notify({text: 'Deleted certificate', clearAfter: 'AUTO', status: 'INFO'});
+                log.debug("delete certificates after notify: "+event.memo.content.id);
+                var i;
+                for (i = data.certificates.length - 1; i >= 0; i--) {
+                    if (('id' in data.certificates[i]) && data.certificates[i].id == event.memo.content.id) {
+                        data.certificates.splice(i, 1);
+                    }
+                }
+                //view.sync();
+                mtwilson.rivets.views['certificate-browse-table'].sync();
                 break;
             case 'configurations':
                 mtwilson.atag.notify({text: 'Deleted configuration', clearAfter: 'AUTO', status: 'INFO'});
@@ -891,13 +940,13 @@ mtwilson.atag = mtwilson.atag || {};
         for (i = data.rdfTriples.length - 1; i >= 0; i--) {
             if (('uuid' in data.rdfTriples[i]) && data.rdfTriples[i].uuid == uuid) {
                 ajax.json.delete('rdfTriples', data.rdfTriples[i]);
-                data.rdfTriples.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                //data.rdfTriples.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
                 //					return;
             }
             //view.sync(); //view.update(data);
         }
 //        view.sync();
-        mtwilson.rivets.views['rdf-triple-browse-table'].sync();
+        //mtwilson.rivets.views['rdf-triple-browse-table'].sync();
 
         /*
          for(var i=sampledata.rdfTriples.length-1; i>=0; i--) {
@@ -910,7 +959,7 @@ mtwilson.atag = mtwilson.atag || {};
     };
 
 
-
+    /*
     mtwilson.atag.removeFirstTag = function(oid) {
         var i;
         for (i = 0; i < data.tags.length; i--) {
@@ -922,6 +971,7 @@ mtwilson.atag = mtwilson.atag || {};
             }
         }
     };
+    */
 
     // removes all tags with this oid
     mtwilson.atag.removeTag = function(uuid) {
@@ -929,12 +979,12 @@ mtwilson.atag = mtwilson.atag || {};
         for (i = data.tags.length - 1; i >= 0; i--) {
             if (('id' in data.tags[i]) && data.tags[i].id == uuid) {
                 ajax.json.delete('tags', data.tags[i]);
-                data.tags.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                //data.tags.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
                 //					return;
             }
         }
         //view.sync();
-        mtwilson.rivets.views['tag-browse-table'].sync();
+        //mtwilson.rivets.views['tag-browse-table'].sync();
     };
 
     // Get the selection details
@@ -949,23 +999,23 @@ mtwilson.atag = mtwilson.atag || {};
         log.debug("removeSelection: " + uuid);
         var i;
         for (i = data.selections.length - 1; i >= 0; i--) {
-            log.debug("removeSelection from model; looking at index " + i);
-            log.debug("index i is: " + Object.toJSON(data.selections[i]));
-            log.debug("index i uuid is: " + data.selections[i].uuid);
-            log.debug("typeof data.selections[i].uuid = " + (typeof data.selections[i].uuid));
+      //      log.debug("removeSelection from model; looking at index " + i);
+    //        log.debug("index i is: " + Object.toJSON(data.selections[i]));
+  //          log.debug("index i uuid is: " + data.selections[i].uuid);
+//            log.debug("typeof data.selections[i].uuid = " + (typeof data.selections[i].uuid));
             if (data.selections[i].id == uuid) {
                 log.debug("found selection with uuid " + data.selections[i].uuid);
                 ajax.json.delete('selections', data.selections[i]);
-                //ajax.json.delete('selections', uuid);
-                log.debug("ajax request ok");
-                data.selections.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
-                log.debug("model splice ok");
+        
+    //            log.debug("ajax request ok");
+      //          data.selections.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+  //              log.debug("model splice ok");
                 //					return;
             }
         }
-        log.debug("removeSelection synchrnoizing view...");
+//        log.debug("removeSelection synchrnoizing view...");
 //        view.sync();
-        mtwilson.rivets.views['selection-browse-table'].sync();
+ //       mtwilson.rivets.views['selection-browse-table'].sync();
 
     };
      // removes all tags with this oid
@@ -981,12 +1031,12 @@ mtwilson.atag = mtwilson.atag || {};
         for (i = data.certificateRequests.length - 1; i >= 0; i--) {
             if (('uuid' in data.certificateRequests[i]) && data.certificateRequests[i].uuid == uuid) {
                 ajax.json.delete('certificateRequests', data.certificateRequests[i]);
-                data.certificateRequests.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                //data.certificateRequests.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
                 //					return;
             }
         }
         //view.sync();
-        mtwilson.rivets.views['certificate-request-browse-table'].sync();
+        //mtwilson.rivets.views['certificate-request-browse-table'].sync();
     };
 
 
@@ -996,12 +1046,12 @@ mtwilson.atag = mtwilson.atag || {};
         for (i = data.certificates.length - 1; i >= 0; i--) {
             if (('id' in data.certificates[i]) && data.certificates[i].id == uuid) {
                 ajax.json.delete('certificates', data.certificates[i]);
-                data.certificates.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                //data.certificates.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
                 //					return;
             }
         }
         //view.sync();
-        mtwilson.rivets.views['certificate-browse-table'].sync();
+        //mtwilson.rivets.views['certificate-browse-table'].sync();
     };
 
     mtwilson.atag.revokeCertificate = function(uuid) {

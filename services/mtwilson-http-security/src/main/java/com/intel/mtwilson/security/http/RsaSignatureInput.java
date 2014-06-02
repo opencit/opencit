@@ -13,8 +13,8 @@ import org.apache.commons.lang3.StringUtils;
  * org.apache.commons.lang.StringUtils from commons-lang
  * 
  * This class defines the format of the content which is hashed to produce
- * the RSA asymmetric-key signature for the "PublicKey" authentication
- * scheme. This class is not tied to the signature algorithm and could also
+ * the RSA asymmetric-key signature for the "PublicKey" or "X509" authentication
+ * scheme. This class could probably also
  * be used with other signature algorithms. The structure of the document
  * to sign is different between MtWilson and PublicKey authentication schemes.
  * 
@@ -23,6 +23,9 @@ import org.apache.commons.lang3.StringUtils;
  * lot of flexibility in determining just what should or shouldn't be included
  * in the signed document, without duplicating information from standard
  * HTTP headers into the Authorization header.
+ * 
+ * Mt Wilson 2.0 clients MUST include the Date header in the request
+ * and cover it with the signature.
  * 
  * @since 0.5.2
  * @author jbuhacoff
@@ -65,7 +68,7 @@ X-Nonce: FaaKLOOuyG7/kLVD5vQ7iw==
             valueWithoutNewlinesOrEmptyString(realm),
             valueWithoutNewlinesOrEmptyString(fingerprintBase64),
             valueWithoutNewlinesOrEmptyString(signatureAlgorithm));
-        ArrayList<String> httpHeaderList = new ArrayList<String>();
+        ArrayList<String> httpHeaderList = new ArrayList<>();
         for(String headerName : headerNames) {
             httpHeaderList.add( String.format("%s: %s\n", headerName, valueWithoutNewlinesOrEmptyString(headers.get(headerName))) );
         }
