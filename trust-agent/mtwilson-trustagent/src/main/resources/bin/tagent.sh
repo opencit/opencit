@@ -255,6 +255,8 @@ case "$1" in
   uninstall)
     trustagent_stop
     trustagent_uninstall
+    groupdel trustagent > /dev/null 2>&1
+    userdel trustagent > /dev/null 2>&1
     monit_uninstall
     ;;
   *)
