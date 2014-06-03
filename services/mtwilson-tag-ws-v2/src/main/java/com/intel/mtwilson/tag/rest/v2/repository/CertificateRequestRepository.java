@@ -20,7 +20,7 @@ import com.intel.mtwilson.tag.model.CertificateRequest;
 import com.intel.mtwilson.tag.model.CertificateRequestCollection;
 import com.intel.mtwilson.tag.model.CertificateRequestFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateRequestLocator;
-import com.intel.mtwilson.tag.model.Selection;
+import java.io.IOException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -28,11 +28,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -142,7 +137,8 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
             }
         return protection;
     }
-    protected void encrypt(CertificateRequest certificateRequest) throws Exception {
+    
+    protected void encrypt(CertificateRequest certificateRequest) throws IOException {
         byte[] plaintext = certificateRequest.getContent();
         
             // NOTE: the base64-encoded value of mtwilson.as.dek is used as the encryption password;  this is different than using the decoded value as the aes-128 key which is currently done for attestation service host connection info
@@ -156,7 +152,8 @@ public class CertificateRequestRepository implements SimpleRepository<Certificat
             // TODO:  PasswordEncryptedFile currently doesn't support passing the plaintext content type, but when it does we need ot pass it so it will be mentioned in the encrypted file's headers, so that we can check it when we decrypt later (to ensure it's application/xml before we try to parse it)
             
     }
-    protected void decrypt(CertificateRequest certificateRequest) throws Exception {
+    
+    protected void decrypt(CertificateRequest certificateRequest) throws IOException {
             ByteArrayResource resource = new ByteArrayResource(certificateRequest.getContent());
             PasswordEncryptedFile passwordEncryptedFile = new PasswordEncryptedFile(resource, My.configuration().getDataEncryptionKeyBase64());
             byte[] plaintext = passwordEncryptedFile.decrypt(); 

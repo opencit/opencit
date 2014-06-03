@@ -9,6 +9,8 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
+import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
@@ -20,9 +22,11 @@ import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +93,7 @@ public class MigrateUsers extends DatabaseSetupTask {
         // TODO:  check that the configured algorithm is available on this system
         try {
             MessageDigest md = MessageDigest.getInstance(algorithmName);
-            log.debug("Hash algorithm {} is available", algorithmName);
+            log.debug("Hash algorithm {} is available", md.getAlgorithm());
             if (iterations == null) {
                 // determine a suitable number of iterations.
                 // the following will determine how many hash iterations can be
@@ -169,7 +173,7 @@ public class MigrateUsers extends DatabaseSetupTask {
      * @return
      * @throws CryptographyException
      */
-    private int benchmarkIterationCount(MessageDigest md, double elapsedTimeTarget) throws Exception {
+    /*private int benchmarkIterationCount(MessageDigest md, double elapsedTimeTarget) {
         Random rnd = new Random(); // don't need a secure random since we are not generating keys for production use here -- only to test encryption speed
         // generate random input for the trial
         byte[] plaintextInput = new byte[1024];
@@ -195,9 +199,9 @@ public class MigrateUsers extends DatabaseSetupTask {
             iterationCount = Integer.MAX_VALUE;
         }
         return iterationCount;
-    }
+    }*/
 
-    private void migratePortalUser(MwPortalUser portalUser) throws Exception {
+    private void migratePortalUser(MwPortalUser portalUser) throws SQLException, IOException, NonexistentEntityException, IllegalOrphanException {
         try (LoginDAO loginDAO = MyJdbi.authz()) {
             // create new user record
             User user = new User();
@@ -235,7 +239,7 @@ public class MigrateUsers extends DatabaseSetupTask {
         }
     }
 
-    private void migrateApiClient(ApiClientX509 apiClient, User user) throws Exception {
+    private void migrateApiClient(ApiClientX509 apiClient, User user) throws SQLException, IOException, NonexistentEntityException, IllegalOrphanException {
         try (LoginDAO loginDAO = MyJdbi.authz()) {
             UserLoginPassword userLoginPassword = null;
             if (user == null) {
@@ -299,7 +303,7 @@ public class MigrateUsers extends DatabaseSetupTask {
         }
     }
 
-    private Role getRole(String roleName) throws Exception {
+    private Role getRole(String roleName) throws SQLException, IOException {
         Role role;
         if (roleCache.containsKey(roleName)) {
             role = roleCache.get(roleName);
