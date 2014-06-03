@@ -10,9 +10,6 @@ import com.intel.mtwilson.setup.LocalSetupTask;
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.shiro.config.Ini;
 
@@ -90,15 +87,15 @@ public class UpdateSslPort extends LocalSetupTask {
         shiroIni.load(FileUtils.readFileToString(shiroIniFile));
         shiroIni.setSectionProperty("main","ssl.port",String.valueOf(port));
         shiroIni.setSectionProperty("main","ssl.enabled",String.valueOf(true));
-        String newShiroConfig = "";
+        StringBuilder newShiroConfig = new StringBuilder();
         Collection<Ini.Section> sections = shiroIni.getSections();
         for (Ini.Section section : sections) {
-            newShiroConfig = newShiroConfig + "[" + section.getName() + "]\r\n";
+            newShiroConfig.append(String.format("[%s]\r\n",section.getName()));
             for (String sectionKey : section.keySet()) {
-                newShiroConfig = newShiroConfig + sectionKey + " = " + section.get(sectionKey) + "\r\n";
+                newShiroConfig.append(String.format("%s = %s\r\n",sectionKey,section.get(sectionKey)));
             }
         }
         
-        FileUtils.writeStringToFile(shiroIniFile, newShiroConfig);
+        FileUtils.writeStringToFile(shiroIniFile, newShiroConfig.toString());
     }
 }

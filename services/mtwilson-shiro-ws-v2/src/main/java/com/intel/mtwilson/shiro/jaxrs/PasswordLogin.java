@@ -6,7 +6,6 @@ package com.intel.mtwilson.shiro.jaxrs;
 
 import com.intel.mtwilson.shiro.EncryptedTokenContent;
 import com.intel.dcsg.cpg.authz.token.TokenFactory;
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
@@ -15,19 +14,17 @@ import com.intel.mtwilson.shiro.Username;
 import com.thoughtworks.xstream.XStream;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
+import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -70,7 +67,7 @@ public class PasswordLogin {
         log.debug("request from {}", request.getRemoteHost());
 
         PasswordLoginResponse passwordLoginResponse = loginRequest(request, response, passwordLoginRequest);
-
+        log.debug("Successfully processed login request with auth token {}.", passwordLoginResponse.getAuthorizationToken());
         /*
          * XXX TODO  should we return HTML response?  
          * HTML body would just be <html><head><meta …/></head></html>  
@@ -110,11 +107,16 @@ public class PasswordLogin {
         Collection<UserId> userIds = principals.byType(UserId.class);
         Collection<LoginPasswordId> passwordLoginIds = principals.byType(LoginPasswordId.class);
 
+        if (usernames == null || usernames.isEmpty() || userIds == null || userIds.isEmpty() ||
+                passwordLoginIds == null || passwordLoginIds.isEmpty()) {
+            log.error("One of the required parameters is missing. Login request cannot be processed");
+            throw new IllegalStateException();
+        }
         // this block of code repeated in EncryptedTokenAuthenticationFilter
         EncryptedTokenContent tokenContent = new EncryptedTokenContent();
-        tokenContent.loginPasswordId = passwordLoginIds.iterator().next().getLoginPasswordId().toString();
-        tokenContent.userId = userIds.iterator().next().getUserId().toString();
-        tokenContent.username = usernames.iterator().next().getUsername().toString();
+        tokenContent.loginPasswordId = getFirstElementFromCollection(passwordLoginIds).getLoginPasswordId().toString(); // passwordLoginIds.iterator().next().getLoginPasswordId().toString();
+        tokenContent.userId = getFirstElementFromCollection(userIds).getUserId().toString(); // userIds.iterator().next().getUserId().toString();
+        tokenContent.username = getFirstElementFromCollection(passwordLoginIds).getName(); // usernames.iterator().next().getUsername();
         XStream xs = new XStream();
         String tokenContentXml = xs.toXML(tokenContent);
         log.debug("tokenContent xml: {}", tokenContentXml);
@@ -132,5 +134,14 @@ public class PasswordLogin {
         passwordLoginResponse.setAuthorizationToken(authorizationToken);
 
         return passwordLoginResponse;
+    }
+    
+    private <T extends Object> T getFirstElementFromCollection(Collection<T> objColl) {
+        if (objColl != null) {
+            Iterator<T> iterator = objColl.iterator();
+            if (iterator.hasNext())
+                return iterator.next();
+        }
+        return null;
     }
 }
