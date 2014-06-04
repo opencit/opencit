@@ -418,8 +418,12 @@ if using_mysql; then
   
   if [ -z "$SKIP_DATABASE_INIT" ]; then
     # mysql db init here
-  mysql_create_database 
-  # mysql db init end
+    if ! mysql_create_database; then
+      mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
+      mysqladmin -u "$MYSQL_USERNAME" password "$MYSQL_PASSWORD"
+      mysql_create_database
+    fi
+    # mysql db init end
   else
     echo_warning "Skipping init of database"
   fi 
