@@ -247,7 +247,7 @@ case "$1" in
   start)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then
-          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e '/ *$//g'`
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
           if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
             # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
             if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
