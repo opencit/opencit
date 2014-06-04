@@ -84,13 +84,11 @@ public class InitDatabase extends LocalSetupTask {
         initDatabase();
     }
     
-    private boolean testConnection() throws Exception {
+    private boolean testConnection() {
         try {
-            Connection c = My.jdbc().connection();
-            Statement s = c.createStatement();
-            s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
-            s.close();
-            c.close();
+            try (Connection c = My.jdbc().connection(); Statement s = c.createStatement()) {
+                s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
+            }
             return true;
         }
         catch(Exception e) {
@@ -150,7 +148,7 @@ public class InitDatabase extends LocalSetupTask {
         DataSource ds = getDataSource();
         
         log.debug("Connecting to {}", databaseVendor);
-        Connection c = null;
+        Connection c;
         try {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
@@ -168,7 +166,7 @@ public class InitDatabase extends LocalSetupTask {
         
 //        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
-        HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
+        HashMap<Long,ChangelogEntry> presentChanges = new HashMap<>(); // what is already in the database according to the changelog
         verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
             if( entry != null ) { 
@@ -179,7 +177,7 @@ public class InitDatabase extends LocalSetupTask {
 
         // Does it have any changes that we don't?  In other words, is the database schema newer than what we know in this installer?
 //        if( options.getBoolean("check", false) ) {
-            HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
+            HashSet<Long> unknownChanges = new HashSet<>(presentChanges.keySet()); // list of what is in database
             unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
             if( unknownChanges.isEmpty() ) {
                 log.info("Database is compatible");
@@ -188,7 +186,7 @@ public class InitDatabase extends LocalSetupTask {
             else { // if( !unknownChanges.isEmpty() ) {
                 // Database has new schema changes we dont' know about
                 log.warn("Database schema is newer than this version of Mt Wilson");
-                ArrayList<Long> unknownChangesInOrder = new ArrayList<Long>(unknownChanges);
+                ArrayList<Long> unknownChangesInOrder = new ArrayList<>(unknownChanges);
                 Collections.sort(unknownChangesInOrder);
                 for(Long unknownChangeId : unknownChangesInOrder) {
                     ChangelogEntry entry = presentChanges.get(unknownChangeId);
@@ -200,7 +198,7 @@ public class InitDatabase extends LocalSetupTask {
             }
 //        }
         
-        changesToApply = new HashSet<Long>(sql.keySet());
+        changesToApply = new HashSet<>(sql.keySet());
         changesToApply.removeAll(presentChanges.keySet());
         
         if( changesToApply.isEmpty() ) {
@@ -227,53 +225,42 @@ public class InitDatabase extends LocalSetupTask {
         DataSource ds = getDataSource();
         
         log.debug("Connecting to {}", databaseVendor);
-        Connection c = null;
-        try {
-            c = ds.getConnection();  // username and password should already be set in the datasource
-        }
-        catch(SQLException e) {
+        try (Connection c = ds.getConnection()) {
+            ArrayList<Long> changesToApplyInOrder = new ArrayList<>(changesToApply);
+            Collections.sort(changesToApplyInOrder);
+            
+            
+    //        if(options.getBoolean("check", false)) {
+                log.info("The following changes will be applied:");
+                        for(Long changeId : changesToApplyInOrder) {
+                            /*
+                            ChangelogEntry entry = presentChanges.get(changeId);
+                            System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                            */
+                            log.info("Change ID: {}", changeId);
+                        }
+    //            System.exit(0); // database is compatible
+    //            return;
+    //        }
+            
+            ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
+            // removing unneeded output as user can't choice what updates to apply
+            // XXX-TODO stdalex this should all be log.info
+            //System.out.println("Available database updates:");
+            for(Long id : changesToApplyInOrder) {
+                //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));
+                rdp.addScript(sql.get(id)); // new ClassPathResource("/com/intel/mtwilson/database/mysql/bootstrap.sql")); // must specify full path to resource
+            }
+            
+            rdp.setContinueOnError(true);
+            rdp.setIgnoreFailedDrops(true);
+            rdp.setSeparator(";");
+            rdp.populate(c);
+        }  catch(SQLException e) {
             log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage()); 
                 validation("Cannot connect to database");
-                return;
-//                System.exit(2);
-//            throw e;
-            // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
-        
-        // At this point we know we have some updates to the databaseschema. 
-        
-        ArrayList<Long> changesToApplyInOrder = new ArrayList<Long>(changesToApply);
-        Collections.sort(changesToApplyInOrder);
-        
-        
-//        if(options.getBoolean("check", false)) {
-            log.info("The following changes will be applied:");
-                    for(Long changeId : changesToApplyInOrder) {
-                        /*
-                        ChangelogEntry entry = presentChanges.get(changeId);
-                        System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
-                        */
-                        log.info("Change ID: {}", changeId);
-                    }
-//            System.exit(0); // database is compatible
-//            return;
-//        }
-        
-        ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
-        // removing unneeded output as user can't choice what updates to apply
-        // XXX-TODO stdalex this should all be log.info
-        //System.out.println("Available database updates:");
-        for(Long id : changesToApplyInOrder) {
-            //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));
-            rdp.addScript(sql.get(id)); // new ClassPathResource("/com/intel/mtwilson/database/mysql/bootstrap.sql")); // must specify full path to resource
-        }
-        
-        rdp.setContinueOnError(true);
-        rdp.setIgnoreFailedDrops(true);
-        rdp.setSeparator(";");
-        rdp.populate(c);
-        
-        c.close();
+
     }
     // commenting out unused function (6/11 1.2)
     /*
@@ -306,7 +293,7 @@ public class InitDatabase extends LocalSetupTask {
      */
     private Map<Long,Resource> getSql(String databaseVendor) throws SetupException {
         System.out.println("Scanning for "+databaseVendor+" SQL files");
-        HashMap<Long,Resource> sqlmap = new HashMap<Long,Resource>();
+        HashMap<Long,Resource> sqlmap = new HashMap<>();
         try {
             Resource[] list = listResources(databaseVendor); // each URL like: jar:file:/C:/Users/jbuhacof/workspace/mountwilson-0.5.4/desktop/setup-console/target/setup-console-0.5.4-SNAPSHOT-with-dependencies.jar!/com/intel/mtwilson/database/mysql/20121226000000_remove_created_by_patch_rc3.sql
             for(Resource resource : list) {
@@ -437,29 +424,29 @@ public class InitDatabase extends LocalSetupTask {
     
     private List<String> getTableNames(Connection c) throws SQLException {
         
-       ArrayList<String> list = new ArrayList<String>();
-        Statement s = c.createStatement();
-        
-        String sql = "";
-        if (databaseVendor.equals("mysql")){
-            sql = "SHOW TABLES";
+       ArrayList<String> list = new ArrayList<>();
+        try (Statement s = c.createStatement()) {
+            String sqlStmt = "";
+           switch (databaseVendor) {
+               case "mysql":
+                   sqlStmt = "SHOW TABLES";
+                   break;
+               case "postgresql":
+                   sqlStmt = "SELECT table_name FROM information_schema.tables;";
+                   break;
+           }
+           try (ResultSet rs = s.executeQuery(sqlStmt)) {
+               while(rs.next()) {
+                   list.add(rs.getString(1));
+               }
+           }
         }
-        else if (databaseVendor.equals("postgresql")){
-            sql = "SELECT table_name FROM information_schema.tables;";          
-        }
-       
-        ResultSet rs = s.executeQuery(sql);
-        while(rs.next()) {
-            list.add(rs.getString(1));
-        }
-        s.close();
-        rs.close();
         return list;
 
     }
     
     private List<ChangelogEntry> getChangelog(Connection c) throws SQLException {
-        ArrayList<ChangelogEntry> list = new ArrayList<ChangelogEntry>();
+        ArrayList<ChangelogEntry> list = new ArrayList<>();
         log.debug("Listing tables...");
         // first determine if we have the new changelog table `mw_changelog`, or the old one `changelog`, or none at all
         List<String> tableNames = getTableNames(c);
@@ -479,28 +466,28 @@ public class InitDatabase extends LocalSetupTask {
         String changelogTableName = null;
         // if we have both changelog tables, copy all records from old changelog to new changelog and then use that
         if( hasChangelog && hasMwChangelog ) {
-            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?");
-            PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
-            Statement select = c.createStatement();
-            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog");
-            while(rs.next()) {
-                check.setLong(1, rs.getLong("ID"));
-                ResultSet rsCheck = check.executeQuery();
-                if( rsCheck.next() ) {
-                    // the id is already in the new mw_changelog table
+            try (PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?")) {
+                try (PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?")) {
+                    try (Statement select = c.createStatement()) {
+                        try (ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog")) {
+                            while(rs.next()) {
+                                check.setLong(1, rs.getLong("ID"));
+                                try (ResultSet rsCheck = check.executeQuery()) {
+                                    if( rsCheck.next() ) {
+                                        // the id is already in the new mw_changelog table
+                                    }
+                                    else {
+                                        insert.setLong(1, rs.getLong("ID"));
+                                        insert.setString(2, rs.getString("APPLIED_AT"));
+                                        insert.setString(3, rs.getString("DESCRIPTION"));
+                                        insert.executeUpdate();
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                else {
-                    insert.setLong(1, rs.getLong("ID"));
-                    insert.setString(2, rs.getString("APPLIED_AT"));
-                    insert.setString(3, rs.getString("DESCRIPTION"));
-                    insert.executeUpdate();
-                }
-                rsCheck.close();
             }
-            rs.close();
-            select.close();
-            insert.close();
-            check.close();
             changelogTableName = "mw_changelog"; 
         }
         else if( hasMwChangelog ) {
@@ -509,18 +496,17 @@ public class InitDatabase extends LocalSetupTask {
         else if( hasChangelog ) {
             changelogTableName = "changelog";
         }
-        
-        Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName));
-        while(rs.next()) {
-            ChangelogEntry entry = new ChangelogEntry();
-            entry.id = rs.getString("ID");
-            entry.applied_at = rs.getString("APPLIED_AT");
-            entry.description = rs.getString("DESCRIPTION");
-            list.add(entry);
+        try (Statement s = c.createStatement()) {
+            try (ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName))) {
+                while(rs.next()) {
+                    ChangelogEntry entry = new ChangelogEntry();
+                    entry.id = rs.getString("ID");
+                    entry.applied_at = rs.getString("APPLIED_AT");
+                    entry.description = rs.getString("DESCRIPTION");
+                    list.add(entry);
+                }
+            }
         }
-        rs.close();
-        s.close();
         return list;
     }
     

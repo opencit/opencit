@@ -77,14 +77,14 @@ public class ConfigureDatabase extends LocalSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        try {
-            Connection c = My.jdbc().connection();
-            Statement s = c.createStatement();
-            s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
-            s.close();
-            c.close();
-        }
-        catch(Exception e) {
+        try (Connection c = My.jdbc().connection()) {
+            try (Statement s = c.createStatement()) {
+                s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
+            } catch (Exception ex) {
+                log.error("Error creating select statement");
+                validation("Error creating select statement");
+            }
+        } catch(Exception e) {
             log.error("Cannot connect to database", e);
             validation("Cannot connect to database");
         }

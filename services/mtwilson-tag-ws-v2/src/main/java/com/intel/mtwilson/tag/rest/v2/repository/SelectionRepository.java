@@ -106,9 +106,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
 
         try(SelectionDAO dao = TagJdbi.selectionDao()) {
             
-            Selection obj = null;            
-            obj = dao.findById(item.getId());
-            
+            Selection obj = dao.findById(item.getId());           
             if (obj == null) {
                 throw new WebApplicationException("Object with the specified id does not exist.", Response.Status.NOT_FOUND);
             }
@@ -128,8 +126,7 @@ public class SelectionRepository implements SimpleRepository<Selection, Selectio
     public void create(Selection item) {
         
         try(SelectionDAO dao = TagJdbi.selectionDao()) {
-            Selection obj = null;
-            obj = dao.findById(item.getId());
+            Selection obj = dao.findById(item.getId());
             if (obj != null) {
                 throw new WebApplicationException("Object with the specified id already exists.", Response.Status.CONFLICT);
             }

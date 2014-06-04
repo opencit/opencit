@@ -111,7 +111,7 @@ public class DeployTagCertificate implements Runnable{
 
     private void deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord) throws IOException {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
-        ByteArrayResource tlsKeystore = new ByteArrayResource();
+        //ByteArrayResource tlsKeystore = new ByteArrayResource();
         ConnectionString connectionString = ConnectionString.from(hostRecord);
         // XXX TODO use the tls policy factory with the keystore for this host ... from the host tls keystore table
         HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());

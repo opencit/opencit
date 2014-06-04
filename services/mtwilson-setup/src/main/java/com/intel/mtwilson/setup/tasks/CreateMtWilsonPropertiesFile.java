@@ -4,19 +4,11 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
-import com.intel.dcsg.cpg.io.Platform;
-import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.setup.AbstractSetupTask;
-import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.LocalSetupTask;
-import com.intel.mtwilson.setup.SetupTask;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Depends on ConfigureFilesystem. 
@@ -50,11 +42,10 @@ public class CreateMtWilsonPropertiesFile extends LocalSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        FileOutputStream out = new FileOutputStream(mtwilsonProperties);
-//        getConfiguration().
-        Properties properties = new Properties();
-        properties.store(out, "automatically generated");
-        out.close();
+        try (FileOutputStream out = new FileOutputStream(mtwilsonProperties)) {
+            Properties properties = new Properties();
+            properties.store(out, "automatically generated");
+        }
     }
 
 }
