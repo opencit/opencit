@@ -26,12 +26,14 @@ import java.net.SocketException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -157,13 +159,22 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
                         log.debug("request does not include date header");
                         return null;
                     }
+                    // second, check if the user has specified an expiration time for the request and enforce it
+                    if( xToken.getSignatureInput().headers.containsKey("Expires") ) {
+                        Date expires = Rfc822Date.parse(xToken.getSignatureInput().headers.get("Expires"));
+                        if( requestLogEntry.getReceived().after(expires) ) {
+                            log.debug("request has expired; must be rejected");
+                            return null;
+                        }
+                    }
+                    // third, ensure that the request is not earlier than the start of our anti-replay protection window (represented by the earliest request received in the request log) 
                     Date requestDate = Rfc822Date.parse(xToken.getSignatureInput().headers.get("Date"));
                     RequestLogEntry earliest = dao.findRequestLogEntryByEarliestDate();
                     if( earliest != null && requestDate.before(earliest.getReceived()) ) {
                         log.debug("request date is before anti-replay window; must be rejected");
                         return null;
                     }
-                    // second, try to insert the request into the log - it will fail if there is already a request with the same digest
+                    // fourth, try to insert the request into the log - it will fail if there is already a request with the same digest
                     log.debug("inserting request log entry with digest {} from source {} received at {} by {}", requestLogEntry.getDigest(), requestLogEntry.getSource(), requestLogEntry.getReceived(), requestLogEntry.getInstance());
                     dao.insertRequestLogEntry(requestLogEntry);
                     // so at this point, we have inserted a new request into the request log 
@@ -216,4 +227,5 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
 
         return info;
     }
+        
 }

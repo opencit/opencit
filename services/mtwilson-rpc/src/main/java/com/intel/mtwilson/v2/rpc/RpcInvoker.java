@@ -31,7 +31,7 @@ public class RpcInvoker implements Runnable {
 //    public static RpcInvoker getInstance() { return instance; }
     
     private RpcRepository repository = new RpcRepository();
-    private ConcurrentLinkedQueue<UUID> queue = new ConcurrentLinkedQueue<UUID>(); // of rpc request uuid's to run
+    private ConcurrentLinkedQueue<UUID> queue = new ConcurrentLinkedQueue<>(); // of rpc request uuid's to run
     private ObjectMapper mapper = new ObjectMapper(); // XXX for debugging only
     
 //    public void setRepository(RpcRepository repository) { this.repository = repository; }
