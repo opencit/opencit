@@ -573,7 +573,7 @@ update_property_in_file() {
     if [ -n "$ispresent" ]; then
       # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
       local escaped_value=`echo "${value}" | sed 's/|/\\|/g'`
-      local sed_escaped_value=$(sed_escape $escaped_value)
+      local sed_escaped_value=$(sed_escape "$escaped_value")
       # replace just that line in the file and save the file
       updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${sed_escaped_value}|" "${filename}"`
       # protect against an error
@@ -2211,7 +2211,7 @@ glassfish_running_report() {
 glassfish_start() {
   glassfish_require 2>&1 > /dev/null
   if glassfish_running; then
-    echo_warning "Glassfish already running [PID: $GLASSFISH_PID]."
+    echo_warning "Glassfish already running [PID: $GLASSFISH_PID]"
   elif [ -n "$glassfish" ]; then
     echo -n "Waiting for Glassfish services to startup..."
     ($glassfish start-domain) 2>&1 > /dev/null #NOT in background, takes some time to start, and will report a running pid in the interim
@@ -2230,7 +2230,7 @@ glassfish_shutdown() {
 glassfish_stop() {
   glassfish_require 2>&1 > /dev/null
   if ! glassfish_running; then
-    echo_warning "Glassfish already stopped."
+    echo_warning "Glassfish already stopped"
   elif [ -n "$glassfish" ]; then
     echo -n "Waiting for Glassfish services to shutdown..."
     ($glassfish stop-domain &) 2>&1 > /dev/null
@@ -2682,7 +2682,7 @@ tomcat_running_report() {
 tomcat_start() {
   tomcat_require 2>&1 > /dev/null
   if tomcat_running; then
-    echo_warning "Tomcat already running [PID: $TOMCAT_PID]."
+    echo_warning "Tomcat already running [PID: $TOMCAT_PID]"
   elif [ -n "$tomcat" ]; then
     echo -n "Waiting for Tomcat services to startup..."
     ($tomcat start &) 2>&1 > /dev/null
@@ -2702,7 +2702,7 @@ tomcat_shutdown() {
 tomcat_stop() {
   tomcat_require 2>&1 > /dev/null
   if ! tomcat_running; then
-    echo_warning "Tomcat already stopped."
+    echo_warning "Tomcat already stopped"
   elif [ -n "$tomcat" ]; then
     echo -n "Waiting for Tomcat services to shutdown..."
     $tomcat stop 2>&1 > /dev/null
@@ -3910,7 +3910,7 @@ change_db_pass() {
   # Do not allow a blank password to be specified
   prompt_with_default_password DATABASE_PASSWORD_NEW "New database password: " "$DATABASE_PASSWORD_NEW"
   new_db_pass="$DATABASE_PASSWORD_NEW"
-  sed_escaped_value=$(sed_escape $new_db_pass)
+  sed_escaped_value=$(sed_escape "$new_db_pass")
   
   # Check for encryption, add to array if encrypted
   encrypted_files=()
@@ -3980,7 +3980,7 @@ change_db_pass() {
   ## Update password in mtwilson.env file
   #if [ -f /root/mtwilson.env ]; then
   #  echo -n "Updating database password value in mtwilson.env file...."
-  #  export sed_escaped_value=$(sed_escape $new_db_pass)
+  #  export sed_escaped_value=$(sed_escape "$new_db_pass")
   #  sed -i -e 's/DATABASE_PASSWORD=[^\n]*/DATABASE_PASSWORD='\'"$sed_escaped_value"\''/g' "/root/mtwilson.env"
   #  echo_success "Done"
   #fi
