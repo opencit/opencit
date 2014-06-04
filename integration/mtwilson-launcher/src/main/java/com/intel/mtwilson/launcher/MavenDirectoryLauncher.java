@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.classpath.MavenResolver;
 import com.intel.dcsg.cpg.module.Module;
 import com.intel.dcsg.cpg.module.ModuleRepository;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -68,21 +69,17 @@ public class MavenDirectoryLauncher extends ModuleDirectoryLauncher {
 
     // returns the artifacts from the list that were found and copied
     public List<String> copyMavenArtifactsToDirectory(File directory, List<String> artifactNames) {
-        ArrayList<String> resolved = new ArrayList<String>();
+        ArrayList<String> resolved = new ArrayList<>();
         MavenResolver m2 = new MavenResolver();
         for (String artifactName : artifactNames) {
-            try {
-                InputStream in = m2.findJar(artifactName);
-                if (in != null) {
-                    log.debug("Found artifact {} in maven repository", artifactName);
-                    File target = new File(directory.getAbsolutePath(), artifactName);  // in java 7 this would be directory.toPath().resolve(artifactName).toFile()
-                    FileOutputStream out = new FileOutputStream(target); // throws FileNotFoundException
+            try(InputStream in = new FileInputStream(m2.findExistingJarFile(artifactName))) {
+                log.debug("Found artifact {} in maven repository", artifactName);
+                File target = new File(directory.getAbsolutePath(), artifactName);  // in java 7 this would be directory.toPath().resolve(artifactName).toFile()
+                try(FileOutputStream out = new FileOutputStream(target)) { // throws FileNotFoundException
                     IOUtils.copy(in, out); // throws IOException
-                    in.close();
-                    out.close();
-                    if (target.exists()) {
-                        resolved.add(artifactName);
-                    }
+                }
+                if (target.exists()) {
+                    resolved.add(artifactName);
                 }
             } catch (Exception e) {
                 log.error("Cannot copy artifact {}", artifactName, e);

@@ -174,9 +174,9 @@ public class TrustagentConfiguration extends AbstractConfiguration {
             log.debug("Retrieved IPs from trust agent configuration: {}", (Object[])TlsCertIPs);
             return TlsCertIPs;
         }
-        List<String> TlsCertIPsList = NetUtils.getNetworkAddressList();
+        List<String> TlsCertIPsList = NetUtils.getNetworkAddressList(); // never returns null but may be empty
         String[] ipListArray = new String[TlsCertIPsList.size()];
-        if (ipListArray != null && ipListArray.length > 0) {
+        if (ipListArray.length > 0) {
             log.debug("Retrieved IPs from network configuration: {}", (Object[])ipListArray);
             return TlsCertIPsList.toArray(ipListArray);
         }
@@ -193,9 +193,9 @@ public class TrustagentConfiguration extends AbstractConfiguration {
             log.debug("Retrieved Domain Names trust agent from configuration: {}", (Object[])TlsCertDNs);
             return TlsCertDNs;
         }
-        List<String> TlsCertDNsList = NetUtils.getNetworkHostnameList();
+        List<String> TlsCertDNsList = NetUtils.getNetworkHostnameList(); // never returns null but may be empty
         String[] dnListArray = new String[TlsCertDNsList.size()];
-        if (dnListArray != null && dnListArray.length > 0) {
+        if (dnListArray.length > 0) {
             log.debug("Retrieved Domain Names from network configuration: {}", (Object[])dnListArray);
             return TlsCertDNsList.toArray(dnListArray);
         }

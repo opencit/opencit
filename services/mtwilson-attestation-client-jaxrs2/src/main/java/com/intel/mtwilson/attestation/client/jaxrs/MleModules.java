@@ -76,7 +76,7 @@ public class MleModules extends MtWilsonClient {
      */
     public MleModule createMleModule(MleModule obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", obj.getMleUuid().toString());
         MleModule newObj = getTarget().path("mles/{mle_id}/modules").resolveTemplates(map)
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), MleModule.class);
@@ -103,7 +103,7 @@ public class MleModules extends MtWilsonClient {
      */
     public void deleteMleModule(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", mleUuid);
         map.put("id", uuid); 
         Response obj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
@@ -136,8 +136,8 @@ public class MleModules extends MtWilsonClient {
      */
     public MleModule editMleModule(MleModule obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", obj.getMleUuid().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", obj.getMleUuid());
         map.put("id", obj.getId().toString()); 
         MleModule newObj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), MleModule.class);
         return newObj;
@@ -166,7 +166,7 @@ public class MleModules extends MtWilsonClient {
      */
     public MleModule retrieveMleModule(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", mleUuid);
         map.put("id", uuid);
         MleModule obj = getTarget().path("mles/{mle_id}/modules/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleModule.class);
@@ -200,7 +200,7 @@ public class MleModules extends MtWilsonClient {
      */
     public MleModuleCollection searchMleModules(MleModuleFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", criteria.mleUuid);
         MleModuleCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/modules", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleModuleCollection.class);

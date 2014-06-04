@@ -20,10 +20,11 @@ public class QueryManager {
         private String driverName;
         private Properties sql;
         public QueryManager(String sqlResourcePath, String driverName) throws IOException {
-            InputStream in = getClass().getResourceAsStream(sqlResourcePath); // for example  "/tag-jdbi.properties");
+            try(InputStream in = getClass().getResourceAsStream(sqlResourcePath)) { // for example  "/tag-jdbi.properties");
             sql = new Properties();
             sql.load(in);
             this.driverName = driverName;
+            }
         }
         public String getQuery(String queryName) {
             String query = sql.getProperty(String.format("%s.%s", queryName, driverName));

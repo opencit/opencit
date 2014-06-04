@@ -22,11 +22,10 @@ public class MyEnvironment {
     private final ArrayList<ConnectionString> hostConnectionStrings;
     
     public MyEnvironment(File environmentFile) throws FileNotFoundException, IOException {
-        FileInputStream in = new FileInputStream(environmentFile);
+        try(FileInputStream in = new FileInputStream(environmentFile)) {
         String hostList = IOUtils.toString(in); // one connection string per line
-        IOUtils.closeQuietly(in);
         String[] hosts = StringUtils.split(hostList, "\n\r");
-        hostConnectionStrings = new ArrayList<ConnectionString>();
+        hostConnectionStrings = new ArrayList<>();
         for(String host : hosts) {
             if( host != null && !host.trim().isEmpty() ) {
                 try {
@@ -36,6 +35,7 @@ public class MyEnvironment {
                     System.err.println("Invalid host URL: "+host);
                 }
             }
+        }
         }
     }
     public List<ConnectionString> getHostConnectionList() {

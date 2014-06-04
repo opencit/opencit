@@ -19,6 +19,7 @@ import com.intel.dcsg.cpg.classpath.DirectoryResolver;
 import com.intel.dcsg.cpg.classpath.FencedClassLoadingStrategy;
 import com.intel.dcsg.cpg.classpath.JarUtil;
 import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
+import com.intel.dcsg.cpg.module.ContainerException;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class ModuleDirectoryLauncher {
      * XXX TODO  should launch, loadModules, and addShutdownHook move into an AbstractLauncher? 
      * Initialize everything but do NOT start the event loop (caller must start it and stop it as needed)
      */
-    public void launch() throws Exception {
+    public void launch() throws IOException, ContainerException {
         // XXX TODO  should we check for container == null and throw illegalstateexception ? or illegalargumentexception?
         loadModules();
 

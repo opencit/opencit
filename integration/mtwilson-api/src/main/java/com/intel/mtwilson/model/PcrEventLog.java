@@ -1,12 +1,10 @@
 package com.intel.mtwilson.model;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import com.fasterxml.jackson.annotation.JsonValue;
 //import org.codehaus.jackson.annotate.JsonValue;
 
 /**
@@ -35,7 +33,7 @@ public class PcrEventLog extends ObjectModel {
 
     public PcrEventLog(PcrIndex pcrIndex) {
         this.pcrIndex = pcrIndex;
-        this.eventLog = new ArrayList<Measurement>();
+        this.eventLog = new ArrayList<>();
     }
     public PcrEventLog(PcrIndex pcrIndex, List<Measurement> moduleManifest) {
         this.pcrIndex = pcrIndex;
@@ -110,7 +108,7 @@ public class PcrEventLog extends ObjectModel {
         if( other == this ) { return true; }
         if( other.getClass() != this.getClass() ) { return false; }
         PcrEventLog rhs = (PcrEventLog)other;
-        EqualsBuilder builder = new EqualsBuilder();
+//        EqualsBuilder builder = new EqualsBuilder(); // org.apache.commons.lang3.builder.EqualsBuilder
         if( !pcrIndex.equals(rhs.pcrIndex)) { return false; }
         if( !eventLog.equals(rhs.eventLog)) { return false; }
         return true;

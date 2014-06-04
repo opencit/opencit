@@ -57,7 +57,7 @@ public class HostAikCertificates extends MtWilsonClient {
     public HostAikCertificate createHostAikCertificate(HostAikCertificate obj) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("host_id", obj.getHostUuid().toString());
+        map.put("host_id", obj.getHostUuid());
         HostAikCertificate newObj = getTarget().path("hosts/{host_id}/aik-certificates").resolveTemplates(map)
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), HostAikCertificate.class);
         return newObj;

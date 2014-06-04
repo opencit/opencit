@@ -18,7 +18,7 @@ public class Measurement extends ObjectModel {
 
     private final Sha1Digest digest;
     private final String label;
-    private final HashMap<String,String> info = new HashMap<String,String>();
+    private final HashMap<String,String> info = new HashMap<>();
     
     public Measurement(Sha1Digest digest, String label) {
         this.digest = digest;

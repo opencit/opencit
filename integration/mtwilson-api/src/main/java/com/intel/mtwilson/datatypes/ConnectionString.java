@@ -185,6 +185,7 @@ public class ConnectionString {
             }
             else { // if( vendor != null )
                 connectionString = vendorConnectionFromURL(connectionString);
+                if( connectionString == null ) { throw new IllegalArgumentException("Invalid or missing connection string"); }
             }
             addOnConnectionString = connectionString;
             switch(vendor) {
@@ -245,7 +246,7 @@ public class ConnectionString {
      * @return
      */
     public String getConnectionString() {
-        String connectionString = "";
+        String connectionString;
 
         if (this.vendor == Vendor.INTEL) {
             connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
@@ -378,6 +379,7 @@ public class ConnectionString {
         public static IntelConnectionString forURL(String url) throws MalformedURLException {
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
             if( info.vendor !=  Vendor.INTEL ) {
                 throw new IllegalArgumentException("Not an Intel Host URL: "+info.url.toExternalForm());
             }
@@ -412,13 +414,16 @@ public class ConnectionString {
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
             if( info.vendor !=  Vendor.CITRIX ) {
                 throw new IllegalArgumentException("Not a Citrix Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
-            cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
-            cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            if( info.options != null ) {
+                cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
+                cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            }
             return cs;
         }
     }
@@ -457,12 +462,14 @@ public class ConnectionString {
         public static VmwareConnectionString forURL(String url) throws MalformedURLException {
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
             if( info.vendor !=  Vendor.VMWARE ) {
                 throw new IllegalArgumentException("Not a VMware Host URL: "+info.url.toExternalForm());
             }
             cs.vcenterAddress = new InternetAddress(info.url.getHost());
-            cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
             cs.port = portFromURL(info.url);
+            if( info.options == null || info.options.getString(OPT_HOSTNAME) == null ) { throw new IllegalArgumentException("Missing required hostname parameter in VMware Host URL"); }
+            cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
             cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
             cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
             return cs;
@@ -839,10 +846,12 @@ public class ConnectionString {
         return null;
     }        
     
+    /*
     private static Vendor vendorFromURL(URL url) {
         return vendorFromURL(url.toExternalForm());
     }
-
+    */
+    
     private static Vendor vendorFromURL(String url) {
         for( Vendor v : Vendor.values() ) {
             if( url.toLowerCase().startsWith(v.name().toLowerCase()+":") ) {

@@ -25,10 +25,10 @@ public class UUIDMapper {
         int max = meta.getColumnCount();
         for(int i=1; i<=max; i++) {
 //            log.debug("column {} is type {}  ({})", meta.getColumnName(i), meta.getColumnTypeName(i), meta.getColumnType(i)); //  
-            int type = meta.getColumnType(i);
-            if( type == java.sql.Types.BINARY) {
+//            int type = meta.getColumnType(i);
+//            if( type == java.sql.Types.BINARY) {
 //                log.debug("column {} is binary", meta.getColumnName(i));
-            }
+//            }
             if( fieldName.equalsIgnoreCase(meta.getColumnName(i)))  {
                 index = i;
             }

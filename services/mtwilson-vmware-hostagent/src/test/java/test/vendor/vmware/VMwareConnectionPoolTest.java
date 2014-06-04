@@ -83,14 +83,14 @@ public class VMwareConnectionPoolTest {
         log.debug("Acquiring vmware client...");
         VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance()));
         
-        List<String> datacenters = client.getDatacenterNames();
+//        List<String> datacenters = client.getDatacenterNames();
         List<String> clusters = client.getClusterNamesWithDC();
         
         log.debug(clusters.get(0).substring(clusters.get(0).indexOf("] ") + 2));
         log.debug(clusters.get(1).substring(clusters.get(1).indexOf("] ") + 2));
         log.debug(clusters.get(2).substring(clusters.get(2).indexOf("] ") + 2));
         
-        List<String> hosts0 = client.getHostNamesForCluster(clusters.get(1).substring(clusters.get(1).indexOf("] ") + 2));
+//        List<String> hosts0 = client.getHostNamesForCluster(clusters.get(1).substring(clusters.get(1).indexOf("] ") + 2));
         
         
         

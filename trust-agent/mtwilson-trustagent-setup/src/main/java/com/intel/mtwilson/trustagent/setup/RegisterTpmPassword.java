@@ -107,12 +107,12 @@ public class RegisterTpmPassword extends AbstractSetupTask {
 //        TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
 //        criteria.id = hostHardwareId;
 //        TpmPassword tpmPassword = client.retrieveTpmPassword(criteria);
-        TpmPassword tpmPassword = null;
+        TpmPassword tpmPassword;
         try {
             tpmPassword = client.retrieveTpmPassword(hostHardwareId);
         } catch (Exception e) {
 //            log.debug("Error while retrieving tpm password for {}: {}", hostHardwareId, e.getMessage());
-            validation("Cannot determine if TPM Owner Secret is registered with Mt Wilson");
+            validation(e, "Cannot determine if TPM Owner Secret is registered with Mt Wilson");
             return;
         }
         // mt wilson has a value for this, check if it's the same as ours

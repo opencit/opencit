@@ -29,27 +29,31 @@ public class ConnectionStringValidator extends InputValidator<String> {
                 // Construct the connection string object so that we can extract the individual elements and validate them
                 ConnectionString.VendorConnection cs = ConnectionString.parseConnectionString(input);
                 // validate the management server name, port, host name
-            if( !ValidationUtil.isValidWithRegex(cs.url.getHost(), RegexPatterns.IPADDR_FQDN)) {
-                fault("Invalid hostname or IP address");
-            }
-            if( cs.url.getPort() != -1 ) { // -1 means the port is not set in the url  so we don't need to validate if it's -1
-                String port = String.valueOf(cs.url.getPort());
-                if( !ValidationUtil.isValidWithRegex(port, RegexPatterns.PORT)) {
-                    fault("Invalid port number");
-                }
-            }
-                if (cs.options != null && !cs.options.isEmpty()) {
-                    String hostnameOption = cs.options.getString(ConnectionString.OPT_HOSTNAME);
-                    String passwordOption = cs.options.getString(ConnectionString.OPT_PASSWORD);
-                    String usernameOption = cs.options.getString(ConnectionString.OPT_USERNAME);
-                    if (!isEmpty(hostnameOption) && !ValidationUtil.isValidWithRegex(hostnameOption, RegexPatterns.IPADDR_FQDN)) {
-                        fault("Invalid hostname or IP address in option");
+                if (cs.url == null) {
+                    fault("Invalid URL in connection string");
+                } else {
+                    if (!ValidationUtil.isValidWithRegex(cs.url.getHost(), RegexPatterns.IPADDR_FQDN)) {
+                        fault("Invalid hostname or IP address");
                     }
-                    if (!isEmpty(passwordOption) && !ValidationUtil.isValidWithRegex(passwordOption, PASSWORD)) {
-                        fault("Invalid password");
+                    if (cs.url.getPort() != -1) { // -1 means the port is not set in the url  so we don't need to validate if it's -1
+                        String port = String.valueOf(cs.url.getPort());
+                        if (!ValidationUtil.isValidWithRegex(port, RegexPatterns.PORT)) {
+                            fault("Invalid port number");
+                        }
                     }
-                    if (!isEmpty(usernameOption) && !ValidationUtil.isValidWithRegex(usernameOption, USERNAME)) {
-                        fault("Invalid username");
+                    if (cs.options != null && !cs.options.isEmpty()) {
+                        String hostnameOption = cs.options.getString(ConnectionString.OPT_HOSTNAME);
+                        String passwordOption = cs.options.getString(ConnectionString.OPT_PASSWORD);
+                        String usernameOption = cs.options.getString(ConnectionString.OPT_USERNAME);
+                        if (!isEmpty(hostnameOption) && !ValidationUtil.isValidWithRegex(hostnameOption, RegexPatterns.IPADDR_FQDN)) {
+                            fault("Invalid hostname or IP address in option");
+                        }
+                        if (!isEmpty(passwordOption) && !ValidationUtil.isValidWithRegex(passwordOption, PASSWORD)) {
+                            fault("Invalid password");
+                        }
+                        if (!isEmpty(usernameOption) && !ValidationUtil.isValidWithRegex(usernameOption, USERNAME)) {
+                            fault("Invalid username");
+                        }
                     }
                 }
             } catch (MalformedURLException ex) {
@@ -58,6 +62,8 @@ public class ConnectionStringValidator extends InputValidator<String> {
             }
         }
     }
-    
-    private boolean isEmpty(String input) { return input == null || input.isEmpty(); }
+
+    private boolean isEmpty(String input) {
+        return input == null || input.isEmpty();
+    }
 }

@@ -61,7 +61,7 @@ public class MleSources extends MtWilsonClient {
      */
     public MleSource createMleSource(MleSource obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", obj.getMleUuid());
         MleSource newObj = getTarget().path("mles/{mle_id}/source").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), MleSource.class);
         return newObj;
@@ -87,7 +87,7 @@ public class MleSources extends MtWilsonClient {
      */
     public void deleteMleSource(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", mleUuid);
         map.put("id", uuid); // Even though this id is not needed, the framework expects it to be there.
         Response obj = getTarget().path("mles/{mle_id}/source/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
@@ -120,8 +120,8 @@ public class MleSources extends MtWilsonClient {
      */
     public MleSource editMleSource(MleSource obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", obj.getMleUuid().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", obj.getMleUuid());
         map.put("id", obj.getId().toString()); // Even though this id is not needed, the framework expects it to be there.
         MleSource newObj = getTarget().path("mles/{mle_id}/source/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), MleSource.class);
         return newObj;

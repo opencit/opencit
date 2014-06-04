@@ -4,26 +4,28 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.resource;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignatureInput;
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignature;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 //import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.My;
-import java.io.File;
-import java.io.IOException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
+import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import javax.ws.rs.Consumes;
 import org.apache.commons.codec.binary.Base64;
 
@@ -55,7 +57,7 @@ public class ManifestSignatureRpc {
     @POST
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
-    public ManifestSignature signImageManifest(ManifestSignatureInput input) throws Exception {
+    public ManifestSignature signImageManifest(ManifestSignatureInput input) throws KeyManagementException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, CryptographyException, InvalidKeyException, SignatureException {
         
         // TODO: validate the input
         // TODO: create the vmblob xml

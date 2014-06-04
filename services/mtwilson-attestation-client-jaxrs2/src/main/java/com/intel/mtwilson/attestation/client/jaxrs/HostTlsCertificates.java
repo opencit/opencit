@@ -43,7 +43,7 @@ public class HostTlsCertificates extends MtWilsonClient {
     
     public HostTlsCertificate retrieveHostTlsCertificate(String hostUuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", hostUuid);
         // We are passing the host UUID to "id" also even though it will not be used (without this framework treats this call as a 
         // search call instead of a retrieve call. Since there will be only one tlspolicy cert for a host, we can retrieve
@@ -56,9 +56,9 @@ public class HostTlsCertificates extends MtWilsonClient {
 
     public HostTlsCertificate editHostTlsCertificate(HostTlsCertificate obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("host_id", obj.getHostUuid().toString());
-        map.put("id", obj.getHostUuid().toString()); // See above as to why we are using the value of hostuuid again.
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("host_id", obj.getHostUuid());
+        map.put("id", obj.getHostUuid()); // See above as to why we are using the value of hostuuid again.
         HostTlsCertificate newObj = getTarget().path("hosts/{host_id}/tls-policy/certificates/{id}")
                 .resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON)
                 .put(Entity.json(obj), HostTlsCertificate.class);
