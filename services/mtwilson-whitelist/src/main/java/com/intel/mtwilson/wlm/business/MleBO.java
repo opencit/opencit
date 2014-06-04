@@ -150,12 +150,12 @@ public class MleBO extends BaseBO {
                          * @param str
                          * @return 
                          */
-	private String getUpperCase(String str) {
+	/*private String getUpperCase(String str) {
                                 if(str != null){
                                         return str.toUpperCase().replaceAll("[/.]","");
                                 }
                                 return "NULL";
-	}
+	}*/
 
 
                         /**
@@ -164,7 +164,7 @@ public class MleBO extends BaseBO {
                          * @return 
                          */
 	public String updateMle(MleData mleData, String mleUuid) {
-            TblMle tblMle = null;
+            TblMle tblMle;
                                 try {
                                     // Feature: 917 - Support for UUID
                                     if (mleUuid != null && !mleUuid.isEmpty()) {
@@ -206,7 +206,7 @@ public class MleBO extends BaseBO {
                          * @return 
                          */
 	public String deleteMle(String mleName, String mleVersion, String osName, String osVersion, String oemName, String mleUuid) {
-            TblMle tblMle = null;
+            TblMle tblMle;
                                 try {
                                     if (mleUuid != null && !mleUuid.isEmpty()) {
                                         tblMle = mleJpaController.findTblMleByUUID(mleUuid);
@@ -369,7 +369,7 @@ public class MleBO extends BaseBO {
                                 List<ManifestData> manifestList = null;
 
                                 if (addManifest) {
-                                        manifestList = new ArrayList<ManifestData>();
+                                        manifestList = new ArrayList<>();
                                         for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
                                                 manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue()));
                                         }
@@ -426,7 +426,7 @@ public class MleBO extends BaseBO {
                          * @return 
                          */
 	private List<String> manifestNames(List<ManifestData> mleManifests) {
-		ArrayList<String> names = new ArrayList<String>();
+		ArrayList<String> names = new ArrayList<>();
 		for( ManifestData manifestData : mleManifests ) {
 			names.add( manifestData.getName().trim() );
 		}
@@ -583,7 +583,7 @@ public class MleBO extends BaseBO {
                          * @return 
                          */
 	private HashMap<String, String> getPcrMap(MleData mleData) {
-		HashMap<String, String> pcrMap = new HashMap<String, String>();
+		HashMap<String, String> pcrMap = new HashMap<>();
 
 		if (mleData.getManifestList() != null) {
 			for (ManifestData manifestData : mleData.getManifestList()) {
@@ -653,8 +653,8 @@ public class MleBO extends BaseBO {
                          * @return : true if the call is successful or else exception.
                          */
 	public String addPCRWhiteList(PCRWhiteList pcrData, EntityManager em, String uuid, String mleUuid) {
-                                TblMle tblMle = null;
-                                TblPcrManifest tblPcr = null;
+                                TblMle tblMle;
+                                TblPcrManifest tblPcr;
                                 try {
                                     if (mleUuid != null && !mleUuid.isEmpty()) {
                                         tblMle = mleJpaController.findTblMleByUUID(mleUuid);
@@ -689,7 +689,7 @@ public class MleBO extends BaseBO {
 
                                     // In order to reuse the addPCRManifest function, we need to create a list and
                                     // add a single entry into it using the manifest data that we got.
-                                    List<ManifestData> pcrWhiteList = new ArrayList<ManifestData>();
+                                    List<ManifestData> pcrWhiteList = new ArrayList<>();
                                     pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest()));
 
                                     // Now add the pcr to the database.
@@ -737,8 +737,8 @@ public class MleBO extends BaseBO {
                          * @return : true if the call is successful or else exception.
                          */
 	public String updatePCRWhiteList(PCRWhiteList pcrData, EntityManager em, String uuid) {
-                                TblMle tblMle = null;
-                                TblPcrManifest tblPcr = null; 
+                                TblMle tblMle;
+                                TblPcrManifest tblPcr; 
 
                                 try {
 
@@ -802,8 +802,8 @@ public class MleBO extends BaseBO {
                          * @return 
                          */
 	public String deletePCRWhiteList(String pcrName, String mleName, String mleVersion, String osName,  String osVersion, String oemName, String pcrUuid) {
-                                TblPcrManifest tblPcr = null;
-                                TblMle tblMle = null;
+                                TblPcrManifest tblPcr;
+                                TblMle tblMle;
                                 try {
                                     
                                     if (pcrUuid != null && !pcrUuid.isEmpty()) {
@@ -852,10 +852,10 @@ public class MleBO extends BaseBO {
          * @return : "true" if everything is successful or else exception
          */
         public String addModuleWhiteList(ModuleWhiteList moduleData, EntityManager em, String uuid, String mleUuid) {
-            TblMle tblMle = null;
-            TblEventType tblEvent = null;
-            TblPackageNamespace nsPackNS = null;
-            TblModuleManifest tblModule = null;
+            TblMle tblMle;
+            TblEventType tblEvent;
+            TblPackageNamespace nsPackNS;
+            //TblModuleManifest tblModule = null;
             String fullComponentName ;
             long addModule = System.currentTimeMillis();
             
@@ -1205,7 +1205,7 @@ public class MleBO extends BaseBO {
         public List<ModuleWhiteList> getModuleWhiteList(String mleName, String mleVersion, 
                 String osName, String osVersion, String oemName) {
             TblMle tblMle;
-            List<ModuleWhiteList> modManifestList = new ArrayList<ModuleWhiteList> ();
+            List<ModuleWhiteList> modManifestList = new ArrayList<> ();
             List<TblModuleManifest> tblModList;
             try {
                 
@@ -1274,7 +1274,7 @@ public class MleBO extends BaseBO {
          * @return True or False
          */
         public String addMleSource(MleSource mleSourceObj, String uuid, String mleUuid) {
-            TblMle tblMle = null;
+            TblMle tblMle;
             MleData mleData = null ;
             try {
 
@@ -1287,7 +1287,7 @@ public class MleBO extends BaseBO {
                         tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
                                         mleData.getOsVersion(), mleData.getOemName());
                     } catch (NoResultException nre){
-                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                        throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, nre.getClass().getSimpleName());
                     }
                 }
                   
@@ -1304,7 +1304,7 @@ public class MleBO extends BaseBO {
                 
                 if (mleSourceCurrentObj != null) {
                     log.error("White List host is already mapped to the MLE - " + tblMle.getName());
-                    throw new ASException(ErrorCode.WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS, mleData.getName());
+                    throw new ASException(ErrorCode.WS_MLE_HOST_MAP_CREATE_ERROR, this.getClass().getSimpleName());
                 }
                 
                 // Else create a new entry in the DB.
@@ -1336,9 +1336,9 @@ public class MleBO extends BaseBO {
          * @return 
          */
         public String updateMleSource(MleSource mleSourceObj, String mleUuid) {
-            TblMle tblMle = null;
+            TblMle tblMle;
             MleData mleData = null ;
-            MwMleSource mwMleSource = null;
+            MwMleSource mwMleSource;
             try {
 
                 MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
@@ -1352,7 +1352,7 @@ public class MleBO extends BaseBO {
                         tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
                                         mleData.getOsVersion(), mleData.getOemName());
                     } catch (NoResultException nre){
-                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                        throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, nre.getClass().getSimpleName());
                     }
                     
                     // Now retrieve the MleSource details
@@ -1361,7 +1361,7 @@ public class MleBO extends BaseBO {
                                 
                 // If the mapping does not exist already in the db, then we need to return back error.
                 if (mwMleSource == null) {
-                    throw new ASException(ErrorCode.WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST, mleData.getName());
+                    throw new ASException(ErrorCode.WS_MLE_HOST_MAP_UPDATE_ERROR, this.getClass().getSimpleName());
                 }
                 
                 mwMleSource.setHostName(mleSourceObj.getHostName());        
@@ -1390,8 +1390,8 @@ public class MleBO extends BaseBO {
          * @return 
          */
         public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName, String mleUuid) {
-            TblMle tblMle = null;
-            MwMleSource mwMleSource = null;
+            TblMle tblMle;
+            MwMleSource mwMleSource;
             try {
                  MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
                  

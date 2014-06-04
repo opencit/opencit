@@ -99,12 +99,14 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
             throw new AccountException("Username must be provided");
         }
         log.debug("doGetAuthenticationInfo for username {}", username);
-        UserLoginPassword userLoginPassword = null;
-        User user = null;
+        UserLoginPassword userLoginPassword;
+        User user;
         try (LoginDAO dao = MyJdbi.authz()) {
             userLoginPassword = dao.findUserLoginPasswordByUsernameEnabled(username, true);
             if( userLoginPassword != null && userLoginPassword.isEnabled() ) {
                 user = dao.findUserById(userLoginPassword.getUserId());
+            } else {
+                user = null;
             }
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);
@@ -120,7 +122,7 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         principals.add(new Username(username), getName());
         principals.add(new LoginPasswordId(user.getUsername(), userLoginPassword.getUserId(), userLoginPassword.getId()), getName());
 
-        HashedPassword hashedPassword = new HashedPassword();
+        //HashedPassword hashedPassword = new HashedPassword();
         
         PasswordAuthenticationInfo info = new PasswordAuthenticationInfo();
         info.setPrincipals(principals);

@@ -235,7 +235,8 @@ public class JpaPolicyReader {
         PcrEventLogIncludes rule = null;
         if (m != null)
             rule = new PcrEventLogIncludes(pcrIndex, m);
-        rule.setMarkers(markers);
+        if (rule != null)
+            rule.setMarkers(markers);
         return rule;
     }
     

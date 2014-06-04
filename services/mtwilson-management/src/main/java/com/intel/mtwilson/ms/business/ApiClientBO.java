@@ -193,7 +193,7 @@ public class ApiClientBO extends BaseBO {
                 apiClientX509.setUuid_hex(new UUID().toString());
             
             // Feb 12, 2014: Adding the reference to the user table in the x509 table.
-            apiClientX509.setUser_uuid_hex(userUuid.toString());
+            apiClientX509.setUser_uuid_hex(userUuid);
             
             apiClientX509.setCertificate(apiClientRequest.getCertificate());
             apiClientX509.setEnabled(false);
@@ -325,7 +325,7 @@ public class ApiClientBO extends BaseBO {
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);
             // Clear the existing roles and update it with the new ones only if specified by the user
-            if (apiClientUpdateRequest.roles != null && apiClientUpdateRequest.roles.length > 0) {
+            if ((apiClientUpdateRequest.roles != null) && (apiClientUpdateRequest.roles.length > 0) && (userLoginCertificate != null)) {
                 // Let us first delete the existing roles
                 log.debug("Looking for existing roles for user login certificate {}", userLoginCertificate.getId());
                 List<com.intel.mtwilson.user.management.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
@@ -418,8 +418,8 @@ public class ApiClientBO extends BaseBO {
      * @param apiClientRequest 
      */
     public void update(ApiClientUpdateRequest apiClientRequest, String uuid) {
-        ApiClientX509 apiClientX509 = null;
-        String userName = null;
+        ApiClientX509 apiClientX509;
+        String userName;
         try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
 

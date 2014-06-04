@@ -40,7 +40,7 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
         if( cacerts == null ) {
             cacerts = loadTrustedAikCertificateAuthorities();
         }
-        HashSet<Rule> rules = new HashSet<Rule>();
+        HashSet<Rule> rules = new HashSet<>();
         AikCertificateTrusted aikcert = new AikCertificateTrusted(cacerts);
         aikcert.setMarkers(TrustMarker.BIOS.name());
         rules.add(aikcert);
@@ -54,7 +54,7 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
         if( cacerts == null ) {
             cacerts = loadTrustedAikCertificateAuthorities();
         }
-        HashSet<Rule> rules = new HashSet<Rule>();
+        HashSet<Rule> rules = new HashSet<>();
         AikCertificateTrusted aikcert = new AikCertificateTrusted(cacerts);
         aikcert.setMarkers(TrustMarker.VMM.name());
         rules.add(aikcert);
@@ -78,7 +78,7 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
 
     @Override
     public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
-        HashSet<Rule> rules = new HashSet<Rule>();
+        HashSet<Rule> rules = new HashSet<>();
         // first, load the list of pcr's marked for this host's vmm mle 
         Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
         rules.addAll(pcrConstantRules);
@@ -92,30 +92,23 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
     }
 
     private X509Certificate[] loadTrustedAikCertificateAuthorities() {
-        HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
-        try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem")); // may contain multiple trusted privacy CA certs from remove Privacy CAs
+        HashSet<X509Certificate> pcaList = new HashSet<>();
+        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
-            IOUtils.closeQuietly(privacyCaIn);
+            //IOUtils.closeQuietly(privacyCaIn);
             log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
+        } catch(Exception ex) {
+            log.warn("Cannot load PrivacyCA.list.pem", ex);            
         }
-        catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificates from file
-            log.warn("Cannot load PrivacyCA.list.pem");            
-        }
-        try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem")); // may contain one trusted privacy CA cert from local Privacy CA
+        
+        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem"))) {
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
-            IOUtils.closeQuietly(privacyCaIn);
+            //IOUtils.closeQuietly(privacyCaIn);
             log.debug("Added certificate from PrivacyCA.pem");
-        }
-        catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificate from file
-            log.warn("Cannot load PrivacyCA.pem", e);            
+        } catch(Exception ex) {
+            log.warn("Cannot load PrivacyCA.pem", ex);            
         }
         X509Certificate[] cas = pcaList.toArray(new X509Certificate[0]);
         return cas;
