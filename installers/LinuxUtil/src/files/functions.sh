@@ -5,6 +5,8 @@
 
 # CONFIGURATION:
 
+# 2014-06-04|17:44 TEST COMMIT
+
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 #conf_dir=/etc/intel/cloudsecurity
 DEFAULT_MTWILSON_JAVA_DIR=/opt/mtwilson/java
