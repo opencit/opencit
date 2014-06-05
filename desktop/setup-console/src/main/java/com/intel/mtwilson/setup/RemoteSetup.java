@@ -95,7 +95,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     private InternetAddress remoteHost;
     private String username = null; // ssh
     private String password = null; // ssh
-    private RemoteHostKey remoteHostKey = new RemoteHostKey(); // will be populated in open()
+    private final RemoteHostKey remoteHostKey = new RemoteHostKey(); // will be populated in open()
     private Timeout remoteTimeout = null; // leave null to specify no timeout; set to any positive value to specify a timeout in seconds
     
     /**

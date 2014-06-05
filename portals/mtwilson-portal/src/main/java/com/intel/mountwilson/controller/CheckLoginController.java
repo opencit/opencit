@@ -136,7 +136,9 @@ public class CheckLoginController extends AbstractController {
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ProxyApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                     if (rsaApiClient == null) {
-                        throw new IllegalStateException("Failed to initialize the RSA API client object.");
+                        view.addObject("result", false);
+                        view.addObject("message", "Failed to initialize the RSA API client object.");
+                        return view;
                     }
                     /*  this was a temporary workaround for an authentication issue - delete when fixed:
                     Properties ptemp = new Properties();

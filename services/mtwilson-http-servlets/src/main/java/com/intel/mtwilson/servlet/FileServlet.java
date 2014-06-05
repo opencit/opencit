@@ -66,7 +66,8 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     if( file.isDirectory() && !path.endsWith("/") ) {
         String queryString = request.getQueryString() == null ? "" : "?" + request.getQueryString();
         if (queryString.contains("\r\n")) {
-            throw new IllegalArgumentException("Invalid characters in query string input.");
+            response.setStatus(400);
+            return;
         }
         // XXX TODO: Encoding the query string before passing to client would make this more secure
         response.sendRedirect(request.getRequestURI() + "/" + queryString);
