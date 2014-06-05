@@ -124,8 +124,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                     obj.BIOS_Oem = bios.getOemId().getName();
                     obj.BIOS_Version = bios.getVersion();
                 } else {
-                    log.error("UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid().toString());
-                    throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid().toString());                    
+                    log.error("UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
+                    throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid());
                 }                
             } else {
                 log.error("UUID specified for BIOS MLE is not valid.");

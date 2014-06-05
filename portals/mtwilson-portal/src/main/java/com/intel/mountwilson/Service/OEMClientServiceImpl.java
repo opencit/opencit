@@ -30,16 +30,15 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public List<OEMDataVO> getAllOEM(WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("OEMClientServiceImpl.getAllOEM >>");
-                                List<OEMDataVO> list = null;
-                                try {
-                                        list =ConverterUtil.getListToOEMDataVO(apiClientServices.listAllOEM());
-                                }catch (Exception e) {
-                                        log.error(e.getMessage());
-                                        throw ConnectionUtil.handleWLMPortalException(e);
-                                        }
-                                log.info("OEMClientServiceImpl.getAllOEM <<");
-                                return list;
+            log.info("OEMClientServiceImpl.getAllOEM >>");
+            try {
+                List<OEMDataVO> list = ConverterUtil.getListToOEMDataVO(apiClientServices.listAllOEM());
+                log.info("OEMClientServiceImpl.getAllOEM <<");
+                return list;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 
 	/**
@@ -52,17 +51,16 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public boolean addOEMInfo(OEMDataVO dataVO, WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("OEMClientServiceImpl.addOEMInfo >>");
-                                boolean result = false;
-                                try {
-                                        apiClientServices.addOEM(new OemData(dataVO.getOemName(), dataVO.getOemDescription()));
-                                        result = true;
-                                } catch (Exception e) {
-                                        log.error(e.getMessage());
-                                        throw ConnectionUtil.handleWLMPortalException(e);
-                                }
-                                log.info("OEMClientServiceImpl.addOEMInfo <<");       	
-                                return result;
+            log.info("OEMClientServiceImpl.addOEMInfo >>");
+            try {
+                apiClientServices.addOEM(new OemData(dataVO.getOemName(), dataVO.getOemDescription()));
+                boolean result = true;
+                log.info("OEMClientServiceImpl.addOEMInfo <<");
+                return result;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 
 	
@@ -76,17 +74,16 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public boolean updateOEMInfo(OEMDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("OEMClientServiceImpl.updateOEMInfo >>");
-                                boolean result = false;
-                                try {
-                                        apiClientServices.updateOEM(new OemData(dataVO.getOemName(), dataVO.getOemDescription()));
-                                        result = true;
-                                } catch (Exception e) {
-                                        log.error(e.getMessage());
-                                        throw ConnectionUtil.handleWLMPortalException(e);
-                                }
-                                log.info("OEMClientServiceImpl.updateOEMInfo <<");
-                                return result;
+            log.info("OEMClientServiceImpl.updateOEMInfo >>");
+            try {
+                apiClientServices.updateOEM(new OemData(dataVO.getOemName(), dataVO.getOemDescription()));
+                boolean result = true;
+                log.info("OEMClientServiceImpl.updateOEMInfo <<");
+                return result;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 
 	/**
@@ -99,16 +96,15 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public boolean deleteOEM(OEMDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("OEMClientServiceImpl.deleteOEM >>");
-		boolean result = false;
-		try {
-			System.out.println(apiClientServices+"----"+dataVO.getOemName());
-			result = apiClientServices.deleteOEM(dataVO.getOemName());
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			throw ConnectionUtil.handleWLMPortalException(e);
-		}
-                               log.info("OEMClientServiceImpl.deleteOEM <<");
-                                return result;
+            log.info("OEMClientServiceImpl.deleteOEM >>");
+            try {
+                System.out.println(apiClientServices + "----" + dataVO.getOemName());
+                boolean result = apiClientServices.deleteOEM(dataVO.getOemName());
+                log.info("OEMClientServiceImpl.deleteOEM <<");
+                return result;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 }

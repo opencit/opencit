@@ -61,16 +61,16 @@ public class i18n {
         MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
         MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
         log.debug("Retrieving locale for portal user: {}", portalUser.getUsername());
-            if(portalUser != null) {
+//            if(portalUser != null) {
                 log.debug("Locale for {}: {}", portalUser.getUsername(), portalUser.getLocale());
                 if(portalUser.getLocale() != null) {
                     return portalUser.getLocale();
                 } else
-                    return "NA";
-            } else {
-                log.debug("Portal user not found.");
-                return "Portal user not found.";
-            }
+                    return "en-US";
+//            } else {
+//                log.debug("Portal user not found.");
+//                return "Portal user not found.";
+//            }
     }
     
     /**
@@ -93,11 +93,11 @@ public class i18n {
         MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
         MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(pul.getUser());
         log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
-        if (portalUser != null) {
+//        if (portalUser != null) {
             log.debug("Setting locale [{}] for portal user [{}] in database.", pul.getLocale(), portalUser.getUsername());
             portalUser.setLocale(pul.getLocale());
             mwPortalUserJpaController.edit(portalUser);
-        } else { return "Portal user not found."; }
+//        } else { return "Portal user not found."; }
         
         return "OK";
     }

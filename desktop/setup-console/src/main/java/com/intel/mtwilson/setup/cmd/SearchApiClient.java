@@ -75,21 +75,13 @@ public class SearchApiClient implements Command {
         boolean found = false;
         SetupWizard wizard = new SetupWizard(conf);
         try {
-            Connection c = wizard.getMSDatabaseConnection();        
-            // why prepared statement doesn't work ????
-            /*
-            PreparedStatement s = c.prepareStatement("SELECT ID,name,status FROM api_client_x509 WHERE hex(fingerprint)=?");
-            //s.setBytes(1, fingerprint);
-            s.setString(1, Hex.encodeHexString(fingerprint).toUpperCase());
-            * */
-            Statement s = c.createStatement();
-            ResultSet rs = s.executeQuery("SELECT ID,name,status FROM api_client_x509 WHERE hex(fingerprint)=\""+Hex.encodeHexString(fingerprint).toUpperCase()+"\"");
-            if(rs.next()) {
-                found = true;
+            try (Connection c = wizard.getMSDatabaseConnection();
+                    Statement s = c.createStatement();
+                    ResultSet rs = s.executeQuery("SELECT ID,name,status FROM api_client_x509 WHERE hex(fingerprint)=\"" + Hex.encodeHexString(fingerprint).toUpperCase() + "\"")) {
+                if (rs.next()) {
+                    found = true;
+                }
             }
-            rs.close();
-            s.close();
-            c.close();
             return found;
         }
         catch(SQLException e) {

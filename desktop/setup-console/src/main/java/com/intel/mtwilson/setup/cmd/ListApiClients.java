@@ -43,21 +43,19 @@ public class ListApiClients implements Command {
         boolean found = false;
         SetupWizard wizard = new SetupWizard(conf);
         try {
-            Connection c = wizard.getMSDatabaseConnection();        
-            PreparedStatement s = c.prepareStatement("SELECT ID,name,hex(enabled) as enabled,status,hex(fingerprint) as fingerprint, comment FROM api_client_x509");
-            ResultSet rs = s.executeQuery();
-            while(rs.next()) {
-                System.out.println("---");
-                System.out.println("  ID: "+rs.getInt("ID"));
-                System.out.println("  Name: "+rs.getString("name"));
-                System.out.println("  Enabled: "+rs.getString("enabled"));
-                System.out.println("  Status: "+rs.getString("status"));
-                System.out.println("  Fingerprint: "+rs.getString("fingerprint"));
-                System.out.println("  Comment: "+rs.getString("comment"));
+            try (Connection c = wizard.getMSDatabaseConnection();
+                    PreparedStatement s = c.prepareStatement("SELECT ID,name,hex(enabled) as enabled,status,hex(fingerprint) as fingerprint, comment FROM api_client_x509");
+                    ResultSet rs = s.executeQuery()) {
+                while (rs.next()) {
+                    System.out.println("---");
+                    System.out.println("  ID: " + rs.getInt("ID"));
+                    System.out.println("  Name: " + rs.getString("name"));
+                    System.out.println("  Enabled: " + rs.getString("enabled"));
+                    System.out.println("  Status: " + rs.getString("status"));
+                    System.out.println("  Fingerprint: " + rs.getString("fingerprint"));
+                    System.out.println("  Comment: " + rs.getString("comment"));
+                }
             }
-            rs.close();
-            s.close();
-            c.close();
             return found;
         }
         catch(SQLException e) {

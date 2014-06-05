@@ -40,16 +40,16 @@ public class ExportConfig implements Command {
             PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
             String content = encryptedFile.loadString();
             if( options.containsKey("out")) {
-                FileOutputStream out = new FileOutputStream(new File(options.getString("out")));
-                IOUtils.write(content, out);
-                IOUtils.closeQuietly(out);
+                try (FileOutputStream out = new FileOutputStream(new File(options.getString("out")))) {
+                    IOUtils.write(content, out);
+                }
             }
                 else if( options.getBoolean("stdout", false)) {
                 IOUtils.write(content, System.out);
             }else {
-                FileOutputStream out = new FileOutputStream(new File(filename));
-                IOUtils.write(content, out);
-                IOUtils.closeQuietly(out);
+                try (FileOutputStream out = new FileOutputStream(new File(filename))) {
+                    IOUtils.write(content, out);
+                }
             }
         }
     }

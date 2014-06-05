@@ -51,7 +51,7 @@ public class CheckLoginController extends AbstractController {
             
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
-            String locale = "en";
+            String locale;
 
             if (isNullOrEmpty(keyAliasName) || isNullOrEmpty(keyPassword)) {
                 view.addObject("result", false);
@@ -104,8 +104,8 @@ public class CheckLoginController extends AbstractController {
             }
             
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
-            RsaCredential credential = null;
-            SimpleKeystore keystore = null;
+            RsaCredential credential;
+            SimpleKeystore keystore;
             try {
 //                KeyStore keystore = KeystoreUtil.open(new FileInputStream(keyStoreFile), keyPassword);
 //                credential = KeystoreUtil.loadX509(keystore, keyAliasName, keyPassword);
@@ -135,6 +135,9 @@ public class CheckLoginController extends AbstractController {
                     // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ProxyApiClient(baseURL, credential, keystore, new MapConfiguration(p));
+                    if (rsaApiClient == null) {
+                        throw new IllegalStateException("Failed to initialize the RSA API client object.");
+                    }
                     /*  this was a temporary workaround for an authentication issue - delete when fixed:
                     Properties ptemp = new Properties();
                     ptemp.setProperty("mtwilson.api.baseurl", My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));

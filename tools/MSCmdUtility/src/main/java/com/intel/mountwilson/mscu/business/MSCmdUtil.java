@@ -45,7 +45,7 @@ public class MSCmdUtil {
             String keystoreFilename = MSCUConfig.getConfiguration().getString("mtwilson.mscu.keystore.dir") + File.separator + Filename.encode(keyAliasName) + ".jks";
             
             // Open the keystore with the password and retrieve the credentials
-            File keyStoreFile = null; 
+            File keyStoreFile;
             SimpleKeystore keystore = null; 
             RsaCredential credential = null;             
             
@@ -55,8 +55,9 @@ public class MSCmdUtil {
 
             } catch (Exception ex) {
                 
-                System.out.println("Key store is not configured/saved correctly in " + keystoreFilename + ".");
-                System.exit(0);
+                System.out.println(String.format("Key store is not configured/saved correctly in %s.", keystoreFilename));
+                throw new IllegalStateException(String.format("Key store is not configured/saved correctly in %s.", keystoreFilename));
+//                System.exit(0);
             }
 
             try {
@@ -66,13 +67,15 @@ public class MSCmdUtil {
 
             } catch (KeyStoreException kse) {
 
-                System.out.println("Username or Password does not match. Please try again." + kse.getMessage());
-                System.exit(0);
+                System.out.println(String.format("Username or Password does not match. Please try again. %s", kse.getMessage()));
+                throw new IllegalStateException(String.format("Username or Password does not match. Please try again. %s", kse.getMessage()));
+//                System.exit(0);
 
             } catch (Exception ex) {
 
-                System.out.println("Error during user authentication. " + ex.getMessage());
-                System.exit(0);
+                System.out.println(String.format("Error during user authentication. %s", ex.getMessage()));
+                throw new IllegalStateException(String.format("Error during user authentication. %s", ex.getMessage()));
+//                System.exit(0);
 
             }
 
@@ -86,15 +89,17 @@ public class MSCmdUtil {
                 
             } catch (Exception ex) {
 
-                System.out.println("Error during user authentication. " + ex.getMessage());
-                System.exit(0);
+                System.out.println(String.format("Error during user authentication. %s", ex.getMessage()));
+                throw new IllegalStateException(String.format("Error during user authentication. %s", ex.getMessage()));
+//                System.exit(0);
                 
             } 
 
         } catch (Exception ex) {
 
-            System.out.println("Error during user authentication. " + ex.getMessage());
-            System.exit(0);
+            System.out.println(String.format("Error during user authentication. %s", ex.getMessage()));
+            throw new IllegalStateException(String.format("Error during user authentication. %s", ex.getMessage()));
+//            System.exit(0);
         }
         
         return rsaApiClient;            
@@ -111,19 +116,20 @@ public class MSCmdUtil {
         
         if (args.length != 2) {
             System.out.println("Usage: MSCmdUtil LoginID Password");
-            System.exit(0);
+            throw new IllegalStateException("Usage: MSCmdUtil LoginID Password");
+//            System.exit(0);
         }
         
         String userName = args[0];
         String userPassword = args[1];
         
         try {
-            
             msClient = (ManagementService) createAPIObject(userName, userPassword);
-            
+            if (msClient == null) {
+                throw new IllegalStateException("Failed to initialize the management service API client object.");
+            }
         } catch (Exception ex) {
-            
-            System.out.println("Error while authenticating the user." + ex.getMessage());
+            System.out.println(String.format("Error while authenticating the user. %s", ex.getMessage()));
         }
                 
         try {
@@ -148,7 +154,7 @@ public class MSCmdUtil {
                         userInput = getUserInput(MSCUConfig.getConfiguration().getString("mtwilson.mscu.gkvHost"), 
                                 String.format("Press Enter to accept default or provide a new value of type {%s}: ", gkvHostType));
 
-                        log.debug("White list values will be configured using the host :" + userInput);
+                        log.debug("White list values will be configured using the host : {}", userInput);
 
                         TxtHostRecord gkvHostObj = new TxtHostRecord();
                         if (gkvHostType.equalsIgnoreCase("VMware")) {
@@ -165,7 +171,8 @@ public class MSCmdUtil {
                         } else {
 
                             System.out.println("Please configure the VMM Type of the good known host correctly. Exiting...");
-                            System.exit(0);
+                            throw new IllegalStateException("Please configure the VMM Type of the good known host correctly. Exiting...");
+//                            System.exit(0);
                         }
                         
                         try {
@@ -173,8 +180,8 @@ public class MSCmdUtil {
                             boolean configureWhiteList = msClient.configureWhiteList(gkvHostObj);
                             System.out.println("About to configure whitelist");
                             if (configureWhiteList) {
-                                log.debug("Successfully configured the white list database using the host : " + gkvHostObj.HostName);
-                                System.out.println("Successfully configured the white list database using the host : " + gkvHostObj.HostName);
+                                log.debug("Successfully configured the white list database using the host : {}", gkvHostObj.HostName);
+                                System.out.println(String.format("Successfully configured the white list database using the host : %s", gkvHostObj.HostName));
                             }
 
                         } catch (Exception ex) {
@@ -191,58 +198,58 @@ public class MSCmdUtil {
                             try {
                                 
                                 String hostFileName = MSCUConfig.getConfiguration().getString("mtwilson.mscu.fileName");
+                                if (!hostFileName.startsWith(System.getProperty("user.home")) && !hostFileName.startsWith("/var/")) {
+                                    throw new IllegalArgumentException("Host file name must exist within the user home directory or the /var/ directory.");
+                                }
                                 hostFileName = getUserInput(hostFileName, 
                                     "Press Enter to accept default or provide a new path to file: " + hostFileName);
                                 
-                                log.debug("Hosts configured in the file :" + hostFileName + " would be registered with Mt.Wilson");
-                                
-                                // Read the file line by line and register the hosts individually
-                                BufferedReader hfr = new BufferedReader(new FileReader(hostFileName));
-                                String hostDetails;
-                                
-                                while((hostDetails = hfr.readLine()) != null) {
-
-                                    // Let us first split the line into the hypervisor type, host name and port/vCenter
-                                    String[] hostInfo = hostDetails.split("::");
-                                    TxtHostRecord newHostObj = new TxtHostRecord();
-
-                                    if (hostInfo[1].contains("http")) {
-
-                                        newHostObj.HostName = hostInfo[0];
-                                        newHostObj.AddOn_Connection_String = hostInfo[1];
-
-                                    } else {
-
-                                        newHostObj.HostName = hostInfo[0];
-                                        newHostObj.IPAddress = hostInfo[0];
-                                        newHostObj.Port = Integer.parseInt(hostInfo[1]);
-                                    }
+                                log.debug("Hosts configured in the file : {} would be registered with Mt.Wilson", hostFileName);
+                                try (BufferedReader hfr = new BufferedReader(new FileReader(hostFileName))) {
+                                    String hostDetails;
                                     
-                                    userInput = getUserInput("Y",String.format("Registering Host : {%s}. Press Enter OR 'Y' to continue. " + 
-                                            "Enter any other character to skip registration.", newHostObj.HostName));
-                                    if (!userInput.equalsIgnoreCase("Y")) {
-                                     
-                                        System.out.println("Skipping registration of host : " + newHostObj.HostName);
-                                        continue;
-                                    }
-
-                                    try {
-                                        // Process the host registration
-                                        boolean registerHost = msClient.registerHost(newHostObj);
-                                        if (registerHost) {
-                                            log.debug("Successfully registered the host : " + newHostObj.HostName);
-                                            System.out.println("Successfully registered the host : " + newHostObj.HostName);
+                                    while((hostDetails = hfr.readLine()) != null) {
+                                        
+                                        // Let us first split the line into the hypervisor type, host name and port/vCenter
+                                        String[] hostInfo = hostDetails.split("::");
+                                        TxtHostRecord newHostObj = new TxtHostRecord();
+                                        
+                                        if (hostInfo[1].contains("http")) {
+                                            
+                                            newHostObj.HostName = hostInfo[0];
+                                            newHostObj.AddOn_Connection_String = hostInfo[1];
+                                            
+                                        } else {
+                                            
+                                            newHostObj.HostName = hostInfo[0];
+                                            newHostObj.IPAddress = hostInfo[0];
+                                            newHostObj.Port = Integer.parseInt(hostInfo[1]);
                                         }
-
-                                    } catch (Exception ex) {
-
-                                        // Print out a message and continue with processing the remaining hosts
-                                        log.error("Error during the registration of host : " + newHostObj.HostName + ". Details: " + ex.getMessage());                                        
-                                        System.out.println("Error during the registration of host : " + 
-                                                newHostObj.HostName + ". Details: " + ex.getMessage());
-                                    }                               
+                                        
+                                        userInput = getUserInput("Y",String.format("Registering Host : {%s}. Press Enter OR 'Y' to continue. " +
+                                                "Enter any other character to skip registration.", newHostObj.HostName));
+                                        if (!userInput.equalsIgnoreCase("Y")) {
+                                            
+                                            System.out.println("Skipping registration of host : " + newHostObj.HostName);
+                                            continue;
+                                        }                               
+                                        
+                                        try {
+                                            // Process the host registration
+                                            boolean registerHost = msClient.registerHost(newHostObj);
+                                            if (registerHost) {
+                                                log.debug("Successfully registered the host : {}", newHostObj.HostName);
+                                                System.out.println(String.format("Successfully registered the host : %s", newHostObj.HostName));
+                                            }
+                                            
+                                        } catch (Exception ex) {
+                                            
+                                            // Print out a message and continue with processing the remaining hosts
+                                            log.error("Error during the registration of host : {}. Details: ", newHostObj.HostName, ex.getMessage());
+                                            System.out.println(String.format("Error during the registration of host : %s. Details: %s", newHostObj.HostName, ex.getMessage()));
+                                        }
+                                    }
                                 }
-                                hfr.close();
                             } catch (Exception ex) {
 
                                 // We get here if there is some kind of IOException or the file format is not right
@@ -259,7 +266,7 @@ public class MSCmdUtil {
                             clusterName = getUserInput(clusterName, 
                                 "Press Enter to accept default or provide a new Cluster name: " + clusterName);
 
-                            log.debug("Hosts configured in the vCenter Cluster :" + clusterName + " would be registered with Mt.Wilson");
+                            log.debug("Hosts configured in the vCenter Cluster : {} would be registered with Mt.Wilson", clusterName);
                             
                             String prodVCenter = MSCUConfig.getConfiguration().getString("mtwilson.mscu.productionVCenter");
                             List<TxtHostRecord> hostList;
@@ -275,7 +282,7 @@ public class MSCmdUtil {
 
                                 // If we get an exception while reading the cluster, there is nothing much we can do
                                 // so exit
-                                log.error("Error during retrieval of host details from the cluster. " + ex.getMessage());
+                                log.error("Error during retrieval of host details from the cluster. {}", ex.getMessage());
                                 throw ex;
                             }
 
@@ -295,15 +302,15 @@ public class MSCmdUtil {
 
                                     boolean registerHost = msClient.registerHost(hostObj);
                                     if (registerHost) {
-                                        log.debug("Successfully registered the host : " + hostObj.HostName);
-                                        System.out.println("Successfully registered the host : " + hostObj.HostName);
+                                        log.debug("Successfully registered the host : {}", hostObj.HostName);
+                                        System.out.println(String.format("Successfully registered the host : %s", hostObj.HostName));
                                     }
 
                                 } catch (Exception ex) {
 
                                     // Print out a message and continue with processing the remaining hosts
-                                    log.error("Error during the registration of host : " + hostObj.HostName + ". Details: " + ex.getMessage());
-                                    System.out.println("Error during the registration of host : " + hostObj.HostName + ". Details: " + ex.getMessage());
+                                    log.error("Error during the registration of host : {}. Details: {}", hostObj.HostName, ex.getMessage());
+                                    System.out.println(String.format("Error during the registration of host : %s. Details: %s", hostObj.HostName, ex.getMessage()));
                                 }                            
                             }
                         }
@@ -312,9 +319,10 @@ public class MSCmdUtil {
                         
                     case 3:
 
-                        System.out.println("User choose to quit");
-                        System.exit(0);
-                        break;
+                        System.out.println("User chose to quit");
+                        throw new IllegalStateException("User chose to quit");
+//                        System.exit(0);
+//                        break;
                         
                     default:
                         
@@ -323,7 +331,7 @@ public class MSCmdUtil {
             }
         } catch (Exception ex) {
             
-            log.error("Unexpected error. " + ex.getMessage() + ex.getStackTrace());
+            log.error("Unexpected error. {} {}", ex.getMessage(), ex.getStackTrace());
             System.out.println(ex.getMessage());
             
         }

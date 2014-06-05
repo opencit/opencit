@@ -56,46 +56,43 @@ public class Main {
      * @param args 
      */
     public static void main(String[] args) {
-       
-        if( args.length == 0 ) {
-            System.err.println("Usage: <command> [args]");
-            System.exit(1);
-        }
-        // turn off jdk logging because sshj logs to console
-        LogManager.getLogManager().reset();
-//        Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);          
-        
-        String commandName = args[0];
         try {
-            Class commandClass = Class.forName("com.intel.mtwilson.setup.cmd."+commandName);
-            Object commandObject = commandClass.newInstance();
-            Command command = (Command)commandObject;
-            String[] subargs = Arrays.copyOfRange(args, 1, args.length);
+            if (args.length == 0) {
+                System.err.println("Usage: <command> [args]");
+                System.exit(1);
+            }
+            // turn off jdk logging because sshj logs to console
+            LogManager.getLogManager().reset();
+//        Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);          
+
+            String commandName = args[0];
+            try {
+                Class commandClass = Class.forName("com.intel.mtwilson.setup.cmd." + commandName);
+                Object commandObject = commandClass.newInstance();
+                Command command = (Command) commandObject;
+                String[] subargs = Arrays.copyOfRange(args, 1, args.length);
 //            command.setContext(ctx);
-            ExtendedOptions getopt = new ExtendedOptions(subargs);
-            Configuration options = getopt.getOptions();
-            subargs = getopt.getArguments();
+                ExtendedOptions getopt = new ExtendedOptions(subargs);
+                Configuration options = getopt.getOptions();
+                subargs = getopt.getArguments();
 //            command.setContext(ctx);
-            command.setOptions(options);
-            command.execute(subargs);
+                command.setOptions(options);
+                command.execute(subargs);
+            } catch (ClassNotFoundException e) {
+                System.err.println("Unrecognized command: " + commandName);
+            } /*
+             catch(IOException e){
+             System.err.println("No console.");
+             e.printStackTrace();   
+             }
+             * */ catch (java.lang.SecurityException e) {
+                System.err.println("Securty Exception: " + e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        } catch (SecurityException se) {
+            System.err.println(String.format("Security exception while running command %s", (args.length>0?args[0]:"")));
         }
-        catch(ClassNotFoundException e) {
-            System.err.println("Unrecognized command: "+commandName);
-        }
-        /*
-        catch(IOException e){
-            System.err.println("No console.");
-            e.printStackTrace();   
-        }
-        * */
-        catch(java.lang.SecurityException e){
-            System.err.println("Securty Exception: "+ e.getMessage());
-        }
-        catch(Exception e) {
-            e.printStackTrace(System.err);
-        }
-        
-        
     }
     
 

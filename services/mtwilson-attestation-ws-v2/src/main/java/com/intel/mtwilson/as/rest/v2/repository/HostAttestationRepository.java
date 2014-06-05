@@ -58,7 +58,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
                     objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
                 }
             } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1.toString());
+                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
                 if (hostObj != null) {
                     TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
                     if (obj != null) {
@@ -66,7 +66,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
                     }
                 }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo.toString());
+                TblHosts hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
                 if (hostObj != null) {
                     TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
                     if (obj != null) {

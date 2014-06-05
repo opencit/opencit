@@ -249,6 +249,9 @@ public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPa
                 RoleLocator roleLocator = new RoleLocator();
                 roleLocator.id = role.getRoleId();
                 Role retrieve = roleRepo.retrieve(roleLocator);
+                if (retrieve == null) {
+                    throw new IllegalStateException(String.format("Unable to retrieve role with ID: %s", role.getId()));
+                }
                 associatedRoles.add(retrieve.getRoleName());
             }            
         }                 

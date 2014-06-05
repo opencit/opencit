@@ -11,8 +11,8 @@ function i18nInit() {
                 'resGetPath': 'locales/__ns__-__lng__.json', // resource files will be stored in locales/translation-en-US.json  for example
                 'detectLngQS': 'lang', // optional query string parameter to set language, for example  ?lang=en-US 
                 'cookieName': 'lang', // optional cookie name to set language
-                'preload': ['en'], // optimization, XXX TODO allow customer to configure this list on the server and inserted the configured list here
-                'fallbackLng': 'en', // if a key is not available in current language, use the corresponding key from this fallback language, XXX TODO allow customer to configure this setting on the server and insert the configured setting here
+                'preload': ['en-US'], // optimization, XXX TODO allow customer to configure this list on the server and inserted the configured list here
+                'fallbackLng': 'en-US', // if a key is not available in current language, use the corresponding key from this fallback language, XXX TODO allow customer to configure this setting on the server and insert the configured setting here
                 'fallbackToDefaultNS': false, // if a namespace is used and a key is missing, do not look in the default namespace for it;  false happens to also be the default option for this setting
                 'useLocalStorage': false, // XXX PRODUCTION optimization enable this in production 
                 'localStorageExpirationTime': 86400000, // in ms, default 1 week

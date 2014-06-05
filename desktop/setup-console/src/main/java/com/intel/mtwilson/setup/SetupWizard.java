@@ -97,6 +97,7 @@ public class SetupWizard {
         }
     }
     
+    /***** UNUSED
     public void closeConnection(Connection c) throws SetupException {
         try {
             if( c != null ) {
@@ -106,18 +107,22 @@ public class SetupWizard {
         catch (SQLException e) {
             throw new SetupException("Error while closing database connection", e);
         }
-    }
+    }*/
     
     public void encryptVmwareConnectionStrings() throws SetupException, IOException {
-        Connection c = getDatabaseConnection();
-        /*
-        if( !allNonEmptyFieldsInTableBeginWith(c, "tbl_hosts", "http") ) {
-            throw new SetupException("Not all non-empty fields in tbl_hosts are valid connection strings");
+        try {
+            try (Connection c = getDatabaseConnection()) {
+                /*
+                 if( !allNonEmptyFieldsInTableBeginWith(c, "tbl_hosts", "http") ) {
+                 throw new SetupException("Not all non-empty fields in tbl_hosts are valid connection strings");
+                 }
+                 */
+                String dekBase64 = loadOrCreateSecretKeyAes128("mtwilson.as.dek");
+                encryptAllNonEmptyFieldsInTableWithKey(c, "mw_hosts", "AddOn_Connection_Info", dekBase64); // XXX mw_hosts in 1.1,  tbl_hosts in 1.0-RC2
+            }
+        } catch (SQLException e) {
+            throw new SetupException("Error while closing database connection", e);
         }
-        */
-        String dekBase64 = loadOrCreateSecretKeyAes128("mtwilson.as.dek");
-        encryptAllNonEmptyFieldsInTableWithKey(c, "mw_hosts", "AddOn_Connection_Info", dekBase64); // XXX mw_hosts in 1.1,  tbl_hosts in 1.0-RC2
-        closeConnection(c);
     }
     
     private String loadOrCreateSecretKeyAes128(String name) throws SetupException {
@@ -130,11 +135,13 @@ public class SetupWizard {
                 //conf.setProperty(name, dekBase64); // this does not automatically save to the configuration file
                 // save the new dek to configuration file.    the Properties object inserts backslash-escapes before punctuation like : , = , etc. which affects the values... not sure if they'll be read in properly!!!
                 Properties xxxTodoSubclassConf = new Properties();
-                xxxTodoSubclassConf.load(new FileInputStream("/etc/intel/cloudsecurity/mtwilson.properties"));
+                try (FileInputStream in = new FileInputStream("/etc/intel/cloudsecurity/mtwilson.properties")) {
+                    xxxTodoSubclassConf.load(in);
+                }
                 xxxTodoSubclassConf.setProperty(name, dekBase64);
-                FileOutputStream out = new FileOutputStream("/etc/intel/cloudsecurity/mtwilson.properties");
-                xxxTodoSubclassConf.store(out, "auto-saved");
-                IOUtils.closeQuietly(out);
+                try (FileOutputStream out = new FileOutputStream("/etc/intel/cloudsecurity/mtwilson.properties")) {
+                    xxxTodoSubclassConf.store(out, "auto-saved");
+                }
                 My.reset();
             } catch (CryptographyException e) {
                 throw new SetupException(String.format("Cannot create Data Encryption Key %s", name), e);
@@ -190,22 +197,18 @@ public class SetupWizard {
     private void encryptAllNonEmptyFieldsInTableWithKey(Connection c, String tableName, String fieldName, String dekBase64) throws SetupException {
         try {
             Aes128 aes = new Aes128(Base64.decodeBase64(dekBase64));
-            PreparedStatement update = c.prepareStatement(String.format("UPDATE %s SET %s=? WHERE ID=?", tableName, fieldName));
-            Statement query = c.createStatement();
-            ResultSet rs = query.executeQuery(String.format("SELECT ID,%s FROM %s", fieldName, tableName));
-            while(rs.next()) {
-                String value = rs.getString(fieldName);
-                if( value != null && !value.isEmpty() && value.startsWith("http") ) { // XXX TODO: make the value.startsWith(http) a filter function that can be passed into the method to determine which records should be encrypted
-                    log.debug(String.format("Encrypting record %d field %s", rs.getInt("ID"), fieldName)); // do not log the value being encrypted because that leaks sensitive information to log
-                    String encrypted = aes.encryptString(value);
-                    update.setString(1, encrypted);
-                    update.setInt(2, rs.getInt("ID"));
-                    update.executeUpdate();
+            try (PreparedStatement update = c.prepareStatement(String.format("UPDATE %s SET %s=? WHERE ID=?", tableName, fieldName));Statement query = c.createStatement();ResultSet rs = query.executeQuery(String.format("SELECT ID,%s FROM %s", fieldName, tableName))) {
+                while (rs.next()) {
+                    String value = rs.getString(fieldName);
+                    if (value != null && !value.isEmpty() && value.startsWith("http")) { // XXX TODO: make the value.startsWith(http) a filter function that can be passed into the method to determine which records should be encrypted
+                        log.debug(String.format("Encrypting record %d field %s", rs.getInt("ID"), fieldName)); // do not log the value being encrypted because that leaks sensitive information to log
+                        String encrypted = aes.encryptString(value);
+                        update.setString(1, encrypted);
+                        update.setInt(2, rs.getInt("ID"));
+                        update.executeUpdate();
+                    }
                 }
             }
-            rs.close();
-            query.close();
-            update.close();
         }
         catch (CryptographyException e) {
             throw new SetupException(String.format("Cannot encrypt field %s in table %s", tableName), e);

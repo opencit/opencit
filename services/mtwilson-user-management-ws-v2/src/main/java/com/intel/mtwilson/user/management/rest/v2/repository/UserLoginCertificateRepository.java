@@ -23,6 +23,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -67,12 +68,12 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
                             objCollection.getUserLoginCertificates().add(obj);
                         }
                     } else if (criteria.sha1 != null) {
-                        if (obj.getSha1Hash().equals(criteria.sha1)) {
+                        if (Arrays.equals(obj.getSha1Hash(), criteria.sha1)) {
                             obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
                             objCollection.getUserLoginCertificates().add(obj);
                         }
                     } else if (criteria.sha256 != null) {
-                        if (obj.getSha256Hash().equals(criteria.sha256)) {
+                        if (Arrays.equals(obj.getSha256Hash(), criteria.sha256)) {
                             obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
                             objCollection.getUserLoginCertificates().add(obj);
                         }
@@ -254,6 +255,9 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
                 RoleLocator roleLocator = new RoleLocator();
                 roleLocator.id = role.getRoleId();
                 Role retrieve = roleRepo.retrieve(roleLocator);
+                if (retrieve == null) {
+                    throw new IllegalStateException(String.format("Unable to retrieve role with ID: %s", role.getId()));
+                }
                 associatedRoles.add(retrieve.getRoleName());
             }            
         }                 

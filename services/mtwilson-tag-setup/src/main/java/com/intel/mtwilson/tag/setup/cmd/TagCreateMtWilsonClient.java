@@ -116,7 +116,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         try {
             approveMtWilsonClient(rsaCredentialX509.identity());
             try (LoginDAO loginDAO = MyJdbi.authz()) {
-                ApproveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
+                approveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
             }
             System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
          }
@@ -145,7 +145,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
         }
     }
         
-    private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
+    private void approveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");        
     }

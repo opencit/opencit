@@ -74,19 +74,19 @@ public class TrustAgentEnvironmentUtil {
         if (certFile != null) {
             if (certFile.endsWith(".pem")) {
                 File tlsPemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(tlsPemFile); // throws FileNotFoundException
-                String pem = IOUtils.toString(in); // throws IOException
-                IOUtils.closeQuietly(in);
-                X509Certificate cert = X509Util.decodePemCertificate(pem); // throws CertificateException
-                return cert;
+                try (FileInputStream in = new FileInputStream(tlsPemFile)) { // throws FileNotFoundException
+                    String pem = IOUtils.toString(in); // throws IOException
+                    X509Certificate cert = X509Util.decodePemCertificate(pem); // throws CertificateException
+                    return cert;
+                }
             }
             if (certFile.endsWith(".crt")) {
                 File tlsPemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(tlsPemFile); // throws FileNotFoundException
-                byte[] der = IOUtils.toByteArray(in); // throws IOException
-                IOUtils.closeQuietly(in);
-                X509Certificate cert = X509Util.decodeDerCertificate(der);
-                return cert;
+                try (FileInputStream in = new FileInputStream(tlsPemFile)) { // throws FileNotFoundException
+                    byte[] der = IOUtils.toByteArray(in); // throws IOException
+                    X509Certificate cert = X509Util.decodeDerCertificate(der);
+                    return cert;
+                }
             }
             throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
         } else {

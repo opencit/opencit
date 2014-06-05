@@ -77,6 +77,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                 	
                 	//get HostDetailsEntityVO for current host for which we are checking Trust Status.
                 	HostDetailsEntityVO hostDetails = hostTempMap.get(hostTrustXmlResponse.getName());
+                        if (hostDetails == null) {
+                            throw new IllegalArgumentException("Host entity search yielded no results.");
+                        }
 	                try {
 	                	log.debug("getTrustStatusForHost: Getting trust Information for Host "+hostTrustXmlResponse.getName());
 	                	if (hostTrustXmlResponse.getAssertion() != null) {
@@ -122,7 +125,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public List<HostDetailsEntityVO> getHostListFromDB(AttestationService service) throws DemoPortalException{
-		List<HostDetailsEntityVO> hostList  = null;
+		List<HostDetailsEntityVO> hostList;
 		try{
 			//Call into REST Services for getting all HOST information by passing empty String.
 			hostList = ConverterUtil.getHostVOListFromTxtHostRecord(service.queryForHosts("")); 
@@ -179,10 +182,10 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	@Override
 	public TrustedHostVO getSingleHostTrust(String hostName,AttestationService apiClientServices,X509Certificate[] trustedCertificates)throws DemoPortalException {
 		
-		TrustedHostVO hostVO = null;
+		TrustedHostVO hostVO;
 		HostDetailsEntityVO hostDetailsEntityVO = new HostDetailsEntityVO();
 		hostDetailsEntityVO.setHostName(hostName);
-		String xmloutput = null;
+		String xmloutput;
 		try {
 			log.debug("Getting trust Information for Host "+hostName);
 			
@@ -214,11 +217,10 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 * @throws DemoPortalException
 	 */
 	@Override
-	public Map<String, List<Map<String, String>>> getAllOemInfo(ApiClient client)throws DemoPortalException {
-		
-		Map<String, List<Map<String, String>>> map = new HashMap<String, List<Map<String,String>>>();
-		List<MleDetailsEntityVO> mleList = null;
-        List<Map<String, String>> list = new ArrayList<Map<String,String>>();
+	public Map<String, List<Map<String, String>>> getAllOemInfo(ApiClient client) throws DemoPortalException {
+            Map<String, List<Map<String, String>>> map = new HashMap<>();
+            List<MleDetailsEntityVO> mleList;
+            List<Map<String, String>> list;
 		
 		try {
 			WhitelistService service = (WhitelistService) client;
@@ -229,12 +231,12 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			 if (mleList != null && mleList.size() > 0) {
 				for (MleDetailsEntityVO mleDetailsEntityVO : mleList) {
 					if (map.get(mleDetailsEntityVO.getOemName()) == null) {
-						list = new ArrayList<Map<String,String>>();
+						list = new ArrayList<>();
 						map.put(mleDetailsEntityVO.getOemName(), list);
 					}else {
 						list = map.get(mleDetailsEntityVO.getOemName());
 					}
-					Map<String, String> oemInfo = new HashMap<String, String>();
+					Map<String, String> oemInfo = new HashMap<>();
 					oemInfo.put(mleDetailsEntityVO.getMleName(), mleDetailsEntityVO.getMleVersion());
                     if(list != null)
                         list.add(oemInfo);
@@ -259,9 +261,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public Map<String, Boolean> getOSAndVMMInfo(ApiClient client)throws DemoPortalException {
-		 List<MleDetailsEntityVO> mleList = null;
+		 List<MleDetailsEntityVO> mleList;
 		 //This is a MAP of OS/VMM name and boolean variable which denote about current os/vmm info is VMWare type or not. 
-		 Map<String,Boolean> maps = new HashMap<String, Boolean>();
+		 Map<String,Boolean> maps = new HashMap<>();
 		 WhitelistService service = (WhitelistService) client;
 		try {
 			//Call to REST Services to get all details of MLE, will extract all MLE from that data where OEM info is null.
@@ -285,7 +287,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean saveNewHostData(HostDetailsEntityVO dataVO,AttestationService apiClientServices)throws DemoPortalException {
-		boolean result = false;
+//		boolean result = false;
 		try {
             ConnectionString connStr;
             if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
@@ -311,12 +313,11 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                                     
 			//Call to REST Services to add host information.                                    
 			apiClientServices.addHost(hostObj);
-			result = true;
+			return true;
 		} catch (Exception e) {
 			log.error("Errror While Adding New Host."+e.getMessage());
 			throw ConnectionUtil.handleDemoPortalException(e); 
 		}
-		return result;
 	}
 	
 	/**
@@ -329,7 +330,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean updateHostData(HostDetailsEntityVO dataVO,AttestationService apiClientServices)throws DemoPortalException {
-		boolean result = false;
+//		boolean result = false;
 		try {
             ConnectionString connStr;
             if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
@@ -356,13 +357,11 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			apiClientServices.updateHost(hostObj);
             // now call again to evaluate the host trust status --- we're not going to display it here but the server will cache it so when the user returns to the trust dashboard the host will already be updated
             apiClientServices.getSamlForHost(new Hostname(dataVO.getHostName()), true);
-			result = true;
+			return true;
 		} catch (Exception e) {
 			log.error("Errror While Updating Host.");
 			throw ConnectionUtil.handleDemoPortalException(e);
 		}
-		
-		return result;
 	}
 
 	/**
@@ -378,24 +377,24 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean deleteHostDetails(String hostID, String hostName,AttestationService apiClientServices,Map<String, HostVmMappingVO> vmMappingData) throws DemoPortalException {
-		boolean result = false;
+//		boolean result = false;
 		try {
 			//Call to Services to delete HOST.
 			apiClientServices.deleteHost(new Hostname(hostName));
 			
+                        Map<String, HostVmMappingVO> tempVmMappingData = vmMappingData;
 			//Delete all entries from HostVMMapping table, which store policy for VM.
-			for (Entry<String, HostVmMappingVO> vmMap : vmMappingData.entrySet()) {
+			for (Entry<String, HostVmMappingVO> vmMap : tempVmMappingData.entrySet()) {
 				HostVmMappingVO hostVmMappingVO = vmMap.getValue();
 				if (hostVmMappingVO.getHostId().equals(hostID)) {
 					vmMappingData.remove(vmMap.getKey());
 				}
 			}
-			result = true;
+			return true;
 		} catch (Exception e) {
 			log.error("Errror While Deleting Host.");
 			 throw ConnectionUtil.handleDemoPortalException(e);
 		}
-		return result;
 	}
 
 	/**
@@ -607,7 +606,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	public List<HostReportTypeVO> getHostTrustReport(List<String> hostNames,ApiClient client)throws DemoPortalException {
 		
             AttestationService service = (AttestationService) client;
-            HostsTrustReportType report = null;
+            HostsTrustReportType report;
             List<HostReportTypeVO> hostReportTypeVO = new ArrayList<HostReportTypeVO>();
 		try {
             List<Hostname> hostList = new ArrayList<Hostname>();
@@ -636,6 +635,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		return hostReportTypeVO;
 	}
 
+        /*********** UNUSED
    	//Method to add/update VM Mapping map after getting all VM info for a Host.
     private void addVMDetailsToHostVmMapping(String hostID, List<String> listVMDetails, Map<String, HostVmMappingVO> vmMappingData) {
         for (String vmDetails : listVMDetails) {
@@ -653,7 +653,8 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                 
                 if(!vmMappingData.isEmpty()){
                     boolean vmFound = false;
-                    for (Entry<String, HostVmMappingVO> entry : vmMappingData.entrySet()) {
+                    Map<String, HostVmMappingVO> tempVmMappingData = vmMappingData;
+                    for (Entry<String, HostVmMappingVO> entry : tempVmMappingData.entrySet()) {
                         HostVmMappingVO vo = entry.getValue();
                         //Check for VM Mapping data for all VM and if found then update map with old policy.
                     	if(vo.getVmName().equals(hostVmMappingVO.getVmName())){
@@ -672,8 +673,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                 	vmMappingData.put(hostVmMappingVO.getHostId()+HelperConstant.VM_HOST_MAPPING_SEPERATOR+hostVmMappingVO.getVmName(), hostVmMappingVO);
                 }
          }
-    }
+    }*/
 
+    /*********** UNUSED
     private List<HostVmMappingVO> getVMFromHostVmMapping(String hostID, List<String> vms, Map<String, HostVmMappingVO> vmMappingData) throws DemoPortalException {
     	List<HostVmMappingVO> list = new ArrayList<HostVmMappingVO>();
     	Set<String> hostToDelete = new HashSet<String>();
@@ -703,12 +705,12 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		}
         
         return list;
-    }
+    }*/
     
     
 	@Override
 	public HostDetailsEntityVO getSingleHostDetailFromDB(String hostName,AttestationService service) throws DemoPortalException {
-		HostDetailsEntityVO hostDetailsEntityVO  = new HostDetailsEntityVO();
+		HostDetailsEntityVO hostDetailsEntityVO;
 		try{
 			hostDetailsEntityVO = ConverterUtil.getHostVOObjectFromTxtHostRecord(service.queryForHosts(hostName).get(0));
 		} catch (Exception e) {
@@ -771,16 +773,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
      */
     @Override
     public String[] getLocales(ManagementService apiClientServices) throws DemoPortalException {
-        String[] ret = null;
-
         try {
-            ret = apiClientServices.getLocales();
-
+            String[] ret = apiClientServices.getLocales();
+            return ret;
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ConnectionUtil.handleDemoPortalException(e);
         }
-        return ret;
     }
     
     /**
@@ -793,16 +792,12 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
      */
     @Override
     public String getLocale(String username, ApiClient apiclient) throws DemoPortalException {
-        String locale = null;
-        
         try {
-            locale = apiclient.getLocale(username);
+            return apiclient.getLocale(username);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ConnectionUtil.handleDemoPortalException(e);
         }
-
-        return locale;
     }
     
     /**
@@ -818,7 +813,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
     public String setLocale(String user, String locale, ApiClient apiclient) throws DemoPortalException {
         log.debug("Calling api to set locale [{}] for user [{}]", locale, user);
         PortalUserLocale pul = new PortalUserLocale(user, locale);
-        String resp = null;
+        String resp;
         
         try {
             resp = apiclient.setLocaleForUser(pul);

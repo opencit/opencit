@@ -146,8 +146,8 @@ public class ProxyApiClient extends ApiClient {
         }
         String content = null;
         Headers headers = copyRequestHeaders(request);
-        ApiRequest proxyRequest = null;
-        ApiResponse proxyResponse = null;
+        ApiRequest proxyRequest;
+        ApiResponse proxyResponse;
         switch (request.getMethod()) {
             case "GET":
                 proxyResponse = httpGet(urltext, headers);
@@ -179,6 +179,7 @@ public class ProxyApiClient extends ApiClient {
         throw new IOException("Proxy failed for request: " + urltext);
     }
     
+    /***** UNUSED
     private void removeDuplicateParameters(MutableQuery query) {
         HashSet<String> keys = new HashSet<String>();
         keys.addAll(query.keySet()); // iterate on this copy instead of on the query's keySet so we don't get ConcurrentModificationException when we remove keys inside the loop
@@ -189,5 +190,5 @@ public class ProxyApiClient extends ApiClient {
             query.removeAll(key);
             query.add(key, uniqueValues);
         }
-    }
+    }*/
 }

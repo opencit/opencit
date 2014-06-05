@@ -15,6 +15,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +135,7 @@ public class SecurityFilter implements Filter {
                 return tokenObject;
             } 
             else { 
-                log.debug("XXX TOKEN DEBUGGING ONLYI:   usernames are NOT equal"); 
+                log.debug("XXX TOKEN DEBUGGING ONLY:   usernames are NOT equal"); 
                 log.debug("username: {}", username.toCharArray()); 
                 log.debug("confirmusername: {}", confirmUsername.toCharArray()); 
                 return null;
@@ -188,6 +189,11 @@ public class SecurityFilter implements Filter {
         if (existingToken == null) {
             log.debug("processRequestToken: Missing required AuthorizationToken");
             return false;
+        }
+        if (!Base64.isBase64(existingToken)) {
+            log.error("processRequestToken: AuthorizationToken is not formatted as a hexadecimal string");
+            return false;
+        } else {
         }
 
         log.debug("processRequestToken: Received AuthorizationToken, validating");

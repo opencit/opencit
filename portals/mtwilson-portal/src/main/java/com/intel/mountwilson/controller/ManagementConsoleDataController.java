@@ -214,7 +214,11 @@ public class ManagementConsoleDataController extends MultiActionController {
 
         if (listOfRegisterHost != null) {
             try {
-                responseView = getListofRegisteredHost(listOfRegisterHost, responseView, getApiClientService(req, ApiClient.class));
+                ApiClient apiClient = getApiClientService(req, ApiClient.class);
+                if (apiClient == null) {
+                    throw new IllegalStateException("Failed to initialize the API client object.");
+                }
+                responseView = getListofRegisteredHost(listOfRegisterHost, responseView, apiClient);
                 result = true;
             } catch (Exception ex) {
                 //log.warn("Exception Checking for already register host. " + ex.getMessage());
@@ -373,7 +377,7 @@ public class ManagementConsoleDataController extends MultiActionController {
     public ModelAndView getDefinedWhiteListConfig(HttpServletRequest req, HttpServletResponse res) {
         //log.info("ManagementConsoleDataController.getDefinedWhiteListConfig >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
-        boolean result = false;
+        boolean result;
         HostConfigData whiteList;
 
         try {
@@ -387,6 +391,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             result = true;
 
         } catch (Exception ex) {
+            result = false;
             //log.warn("Exception during whitelist configuration. " + ex.getMessage());
             responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
             responseView.addObject("result", result);
@@ -409,7 +414,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("ManagementConsoleDataController.retrieveDatacenters >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String vCenterConnection;
-        String dcCombined = "";
+        String dcCombined;
 
         try {
             vCenterConnection = req.getParameter("vCentertConnection");
@@ -426,9 +431,13 @@ public class ManagementConsoleDataController extends MultiActionController {
             VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
             List<String> datacenters = services.getDatacenterNames(client);
 
+            StringBuilder dcBuilder = new StringBuilder();
             for (String dc : datacenters) {
-                dcCombined += dc + ",";
+                dcBuilder.append(dc);
+                dcBuilder.append(",");
             }
+            dcCombined = dcBuilder.toString();
+            
             dcCombined = dcCombined.substring(0, dcCombined.length() - 1);
         } catch (Exception e) {
             //log.warn("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
@@ -472,9 +481,12 @@ public class ManagementConsoleDataController extends MultiActionController {
             VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy())); 
             List<String> clusters = services.getClusterNamesWithDC(client);
             Collections.sort(clusters);
+            StringBuilder clusterBuilder = new StringBuilder();
             for (String cluster : clusters) {
-                clusterCombined += cluster + ",";
+                clusterBuilder.append(cluster);
+                clusterBuilder.append(",");
             }
+            clusterCombined = clusterBuilder.toString();
             clusterCombined = clusterCombined.substring(0, clusterCombined.length() - 1);
         } catch (Exception e) {
             //log.warn("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
@@ -506,6 +518,9 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             clusterName = req.getParameter("clusterName");
             clusterName = clusterName.substring(clusterName.indexOf("] ") + 2);
+            if (clusterName == null) {
+                throw new IllegalArgumentException("Cluster name cannot be null.");
+            }
             vCenterConnection = req.getParameter("vCentertConnection");
         } catch (Exception e) {
             //log.warn("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
@@ -524,10 +539,11 @@ public class ManagementConsoleDataController extends MultiActionController {
                 // Since we have retrieved the hosts from the VMware cluster, we just mark all the hosts as of VMware type
                 hostDetail.setHostType("vmware");
             }
-
-            if (hosts != null) {
-                responseView = getListofRegisteredHost(hosts, responseView, getApiClientService(req, ApiClient.class));
+            ApiClient apiClient = getApiClientService(req, ApiClient.class);
+            if (apiClient == null) {
+                throw new IllegalStateException("Failed to initialize the API client object.");
             }
+            responseView = getListofRegisteredHost(hosts, responseView, apiClient);
         } catch (Exception e) {
             //log.warn("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
             responseView.addObject("message", e.getMessage());
@@ -707,7 +723,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         ModelAndView responseView = new ModelAndView(new JSONView());
         String hostDetailsString;
         ApiClientDetails apiClientDetailsObj;
-        boolean result = false;
+        boolean result;
 
         try {
             // Now get the API object from the session
@@ -718,6 +734,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             result = services.updateRequest(apiClientDetailsObj, apiObj, true);
         } catch (Exception ex) {
             log.error("Error approving access request: {}", ex.getMessage());
+            result = false;
             responseView.addObject("result", false);
             responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
             return responseView;
@@ -888,7 +905,8 @@ public class ManagementConsoleDataController extends MultiActionController {
     }
     
     protected static final ObjectMapper mapper = new ObjectMapper();
-     
+    
+    /***** UNUSED
     private <T> T fromJSON(String document, Class<T> valueType) throws IOException, ApiException {
         try {
             return mapper.readValue(document, valueType);
@@ -897,7 +915,7 @@ public class ManagementConsoleDataController extends MultiActionController {
            
             throw new ApiException("Cannot parse response", e);
         }
-    }
+    }*/
 
     private ModelAndView getListofRegisteredHost(List<HostDetails> listOfRegisterHost, ModelAndView responseView, ApiClient apiClient) throws IOException, NoSuchAlgorithmException, KeyManagementException, ApiException, SignatureException {
         List<HostDetails> listToSend = new ArrayList<HostDetails>();
@@ -1012,15 +1030,16 @@ public class ManagementConsoleDataController extends MultiActionController {
     //End_Added by Soni-Function for CA
 
     private String readCertFile(String file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = null;
-        StringBuilder stringBuilder = new StringBuilder();
-        String ls = System.getProperty("line.separator");
-        while ((line = reader.readLine()) != null) {
-            stringBuilder.append(line);
-            stringBuilder.append(ls);
+        StringBuilder stringBuilder;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            stringBuilder = new StringBuilder();
+            String ls = System.getProperty("line.separator");
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(ls);
+            }
         }
-        reader.close();
         return stringBuilder.toString();
     }
 
@@ -1037,6 +1056,9 @@ public class ManagementConsoleDataController extends MultiActionController {
             // Now get the API object from the session
 
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
+            if (apiObj == null) {
+                throw new IllegalArgumentException("API client object cannot be null.");
+            }
             // InputStream in = new ByteArrayInputStream(apiObj.getSamlCertificate().getEncoded());
             //System.err.println("SAMLcertificate     "+apiObj.getSamlCertificate().getEncoded());
             //IOUtils.copy(in, res.getOutputStream());
@@ -1086,10 +1108,18 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             //Now get the API object from the session
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
+            if (apiObj == null) {
+                throw new IllegalArgumentException("API client object cannot be null.");
+            }
             //X509Certificate[] certs = (X509Certificate[]) apiObj.getRootCaCertificates().toArray();
             Set<X509Certificate> certs = apiObj.getRootCaCertificates();
+            X509Certificate cert;
             Iterator i = certs.iterator();
-            X509Certificate cert = (X509Certificate) i.next();
+            if (i.hasNext()) {
+                cert = (X509Certificate) i.next();
+            } else {
+                throw new IllegalArgumentException("RootCACertificate not found.");
+            }
             String ret = "-----BEGIN CERTIFICATE-----\n";
             ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
             ret += "\n-----END CERTIFICATE-----";
@@ -1119,9 +1149,17 @@ public class ManagementConsoleDataController extends MultiActionController {
 
         try {
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
+            if (apiObj == null) {
+                throw new IllegalArgumentException("API client object cannot be null.");
+            }
             Set<X509Certificate> certs = apiObj.getPrivacyCaCertificates();
+            X509Certificate cert;
             Iterator i = certs.iterator();
-            X509Certificate cert = (X509Certificate) i.next();
+            if (i.hasNext()) {
+                cert = (X509Certificate) i.next();
+            } else {
+                throw new IllegalArgumentException("PrivacyCACertificate not found.");
+            }
             String ret = "-----BEGIN CERTIFICATE-----\n";
             ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
             ret += "\n-----END CERTIFICATE-----";
@@ -1186,9 +1224,17 @@ public class ManagementConsoleDataController extends MultiActionController {
             // Now get the API object from the session
 
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
+            if (apiObj == null) {
+                throw new IllegalArgumentException("API client object cannot be null.");
+            }
             Set<X509Certificate> certs = apiObj.getTlsCertificates();
+            X509Certificate cert;
             Iterator i = certs.iterator();
-            X509Certificate cert = (X509Certificate) i.next();
+            if (i.hasNext()) {
+                cert = (X509Certificate) i.next();
+            } else {
+                throw new IllegalArgumentException("TLSCertificate not found.");
+            }
             String ret = "-----BEGIN CERTIFICATE-----\n";
             ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
             ret += "\n-----END CERTIFICATE-----";
@@ -1228,9 +1274,17 @@ public class ManagementConsoleDataController extends MultiActionController {
             // Now get the API object from the session
 
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
+            if (apiObj == null) {
+                throw new IllegalArgumentException("API client object cannot be null.");
+            }
             Set<X509Certificate> certs = apiObj.getSamlCertificates();
+            X509Certificate cert;
             Iterator i = certs.iterator();
-            X509Certificate cert = (X509Certificate) i.next();
+            if (i.hasNext()) {
+                cert = (X509Certificate) i.next();
+            } else {
+                throw new IllegalArgumentException("TLSCertificate not found.");
+            }
             String ret = "-----BEGIN CERTIFICATE-----\n";
             ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
             ret += "\n-----END CERTIFICATE-----";
@@ -1276,7 +1330,7 @@ public class ManagementConsoleDataController extends MultiActionController {
      */
     public ModelAndView getDashBoardData(HttpServletRequest req, HttpServletResponse res) {
         //log.info("DemoPortalDataController.getDashBoardData >>");
-        Map<Integer, List<HostDetailsEntityVO>> map = null;
+        Map<Integer, List<HostDetailsEntityVO>> map;
         ModelAndView responseView = new ModelAndView(new JSONView());
         try {
             //Get map view for All Host based on the value of Page_NO(this values is available from TDPConfig) 
@@ -1390,7 +1444,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         try {
             responseView.addObject("hostVo", demoPortalServices.getSingleHostTrust(req.getParameter("hostName"), getAttestationService(req, AttestationService.class), getTrustedCertificates(req)));
         } catch (DemoPortalException e) {
-            block = "Fail";
+//            block = "Fail";
             //log.error(e.toString());
             log.info("F-Error");
             //e.printStackTrace();
@@ -1464,17 +1518,21 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("WLMDataController.saveNewHostInfo >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String hostObject = null;
-        boolean newhost = false;
+        boolean newhost;
         try {
             hostObject = req.getParameter("hostObject");
+            if (hostObject == null) {
+                throw new IllegalArgumentException("Host object cannot be null.");
+            }
             newhost = Boolean.parseBoolean(req.getParameter("newhost"));
         } catch (Exception e1) {
+            newhost = false;
             responseView.addObject("result", false);
             responseView.addObject("message", StringEscapeUtils.escapeHtml(e1.getMessage()));
         }
         //System.out.println(hostObject);
         ObjectMapper mapper = new ObjectMapper();
-        HostDetailsEntityVO dataVO = new HostDetailsEntityVO();
+        HostDetailsEntityVO dataVO;
 
         try {
             dataVO = mapper.readValue(hostObject, HostDetailsEntityVO.class);
@@ -1602,6 +1660,9 @@ public class ManagementConsoleDataController extends MultiActionController {
 
             Map<String, HostVmMappingVO> vmMappingData = getHostVmMappingdata();
             HostVmMappingVO hostVmMappingVO = vmMappingData.get(hostID + HelperConstant.VM_HOST_MAPPING_SEPERATOR + vmName);
+            if (hostVmMappingVO == null) {
+                throw new IllegalArgumentException("hostVmMappingVO cannot be null.");
+            }
             hostVmMappingVO.setTrustedHostPolicy(trustPolicy);
             hostVmMappingVO.setLocationPolicy(locationPloicy);
             if (isPowerOnCommand) {
@@ -1646,6 +1707,9 @@ public class ManagementConsoleDataController extends MultiActionController {
 
             Map<String, HostVmMappingVO> vmMappingData = getHostVmMappingdata();
             HostVmMappingVO hostVmMappingVO = vmMappingData.get(hostID + HelperConstant.VM_HOST_MAPPING_SEPERATOR + vmName);
+            if (hostVmMappingVO == null) {
+                throw new IllegalArgumentException("hostVmMappingVO cannot be null.");
+            }
             hostVmMappingVO.setHostId(targetHosthostID);
             hostVmMappingVO.setTrustedHostPolicy(trustPolicy);
             hostVmMappingVO.setLocationPolicy(locationPloicy);
@@ -1675,7 +1739,7 @@ public class ManagementConsoleDataController extends MultiActionController {
      */
     public ModelAndView getAllHostForView(HttpServletRequest req, HttpServletResponse res) {
         //log.info("DemoPortalDataController.getAllHostForView >>");
-        Map<Integer, List<HostDetailsEntityVO>> map = null;
+        Map<Integer, List<HostDetailsEntityVO>> map;
         ModelAndView responseView = new ModelAndView(new JSONView());
         try {
             map = getAllHostDetailsFromDB(req);
@@ -2067,7 +2131,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("WLMDataController.getHostOSForVMM >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         List<VmmHostDataVo> list = new ArrayList<VmmHostDataVo>();
-        VmmHostDataVo dataVo = null;
+        VmmHostDataVo dataVo;
         List<String> VmmNames = getVMMNameList(WLMPConfig.getConfiguration().getString("mtwilson.wlmp.openSourceHypervisors"));
 
         try {

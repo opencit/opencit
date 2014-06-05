@@ -35,15 +35,14 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public List<MLEDataVO> getAllMLE(WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.getAllMLE >>");
-                                List<MLEDataVO> list = null;
-                                try {
-                                        list =ConverterUtil.getListToMLEDataVO(apiClientServices.searchMLE(""));
-                                }catch (Exception e) {
-                                                        throw ConnectionUtil.handleWLMPortalException(e);
-                                }
-                                log.info("MLEClientServiceImpl.getAllMLE <<");
-                                return list;
+            log.info("MLEClientServiceImpl.getAllMLE >>");
+            try {
+                List<MLEDataVO> list = ConverterUtil.getListToMLEDataVO(apiClientServices.searchMLE(""));
+                log.info("MLEClientServiceImpl.getAllMLE <<");
+                return list;
+            } catch (Exception e) {
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 
 	/**
@@ -56,17 +55,15 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public boolean addMLEInfo(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.addMLEInfo >>");
-		boolean result = false;
-		try {
-			result = apiClientServices.addMLE(ConverterUtil.getMleApiClientObject(dataVO));
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			throw ConnectionUtil.handleWLMPortalException(e);
-		}
-                                log.info("MLEClientServiceImpl.addMLEInfo <<");
-       	
-                                return result;
+            log.info("MLEClientServiceImpl.addMLEInfo >>");
+            try {
+                boolean result = apiClientServices.addMLE(ConverterUtil.getMleApiClientObject(dataVO));
+                log.info("MLEClientServiceImpl.addMLEInfo <<");
+                return result;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }                   
 	}
 
 	/**
@@ -79,16 +76,15 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public boolean updateMLEInfo(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.updateMLEInfo >>");
-		boolean result = false;
-		try {
-			result =apiClientServices.updateMLE(ConverterUtil.getMleApiClientObject(dataVO));
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			throw ConnectionUtil.handleWLMPortalException(e);
-		}
-		log.info("MLEClientServiceImpl.updateMLEInfo <<");
-		return result;
+            log.info("MLEClientServiceImpl.updateMLEInfo >>");
+            try {
+                boolean result = apiClientServices.updateMLE(ConverterUtil.getMleApiClientObject(dataVO));
+                log.info("MLEClientServiceImpl.updateMLEInfo <<");
+                return result;
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 
 	/**
@@ -101,28 +97,27 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public boolean deleteMLE(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.deleteMLE >>");
-		boolean result = false; 
-		try {
-			MLESearchCriteria criteria = new MLESearchCriteria();
-			criteria.mleName = dataVO.getMleName();
-                                                                        criteria.mleVersion = dataVO.getMleVersion();
-                                                                        if (dataVO.getOemName() != null) {
-				criteria.oemName = dataVO.getOemName();
-				criteria.osName = "";
-				criteria.osVersion = "";
-			}else {
-				criteria.osName = dataVO.getOsName();
-				criteria.osVersion = dataVO.getOsVersion();
-				criteria.oemName = "";
-			}
-			result = apiClientServices.deleteMLE(criteria);
-		} catch (Exception e) {
-			log.error("Failed to delete MLE: "+e.toString());
-			throw ConnectionUtil.handleWLMPortalException(e);
-		}
-                       log.info("MLEClientServiceImpl.deleteMLE <<");
-       	return result;
+            log.info("MLEClientServiceImpl.deleteMLE >>");
+            try {
+                MLESearchCriteria criteria = new MLESearchCriteria();
+                criteria.mleName = dataVO.getMleName();
+                criteria.mleVersion = dataVO.getMleVersion();
+                if (dataVO.getOemName() != null) {
+                    criteria.oemName = dataVO.getOemName();
+                    criteria.osName = "";
+                    criteria.osVersion = "";
+                } else {
+                    criteria.osName = dataVO.getOsName();
+                    criteria.osVersion = dataVO.getOsVersion();
+                    criteria.oemName = "";
+                }
+                boolean result = apiClientServices.deleteMLE(criteria);
+                log.info("MLEClientServiceImpl.deleteMLE <<");
+                return result;
+            } catch (Exception e) {
+                log.error("Failed to delete MLE: " + e.toString());
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
 	}
 	
 	/**
@@ -135,27 +130,26 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public MLEDataVO getSingleMleData(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.getSingleMleData >>");
-                                MLEDataVO mleObject = null;
-                                try {
-                                        MLESearchCriteria criteria = new MLESearchCriteria();
-                                        criteria.mleName = dataVO.getMleName();
-                                        criteria.mleVersion = dataVO.getMleVersion();
-                                        if (dataVO.getOemName() != null) {
-                                                criteria.oemName = dataVO.getOemName();
-                                                criteria.osName = "";
-                                                criteria.osVersion = "";
-                                        }else{
-                                                criteria.osName = dataVO.getOsName();
-                                                criteria.osVersion = dataVO.getOsVersion();
-                                                criteria.oemName = "";
-                                        }
-                                        mleObject = ConverterUtil.getMleDataVoObject(apiClientServices.getMLEManifest(criteria));
-                                }catch (Exception e) {
-                                        throw ConnectionUtil.handleWLMPortalException(e);
-                                }
-                                log.info("MLEClientServiceImpl.getSingleMleData <<");
-                                return mleObject;
+            log.info("MLEClientServiceImpl.getSingleMleData >>");
+            try {
+                MLESearchCriteria criteria = new MLESearchCriteria();
+                criteria.mleName = dataVO.getMleName();
+                criteria.mleVersion = dataVO.getMleVersion();
+                if (dataVO.getOemName() != null) {
+                    criteria.oemName = dataVO.getOemName();
+                    criteria.osName = "";
+                    criteria.osVersion = "";
+                } else {
+                    criteria.osName = dataVO.getOsName();
+                    criteria.osVersion = dataVO.getOsVersion();
+                    criteria.oemName = "";
+                }
+                MLEDataVO mleObject = ConverterUtil.getMleDataVoObject(apiClientServices.getMLEManifest(criteria));
+                log.info("MLEClientServiceImpl.getSingleMleData <<");
+                return mleObject;
+            } catch (Exception e) {
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }                   
 	}
         
         /**
@@ -167,17 +161,16 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 * @throws WLMPortalException
 	 */
 	@Override
-	public List<ModuleWhiteList> getManifestListForModuleTypeMle(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle >>");
-                                List<ModuleWhiteList> moduleManifestList = null;
-                                try {
-                                        moduleManifestList =  apiClientServices.listModuleWhiteListForMLE(dataVO.getMleName(), dataVO.getMleVersion(), dataVO.getOsName(), dataVO.getOsVersion(), "");
-                                }catch (Exception e) {
-                                                        throw ConnectionUtil.handleWLMPortalException(e);
-                                }
-                                log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle <<");
-                                return moduleManifestList;
-	}
+	public List<ModuleWhiteList> getManifestListForModuleTypeMle(MLEDataVO dataVO, WhitelistService apiClientServices) throws WLMPortalException {
+            log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle >>");
+            try {
+                List<ModuleWhiteList> moduleManifestList = apiClientServices.listModuleWhiteListForMLE(dataVO.getMleName(), dataVO.getMleVersion(), dataVO.getOsName(), dataVO.getOsVersion(), "");
+                log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle <<");
+                return moduleManifestList;
+            } catch (Exception e) {
+                throw ConnectionUtil.handleWLMPortalException(e);
+            }
+        }
 
         /**
          * Retries the name of the host that was used for white listing the MLE.

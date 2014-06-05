@@ -85,6 +85,9 @@ public class ConfigureRemote implements Command {
                 generateRootCAKey(); // create or load root ca key and put it in the setup context
                 
                 RemoteSetup remote = new RemoteSetup(ctx);
+                if (remote == null) {
+                    throw new IllegalStateException("ConfigureRemote command failed: remote object is null.");
+                }
                 remote.setRemoteHost(getRequiredInternetAddressWithPrompt("SSH to remote host"));
                 remote.setUsername(getRequiredStringWithPrompt("SSH Username (eg. root)"));
                 remote.setPassword(getRequiredPasswordWithPrompt("SSH Password"));
@@ -348,8 +351,12 @@ public class ConfigureRemote implements Command {
      * @param level of indentation;  use 0 for top-level faults, and increment once for each level of logical nesting
      */
     private void printFault(Fault f, int level) {
-        String indentation = ""; 
-        for(int i=0; i<level; i++) { indentation += "  "; } // each level is indented two spaces from the previous level
+        String indentation = "";
+        StringBuilder indentationBuilder = new StringBuilder();
+        for(int i=0; i<level; i++) {
+            indentationBuilder.append("  "); // each level is indented two spaces from the previous level
+        }
+        indentation = indentationBuilder.toString();
         System.err.println(String.format("%s- %s", indentation, f.toString()));
         if( f.getCause() != null ) {
             System.err.println(String.format("%s  Caused by: %s", indentation, f.getCause().toString()));
