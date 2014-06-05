@@ -232,6 +232,7 @@
     "table": {
         "name": "Name",
         "requested_roles": "Requested Roles",
+        "roles": "Roles",
         "description": "Description",
         "version": "Version",
         "host_name": "Host Name",

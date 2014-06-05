@@ -8,7 +8,6 @@ import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.model.InternetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
@@ -377,6 +376,7 @@ public class ConnectionString {
         }
         
         public static IntelConnectionString forURL(String url) throws MalformedURLException {
+            log.debug("IntelConnectionString forURL {}", url);
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
@@ -412,6 +412,7 @@ public class ConnectionString {
             return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
+            log.debug("CitrixConnectionString forURL {}", url);
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
@@ -460,6 +461,7 @@ public class ConnectionString {
             return String.format("https://%s:%d/sdk;u=%s;p=%s;h=%s", vcenterAddress.toString(), port, username, password, hostAddress.toString());
         }
         public static VmwareConnectionString forURL(String url) throws MalformedURLException {
+            log.debug("VmwareConnectionString forURL {}", url);
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
@@ -468,10 +470,11 @@ public class ConnectionString {
             }
             cs.vcenterAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
-            if( info.options == null || info.options.getString(OPT_HOSTNAME) == null ) { throw new IllegalArgumentException("Missing required hostname parameter in VMware Host URL"); }
-            cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
-            cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
-            cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            if( info.options != null ) {
+                cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
+                cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
+                cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            }
             return cs;
         }
     }

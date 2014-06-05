@@ -432,15 +432,17 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                     apiClientDetailObj.setName(apiClientObj.name);
                     apiClientDetailObj.setFingerprint(new String(Hex.encodeHex(apiClientObj.fingerprint)));
                     apiClientDetailObj.setExpires(apiClientObj.expires);
-//                    apiClientDetailObj.setRequestedRoles(Arrays.asList(apiClientObj.roles));
+                    apiClientDetailObj.setRoles(Arrays.asList(apiClientObj.roles));
                     apiClientDetailObj.setIssuer(apiClientObj.issuer);
                     apiClientDetailObj.setStatus(apiClientObj.status);
 //                    apiClientDetailObj.setComment(apiClientObj.comment);
                     try {
                         if( apiClientObj.comment != null ) {
                             UserComment comment = yaml.readValue(apiClientObj.comment, UserComment.class);
-                            apiClientDetailObj.setRequestedRoles(new ArrayList<String>(comment.roles));
-                            apiClientDetailObj.setComment("");
+                            if( comment.roles != null ) {
+                                apiClientDetailObj.setRequestedRoles(new ArrayList<String>(comment.roles));
+                            }
+                            apiClientDetailObj.setComment(""); // TODO:  if comment.comment != null ... 
                         }
                     }
                     catch(Exception e) {

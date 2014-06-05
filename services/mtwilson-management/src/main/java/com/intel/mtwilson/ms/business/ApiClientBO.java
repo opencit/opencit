@@ -36,8 +36,10 @@ import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserComment;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -483,7 +485,7 @@ public class ApiClientBO extends BaseBO {
      * @param apiClientX509
      * @return 
      */
-    private ApiClientInfo toApiClientInfo(ApiClientX509 apiClientX509) {
+    private ApiClientInfo toApiClientInfo(ApiClientX509 apiClientX509) throws SQLException, IOException {
         ApiClientInfo info = new ApiClientInfo();
         info.certificate = apiClientX509.getCertificate();
         info.fingerprint = apiClientX509.getFingerprint();
@@ -495,9 +497,24 @@ public class ApiClientBO extends BaseBO {
         info.status = apiClientX509.getStatus();
         info.comment = apiClientX509.getComment();
         // set the roles array
-        ArrayList<String> roleNames = new ArrayList<String>();
+        ArrayList<String> roleNames = new ArrayList<>();
+        /*
         for(ApiRoleX509 role : apiClientX509.getApiRoleX509Collection()) {
             roleNames.add(role.getApiRoleX509PK().getRole());
+        }
+        */
+        // set the roles array from new user login certificate tables
+        // TODO:  instead of using LoginDAO here,  use the UserLoginCertificateRepository or the RoleRepository
+        try(LoginDAO dao = MyJdbi.authz()) {
+            log.debug("searching for user login certificate with sha1 {}", Sha1Digest.digestOf(info.certificate).toHexString());
+            UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateBySha1(Sha1Digest.digestOf(info.certificate).toByteArray());
+            log.debug("found user login certificate {}", userLoginCertificate.getId().toString());
+            List<com.intel.mtwilson.user.management.rest.v2.model.Role> v2roles = dao.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+            log.debug("found {} roles", v2roles.size());
+            for(com.intel.mtwilson.user.management.rest.v2.model.Role v2role : v2roles) {
+                log.debug("found role name: {}", v2role.getRoleName());
+                roleNames.add(v2role.getRoleName());
+            }
         }
         info.roles = roleNames.toArray(new String[0]);
         return info;
@@ -580,7 +597,7 @@ public class ApiClientBO extends BaseBO {
                 // no criteria means return all records
                 list = apiClientX509JpaController.findApiClientX509Entities();
             }
-            ArrayList<ApiClientInfo> response = new ArrayList<ApiClientInfo>();
+            ArrayList<ApiClientInfo> response = new ArrayList<>();
             if( list == null ) {
                 return response; // empty list
             }
