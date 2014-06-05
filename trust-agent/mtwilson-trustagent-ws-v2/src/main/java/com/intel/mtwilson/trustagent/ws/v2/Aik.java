@@ -64,7 +64,7 @@ public class Aik {
     @GET
     @Path("/ca")
     @Produces({CryptoMediaType.APPLICATION_PKIX_CERT, CryptoMediaType.APPLICATION_X_PEM_FILE})
-    public X509Certificate getIdentityCA() throws Exception {
+    public X509Certificate getIdentityCA() throws IOException {
         TrustagentConfiguration configuration = getConfiguration();
         File keystoreFile = configuration.getTrustagentKeystoreFile();
         if( !keystoreFile.exists() ) {

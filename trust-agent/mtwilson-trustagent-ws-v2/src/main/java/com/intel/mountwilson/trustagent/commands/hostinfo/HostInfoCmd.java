@@ -11,9 +11,6 @@ import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.IOException;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -66,26 +63,30 @@ public class HostInfoCmd implements ICommand {
     
     private void getOsAndVersion() throws TAException, IOException {
         CommandResult commandResult = CommandUtil.runCommand("lsb_release -a");
-        String[] result = commandResult.getStdout().split("\n");
-        for (String str : result) {
-            String[] parts = str.split(":");
+        if (commandResult != null && commandResult.getStdout() != null) {
+            String[] result = commandResult.getStdout().split("\n");
+            for (String str : result) {
+                String[] parts = str.split(":");
 
-            if (parts != null && parts.length > 1) {
-                if (parts[0].trim().equalsIgnoreCase("Distributor ID")) {
-                    if (parts[1] != null) {
-                        context.setOsName(parts[1].trim());
-                    }
-                } else if (parts[0].trim().equalsIgnoreCase("Release")) {
-                    if (parts[1] != null) {
-                        context.setOsVersion(parts[1].trim());
-                    }
+                if (parts != null && parts.length > 1) {
+                    if (parts[0].trim().equalsIgnoreCase("Distributor ID")) {
+                        if (parts[1] != null) {
+                            context.setOsName(parts[1].trim());
+                        }
+                    } else if (parts[0].trim().equalsIgnoreCase("Release")) {
+                        if (parts[1] != null) {
+                            context.setOsVersion(parts[1].trim());
+                        }
 
+                    }
                 }
             }
+            log.debug("OS Name: " + context.getOsName());
+            log.debug("OS Version: " + context.getOsVersion());
+        } else {
+            log.error("Error executing the lsb_release command to retrieve the OS details");
         }
-        log.debug("OS Name: " + context.getOsName());
-        log.debug("OS Version: " + context.getOsVersion());
-
+            
     }
     
     private String trim(String text) {
@@ -123,27 +124,30 @@ public class HostInfoCmd implements ICommand {
     private void getVmmAndVersion() throws TAException, IOException {
 
         CommandResult commandResult = CommandUtil.runCommand("virsh version");
-        String[] result = commandResult.getStdout().split("\n");
+        if (commandResult != null && commandResult.getStdout() != null) {
+            String[] result = commandResult.getStdout().split("\n");
 
-        for (String str : result) {
-            String[] parts = str.split(":");
+            for (String str : result) {
+                String[] parts = str.split(":");
 
-            if (parts != null && parts.length > 1) {
-                if (parts[0].trim().equalsIgnoreCase("Running hypervisor")) {
-                    if (parts[1] != null) {
-                        String[] subParts = parts[1].trim().split(" ");
-                        if (subParts[0] != null) {
-                            context.setVmmName(subParts[0]);
-                        }
-                        if (subParts[1] != null) {
-                            context.setVmmVersion(subParts[1]);
+                if (parts != null && parts.length > 1) {
+                    if (parts[0].trim().equalsIgnoreCase("Running hypervisor")) {
+                        if (parts[1] != null) {
+                            String[] subParts = parts[1].trim().split(" ");
+                            if (subParts[0] != null) {
+                                context.setVmmName(subParts[0]);
+                            }
+                            if (subParts[1] != null) {
+                                context.setVmmVersion(subParts[1]);
+                            }
                         }
                     }
                 }
+                log.debug("VMM Name: " + context.getVmmName());
+                log.debug("VMM Version: " + context.getVmmVersion());
             }
-            log.debug("VMM Name: " + context.getVmmName());
-            log.debug("VMM Version: " + context.getVmmVersion());
-
+        } else {
+            log.error("Error executing the virsh version command to retrieve the hypervisor details.");
         }
     }
 
@@ -156,31 +160,35 @@ public class HostInfoCmd implements ICommand {
        private void getProcessorInfo() throws TAException, IOException {
            
             CommandResult commandResult = CommandUtil.runCommand("dmidecode --type processor");
-            String[] result = commandResult.getStdout().split("\n");
-            String processorInfo = "";
-            
-            // Sample output would look like below for a 2 CPU system. We will extract the processor info between CPU and the @ sign
-            //Processor Information
-            //Socket Designation: CPU1
-            //Type: Central Processor
-            //Family: Xeon
-            //Manufacturer: Intel(R) Corporation
-            //ID: C2 06 02 00 FF FB EB BF -- This is the CPU ID
-            //Signature: Type 0, Family 6, Model 44, Stepping 2
-            
-            for (String entry : result) {
-                if (entry != null && !entry.isEmpty() && entry.trim().startsWith("ID:")) {                    
-                    String[] parts = entry.trim().split(":");
-                     if (parts != null && parts.length > 1) {
-                        processorInfo = parts[1];
-                        break;
-                     }
-                }            
+            if (commandResult != null && commandResult.getStdout() != null) {
+                String[] result = commandResult.getStdout().split("\n");
+                String processorInfo = "";
+
+                // Sample output would look like below for a 2 CPU system. We will extract the processor info between CPU and the @ sign
+                //Processor Information
+                //Socket Designation: CPU1
+                //Type: Central Processor
+                //Family: Xeon
+                //Manufacturer: Intel(R) Corporation
+                //ID: C2 06 02 00 FF FB EB BF -- This is the CPU ID
+                //Signature: Type 0, Family 6, Model 44, Stepping 2
+
+                for (String entry : result) {
+                    if (entry != null && !entry.isEmpty() && entry.trim().startsWith("ID:")) {                    
+                        String[] parts = entry.trim().split(":");
+                         if (parts != null && parts.length > 1) {
+                            processorInfo = parts[1];
+                            break;
+                         }
+                    }            
+                }
+
+                log.debug("Processor Information " + processorInfo);
+                context.setProcessorInfo(processorInfo);
+                log.debug("Context is being set with processor info: " + context.getProcessorInfo());
+            } else {
+                log.error("Error retrieving the processor information");
             }
-            
-            log.debug("Processor Information " + processorInfo);
-            context.setProcessorInfo(processorInfo);
-            log.debug("Context is being set with processor info: " + context.getProcessorInfo());
     }
     
     /**

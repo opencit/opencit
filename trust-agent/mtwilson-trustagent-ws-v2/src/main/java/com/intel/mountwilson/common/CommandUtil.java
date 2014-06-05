@@ -84,12 +84,9 @@ public class CommandUtil {
     }
         
     public static byte[] readfile(String fileName) throws TAException {
-
-
-        InputStream fStream = null;
-        try {
+        
+        try (InputStream fStream = new FileInputStream(fileName)) {
             int fileLength = (int) new File(fileName).length();
-            fStream = new FileInputStream(fileName);
             byte[] fileContents = new byte[fileLength];
             int read = fStream.read(fileContents);
             if (read != fileLength) {
@@ -98,25 +95,15 @@ public class CommandUtil {
             return fileContents;
         } catch (Exception ex) {
             throw new TAException(ErrorCode.ERROR, "Error while reading cert", ex);
-        } finally {
-           
-                try {
-                    if(fStream != null){
-                        fStream.close();
-                    }
-                } catch (IOException e) {
-                    log.warn("Error while closing stream", e);
-                }
-        }
-
-
+        } 
     }
 
     public static String readCertificate(String fileName) throws TAException {
         try {
-            FileInputStream in = new FileInputStream(new File(fileName));
-            String pem = IOUtils.toString(in);
-            in.close();
+            String pem;
+            try (FileInputStream in = new FileInputStream(new File(fileName))) {
+                pem = IOUtils.toString(in);
+            }
 //            X509Certificate certificate = X509Util.decodePemCertificate(pem);
             return pem;
         } catch (Exception e) {

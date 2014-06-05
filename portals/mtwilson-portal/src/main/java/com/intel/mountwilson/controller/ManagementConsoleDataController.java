@@ -464,7 +464,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("ManagementConsoleDataController.retrieveAllClusters >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String vCenterConnection;
-        String clusterCombined = "";
+        String clusterCombined;
 
         try {
             vCenterConnection = req.getParameter("vCentertConnection");

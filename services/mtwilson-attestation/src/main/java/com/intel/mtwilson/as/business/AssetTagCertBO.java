@@ -335,7 +335,6 @@ public class AssetTagCertBO extends BaseBO{
      */
     public MwAssetTagCertificate findValidAssetTagCertForHost(String uuid){
         uuid = uuid.replace("\n", "");
-        MwAssetTagCertificate atagCert = null;
 
         try {
             // Find the asset tag certificates for the specified UUID of the host. Not that this might return back multiple
@@ -356,6 +355,7 @@ public class AssetTagCertBO extends BaseBO{
                         }
                     }
                     log.info("No valid asset tag certificate found for host with UUID {}.", uuid);
+                    return null;
                 }
             } else {
                 log.error("UUID specified for the host is not valid.");
@@ -367,9 +367,7 @@ public class AssetTagCertBO extends BaseBO{
         } catch (Exception ex) {
             log.error("Unexpected error during querying of valid asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
-        }
-        
-        return atagCert;
+        }        
     }
     
     public MwAssetTagCertificate findValidAssetTagCertForHost(Integer hostID){
