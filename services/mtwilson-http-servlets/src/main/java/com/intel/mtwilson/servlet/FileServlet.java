@@ -105,5 +105,9 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
         log.error("Cannot retrieve file", e);
         response.setStatus(500);
     }
+    catch (IllegalArgumentException iae) {
+        log.error("Illegal arguments specified.", iae);
+        response.setStatus(500);
+    }
   }    
 }

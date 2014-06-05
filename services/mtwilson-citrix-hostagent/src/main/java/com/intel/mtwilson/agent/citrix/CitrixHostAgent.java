@@ -274,8 +274,9 @@ BwIDAQAB
         HostInfo hostInfo;
         try {
             hostInfo = client.getHostInfo();
+            log.debug("Successfully retrieved the details of the host ruuing OS {}.", hostInfo.getOsName());
             // TODO: see comment from getHostAttributes in the IntelHostAgent:  Currently we are just adding the UUID of th host. Going ahead we can add additional details
-        } catch (Exception ex) {
+        } catch (NoSuchAlgorithmException | KeyManagementException | MalformedURLException | Types.XenAPIException | XmlRpcException ex) {
             log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
         }
         try {

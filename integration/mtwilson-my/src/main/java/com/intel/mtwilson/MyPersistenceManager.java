@@ -253,10 +253,10 @@ public class MyPersistenceManager extends PersistenceManager {
         if ( mtwilsonDbDriverEnvVar != null && !mtwilsonDbDriverEnvVar.isEmpty()) {
             prop.put("javax.persistence.jdbc.driver", mtwilsonDbDriverEnvVar);
         }
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+        if( (prop.get("javax.persistence.jdbc.driver") != null) && prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+        else if(  (prop.get("javax.persistence.jdbc.driver") != null) && prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {

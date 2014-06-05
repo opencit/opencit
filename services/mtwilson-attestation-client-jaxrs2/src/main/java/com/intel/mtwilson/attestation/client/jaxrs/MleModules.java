@@ -77,7 +77,7 @@ public class MleModules extends MtWilsonClient {
     public MleModule createMleModule(MleModule obj) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
-        map.put("mle_id", obj.getMleUuid().toString());
+        map.put("mle_id", obj.getMleUuid());
         MleModule newObj = getTarget().path("mles/{mle_id}/modules").resolveTemplates(map)
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), MleModule.class);
         return newObj;

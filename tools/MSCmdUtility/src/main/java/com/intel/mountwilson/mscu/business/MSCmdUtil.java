@@ -14,10 +14,13 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.dcsg.cpg.io.Filename;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.agent.vmware.VMwareConnectionException;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyStoreException;
+import java.security.SignatureException;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
@@ -37,7 +40,7 @@ public class MSCmdUtil {
 
     private static ApiClient createAPIObject(String keyAliasName, String keyPassword) throws MalformedURLException, ApiException {
         
-        ApiClient rsaApiClient = null;
+        ApiClient rsaApiClient;
         
         try {
                         
@@ -46,8 +49,8 @@ public class MSCmdUtil {
             
             // Open the keystore with the password and retrieve the credentials
             File keyStoreFile;
-            SimpleKeystore keystore = null; 
-            RsaCredential credential = null;             
+            SimpleKeystore keystore; 
+            RsaCredential credential;             
             
             try {
 
@@ -95,7 +98,7 @@ public class MSCmdUtil {
                 
             } 
 
-        } catch (Exception ex) {
+        } catch (MalformedURLException | IllegalStateException ex) {
 
             System.out.println(String.format("Error during user authentication. %s", ex.getMessage()));
             throw new IllegalStateException(String.format("Error during user authentication. %s", ex.getMessage()));
@@ -128,7 +131,7 @@ public class MSCmdUtil {
             if (msClient == null) {
                 throw new IllegalStateException("Failed to initialize the management service API client object.");
             }
-        } catch (Exception ex) {
+        } catch (MalformedURLException | ApiException | IllegalStateException ex) {
             System.out.println(String.format("Error while authenticating the user. %s", ex.getMessage()));
         }
                 
@@ -184,7 +187,7 @@ public class MSCmdUtil {
                                 System.out.println(String.format("Successfully configured the white list database using the host : %s", gkvHostObj.HostName));
                             }
 
-                        } catch (Exception ex) {
+                        } catch (IOException | ApiException | SignatureException ex) {
                             log.error(ex.getMessage());
                             System.out.println(ex.getMessage());
                         } 
@@ -242,7 +245,7 @@ public class MSCmdUtil {
                                                 System.out.println(String.format("Successfully registered the host : %s", newHostObj.HostName));
                                             }
                                             
-                                        } catch (Exception ex) {
+                                        } catch (IOException | ApiException | SignatureException ex) {
                                             
                                             // Print out a message and continue with processing the remaining hosts
                                             log.error("Error during the registration of host : {}. Details: ", newHostObj.HostName, ex.getMessage());
@@ -250,7 +253,7 @@ public class MSCmdUtil {
                                         }
                                     }
                                 }
-                            } catch (Exception ex) {
+                            } catch (IllegalArgumentException | IOException ex) {
 
                                 // We get here if there is some kind of IOException or the file format is not right
                                 // Print out the error and exit.
@@ -278,7 +281,7 @@ public class MSCmdUtil {
 //                                vmHelperObj.connect(prodVCenter);
                                 hostList = vmHelperObj.getHostDetailsForCluster(clusterName, prodVCenter);
 
-                            } catch (Exception ex) {
+                            } catch (VMwareConnectionException | ASException ex) {
 
                                 // If we get an exception while reading the cluster, there is nothing much we can do
                                 // so exit

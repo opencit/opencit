@@ -653,7 +653,7 @@ public class VMwareClient implements TlsClient {
      * @return : string list of cluster names
      * @throws Exception
      */
-    public List<String> getClusterNamesWithDC() throws /*InvalidProperty, RuntimeFault, RemoteException*/ Exception {
+    public List<String> getClusterNamesWithDC() throws InvalidProperty, RuntimeFault, RemoteException  {
         List<String> ret = new ArrayList<String>();
         log.debug("Acquiring clusters...");
         ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("ComputeResource");

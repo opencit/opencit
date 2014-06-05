@@ -167,10 +167,10 @@ public class MyConfiguration {
 //            System.out.println("Looking for "+f.getAbsolutePath());
             try {
                 if (f.exists() && f.canRead()) {
-                    // first check if the file is encrypted... if it is, we need to decrypt it before loading!
-                    FileInputStream in = new FileInputStream(f);
-                    String content = IOUtils.toString(in);
-                    in.close();
+                    String content;
+                    try (FileInputStream in = new FileInputStream(f)) {
+                        content = IOUtils.toString(in);
+                    }
                     if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
                         // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
                         String password = null;
