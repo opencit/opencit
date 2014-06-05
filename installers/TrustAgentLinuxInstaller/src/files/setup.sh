@@ -88,7 +88,7 @@ ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 # TODO: check if trustagent exists before trying to add it; allow user name to be
 #       specified by environment variable
 groupadd trustagent >> $logfile  2>&1
-useradd -d /opt/trustagent -r -s /bin/false -G trustagent trustagent >> $logfile  2>&1
+useradd -d /opt/trustagent -r -s /bin/false -g trustagent trustagent >> $logfile  2>&1
 
 mkdir -p /opt/trustagent
 unzip -DD -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
