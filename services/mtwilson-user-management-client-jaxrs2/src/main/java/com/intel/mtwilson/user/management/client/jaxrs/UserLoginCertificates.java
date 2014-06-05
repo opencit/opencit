@@ -11,6 +11,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -90,7 +91,11 @@ public class UserLoginCertificates extends MtWilsonClient {
         HashMap<String,Object> map = new HashMap<>();
         map.put("user_id", userUuid);
         map.put("id", uuid);
-        Response userLoginPassword = getTarget().path("/users/{user_id}/login-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        Response obj = getTarget().path("/users/{user_id}/login-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
+            throw new WebApplicationException("Delete user login certificate failed");
+        }
     }
 
     /**

@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -52,7 +51,7 @@ public class LoginPassword implements Command {
     }
 
     // never returns null but password may be empty (and that's allowed)
-    private String getPassword(String[] args) throws Exception {
+    private String getPassword(String[] args) throws IOException {
         String password;
         if (isEmptyPassword()) {
             password = "";
@@ -78,7 +77,7 @@ public class LoginPassword implements Command {
     }
     // get the 3rd arg if it's usrename passsword permissions, or the 2nd arg if it's username --nopass permissions
 
-    private List<RolePermission> getPermissions(String[] args) throws Exception {
+    private List<RolePermission> getPermissions(String[] args) {
         int i = 2; // login-password 0<username> 1<password> 2<permissions...>
         if (isEmptyPassword()) {
             i = 1;  //  login-password 0<username> 1<permissions...>

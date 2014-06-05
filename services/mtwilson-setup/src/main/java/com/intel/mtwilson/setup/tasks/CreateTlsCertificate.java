@@ -97,9 +97,9 @@ public class CreateTlsCertificate extends LocalSetupTask {
         // as validation issues while dependent setups such as this TLS setup need to 
         // log them as configuration issues here
             byte[] combinedPrivateKeyAndCertPemBytes;
-            FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile()); // throws FileNotFoundException, IOException
-            combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn); // throws IOException
-            cakeyIn.close();
+            try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
+                combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
+            }
             try {
                 PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
                 log.debug("Read cakey {} from {}", cakey.getAlgorithm(), My.configuration().getCaKeystoreFile().getAbsolutePath());
@@ -150,12 +150,12 @@ public class CreateTlsCertificate extends LocalSetupTask {
     protected void execute() throws Exception {
         // load the ca key - same code as in configure() but without exception
         // handling 
-            byte[] combinedPrivateKeyAndCertPemBytes;
-            FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile()); // throws FileNotFoundException, IOException
-            combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn); // throws IOException
-            cakeyIn.close();
-            PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
-            X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
+        byte[] combinedPrivateKeyAndCertPemBytes;
+        try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
+            combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
+        }
+        PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
+        X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
         
         // create a new key pair for TLS
         KeyPair tlskey = RsaUtil.generateRsaKeyPair(2048);

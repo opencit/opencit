@@ -42,4 +42,26 @@ public class Util {
             return false;
         }
     }
+    
+    public static boolean isEndorsementCertificatePresent(byte[] secret) {
+        try {
+            byte[] ekCert = TpmModule.getCredential(secret, "EC");
+            return ekCert != null && ekCert.length > 0;
+        }
+        catch(TpmModule.TpmModuleException e) {
+            if( e.getErrorCode() == 2 ) {
+                return false; // Endorsement Certificate is missing
+            }
+            else {
+                log.error("Cannot determine presence of Endorsement Certificate");
+                log.debug("TpmModule error: {}", e.getMessage());
+                return false;
+            }
+        }
+        catch(IOException e) {
+            log.error("Cannot determine presence of Endorsement Certificate");
+            log.debug("IO error: {}", e.getMessage());
+            return false;
+        }
+    }
 }

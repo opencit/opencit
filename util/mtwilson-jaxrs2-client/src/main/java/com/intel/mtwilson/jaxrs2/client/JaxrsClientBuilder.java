@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.Properties;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.util.logging.Logger;
@@ -25,6 +26,13 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.filter.LoggingFilter;
 import com.intel.mtwilson.jaxrs2.feature.JacksonFeature;
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 
 /**
  * Examples:
@@ -91,7 +99,7 @@ public class JaxrsClientBuilder {
         return this;
     }
     
-    private void authentication() throws Exception {
+    private void authentication() throws KeyManagementException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, CryptographyException {
         if( configuration == null ) { return; }
         // X509 authorization 
         SimpleKeystore keystore = null;
@@ -121,14 +129,10 @@ public class JaxrsClientBuilder {
         }
     }
 
-    private void url() throws Exception {
+    private void url() throws MalformedURLException {
         if( url == null ) {
-            try {
-                if( configuration != null ) {
-                    url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
-                }
-            } catch (Exception ex) {
-                throw new IllegalStateException("URL must be set");
+            if( configuration != null ) {
+                url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
             }
         }
     }
@@ -165,7 +169,8 @@ public class JaxrsClientBuilder {
         return this;
     }
     
-    public JaxrsClient build() throws Exception {
+    public JaxrsClient build() {
+        try {
         url();
         tls(); // sets tls connection
         authentication(); // adds to clientConfig
@@ -183,6 +188,10 @@ public class JaxrsClientBuilder {
         WebTarget target = client.target(url.toExternalForm());
         
         return new JaxrsClient(client, target);
+        }
+        catch(MalformedURLException | KeyManagementException | FileNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
+            throw new IllegalArgumentException("Cannot construct client", e);
+        }
     }
     
     /*

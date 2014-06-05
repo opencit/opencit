@@ -16,10 +16,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyAwareSSLSocketFactory;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
@@ -44,9 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.xmlrpc.XmlRpcException;
@@ -101,13 +95,12 @@ public class CitrixClient {
         log.debug("varpath = {}", varPath);
         File bin = new File(binPath);
         File var = new File(varPath);
-        if( bin.exists() && var.exists() ) {
+        if (bin.exists() && var.exists()) {
             aikverifyhomeBin = binPath;
             aikverifyhomeData = varPath;
             opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
-        }
-        else {
+        } else {
             // mtwilson 1.2 configuration
             Configuration config = ASConfig.getConfiguration();
             String aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
@@ -116,7 +109,7 @@ public class CitrixClient {
             opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
             aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
         }
-        
+
 
     }
 
@@ -174,14 +167,14 @@ public class CitrixClient {
     }
 
     public void connect() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XmlRpcException, XmlRpcException {
-        URL url = null;
+        URL url;
         try {
             url = new URL("https://" + hostIpAddress + ":" + port);
         } catch (MalformedURLException e) {
             throw new ASException(e, ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }
 
-        
+
 //        TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
 
         log.debug("Connecting to Citrix with ProtocolSelector: {}", tlsConnection.getTlsPolicy().getProtocolSelector().preferred());
@@ -192,7 +185,7 @@ public class CitrixClient {
 //        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
         // it would be better to use TlsConnection's openConnection directly but the URL is used from Citrix code so we try to affect it by setting the default policies
         TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
-        
+
         connection = new Connection(url);
 
         Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
@@ -209,32 +202,39 @@ public class CitrixClient {
     }
 
     /**
-     * This is a Citrix-specific API, not implemented by vmware hosts ;  trust agent will implement it
-     * when it's merged with provisioning agent from the asset tag branch
-     * @param tag 
+     * This is a Citrix-specific API, not implemented by vmware hosts ; trust
+     * agent will implement it when it's merged with provisioning agent from the
+     * asset tag branch
+     *
+     * @param tag
      */
-    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException, NoSuchAlgorithmException, KeyManagementException  {
-            if( !isConnected()) { connect(); } 
-            Set<Host> hostList = Host.getAll(connection);
-            Iterator iter = hostList.iterator();
-            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
-            // to throw an exception if the hasNext is false.
-            Host h = null;
-            if (iter.hasNext()) {
-                h = (Host)iter.next();
-            }
-			
-            Map<String, String> myMap = new HashMap<String, String>();
-            log.debug("sending the following to the xenserver: " + tag.toBase64());
-            myMap.put("tag", Base64.encodeBase64String(tag.toByteArray()));
-            
-            //toByteArray()
-            String retval = h.callPlugin(connection,  "tpm","tpm_set_asset_tag", myMap);
-            log.debug("xenapi returned: {}", retval);
-            
+    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException, NoSuchAlgorithmException, KeyManagementException {
+        if (!isConnected()) {
+            connect();
+        }
+        Set<Host> hostList = Host.getAll(connection);
+        Iterator iter = hostList.iterator();
+        // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+        // to throw an exception if the hasNext is false.
+        Host h = null;
+        if (iter.hasNext()) {
+            h = (Host) iter.next();
+        }
+        if (h == null) {
+            throw new IllegalStateException("Cannot find Citrix Xen host");
+        }
+
+        Map<String, String> myMap = new HashMap<>();
+        log.debug("sending the following to the xenserver: " + tag.toBase64());
+        myMap.put("tag", Base64.encodeBase64String(tag.toByteArray()));
+
+
+        //toByteArray()
+        String retval = h.callPlugin(connection, "tpm", "tpm_set_asset_tag", myMap);
+        log.debug("xenapi returned: {}", retval);
+
     }
-    
-    
+
     public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
         log.debug("getQuoteInformationForHost pcrList == " + pcrList);
         try {
@@ -254,7 +254,6 @@ public class CitrixClient {
 
             // System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
 
-            Map<String, String> myMap = new HashMap<String, String>();
             Set<Host> hostList = Host.getAll(connection);
             Iterator iter = hostList.iterator();
             // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
@@ -264,22 +263,25 @@ public class CitrixClient {
             if (iter.hasNext()) {
                 h = (Host) iter.next();
             }
+            if (h == null) {
+                throw new IllegalStateException("Cannot find Citrix Xen host");
+            }
 
             /*
-            String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
-            int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
-            int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
-            // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
-            String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(), endP);
-            log.debug("aikCert == " + cert);
-            keys key = new keys();
-            key.tpmAttKeyPEM = cert;  // This is the actual value for AIK!!!!!
-            aikCertificate = key.tpmAttKeyPEM;
-            */
-            
+             String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
+             int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
+             int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
+             // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
+             String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(), endP);
+             log.debug("aikCert == " + cert);
+             keys key = new keys();
+             key.tpmAttKeyPEM = cert;  // This is the actual value for AIK!!!!!
+             aikCertificate = key.tpmAttKeyPEM;
+             */
+
             log.debug("extracted aik cert from response: " + aikCertificate);
 
-            myMap = new HashMap<String, String>();
+            Map<String, String> myMap = new HashMap<>();
             myMap.put("nonce", nonce);
 
             long plugInCallStart = System.currentTimeMillis();
@@ -393,46 +395,30 @@ public class CitrixClient {
     }
 
     private File saveFile(String fileName, byte[] contents) throws IOException {
-        File file = null;
-        FileOutputStream fileOutputStream = null;
-
-        try {
-//            assert aikverifyhome != null;
+        File file = new File(aikverifyhomeData + File.separator + fileName);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
-            file = new File(aikverifyhomeData + File.separator + fileName);
-            fileOutputStream = new FileOutputStream(file);
-            assert fileOutputStream != null;
             assert contents != null;
             fileOutputStream.write(contents);
             fileOutputStream.flush();
+            return file;
         } catch (FileNotFoundException e) {
             log.warn(String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
             throw e;
-        } finally {
-            if (fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException ex) {
-                    log.warn(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()));
-                }
-            }
         }
-        return file;
     }
 
     private File saveQuote(String quote, String sessionId) throws IOException {
 //          byte[] quoteBytes = new BASE64Decoder().decodeBuffer(quote);
-        File q;
         byte[] quoteBytes = Base64.decodeBase64(quote);
-        q = saveFile(getQuoteFileName(sessionId), quoteBytes);
+        File q = saveFile(getQuoteFileName(sessionId), quoteBytes);
         return q;
     }
 
     private File saveNonce(String nonce, String sessionId) throws IOException {
 //          byte[] nonceBytes = new BASE64Decoder().decodeBuffer(nonce);
-        File n;
         byte[] nonceBytes = Base64.decodeBase64(nonce);
-        n = saveFile(getNonceFileName(sessionId), nonceBytes);
+        File n = saveFile(getNonceFileName(sessionId), nonceBytes);
         return n;
     }
 
@@ -516,6 +502,9 @@ public class CitrixClient {
         if (iter.hasNext()) {
             h = (Host) iter.next();
         }
+        if (h == null) {
+            throw new IllegalStateException("Cannot find Citrix Xen host");
+        }
 
         response.setClientIp(hostIpAddress);
 
@@ -563,50 +552,52 @@ public class CitrixClient {
     }
 
     public String getSystemUUID() throws NoSuchAlgorithmException, KeyManagementException, XenAPIException, BadServerResponse, XmlRpcException {
-       String resp = "";
-        
-       if( !isConnected()) { connect(); } 
 
-       log.debug( "CitrixClient getSystemUUID: connected to server ["+hostIpAddress+"]");	
-			 
-       Map<String, String> myMap = new HashMap<String, String>();
-       Set<Host> hostList = Host.getAll(connection);
-       Iterator iter = hostList.iterator();
+        if (!isConnected()) {
+            connect();
+        }
+
+        log.debug("CitrixClient getSystemUUID: connected to server [" + hostIpAddress + "]");
+
+        Map<String, String> myMap = new HashMap<String, String>();
+        Set<Host> hostList = Host.getAll(connection);
+        Iterator iter = hostList.iterator();
         // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
         // to throw an exception if the hasNext is false.
-       Host h = null;
-        if (iter.hasNext()) {       
-          h = (Host)iter.next();
+        Host h = null;
+        if (iter.hasNext()) {
+            h = (Host) iter.next();
         }
-        
-       String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
-       
-       int startP = aik.indexOf("<xentxt:System_UUID>");
-       int endP   = aik.indexOf("</xentxt:System_UUID>");
-       // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
-       String systemUUID = aik.substring(startP +"<xentxt:System_UUID>".length(),endP);
-       log.debug("systemUUID == " + systemUUID);
-      
-            
-       
-       resp = systemUUID.toLowerCase();
-       
+        if (h == null) {
+            throw new IllegalStateException("Cannot find Citrix Xen host");
+        }
+
+        String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
+
+        int startP = aik.indexOf("<xentxt:System_UUID>");
+        int endP = aik.indexOf("</xentxt:System_UUID>");
+        // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
+        String systemUUID = aik.substring(startP + "<xentxt:System_UUID>".length(), endP);
+        log.debug("systemUUID == " + systemUUID);
+
+
+
+        String resp = systemUUID.toLowerCase();
+
         // log.trace("stdalex-error getAIKCert: returning back: " + resp);
         return resp;
     }
-    
-    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException,  XmlRpcException {
-        String resp = "";
+
+    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XmlRpcException {
 //        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
 
         //log.debug("CitrixClient: AIKCert: " + AIKCert);
         long startTime = System.currentTimeMillis();
-        
+
         if (AIKCert != null) {
             log.debug("CitrixClient: AIKCert already generated: " + AIKCert);
             return AIKCert;
-        }
-        else {
+        } else {
             if (!isConnected()) {
                 connect();
             }
@@ -622,12 +613,15 @@ public class CitrixClient {
             if (iter.hasNext()) {
                 h = (Host) iter.next();
             }
-            
-            log.debug("TIMETAKEN: get host list: {}", System.currentTimeMillis()-startTime);
+            if (h == null) {
+                throw new IllegalStateException("Cannot find Citrix Xen host");
+            }
+
+            log.debug("TIMETAKEN: get host list: {}", System.currentTimeMillis() - startTime);
             startTime = System.currentTimeMillis();
 
             String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
-            log.debug("TIMETAKEN: citrix api: {}", System.currentTimeMillis()-startTime);
+            log.debug("TIMETAKEN: citrix api: {}", System.currentTimeMillis() - startTime);
 
             int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
             int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
@@ -640,7 +634,7 @@ public class CitrixClient {
             key.tpmAttKeyPEM = cert;  // This is the actual value for AIK!!!!!
 
             //resp = new String( Base64.decodeBase64(key.tpmAttKeyPEM));
-            resp = key.tpmAttKeyPEM;//new String(key.tpmAttKeyPEM);
+            String resp = key.tpmAttKeyPEM;//new String(key.tpmAttKeyPEM);
 
 //       log.trace("stdalex-error getAIKCert: returning back: " + resp);
             AIKCert = resp;

@@ -56,9 +56,9 @@ public class HostTlsPolicy extends MtWilsonClient {
      */
     public com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy editHostTlsPolicy(com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", obj.getHostUuid());
-        map.put("id", obj.getHostUuid().toString()); // See above as to why we are using the value of hostuuid again.
+        map.put("id", obj.getHostUuid()); // See above as to why we are using the value of hostuuid again.
         com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy newObj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
                 .resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON)
                 .put(Entity.json(obj), com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy.class);
@@ -120,7 +120,7 @@ public class HostTlsPolicy extends MtWilsonClient {
      */
     public HostTlsPolicyCollection searchHostTlsPolicy(HostTlsPolicyFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", criteria.hostUuid);
         HostTlsPolicyCollection objCollection = getTargetPathWithQueryParams("hosts/{host_id}/tls-policy", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostTlsPolicyCollection.class);

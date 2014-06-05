@@ -20,20 +20,21 @@ public class TestUpdateSslPort {
     @Test
     public void testUpdateSslPort() throws Exception {
 
-        File shiroIniFile = new File("C:\\Intel\\MtWilson\\conf\\shiro.ini");
+        File shiroIniFile = new File("C:\\Intel\\MtWilson\\conf\\shiro2.ini");
         Ini shiroIni = new Ini();
         shiroIni.load(FileUtils.readFileToString(shiroIniFile));
         shiroIni.setSectionProperty("main","ssl.port",String.valueOf(8181));
         shiroIni.setSectionProperty("main","ssl.enabled",String.valueOf(true));
-        String newShiroConfig = "";
+        StringBuilder newShiroConfig = new StringBuilder();
         Collection<Ini.Section> sections = shiroIni.getSections();
         for (Ini.Section section : sections) {
-            newShiroConfig = newShiroConfig + "[" + section.getName() + "]\r\n";
+            newShiroConfig.append(String.format("[%s]\r\n",section.getName()));
             for (String sectionKey : section.keySet()) {
-                newShiroConfig = newShiroConfig + sectionKey + " = " + section.get(sectionKey) + "\r\n";
+                newShiroConfig.append(String.format("%s = %s\r\n",sectionKey,section.get(sectionKey)));
             }
         }
-        FileUtils.writeStringToFile(shiroIniFile, newShiroConfig);
+        
+        FileUtils.writeStringToFile(shiroIniFile, newShiroConfig.toString());
 
     }
     

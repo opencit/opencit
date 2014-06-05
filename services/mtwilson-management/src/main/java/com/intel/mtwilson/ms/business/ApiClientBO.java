@@ -36,8 +36,10 @@ import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserComment;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -193,7 +195,7 @@ public class ApiClientBO extends BaseBO {
                 apiClientX509.setUuid_hex(new UUID().toString());
             
             // Feb 12, 2014: Adding the reference to the user table in the x509 table.
-            apiClientX509.setUser_uuid_hex(userUuid.toString());
+            apiClientX509.setUser_uuid_hex(userUuid);
             
             apiClientX509.setCertificate(apiClientRequest.getCertificate());
             apiClientX509.setEnabled(false);
@@ -325,7 +327,7 @@ public class ApiClientBO extends BaseBO {
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);
             // Clear the existing roles and update it with the new ones only if specified by the user
-            if (apiClientUpdateRequest.roles != null && apiClientUpdateRequest.roles.length > 0) {
+            if ((apiClientUpdateRequest.roles != null) && (apiClientUpdateRequest.roles.length > 0) && (userLoginCertificate != null)) {
                 // Let us first delete the existing roles
                 log.debug("Looking for existing roles for user login certificate {}", userLoginCertificate.getId());
                 List<com.intel.mtwilson.user.management.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
@@ -418,8 +420,8 @@ public class ApiClientBO extends BaseBO {
      * @param apiClientRequest 
      */
     public void update(ApiClientUpdateRequest apiClientRequest, String uuid) {
-        ApiClientX509 apiClientX509 = null;
-        String userName = null;
+        ApiClientX509 apiClientX509;
+        String userName;
         try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
 
@@ -483,7 +485,7 @@ public class ApiClientBO extends BaseBO {
      * @param apiClientX509
      * @return 
      */
-    private ApiClientInfo toApiClientInfo(ApiClientX509 apiClientX509) {
+    private ApiClientInfo toApiClientInfo(ApiClientX509 apiClientX509) throws SQLException, IOException {
         ApiClientInfo info = new ApiClientInfo();
         info.certificate = apiClientX509.getCertificate();
         info.fingerprint = apiClientX509.getFingerprint();
@@ -495,9 +497,24 @@ public class ApiClientBO extends BaseBO {
         info.status = apiClientX509.getStatus();
         info.comment = apiClientX509.getComment();
         // set the roles array
-        ArrayList<String> roleNames = new ArrayList<String>();
+        ArrayList<String> roleNames = new ArrayList<>();
+        /*
         for(ApiRoleX509 role : apiClientX509.getApiRoleX509Collection()) {
             roleNames.add(role.getApiRoleX509PK().getRole());
+        }
+        */
+        // set the roles array from new user login certificate tables
+        // TODO:  instead of using LoginDAO here,  use the UserLoginCertificateRepository or the RoleRepository
+        try(LoginDAO dao = MyJdbi.authz()) {
+            log.debug("searching for user login certificate with sha1 {}", Sha1Digest.digestOf(info.certificate).toHexString());
+            UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateBySha1(Sha1Digest.digestOf(info.certificate).toByteArray());
+            log.debug("found user login certificate {}", userLoginCertificate.getId().toString());
+            List<com.intel.mtwilson.user.management.rest.v2.model.Role> v2roles = dao.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+            log.debug("found {} roles", v2roles.size());
+            for(com.intel.mtwilson.user.management.rest.v2.model.Role v2role : v2roles) {
+                log.debug("found role name: {}", v2role.getRoleName());
+                roleNames.add(v2role.getRoleName());
+            }
         }
         info.roles = roleNames.toArray(new String[0]);
         return info;
@@ -580,7 +597,7 @@ public class ApiClientBO extends BaseBO {
                 // no criteria means return all records
                 list = apiClientX509JpaController.findApiClientX509Entities();
             }
-            ArrayList<ApiClientInfo> response = new ArrayList<ApiClientInfo>();
+            ArrayList<ApiClientInfo> response = new ArrayList<>();
             if( list == null ) {
                 return response; // empty list
             }

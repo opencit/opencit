@@ -123,9 +123,9 @@ public class TxtHost {
         if( connectionString == null) {
             if (ipAddress != null && port != null) {
                 // for backwards compatibility with cilents that don't submit a connection string for intel hosts
-                connStr = ConnectionString.forIntel(ipAddress.toString(), port);
+                connStr = ConnectionString.forIntel(ipAddress, port);
                 // return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
-            }            
+            }
         } else {
             // Let us first check if the user already has specified the connection string in the correct format. If yes, then return back the connection
             // string since we do not need to do any formatting.
@@ -145,6 +145,7 @@ public class TxtHost {
                 }           
             }
         }
+        if( connStr == null ) { return null; }
         // Now return back the properly formatted connection string.
         return connStr.getConnectionStringWithPrefix();
     }

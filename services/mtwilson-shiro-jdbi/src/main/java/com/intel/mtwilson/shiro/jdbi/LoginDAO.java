@@ -273,8 +273,10 @@ public interface LoginDAO extends Closeable {
     @SqlUpdate("insert into mw_request_log (instance,received,source,digest,content) values (:instance,:received,:source,:digest,:content)")
     void insertRequestLogEntry(@BindBean RequestLogEntry requestLogEntry);
     @SqlQuery("select instance, received, source, digest from mw_request_log where digest=:digest")
-    List<RequestLogEntry> findRequestLogEntryByDigest(@BindIn("digest") String digestBase64);
+    List<RequestLogEntry> findRequestLogEntryByDigest(@Bind("digest") String digestBase64);
     @SqlQuery("select instance, received, source, digest from mw_request_log where received is not null order by received asc limit 1")
     RequestLogEntry findRequestLogEntryByEarliestDate();
+    @SqlUpdate("delete from mw_request_log where received < :notBefore")
+    void deleteRequestLogEntriesEarlierThan(@Bind("notBefore") Date notBefore);
     
 }

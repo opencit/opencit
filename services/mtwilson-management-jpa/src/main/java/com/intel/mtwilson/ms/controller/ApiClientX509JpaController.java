@@ -33,18 +33,19 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
 
     @Override
     public EntityManager getEntityManager() {
-        return emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
+        if( em == null ) { throw new IllegalStateException("Cannot obtain entity manager"); }
+        return em;
     }
 
     public void create(ApiClientX509 apiClientX509) {
         if (apiClientX509.getApiRoleX509Collection() == null) {
             apiClientX509.setApiRoleX509Collection(new ArrayList<ApiRoleX509>());
         }
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
-            Collection<ApiRoleX509> attachedApiRoleX509Collection = new ArrayList<ApiRoleX509>();
+            Collection<ApiRoleX509> attachedApiRoleX509Collection = new ArrayList<>();
             for (ApiRoleX509 apiRoleX509CollectionApiRoleX509ToAttach : apiClientX509.getApiRoleX509Collection()) {
                 apiRoleX509CollectionApiRoleX509ToAttach = em.getReference(apiRoleX509CollectionApiRoleX509ToAttach.getClass(), apiRoleX509CollectionApiRoleX509ToAttach.getApiRoleX509PK());
                 attachedApiRoleX509Collection.add(apiRoleX509CollectionApiRoleX509ToAttach);
@@ -62,9 +63,7 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
             }
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 

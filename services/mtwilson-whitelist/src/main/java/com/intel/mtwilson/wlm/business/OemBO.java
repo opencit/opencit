@@ -64,7 +64,7 @@ public class OemBO extends BaseBO {
      * @return 
      */
     public String updateOem(OemData oemData, String uuid) {
-        TblOem tblOem = null;
+        TblOem tblOem;
         try {
             // Feature: 917 - Added support for UUID
             if (uuid != null && !uuid.isEmpty())
@@ -132,7 +132,7 @@ public class OemBO extends BaseBO {
      * @return 
      */
     public String deleteOem(String oemName,  String uuid) {
-        TblOem tblOem = null;
+        TblOem tblOem;
         try{
             // Feature: 917 - Added support for UUID
             if (uuid != null && !uuid.isEmpty())

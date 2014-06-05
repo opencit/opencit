@@ -8,9 +8,11 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import java.net.URL;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 /**
  *
@@ -51,6 +53,10 @@ public class DeployTagCertificate extends MtWilsonClient {
     public void deployTagCertificate(UUID certificateId, String host) {
         log.debug("target: {}", getTarget().getUri().toString());
         Response obj = getTarget().path("rpc/deploy-tag-certificate").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(certificateId));
+        if( !obj.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
+            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
+            throw new WebApplicationException("Deploy tag certificate failed");
+        }
     }
         
 }

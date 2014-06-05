@@ -15,11 +15,14 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-//import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.TpmQuote;
+import com.xensource.xenapi.Types;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -31,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import org.apache.xmlrpc.XmlRpcException;
 
 
 /**
@@ -101,10 +105,10 @@ public class CitrixHostAgent implements HostAgent{
         long getHostInfoStart = System.currentTimeMillis();
         //throw new UnsupportedOperationException("Not supported yet.");
         TxtHostRecord record = new TxtHostRecord();
-        HostInfo info = null;
+        HostInfo info;
         try {
             info = this.client.getHostInfo();
-        } catch(Exception ex){
+        } catch(NoSuchAlgorithmException | KeyManagementException | MalformedURLException | Types.XenAPIException | XmlRpcException ex){
             log.error("getHostDetails getHostInfo caught: " + ex.getMessage());
             throw new IOException("Cannot get Citrix host info: "+ex.getMessage(), ex);
        }
@@ -265,18 +269,19 @@ BwIDAQAB
 
     @Override
     public Map<String, String> getHostAttributes()  {
-        HashMap<String,String> hm = new HashMap<String, String>();
+        HashMap<String,String> hm = new HashMap<>();
         // Retrieve the data from the host and add it into the hashmap
-        HostInfo hostInfo = null;
+        HostInfo hostInfo;
         try {
             hostInfo = client.getHostInfo();
+            // TODO: see comment from getHostAttributes in the IntelHostAgent:  Currently we are just adding the UUID of th host. Going ahead we can add additional details
         } catch (Exception ex) {
             log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
         }
         try {
             // Currently we are just adding the UUID of th host. Going ahead we can add additional details
             hm.put("Host_UUID", client.getSystemUUID());
-        } catch(Exception ex){
+        } catch(NoSuchAlgorithmException | KeyManagementException | Types.XenAPIException | XmlRpcException ex){
             throw new ASException(ex);
         }
         return hm;
@@ -287,7 +292,7 @@ BwIDAQAB
         try {
             client.setAssetTag(tag);
         }
-        catch(Exception e) {
+        catch(Types.XenAPIException | XmlRpcException | NoSuchAlgorithmException | KeyManagementException e) {
             log.error("Unexpected error while setting asset tag", e);
             throw new IOException(e);
         }

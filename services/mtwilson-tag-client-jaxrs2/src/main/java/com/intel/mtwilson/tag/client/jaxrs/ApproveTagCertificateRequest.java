@@ -11,6 +11,7 @@ import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 /**
  *
@@ -54,6 +55,9 @@ public class ApproveTagCertificateRequest extends MtWilsonClient {
     public void provisionTagCertificate(UUID certificateRequestId, byte[] certificate) {
         log.debug("target: {}", getTarget().getUri().toString());
         Response obj = getTarget().path("rpc/approve-tag-certificate-request").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(certificateRequestId));
+        if( !obj.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
+            throw new IllegalStateException("Tag provisioning failed");
+        }
     }
         
 }

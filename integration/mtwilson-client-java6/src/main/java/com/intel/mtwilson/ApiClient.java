@@ -1222,7 +1222,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     @Override
     public boolean registerApiClient(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException {
        String result = text(httpPost(msurl("/apiclient/register"), toJSON(apiClient)));
-        return true;        
+//        return true;        
+       return "OK".equalsIgnoreCase(result);
     }
     // Credential Management API
     

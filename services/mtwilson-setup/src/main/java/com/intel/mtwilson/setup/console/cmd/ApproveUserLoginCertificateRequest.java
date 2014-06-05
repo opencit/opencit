@@ -15,6 +15,8 @@ import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -35,9 +37,9 @@ public class ApproveUserLoginCertificateRequest implements Command {
     }
             
     // get the 3rd arg if it's usrename roles permissions, or the 2nd arg if it's username permissions
-    private List<RolePermission> getPermissions(String[] args) throws Exception {
+    private List<RolePermission> getPermissions(String[] args) {
         ArrayList<RolePermission> list = new ArrayList<>();
-        int i = 0;
+        int i;
         
         if (options.getBoolean("permissions")) {
 
@@ -84,9 +86,9 @@ public class ApproveUserLoginCertificateRequest implements Command {
      * @return List of validated roles.
      * @throws Exception 
      */
-    private List<Role> getRoles(String args[]) throws Exception {
+    private List<Role> getRoles(String args[]) throws SQLException, IOException  {
         List<Role> requestedRoles = new ArrayList<>();
-        String[] roles = null;
+        String[] roles;
         
         if (options.getBoolean("roles")) {
            roles = args[2].split(",");

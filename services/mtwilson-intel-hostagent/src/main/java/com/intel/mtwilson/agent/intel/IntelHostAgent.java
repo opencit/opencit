@@ -183,6 +183,7 @@ public class IntelHostAgent implements HostAgent {
     @Override
     public PublicKey getAik() {
         X509Certificate aikcert = getAikCertificate();
+        if( aikcert == null ) { return null; }
         return aikcert.getPublicKey();
     }
 
@@ -193,13 +194,13 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public Map<String, String> getHostAttributes() throws IOException {
-       HashMap<String,String> hm = new HashMap<String, String>();
+       HashMap<String,String> hm = new HashMap<>();
         // Retrieve the data from the host and add it into the hashmap
         HostInfo hostInfo = trustAgentClient.getHostInfo();
         // Currently we are just adding the UUID of th host. Going ahead we can add additional details
-        if (hostInfo != null)
+        if (hostInfo != null) {
             hm.put("Host_UUID", hostInfo.getHostUUID().trim());
-        
+        }
         return hm;
     }
     

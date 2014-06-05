@@ -35,10 +35,6 @@ import org.slf4j.LoggerFactory;
 public class ApiCommand {
     private static Logger log = LoggerFactory.getLogger(ApiCommand.class);
     
-    private static interface Command {
-        void run(String[] args);
-    }
-    
     private static String getLocalhost() {
         try {
             InetAddress addr = InetAddress.getLocalHost();
@@ -364,8 +360,9 @@ public class ApiCommand {
         System.err.println("    Will prompt for username and password.");
         System.err.println("    Will create username.jks in directory.");
     }
-    
+    /*
     private static void printUsage(String command, String parameters) {
         System.err.println("Usage: mtwilson [configuration options] "+command+" "+parameters);
     }
+    */
 }

@@ -23,7 +23,8 @@ import org.eclipse.persistence.config.HintValues;
 import org.eclipse.persistence.config.QueryHints;
 
 /**
- *
+ * TODO:  this is part of the mtwilson-portal project and should be moved to
+ * a new mtwilson-portal-jpa project.
  * @author jbuhacoff
  */
 public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser> implements Serializable {
@@ -52,15 +53,16 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
 
     public void edit(MwPortalUser mwPortalUser) throws NonexistentEntityException, MSDataException {
         EntityManager em = getEntityManager();
+        Integer id = null;
         try {
             em.getTransaction().begin();
             mwPortalUser = em.merge(mwPortalUser);
+            id = mwPortalUser.getId();
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = mwPortalUser.getId();
-                if (findMwPortalUser(id) == null) {
+                if (id != null && findMwPortalUser(id) == null) {
                     throw new NonexistentEntityException("The mwPortalUser with id " + id + " no longer exists.");
                 }
             }
@@ -195,7 +197,7 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
     }
 
     public List<MwPortalUser> findMwPortalUsersWithEnabledStatus(Boolean enabled) {
-        List<MwPortalUser> portalUsers = new ArrayList<MwPortalUser>();
+        List<MwPortalUser> portalUsers;
         EntityManager em = getEntityManager();
 
         try {
@@ -205,6 +207,9 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
 
             portalUsers = query.getResultList();
+            if( portalUsers == null ) {
+                portalUsers = new ArrayList<>();
+            }
 
         } finally {
             em.close();

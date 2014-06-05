@@ -12,9 +12,11 @@ import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 /**
  *
@@ -86,6 +88,10 @@ public class KvAttributes extends MtWilsonClient {
         HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response kvObj = getTarget().path("tag-kv-attributes/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        if( !kvObj.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
+            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
+            throw new WebApplicationException("Delete key-value attribute failed");
+        }
     }
     
     /**

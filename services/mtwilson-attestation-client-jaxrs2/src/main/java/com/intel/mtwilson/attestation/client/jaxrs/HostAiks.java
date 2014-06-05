@@ -34,8 +34,8 @@ public class HostAiks extends MtWilsonClient {
     
     public HostAikCollection searchHostAiks(HostAikFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("host_id", criteria.hostUuid.toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("host_id", criteria.hostUuid);
         HostAikCollection objCollection = getTargetPathWithQueryParams("hosts/{host_id}/aiks", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostAikCollection.class);
         return objCollection;
@@ -43,7 +43,7 @@ public class HostAiks extends MtWilsonClient {
     
     public HostAik retrieveHostAik(String hostUuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", hostUuid);
         // We are passing the host UUID to "id" also even though it will not be used (without this framework treats this call as a 
         // search call instead of a retrieve call. Since there will be only one aik for a host, we can retrieve

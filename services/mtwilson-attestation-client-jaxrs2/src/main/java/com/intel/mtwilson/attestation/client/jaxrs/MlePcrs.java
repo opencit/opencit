@@ -64,8 +64,8 @@ public class MlePcrs extends MtWilsonClient {
      */
     public MlePcr createMlePcr(MlePcr obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", obj.getMleUuid().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", obj.getMleUuid());
         MlePcr newObj = getTarget().path("mles/{mle_id}/pcrs").resolveTemplates(map)
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), MlePcr.class);
         return newObj;
@@ -91,7 +91,7 @@ public class MlePcrs extends MtWilsonClient {
      */
     public void deleteMlePcr(String mleUuid, String pcrIndex) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", mleUuid);
         map.put("id", pcrIndex); 
         Response obj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
@@ -125,8 +125,8 @@ public class MlePcrs extends MtWilsonClient {
      */
     public MlePcr editMlePcr(MlePcr obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
-        map.put("mle_id", obj.getMleUuid().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", obj.getMleUuid());
         map.put("id", obj.getPcrIndex()); 
         MlePcr newObj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), MlePcr.class);
         return newObj;

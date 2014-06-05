@@ -66,7 +66,7 @@ public class PcrEventLogIntegrity extends BaseRule {
                 }
                 else {
                     List<Measurement> measurements = eventLog.getEventLog();
-                    if( measurements == null || measurements.isEmpty() ) {
+                    if( measurements != null ) {
                         Sha1Digest expectedValue = computeHistory(measurements); // calculate expected' based on history
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {

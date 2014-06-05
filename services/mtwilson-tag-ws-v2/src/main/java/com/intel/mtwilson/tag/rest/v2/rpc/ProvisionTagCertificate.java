@@ -11,6 +11,7 @@ import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
@@ -34,10 +35,14 @@ import com.intel.mtwilson.tag.selection.xml.SelectionType;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -128,18 +133,21 @@ public class ProvisionTagCertificate  {
      * @return
      * @throws IOException
      */
-    public Certificate createOne(String subject, SelectionsType selections, HttpServletRequest request, HttpServletResponse response) throws Exception {        
+    public Certificate createOne(String subject, SelectionsType selections, HttpServletRequest request, HttpServletResponse response) 
+            throws IOException, ApiException, SignatureException, SQLException, IllegalArgumentException {        
         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         TagCertificateAuthority ca = new TagCertificateAuthority(configuration);
         // if the subject is an ip address or hostname, resolve it to a hardware uuid with mtwilson - if the host isn't registered in mtwilson we can't get the hardware uuid so we have to reject the request
         if( !UUID.isValid(subject)) {
             subject = ca.findSubjectHardwareUuid(subject);
             if (subject == null) {
-                throw new Exception("Invalid subject specified in the call");
+                log.error("Subject specified is not valid.");
+                throw new IllegalArgumentException("Invalid subject specified in the call");
             }
         }
         if( selections == null ) {
-            throw new Exception("Invalid selections");
+            log.error("Selections specified is not valid.");
+            throw new IllegalArgumentException("Invalid selections specified.");
         }
         // if external ca is configured then we only save the request to the database and indicate async processing in our response
         if( configuration.isTagProvisionExternal() || isAsync(request) ) {
@@ -272,15 +280,23 @@ public class ProvisionTagCertificate  {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
-    public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
+    public byte[] createOneFromJsonToBytes(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) 
+            throws IOException, ApiException, SignatureException, SQLException, CertificateException  {        
         Certificate certificate = createOneJson(locator, json, request, response);
-        return certificate.getCertificate();
+        if (certificate != null)
+            return certificate.getCertificate();
+        else {
+            log.error("Error creating the certificate.");
+            throw new CertificateException("Error creating the certificate.");
+        }
     }
+    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RequiresPermissions("tag_certificates:create")         
-    public Certificate createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {        
+    public Certificate createOneJson(@BeanParam CertificateRequestLocator locator, String json, @Context HttpServletRequest request, @Context HttpServletResponse response) 
+            throws IOException, ApiException, SignatureException, SQLException {        
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
              throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
@@ -312,15 +328,23 @@ public class ProvisionTagCertificate  {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
-    public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+    public byte[] createOneFromXmlToBytes(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) 
+            throws IOException, ApiException, SignatureException, SQLException, CertificateException {
         Certificate certificate = createOneXml(locator, xml, request, response);
-        return certificate.getCertificate();
+        if (certificate != null)
+            return certificate.getCertificate();
+        else {
+            log.error("Error creating the certificate.");
+            throw new CertificateException("Error creating the certificate.");
+        }
     }
+    
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     @RequiresPermissions("tag_certificates:create")         
-    public Certificate createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+    public Certificate createOneXml(@BeanParam CertificateRequestLocator locator, String xml, @Context HttpServletRequest request, @Context HttpServletResponse response) 
+            throws IOException, ApiException, SignatureException, SQLException  {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
              throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
@@ -352,7 +376,8 @@ public class ProvisionTagCertificate  {
     @Consumes(CryptoMediaType.MESSAGE_RFC822)
     @Produces(CryptoMediaType.APPLICATION_PKIX_CERT)
     @RequiresPermissions("tag_certificates:create")         
-    public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) throws Exception {
+    public byte[] createOneEncryptedXml(@BeanParam CertificateRequestLocator locator, byte[] message, @Context HttpServletRequest request, @Context HttpServletResponse response) 
+            throws FileNotFoundException, IOException, ApiException, SignatureException, SQLException, CertificateException {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         
         /*
@@ -390,7 +415,12 @@ public class ProvisionTagCertificate  {
                 //return createOneFromXmlToBytes(locator, xml, request, response); // don't call this because it checks if encryption is required and doesn't "know" that we just decrypted the file
                 SelectionsType selections = Util.fromXml(xml);
                 Certificate certificate = createOne(getSubject(request, locator), selections, request, response);
-                return certificate.getCertificate();
+                if (certificate != null)
+                    return certificate.getCertificate();
+                else {
+                    log.error("Error creating the certificate.");
+                    throw new CertificateException("Error creating the certificate.");
+                }
             }
             finally {
                 // TODO: delete all the temporary files - won't be necessary when the decryption moves to java and it's all in memory

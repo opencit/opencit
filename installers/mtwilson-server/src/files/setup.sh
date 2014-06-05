@@ -199,6 +199,7 @@ auto_install "Installer requirements" "APICLIENT"
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
+chmod 600 /etc/intel/cloudsecurity/*.properties
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
   default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ -z "$default_mtwilson_tls_policy_name" ]; then
@@ -213,6 +214,8 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
     # in a future release we will have a UI mechanism to manage this.
   #fi
 else
+    touch /etc/intel/cloudsecurity/mtwilson.properties
+    chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
     update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
     # for a new install we generate a random password to protect all the tls keystores. (each host record has a tls policy and tls keystore field)
@@ -239,14 +242,14 @@ update_property_in_file "dbcp.validation.on.return" /etc/intel/cloudsecurity/mtw
 
 
 # copy default logging settings to /etc
-chmod 700 logback.xml
+chmod 600 logback.xml
 cp logback.xml /etc/intel/cloudsecurity
-chmod 700 logback-stderr.xml
+chmod 600 logback-stderr.xml
 cp logback-stderr.xml /etc/intel/cloudsecurity
 
 # copy shiro.ini api security file
 if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
-  chmod 700 shiro.ini shiro-localhost.ini
+  chmod 600 shiro.ini shiro-localhost.ini
   cp shiro.ini shiro-localhost.ini /etc/intel/cloudsecurity
 fi
 
@@ -277,7 +280,7 @@ fi
 
 # copy extensions.cache file
 if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 700 extensions.cache
+  chmod 600 extensions.cache
   cp extensions.cache /opt/mtwilson/configuration
 fi
 
@@ -418,8 +421,12 @@ if using_mysql; then
   
   if [ -z "$SKIP_DATABASE_INIT" ]; then
     # mysql db init here
-  mysql_create_database 
-  # mysql db init end
+    if ! mysql_create_database; then
+      mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
+      mysqladmin -u "$MYSQL_USERNAME" password "$MYSQL_PASSWORD"
+      mysql_create_database
+    fi
+    # mysql db init end
   else
     echo_warning "Skipping init of database"
   fi 

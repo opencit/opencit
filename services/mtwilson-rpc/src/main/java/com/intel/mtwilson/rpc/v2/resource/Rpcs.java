@@ -9,19 +9,11 @@ import com.intel.mtwilson.rpc.v2.model.Rpc;
 import com.intel.mtwilson.rpc.v2.model.RpcFilterCriteria;
 import com.intel.mtwilson.rpc.v2.model.RpcCollection;
 import com.intel.mtwilson.jaxrs2.NoLinks;
-import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
-import com.intel.mtwilson.jaxrs2.server.resource.AbstractSimpleResource;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.rpc.v2.model.RpcLocator;
 import com.intel.mtwilson.rpc.v2.model.RpcPriv;
-import com.intel.mtwilson.v2.rpc.RpcUtil;
 import com.thoughtworks.xstream.XStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 //import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
@@ -29,15 +21,12 @@ import javax.ws.rs.BeanParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
 import org.glassfish.jersey.message.MessageBodyWorkers;
 
 /**
@@ -104,9 +93,14 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
     public Response getRpcInput(@BeanParam RpcLocator locator) {
         log.debug("rpc get input, sending fake data");
         RpcPriv rpc = repository.retrieveInput(locator);
-        rpc.setInput("<input><sample/></input>".getBytes());
-        Response response = Response.ok(rpc.getInput(), "application/octet-stream" /*rpc.getInputContentType()*/).build();
-        return response;
+        if (rpc != null) {
+            rpc.setInput("<input><sample/></input>".getBytes());
+            Response response = Response.ok(rpc.getInput(), "application/octet-stream" /*rpc.getInputContentType()*/).build();
+            return response;
+        } else {
+            return null;
+        }
+            
     }
 /*
     @Path("/{id}/output")
@@ -164,7 +158,9 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
     @Produces(MediaType.WILDCARD)
     public Object getRpcOutput(@BeanParam RpcLocator locator, @Context HttpServletRequest request) {
         RpcPriv rpc = repository.retrieveOutput(locator); 
-        
+        if (rpc == null) {
+            return null;
+        }
         // convert the intermediate output to client's requested output type
         log.debug("Client requested output type: {}" ,request.getHeader(HttpHeaders.ACCEPT));
 //        rpc.setOutputContentType(MediaType.WILDCARD); //   TODO jersey already has code to find the preferred content type.... use it to extract from the accept header 

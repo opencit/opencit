@@ -15,6 +15,8 @@ conf_dir=/etc/intel/cloudsecurity
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51
+MTWILSON_PID_FILE=/var/run/mtwilson.pid
+MTWILSON_PID_WAIT_FILE=/var/run/mtwilson.pid.wait
 
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
@@ -244,29 +246,77 @@ case "$1" in
         ;;
   start)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
+        if [ -f $MTWILSON_PID_WAIT_FILE ]; then
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
+          if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
+            # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
+            if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
+              echo "Mt Wilson may already be launching [PID: $any_mtwilson_pid]"
+              echo "Use 'mtwilson start --force' to launch anyway"
+              exit 1
+            fi
+            # otherwise if the mtwilson.pid.wait file is more than 2 minutes old, we ignore it and continue
+          fi
+        fi
+        touch $MTWILSON_PID_WAIT_FILE
         if using_glassfish; then
           glassfish_start
+          if [ -n "$GLASSFISH_PID" ]; then
+            echo $GLASSFISH_PID > $MTWILSON_PID_FILE
+          fi
         elif using_tomcat; then
           tomcat_start
+          if [ -n "$TOMCAT_PID" ]; then
+            echo $TOMCAT_PID > $MTWILSON_PID_FILE
+          fi
         fi
+        if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
   stop)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
+        touch $MTWILSON_PID_WAIT_FILE
         if using_glassfish; then
           glassfish_stop
           #glassfish_shutdown
+          if [ -f $MTWILSON_PID_FILE ]; then
+            rm $MTWILSON_PID_FILE
+          fi
         elif using_tomcat; then
           tomcat_stop
           #tomcat_shutdown
+          if [ -f $MTWILSON_PID_FILE ]; then
+            rm $MTWILSON_PID_FILE
+          fi
         fi
+        if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
   restart)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
+        if [ -f $MTWILSON_PID_WAIT_FILE ]; then
+          any_mtwilson_pid=`ps gauxww | grep mtwilson | grep -v grep | awk '{ print $2 }' | tr [:space:] ' ' | sed -e 's/ *$//g'`
+          if [ -n "$any_mtwilson_pid" ] && [ "$2" != "--force" ]; then
+            # if the mtwilson.pid.wait file was touched less than 2 minutes ago, assume there is something in progress:
+            if test `find $MTWILSON_PID_WAIT_FILE -mmin -2`; then
+              echo "Mt Wilson may already be launching [PID: $any_mtwilson_pid]"
+              echo "Use 'mtwilson start --force' to launch anyway"
+              exit 1
+            fi
+            # otherwise if the mtwilson.pid.wait file is more than 2 minutes old, we ignore it and continue
+          fi
+        fi
+        touch $MTWILSON_PID_WAIT_FILE
         if using_glassfish; then
           glassfish_restart
+          if [ -n "$GLASSFISH_PID" ]; then
+            echo $GLASSFISH_PID > $MTWILSON_PID_FILE
+          fi
         elif using_tomcat; then
           tomcat_restart
+          if [ -n "$TOMCAT_PID" ]; then
+            echo $TOMCAT_PID > $MTWILSON_PID_FILE
+          fi
         fi
+        if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
   glassfish-detect)
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi

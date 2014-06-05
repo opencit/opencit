@@ -7,13 +7,11 @@ package com.intel.mtwilson.as.business;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
-import com.intel.mtwilson.api.ApiRequest;
 import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -22,42 +20,23 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
-import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
-import com.intel.mtwilson.security.http.apache.ApacheHttpAuthorization;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
-import com.intel.mtwilson.util.ResourceFinder;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.core.MediaType;
-import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.mtwilson.tag.model.Certificate;
-import java.util.ArrayList;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import java.security.cert.CertificateException;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +65,7 @@ public class AssetTagCertBO extends BaseBO{
      * @return 
      */
     public boolean importAssetTagCertificate(AssetTagCertCreateRequest atagObj, String uuid) {
-        boolean result = false;
+        boolean result;
         X509AttributeCertificate x509AttrCert;
         
         try {
@@ -141,10 +120,7 @@ public class AssetTagCertBO extends BaseBO{
             log.error("Unexpected error during creation of a new asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
-        
-        // Now that the asset tag has been created and added to the DB
-        // Check to see if any host has a matching UUID in the mw_hosts table
-        
+                
         return result;       
     }
     
@@ -189,7 +165,7 @@ public class AssetTagCertBO extends BaseBO{
                     }
                 }
             }
-        }catch(Exception ex){
+        }catch(IOException | ASException | CryptographyException ex){
             log.error("Unexpected error during mapping of host to the asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }       
@@ -204,13 +180,12 @@ public class AssetTagCertBO extends BaseBO{
      * @return 
      */
     public boolean mapAssetTagCertToHostById(AssetTagCertAssociateRequest atagObj) {
-        boolean result = false;
-        Sha1Digest expectedHash = null;
+        boolean result;
         log.debug("mapAssetTagCertToHostById");
         
         // Before we map the asset tag cert to the host, we first need to unmap any associations if it already exists
         try {
-            boolean unmapResult = unmapAssetTagCertFromHostById(atagObj);
+            unmapAssetTagCertFromHostById(atagObj);
             log.debug("Successfully unmapped the asset tag certificate assocation with host {}. ", atagObj.getHostID());
             
         } catch (Exception ex) {
@@ -241,7 +216,7 @@ public class AssetTagCertBO extends BaseBO{
                     // the PCREvent column.
                     Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
                     log.debug("mapAssetTagCertToHostById : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
-                    expectedHash = Sha1Digest.ZERO.extend(tag);
+                    Sha1Digest expectedHash = Sha1Digest.ZERO.extend(tag);
                     log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
 
                     atagCert.setPCREvent(expectedHash.toByteArray());
@@ -318,8 +293,8 @@ public class AssetTagCertBO extends BaseBO{
      * @return 
      */
     public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest atagObj, String uuid) {
-        boolean result = false;
-        List<MwAssetTagCertificate> atagCerts = null;
+        boolean result;
+        List<MwAssetTagCertificate> atagCerts;
         try {
             // Find the asset tag certificate for the specified Sha256Hash value
             if (uuid != null && !uuid.isEmpty()) {
@@ -398,8 +373,6 @@ public class AssetTagCertBO extends BaseBO{
     }
     
     public MwAssetTagCertificate findValidAssetTagCertForHost(Integer hostID){
-        MwAssetTagCertificate atagCert = null;
-
         try {
             // Find the asset tag certificates for the specified UUID of the host. Note that this might return back multiple
             // values. We need to evaluate each of the certificates to make sure that they are valid
@@ -433,7 +406,7 @@ public class AssetTagCertBO extends BaseBO{
             throw new ASException(ex);
         }
         
-        return atagCert;
+        return null;
     }
 
     /**
@@ -456,21 +429,20 @@ public class AssetTagCertBO extends BaseBO{
             X509AttributeCertificate atagAttrCertForHost = X509AttributeCertificate.valueOf(atagObj.getCertificate());
             
             List<X509Certificate> atagCaCerts = null;
-            try {
-                InputStream atagCaIn = new FileInputStream(My.configuration().getAssetTagCaCertificateFile()); //ResourceFinder.getFile("AssetTagCA.pem")); 
-                //InputStream atagCaIn = new FileInputStream(new File("c:/development/AssetTagCA.pem")); 
+            try (InputStream atagCaIn = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
                 atagCaCerts = X509Util.decodePemCertificates(IOUtils.toString(atagCaIn));
-                IOUtils.closeQuietly(atagCaIn);
+                //IOUtils.closeQuietly(atagCaIn);
                 log.debug("Added {} certificates from AssetTagCA.pem", atagCaCerts.size());
-            }
-            catch(Exception ex) {
-                log.error("Error loading the Asset Tag pem file to extract the CA certificate(s).");
+            } catch(IOException | CertificateException ex) {
+                log.error("Error loading the Asset Tag pem file to extract the CA certificate(s).",ex);
             }
             
             // The below isValid function verifies both the signature and the dates.
-            for (X509Certificate atagCACert : atagCaCerts) {
-                if (atagAttrCertForHost.isValid(atagCACert))
-                    return true;
+            if (atagCaCerts != null ) {
+                for (X509Certificate atagCACert : atagCaCerts) {
+                    if (atagAttrCertForHost.isValid(atagCACert))
+                        return true;
+                }
             }
             
         } catch (Exception ex) {

@@ -33,6 +33,8 @@ import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
+import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
 import java.security.KeyPair;
@@ -41,11 +43,13 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -288,7 +292,8 @@ public class CreateAdminUser extends DatabaseSetupTask {
         return adminPasswordRolePermissions;
     }
 
-    private MwPortalUser createMwPortalUser(PrivateKey privateKey, X509Certificate certificate, X509Certificate... cacerts) throws Exception {
+    private MwPortalUser createMwPortalUser(PrivateKey privateKey, X509Certificate certificate, X509Certificate... cacerts) 
+            throws IOException, KeyManagementException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException  {
         MwPortalUser portalUser = My.jpa().mwPortalUser().findMwPortalUserByUserName(username);
         
         if (portalUser == null) {
@@ -339,7 +344,9 @@ public class CreateAdminUser extends DatabaseSetupTask {
         return portalUser;
     }
 
-    private UserLoginCertificate createUserLoginCertificate(LoginDAO loginDAO, User user) throws Exception {
+    private UserLoginCertificate createUserLoginCertificate(LoginDAO loginDAO, User user) 
+            throws FileNotFoundException, IOException, CryptographyException, CertificateException, NoSuchAlgorithmException, KeyManagementException, 
+            KeyStoreException, NonexistentEntityException, MSDataException  {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         if (userLoginCertificate == null) {
             
@@ -380,7 +387,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
                 for(Fault fault : certificateBuilderFaults) {
                     log.error(fault.toString());
                 }
-                throw new Exception("Cannot generate certificate");
+                throw new CertificateException("Cannot generate certificate");
             }
             
             userLoginCertificate = new UserLoginCertificate();
@@ -397,6 +404,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             log.debug("Created user login certificate with sha256 {}", Sha256Digest.valueOf(userLoginCertificate.getSha256Hash()).toHexString());
             // now we have to store the private key somewhere.... for now we will create a portal user keystore so the admin user can use these privileges when logged in to portal
             MwPortalUser portalUser = createMwPortalUser(keyPair.getPrivate(), certificate, cacert);
+            log.debug("Created the portal user {} successfully", portalUser.getUsername());
         }
         return userLoginCertificate;
     }
@@ -441,10 +449,12 @@ public class CreateAdminUser extends DatabaseSetupTask {
             // password-based login
             UserLoginPassword userLoginPassword = createUserLoginPassword(loginDAO, user);
             List<RolePermission> adminPasswordRolePermissions = createAdminUserPasswordPermissions(loginDAO, adminRole, userLoginPassword);
+            log.debug("Added {} password roles for admin user.", adminPasswordRolePermissions.size());
 
             // now prepare the x509 certificate login
             UserLoginCertificate userLoginCertificate = createUserLoginCertificate(loginDAO, user);
             List<RolePermission> adminCertificateRolePermissions = createAdminUserCertificatePermissions(loginDAO, adminRole, userLoginCertificate);
+            log.debug("Added {} certificate roles for admin user.", adminCertificateRolePermissions.size());
 
         }
     }
@@ -468,7 +478,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
     
     // TODO:  duplicated code from setup task CreateSamlCertificate , should be 
     // refactored to a SAML repository or business layer
-    private X509Certificate getSamlCertificate() throws Exception {
+    private X509Certificate getSamlCertificate() throws KeyManagementException, KeyStoreException {
         SimpleKeystore samlKeystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
         for (String alias : samlKeystore.aliases()) {
             log.debug("SAML Keystore alias: {}", alias);
@@ -486,7 +496,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
     }
     // TODO:  duplicated code from setup task CreateTlsCertificate , should be 
     // refactored to a TLS repository or business layer
-    private X509Certificate getTlsCertificate() throws Exception {
+    private X509Certificate getTlsCertificate() throws KeyManagementException, KeyStoreException  {
         SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), My.configuration().getTlsKeystorePassword());
         for (String alias : tlsKeystore.aliases()) {
             log.debug("TLS Keystore alias: {}", alias);

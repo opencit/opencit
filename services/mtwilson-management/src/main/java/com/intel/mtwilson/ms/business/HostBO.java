@@ -45,7 +45,12 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -269,16 +274,14 @@ public class HostBO extends BaseBO {
                     // Bug 799 & 791: Need to append the platform name too
                     String platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty())
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0] + "_" + platformName + "_" + hostObj.VMM_Name;
                     else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0] + "_" +  hostObj.VMM_Name;                    
                 } else if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_GLOBAL) {
                     // Bug #951 where in we need to append the platform name to the global white lists also.
                     String platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty())
                         hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.VMM_Name;
                 }
         }
         hostConfigObj.setTxtHostRecord(hostObj);
@@ -376,7 +379,7 @@ public class HostBO extends BaseBO {
      * @return
      */
     private boolean isHostConfigured(TxtHostRecord hostObj) {
-        boolean isHostConfigured = false;
+        boolean isHostConfigured;
         try {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getASEntityManagerFactory());
 
@@ -408,22 +411,21 @@ public class HostBO extends BaseBO {
      * @return : True if the host is registered successfully.
      */
     public boolean registerHost(TxtHostRecord hostObj) {
-        HostConfigData hostConfigObj = null;
-        boolean registerStatus = false;
 
         try {
-
             if (hostObj != null) {
 
-                hostConfigObj = new HostConfigData();
+                HostConfigData hostConfigObj = new HostConfigData();
                 hostConfigObj.setTxtHostRecord(hostObj);
 
                 // Set the default parameters
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
+                return (registerHostFromCustomData(hostConfigObj));
+            } else {
+                log.error("Input not specified for registering the host.");
+                return false;
             }
-
-            registerStatus = registerHostFromCustomData(hostConfigObj);
 
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -433,7 +435,6 @@ public class HostBO extends BaseBO {
             log.error("Unexpected errror during host registration. ", ex);
             throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
-        return registerStatus;
     }
 
  
@@ -448,7 +449,7 @@ public class HostBO extends BaseBO {
      */
     public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) {
         HostConfigDataList hostList = new HostConfigDataList();
-        HostConfigResponseList hostResponseList = null;
+        HostConfigResponseList hostResponseList;
 
         try {
 
@@ -494,7 +495,7 @@ public class HostBO extends BaseBO {
         HostConfigResponseList results = new HostConfigResponseList();
         
         try {
-            TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
+            //TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
             log.debug("About to start processing {} the hosts", hostRecords.getHostRecords().size());
         
             // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
@@ -573,17 +574,15 @@ public class HostBO extends BaseBO {
      */
     public boolean registerHostFromCustomData(HostConfigData hostConfigObj) {
 
-        boolean registerStatus = false;
-        TxtHost txtHost;
-
+        boolean registerStatus;
         try {
-
-            TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
-            log.debug("Starting to process the registration for host: " + hostObj.HostName);
+            log.debug("Starting to process the registration for host: " + hostConfigObj.getTxtHostRecord().HostName);
 
             hostConfigObj = getHostMLEDetails(hostConfigObj, true);            
             registerStatus = true;
-            log.debug("Successfully registered the host: " + hostObj.HostName);
+
+            log.debug("Successfully registered the host: " + hostConfigObj.getTxtHostRecord().HostName);
+            return registerStatus;
 
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -593,7 +592,6 @@ public class HostBO extends BaseBO {
             log.error("Unexpected errror during host registration. ", ex);
             throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
-        return registerStatus;
     }
 
     /**
@@ -605,14 +603,14 @@ public class HostBO extends BaseBO {
      */
     public boolean configureWhiteListFromHost(TxtHostRecord gkvHost) throws ApiException {
         WhitelistConfigurationData hostConfigObj = null;
-        boolean configStatus = false;
+        boolean configStatus;
 
         try {
            
             if (gkvHost != null) {
 
                 hostConfigObj = new WhitelistConfigurationData();                
-                String vmmPCRs = "";                
+                String vmmPCRs;                
                 TxtHost tempHostObj = new TxtHost(gkvHost);
                 
                 ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());                
@@ -641,19 +639,15 @@ public class HostBO extends BaseBO {
             }
 
             configStatus = configureWhiteListFromCustomData(hostConfigObj);
+            return configStatus;
 
-        } catch (MSException me) {
+        } catch (MSException | ASException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
-        } catch (ASException ae) {
-            log.error("Error during white list configuration. " + ae.getErrorCode() + " :" + ae.getErrorMessage());
-            throw ae;
         } catch (Exception ex) {
             log.error("Unexpected error during white list configuration. ",  ex);
             throw new MSException(ErrorCode.MS_WHITELIST_CONFIG_ERROR, ex.getClass().getSimpleName());
         }
-
-        return configStatus;
     }
 
     /**
@@ -919,12 +913,9 @@ public class HostBO extends BaseBO {
                 
                 configStatus = true;
             }
-        } catch (MSException me) {
+        } catch (MSException | ASException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
-        } catch (ASException ae) {
-            log.error("Error during white list configuration. " + ae.getErrorCode() + " :" + ae.getErrorMessage());
-            throw ae;
         } catch (Exception ex) {
             log.error("Unexpected error during white list configuration. ", ex);
             throw new MSException(ErrorCode.MS_WHITELIST_CONFIG_ERROR, ex.getClass().getSimpleName());
@@ -1041,9 +1032,8 @@ public class HostBO extends BaseBO {
      * be configured.
      * @return : A boolean indicating if the BIOS MLE was created or it already existed.
      */
-    private boolean configureBIOSMLE(WhitelistConfigurationData hostConfigObj) {
-        boolean biosMLEAlreadyExists = false;
-
+    private void configureBIOSMLE(WhitelistConfigurationData hostConfigObj) {
+        
         try {
             // Extract the host object
             if (hostConfigObj != null) {
@@ -1090,7 +1080,7 @@ public class HostBO extends BaseBO {
                 }
                 String[] biosPCRList = biosPCRs.split(",");
 
-                List<ManifestData> biosMFList = new ArrayList<ManifestData>();
+                List<ManifestData> biosMFList = new ArrayList<>();
                 for (String biosPCR : biosPCRList) {
                     biosMFList.add(new ManifestData(biosPCR, ""));
                 }
@@ -1104,7 +1094,6 @@ public class HostBO extends BaseBO {
                     log.debug("Successfully created the BIOS MLE : " + hostObj.BIOS_Name);
 
                 } else {
-                    biosMLEAlreadyExists = true;
                     log.debug("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
                 }
             }
@@ -1115,9 +1104,6 @@ public class HostBO extends BaseBO {
             log.error("Unexpected errror during OEM - BIOS MLE configuration. ", ex);
             throw new MSException(ErrorCode.MS_BIOS_MLE_ERROR, ex.getClass().getSimpleName());
         }
-
-        return biosMLEAlreadyExists;
-
     }
 
     /**
@@ -1128,9 +1114,8 @@ public class HostBO extends BaseBO {
      * be configured.
      * @return : A boolean indicating if the VMM MLE was created or it already existed.
      */
-    private boolean configureVMMMLE(WhitelistConfigurationData hostConfigObj) {
-        String attestationType = "";
-        boolean vmmMLEAlreadyExists = false;
+    private void configureVMMMLE(WhitelistConfigurationData hostConfigObj) {
+        String attestationType;
         try {
             if (hostConfigObj != null) {
                 TblOsJpaController osJpa = My.jpa().mwOs(); 
@@ -1180,7 +1165,7 @@ public class HostBO extends BaseBO {
                 String vmmPCRs = hostConfigObj.getVmmPCRs();
                 String[] vmmPCRList = vmmPCRs.split(",");
 
-                List<ManifestData> vmmMFList = new ArrayList<ManifestData>();
+                List<ManifestData> vmmMFList = new ArrayList<>();
                 for (String vmmPCR : vmmPCRList) {
                     vmmMFList.add(new ManifestData(vmmPCR, "")); // whitelist service now allows empty pcr's 
                 }
@@ -1200,9 +1185,8 @@ public class HostBO extends BaseBO {
                     // the overwrite flag is set, we will unset it here.
                     if (hostConfigObj.getOverWriteWhiteList())
                         hostConfigObj.setOverWriteWhiteList(false);
-
+                    
                 } else {
-                    vmmMLEAlreadyExists = true;
                     log.debug("Database already has the configuration details for VMM MLE : " + hostObj.VMM_Name);
                 }
             }
@@ -1213,9 +1197,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Error during OS - VMM MLE configuration. ", ex);
             throw new MSException(ErrorCode.MS_VMM_MLE_ERROR, ex.getClass().getSimpleName());
-        }
-
-        return vmmMLEAlreadyExists;
+        }        
     }
 
     /**
@@ -1473,7 +1455,7 @@ public class HostBO extends BaseBO {
      * @return 
      */
     public String getNextAvailableBIOSMLEName(String biosName, String biosVersion, String oemName) {
-        TblMle tblMleObj = null;
+        TblMle tblMleObj;
         int counter = 1;
         String tempBIOSName = biosName;
 
@@ -1514,7 +1496,7 @@ public class HostBO extends BaseBO {
      * @return 
      */
     public String getNextAvailableVMMMLEName(String vmmName, String vmmVersion, String osName, String osVersion) {
-        TblMle tblMleObj = null;
+        TblMle tblMleObj;
         int counter = 1;
         String tempVMMName = vmmName;
 
@@ -1542,26 +1524,6 @@ public class HostBO extends BaseBO {
             throw new MSException(ErrorCode.MS_VMM_MLE_NAME_ERROR, ex.getClass().getSimpleName());
         }   
     }
-
-    /**
-     * TODO: In 2.0 we need to add additional properties having the URL of attestation service.
-     * If the attestation service is local, then we can instantiate the Business layer directly. If
-     * not we need to use the REST API service.
-     * @return 
-     */
-    private boolean isAttestationServiceLocal(){
-        return true;
-    }
-        
-    /**
-     * TODO: In 2.0 we need to add additional properties having the URL of White List service.
-     * If the white list service is local, then we can instantiate the Business layer directly. If
-     * not we need to use the REST API service.
-     * @return 
-     */
-    private boolean isWhiteListServiceLocal(){
-        return true;
-    }
    
     /**
      * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN ATTESTATION SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
@@ -1573,27 +1535,24 @@ public class HostBO extends BaseBO {
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
         // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
-        HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
-        try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem")); // may contain multiple trusted privacy CA certs
-            List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
+        HashSet<X509Certificate> pcaList = new HashSet<>();
+        List<X509Certificate> privacyCaCerts;
+        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
+            privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
-            IOUtils.closeQuietly(privacyCaIn);
+            //IOUtils.closeQuietly(privacyCaIn);
             log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
-        }
-        catch(Exception e) {
+        } catch(IOException | CertificateException e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file
             log.error("Cannot load PrivacyCA.list.pem");            
         }
-        try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem")); // may contain multiple trusted privacy CA certs
+        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem"))) {
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
-            IOUtils.closeQuietly(privacyCaIn);
+            //IOUtils.closeQuietly(privacyCaIn);
             log.info("Added certificate from PrivacyCA.pem");
-        }
-        catch(Exception e) {
+        } catch(IOException | CertificateException e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificate from file
             log.error("Cannot load PrivacyCA.pem", e);
@@ -1610,7 +1569,7 @@ public class HostBO extends BaseBO {
                     validCaSignature = true;
                 }
             }
-            catch(Exception e) {
+            catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
                 log.error("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
             }
         }

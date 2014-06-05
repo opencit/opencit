@@ -31,7 +31,8 @@ public class Main {
 
     private static final ModuleDirectoryLauncher launcher = new ModuleDirectoryLauncher();
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        try {
         // read environment variable so we know where to find our plugins
         // XXX TODO:  we need to know a few things from environment like MTWILSON_HOME
         // so that we can go and read our core files and extensions using our own
@@ -74,7 +75,6 @@ public class Main {
         //    the daemon should automatically issue a new one before it expires. the daemon can exit automatically if it has been idle for some time (maybe
         //    an hour or more as a default).  daemon can auto-generate an internal-use-only ssl certificate or use an existing configured mtwilson ssl cert if available 
         //    
-        try {
             launcher.launch();
             // start event loop (block in foreground so http module etc can listen for connections)
             launcher.startEventLoop();

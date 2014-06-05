@@ -19,7 +19,8 @@ public class ApiClientDetails {
     private Integer serialNumber;
     private boolean enabled;
     private String status;
-    private List<String> requestedRoles;
+    private List<String> requestedRoles; // roles user requested when registering ; we get it from the comments micro-format ; only relevant for user approval page
+    private List<String> roles; // actual granted roles ; relevant for view registered user page
     private Date expires;
     private String comments;
 
@@ -87,6 +88,15 @@ public class ApiClientDetails {
         this.requestedRoles = requestedRoles;
     }
 
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
+
+    
     public Integer getSerialNumber() {
         return serialNumber;
     }

@@ -31,50 +31,46 @@ public class MwAssetTagCertificateJpaController extends GenericJpaController<MwA
     
     @Override
     public EntityManager getEntityManager() {
-        return emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
+        if( em == null ) { throw new IllegalStateException("Cannot obtain entity manager"); }
+        return em;
     }
 
     public void create(MwAssetTagCertificate mwAssetTagCertificate) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwAssetTagCertificate);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
-    public void edit(MwAssetTagCertificate mwAssetTagCertificate) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+    public void edit(MwAssetTagCertificate mwAssetTagCertificate) throws NonexistentEntityException {
+        EntityManager em = getEntityManager();
+        Integer id = null;
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             mwAssetTagCertificate = em.merge(mwAssetTagCertificate);
+            id = mwAssetTagCertificate.getId();
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = mwAssetTagCertificate.getId();
-                if (findMwAssetTagCertificate(id) == null) {
+                if (id != null && findMwAssetTagCertificate(id) == null) {
                     throw new NonexistentEntityException("The mwAssetTagCertificate with id " + id + " no longer exists.");
                 }
             }
             throw ex;
         } finally {
-            if (em != null) {
                 em.close();
-            }
         }
     }
 
     public void destroy(Integer id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             MwAssetTagCertificate mwAssetTagCertificate;
             try {
@@ -86,9 +82,7 @@ public class MwAssetTagCertificateJpaController extends GenericJpaController<MwA
             em.remove(mwAssetTagCertificate);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
                 em.close();
-            }
         }
     }
 

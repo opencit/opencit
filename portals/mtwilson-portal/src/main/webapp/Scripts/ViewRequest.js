@@ -15,7 +15,7 @@ function fnViewRequestSuccess(responseJSON) {
 			str+='<tr class="'+classValue+'">'+
 					'<td class="viewRow1" title="'+request[item].fingerprint+'" name="name">'+request[item].name+'</td>'+
 					'<td class="viewRow2" name="status">'+request[item].status+'</td>'+
-					'<td class="viewRow3">'+request[item].requestedRoles.toString()+'</td>'+
+					'<td class="viewRow3">'+request[item].roles.toString()+'</td>'+
 					'<td class="viewRow4" name="expires">'+fnGetFormatedDate(request[item].expires)+'</td>';
 				var comment = request[item].comments == undefined || request[item].comments == null || request[item].comments == "" ? "&nbsp;" : request[item].comments; 
 					str+='<td class="viewRow5" name="expires">'+comment+'</td>'+

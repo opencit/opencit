@@ -66,7 +66,7 @@ public class TagCertificateAuthority {
      * @param ip address or hostname
      * @return
      */
-    public String findSubjectHardwareUuid(String ip) throws Exception {
+    public String findSubjectHardwareUuid(String ip) throws IOException, ApiException, SignatureException {
         log.debug("Querying host {} in Mt Wilson", ip);
         List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip, true);
         if (hostList == null || hostList.isEmpty()) {
@@ -155,7 +155,8 @@ public class TagCertificateAuthority {
      * a selection could not be found.
      *
      */
-    public SelectionType findCurrentSelectionForSubject(UUID targetSubject, SelectionsType selections) throws Exception {
+    public SelectionType findCurrentSelectionForSubject(UUID targetSubject, SelectionsType selections) 
+            throws SQLException, IOException, ApiException, SignatureException {
         log.debug("findSelectionForSubject {}", targetSubject.toString());
         SelectionsType currentSelections = SelectionUtil.copySelectionsValidOn(selections, new Date());
         // first search by host uuid
@@ -214,7 +215,7 @@ public class TagCertificateAuthority {
      * @return
      * @throws Exception
      */
-    public byte[] createTagCertificate(UUID subject, SelectionsType selections) throws Exception {
+    public byte[] createTagCertificate(UUID subject, SelectionsType selections) throws SQLException, IOException, ApiException, SignatureException {
         SelectionType selection = findCurrentSelectionForSubject(subject, selections);
         return createTagCertificate(subject, selection);
     }
@@ -233,7 +234,7 @@ public class TagCertificateAuthority {
      * @return
      * @throws Exception
      */
-    public byte[] createTagCertificate(UUID subject, SelectionType selection) throws Exception {
+    public byte[] createTagCertificate(UUID subject, SelectionType selection) throws IOException {
         // check if we have a private key to use for signing
         PrivateKey cakey = Global.cakey();
         X509Certificate cakeyCert = Global.cakeyCert();

@@ -280,10 +280,14 @@ public class TrustAssertion {
     private Element readXml(String xml) throws ParserConfigurationException, SAXException, IOException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         schemaFactory.setResourceResolver(new ClasspathResourceResolver());
-        Source samlSchemaProtocol = new StreamSource(getClass().getResourceAsStream("/saml-schema-protocol-2.0.xsd")); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-protocol-2.0.xsd
-        Source samlSchemaAssertion = new StreamSource(getClass().getResourceAsStream("/saml-schema-assertion-2.0.xsd")); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd
-        Source xencSchema = new StreamSource(getClass().getResourceAsStream("/xenc-schema.xsd")); // http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd
-        Source xmldsigCoreSchema = new StreamSource(getClass().getResourceAsStream("/xmldsig-core-schema.xsd")); // http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd
+        try(InputStream samlSchemaProtocolStream = getClass().getResourceAsStream("/saml-schema-protocol-2.0.xsd");
+            InputStream samlSchemaAssertionStream = getClass().getResourceAsStream("/saml-schema-assertion-2.0.xsd");
+            InputStream xencSchemaStream = getClass().getResourceAsStream("/xenc-schema.xsd");
+            InputStream xmldigCoreSchemaStream = getClass().getResourceAsStream("/xmldsig-core-schema.xsd")) {
+        Source samlSchemaProtocol = new StreamSource(samlSchemaProtocolStream); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-protocol-2.0.xsd
+        Source samlSchemaAssertion = new StreamSource(samlSchemaAssertionStream); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd
+        Source xencSchema = new StreamSource(xencSchemaStream); // http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd
+        Source xmldsigCoreSchema = new StreamSource(xmldigCoreSchemaStream); // http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd
         Schema schema = schemaFactory.newSchema(new Source[] { samlSchemaProtocol, samlSchemaAssertion, xencSchema, xmldsigCoreSchema });
         DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware (true);
@@ -291,10 +295,11 @@ public class TrustAssertion {
         factory.setXIncludeAware(false); // bug #1038 prevent XXE
         factory.setSchema(schema); // fix for javax.xml.crypto.dsig.XMLSignatureException: javax.xml.crypto.URIReferenceException: com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException: Cannot resolve element with ID HostTrustAssertion
         DocumentBuilder builder = factory.newDocumentBuilder(); // ParserConfigurationException
-        ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
+        try(ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes())) {
         Element document = builder.parse(in).getDocumentElement (); // SAXException, IOException
-        in.close(); // IOExeception
         return document;
+        }
+        }
     }
 
     private Assertion readAssertion(Element document) throws UnmarshallingException {
