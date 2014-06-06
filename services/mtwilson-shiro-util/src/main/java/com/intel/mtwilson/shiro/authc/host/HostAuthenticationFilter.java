@@ -27,7 +27,7 @@ public class HostAuthenticationFilter extends AuthenticationFilter {
     }
 
     @Override
-    protected AuthenticationToken createToken(ServletRequest request) throws Exception {
+    protected AuthenticationToken createToken(ServletRequest request) {
         HttpServletRequest httpRequest = WebUtils.toHttp(request);
         HostToken hostToken = new HostToken(httpRequest.getRemoteAddr());
         return hostToken;
