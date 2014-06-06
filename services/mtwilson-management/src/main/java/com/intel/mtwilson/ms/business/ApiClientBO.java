@@ -466,7 +466,7 @@ public class ApiClientBO extends BaseBO {
             updateShiroUserTables(apiClientRequest, apiClientX509.getUserNameFromName());
             
             // Capture the change in the syslog
-            Object[] paramArray = {Arrays.toString(apiClientX509.getFingerprint()), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            Object[] paramArray = {Hex.encodeHexString(apiClientX509.getFingerprint()), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
             log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {
