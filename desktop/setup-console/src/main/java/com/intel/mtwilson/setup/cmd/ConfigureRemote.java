@@ -94,35 +94,37 @@ public class ConfigureRemote implements Command {
                 remote.setRemoteHostTimeout(new Timeout(60, TimeUnit.SECONDS));
                 try {
                     remote.open();
-                    boolean trustRemoteHost = shouldTrustRemoteHost(remote.getRemoteHostKey().server, remote.getRemoteHostKey().publicKey);
-                    if( !trustRemoteHost ) { remote.close(); return; }
-                    remote.getRemoteSettings();
+                    if (remote.getRemoteHostKey() != null) {
+                        boolean trustRemoteHost = shouldTrustRemoteHost(remote.getRemoteHostKey().server, remote.getRemoteHostKey().publicKey);
+                        if( !trustRemoteHost ) { remote.close(); return; }
+                        remote.getRemoteSettings();
 
-//            inputDistinguishedNameForCertificates();
-                    if( ctx.rootCa != null ) {
-                        remote.deployRootCACertToServer(); // using ssh, write the root CA cert to file on disk so server can trust it
-                        // saml
-                        remote.downloadSamlCertFromServer();
-                        remote.signSamlCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
-                        remote.uploadSamlCertToServer();
-                        // tls
-                        remote.downloadTlsKeystoreFromServer(); // XXX TODO we are assuming GLASSFISH,  need to make this dependent on webContainerType , probably with an object-oriented design
-                        if( ctx.tlsCertificate == null ) {
-                            System.err.println("FAILED TO READ TLS CERT"); 
-                            printFaults(remote);
-                            remote.close(); return; 
+    //            inputDistinguishedNameForCertificates();
+                        if( ctx.rootCa != null ) {
+                            remote.deployRootCACertToServer(); // using ssh, write the root CA cert to file on disk so server can trust it
+                            // saml
+                            remote.downloadSamlCertFromServer();
+                            remote.signSamlCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
+                            remote.uploadSamlCertToServer();
+                            // tls
+                            remote.downloadTlsKeystoreFromServer(); // XXX TODO we are assuming GLASSFISH,  need to make this dependent on webContainerType , probably with an object-oriented design
+                            if( ctx.tlsCertificate == null ) {
+                                System.err.println("FAILED TO READ TLS CERT"); 
+                                printFaults(remote);
+                                remote.close(); return; 
+                            }
+    //                        remote.downloadTlsCertFromServer();
+                            remote.signTlsCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
+                            remote.uploadTlsCertToServer(); // XXX TODO  needs to be rewritten for apache/nginx 
+                            remote.uploadTlsKeystoreToServer(); 
+                            // privacy ca
+                            remote.downloadPrivacyCaKeystoreFromServer();
+                            remote.signPrivacyCaCertWithRootCaCert();
+                            remote.uploadPrivacyCaKeystoreToServer();
                         }
-//                        remote.downloadTlsCertFromServer();
-                        remote.signTlsCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
-                        remote.uploadTlsCertToServer(); // XXX TODO  needs to be rewritten for apache/nginx 
-                        remote.uploadTlsKeystoreToServer(); 
-                        // privacy ca
-                        remote.downloadPrivacyCaKeystoreFromServer();
-                        remote.signPrivacyCaCertWithRootCaCert();
-                        remote.uploadPrivacyCaKeystoreToServer();
+
+                        remote.close();
                     }
-                    
-                    remote.close();
                 }
                 catch(UserAuthException e) {
                     System.out.println("Not able to ssh to remote host with given username and password: "+e.toString());
