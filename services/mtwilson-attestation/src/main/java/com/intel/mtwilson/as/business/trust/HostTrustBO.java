@@ -1113,7 +1113,8 @@ public class HostTrustBO extends BaseBO {
 
                             Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                             for(Measurement m : missingEntries) {
-                                log.debug("Missing entry : " + m.getInfo().get("ComponentName") + "||" + m.getValue().toString());
+                                String mComponentName = m.getInfo().get("ComponentName");
+                                log.debug("Missing entry : " + mComponentName + "||" + m.getValue().toString());
                                 // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
                                 if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()) == null ) {
                                     throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
@@ -1122,10 +1123,11 @@ public class HostTrustBO extends BaseBO {
                                 List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
                                 if (actualEntries != null) {
                                     for(Measurement a : actualEntries) {
-                                        if (a != null && a.getInfo() != null) {
+                                        String aFullComponentName = a.getInfo().get("FullComponentName");
+                                        if (a != null && a.getInfo() != null && (!a.getInfo().isEmpty())) {
                                             // log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
-                                            if( a.getInfo().get("FullComponentName") != null && m.getInfo().get("ComponentName") != null && 
-                                                    a.getInfo().get("FullComponentName").equals(m.getInfo().get("ComponentName")) ) {
+                                            if( aFullComponentName != null && mComponentName != null && 
+                                                    aFullComponentName.equals(mComponentName) ) {
                                                 found = a;
                                                 break;
                                             }
@@ -1185,7 +1187,8 @@ public class HostTrustBO extends BaseBO {
 
                             List<Measurement> unexpectedEntries = unexpectedEntriesFault.getUnexpectedEntries();
                             for(Measurement m : unexpectedEntries) {
-                                log.debug("Unexpected Entry : " + m.getInfo().get("FullComponentName"));
+                                String mFullComponentName = m.getInfo().get("FullComponentName");
+                                log.debug("Unexpected Entry : " + mFullComponentName);
                                 // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
                                 if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()) == null ) {
                                     throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
@@ -1194,11 +1197,12 @@ public class HostTrustBO extends BaseBO {
                                 List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()).getEventLog();
                                 if (actualEntries != null) {
                                     for(Measurement a : actualEntries) {
-                                        if ( a != null && a.getInfo() != null) {
+                                        String aFullComponentName = a.getInfo().get("FullComponentName");
+                                        if ( a != null && a.getInfo() != null && (!a.getInfo().isEmpty())) {
                                             //log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + 
                                              //       a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
-                                            if( a.getInfo().get("FullComponentName") != null && m.getInfo().get("FullComponentName") != null && 
-                                                    a.getInfo().get("FullComponentName").equals(m.getInfo().get("FullComponentName")) ) {
+                                            if( aFullComponentName != null && mFullComponentName != null && 
+                                                    aFullComponentName.equals(mFullComponentName) ) {
                                                 found = a;
                                                 break;
                                             }

@@ -230,8 +230,9 @@ public class HostBO extends BaseBO {
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         Map<String,String> attributes = agent.getHostAttributes();
-                        if ((attributes != null) && (attributes.get("Host_UUID") != null))
-                            tblHosts.setHardwareUuid(attributes.get("Host_UUID").toLowerCase().trim());
+                        String hostUuidAttr = attributes.get("Host_UUID");
+                        if ((attributes != null) && (!attributes.isEmpty()) && (hostUuidAttr != null))
+                            tblHosts.setHardwareUuid(hostUuidAttr.toLowerCase().trim());
                         
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId, uuid);
                         
@@ -750,18 +751,21 @@ public class HostBO extends BaseBO {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
             if (pcrEventLog != null) {
                 for (Measurement m : pcrEventLog.getEventLog()) {
-                    if (m != null && m.getInfo() != null) {
+                    if (m != null && m.getInfo() != null && (!m.getInfo().isEmpty())) {
 
-                        log.debug("Checking host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                                "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                        String mEventName = m.getInfo().get("EventName");
+                        String mComponentName = m.getInfo().get("ComponentName");
+                        log.debug("Checking host specific manifest for event '"   + mEventName + 
+                                "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
 
                         // we are looking for the "commandline" event specifically  (vmware)
-                        if (hostType.equals(Vendor.VMWARE) && m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails")) {
+                        if (hostType.equals(Vendor.VMWARE) && mEventName != null && mComponentName != null 
+                                && mEventName.equals("Vim25Api.HostTpmCommandEventDetails")) {
 
-                            log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                                    "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                            log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
-                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                            log.debug("Adding host specific manifest for event '"   + mEventName + 
+                                    "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
+                            log.debug("Querying manifest for event '"   +mEventName + 
+                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + mComponentName + "'");
 
                             TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                                     m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));

@@ -935,7 +935,7 @@ public class VMwareClient implements TlsClient {
 
                 // Process the event log only for the ESXi 5.1 or higher
                 // if (hostTrustReport != null && hostVer.contains("5.1")) {
-                if (hostTrustReport != null && (isModuleAttestationSupportedByESX(hostVer))) {
+                if (hostTrustReport != null && hostVer != null && (isModuleAttestationSupportedByESX(hostVer))) {
                     log.debug("Retrieving TPM events...");
                     int numOfEvents = hostTrustReport.getTpmEvents().length;
                     for (int k = 0; k < numOfEvents; k++) {

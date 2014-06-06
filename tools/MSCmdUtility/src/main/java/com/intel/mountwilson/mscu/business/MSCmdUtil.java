@@ -37,7 +37,7 @@ public class MSCmdUtil {
 
     private static ApiClient createAPIObject(String keyAliasName, String keyPassword) throws MalformedURLException, ApiException {
         
-        ApiClient rsaApiClient = null;
+        ApiClient rsaApiClient;
         
         try {
                         
@@ -46,8 +46,8 @@ public class MSCmdUtil {
             
             // Open the keystore with the password and retrieve the credentials
             File keyStoreFile;
-            SimpleKeystore keystore = null; 
-            RsaCredential credential = null;             
+            SimpleKeystore keystore; 
+            RsaCredential credential;             
             
             try {
 
@@ -95,7 +95,7 @@ public class MSCmdUtil {
                 
             } 
 
-        } catch (Exception ex) {
+        } catch (MalformedURLException | IllegalStateException ex) {
 
             System.out.println(String.format("Error during user authentication. %s", ex.getMessage()));
             throw new IllegalStateException(String.format("Error during user authentication. %s", ex.getMessage()));
