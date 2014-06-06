@@ -86,7 +86,7 @@ public class HostTrustBO extends BaseBO {
     private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(getEntityManagerFactory());
     private Resource samlKeystoreResource = null;
     
-    private HostBO hostBO;
+    private HostBO hostBO = new HostBO(); // TODO: use IoC
     
     static{
         CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
@@ -153,6 +153,7 @@ public class HostTrustBO extends BaseBO {
      * @throws IOException 
      */
     public HostResponse getTrustStatusOfHostNotInDBAndRegister(TxtHostRecord hostObj) {
+        if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         boolean biosMLEFound = false, VMMMLEFound = false;
         
         try {
@@ -305,7 +306,6 @@ public class HostTrustBO extends BaseBO {
 
             HostResponse hostResponse;
             
-            //HostBO hostBO = new HostBO();
             // We need to check if the host is already configured in the system. If yes, we need to update the host or else create a new one
             if (hostBO.getHostByName(new Hostname((hostObj.HostName))) != null) {
                 // update the host
@@ -339,6 +339,7 @@ public class HostTrustBO extends BaseBO {
      * @throws IOException 
      */
     public TrustReport updateHostIfUntrusted(TblHosts tblHosts, HostReport hostReport, TrustReport trustReport, HostAgent agent) {
+        if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         String regExForNumericExtNames = ".*_([^_][0-9]*)$"; // Regular expression to match the host names with numeric extenstions
         boolean updateBIOSMLE = false, updateVMMMLE = false;
         
@@ -539,7 +540,6 @@ public class HostTrustBO extends BaseBO {
             
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
-                HostBO hostBO = new HostBO();
                 hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest, agent, null);
             }
 
@@ -1251,8 +1251,9 @@ public class HostTrustBO extends BaseBO {
     }
 
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
+        if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         try {
-            TblHosts tblHost = new HostBO().getHostByName(hostName);
+            TblHosts tblHost = hostBO.getHostByName(hostName);
             //Bug # 848 Check if the query returned back null or we found the host 
             if (tblHost == null ){
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
@@ -1265,6 +1266,7 @@ public class HostTrustBO extends BaseBO {
     }
     
     private TblHosts getHostByAik(Sha1Digest fingerprint) throws IOException  { // datatype.Hostname
+        if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         try {
             return hostBO.getHostByAik(fingerprint);
         }
