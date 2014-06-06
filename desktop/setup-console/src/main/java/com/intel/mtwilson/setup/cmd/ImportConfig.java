@@ -53,16 +53,16 @@ public class ImportConfig implements Command {
         
             String content ;
             if( options.containsKey("in") ) {
-                FileInputStream in = new FileInputStream(new File(options.getString("in")));
-                content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
+                try (FileInputStream in = new FileInputStream(new File(options.getString("in")))) {
+                    content = IOUtils.toString(in);
+                }
             }
             else if( options.getBoolean("stdin", false) ) {
                 content = IOUtils.toString(System.in);
             }else {
-                FileInputStream in = new FileInputStream(new File(filename));
-                content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
+                try (FileInputStream in = new FileInputStream(new File(filename))) {
+                    content = IOUtils.toString(in);
+                }
             }
             encryptedFile.saveString(content);
         }

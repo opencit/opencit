@@ -61,13 +61,13 @@ public class Derby {
             Class.forName(driver).newInstance();
             isLoaded = true;
             }
-            catch(Exception e) {
+            catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new SQLException("Cannot load Derby driver", e);
             }
         }
     }
     
-    public static void stopDatabase() throws Exception {
+    public static void stopDatabase() {
 //        DriverManager.getConnection("jdbc:derby:MyDbTest;shutdown=true");  // shut down a specific database
         try {
             // shut down all databaes and the derby engine  ; throws SQLException "Derby system shutdown."
@@ -109,15 +109,15 @@ public class Derby {
     }
     
     public static void testDatabaseConnection() throws SQLException {
-        Connection c = DriverManager.getConnection(protocol, new Properties());
-        Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery("VALUES 1");
-        if( rs.next() ) {
-            log.info("Database connection is ok");
+        try (Connection c = DriverManager.getConnection(protocol, new Properties())) {
+            try (Statement s = c.createStatement()) {
+                try (ResultSet rs = s.executeQuery("VALUES 1")) {
+                    if( rs.next() ) {
+                        log.info("Database connection is ok");
+                    }
+                }
+            }
         }
-        rs.close();
-        s.close();
-        c.close();
     }
 
     public static boolean tableExists(String tableName) throws SQLException {
@@ -137,13 +137,12 @@ public class Derby {
   private static void readDBTable(Set<String> set, DatabaseMetaData dbmeta, String searchCriteria, String schema)
       throws SQLException
   {
-    ResultSet rs = dbmeta.getTables(null, schema, null, new String[]
-    { searchCriteria });
-    while (rs.next())
-    {
-        log.trace("readDBTable Table: {}" , rs.getString("TABLE_NAME"));
-      set.add(rs.getString("TABLE_NAME"));
-    }
+        try (ResultSet rs = dbmeta.getTables(null, schema, null, new String[]{ searchCriteria })) {
+            while (rs.next()) {
+                log.trace("readDBTable Table: {}" , rs.getString("TABLE_NAME"));
+              set.add(rs.getString("TABLE_NAME"));
+            }
+        }
   }    
   
   

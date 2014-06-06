@@ -87,7 +87,7 @@ public abstract class HttpAuthenticationFilter extends AuthenticationFilter {
         return false;
     }
     
-    protected void sendChallenge(ServletRequest request, ServletResponse response) throws Exception {
+    protected void sendChallenge(ServletRequest request, ServletResponse response) {
         log.debug("sending challenge header {} to {}", challengeHeaderName, request.getRemoteAddr());
         HttpServletResponse httpResponse = WebUtils.toHttp(response);
         httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

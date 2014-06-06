@@ -10,9 +10,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
-import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 
@@ -70,10 +68,9 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     public String searchCollectionSaml(@BeanParam HostAttestationFilterCriteria criteria) {
         try { log.debug("searchCollection: {}", mapper.writeValueAsString(criteria)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(criteria); 
-        String samlAssertion = null;
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
-            TblHosts obj = null;
+            TblHosts obj;
             if (criteria.hostUuid != null) {
                 obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
                 if (obj == null) {
@@ -85,7 +82,7 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                     throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, criteria.aikSha1);
                 }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                obj = jpaController.findByName(criteria.nameEqualTo.toString());
+                obj = jpaController.findByName(criteria.nameEqualTo);
                 if (obj == null) {
                     throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, criteria.nameEqualTo);
                 }
@@ -121,7 +118,7 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
         log.debug("Entering the creation of SAML assertion function.");
         try { log.debug("createSamlAssertion: {}", mapper.writeValueAsString(item)); } catch(JsonProcessingException e) { log.debug("createSamlAssertion: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        String samlAssertion = "";
+        String samlAssertion;
         
         try {
             TblHosts obj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());

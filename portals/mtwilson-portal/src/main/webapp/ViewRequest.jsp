@@ -16,7 +16,7 @@
 					<tr>
 						<td class="viewRow1" data-i18n="table.name">Name</td>
 						<td class="viewRow2" data-i18n="table.status">Status</td>
-						<td class="viewRow3" data-i18n="table.requested_roles">Requested Roles</td>
+						<td class="viewRow3" data-i18n="table.roles">Roles</td>
 						<td class="viewRow4" data-i18n="table.expires">Expires</td>
 						<td class="viewRow5Header" data-i18n="table.comments">Comments</td>
 					</tr>

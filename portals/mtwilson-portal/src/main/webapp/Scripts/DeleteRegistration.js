@@ -14,7 +14,7 @@ function fnDeleteRegistrationDetailsSuccess(responseJSON) {
 			if(item % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 			str+='<tr class="'+classValue+'" fingerprint="'+request[item].fingerprint+'">'+
 					'<td class="deleteRequestRow1" name="name">'+request[item].name+'</td>'+
-					'<td class="deleteRequestRow2" name="requestedRoles">'+request[item].requestedRoles.toString()+'</td>'+
+					'<td class="deleteRequestRow2" name="requestedRoles">'+request[item].roles.toString()+'</td>'+
 					'<td class="deleteRequestRow3" name="expires">'+fnGetFormatedDate(request[item].expires)+'</td>'+
 					'<td class="deleteRequestRow4"><input type="button" value="Delete" onclick="fnDeleteSelectedRequest(this)"></td>'+
 				'</tr>';

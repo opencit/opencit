@@ -37,7 +37,7 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
-                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
+                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid);
                 if (obj != null) {
                     String ksPassword = My.configuration().getTlsKeystorePassword();
                     SimpleKeystore tlsKeystore = new SimpleKeystore(obj.getTlsKeystoreResource(), ksPassword);

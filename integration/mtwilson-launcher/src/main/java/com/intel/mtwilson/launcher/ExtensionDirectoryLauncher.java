@@ -130,6 +130,7 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         // list all the jar files in the java directory
         FilenameEndsWithFilter jarfilter = new FilenameEndsWithFilter(".jar");
         File[] jars = javaFolder.listFiles(jarfilter);
+        if( jars == null ) { return new File[0]; }
         return jars;
     }
     

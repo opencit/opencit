@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -130,10 +131,13 @@ public class Mles extends MtWilsonClient {
      */
     public void deleteMle(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("mles/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
-        log.debug(obj.toString());
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
+            throw new WebApplicationException("Delete MLE failed");
+        }
     }
     
     /**

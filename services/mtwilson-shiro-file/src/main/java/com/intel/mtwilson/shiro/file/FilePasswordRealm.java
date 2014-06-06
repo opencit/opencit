@@ -87,16 +87,16 @@ public class FilePasswordRealm extends AuthorizingRealm {
             throw new AccountException("Username must be provided");
         }
         log.debug("doGetAuthenticationInfo for username {}", username);
-        UserPassword userLoginPassword = null;
+        UserPassword userLoginPassword;
         try {
             LoginDAO dao = new LoginDAO(new File(userFilePath), new File(permissionFilePath));
             userLoginPassword = dao.findUserByName(username);
+            if (userLoginPassword == null) {
+                return null;
+            }
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);
             throw new AuthenticationException("Internal server error", e); // TODO: i18n
-        }
-        if (userLoginPassword == null) {
-            return null;
         }
         log.debug("doGetAuthenticationInfo found user {}", userLoginPassword.getUsername());
         SimplePrincipalCollection principals = new SimplePrincipalCollection();

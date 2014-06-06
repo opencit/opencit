@@ -65,7 +65,7 @@ public class OsBO extends BaseBO {
      * @return 
      */
     public String updateOs(OsData osData, String uuid) {
-        TblOs tblOs = null;
+        TblOs tblOs;
         try {
             // Feature: 917 - Added support for UUID
             if (uuid != null && !uuid.isEmpty())
@@ -137,7 +137,7 @@ public class OsBO extends BaseBO {
      * @return 
      */
     public String deleteOs(String osName, String osVersion, String uuid) {
-        TblOs tblOs = null;
+        TblOs tblOs;
         
         try {
             // Feature: 917 - Added support for UUID

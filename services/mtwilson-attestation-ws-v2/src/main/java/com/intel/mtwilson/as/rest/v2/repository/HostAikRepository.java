@@ -34,7 +34,7 @@ public class HostAikRepository implements SimpleRepository<HostAik, HostAikColle
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
-                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
+                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid);
                 if (obj != null) {
                     objCollection.getAiks().add(convert(obj));
                 }

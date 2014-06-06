@@ -4,10 +4,8 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
-import com.intel.mtwilson.setup.SetupTask;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
@@ -81,13 +79,17 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
         byte[] cacertPemContent = cacertPem.getBytes("UTF-8");
         
         // XXX TODO INSECURE need to encrypt this, not just store it plain
-        FileOutputStream cakeyOut = new FileOutputStream(My.configuration().getCaKeystoreFile()); // throws FileNotFoundException, IOException
-        IOUtils.write(combinedPrivateKeyAndCertPemBytes, cakeyOut); // throws IOException
-        cakeyOut.close();
-
-        FileOutputStream cacertsOut = new FileOutputStream(My.configuration().getCaCertsFile()); // throws FileNotFoundException, IOException
-        IOUtils.write(cacertPemContent, cacertsOut); // throws IOException
-        cacertsOut.close();
+        try (FileOutputStream cakeyOut = new FileOutputStream(My.configuration().getCaKeystoreFile())) { // throws FileNotFoundException, IOException
+            IOUtils.write(combinedPrivateKeyAndCertPemBytes, cakeyOut); // throws IOException
+        } catch (Exception ex) {
+            log.error("Error creating CA key store file", ex);
+        }
+        
+        try (FileOutputStream cacertsOut = new FileOutputStream(My.configuration().getCaCertsFile())) {
+            IOUtils.write(cacertPemContent, cacertsOut);
+        } catch (Exception ex) {
+            log.error("Error creating CA certificate file", ex);
+        }
         
     }
 
@@ -98,9 +100,9 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
         // is not necessarily what happened. 
         if(My.configuration().getCaKeystoreFile().exists()) {
             byte[] combinedPrivateKeyAndCertPemBytes;
-            FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile()); // throws FileNotFoundException, IOException
-            combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn); // throws IOException
-            cakeyIn.close();
+            try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
+                combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
+            }
             try {
                 PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
                 log.debug("Read cakey {} from {}", cakey.getAlgorithm(), My.configuration().getCaKeystoreFile().getAbsolutePath());
@@ -123,9 +125,9 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
         }
         if(My.configuration().getCaCertsFile().exists()) {
             byte[] cacertPemContent;
-            FileInputStream cacertsIn = new FileInputStream(My.configuration().getCaCertsFile()); // throws FileNotFoundException, IOException
-            cacertPemContent = IOUtils.toByteArray(cacertsIn); // throws IOException
-            cacertsIn.close();
+            try (FileInputStream cacertsIn = new FileInputStream(My.configuration().getCaCertsFile())) {
+                cacertPemContent = IOUtils.toByteArray(cacertsIn);
+            }
             try {
                 List<X509Certificate> certificates = X509Util.decodePemCertificates(new String(cacertPemContent));
                 log.debug("Read {} certificates from {}", certificates.size(), My.configuration().getCaCertsFile().getAbsolutePath());

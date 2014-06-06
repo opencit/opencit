@@ -132,10 +132,10 @@ public class CA {
 //            if(certFile != null) {
 //                File rootCaPemFile = new File(certFile);
                 File rootCaPemFile = My.configuration().getRootCaCertificateFile();
-                FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
-                String content = IOUtils.toString(in); // IOException
-                IOUtils.closeQuietly(in);
-                return content;
+                try (FileInputStream in = new FileInputStream(rootCaPemFile)) { // FileNotFoundException
+                    String content = IOUtils.toString(in); // IOException
+                    return content;
+                }
 //            }else throw new FileNotFoundException("Could not obtain Root CA cert location from config");
         } 
         catch (FileNotFoundException e) {
@@ -176,10 +176,10 @@ public class CA {
 //            if(certFile != null) {
 //                File samlPemFile = new File(certFile);
                 File samlPemFile = My.configuration().getSamlCertificateFile();
-                FileInputStream in = new FileInputStream(samlPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
+                try (FileInputStream in = new FileInputStream(samlPemFile)) {
+                    String content = IOUtils.toString(in);
+                    return content;
+                }
 //            }else throw new FileNotFoundException("Could not load Saml Cert location from config");
         }
         catch (FileNotFoundException e) {
@@ -222,10 +222,10 @@ public class CA {
 //            if(certFile != null) {
 //                File privacyCaPemFile = new File(certFile);
                 File privacyCaPemFile = My.configuration().getPrivacyCaIdentityCacertsFile();
-                FileInputStream in = new FileInputStream(privacyCaPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
+                try (FileInputStream in = new FileInputStream(privacyCaPemFile)) {
+                    String content = IOUtils.toString(in);
+                    return content;
+                }
 //            }else throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
         }
         catch (FileNotFoundException e) {
@@ -257,21 +257,21 @@ public class CA {
             if(certFile != null) {
                 if( certFile.endsWith(".pem") ) {
                     File tlsPemFile = new File(certFile);
-                    FileInputStream in = new FileInputStream(tlsPemFile);
-                    String content = IOUtils.toString(in);
-                    IOUtils.closeQuietly(in);
-                    List<X509Certificate> list = X509Util.decodePemCertificates(content);
-                    if( list != null && !list.isEmpty() ) {
-                        return list.get(0).getEncoded(); // first certificate is this host, all others are CA's
+                    try (FileInputStream in = new FileInputStream(tlsPemFile)) {
+                        String content = IOUtils.toString(in);
+                        List<X509Certificate> list = X509Util.decodePemCertificates(content);
+                        if (list != null && !list.isEmpty()) {
+                            return list.get(0).getEncoded(); // first certificate is this host, all others are CA's
+                        }
                     }
-                    throw new IOException("Cannot read certificate file: "+certFile);
+                    throw new IOException("Cannot read certificate file: " + certFile);
                 }
                 if( certFile.endsWith(".crt") ) {
                     File tlsPemFile = new File(certFile);
-                    FileInputStream in = new FileInputStream(tlsPemFile);
-                    byte[] content = IOUtils.toByteArray(in);
-                    IOUtils.closeQuietly(in);
-                    return content;
+                    try (FileInputStream in = new FileInputStream(tlsPemFile)) {
+                        byte[] content = IOUtils.toByteArray(in);
+                        return content;
+                    }
                 }
                 throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
             }else{
@@ -316,19 +316,19 @@ public class CA {
             if(certFile != null) {
                 if( certFile.endsWith(".pem") ) {
                     File tlsPemFile = new File(certFile);
-                    FileInputStream in = new FileInputStream(tlsPemFile);
-                    String content = IOUtils.toString(in);
-                    IOUtils.closeQuietly(in);
-                    return content;
+                    try (FileInputStream in = new FileInputStream(tlsPemFile)) {
+                        String content = IOUtils.toString(in);
+                        return content;
+                    }
                 }
                 if( certFile.endsWith(".crt") ) {
                     File tlsPemFile = new File(certFile);
-                    FileInputStream in = new FileInputStream(tlsPemFile);
-                    byte[] content = IOUtils.toByteArray(in);
-                    IOUtils.closeQuietly(in);
-                    X509Certificate cert = X509Util.decodeDerCertificate(content);
-                    String pem = X509Util.encodePemCertificate(cert);
-                    return pem;
+                    try (FileInputStream in = new FileInputStream(tlsPemFile)) {
+                        byte[] content = IOUtils.toByteArray(in);
+                        X509Certificate cert = X509Util.decodeDerCertificate(content);
+                        String pem = X509Util.encodePemCertificate(cert);
+                        return pem;
+                    }
                 }
                 throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
             }else{

@@ -8,7 +8,6 @@ import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.model.InternetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
@@ -185,6 +184,7 @@ public class ConnectionString {
             }
             else { // if( vendor != null )
                 connectionString = vendorConnectionFromURL(connectionString);
+                if( connectionString == null ) { throw new IllegalArgumentException("Invalid or missing connection string"); }
             }
             addOnConnectionString = connectionString;
             switch(vendor) {
@@ -245,7 +245,7 @@ public class ConnectionString {
      * @return
      */
     public String getConnectionString() {
-        String connectionString = "";
+        String connectionString;
 
         if (this.vendor == Vendor.INTEL) {
             connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
@@ -376,8 +376,10 @@ public class ConnectionString {
         }
         
         public static IntelConnectionString forURL(String url) throws MalformedURLException {
+            log.debug("IntelConnectionString forURL {}", url);
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
             if( info.vendor !=  Vendor.INTEL ) {
                 throw new IllegalArgumentException("Not an Intel Host URL: "+info.url.toExternalForm());
             }
@@ -410,15 +412,19 @@ public class ConnectionString {
             return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
+            log.debug("CitrixConnectionString forURL {}", url);
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
             if( info.vendor !=  Vendor.CITRIX ) {
                 throw new IllegalArgumentException("Not a Citrix Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
-            cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
-            cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            if( info.options != null ) {
+                cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
+                cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            }
             return cs;
         }
     }
@@ -455,16 +461,20 @@ public class ConnectionString {
             return String.format("https://%s:%d/sdk;u=%s;p=%s;h=%s", vcenterAddress.toString(), port, username, password, hostAddress.toString());
         }
         public static VmwareConnectionString forURL(String url) throws MalformedURLException {
+            log.debug("VmwareConnectionString forURL {}", url);
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
             if( info.vendor !=  Vendor.VMWARE ) {
                 throw new IllegalArgumentException("Not a VMware Host URL: "+info.url.toExternalForm());
             }
             cs.vcenterAddress = new InternetAddress(info.url.getHost());
-            cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
             cs.port = portFromURL(info.url);
-            cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
-            cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            if( info.options != null ) {
+                cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
+                cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
+                cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            }
             return cs;
         }
     }
@@ -839,10 +849,12 @@ public class ConnectionString {
         return null;
     }        
     
+    /*
     private static Vendor vendorFromURL(URL url) {
         return vendorFromURL(url.toExternalForm());
     }
-
+    */
+    
     private static Vendor vendorFromURL(String url) {
         for( Vendor v : Vendor.values() ) {
             if( url.toLowerCase().startsWith(v.name().toLowerCase()+":") ) {

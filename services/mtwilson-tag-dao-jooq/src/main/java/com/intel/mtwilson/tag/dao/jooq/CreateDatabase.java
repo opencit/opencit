@@ -36,7 +36,7 @@ public class CreateDatabase {
      * @param args
      * @throws Exception 
      */
-    public void execute(String[] args) throws Exception {
+    public void execute(String[] args) throws SQLException {
 //        Derby.protocol = "jdbc:derby:directory:mytestdb;create=true"; // was:   jdbc:derby:directory:target/derby/mytestdb;create=true
         log.debug("Starting Derby...");
         Derby.startDatabase();
@@ -58,9 +58,9 @@ public class CreateDatabase {
         Connection c = Derby.getConnection();
         Set<String> tables = Derby.listTablesAndViews(c);
         for(String table : tables) {
-            Statement s = c.createStatement();
-            s.executeUpdate("DROP TABLE "+table);
-            s.close();
+            try (Statement s = c.createStatement()) {
+                s.executeUpdate("DROP TABLE "+table);
+            }
         }
     }
     
@@ -120,7 +120,7 @@ public class CreateDatabase {
         
     }    
  
-    public static void main(String args[]) throws Exception {
+    public static void main(String args[]) throws SQLException {
         CreateDatabase cmd = new CreateDatabase();
         cmd.setDropTablesEnabled(true);
         cmd.execute(new String[0]);

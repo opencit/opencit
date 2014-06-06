@@ -12,9 +12,11 @@ import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 /**
  * @since 2.0
@@ -111,6 +113,10 @@ public class Certificates  extends MtWilsonClient {
         HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
+            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
+            throw new WebApplicationException("Delete certificate failed");
+        }
     }
     
     /**

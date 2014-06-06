@@ -60,7 +60,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
     }
 
     @Override
-    protected AuthenticationToken createToken(ServletRequest request) throws Exception {
+    protected AuthenticationToken createToken(ServletRequest request) {
         log.debug("createToken");
         try {
             HttpServletRequest httpRequest = WebUtils.toHttp(request);
@@ -83,7 +83,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
             X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), signatureInput, request.getRemoteAddr());
             log.debug("createToken: returning X509AuthenticationToken");
             return token;
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             throw new AuthenticationException("Cannot authenticate request: " + e.getMessage(), e);
         }
     }
@@ -211,37 +211,6 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
             return "2.16.840.1.101.3.4.2.3";
         }
         throw new IllegalArgumentException("Unknown OID for algorithm " + digestAlgorithm);
-    }
-
-    /**
-     *
-     * @param timestamp
-     * @return // check if the request has expired by looking at the HTTP Date
-     * header... but only if it was signed. if(
-     * signatureBlock.headers.containsKey("Date") ) { Date requestDate =
-     * Rfc822Date.parse(signatureBlock.headers.get("Date")); if(
-     * isRequestExpired(requestDate) ) {
-     * log.error("X509CertificateAuthorization: Request expired;
-     * date="+requestDate); throw new IllegalArgumentException("Request
-     * expired"); //; current time is "+Iso8601Date.format(new Date())); } }
-     * else { throw new IllegalArgumentException("Missing date header in
-     * request"); }
-     *
-     */
-    // XXX should this be in the matcher? because at this point here we can't verify the signature yet so we can't reall ytrust the time to know that it's not been tampered with to stay within the window...
-    private boolean isRequestExpired(Date timestamp) {
-        // request expiration policy
-        Calendar expirationTime = Calendar.getInstance();
-        expirationTime.setTime(timestamp);
-        expirationTime.add(Calendar.MILLISECOND, expiresAfter);
-        Calendar currentTime = Calendar.getInstance();
-
-        if (currentTime.after(expirationTime)) {
-            long diff = currentTime.getTimeInMillis() - expirationTime.getTimeInMillis();
-            log.warn("Request expired: {}", DurationFormatUtils.formatDurationHMS(diff));
-            return true;
-        }
-        return false;
     }
 
     /**

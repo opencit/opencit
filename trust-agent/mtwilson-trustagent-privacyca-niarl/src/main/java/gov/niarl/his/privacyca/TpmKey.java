@@ -192,7 +192,7 @@ public class TpmKey {
 			throws TpmUnsignedConversionException{
 		byte [] keyParmsBytes = keyParms.toByteArray();
 		byte [] toReturn = new byte[4 + 2 + 4 + 1 + keyParmsBytes.length + 4 + pcrInfo.length + 4 + tpmStorePubkey.length + 4 + encryptedData.length];
-		byte [] tempBytes = null;
+		byte [] tempBytes;
 		int copyPos = 0;
 		//structver: 4
 		System.arraycopy(structVer, 0, toReturn, copyPos, structVer.length);

@@ -142,16 +142,16 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         if (certFile != null) {
             if (certFile.endsWith(".pem")) {
                 File PemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(PemFile);
-                String pem = IOUtils.toString(in);
-                X509Certificate cert = X509Util.decodePemCertificate(pem);
-                caCert.setCertificate(cert.getEncoded());
-                IOUtils.closeQuietly(in);
+                try (FileInputStream in = new FileInputStream(PemFile)) {
+                    String pem = IOUtils.toString(in);
+                    X509Certificate cert = X509Util.decodePemCertificate(pem);
+                    caCert.setCertificate(cert.getEncoded());
+                }
             } else if (certFile.endsWith(".crt")) {
                 File crtFile = new File(certFile);
-                FileInputStream in = new FileInputStream(crtFile);
-                caCert.setCertificate(IOUtils.toByteArray(in));
-                IOUtils.closeQuietly(in);
+                try (FileInputStream in = new FileInputStream(crtFile)) {
+                    caCert.setCertificate(IOUtils.toByteArray(in));
+                }
             } else {
                 throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
             }

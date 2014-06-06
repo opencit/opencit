@@ -1,7 +1,7 @@
 package com.intel.mtwilson.as.business;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.util.Date;
-import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.as.data.TblModuleManifestLog;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -13,7 +13,6 @@ import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.i18n.ErrorCode;
 //import com.intel.mtwilson.model;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
@@ -22,21 +21,12 @@ import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
-import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
-import com.intel.mtwilson.util.DataCipher;
-import com.intel.mtwilson.crypto.Aes128;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Hostname;
-import com.intel.mtwilson.model.Pcr;
-import com.intel.mtwilson.model.PcrManifest;
-import java.io.StringWriter;
 import java.util.*;
 import java.io.IOException;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
 //import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +83,7 @@ public class ReportsBO extends BaseBO {
 
             }
             return hostsTrustReportType;
-        } catch (Exception e) {
+        } catch (IOException | CryptographyException | ASException e) {
             // throw new ASException(e);
             // Bug: 1038 - prevent leaks in error messages to client
             logger.error("Error during retrieval of host trust report.", e);
@@ -111,7 +101,7 @@ public class ReportsBO extends BaseBO {
          * + " is empty."); }
          *
          */
-        TblHosts tblHosts = null;
+        TblHosts tblHosts;
         
         try {
         tblHosts = My.jpa().mwHosts().findByName(hostName.toString()); // datatype.Hostname
@@ -184,8 +174,7 @@ public class ReportsBO extends BaseBO {
 
     // BUG #497 XXX TODO needs rewrite to use HostAgentFactory and HostAgent interfaces
     public String getHostAttestationReport(Hostname hostName) {
-        TblHosts tblHosts = null;
-//        String attestationReport = "";
+        TblHosts tblHosts;
 
         try {
 
@@ -233,8 +222,7 @@ public class ReportsBO extends BaseBO {
          *
          */
 
-        TblHosts tblHosts = null;
-                    tblHosts = My.jpa().mwHosts().findByName(hostName.toString()); // datatype.Hostname
+        TblHosts tblHosts = My.jpa().mwHosts().findByName(hostName.toString()); // datatype.Hostname
         
         if (tblHosts == null) {
             throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
@@ -296,7 +284,7 @@ public class ReportsBO extends BaseBO {
         }*/
         return attestationReport;
         }
-        catch(Exception ex) {
+        catch(IOException | CryptographyException | ASException | NumberFormatException ex) {
             // throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
             // Bug: 1038 - prevent leaks in error messages to client
             logger.error("Error during retrieval of host attestation report.", ex);
@@ -342,7 +330,7 @@ public class ReportsBO extends BaseBO {
     
     // XXX the mw_ta_log and  mw_module_manifest_log tables are not adequate to express the results of policy evaluation... better to just store a serialized copy of the trust report and then read it in once using json mapper, or maybe yaml,  and then have all the info. 
     private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
-        HashMap<String,ModuleLogReport> moduleReports = new HashMap<String, ModuleLogReport>();
+        HashMap<String,ModuleLogReport> moduleReports = new HashMap<>();
         
         if(log.getTblModuleManifestLogCollection() != null){
             logger.debug("addManifestLogs - This is module based attestation with {} of modules.", log.getTblModuleManifestLogCollection().size());
@@ -378,7 +366,7 @@ public class ReportsBO extends BaseBO {
     }
 
     private TblPcrManifest getPcrModuleManifest(TblHosts tblHosts, Integer mleId, String manifestName) {
-        Collection<TblPcrManifest> pcrManifestCollection = null;
+        Collection<TblPcrManifest> pcrManifestCollection;
         
         if (tblHosts.getVmmMleId().getId().intValue() == mleId.intValue()) {
             pcrManifestCollection = tblHosts.getVmmMleId().getTblPcrManifestCollection();

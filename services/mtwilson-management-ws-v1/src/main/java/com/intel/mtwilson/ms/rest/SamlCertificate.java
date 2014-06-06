@@ -74,16 +74,16 @@ public class SamlCertificate {
         try {
             File certFile = ResourceFinder.getFile(MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file", "saml.crt.pem"));
             log.debug("Certificate File " + certFile.getPath());
-            FileInputStream in = new FileInputStream(certFile);
-//            byte[] certificate = IOUtils.toByteArray(in);
-            String certificate = IOUtils.toString(in);
-            IOUtils.closeQuietly(in);
-//            X509Certificate cert = X509Util.decodeDerCertificate(certificate);
-            X509Certificate cert = X509Util.decodePemCertificate(certificate); // XXX assuming only one, should assume multiple and decide whetehr to sign first (end-subject) or last (root ca). 
-            
-            log.info("Read certificate successfully");
+            try (FileInputStream in = new FileInputStream(certFile)) {
+//                byte[] certificate = IOUtils.toByteArray(in);
+                String certificate = IOUtils.toString(in);
+//                X509Certificate cert = X509Util.decodeDerCertificate(certificate);
+                X509Certificate cert = X509Util.decodePemCertificate(certificate); // XXX assuming only one, should assume multiple and decide whetehr to sign first (end-subject) or last (root ca). 
 
-            return cert.getEncoded();
+                log.info("Read certificate successfully");
+
+                return cert.getEncoded();
+            }
         } catch (CertificateException e) {
             throw new MSException(ErrorCode.MS_BAD_CERTIFICATE_FILE, ErrorCode.MS_BAD_CERTIFICATE_FILE.getMessage(), e);
 

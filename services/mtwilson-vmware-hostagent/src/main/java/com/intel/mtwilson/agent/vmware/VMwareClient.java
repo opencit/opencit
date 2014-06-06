@@ -27,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -250,15 +251,13 @@ public class VMwareClient implements TlsClient {
      * contrast to getEntitiesByType which returns all the hosts and then we
      * have to query each one to see if it's the one we want
      */
-    public ManagedObjectReference getHostReference(String hostname) throws Exception {
-        ManagedObjectReference hostRef = null;
-
+    public ManagedObjectReference getHostReference(String hostname) throws RemoteException {
         //ManagedObjectReference searchIndex;
         //vimPort.findByDnsName and vimPort.findByIp ....  first parameter is the searchindex mor, second is datacenter (optional, can be null), , third is the dnsname/ip,  fourth is true for vm or false for host.
         // page 20: obtain manageed obejct reference by accessor method, for searchindex
 //        ServiceContent sc = vimPort.retrieveServiceContent(hostRef)
         ManagedObjectReference searchIndex = serviceContent.getSearchIndex();
-        hostRef = vimPort.findByDnsName(searchIndex, null, hostname, false);
+        ManagedObjectReference hostRef = vimPort.findByDnsName(searchIndex, null, hostname, false);
         if (hostRef == null) {
             hostRef = vimPort.findByIp(searchIndex, null, hostname, false);
         }
@@ -291,6 +290,11 @@ public class VMwareClient implements TlsClient {
         return hostObj.getName();
     }
 
+    public String getStringMEProperty(String meType, String meName, String propertyName) throws InvalidProperty, RuntimeFault, RemoteException {
+        Object value = getMEProperty(meType, meName, propertyName);
+        if( value == null ) { return null; }
+        return value.toString();
+    }
     public Object getMEProperty(String meType, String meName, String propertyName)
             throws InvalidProperty, RuntimeFault, RemoteException {
         return getMEProperties(meType, meName, new String[]{propertyName}).get(propertyName);
@@ -312,9 +316,10 @@ public class VMwareClient implements TlsClient {
     }
 
     public List<String> getPropertyNames(TxtHostRecord hostObj) throws InvalidProperty, RuntimeFault, RemoteException, VMwareConnectionException {
-        ManagedObjectReference moRef = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
         // Return object array
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
+        ManagedObjectReference moRef = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
+        if(moRef == null ) { throw new IllegalArgumentException("Cannot get reference to specified host"); }
         // PropertySpec specifiesgetHostAttestationReport what properties to
         // retrieve and from type of Managed Object
         PropertySpec pSpec = new PropertySpec();
@@ -541,13 +546,13 @@ public class VMwareClient implements TlsClient {
                 throw new Exception("Host specified does not exist in the vCenter.");
             }
 
-            hostObj.HostName = getMEProperty("HostSystem", hostObj.HostName, "name").toString();
+            hostObj.HostName = getStringMEProperty("HostSystem", hostObj.HostName, "name");
             // hostObj.Description = serviceContent.getAbout().getVersion();
-            hostObj.VMM_OSName = getMEProperty("HostSystem", hostObj.HostName, "config.product.name").toString();
-            hostObj.VMM_OSVersion = getMEProperty("HostSystem", hostObj.HostName, "config.product.version").toString();
-            hostObj.VMM_Version = getMEProperty("HostSystem", hostObj.HostName, "config.product.build").toString();
-            hostObj.BIOS_Oem = getMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor").toString();
-            hostObj.BIOS_Version = getMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion").toString();
+            hostObj.VMM_OSName = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.name");
+            hostObj.VMM_OSVersion = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.version");
+            hostObj.VMM_Version = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.build");
+            hostObj.BIOS_Oem = getStringMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor");
+            hostObj.BIOS_Version = getStringMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion");
 
         } catch (Exception ex) {
             throw new VMwareConnectionException(ex);
@@ -599,7 +604,7 @@ public class VMwareClient implements TlsClient {
 
             for (int i = 0; i < hostList.size(); i++) {
                 log.debug("VSPHERE: Host " + i + " = " + hostList.get(i).toString());
-                String hostName = getMEProperty("HostSystem", hostList.get(i).toString(), "name").toString();
+                String hostName = getStringMEProperty("HostSystem", hostList.get(i).toString(), "name");
                 TxtHostRecord hostObj = new TxtHostRecord();
                 hostObj.HostName = hostName;
                 hostObj.AddOn_Connection_String = vCenterConnectionString;
@@ -624,8 +629,8 @@ public class VMwareClient implements TlsClient {
      * @return : string list of datacenter names
      * @throws Exception
      */
-    public List<String> getDatacenterNames() throws /*InvalidProperty, RuntimeFault, RemoteException */ Exception {
-        List<String> ret = new ArrayList<String>();
+    public List<String> getDatacenterNames() throws InvalidProperty, RuntimeFault, RemoteException {
+        List<String> ret = new ArrayList<>();
         log.debug("Acquiring datacenters...");
         ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("Datacenter");
         for (ManagedEntity me : mes) {
@@ -648,7 +653,7 @@ public class VMwareClient implements TlsClient {
      * @return : string list of cluster names
      * @throws Exception
      */
-    public List<String> getClusterNamesWithDC() throws /*InvalidProperty, RuntimeFault, RemoteException*/ Exception {
+    public List<String> getClusterNamesWithDC() throws InvalidProperty, RuntimeFault, RemoteException  {
         List<String> ret = new ArrayList<String>();
         log.debug("Acquiring clusters...");
         ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("ComputeResource");
@@ -660,8 +665,8 @@ public class VMwareClient implements TlsClient {
         return ret;
     }
     
-    public ArrayList getHostNamesForCluster(String clusterName) throws /*InvalidProperty, RuntimeFault, RemoteException*/ Exception {
-        ArrayList hostDetailList = new ArrayList<TxtHostRecord>();
+    public ArrayList getHostNamesForCluster(String clusterName) throws InvalidProperty, RuntimeFault, RemoteException {
+        ArrayList<TxtHostRecord> hostDetailList = new ArrayList<>();
         log.debug("Acquiring host systems...");
         
         ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("HostSystem");
@@ -671,11 +676,11 @@ public class VMwareClient implements TlsClient {
                 TxtHostRecord hostObj = new TxtHostRecord();
                 hostObj.HostName = me.getName();
                 hostObj.AddOn_Connection_String = vmwareConnectionString;
-                hostObj.VMM_OSName = getMEProperty("HostSystem", hostObj.HostName, "config.product.name").toString();
-                hostObj.VMM_OSVersion = getMEProperty("HostSystem", hostObj.HostName, "config.product.version").toString();
-                hostObj.VMM_Version = getMEProperty("HostSystem", hostObj.HostName, "config.product.build").toString();
-                hostObj.BIOS_Oem = getMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor").toString();
-                hostObj.BIOS_Version = getMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion").toString();
+                hostObj.VMM_OSName = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.name");
+                hostObj.VMM_OSVersion = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.version");
+                hostObj.VMM_Version = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.build");
+                hostObj.BIOS_Oem = getStringMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor");
+                hostObj.BIOS_Version = getStringMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion");
                 hostDetailList.add(hostObj);
             }
             else {
@@ -762,9 +767,9 @@ public class VMwareClient implements TlsClient {
                 throw new Exception("Invalid virtual machine or host specified for the VM migration.");
             }
 
-            String vmPowerState = getMEProperty("VirtualMachine", vmName, "runtime.powerState").toString();
+            String vmPowerState = getStringMEProperty("VirtualMachine", vmName, "runtime.powerState");
 
-            if (vmPowerState.equalsIgnoreCase("powered_on")) {
+            if (vmPowerState != null && vmPowerState.equalsIgnoreCase("powered_on")) {
                 migrateTaskMOR = vimPort.migrateVM_Task(vmMOR, null, hostMOR,
                         VirtualMachineMovePriority.highPriority, VirtualMachinePowerState.poweredOn);
             } else {
@@ -909,7 +914,7 @@ public class VMwareClient implements TlsClient {
              doNotDisconnect = true;
              */
 
-            Boolean tpmSupport = Boolean.parseBoolean(getMEProperty(hostMOR.type, hostName, "capability.tpmSupported").toString());
+            Boolean tpmSupport = Boolean.parseBoolean(getStringMEProperty(hostMOR.type, hostName, "capability.tpmSupported"));
 
             // Lets create the start of the XML document
             // xtw = xof.createXMLStreamWriter(new FileWriter("c:\\temp\\nb_xml.xml"));
@@ -918,7 +923,7 @@ public class VMwareClient implements TlsClient {
             xtw.writeStartElement("Host_Attestation_Report");
             xtw.writeAttribute("Host_Name", hostName);
             xtw.writeAttribute("vCenterVersion", serviceContent.getAbout().getVersion());
-            String hostVer = getMEProperty(hostMOR.type, hostName, "config.product.version").toString();
+            String hostVer = getStringMEProperty(hostMOR.type, hostName, "config.product.version");
             xtw.writeAttribute("HostVersion", hostVer);
             xtw.writeAttribute("TXT_Support", tpmSupport.toString());
 
@@ -930,7 +935,7 @@ public class VMwareClient implements TlsClient {
 
                 // Process the event log only for the ESXi 5.1 or higher
                 // if (hostTrustReport != null && hostVer.contains("5.1")) {
-                if (hostTrustReport != null && (isModuleAttestationSupportedByESX(hostVer))) {
+                if (hostTrustReport != null && hostVer != null && (isModuleAttestationSupportedByESX(hostVer))) {
                     log.debug("Retrieving TPM events...");
                     int numOfEvents = hostTrustReport.getTpmEvents().length;
                     for (int k = 0; k < numOfEvents; k++) {
@@ -1034,7 +1039,7 @@ public class VMwareClient implements TlsClient {
             } else if (tpmSupport == true && serviceContent.getAbout().getVersion().contains("5.0")) {
                 // Refresh the runtime information
                 HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) getMEProperty(hostMOR.type, hostName, "runtime");
-
+                if( runtimeInfo != null ) {
                 // Now process the digest information
                 List<String> pcrs = Arrays.asList(pcrList.split(","));
                 int numTPMValues = runtimeInfo.getTpmPcrValues().length;
@@ -1046,6 +1051,7 @@ public class VMwareClient implements TlsClient {
                         xtw.writeAttribute("DigestValue", byteArrayToHexString(pcrInfo.getDigestValue()));
                         xtw.writeEndElement();
                     }
+                }
                 }
             } else {
                 xtw.writeStartElement("PCRInfo");
@@ -1059,7 +1065,7 @@ public class VMwareClient implements TlsClient {
             xtw.close();
             String attestationReport = sw.toString();
             return attestationReport;
-        } catch (Exception ex) {
+        } catch (RemoteException | XMLStreamException ex) {
             throw new VMwareConnectionException(ex);
         } finally {/*
              if (!doNotDisconnect)
@@ -1068,16 +1074,6 @@ public class VMwareClient implements TlsClient {
         }
     }
 
-    /**
-     *
-     * @param foo
-     * @return
-     */
-    public static String getMyClusterNames() {
-        VMwareClient client = new VMwareClient();
-        return null;
-
-    }
 
     // <editor-fold defaultstate="collapsed" desc="Code copied from VMware SDK's VMPowerOps.Java file.">
     /**
@@ -1092,7 +1088,7 @@ public class VMwareClient implements TlsClient {
             throws VMwareConnectionException {
         
         RetrieveOptions propObjectRetrieveOpts = new RetrieveOptions();
-        List<ObjectContent> listobjcontent = new ArrayList<ObjectContent>();
+        List<ObjectContent> listobjcontent = new ArrayList<>();
 
         try {
             RetrieveResult rslts = vimPort.retrievePropertiesEx(propCollectorRef, (PropertyFilterSpec[])listpfs.toArray(), propObjectRetrieveOpts);
@@ -1176,6 +1172,13 @@ public class VMwareClient implements TlsClient {
      * @param typeinfo 2D array of properties for each typename
      * @param recurse retrieve contents recursively from the root down
      *
+     * XXX  this function has several issues that make it unclear if it 
+     * is working as intended; it is only called from two places and both of 
+     * them use recurse=true, and if they didn't this function would throw a
+     * null pointer exception; also use of .equals without any branching seems
+     * useless - but it is apparently the way the vmware sdk implements some
+     * of the filter criteria. 
+     * 
      * @return retrieved object contents
      */
     private List<ObjectContent> getContentsRecursively(ManagedObjectReference collector,
@@ -1203,18 +1206,19 @@ public class VMwareClient implements TlsClient {
         if (recurse) {
             selectionSpecs = buildFullTraversal();
         }
+        // XXX if recurse == false there would be a null pointer exception below;  but this function is only called from two places in this class and both use recurse == true
 
         List<PropertySpec> propspecary = buildPropertySpecArray(typeinfo);
         ObjectSpec objSpec = new ObjectSpec();
         objSpec.setObj(useroot);
         objSpec.setSkip(Boolean.FALSE);
-        objSpec.getSelectSet().equals((PropertySpec[])selectionSpecs.toArray());
-        List<ObjectSpec> objSpecList = new ArrayList<ObjectSpec>();
+        objSpec.getSelectSet().equals((PropertySpec[])selectionSpecs.toArray()); 
+        List<ObjectSpec> objSpecList = new ArrayList<>();
         objSpecList.add(objSpec);
         PropertyFilterSpec spec = new PropertyFilterSpec();
-        spec.getPropSet().equals(propspecary);
-        spec.getObjectSet().equals(objSpecList);
-        List<PropertyFilterSpec> listpfs = new ArrayList<PropertyFilterSpec>();
+        spec.getPropSet().equals(propspecary); 
+        spec.getObjectSet().equals(objSpecList); 
+        List<PropertyFilterSpec> listpfs = new ArrayList<>();
         listpfs.add(spec);
         List<ObjectContent> listobjcont = retrievePropertiesAllObjects(listpfs);
 

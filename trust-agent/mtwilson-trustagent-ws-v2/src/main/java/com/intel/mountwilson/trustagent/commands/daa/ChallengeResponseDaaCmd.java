@@ -10,10 +10,8 @@ import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import org.apache.commons.io.FileUtils;
-
+import java.io.IOException;
 import org.apache.commons.io.IOUtils;
-//import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +31,9 @@ public class ChallengeResponseDaaCmd implements ICommand {
     @Override
     public void execute() throws TAException {
         try {
-            // write challenge to file
-        	FileOutputStream out = new FileOutputStream(new File(context.getDaaChallengeFileName()));
+            try (FileOutputStream out = new FileOutputStream(new File(context.getDaaChallengeFileName()))) {
                 IOUtils.copy(new ByteArrayInputStream(context.getDaaChallenge()), out);
-             // Removing the dependency on the codehaus
-            //IOUtil.copy(context.getDaaChallenge(), out);
-            IOUtils.closeQuietly(out);
+            }
             
             // prepare response to challenge
             CommandUtil.runCommand(String.format("aikrespond %s %s %s", context.getAikBlobFileName(), context.getDaaChallengeFileName(), context.getDaaResponseFileName())); // safe; no arguments involved in this command line
@@ -50,7 +45,7 @@ public class ChallengeResponseDaaCmd implements ICommand {
             (new File(context.getDaaResponseFileName())).delete();
             log.debug("DAA Response file deleted - {}", context.getDaaResponseFileName());
             
-        } catch (Exception e) {
+        } catch (IOException | TAException e) {
             throw new TAException(ErrorCode.COMMAND_ERROR, "Error while preparing DAA challenge response: "+e.toString());
         }
     }

@@ -60,6 +60,7 @@ public class SetAssetTag implements ICommand{
             
             if(!writeHashToNvram(tpmNvramPass)) {
                 // need some type of exception here
+                log.error("Error writing hash to NVRAM");
             }
             
             //last thing is, if we generated a new password, we need to register it
@@ -138,9 +139,11 @@ public class SetAssetTag implements ICommand{
     
     private boolean indexExists() throws TAException, IOException {     
         try {
-            CommandResult result = CommandUtil.runCommand("tpm_nvinfo -i " + index);  
-            if(result.getStdout().contains("NVRAM index")) 
-                return true;
+            CommandResult result = CommandUtil.runCommand("tpm_nvinfo -i " + index);
+            if (result != null && result.getStdout() != null) {
+                if(result.getStdout().contains("NVRAM index")) 
+                    return true;
+            }
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;

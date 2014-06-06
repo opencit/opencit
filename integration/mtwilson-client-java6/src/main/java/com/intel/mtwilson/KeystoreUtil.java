@@ -78,6 +78,7 @@ public class KeystoreUtil {
     private static final Logger log = LoggerFactory.getLogger(KeystoreUtil.class);
     
     /**
+     * Does not close the input stream ; caller must close it.
      * 
      * @param keystoreIn
      * @param keystorePassword
@@ -86,6 +87,38 @@ public class KeystoreUtil {
      * @throws IOException
      * @throws NoSuchAlgorithmException
      * @throws CertificateException 
+     */
+    public static KeyStore fromInputStream(InputStream keystoreIn, String keystorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. XXX TODO we need to implement AES-128 keystore encryption provider
+        ks.load(keystoreIn, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
+        return ks;
+    }
+    
+    public static KeyStore fromFilename(String keystoreFilename, String keystorePassword) throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+        File file = new File(keystoreFilename);
+        if( file.exists() ) {
+            try(InputStream in = new FileInputStream(keystoreFilename)) {
+                return fromInputStream(in, keystorePassword);
+            }
+        }
+        else {
+            try(InputStream in =  KeystoreUtil.class.getResourceAsStream(keystoreFilename)) {
+                return fromInputStream(in, keystorePassword);
+            }
+        }
+        
+    }
+    
+    /**
+     * 
+     * @param keystoreIn
+     * @param keystorePassword
+     * @return
+     * @throws KeyStoreException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException 
+     * @deprecated use fromInputStream instead
      */
     public static KeyStore open(InputStream keystoreIn, String keystorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. XXX TODO we need to implement AES-128 keystore encryption provider
@@ -113,15 +146,17 @@ public class KeystoreUtil {
     public static KeyStore open(Configuration config) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         String filename = config.getString("mtwilson.api.keystore", "keystore.jks");
         String password = config.getString("mtwilson.api.keystore.password", "changeit");
-        InputStream in;
-        try {
-            in = new FileInputStream(filename);
+        File file = new File(filename);
+        if( file.exists() ) {
+            try(InputStream in = new FileInputStream(filename)) {
+                return fromInputStream(in, password);
+            }
         }
-        catch(FileNotFoundException e) {
-            // not a file, try the classpath
-            in = KeystoreUtil.class.getResourceAsStream(filename);
+        else {
+            try(InputStream in =  KeystoreUtil.class.getResourceAsStream(filename)) {
+                return fromInputStream(in, password);
+            }
         }
-        return open(in, password);
     }
 
     /**
@@ -193,16 +228,8 @@ public class KeystoreUtil {
      */
     public static RsaCredential loadX509(Configuration config) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, com.intel.dcsg.cpg.crypto.CryptographyException {
         String keystore = config.getString("mtwilson.api.keystore", "keystore.jks");
-        InputStream in;
-        try {
-            in = new FileInputStream(keystore);
-        }
-        catch(FileNotFoundException e) {
-            // not a file, try the classpath
-            in = KeystoreUtil.class.getResourceAsStream(keystore);
-        }
-        KeyStore ks = open(in, 
-                config.getString("mtwilson.api.keystore.password", "changeit"));
+        String keystorePassword = config.getString("mtwilson.api.keystore.password", "changeit");
+        KeyStore ks = fromFilename(keystore, keystorePassword);
         RsaCredential rsa = loadX509(ks,
                 config.getString("mtwilson.api.key.alias", "mykey"),
                 config.getString("mtwilson.api.key.password", "changeit"));
@@ -248,8 +275,10 @@ public class KeystoreUtil {
     
 */
 
-    public static void save(KeyStore keystore, String password, File output) throws FileNotFoundException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        keystore.store(new FileOutputStream(output), password.toCharArray()); // FileNotFoundException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException
+    public static void save(KeyStore keystore, String password, File outputFile) throws FileNotFoundException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        try(OutputStream out = new FileOutputStream(outputFile)) {
+        keystore.store(out, password.toCharArray()); // FileNotFoundException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException
+        }
     }
     /*
     public static File save(KeyStore keystore, String password) throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
@@ -309,16 +338,7 @@ public class KeystoreUtil {
             keystore.save(); // KeyStoreException, IOException, CertificateException        
             return keystore;
         } 
-        catch(KeyManagementException e) {
-            throw new CryptographyException("Cannot create keystore", e);
-        }
-        catch(NoSuchAlgorithmException e) {
-            throw new CryptographyException("Cannot create keystore", e);
-        }
-        catch(KeyStoreException e) {
-            throw new CryptographyException("Cannot create keystore", e);
-        }
-        catch(CertificateException e) {
+        catch(KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException e) {
             throw new CryptographyException("Cannot create keystore", e);
         }
     }
@@ -372,11 +392,11 @@ public class KeystoreUtil {
                     log.trace("Certificate: "+keystore.getX509Certificate(alias).getSubjectX500Principal().getName());
                 }
             }
-            catch(Exception e) {
+            catch(KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
                 log.trace("cannot display keystore: "+e.toString());
             }
         }
-        ApiClient c = null;
+        ApiClient c;
         try {
             // download server's ssl certificates and add them to the keystore
 //            Properties p = new Properties();
@@ -406,12 +426,12 @@ public class KeystoreUtil {
                     log.debug("Adding CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
                     keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
                 }
-                catch(Exception e) {
+                catch(CertificateEncodingException | KeyManagementException e) {
                     log.error(e.toString());
                 }
             }            
         }
-        catch(Exception e) {
+        catch(IOException | ApiException | SignatureException e) {
             log.error(e.toString());
         }
         
@@ -423,12 +443,12 @@ public class KeystoreUtil {
                     log.debug("Adding Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
                     keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
                 }
-                catch(Exception e) {
+                catch(CertificateEncodingException | KeyManagementException e) {
                     log.error(e.toString());
                 }
             }            
         }
-        catch(Exception e) {
+        catch(IOException | ApiException | SignatureException e) {
             log.error(e.toString());
         }
         
@@ -447,12 +467,12 @@ public class KeystoreUtil {
                         log.debug("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost());
                     }
                 }
-                catch(Exception e) {
+                catch(KeyManagementException | CertificateEncodingException e) {
                     log.error(e.toString());
                 }
             }            
         }
-        catch(Exception e) {
+        catch(IOException | ApiException | SignatureException e) {
             log.error(e.toString());
         }
         
@@ -460,7 +480,7 @@ public class KeystoreUtil {
             keystore.save();
             return keystore;
         }
-        catch(Exception e) {
+        catch(KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new CryptographyException("Cannot save keystore to resource: "+e.toString(), e);
         }
     }
@@ -566,7 +586,9 @@ public class KeystoreUtil {
             rpcUserWithCert.setUser(newUser);
             rpcUserWithCert.setUserLoginCertificate(userLoginCertificate);
             boolean result = client.registerUserWithCertificate(rpcUserWithCert);
-            
+            if( !result ) {
+                throw new IllegalStateException("Failed to register user with certificate");
+            }
         } catch (Exception ex) {
             log.error("Error during creation of user.", ex);
         }

@@ -172,7 +172,7 @@ public class InitDatabase implements Command {
         verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
             presentChanges.put(Long.valueOf(entry.id), entry);
-            if( entry != null ) { verbose("%s %s %s", entry.id, entry.applied_at, entry.description); }
+            verbose("%s %s %s", entry.id, entry.applied_at, entry.description);
         }
 
         // Does it have any changes that we don't?  In other words, is the database schema newer than what we know in this installer?
@@ -400,24 +400,20 @@ public class InitDatabase implements Command {
     
     
     private List<String> getTableNames(Connection c) throws SQLException {
-        
-       ArrayList<String> list = new ArrayList<String>();
-        Statement s = c.createStatement();
-        
-        String sql = "";
-        if (vendor.equals("mysql")){
-            sql = "SHOW TABLES";
+        ArrayList<String> list = new ArrayList<>();
+        try (Statement s = c.createStatement()) {
+            String sql = "";
+            if (vendor.equals("mysql")) {
+                sql = "SHOW TABLES";
+            } else if (vendor.equals("postgresql")) {
+                sql = "SELECT table_name FROM information_schema.tables;";
+            }
+            try (ResultSet rs  = s.executeQuery(sql)) {
+                while (rs.next()) {
+                    list.add(rs.getString(1));
+                }
+            }
         }
-        else if (vendor.equals("postgresql")){
-            sql = "SELECT table_name FROM information_schema.tables;";          
-        }
-       
-        ResultSet rs = s.executeQuery(sql);
-        while(rs.next()) {
-            list.add(rs.getString(1));
-        }
-        s.close();
-        rs.close();
         return list;
 
     }
@@ -442,29 +438,28 @@ public class InitDatabase implements Command {
         
         String changelogTableName = null;
         // if we have both changelog tables, copy all records from old changelog to new changelog and then use that
-        if( hasChangelog && hasMwChangelog ) {
-            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?");
-            PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
-            Statement select = c.createStatement();
-            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog");
-            while(rs.next()) {
-                check.setLong(1, rs.getLong("ID"));
-                ResultSet rsCheck = check.executeQuery();
-                if( rsCheck.next() ) {
-                    // the id is already in the new mw_changelog table
+        if( hasChangelog && hasMwChangelog) {
+            try (PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?")) {
+                try (PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?")) {
+                    try (Statement select = c.createStatement()) {
+                        try (ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog")) {
+                            while (rs.next()) {
+                                check.setLong(1, rs.getLong("ID"));
+                                try (ResultSet rsCheck = check.executeQuery()) {
+                                    if (rsCheck.next()) {
+                                        // the id is already in the new mw_changelog table
+                                    } else {
+                                        insert.setLong(1, rs.getLong("ID"));
+                                        insert.setString(2, rs.getString("APPLIED_AT"));
+                                        insert.setString(3, rs.getString("DESCRIPTION"));
+                                        insert.executeUpdate();
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                else {
-                    insert.setLong(1, rs.getLong("ID"));
-                    insert.setString(2, rs.getString("APPLIED_AT"));
-                    insert.setString(3, rs.getString("DESCRIPTION"));
-                    insert.executeUpdate();
-                }
-                rsCheck.close();
             }
-            rs.close();
-            select.close();
-            insert.close();
-            check.close();
             changelogTableName = "mw_changelog"; 
         }
         else if( hasMwChangelog ) {
@@ -473,18 +468,17 @@ public class InitDatabase implements Command {
         else if( hasChangelog ) {
             changelogTableName = "changelog";
         }
-        
-        Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName));
-        while(rs.next()) {
-            ChangelogEntry entry = new ChangelogEntry();
-            entry.id = rs.getString("ID");
-            entry.applied_at = rs.getString("APPLIED_AT");
-            entry.description = rs.getString("DESCRIPTION");
-            list.add(entry);
+        try (Statement s = c.createStatement()) {
+            try (ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName))) {
+                while (rs.next()) {
+                    ChangelogEntry entry = new ChangelogEntry();
+                    entry.id = rs.getString("ID");
+                    entry.applied_at = rs.getString("APPLIED_AT");
+                    entry.description = rs.getString("DESCRIPTION");
+                    list.add(entry);
+                }
+            }
         }
-        rs.close();
-        s.close();
         return list;
     }
     

@@ -20,9 +20,6 @@ import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION_
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.Selection;
-import com.intel.mtwilson.tag.model.SelectionCollection;
-import java.util.ArrayList;
-import java.util.HashMap;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -132,7 +129,7 @@ public class SelectionKvAttributeRepository implements SimpleRepository<Selectio
                 SelectionDAO selectionDao = TagJdbi.selectionDao();
                 KvAttributeDAO attrDao = TagJdbi.kvAttributeDao()) {
             
-            Selection selectionObj = null;
+            Selection selectionObj;
             SelectionKvAttribute obj = dao.findById(item.getId());
             if (obj == null) {
                 if (item.getSelectionName() == null || item.getKvAttributeId() == null) {

@@ -106,7 +106,7 @@ public class HostTrustPolicyManager {
      */
     public Policy loadTrustPolicyForHost(TblHosts host, String hostId) {
         VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);        
-        HashSet<Rule> rules = new HashSet<Rule>();
+        HashSet<Rule> rules = new HashSet<>();
         // only add bios policy if the host is linked with a bios mle
         if( host.getBiosMleId() != null ) {
             Bios bios = new Bios(host.getBiosMleId().getName(), host.getBiosMleId().getVersion(), host.getBiosMleId().getOemId().getName());
@@ -126,7 +126,7 @@ public class HostTrustPolicyManager {
         try {
             // Since this function can be called either during attestation or during verification of mle matches during which
             // the host is actually not registered, we need to check for that explicitly.
-            if (host != null && host.getId() != null && host.getId() != 0) {
+            if (host.getId() != null && host.getId() != 0) {
                 // Need to add the certificate whitelist only if the host is associated with a valid asset tag certificate.
                 AssetTagCertBO atagCertBO = new AssetTagCertBO();
                 MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(host.getId());            

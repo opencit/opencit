@@ -35,7 +35,7 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
-                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
+                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid);
                 if (obj != null) {
                     objCollection.getAikCertificates().add(convert(obj));
                 }
@@ -85,7 +85,7 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
             TblHosts obj = jpaController.findHostByUuid(item.getHostUuid());
             if (obj != null) {
                 obj.setAIKCertificate(item.getCertificate().toString());
-                Sha1Digest aikSha1 = Sha1Digest.valueOf(item.getCertificate());
+//                Sha1Digest aikSha1 = Sha1Digest.valueOf(item.getCertificate());
                 
                 jpaController.edit(obj);
             }

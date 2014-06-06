@@ -96,7 +96,7 @@ public class AuditLogger {
     }
     
     public String getAuditUserName() {
-        String userName = "";
+        String userName;
         try {
             AuditContext auditContext =  MtWilsonThreadLocal.get();
             if(auditContext != null){

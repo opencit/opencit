@@ -66,7 +66,7 @@ public class TagCertificateAuthority {
      * @param ip address or hostname
      * @return
      */
-    public String findSubjectHardwareUuid(String ip) throws Exception {
+    public String findSubjectHardwareUuid(String ip) throws IOException, ApiException, SignatureException {
         log.debug("Querying host {} in Mt Wilson", ip);
         List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip, true);
         if (hostList == null || hostList.isEmpty()) {
@@ -139,8 +139,12 @@ public class TagCertificateAuthority {
                     return found;
                 }
             }
-            // did not find a selection on the server and the selection xml is broken (selection/>)
-            throw new IllegalArgumentException("Invalid selection");
+            // if there are no inline <attribute>...</attribute> tags then either <selection name="..."/> or <selection id="..."/> xml attributes must be specified so we can look up the selected attributes in the database
+            if( selection.getId() == null && selection.getName() == null ) {
+                throw new IllegalArgumentException("Empty selection with no id or name");
+            }
+            // if id or name attributes were specified but we didn't find them in the database, it's also an error
+            throw new IllegalArgumentException("Cannot find selection by id or name");
         }
         // if it's not empty we use the included attributes and do not need to look anything up on the server
         return selection;
@@ -155,7 +159,8 @@ public class TagCertificateAuthority {
      * a selection could not be found.
      *
      */
-    public SelectionType findCurrentSelectionForSubject(UUID targetSubject, SelectionsType selections) throws Exception {
+    public SelectionType findCurrentSelectionForSubject(UUID targetSubject, SelectionsType selections) 
+            throws SQLException, IOException, ApiException, SignatureException {
         log.debug("findSelectionForSubject {}", targetSubject.toString());
         SelectionsType currentSelections = SelectionUtil.copySelectionsValidOn(selections, new Date());
         // first search by host uuid
@@ -171,11 +176,12 @@ public class TagCertificateAuthority {
             }
         }
         // second search by host ip or host name
+        // TODO: look up the subject's ip addresses and hostnames by subject uuid just once here, then compare what is in the xml against this list to find a matching selection
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
                 if (subject.getIp() != null) {
                     log.debug("looking up uuid for host with ip {}", subject.getIp().getValue());
-                    String uuid = findSubjectHardwareUuid(subject.getIp().getValue());
+                    String uuid = findSubjectHardwareUuid(subject.getIp().getValue()); // TODO: (see note immediately before this block) instead of looking up the hardware uuid for each ip to compare to the subject uuid,  we should be looking up the subject uuid's ip address or hostname list just once and then seeing if this matches any of the ip values we already looked up for the subject 
                     if (uuid != null) {
                         log.debug("comparing to found selection subject uuid {}", uuid);
                         if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {
@@ -200,7 +206,8 @@ public class TagCertificateAuthority {
          return findSelectionByName(defaultSelectionName);
          }
          */
-        throw new IllegalArgumentException("No matching selection");
+        //throw new IllegalArgumentException("No matching selection");
+        return null; // no matching selection - let the caller decide if it's an error or not
     }
 
     /**
@@ -214,8 +221,11 @@ public class TagCertificateAuthority {
      * @return
      * @throws Exception
      */
-    public byte[] createTagCertificate(UUID subject, SelectionsType selections) throws Exception {
+    public byte[] createTagCertificate(UUID subject, SelectionsType selections) throws SQLException, IOException, ApiException, SignatureException {
         SelectionType selection = findCurrentSelectionForSubject(subject, selections);
+        if( selection == null ) {
+            throw new IllegalArgumentException("No matching selection");
+        }
         return createTagCertificate(subject, selection);
     }
     
@@ -233,7 +243,7 @@ public class TagCertificateAuthority {
      * @return
      * @throws Exception
      */
-    public byte[] createTagCertificate(UUID subject, SelectionType selection) throws Exception {
+    public byte[] createTagCertificate(UUID subject, SelectionType selection) throws IOException {
         // check if we have a private key to use for signing
         PrivateKey cakey = Global.cakey();
         X509Certificate cakeyCert = Global.cakeyCert();

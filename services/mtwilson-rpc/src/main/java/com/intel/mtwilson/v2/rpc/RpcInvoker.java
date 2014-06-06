@@ -31,7 +31,7 @@ public class RpcInvoker implements Runnable {
 //    public static RpcInvoker getInstance() { return instance; }
     
     private RpcRepository repository = new RpcRepository();
-    private ConcurrentLinkedQueue<UUID> queue = new ConcurrentLinkedQueue<UUID>(); // of rpc request uuid's to run
+    private ConcurrentLinkedQueue<UUID> queue = new ConcurrentLinkedQueue<>(); // of rpc request uuid's to run
     private ObjectMapper mapper = new ObjectMapper(); // XXX for debugging only
     
 //    public void setRepository(RpcRepository repository) { this.repository = repository; }
@@ -67,6 +67,11 @@ public class RpcInvoker implements Runnable {
         locator.id = id;
         RpcPriv rpc = repository.retrieveInput(locator); // retrieve(locator) would only return the status info ;  so we have an additional retrieveInput method to also return the input
         
+        if (rpc == null) {
+            log.error("Cannot retrieve rpc input.");
+            return;
+        }
+        
         // make sure we have an extension to handle this rpc
         RpcAdapter adapter = RpcUtil.findRpcForName(rpc.getName());
         if( adapter == null ) {
@@ -80,7 +85,7 @@ public class RpcInvoker implements Runnable {
         XStream xs = new XStream();
        
         
-        Object taskObject = null;
+        Object taskObject;
         // parse the request body and deserialize to automaticaly set the task inputs
         try {
             taskObject = xs.fromXML(new String(rpc.getInput(), Charset.forName("UTF-8")));

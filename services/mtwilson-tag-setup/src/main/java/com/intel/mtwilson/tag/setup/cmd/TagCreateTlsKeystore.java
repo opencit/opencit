@@ -38,7 +38,7 @@ public class TagCreateTlsKeystore extends TagCommand {
     public void execute(String[] args) throws Exception {
         // file name, and either outfile or stdout
         String ipAlternativeName, dnsAlternativeName;
-        String filename;
+//        String filename;
         String dn;
         if( args.length > 0 ) { 
             dn = args[0];
@@ -46,12 +46,13 @@ public class TagCreateTlsKeystore extends TagCommand {
         else {
             dn = "CN=asset-tag-service,OU=mtwilson";
         }
+        /***** UNUSED
         if( args.length > 1 ) {
             filename = args[1];
         }
         else {
             filename = "keystore.jks";
-        }
+        }*/
         
         ipAlternativeName = getOptions().getString("ip");
         dnsAlternativeName = getOptions().getString("dns");

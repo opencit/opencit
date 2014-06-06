@@ -249,28 +249,31 @@ public class MyPersistenceManager extends PersistenceManager {
     
     public static Properties getEnvDataJpaProperties(MyConfiguration config) {
         Properties prop = getASDataJpaProperties(config);
-        
-        if (System.getenv("MTWILSON_DB_DRIVER") != null && !System.getenv("MTWILSON_DB_DRIVER").isEmpty()) {
-            prop.put("javax.persistence.jdbc.driver", System.getenv("MTWILSON_DB_DRIVER"));
+        String mtwilsonDbDriverEnvVar = System.getenv("MTWILSON_DB_DRIVER");
+        if ( mtwilsonDbDriverEnvVar != null && !mtwilsonDbDriverEnvVar.isEmpty()) {
+            prop.put("javax.persistence.jdbc.driver", mtwilsonDbDriverEnvVar);
         }
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+        String jdbcDriver = prop.get("javax.persistence.jdbc.driver").toString();
+        if( (jdbcDriver != null) && jdbcDriver.equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+        else if((jdbcDriver != null) && jdbcDriver.equals("org.postgresql.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
         else {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }
-        
-        if (System.getenv("MTWILSON_DB_HOST") != null && !System.getenv("MTWILSON_DB_HOST").isEmpty()) {
-            prop.put("javax.persistence.jdbc.host", System.getenv("MTWILSON_DB_HOST"));
+        String mtwilsonDbHostEnvVar = System.getenv("MTWILSON_DB_HOST");
+        if ( mtwilsonDbHostEnvVar != null && !mtwilsonDbHostEnvVar.isEmpty()) {
+            prop.put("javax.persistence.jdbc.host", mtwilsonDbHostEnvVar);
         }
-        if (System.getenv("MTWILSON_DB_PORT") != null && !System.getenv("MTWILSON_DB_PORT").isEmpty()) {
-            prop.put("javax.persistence.jdbc.port", System.getenv("MTWILSON_DB_PORT"));
+        String mtwilsonDbPortEnvVar = System.getenv("MTWILSON_DB_PORT");
+        if (mtwilsonDbPortEnvVar != null && !mtwilsonDbPortEnvVar.isEmpty()) {
+            prop.put("javax.persistence.jdbc.port", mtwilsonDbPortEnvVar);
         }
-        if (System.getenv("MTWILSON_DB_SCHEMA") != null && !System.getenv("MTWILSON_DB_SCHEMA").isEmpty()) {
-            prop.put("javax.persistence.jdbc.schema", System.getenv("MTWILSON_DB_SCHEMA"));
+        String mtwilsonDbSchemaEnvVar = System.getenv("MTWILSON_DB_SCHEMA");
+        if (mtwilsonDbSchemaEnvVar != null && !mtwilsonDbSchemaEnvVar.isEmpty()) {
+            prop.put("javax.persistence.jdbc.schema", mtwilsonDbSchemaEnvVar);
         }
         
         prop.put("javax.persistence.jdbc.url",

@@ -34,7 +34,7 @@ public class Password implements Command {
     }
     
     // never returns null but password may be empty (and that's allowed)
-    private String getPassword(String[] args) throws Exception {
+    private String getPassword(String[] args) throws IOException {
         String password;
         if( options.getBoolean("nopass", false) ) {
             password = "";
@@ -61,7 +61,7 @@ public class Password implements Command {
         return password;
     }
     // get the 3rd arg if it's usrename passsword permissions, or the 2nd arg if it's username --nopass permissions
-    private String getPermissions(String[] args) throws Exception {
+    private String getPermissions(String[] args) {
         String permissions = null;
         if( args.length == 2 && options.getBoolean("nopass", false) ) {
             permissions = args[1];

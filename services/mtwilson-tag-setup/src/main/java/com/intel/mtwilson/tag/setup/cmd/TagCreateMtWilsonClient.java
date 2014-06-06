@@ -15,7 +15,12 @@ import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.datatypes.ApiClientUpdateRequest;
+import com.intel.mtwilson.ms.business.ApiClientBO;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
+import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
+import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
@@ -24,6 +29,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Hex;
@@ -114,19 +120,21 @@ public class TagCreateMtWilsonClient extends TagCommand {
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
         
         try {
-            approveMtWilsonClient(rsaCredentialX509.identity());
-            try (LoginDAO loginDAO = MyJdbi.authz()) {
-                ApproveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
-            }
-            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
-         }
-         catch(Exception e) {
-             System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
-         }
-        
+            ApiClientUpdateRequest updateRequest = new ApiClientUpdateRequest();
+            updateRequest.enabled = true;
+            updateRequest.fingerprint = rsaCredentialX509.identity();
+            updateRequest.roles = roles;
+            updateRequest.status = "APPROVED";
+            ApiClientBO apiClientBO = new ApiClientBO();
+            apiClientBO.update(updateRequest, null);
+            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));
+        } catch (Exception e) {
+            System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
+        }
         
     }
     
+    /***** UNUSED
     private void approveMtWilsonClient(byte[] fingerprint) {
         try {
             System.out.println(String.format("Searching for client by fingerprint: %s", Hex.encodeHexString(fingerprint)));
@@ -140,15 +148,15 @@ public class TagCreateMtWilsonClient extends TagCommand {
             client.setEnabled(true);
             x509jpaController.edit(client);
         }
-        catch(Exception e) {
+        catch(IOException | IllegalStateException | IllegalOrphanException | NonexistentEntityException | MSDataException e) {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }
     }
         
-    private void ApproveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
+    private void approveUserLoginCertificate(LoginDAO loginDAO, String username) {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");        
-    }
+    }*/
             
     
     

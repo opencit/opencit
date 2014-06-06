@@ -39,15 +39,16 @@ public abstract class LocalSetupTask extends AbstractSetupTask {
 
     protected void runToVoid(String commandLine) throws IOException {
         log.debug("runToVoid: {}", commandLine);
-        Process p = Runtime.getRuntime().exec(commandLine);
+        Runtime.getRuntime().exec(commandLine);
     }
 
     protected String runToString(String commandLine) throws IOException {
         log.debug("runToString: {}", commandLine);
         Process p = Runtime.getRuntime().exec(commandLine);
-        InputStream in = p.getInputStream();
-        String output = IOUtils.toString(in);
-        in.close();
+        String output;
+        try (InputStream in = p.getInputStream()) {
+            output = IOUtils.toString(in);
+        }
         return output;
     }
 

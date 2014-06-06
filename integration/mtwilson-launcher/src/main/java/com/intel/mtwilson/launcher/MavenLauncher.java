@@ -21,6 +21,7 @@ import com.intel.dcsg.cpg.classpath.ClassLoadingStrategy;
 import com.intel.dcsg.cpg.classpath.FencedClassLoadingStrategy;
 import com.intel.dcsg.cpg.classpath.JarUtil;
 import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
+import com.intel.dcsg.cpg.module.ContainerException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -126,7 +127,7 @@ public class MavenLauncher {
      * XXX TODO  should launch, loadModules, and addShutdownHook move into an AbstractLauncher? 
      * Initialize everything but do NOT start the event loop (caller must start it and stop it as needed)
      */
-    public void launch() throws Exception {
+    public void launch() throws IOException, ContainerException {
         init();
         
         // XXX TODO  should we check for container == null and throw illegalstateexception ? or illegalargumentexception?

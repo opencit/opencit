@@ -64,7 +64,7 @@ public class Util {
         }
         else {
             HashSet<String> available = new HashSet<>(Arrays.asList(availableLocales));
-            Locale locale = null;
+            Locale locale;
             int i;
             int max = acceptableLanguages.size();
             // 1. look for exact match

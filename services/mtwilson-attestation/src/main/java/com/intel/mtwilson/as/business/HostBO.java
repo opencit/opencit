@@ -22,7 +22,6 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
-import com.intel.mtwilson.datatypes.TLSPolicy;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASComponentFactory;
@@ -40,10 +39,14 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.lang.Object;
 import java.net.MalformedURLException;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
-import java.security.cert.CertificateFactory;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,7 +102,8 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
+//	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -120,8 +124,8 @@ public class HostBO extends BaseBO {
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-
-			String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
+                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+			/*String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
 	    		String[] tlsCertificates = tlsObjects.length > 1 ? (String[])tlsObjects[1] : new String[1];
                         tblHosts.setTlsPolicyName(tlsPolicyName);
 
@@ -130,19 +134,19 @@ public class HostBO extends BaseBO {
 			if (tlsCertificates != null) {
 				try {
 		                        for (String certificate : tlsCertificates) {
-        		                    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        		                    //CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 		            X509Certificate x509Cert = X509Util.decodePemCertificate(new String(Base64.decodeBase64(certificate)));
                         		    clientKeystore.addTrustedSslCertificate(x509Cert, host.getHostName().toString());
 	                        	}
-				} catch(Exception e) {
+				} catch(CertificateException | KeyManagementException e) {
 					// If the certificates are not properly encoded or there is any other error, ever the TLS Policy to INSECURE
 					// Check with JB if this is behaviorally right.
-					tlsPolicyName = TLSPolicy.INSECURE.toString();
+					//tlsPolicyName = TLSPolicy.INSECURE.toString();
 				}
 			
 			}
-                        clientKeystore.save();
-                        //tblHosts.setTlsKeystore(null);
+                        clientKeystore.save();*/
+                        tblHosts.setTlsKeystore(null);
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         
@@ -226,7 +230,10 @@ public class HostBO extends BaseBO {
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         Map<String,String> attributes = agent.getHostAttributes();
-                        tblHosts.setHardwareUuid(attributes.get("Host_UUID").toLowerCase().trim());
+                        String hostUuidAttr = attributes.get("Host_UUID");
+                        if ((attributes != null) && (!attributes.isEmpty()) && (hostUuidAttr != null))
+                            tblHosts.setHardwareUuid(hostUuidAttr.toLowerCase().trim());
+                        
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId, uuid);
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
@@ -267,30 +274,22 @@ public class HostBO extends BaseBO {
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
         // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
-        HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
-        try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem")); // may contain multiple trusted privacy CA certs from remove Privacy CAs
+        HashSet<X509Certificate> pcaList = new HashSet<>();
+        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
-            IOUtils.closeQuietly(privacyCaIn);
+            //IOUtils.closeQuietly(privacyCaIn);
             log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
+        } catch(Exception ex) {
+            log.warn("Cannot load PrivacyCA.list.pem", ex);            
         }
-        catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificates from file
-            log.warn("Cannot load PrivacyCA.list.pem");            
-        }
-        try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem")); // may contain one trusted privacy CA cert from local Privacy CA
+        try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.pem"))) {
             X509Certificate privacyCaCert = X509Util.decodePemCertificate(IOUtils.toString(privacyCaIn));
             pcaList.add(privacyCaCert);
-            IOUtils.closeQuietly(privacyCaIn);
+            //IOUtils.closeQuietly(privacyCaIn);
             log.debug("Added certificate from PrivacyCA.pem");
-        }
-        catch(Exception e) {
-            // FileNotFoundException: cannot find PrivacyCA.pem
-            // CertificateException: error while reading certificate from file
-            log.warn("Cannot load PrivacyCA.pem");            
+        } catch(Exception ex) {
+            log.warn("Cannot load PrivacyCA.pem",ex);            
         }
         // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;
@@ -305,7 +304,7 @@ public class HostBO extends BaseBO {
                     validCaSignature = true;
                 }
             }
-            catch(Exception e) {
+            catch(CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
                 log.debug("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
             }
         }
@@ -335,7 +334,7 @@ public class HostBO extends BaseBO {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
-                        TblHosts tblHosts = null;
+                        TblHosts tblHosts;
                         if (uuid != null && !uuid.isEmpty()) {
                             tblHosts = My.jpa().mwHosts().findHostByUuid(uuid);
                         } else {                            
@@ -345,8 +344,8 @@ public class HostBO extends BaseBO {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, host.getHostName().toString());
                         }
 
-          TblMle  biosMleId = findBiosMleForHost(host); 
-          TblMle  vmmMleId = findVmmMleForHost(host); 
+                        TblMle  biosMleId = findBiosMleForHost(host); 
+                        TblMle  vmmMleId = findVmmMleForHost(host); 
             
 
                         // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
@@ -454,7 +453,7 @@ public class HostBO extends BaseBO {
         public HostResponse deleteHost(Hostname hostName, String uuid) { // datatype.Hostname
 
                 try {
-                        TblHosts tblHosts = null;
+                        TblHosts tblHosts;
                         if (uuid != null && !uuid.isEmpty()) {
                             tblHosts = My.jpa().mwHosts().findHostByUuid(uuid);
                             hostName = new Hostname(tblHosts.getName());
@@ -744,52 +743,57 @@ public class HostBO extends BaseBO {
      * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
     */
     private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) throws IOException {
-        List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
+        List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<>();
 
         // Using the connection string, let us first find out the host type
         // Bug 963: Ensure that we even check if PCR 19 is required as per the MLE setup
         if (vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString()) && pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
+            if (pcrEventLog != null) {
+                for (Measurement m : pcrEventLog.getEventLog()) {
+                    if (m != null && m.getInfo() != null && (!m.getInfo().isEmpty())) {
 
-            for (Measurement m : pcrEventLog.getEventLog()) {
+                        String mEventName = m.getInfo().get("EventName");
+                        String mComponentName = m.getInfo().get("ComponentName");
+                        log.debug("Checking host specific manifest for event '"   + mEventName + 
+                                "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
 
-                log.debug("Checking host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                        "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                
-                // we are looking for the "commandline" event specifically  (vmware)
-                if (hostType.equals(Vendor.VMWARE) && m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails")) {
+                        // we are looking for the "commandline" event specifically  (vmware)
+                        if (hostType.equals(Vendor.VMWARE) && mEventName != null && mComponentName != null 
+                                && mEventName.equals("Vim25Api.HostTpmCommandEventDetails")) {
 
-                    log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                    log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
-                            "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                    
-                    TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                            m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+                            log.debug("Adding host specific manifest for event '"   + mEventName + 
+                                    "' field '" + m.getLabel() + "' component '" + mComponentName + "'");
+                            log.debug("Querying manifest for event '"   +mEventName + 
+                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + mComponentName + "'");
 
-                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                    tblHostSpecificManifests.add(tblHostSpecificManifest);
-                } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
-                    
-                    log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                    log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
-                            "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                    
-                    // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
-                    TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                            m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
+                                    m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                    tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                            //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                            tblHostSpecificManifests.add(tblHostSpecificManifest);
+                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
+
+                            log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                                    "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                            log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+
+                            // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
+                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
+                                    m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+
+                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                            tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                        }
+                    }
                 }
             }
-
             return tblHostSpecificManifests;
             
         } else {

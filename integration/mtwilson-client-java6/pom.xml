@@ -14,6 +14,8 @@
         TODO  the shade plugin and zip plugin should be moved to a pom under installers to generate
         the distribution artifacts so that we don't have to wait for that when building the project
         independently for testing or as part of another build that is not to create an installer.
+        
+        TODO this project should be renamed mtwilson-client-v1 because in mtwilson 2.0 it uses java7 features
     </description>
   
     <parent> 
@@ -55,8 +57,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <skip>false</skip>
                     <showDeprecation>true</showDeprecation>
                 </configuration>

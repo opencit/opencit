@@ -49,6 +49,9 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     // Get the file to view
     String path = request.getPathInfo();
     if (path == null) { path = ""; }
+    
+//  XXX TODO: Review path validation here
+    
     File file = new File(directory, path);
     
     // prevent client from using .. to get out of our content folder and to arbitrary files
@@ -62,6 +65,11 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     file = new File(target);
     if( file.isDirectory() && !path.endsWith("/") ) {
         String queryString = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+        if (queryString.contains("\r\n")) {
+            response.setStatus(400);
+            return;
+        }
+        // XXX TODO: Encoding the query string before passing to client would make this more secure
         response.sendRedirect(request.getRequestURI() + "/" + queryString);
         return;
     }
@@ -96,6 +104,10 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     }
     catch (IOException e) { 
         log.error("Cannot retrieve file", e);
+        response.setStatus(500);
+    }
+    catch (IllegalArgumentException iae) {
+        log.error("Illegal arguments specified.", iae);
         response.setStatus(500);
     }
   }    

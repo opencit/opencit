@@ -189,14 +189,14 @@ public class RpcUtil {
 //                    Float p2 = Float.parseFloat(nvpair2.getName().replace("q=", ""));
                     Float p1 = Float.parseFloat(nvpair1.getValue()); // the name is the parameter name "q"  as in q=0.9  ; the value is the float like 0.9 or 0.8
                     Float p2 = Float.parseFloat(nvpair2.getValue()); 
-                    if( p1 <= p2 ) { return -1; }
-                    if( p1 > p2 ) { return 1; }
+                    if( p1 <= p2 ) { return -1; } else { return 1; }
+                    //if( p1 > p2 ) { return 1; }
                 }
                 catch(NumberFormatException e) {
                     log.debug("Failed to parse preference in accept header: {}", e.getMessage());
                     return 0;
                 }
-                return 1; 
+                //return 1; 
             }
             return 0;
         }

@@ -84,6 +84,9 @@ public class RequestAikCertificate extends AbstractSetupTask {
         // we need an EC in order to request an AIK, so make sure we have it
         try {
             byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+            if( ekCert == null || ekCert.length == 0 ) {
+                configuration("Endorsement Certificate is null or zero-length");
+            }
         }
         catch(TpmModule.TpmModuleException e) {
             if( e.getErrorCode() == 2 ) {

@@ -79,7 +79,7 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
             configuration.setName("my");
             // find all the properties in MyConfiguration that are either String, Boolean, or String[] 
             PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy namingStrategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
-            Map<String,Object> result = new HashMap<String,Object>();
+//            Map<String,Object> result = new HashMap<>();
             Map<String,Object> attrs = PropertyUtils.describe(My.configuration());// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
             for(Map.Entry<String,Object> attr : attrs.entrySet()) {
                 String translatedKey = namingStrategy.translate(attr.getKey());

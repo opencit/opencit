@@ -144,7 +144,7 @@ public class TpmModule {
 	private static commandLineResult executeVer2Command(int mode, String args, int returnCount, boolean useTrousersMode)
 			throws IOException {
         
-		int returnCode = 0;
+		int returnCode;
 //		final String new_TPM_MODULE_EXE_PATH = "TpmModuleExePath";
 //		final String new_EXE_NAME = "ExeName";
 		final String new_TROUSERS_MODE = "TrousersMode";
@@ -192,7 +192,7 @@ public class TpmModule {
 		String line = "";
 		if (returnCount != 0){
 			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			String newLine = "";
+			String newLine;
 			try {
 				while ((newLine = input.readLine()) != null) {
 					line = newLine;
@@ -210,31 +210,15 @@ public class TpmModule {
 		if (DebugMode) log.debug("\"" + line + "\"");
 		
 		//do a loop to wait for an exit value
-		
-		boolean isRunning;
-		int timeout = 10000; //300000; //any need to add this to the properties file?
-		int countToTimeout = 0;
-		do {
-			countToTimeout++;
-			isRunning = false;
-			try {
-				returnCode = p.exitValue();
-			}catch(IllegalThreadStateException e1) {
-				isRunning = true;
-				try {
-					Thread.sleep(1);
-					//if (countToTimeout%5000 == 0) System.out.print(".");
-				} catch (InterruptedException e2) {
-					isRunning = false;
-				}
-			}
-		} while(isRunning && (countToTimeout < timeout));
-		if (countToTimeout == timeout){
-			log.debug("Timeout reached");
-			p.destroy();
-		}
-		
-		returnCode = p.exitValue();
+		try {
+            returnCode = p.waitFor();
+        }
+        catch(InterruptedException e) {
+            log.error("Interrupted while waiting for return value");
+            log.debug("Interrupted while waiting for return value", e);
+            returnCode = -1;
+        }
+        
 		commandLineResult toReturn = new commandLineResult(returnCode, returnCount);
 		if ((returnCode == 0)&&(returnCount != 0)) {
 			StringTokenizer st = new StringTokenizer(line);
@@ -514,8 +498,8 @@ public class TpmModule {
 		String argument = "-key_type " + keyType + " -key_auth " + TpmUtils.byteArrayToHexString(keyAuth) + " -key_index " + keyIndex;
 		commandLineResult result = executeVer2Command(8, argument, 2, false);
 		if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModule.createKey returned nonzero error", result.getReturnCode());
-		byte [] tempArray = TpmUtils.hexStringToByteArray(result.getResult(0)); //modulus - discard in favor of blob
-		tempArray = TpmUtils.hexStringToByteArray(result.getResult(1)); //modulus - discard in favor of blob
+//		byte[] tempArray = TpmUtils.hexStringToByteArray(result.getResult(0)); //modulus - discard in favor of blob
+		byte[] tempArray = TpmUtils.hexStringToByteArray(result.getResult(1));
 		TpmKey toReturn = new TpmKey(tempArray);
 		return toReturn;
 	}
@@ -567,8 +551,8 @@ public class TpmModule {
 		String argument = "-key_type " + keyType + " -key_index " + keyIndex + " -key_auth " + TpmUtils.byteArrayToHexString(keyAuth);
 		commandLineResult result = executeVer2Command(10, argument, 2, false);
 		if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModule.getKey returned nonzero error", result.getReturnCode());
-		byte [] tempArray = TpmUtils.hexStringToByteArray(result.getResult(0)); //modulus - discard in favor of blob
-		tempArray = TpmUtils.hexStringToByteArray(result.getResult(1)); //modulus - discard in favor of blob
+//		byte[] tempArray = TpmUtils.hexStringToByteArray(result.getResult(0)); //modulus - discard in favor of blob
+		byte[] tempArray = TpmUtils.hexStringToByteArray(result.getResult(1));
 		TpmKey toReturn = new TpmKey(tempArray);
 		return toReturn;
 	}

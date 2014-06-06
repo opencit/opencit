@@ -21,11 +21,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -62,7 +57,6 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
             }
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
-            int i = 0;
             for(Record r : result) {
                 File obj = new File();
                 obj.setId(UUID.valueOf(r.getValue(MW_FILE.ID)));

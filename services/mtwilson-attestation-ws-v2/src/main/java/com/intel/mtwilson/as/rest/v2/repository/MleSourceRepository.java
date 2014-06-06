@@ -75,7 +75,7 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
         com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
         try {
             obj.setHostName(item.getName());
-            new MleBO().updateMleSource(obj, item.getMleUuid().toString());
+            new MleBO().updateMleSource(obj, item.getMleUuid());
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {

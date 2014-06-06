@@ -16,6 +16,10 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import javax.servlet.http.Cookie;
@@ -51,7 +55,7 @@ public class CheckLoginController extends AbstractController {
             
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
-            String locale = "en";
+            String locale;
 
             if (isNullOrEmpty(keyAliasName) || isNullOrEmpty(keyPassword)) {
                 view.addObject("result", false);
@@ -104,8 +108,8 @@ public class CheckLoginController extends AbstractController {
             }
             
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
-            RsaCredential credential = null;
-            SimpleKeystore keystore = null;
+            RsaCredential credential;
+            SimpleKeystore keystore;
             try {
 //                KeyStore keystore = KeystoreUtil.open(new FileInputStream(keyStoreFile), keyPassword);
 //                credential = KeystoreUtil.loadX509(keystore, keyAliasName, keyPassword);
@@ -135,6 +139,11 @@ public class CheckLoginController extends AbstractController {
                     // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ProxyApiClient(baseURL, credential, keystore, new MapConfiguration(p));
+                    if (rsaApiClient == null) {
+                        view.addObject("result", false);
+                        view.addObject("message", "Failed to initialize the RSA API client object.");
+                        return view;
+                    }
                     /*  this was a temporary workaround for an authentication issue - delete when fixed:
                     Properties ptemp = new Properties();
                     ptemp.setProperty("mtwilson.api.baseurl", My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
@@ -149,8 +158,12 @@ public class CheckLoginController extends AbstractController {
                 
                 // get locale
                 try {
-                    locale = rsaApiClient.getLocale(keyAliasName);
-                    log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
+                    if (rsaApiClient != null) {
+                        locale = rsaApiClient.getLocale(keyAliasName);
+                        log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
+                    } else {
+                        locale = null;
+                    }
                 } catch (Exception e) {
                     log.warn("Cannot retrieve locale for user: {}\r\n{}", keyAliasName, e.toString());
                     locale = null;
@@ -171,7 +184,7 @@ public class CheckLoginController extends AbstractController {
 			session.setAttribute("apiClientObject",rsaApiClient);
 			session.setAttribute("trustedCertificates",trustedCertificates);
                 
-            } catch (Exception ex) {
+            } catch (MalformedURLException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException ex) {
                 log.error("Login failed", ex);
                 view.addObject("message", "Error during user authentication. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
                 return view;                    

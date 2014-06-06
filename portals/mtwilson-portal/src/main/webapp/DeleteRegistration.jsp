@@ -15,7 +15,7 @@
 				<table cellpadding="0" cellspacing="0" width="100%" class="tableHeader">
 					<tr>
 						<td class="deleteRequestRow1" data-i18n="table.name">Name</td>
-						<td class="deleteRequestRow2" data-i18n="table.requested_roles">Requested Roles</td>
+						<td class="deleteRequestRow2" data-i18n="table.roles">Roles</td>
 						<td class="deleteRequestRow3" data-i18n="table.expires">Expires</td>
 						<td class="deleteRequestRow4Header" data-i18n="table.options">Options</td>
 					</tr>

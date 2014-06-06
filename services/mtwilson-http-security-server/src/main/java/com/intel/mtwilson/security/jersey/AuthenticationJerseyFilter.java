@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * com.sun.jersey.spi.container.ContainerRequest and ContainerRequestFilter from the Jersey Server API's
  * @since 0.5.1
  * @author jbuhacoff
+ * @deprecated use apache shiro
  */
 public class AuthenticationJerseyFilter implements ContainerRequestFilter {
     private HmacRequestVerifier hmacAuthorization; // currently this is set via Spring Framework; example is new VerifyAuthorization(new LoginBO()); and new VerifyAuthorization(new HashMapSecretKeyFinder());

@@ -121,15 +121,17 @@ public class ConverterUtil {
                         if (hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
                             if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {
                                     hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
-                                    String assetTagDetails = "";
+//                                    String assetTagDetails = "";
+                                    StringBuilder atdBuilder = new StringBuilder();
                                     // We need to retrive all the asset tag specific attributes and show it to the user
                                     Set<String> attributeNames = hostTrustAssertion.getAttributeNames();
+                                    
                                     for (String attrName : attributeNames) {
                                         if (attrName.startsWith("ATAG") && !attrName.contains("UUID")) {
-                                            assetTagDetails += hostTrustAssertion.getStringAttribute(attrName) + "\n";
+                                            atdBuilder.append(hostTrustAssertion.getStringAttribute(attrName) + "\n");
                                         }
                                     }
-                                    hostVO.setAssetTagDetails(assetTagDetails);
+                                    hostVO.setAssetTagDetails(atdBuilder.toString());
                             }else {
                                     hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
                                     hostVO.setAssetTagDetails("Un-Trusted");
@@ -216,7 +218,7 @@ public class ConverterUtil {
 	}
         
     public static String formateXMLString(String inputXML){
-        StreamResult xmlOutput = null;
+        StreamResult xmlOutput;
         try {
         Source xmlInput = new StreamSource(new StringReader(inputXML));
         StringWriter stringWriter = new StringWriter();
@@ -258,7 +260,7 @@ public class ConverterUtil {
 	public static List<MleDetailsEntityVO> getMleVOListWhereOEMNotNull(List<MleData> mleDataList) {
 		List<MleDetailsEntityVO> detailsEntityVOs = new ArrayList<MleDetailsEntityVO>();
 		for (MleData data : mleDataList) {
-			if (data.getOemName() != null && !(data.getOemName().equals(""))) {
+			if (data.getOemName() != null && !(data.getOemName().length() == 0)) {
 				MleDetailsEntityVO entityVO = new MleDetailsEntityVO();
 				entityVO.setMleId(null);
 				entityVO.setMleName(data.getName());
@@ -278,7 +280,7 @@ public class ConverterUtil {
 	public static List<MleDetailsEntityVO> getMleVOListWhereOEMIsNull(List<MleData> searchMLE) {
 		List<MleDetailsEntityVO> detailsEntityVOs = new ArrayList<MleDetailsEntityVO>();
 		for (MleData data : searchMLE) {
-			if (data.getOemName() == null || data.getOemName().equals("")) {
+			if (data.getOemName() == null || data.getOemName().length() == 0) {
 				MleDetailsEntityVO entityVO = new MleDetailsEntityVO();
 				entityVO.setMleId(null);
 				entityVO.setMleName(data.getName());

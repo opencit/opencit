@@ -22,6 +22,8 @@ public class LineInputReader implements Runnable {
     public LineInputReader(InputStream in) {
         reader = new BufferedReader(new InputStreamReader(in));
     }
+    
+    
     @Override
     public void run() {
         try {
@@ -31,6 +33,7 @@ public class LineInputReader implements Runnable {
                 if( line == null ) { break; }
                 lines.add(line);
             }
+            reader.close();
         }
         catch(IOException e) {
             throw new RuntimeException(e);
