@@ -276,6 +276,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
     }
     
     private void saveKeystore() throws NonexistentEntityException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException,NonexistentEntityException, ASDataException {
+        if( keystore == null ) { throw new IllegalStateException("Keystore is null"); }
         keystore.save(); // makes the keystore available in mwKeystoreResource.toByteArray()
         if( mwKeystore == null ) {
             mwKeystore = new MwKeystore();

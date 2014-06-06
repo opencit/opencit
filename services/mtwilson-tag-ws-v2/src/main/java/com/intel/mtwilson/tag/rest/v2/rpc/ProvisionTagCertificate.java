@@ -165,14 +165,11 @@ public class ProvisionTagCertificate  {
         SelectionType targetSelection = ca.findCurrentSelectionForSubject(UUID.valueOf(subject), selections); // throws exception if there is no matching selection and no matching default selection
         
         log.debug("Cache mode {}", cacheMode);
-        if( "off".equals(cacheMode) ) {
+        if( "off".equals(cacheMode) && targetSelection != null ) {
             byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), targetSelection);
             Certificate certificate = storeTagCertificate(subject, certificateBytes);
             return certificate;
         }
-        // TODO: Once the subject matches, we also need to make sure that all the selections also match.
-        // If the selection is empty then it would match anything so we would choose the latest created for that host that is valid.
-        // This needs to be done for the GA release.
         
         // if there is an existing currently valid certificate we return it
         CertificateFilterCriteria criteria = new CertificateFilterCriteria();
@@ -193,7 +190,7 @@ public class ProvisionTagCertificate  {
                 if (today.after(attributeCertificate.getNotAfter())) {
                     continue;
                 }
-                if( !certificateAttributesEqual(attributeCertificate, targetSelection)) {
+                if( targetSelection != null && !certificateAttributesEqual(attributeCertificate, targetSelection)) {
                     continue;
                 }
                 // While creating the certificates we are storing the create time in the serial number field
@@ -210,9 +207,12 @@ public class ProvisionTagCertificate  {
         }
         
         // no cached certificate so generate a new certificate
-            byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), targetSelection);
-            Certificate certificate = storeTagCertificate(subject, certificateBytes);
-            return certificate;
+        if( targetSelection == null ) {
+            throw new IllegalArgumentException("No cached certificate and no default selection provided");
+        }
+        byte[] certificateBytes = ca.createTagCertificate(UUID.valueOf(subject), targetSelection);
+        Certificate certificate = storeTagCertificate(subject, certificateBytes);
+        return certificate;
         
     }
     

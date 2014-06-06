@@ -41,17 +41,71 @@ public class ProvisionCertificateTest extends RemoteIntegrationTest {
     public void testProvisionCertificate() throws Exception {
         UUID fakeHostUuid = new UUID();
         String selectionXml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
-                + "<selection>\n"
+                + "<default><selection>\n"
                 + "<attribute oid=\"2.5.4.789.1\">\n"
                 + "<text>country=CA</text>\n"
                 + "</attribute>\n"
-                + "</selection>\n"
+                + "</selection></default>\n"
                 + "</selections>";
 
         TagManagementClient client = new TagManagementClient(testProperties);
         Certificate certificate = client.createOneXml(fakeHostUuid, selectionXml);
         log.debug("got certificate {} bytes for uuid {}", certificate.getCertificate().length, fakeHostUuid.toString());
     }
+    
+    @Test
+    public void testAnyCachedCertificate() throws Exception {
+        // first create a certificate
+        UUID fakeHostUuid = new UUID();
+        String selectionXml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
+                + "<default><selection>\n"
+                + "<attribute oid=\"2.5.4.789.1\">\n"
+                + "<text>country=CA</text>\n"
+                + "</attribute>\n"
+                + "</selection></default>\n"
+                + "</selections>";
+
+        TagManagementClient client = new TagManagementClient(testProperties);
+        Certificate certificate = client.createOneXml(fakeHostUuid, selectionXml);
+        log.debug("got certificate {} bytes for uuid {}", certificate.getCertificate().length, fakeHostUuid.toString());
+        // now try to get the same one from the cache
+        String getCachedCertXml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
+                + "<options><cache mode=\"on\"/></options>\n"
+                + "</selections>";
+        Certificate cachedCertificate = client.createOneXml(fakeHostUuid, getCachedCertXml);
+        log.debug("got certificate {} bytes for uuid {}", cachedCertificate.getCertificate().length, fakeHostUuid.toString());
+        // result: no matching selection
+    }
+
+    @Test
+    public void testCachedCertificateWithSelectedAttributes() throws Exception {
+        // first create a certificate
+        UUID fakeHostUuid = new UUID();
+        String selectionXml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
+                + "<default><selection>\n"
+                + "<attribute oid=\"2.5.4.789.1\">\n"
+                + "<text>country=CA</text>\n"
+                + "</attribute>\n"
+                + "</selection></default>\n"
+                + "</selections>";
+
+        TagManagementClient client = new TagManagementClient(testProperties);
+        Certificate certificate = client.createOneXml(fakeHostUuid, selectionXml);
+        log.debug("got certificate {} bytes for uuid {}", certificate.getCertificate().length, fakeHostUuid.toString());
+        // now try to get the same one from the cache
+        String getCachedCertXml = "<selections xmlns=\"urn:mtwilson-tag-selection\">\n"
+                + "<options><cache mode=\"on\"/></options>\n"
+                + "<default><selection>\n"
+                + "<attribute oid=\"2.5.4.789.1\">\n"
+                + "<text>country=CA</text>\n"
+                + "</attribute>\n"
+                + "</selection></default>\n"
+                + "</selections>";
+        Certificate cachedCertificate = client.createOneXml(fakeHostUuid, getCachedCertXml);
+        log.debug("got certificate {} bytes for uuid {}", cachedCertificate.getCertificate().length, fakeHostUuid.toString());
+        // result: no matching selection
+    }
+    
 
     @Test
     public void testProvisionMultipleCertificatesSequential() throws Exception {

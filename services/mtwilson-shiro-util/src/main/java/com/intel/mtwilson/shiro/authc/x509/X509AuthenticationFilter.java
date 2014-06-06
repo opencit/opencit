@@ -60,7 +60,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
     }
 
     @Override
-    protected AuthenticationToken createToken(ServletRequest request) throws Exception {
+    protected AuthenticationToken createToken(ServletRequest request) {
         log.debug("createToken");
         try {
             HttpServletRequest httpRequest = WebUtils.toHttp(request);
@@ -83,7 +83,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
             X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), signatureInput, request.getRemoteAddr());
             log.debug("createToken: returning X509AuthenticationToken");
             return token;
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             throw new AuthenticationException("Cannot authenticate request: " + e.getMessage(), e);
         }
     }

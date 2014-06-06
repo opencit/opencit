@@ -134,23 +134,29 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
         }
     }
     
-    protected boolean authenticate(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
-        AuthenticationToken token = createToken(request);
-        if( token == null ) {
+    protected boolean authenticate(ServletRequest request, ServletResponse response, Object mappedValue) {
+        try {
+            AuthenticationToken token = createToken(request);
+            if( token != null ) {
+                try {
+                    Subject subject = SecurityUtils.getSubject();
+                    subject.login(token);
+                    log.debug("login success for filter {}", getClass().getName());
+                    onLoginSuccess(token, subject, request, response);
+                    return true;
+                }
+                catch(AuthenticationException e) {
+                    log.debug("login failure for filter {}", getClass().getName());
+                    onLoginFailure(token, e, request, response);
+                    return false;
+                }
+            }
             throw new IllegalStateException("A valid non-null "+
                     "AuthenticationToken must be returned from createToken "+
                     "in order to execute a login attempt.");
         }
-        try {
-            Subject subject = SecurityUtils.getSubject();
-            subject.login(token);
-            log.debug("login success for filter {}", getClass().getName());
-            onLoginSuccess(token, subject, request, response);
-            return true;
-        }
-        catch(AuthenticationException e) {
-            log.debug("login failure for filter {}", getClass().getName());
-            onLoginFailure(token, e, request, response);
+        catch(Exception e) {
+            log.error("Authentication error", e);
             return false;
         }
     }
@@ -161,7 +167,12 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
      */
     abstract protected boolean isAuthenticationRequest(ServletRequest request);
     
-    abstract protected AuthenticationToken createToken(ServletRequest request) throws Exception;
+    /**
+     * 
+     * @param request
+     * @return a valid authentication token or null if one cannot be created
+     */
+    abstract protected AuthenticationToken createToken(ServletRequest request);
     
     /**
      * Always returns true; subclasses can override this behavior.
