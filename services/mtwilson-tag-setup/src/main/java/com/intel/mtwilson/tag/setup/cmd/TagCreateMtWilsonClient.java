@@ -15,6 +15,8 @@ import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.datatypes.ApiClientUpdateRequest;
+import com.intel.mtwilson.ms.business.ApiClientBO;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
@@ -118,19 +120,21 @@ public class TagCreateMtWilsonClient extends TagCommand {
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword);
         
         try {
-            approveMtWilsonClient(rsaCredentialX509.identity());
-            try (LoginDAO loginDAO = MyJdbi.authz()) {
-                approveUserLoginCertificate(loginDAO, mtwilsonClientKeystoreUsername);
-            }
-            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));        
-         }
-         catch(Exception e) {
-             System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
-         }
-        
+            ApiClientUpdateRequest updateRequest = new ApiClientUpdateRequest();
+            updateRequest.enabled = true;
+            updateRequest.fingerprint = rsaCredentialX509.identity();
+            updateRequest.roles = roles;
+            updateRequest.status = "APPROVED";
+            ApiClientBO apiClientBO = new ApiClientBO();
+            apiClientBO.update(updateRequest, null);
+            System.out.println(String.format("Approved %s [fingerprint %s]", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity())));
+        } catch (Exception e) {
+            System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", mtwilsonClientKeystoreUsername, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
+        }
         
     }
     
+    /***** UNUSED
     private void approveMtWilsonClient(byte[] fingerprint) {
         try {
             System.out.println(String.format("Searching for client by fingerprint: %s", Hex.encodeHexString(fingerprint)));
@@ -152,7 +156,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
     private void approveUserLoginCertificate(LoginDAO loginDAO, String username) {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");        
-    }
+    }*/
             
     
     
