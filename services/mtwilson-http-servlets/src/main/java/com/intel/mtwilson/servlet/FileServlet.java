@@ -66,7 +66,8 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     if( file.isDirectory() && !path.endsWith("/") ) {
         String queryString = request.getQueryString() == null ? "" : "?" + request.getQueryString();
         if (queryString.contains("\r\n")) {
-            throw new IllegalArgumentException("Invalid characters in query string input.");
+            response.setStatus(400);
+            return;
         }
         // XXX TODO: Encoding the query string before passing to client would make this more secure
         response.sendRedirect(request.getRequestURI() + "/" + queryString);
@@ -103,6 +104,10 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     }
     catch (IOException e) { 
         log.error("Cannot retrieve file", e);
+        response.setStatus(500);
+    }
+    catch (IllegalArgumentException iae) {
+        log.error("Illegal arguments specified.", iae);
         response.setStatus(500);
     }
   }    

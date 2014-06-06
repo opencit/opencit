@@ -16,6 +16,9 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
+import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
+import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
@@ -24,6 +27,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Hex;
@@ -140,12 +144,12 @@ public class TagCreateMtWilsonClient extends TagCommand {
             client.setEnabled(true);
             x509jpaController.edit(client);
         }
-        catch(Exception e) {
+        catch(IOException | IllegalStateException | IllegalOrphanException | NonexistentEntityException | MSDataException e) {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }
     }
         
-    private void approveUserLoginCertificate(LoginDAO loginDAO, String username) throws Exception {
+    private void approveUserLoginCertificate(LoginDAO loginDAO, String username) {
         UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(username);
         loginDAO.updateUserLoginCertificateById(userLoginCertificate.getId(), true, Status.APPROVED, "");        
     }

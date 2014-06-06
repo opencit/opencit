@@ -193,7 +193,6 @@ public class SecurityFilter implements Filter {
         if (!Base64.isBase64(existingToken)) {
             log.error("processRequestToken: AuthorizationToken is not formatted as a hexadecimal string");
             return false;
-        } else {
         }
 
         log.debug("processRequestToken: Received AuthorizationToken, validating");

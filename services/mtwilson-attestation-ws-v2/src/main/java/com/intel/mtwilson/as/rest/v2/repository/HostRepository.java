@@ -205,7 +205,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                 throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid());
             }
                
-	    String tlsPolicyName = My.configuration().getDefaultTlsPolicyName();
+	    /*String tlsPolicyName = My.configuration().getDefaultTlsPolicyName();
 	    String[] tlsCerts = null;
 	    if(item.getTlsPolicy() != null)  {
 		    if (item.getTlsPolicy().getInsecure()) {
@@ -217,8 +217,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
 			tlsCerts = item.getTlsPolicy().getCertificates();
 		    }
 	    }
-	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);
-//	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
+	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);*/
+	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
            
         } catch (ASException aex) {
             throw aex;            

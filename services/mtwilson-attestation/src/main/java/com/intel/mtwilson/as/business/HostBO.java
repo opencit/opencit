@@ -102,7 +102,8 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
+//	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -123,8 +124,8 @@ public class HostBO extends BaseBO {
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-
-			String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
+                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+			/*String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
 	    		String[] tlsCertificates = tlsObjects.length > 1 ? (String[])tlsObjects[1] : new String[1];
                         tblHosts.setTlsPolicyName(tlsPolicyName);
 
@@ -144,8 +145,8 @@ public class HostBO extends BaseBO {
 				}
 			
 			}
-                        clientKeystore.save();
-                        //tblHosts.setTlsKeystore(null);
+                        clientKeystore.save();*/
+                        tblHosts.setTlsKeystore(null);
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         
@@ -229,7 +230,7 @@ public class HostBO extends BaseBO {
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         Map<String,String> attributes = agent.getHostAttributes();
-                        if (attributes != null)
+                        if ((attributes != null) && (attributes.get("Host_UUID") != null))
                             tblHosts.setHardwareUuid(attributes.get("Host_UUID").toLowerCase().trim());
                         
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId, uuid);
@@ -749,41 +750,43 @@ public class HostBO extends BaseBO {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
             if (pcrEventLog != null) {
                 for (Measurement m : pcrEventLog.getEventLog()) {
+                    if (m != null && m.getInfo() != null) {
 
-                    log.debug("Checking host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-
-                    // we are looking for the "commandline" event specifically  (vmware)
-                    if (hostType.equals(Vendor.VMWARE) && m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails")) {
-
-                        log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                        log.debug("Checking host specific manifest for event '"   + m.getInfo().get("EventName") + 
                                 "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                        log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
-                                "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
 
-                        TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                                m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+                        // we are looking for the "commandline" event specifically  (vmware)
+                        if (hostType.equals(Vendor.VMWARE) && m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails")) {
 
-                        TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                        tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                        //					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                        tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                        tblHostSpecificManifests.add(tblHostSpecificManifest);
-                    } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
+                            log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                                    "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                            log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
 
-                        log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
-                                "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-                        log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
-                                "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
+                                    m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                        // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
-                        TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
-                                m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                            //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                            tblHostSpecificManifests.add(tblHostSpecificManifest);
+                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
 
-                        TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                        tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-                        tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                        tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                            log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                                    "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                            log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                                    "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+
+                            // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
+                            TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
+                                    m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+
+                            TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                            tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                            tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                            tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                        }
                     }
                 }
             }

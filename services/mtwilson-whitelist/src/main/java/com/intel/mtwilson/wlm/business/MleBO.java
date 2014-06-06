@@ -1275,13 +1275,17 @@ public class MleBO extends BaseBO {
          */
         public String addMleSource(MleSource mleSourceObj, String uuid, String mleUuid) {
             TblMle tblMle;
-            MleData mleData = null ;
+            MleData mleData ;
             try {
 
                 if (mleUuid != null && !mleUuid.isEmpty()) {
                     tblMle = mleJpaController.findTblMleByUUID(mleUuid);
                 } else {
                     try {
+                        if (mleSourceObj == null || mleSourceObj.getMleData() == null) {
+                            log.error("Required input parameters is not specified");
+                            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_CREATE_ERROR, this.getClass().getSimpleName());
+                        }
                         mleData = mleSourceObj.getMleData();
                         // Verify if the MLE exists in the system.
                         tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
@@ -1337,7 +1341,7 @@ public class MleBO extends BaseBO {
          */
         public String updateMleSource(MleSource mleSourceObj, String mleUuid) {
             TblMle tblMle;
-            MleData mleData = null ;
+            MleData mleData ;
             MwMleSource mwMleSource;
             try {
 
@@ -1347,6 +1351,11 @@ public class MleBO extends BaseBO {
                     mwMleSource = mleSourceJpaController.findByMleUuid(mleUuid);
                 } else {
                     try {
+                        if (mleSourceObj == null || mleSourceObj.getMleData() == null) {
+                            log.error("Required input parameters is not specified");
+                            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_UPDATE_ERROR, this.getClass().getSimpleName());
+                        }
+                        
                         mleData = mleSourceObj.getMleData();
                         // Verify if the MLE exists in the system.
                         tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),

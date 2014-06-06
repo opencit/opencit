@@ -1122,11 +1122,13 @@ public class HostTrustBO extends BaseBO {
                                 List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
                                 if (actualEntries != null) {
                                     for(Measurement a : actualEntries) {
-                                        // log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
-                                        if( a.getInfo().get("FullComponentName") != null && m.getInfo().get("ComponentName") != null && 
-                                                a.getInfo().get("FullComponentName").equals(m.getInfo().get("ComponentName")) ) {
-                                            found = a;
-                                            break;
+                                        if (a != null && a.getInfo() != null) {
+                                            // log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
+                                            if( a.getInfo().get("FullComponentName") != null && m.getInfo().get("ComponentName") != null && 
+                                                    a.getInfo().get("FullComponentName").equals(m.getInfo().get("ComponentName")) ) {
+                                                found = a;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -1192,12 +1194,14 @@ public class HostTrustBO extends BaseBO {
                                 List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()).getEventLog();
                                 if (actualEntries != null) {
                                     for(Measurement a : actualEntries) {
-                                        //log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + 
-                                         //       a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
-                                        if( a.getInfo().get("FullComponentName") != null && m.getInfo().get("FullComponentName") != null && 
-                                                a.getInfo().get("FullComponentName").equals(m.getInfo().get("FullComponentName")) ) {
-                                            found = a;
-                                            break;
+                                        if ( a != null && a.getInfo() != null) {
+                                            //log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + 
+                                             //       a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
+                                            if( a.getInfo().get("FullComponentName") != null && m.getInfo().get("FullComponentName") != null && 
+                                                    a.getInfo().get("FullComponentName").equals(m.getInfo().get("FullComponentName")) ) {
+                                                found = a;
+                                                break;
+                                            }
                                         }
                                     }
                                 }

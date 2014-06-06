@@ -351,7 +351,7 @@ public class ConfigureRemote implements Command {
      * @param level of indentation;  use 0 for top-level faults, and increment once for each level of logical nesting
      */
     private void printFault(Fault f, int level) {
-        String indentation = "";
+        String indentation;
         StringBuilder indentationBuilder = new StringBuilder();
         for(int i=0; i<level; i++) {
             indentationBuilder.append("  "); // each level is indented two spaces from the previous level

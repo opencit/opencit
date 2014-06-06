@@ -464,7 +464,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("ManagementConsoleDataController.retrieveAllClusters >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String vCenterConnection;
-        String clusterCombined = "";
+        String clusterCombined;
 
         try {
             vCenterConnection = req.getParameter("vCentertConnection");
@@ -517,14 +517,15 @@ public class ManagementConsoleDataController extends MultiActionController {
 
         try {
             clusterName = req.getParameter("clusterName");
-            clusterName = clusterName.substring(clusterName.indexOf("] ") + 2);
             if (clusterName == null) {
                 throw new IllegalArgumentException("Cluster name cannot be null.");
             }
+            clusterName = clusterName.substring(clusterName.indexOf("] ") + 2);
+            
             vCenterConnection = req.getParameter("vCentertConnection");
         } catch (Exception e) {
             //log.warn("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
-            responseView.addObject("message", "Input Parameters are NUll.");
+            responseView.addObject("message", "Input parameters are null.");
             responseView.addObject("result", false);
             return responseView;
         }
@@ -734,7 +735,6 @@ public class ManagementConsoleDataController extends MultiActionController {
             result = services.updateRequest(apiClientDetailsObj, apiObj, true);
         } catch (Exception ex) {
             log.error("Error approving access request: {}", ex.getMessage());
-            result = false;
             responseView.addObject("result", false);
             responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
             return responseView;
@@ -1517,7 +1517,7 @@ public class ManagementConsoleDataController extends MultiActionController {
     public ModelAndView saveNewHostInfo(HttpServletRequest req, HttpServletResponse res) {
         //log.info("WLMDataController.saveNewHostInfo >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
-        String hostObject = null;
+        String hostObject;
         boolean newhost;
         try {
             hostObject = req.getParameter("hostObject");
@@ -1526,6 +1526,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             }
             newhost = Boolean.parseBoolean(req.getParameter("newhost"));
         } catch (Exception e1) {
+            hostObject = null;
             newhost = false;
             responseView.addObject("result", false);
             responseView.addObject("message", StringEscapeUtils.escapeHtml(e1.getMessage()));

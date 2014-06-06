@@ -81,7 +81,7 @@ public class ConfigureDatabase extends LocalSetupTask {
             try (Statement s = c.createStatement()) {
                 s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
             } catch (Exception ex) {
-                log.error("Error creating select statement");
+                log.error("Error creating select statement",ex);
                 validation("Error creating select statement");
             }
         } catch(Exception e) {
