@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 
 /**
@@ -11,10 +12,11 @@ import javax.ws.rs.QueryParam;
  * @author ssbangal
  */
 public class DefaultFilterCriteria {
-    @QueryParam("filter") 
-    public boolean filter = true; 
+    @QueryParam("filter")
+    @DefaultValue("true")
+    public boolean filter; 
     @QueryParam("limit") 
-    public Integer limit = null; 
+    public Integer limit; 
     @QueryParam("page") 
-    public Integer page = null; 
+    public Integer page; 
 }
