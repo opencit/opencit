@@ -963,7 +963,9 @@ function isNumber(n) {
                                         <td class="row9" align="center" data-bind-text="item.sha1 | wrap 16"></td>
                                         <td class="row9" align="center" data-bind-text="item.sha256 | wrap 16"></td>
                                         <td class="row9 last_col" align="center">
+                                            <!--
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> &nbsp;
+                                            -->
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show();  $('certificate-provision-host').focus(); return false;">Deploy</a> &nbsp;
                                             <a href="" onmouseover="$(this).download = $(this).getAttribute('filename') + '.crt';$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);"  data-bind-filename="item.subject">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br /><br />
                                             <a data-bind-uuid="item.id" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a>&nbsp;
