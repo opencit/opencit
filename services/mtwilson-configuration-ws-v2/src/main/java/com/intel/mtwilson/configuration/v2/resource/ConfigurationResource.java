@@ -24,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -36,6 +37,7 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationResource.class);
     private static final Pattern xmlTagName = Pattern.compile("(?:^[a-z].*)");
     
+    @RequiresPermissions("configurations:search")        
     @Override
     protected ConfigurationCollection search(ConfigurationFilterCriteria criteria) {
         ConfigurationCollection configurations = new ConfigurationCollection();
@@ -45,6 +47,7 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
         return configurations;
     }
 
+    @RequiresPermissions("configurations:retrieve")        
     @Override
     protected Configuration retrieve(String id) {
         Configuration configuration = null;
@@ -121,15 +124,18 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
         return configuration;
     }
 
+    @RequiresPermissions("configurations:create")        
     @Override
     protected void create(Configuration item) {
         // store it...
     }
+    @RequiresPermissions("configurations:store")        
     @Override
     protected void store(Configuration item) {
         // store it...
     }
 
+    @RequiresPermissions("configurations:delete")        
     @Override
     protected void delete(String id) {
     }
