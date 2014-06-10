@@ -19,7 +19,9 @@ public class OemLocator implements Locator<Oem>{
 
     @Override
     public void copyTo(Oem item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }
