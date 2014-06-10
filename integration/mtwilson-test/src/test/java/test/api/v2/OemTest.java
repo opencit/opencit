@@ -58,10 +58,16 @@ public class OemTest extends RemoteIntegrationTest {
     }
 
     /**
-     * example output:
+     * example output when copyTo method of the OemLocator does NOT have the null check:
      * <pre>
      * oem input: {"id":"d607656e-f27d-4ac7-93f2-56bf6a25e7f7","name":"test new oem a2325a5a"}
      * created new oem {"id":"cd08bb8f-01c8-4049-89d2-9aeccc8475bc","name":"test new oem a2325a5a"}
+     * </pre>
+     * 
+     * example output when copyTo method of the OemLocator is fixed WITH the null check:
+     * <pre>
+     * oem input: {"id":"804c661c-c47a-4475-99ff-dd5fc62cd767","name":"test new oem 7bc629fc"}
+     * created new oem {"id":"804c661c-c47a-4475-99ff-dd5fc62cd767","name":"test new oem 7bc629fc"}
      * </pre>
      */
     @Test

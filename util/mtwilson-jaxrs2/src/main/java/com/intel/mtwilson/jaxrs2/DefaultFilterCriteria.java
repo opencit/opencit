@@ -13,8 +13,8 @@ import javax.ws.rs.QueryParam;
  */
 public class DefaultFilterCriteria {
     @QueryParam("filter")
-    @DefaultValue("true")
-    public boolean filter; 
+    @DefaultValue("true") // default for use by the jaxrs framework
+    public boolean filter = true; // default for use when creating a filter criteria instance from application code
     @QueryParam("limit") 
     public Integer limit; 
     @QueryParam("page") 
