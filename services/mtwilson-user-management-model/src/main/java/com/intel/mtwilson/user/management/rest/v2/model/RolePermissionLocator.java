@@ -19,7 +19,9 @@ public class RolePermissionLocator implements Locator<RolePermission> {
 
     @Override
     public void copyTo(RolePermission item) {
-        item.setRoleId(roleId);
+        if( roleId != null ) {
+            item.setRoleId(roleId);
+        }
     }
     
 }

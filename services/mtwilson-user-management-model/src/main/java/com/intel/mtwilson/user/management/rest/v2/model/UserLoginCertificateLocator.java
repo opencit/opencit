@@ -21,8 +21,12 @@ public class UserLoginCertificateLocator implements Locator<UserLoginCertificate
 
     @Override
     public void copyTo(UserLoginCertificate item) {
-        item.setId(id);
-        item.setUserId(userId);
+        if( id != null ) {
+            item.setId(id);
+        }
+        if( userId != null ) {
+            item.setUserId(userId);
+        }
     }
     
 }

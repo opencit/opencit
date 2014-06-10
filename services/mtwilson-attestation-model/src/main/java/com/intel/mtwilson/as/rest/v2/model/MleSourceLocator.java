@@ -21,8 +21,12 @@ public class MleSourceLocator implements Locator<MleSource> {
     
     @Override
     public void copyTo(MleSource item) {
-        item.setId(id);
-        item.setMleUuid(mleUuid.toString());
+        if( id != null ) {
+            item.setId(id);
+        }
+        if( mleUuid != null ) {
+            item.setMleUuid(mleUuid.toString());
+        }  
     }
     
 }

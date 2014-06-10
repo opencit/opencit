@@ -19,7 +19,9 @@ public class FileLocator implements Locator<File> {
     
     @Override
     public void copyTo(File item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }

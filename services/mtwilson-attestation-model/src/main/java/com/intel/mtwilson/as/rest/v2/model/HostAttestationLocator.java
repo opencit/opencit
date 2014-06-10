@@ -19,7 +19,9 @@ public class HostAttestationLocator implements Locator<HostAttestation> {
     
     @Override
     public void copyTo(HostAttestation item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }

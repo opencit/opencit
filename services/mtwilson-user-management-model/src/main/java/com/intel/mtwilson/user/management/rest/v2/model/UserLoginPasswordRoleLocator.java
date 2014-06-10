@@ -19,7 +19,9 @@ public class UserLoginPasswordRoleLocator implements Locator<UserLoginPasswordRo
 
     @Override
     public void copyTo(UserLoginPasswordRole item) {
-        item.setLoginPasswordId(id);
+        if( id != null ) {
+            item.setLoginPasswordId(id);
+        }
     }
     
 }

@@ -19,7 +19,9 @@ public class UserLocator implements Locator<User> {
 
     @Override
     public void copyTo(User item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }
