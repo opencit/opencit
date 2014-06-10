@@ -19,7 +19,9 @@ public class HostTlsPolicyLocator implements Locator<HostTlsPolicy> {
 
     @Override
     public void copyTo(HostTlsPolicy item) {
-        item.setHostUuid(hostUuid.toString());
+        if( hostUuid != null ) {
+            item.setHostUuid(hostUuid.toString());
+        }        
     }
     
 }

@@ -19,7 +19,9 @@ public class RoleLocator implements Locator<Role> {
 
     @Override
     public void copyTo(Role item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }

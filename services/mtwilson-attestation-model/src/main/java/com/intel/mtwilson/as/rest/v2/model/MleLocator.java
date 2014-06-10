@@ -19,7 +19,9 @@ public class MleLocator implements Locator<Mle> {
 
     @Override
     public void copyTo(Mle item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }

@@ -21,8 +21,12 @@ public class MleModuleLocator implements Locator<MleModule> {
     
     @Override
     public void copyTo(MleModule item) {
-        item.setMleUuid(mleUuid.toString());
-        item.setId(moduleUuid);
+        if( mleUuid != null ) {
+            item.setMleUuid(mleUuid.toString());
+        }  
+        if( moduleUuid != null ) {
+            item.setId(moduleUuid);
+        }
     }
     
 }

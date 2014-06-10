@@ -19,7 +19,9 @@ public class OsLocator implements Locator<Os>{
 
     @Override
     public void copyTo(Os item) {
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
     }
     
 }

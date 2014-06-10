@@ -21,7 +21,9 @@ public class MlePcrLocator implements Locator<MlePcr>{
     
     @Override
     public void copyTo(MlePcr item) {
-        item.setMleUuid(mleUuid.toString());
+        if( mleUuid != null ) {
+            item.setMleUuid(mleUuid.toString());
+        }  
         if (pcrIndex != null && !pcrIndex.isEmpty()) {
             item.setPcrIndex(pcrIndex);
         }

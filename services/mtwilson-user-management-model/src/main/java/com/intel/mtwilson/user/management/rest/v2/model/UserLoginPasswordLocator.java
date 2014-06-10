@@ -21,8 +21,12 @@ public class UserLoginPasswordLocator implements Locator<UserLoginPassword> {
 
     @Override
     public void copyTo(UserLoginPassword item) {
-        item.setUserId(userId);
-        item.setId(id);
+        if( id != null ) {
+            item.setId(id);
+        }
+        if( userId != null ) {
+            item.setUserId(userId);
+        }
     }
     
 }
