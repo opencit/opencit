@@ -97,7 +97,8 @@ public class RolePermissions extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
         map.put("role_id", criteria.roleId);
-        Response obj = getTarget().path("roles/{role_id}/permissions").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
+        Response obj = getTargetPathWithQueryParams("roles/{role_id}/permissions", criteria).resolveTemplates(map)
+                .request(MediaType.APPLICATION_JSON).delete(); //getTarget().path("roles/{role_id}/permissions").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
             // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
             throw new WebApplicationException("Delete role permission failed");
