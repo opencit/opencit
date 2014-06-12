@@ -93,6 +93,38 @@ public class SelectionKvAttributes extends MtWilsonClient {
     }
 
     /**
+     * Deletes the mappings between the selection and the associated key-value pairs based on the 
+     * search criteria specified 
+     * @param criteria SelectionKvAttributeFilterCriteria object specifying the search criteria. The possible search options 
+     * include nameEqualTo, nameContains, attrNameEqualTo, attrNameContains, attrValueContains, and attrValueEqualTo. 
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions tag_selection_kv_attributes:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/tag-selection-kv-attributes?attrValueContains=Folsom
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  SelectionKvAttributes client = new SelectionKvAttributes(My.configuration().getClientProperties());
+     *  SelectionKvAttributeFilterCriteria criteria = new SelectionKvAttributeFilterCriteria();
+     *  criteria.attrValueContains = "Folsom";
+     *  client.deleteSelectionKvAttribute(criteria);
+     * </pre>
+     */
+    public void deleteSelectionKvAttribute(SelectionKvAttributeFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("tag-selection-kv-attributes", criteria).request(MediaType.APPLICATION_JSON).delete();
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete SelectionKvAttribute failed");
+        }
+    }
+    
+    
+    /**
      * Retrieves the details of the mapping between selection and the key value pair with the specified ID. 
      * @param uuid - UUID of the selection key-value mapping to be retrieved
      * @return SelectionKvAttribute object matching the specified UUID.

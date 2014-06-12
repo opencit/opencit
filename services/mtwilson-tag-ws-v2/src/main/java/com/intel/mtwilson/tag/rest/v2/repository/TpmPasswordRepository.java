@@ -146,7 +146,18 @@ public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmP
     @Override
     @RequiresPermissions("tpm_passwords:delete,search")         
     public void delete(TpmPasswordFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("TpmPassword:Delete - Got request to delete TpmPassword by search criteria.");        
+        TpmPasswordCollection objCollection = search(criteria);
+        try { 
+            for (TpmPassword obj : objCollection.getTpmPasswords()) {
+                TpmPasswordLocator locator = new TpmPasswordLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during TpmPassword deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }
