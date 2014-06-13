@@ -127,6 +127,36 @@ public class CertificateRequests extends MtWilsonClient {
             throw new WebApplicationException("Delete certificate request failed");
         }
     }
+
+    /**
+     * Deletes the Certificate requests matching the specified search criteria. 
+     * @param criteria CertificateRequestFilterCriteria object specifying the search criteria. The search options include
+     * id, subjectEqualTo, subjectContains, statusEqualTo and contentTypeEqualTo.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions tag_certificate_requests:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/tag-certificates?subjectEqualTo=064866ea-620d-11e0-b1a9-001e671043c4
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Certificates client = new Certificates(My.configuration().getClientProperties());
+     *  CertificateFilterCriteria criteria = new CertificateFilterCriteria();
+     *  criteria.subjectEqualTo = "064866ea-620d-11e0-b1a9-001e671043c4";
+     *  client.deleteCertificate(criteria);
+     * </pre>
+     */
+    public void deleteCertificate(CertificateRequestFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("tag-certificates", criteria).request(MediaType.APPLICATION_JSON).delete();
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete Certificate Request failed");
+        }
+    }
     
     /**
      * Allows the user to update the status of the certificate request after the external CA has completed
@@ -190,6 +220,8 @@ public class CertificateRequests extends MtWilsonClient {
      * Retrieves the Certificate requests based on the search criteria specified. 
      * @param criteria CertificateRequestFilterCriteria object specifying the filter criteria. Search options include
      * id, subjectEqualTo, subjectContains, statusEqualTo & contentTypeEqualTo.
+     * If the user wants to retrieve all the records, filter=false criteria can be specified. This would override any
+     * other filter criteria that the user would have specified.
      * @return CertificateRequestCollection object with the list of all the CertificateRequest objects matching the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_certificate_requests:search

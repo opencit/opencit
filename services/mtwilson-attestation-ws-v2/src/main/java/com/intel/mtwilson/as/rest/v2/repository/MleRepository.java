@@ -25,9 +25,9 @@ import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.Collection;
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,15 +35,23 @@ import org.slf4j.LoggerFactory;
  */
 public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFilterCriteria, MleLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleRepository.class);
 
     @Override
     @RequiresPermissions("mles:search")    
     public MleCollection search(MleFilterCriteria criteria) {
+        log.debug("Mle:Search - Got request to search for the Mles.");        
         MleCollection mleCollection = new MleCollection();
         try {
             TblMleJpaController jpaController = My.jpa().mwMle();
-            if (criteria.id != null) {
+            if (criteria.filter == false) {
+                List<TblMle> mleList = jpaController.findTblMleEntities();
+                if (mleList != null && !mleList.isEmpty()) {
+                    for(TblMle mleObj : mleList) {
+                        mleCollection.getMles().add(convert(mleObj));
+                    }
+                }                                
+            } else if (criteria.id != null) {
                 TblMle tblMle = jpaController.findTblMleByUUID(criteria.id.toString());
                 if (tblMle != null) {
                     mleCollection.getMles().add(convert(tblMle));
@@ -83,6 +91,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
             log.error("Error during MLE search.", ex);
             throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("Mle:Search - Returning back {} of results.", mleCollection.getMles().size());                
         return mleCollection;
     }
 
@@ -90,6 +99,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @RequiresPermissions("mles:retrieve")    
     public Mle retrieve(MleLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
+        log.debug("Mle:Retrieve - Got request to retrieve Mle with id {}.", locator.id);                
         String id = locator.id.toString();
         try {
             TblMleJpaController jpaController = My.jpa().mwMle();
@@ -110,6 +120,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @Override
     @RequiresPermissions("mles:store")    
     public void store(Mle item) {
+        log.debug("Mle:Store - Got request to update Mle with id {}.", item.getId().toString());        
         try {
             // Only the description and the PCR white lists are editable.
             MleData obj = new MleData();
@@ -118,7 +129,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
             obj.setManifestList(item.getMleManifests());
                 
             new MleBO().updateMle(obj, item.getId().toString());
-                        
+            log.debug("Mle:Store - Successfully updated Mle with id {}.", item.getId().toString());            
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -130,6 +141,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @Override
     @RequiresPermissions("mles:create")    
     public void create(Mle item) {
+        log.debug("Mle:Create - Got request to create a new Mle.");
         try {
             // Since the new APIs accept the UUID of the OEM and OS associated with the MLE, we need to verify the UUIDs
             // then form the MleData object before calling into the business layer.
@@ -177,6 +189,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                 mleSource.setMleUuid(item.getId().toString());
                 sourceRepo.create(mleSource);
             }
+            log.debug("Mle:Create - Successfully created the new Mle with name {}.", item.getName());
             
         } catch (ASException aex) {
             throw aex;            
@@ -190,6 +203,7 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @RequiresPermissions("mles:delete")    
     public void delete(MleLocator locator) {
         if( locator == null || locator.id == null ) { return; }
+        log.debug("Mle:Delete - Got request to delete Mle with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             new MleBO().deleteMle(null, null, null, null, null, id);
@@ -204,7 +218,18 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @Override
     @RequiresPermissions("mles:delete,search")    
     public void delete(MleFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Mle:Delete - Got request to delete Mle by search criteria.");        
+        MleCollection objCollection = search(criteria);
+        try { 
+            for (Mle obj : objCollection.getMles()) {
+                MleLocator locator = new MleLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Mle deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
     
     private Mle convert(TblMle tblMleObj) {

@@ -174,7 +174,7 @@ public class UserLoginCertificates extends MtWilsonClient {
     /**
      * Searches for the User's login certificates entries with the specified set of criteria.
      * @param UserLoginCertificateFilterCriteria object specifying the filter criteria. The search options include
-     * id, sha1, sha256, status and enabled. If the user just provides the user_id without any filter criteria, then the user login certificate
+     * id, sha1, sha256, status and enabled. If the user specifies the filter=false criteria, then the user login certificate
      * for that user_id would be retrieved.
      * @return UserLoginCertificateCollection with the UserLoginCertificates that meet the specified filter criteria
      * @since Mt.Wilson 2.0
@@ -183,7 +183,7 @@ public class UserLoginCertificates extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates
+     * https://server.com:8181/mtwilson/v2/users/cdec55c3-206d-4abb-8ba3-83b819e0b256/login-certificates?filter=false
      * Output: {"user_login_certificates":[{"id":"574874bd-2d5c-4190-b724-d69f2b4c89b4","user_id":"cdec55c3-206d-4abb-8ba3-83b819e0b256",
      * "certificate":"MIICrzCCAZegAwIBAgIJAJ9cWj/....LX+ukqAKQDdqfiSkV+Bw==","sha1_hash":"5vv7fVyDVD6fGdi/AfAmoieTRfo=",
      * "sha256_hash":"b5v2UPacu4zkDnmxXCXrbFBsmHOiUhwES5Olrd+TKC4=","expires":1432106266000,"enabled":true,

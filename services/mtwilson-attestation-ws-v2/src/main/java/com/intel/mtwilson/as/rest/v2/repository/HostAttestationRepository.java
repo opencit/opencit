@@ -26,8 +26,6 @@ import com.intel.mtwilson.policy.TrustReport;
 import java.util.Date;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostAttestationRepository implements SimpleRepository<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLocator> {
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAttestationRepository.class);
     
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
@@ -44,6 +42,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @Override
     @RequiresPermissions("host_attestations:search")    
     public HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
+        log.debug("HostAttestation:Search - Got request to search for the roles.");        
         HostAttestationCollection objCollection = new HostAttestationCollection();
         try {
             TblTaLogJpaController jpaController = My.jpa().mwTaLog();
@@ -80,6 +79,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
             log.error("Error during retrieval of host attestation status from cache.", ex);
             throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("HostAttestation:Search - Returning back {} of results.", objCollection.getHostAttestations().size());                
         return objCollection;
     }
 
@@ -87,6 +87,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @RequiresPermissions("host_attestations:retrieve")    
     public HostAttestation retrieve(HostAttestationLocator locator) {
         if (locator == null || locator.id == null) { return null;}
+        log.debug("HostAttestation:Store - Got request to retrieve the host attestation role with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             TblTaLog obj = My.jpa().mwTaLog().findByUuid(id);
@@ -112,6 +113,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @Override
     @RequiresPermissions("host_attestations:create")    
     public void create(HostAttestation item) {
+        log.debug("HostAttestation:Store - Got request to create host attestation.");        
         try {
             HostTrustBO asBO = new HostTrustBO();
             TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());

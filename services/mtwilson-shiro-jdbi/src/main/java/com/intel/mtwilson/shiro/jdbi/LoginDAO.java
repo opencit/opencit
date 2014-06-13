@@ -85,6 +85,9 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select id,username,locale,comment from mw_user where username=:username")
     User findUserByName(@Bind("username") String username);
     
+    @SqlQuery("select id,username,locale,comment from mw_user where username like :username")
+    List<User> findUserByNameLike(@Bind("username") String username);
+
     @SqlUpdate("delete from mw_user where id=:id")
     void deleteUser(@Bind("id") UUID id);
         
@@ -109,6 +112,9 @@ public interface LoginDAO extends Closeable {
     @SqlQuery("select id,role_name,description from mw_role where role_name=:role_name")
     Role findRoleByName(@Bind("role_name") String roleName);
     
+    @SqlQuery("select id,role_name,description from mw_role where role_name like :role_name")
+    List<Role> findRoleByNameLike(@Bind("role_name") String roleName);
+
     @SqlUpdate("delete from mw_role where id=:id")
     void deleteRole(@Bind("id") UUID id);
 

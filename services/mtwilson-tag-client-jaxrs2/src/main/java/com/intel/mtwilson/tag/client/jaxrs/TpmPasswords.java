@@ -94,6 +94,36 @@ public class TpmPasswords extends MtWilsonClient {
     }
     
     /**
+     * Deletes the list of TPM password entries based on the search criteria specified. 
+     * @param criteria - TpmPasswordFilterCriteria object specifying the filter criteria. The 
+     * only search option currently supported is the ID.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions tpm_passwords:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/host-tpm-passwords?id=07217f9c-f625-4c5a-a538-73f1880abdda
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  TpmPasswords client = new TpmPasswords(My.configuration().getClientProperties());
+     *  TpmPasswordFilterCriteria criteria = new TpmPasswordFilterCriteria();
+     *  criteria.id = UUID.valueOf("07217f9c-f625-4c5a-a538-73f1880abdda");
+     *  client.deleteTpmPassword(criteria);
+     * </pre>
+     */
+    public void deleteTpmPassword(TpmPasswordFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("host-tpm-passwords", criteria).request(MediaType.APPLICATION_JSON).delete();
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete TpmPassword failed");
+        }
+    }
+    
+    /**
      * Allows the user to update the TPM password for the specified ID, which is the
      * host's hardware UUID. 
      * @param obj TpmPassword object having the value that needs to be updated. 

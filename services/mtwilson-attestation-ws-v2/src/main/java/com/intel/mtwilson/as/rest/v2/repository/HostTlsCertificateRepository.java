@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCertificate, HostTlsCertificateCollection, HostTlsCertificateFilterCriteria, HostTlsCertificateLocator> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTlsCertificateRepository.class);
     
     @Override
     @RequiresPermissions("host_tls_certificates:search")    

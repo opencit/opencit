@@ -13,8 +13,6 @@ import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractCertificateJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 @Path("/ca-certificates")
 public class CaCertificates extends AbstractCertificateJsonapiResource<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, NoLinks<CaCertificate>, CaCertificateLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
     private CaCertificateRepository repository;
     
     public CaCertificates() {

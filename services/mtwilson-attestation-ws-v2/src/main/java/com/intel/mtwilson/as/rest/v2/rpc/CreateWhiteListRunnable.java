@@ -11,9 +11,6 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  * @author ssbangal
@@ -22,7 +19,7 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="create_whitelist")
 public class CreateWhiteListRunnable implements Runnable{
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateWhiteListRunnable.class);
 
     private TxtHostRecord host;
     private String result;

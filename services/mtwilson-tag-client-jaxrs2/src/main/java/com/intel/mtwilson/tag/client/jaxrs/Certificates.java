@@ -120,6 +120,36 @@ public class Certificates  extends MtWilsonClient {
     }
     
     /**
+     * Deletes the Certificate(s) matching the specified search criteria. 
+     * @param criteria CertificateFilterCriteria object specifying the search criteria. The search options include
+     * id, nameEqualTo and nameContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions roles:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/tag-certificates?subjectEqualTo=064866ea-620d-11e0-b1a9-001e671043c4
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Certificates client = new Certificates(My.configuration().getClientProperties());
+     *  CertificateFilterCriteria criteria = new CertificateFilterCriteria();
+     *  criteria.subjectEqualTo = "064866ea-620d-11e0-b1a9-001e671043c4";
+     *  client.deleteCertificate(criteria);
+     * </pre>
+     */
+    public void deleteCertificate(CertificateFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("tag-certificates", criteria).request(MediaType.APPLICATION_JSON).delete();
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete certificate failed");
+        }
+    }
+    
+    /**
      * Allows the user to edit the revoked status of the certificate. No other information can be edited.
      * @param obj - Certificate object having the status and the UUID of the certificate that needs to be updated. 
      * @return Updated Certificate object.
@@ -187,12 +217,11 @@ public class Certificates  extends MtWilsonClient {
     }    
         
     /**
-     * Retrieves the details of the provisioned certificates based on the search criteria specified. If none
-     * of the search criteria is specified, then search would return back and empty result set. The 
-     * possible search options include subjectEqualTo, subjectContains, issuerEqualTo, issuerContains, 
-     * sha1, sha256, notBefore, notAfter and revoked.  
+     * Retrieves the details of the provisioned certificates based on the search criteria specified.   
      * @param criteria CertificateFilterCriteria object specifying the filter criteria. Search options include
      * subjectEqualTo, subjectContains, issuerEqualTo, issuerContains, sha1, sha256, notBefore, notAfter and revoked.
+     * If the user wants to retrieve all the records, filter=false criteria can be specified. This would override any
+     * other filter criteria that the user would have specified.
      * @return CertificateCollection object with the list of all the Certificate objects matching the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions tag_certificates:search

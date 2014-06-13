@@ -45,11 +45,18 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
                     if (user != null) {
                         userCollection.getUsers().add(user);
                     }
-                } else if (criteria.userNameEqualTo != null && !criteria.userNameEqualTo.isEmpty()) {
-                    User user = loginDAO.findUserByName(criteria.userNameEqualTo);
+                } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                    User user = loginDAO.findUserByName(criteria.nameEqualTo);
                     if (user != null) {
                         userCollection.getUsers().add(user);
                     }
+                } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
+                    List<User> users = loginDAO.findUserByNameLike("%"+criteria.nameContains+"%");
+                    if (users != null && users.size() > 0) {
+                        for (User user : users) {
+                            userCollection.getUsers().add(user);
+                        }
+                    }                
                 }
             } else {
                 List<User> findAllUsers = loginDAO.findAllUsers();
@@ -171,7 +178,18 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
     
     @Override
     public void delete(UserFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("User:Delete - Got request to delete user by search criteria.");        
+        UserCollection objCollection = search(criteria);
+        try { 
+            for (User obj : objCollection.getUsers()) {
+                UserLocator locator = new UserLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during User deletion.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+        }
     }
     
 }
