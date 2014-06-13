@@ -21,7 +21,6 @@ import javax.ws.rs.Path;
 @Path("/mles/{mle_id}/source")
 public class MleSources extends AbstractJsonapiResource<MleSource, MleSourceCollection, MleSourceFilterCriteria, NoLinks<MleSource>, MleSourceLocator>{
     
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources.class);    
     private MleSourceRepository repository;
 
     public MleSources() {

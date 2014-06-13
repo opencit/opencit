@@ -8,18 +8,13 @@ import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.jaxrs2.NoLinks;
-import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.rest.v2.model.FileLocator;
 import com.intel.mtwilson.as.rest.v2.repository.FileRepository;
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-//import javax.ejb.Stateless;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -38,9 +33,7 @@ public class Files extends AbstractJsonapiResource<File,FileCollection,FileFilte
     private FileRepository repository;
     
     public Files() {
-//        super();
         repository = new FileRepository();
-//        setRepository(repository);
     }
     
     @Override
