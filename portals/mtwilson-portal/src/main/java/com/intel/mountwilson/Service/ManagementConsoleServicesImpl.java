@@ -361,15 +361,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 apiListFromDB = msAPIObj.searchApiClients(apiSearchObj);
 
                 apiSearchObj.enabledEqualTo = false;
-                apiSearchObj.statusEqualTo = ApiClientStatus.CANCELLED.toString();
-                apiListFromDB.addAll(msAPIObj.searchApiClients(apiSearchObj));
-
-                apiSearchObj.enabledEqualTo = false;
                 apiSearchObj.statusEqualTo = ApiClientStatus.REJECTED.toString();
-                apiListFromDB.addAll(msAPIObj.searchApiClients(apiSearchObj));
-
-                apiSearchObj.enabledEqualTo = false;
-                apiSearchObj.statusEqualTo = ApiClientStatus.EXPIRED.toString();
                 apiListFromDB.addAll(msAPIObj.searchApiClients(apiSearchObj));
 
             } else if (apiType == ApiClientListType.DELETE) {
@@ -418,7 +410,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                     catch(Exception e) {
                         log.error("Cannot parse user comment: {}", apiClientObj.comment, e);
                         apiClientDetailObj.setRequestedRoles(new ArrayList<String>());
-                        apiClientDetailObj.setComment("");
+                        apiClientDetailObj.setComment(apiClientObj.comment);
                     }
 
                     apiClientList.add(apiClientDetailObj);
