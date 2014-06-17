@@ -129,7 +129,7 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
                 user.setComment(item.getComment());
                 String localeTag = null;
                 if (item.getLocale() != null)
-                    localeTag = LocaleUtil.toLanguageTag(user.getLocale());
+                    localeTag = LocaleUtil.toLanguageTag(item.getLocale());
                 loginDAO.insertUser(user.getId(), user.getUsername(), localeTag, user.getComment());
                 log.debug("User:Create - Created the user {} successfully.", item.getUsername());
             } else {
