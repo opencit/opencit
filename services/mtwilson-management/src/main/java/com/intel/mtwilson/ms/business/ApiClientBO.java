@@ -303,7 +303,7 @@ public class ApiClientBO extends BaseBO {
         log.debug("Updating v2 user tables for {}", userName);
         try(LoginDAO loginDAO = MyJdbi.authz()) {
             log.debug("Looking up user login certificate {}", Hex.encodeHexString(apiClientUpdateRequest.fingerprint));
-            UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(apiClientUpdateRequest.fingerprint);
+            UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha1(apiClientUpdateRequest.fingerprint);
             if (userLoginCertificate != null) {
                 log.debug("Found user login certificate {}", userLoginCertificate.getId());
                 userLoginCertificate.setEnabled(apiClientUpdateRequest.enabled);
@@ -433,28 +433,43 @@ public class ApiClientBO extends BaseBO {
                 userName = apiClientRequest.fingerprint.toString();
             }
 
-            if (apiClientX509 == null) {
-                log.error("Specified user does not exist in the system.");
-                throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
+            if (apiClientX509 != null) {
+                // User also exists in the V1 API tables. So, they have to be updated accordingly
+                log.info("Specified user has been created using the V1 APIs.");
+                apiClientX509.setEnabled(apiClientRequest.enabled);
+                apiClientX509.setStatus(apiClientRequest.status);
+
+                // Update the comment if there is value. Otherwise we might overwrite an existing value.
+                if (apiClientRequest.comment != null && !apiClientRequest.comment.isEmpty())
+                    apiClientX509.setComment(apiClientRequest.comment);            
+
+                apiClientX509JpaController.edit(apiClientX509); // IllegalOrphanException, NonexistentEntityException, Exception
+
+                // Clear the existing roles and update it with the new ones only if specified by the user
+                if (apiClientRequest.roles != null && apiClientRequest.roles.length > 0) {
+                    clearRolesForApiClient(apiClientX509);
+                    setRolesForApiClient(apiClientX509, apiClientRequest.roles);
+                }
+                userName = apiClientX509.getUserNameFromName();                
+            } else {
+                // Check if the user is in the V2 table. Otherwise we need to throw an error
+                try (LoginDAO loginDao = MyJdbi.authz()) {
+                    UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha1(apiClientRequest.fingerprint);
+                    if (userLoginCertificate == null) {
+                        log.error("User with fingerprint {} is not configured in the system.", Sha1Digest.valueOf(apiClientRequest.fingerprint).toHexString());
+                        throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
+                    } else {
+                        User user = loginDao.findUserById(userLoginCertificate.getUserId());
+                        if (user != null) {
+                            userName = user.getUsername();
+                        }
+                    }
+                }
             }
             
-            apiClientX509.setEnabled(apiClientRequest.enabled);
-            apiClientX509.setStatus(apiClientRequest.status);
-            
-            // Update the comment if there is value. Otherwise we might overwrite an existing value.
-            if (apiClientRequest.comment != null && !apiClientRequest.comment.isEmpty())
-                apiClientX509.setComment(apiClientRequest.comment);            
-
-            apiClientX509JpaController.edit(apiClientX509); // IllegalOrphanException, NonexistentEntityException, Exception
-
-            // Clear the existing roles and update it with the new ones only if specified by the user
-            if (apiClientRequest.roles != null && apiClientRequest.roles.length > 0) {
-                clearRolesForApiClient(apiClientX509);
-                setRolesForApiClient(apiClientX509, apiClientRequest.roles);
-            }
                         
             MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser();//new MwPortalUserJpaController(getMSEntityManagerFactory());
-            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(apiClientX509.getUserNameFromName());
+            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(userName);
             if(portalUser != null) {
                 portalUser.setEnabled(apiClientRequest.enabled);
                 portalUser.setStatus(apiClientRequest.status);
@@ -463,10 +478,10 @@ public class ApiClientBO extends BaseBO {
                 mwPortalUserJpaController.edit(portalUser);
             }
             
-            updateShiroUserTables(apiClientRequest, apiClientX509.getUserNameFromName());
+            updateShiroUserTables(apiClientRequest, userName);
             
             // Capture the change in the syslog
-            Object[] paramArray = {Hex.encodeHexString(apiClientX509.getFingerprint()), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            Object[] paramArray = {userName, Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
             log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {
@@ -555,7 +570,45 @@ public class ApiClientBO extends BaseBO {
      */
     public List<ApiClientInfo> search(ApiClientSearchCriteria criteria) {
         
-        try {
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
+            log.debug("Searching for users based on the criteria.");
+            List<ApiClientInfo> list = new ArrayList<>();
+
+            if( criteria.enabledEqualTo != null && criteria.statusEqualTo != null ) {
+                List<UserLoginCertificate> userLoginCertificates = loginDAO.findUserLoginCertificatesByStatusAndEnabled(Status.valueOf(criteria.statusEqualTo), criteria.enabledEqualTo);
+                if (userLoginCertificates != null && userLoginCertificates.size() > 0) {
+                    for (UserLoginCertificate userLoginCertificate : userLoginCertificates) {
+                        list.add(convertToApiClientInfo(userLoginCertificate));
+                    }
+                }
+            } else if (criteria.statusEqualTo != null) {
+                List<UserLoginCertificate> userLoginCertificates = loginDAO.findUserLoginCertificatesByStatus(Status.valueOf(criteria.statusEqualTo));
+                if (userLoginCertificates != null && userLoginCertificates.size() > 0) {
+                    for (UserLoginCertificate userLoginCertificate : userLoginCertificates) {
+                        list.add(convertToApiClientInfo(userLoginCertificate));
+                    }
+                }
+            } else if (criteria.enabledEqualTo != null) {
+                List<UserLoginCertificate> userLoginCertificates = loginDAO.findUserLoginCertificatesByEnabled(criteria.enabledEqualTo);
+                if (userLoginCertificates != null && userLoginCertificates.size() > 0) {
+                    for (UserLoginCertificate userLoginCertificate : userLoginCertificates) {
+                        list.add(convertToApiClientInfo(userLoginCertificate));
+                    }
+                }
+            } else if (criteria.fingerprintEqualTo != null) {
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha1(criteria.fingerprintEqualTo);
+                if (userLoginCertificate != null) {
+                    list.add(convertToApiClientInfo(userLoginCertificate));
+                }
+            } else if (criteria.nameEqualTo != null) {
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(criteria.nameEqualTo);
+                if (userLoginCertificate != null) {
+                    list.add(convertToApiClientInfo(userLoginCertificate));
+                }
+            }
+            
+            return list;
+        /*try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
             List<ApiClientX509> list;
             if( criteria.enabledEqualTo != null && criteria.statusEqualTo != null ) {
@@ -605,7 +658,7 @@ public class ApiClientBO extends BaseBO {
                 response.add(toApiClientInfo(apiClientX509));
             }
             
-            return response;
+            return response;*/
             
         } catch (MSException me) {
             log.error("Error during searching for the API Client information. " + me.getErrorMessage());            
@@ -622,5 +675,33 @@ public class ApiClientBO extends BaseBO {
         String certName = x509Certificate.getSubjectX500Principal().getName();
         certName = certName.substring((certName.indexOf("CN=")+(("CN=").length())), certName.indexOf(",OU="));
         return certName;
+    }
+    
+    private ApiClientInfo convertToApiClientInfo(UserLoginCertificate userLoginCertificate) throws SQLException, IOException {
+        ApiClientInfo info = new ApiClientInfo();
+        info.certificate = userLoginCertificate.getCertificate();
+        info.fingerprint = userLoginCertificate.getSha1Hash();
+        info.issuer = userLoginCertificate.getX509Certificate().getIssuerDN().getName();
+        info.serialNumber = userLoginCertificate.getX509Certificate().getSerialNumber().intValue();
+        info.expires = userLoginCertificate.getExpires();
+        info.enabled = userLoginCertificate.isEnabled();
+        info.status = userLoginCertificate.getStatus().toString();
+        info.comment = userLoginCertificate.getComment();
+        // set the roles array
+        ArrayList<String> roleNames = new ArrayList<>();
+
+        try(LoginDAO dao = MyJdbi.authz()) {
+            List<com.intel.mtwilson.user.management.rest.v2.model.Role> v2roles = dao.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+            log.debug("found {} roles", v2roles.size());
+            for(com.intel.mtwilson.user.management.rest.v2.model.Role v2role : v2roles) {
+                log.debug("found role name: {}", v2role.getRoleName());
+                roleNames.add(v2role.getRoleName());
+            }
+            User findUserById = dao.findUserById(userLoginCertificate.getUserId());
+            if (findUserById != null)
+                info.name = findUserById.getUsername();
+        }
+        info.roles = roleNames.toArray(new String[0]);
+        return info;        
     }
 }
