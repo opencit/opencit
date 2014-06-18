@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.helper;
 
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.security.jersey.AuthenticationJerseyFilter;
 import com.intel.mtwilson.security.jersey.HmacRequestVerifier;
@@ -16,7 +15,6 @@ import com.intel.mtwilson.security.jpa.ApiClientHttpBasicBO;
 import com.intel.mtwilson.security.jpa.ApiClientX509BO;
 import com.intel.mtwilson.security.jpa.RequestLogBO;
 import java.io.IOException;
-//import com.sun.jersey.spi.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ASAuthenticationFilter extends AuthenticationJerseyFilter implements ContainerRequestFilter {
     private static Logger log = LoggerFactory.getLogger(ASAuthenticationFilter.class);
-    //private ASPersistenceManager persistenceManager = new ASPersistenceManager();
     
     public ASAuthenticationFilter() throws IOException {
         // application-specific configuration
