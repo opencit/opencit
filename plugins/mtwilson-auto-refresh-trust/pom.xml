@@ -54,6 +54,7 @@
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-my</artifactId>
 		<version>${project.version}</version>
+                <type>jar</type>
 	</dependency>
 
 	
