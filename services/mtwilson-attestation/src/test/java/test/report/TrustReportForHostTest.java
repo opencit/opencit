@@ -42,8 +42,8 @@ public class TrustReportForHostTest {
     public void testGetTrustReportForHost() throws IOException, CryptographyException {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostBO hostBO = new HostBO(My.persistenceManager());
-        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
+        HostBO hostBO = new HostBO();
+        HostTrustBO hostTrustBO = new HostTrustBO();
         hostTrustBO.setHostBO(hostBO);
         TrustReport report = hostTrustBO.getTrustReportForHost(host, hostname);
         List<RuleResult> results = report.getResultsForMarker("VMM");
@@ -61,8 +61,8 @@ public class TrustReportForHostTest {
     public void testGetTrustStatusForHost() throws IOException, CryptographyException {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostBO hostBO = new HostBO(My.persistenceManager());
-        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
+        HostBO hostBO = new HostBO();
+        HostTrustBO hostTrustBO = new HostTrustBO();
         hostTrustBO.setHostBO(hostBO);
         HostTrustStatus hostTrustStatus = hostTrustBO.getTrustStatus(host, hostname);        
         log.debug("Trusted BIOS? {}", hostTrustStatus.bios);
