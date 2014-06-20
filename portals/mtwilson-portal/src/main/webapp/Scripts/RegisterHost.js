@@ -193,11 +193,12 @@ function fnCancelButtonHostConfig(element, nextDropDownID) {
 }
 
 function showDialogUpFlatFileHelp() {
-    var str = "";
-    for (var iteam in uploadFileHelp) {
-        str += '<div class="helpDiv">' + uploadFileHelp[iteam] + '</div>';
-    }
-    fnOpenDialog(str, "Upload Flat File Help", 500, 275, false);
+//    var str = "";
+//    for (var iteam in uploadFileHelp) {
+//        str += '<div class="helpDiv">' + uploadFileHelp[iteam] + '</div>';
+//    }
+    var str = '<div class="helpDiv" data-i18n="[html]help.upload_flat_file_help"></div>';
+    fnOpenDialog(str, "upload_flat_file_help", 500, 275, false);
 }
 
 function fnRetrieveDatacenters() {
@@ -388,10 +389,11 @@ function fnRegisterMultipleHostSuccess(responseJSON) {
 
 //function to show help for VCenter String in registerHost page
 function showHelpForVCenterServer() {
-    var str = "";
-    for (var iteam in vCenterStringHelp) {
-        str += '<div class="helpDiv">' + vCenterStringHelp[iteam] + '</div>';
-    }
+//    var str = "";
+//    for (var iteam in vCenterStringHelp) {
+//        str += '<div class="helpDiv">' + vCenterStringHelp[iteam] + '</div>';
+//    }
+    var str = '<div class="helpDiv" data-i18n="[html]help.vcenter_string_help"></div>';
     fnOpenDialog(str, "Help", 500, 285, false);
 }
 

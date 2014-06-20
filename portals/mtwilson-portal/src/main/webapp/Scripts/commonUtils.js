@@ -329,11 +329,16 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
                  }
 			}
 		});
+                $('#ui-dialog-title-dialog').attr('data-i18n', 'title.' + title.toLowerCase());
+                $(':button').attr('data-i18n', '[text]button.ok');
+                $('#dialog').i18n();
+                $('#ui-dialog-title-dialog').i18n();
+                $(':button').i18n();
 }
 
 //Function to show dialog box to show message to user if session is expired or request return Login Page.
 function fnSessionExpireLoginAgain() {
-	var str = 'Your Login Session is Expired. <a href="login.htm">Click here</a> to Login again.';
+	var str = '<span data-i18n="error.login_expired">Your Login Session is Expired. Please Login again.</span>';
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 
@@ -493,15 +498,16 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
 //function to change give date into a format "MM/DD/YYYY hh:mm:sec".  
 function fnGetFormatedDate(dateObject) {
 	var date = new Date(dateObject);
-	var str = "";
-	var month = date.getMonth()+1;
-	month = month.toString().length == 1 ? "0"+month : month;
-	var day = date.getDate().toString().length == 1 ? "0"+date.getDate() : date.getDate();
-	var hr = date.getHours().toString().length == 1 ? "0"+date.getHours() : date.getHours();
-	var min = date.getMinutes().toString().length == 1 ? "0"+date.getMinutes() : date.getMinutes();
-	var sec = date.getSeconds().toString().length == 1 ? "0"+date.getSeconds() : date.getSeconds();
-	str+=month+"/"+day+"/"+date.getFullYear()+" "+hr+":"+min+":"+sec;
-	return str;
+        return date.toISOString();
+//	var str = "";
+//	var month = date.getMonth()+1;
+//	month = month.toString().length == 1 ? "0"+month : month;
+//	var day = date.getDate().toString().length == 1 ? "0"+date.getDate() : date.getDate();
+//	var hr = date.getHours().toString().length == 1 ? "0"+date.getHours() : date.getHours();
+//	var min = date.getMinutes().toString().length == 1 ? "0"+date.getMinutes() : date.getMinutes();
+//	var sec = date.getSeconds().toString().length == 1 ? "0"+date.getSeconds() : date.getSeconds();
+//	str+=month+"/"+day+"/"+date.getFullYear()+" "+hr+":"+min+":"+sec;
+//	return str;
 }
 
 //function to create vCenterString using IPAdress and port no provided. 
@@ -865,11 +871,16 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
 	             }
 			}
 		});
+                $('#ui-dialog-title-dialog').attr('data-i18n', 'title.' + title.toLowerCase());
+                $(':button').attr('data-i18n', '[text]button.ok');
+                $('#dialog').i18n();
+                $('#ui-dialog-title-dialog').i18n();
+                $(':button').i18n();
 }
 
 //Function to show dialog box to show message to user if session is expired or request return Login Page.
 function fnSessionExpireLoginAgain() {
-	var str = 'Your Login Session is Expired. <a href="login.htm">Click here</a> to Login again.';
+	var str = '<span data-i18n="error.login_expired">Your Login Session is Expired. Please Login again.</span>';
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 
@@ -1000,6 +1011,11 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
 	         }
 		}
 	});
+        $('#ui-dialog-title-dialog').attr('data-i18n', 'title.' + title.toLowerCase());
+        $(':button').attr('data-i18n', '[text]button.ok');
+        $('#dialog').i18n();
+        $('#ui-dialog-title-dialog').i18n();
+        $(':button').i18n();
 }
 
 

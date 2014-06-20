@@ -32,7 +32,7 @@
 				
 			</div>
             <div class="valueHintDiv">
-            <span style="color: #555555; font-size: 0.9em">Roles requested by the user are highlighted.</span>
+            <span style="color: #555555; font-size: 0.9em" data-i18n="label.requested_roles_hint">Roles requested by the user are highlighted.</span>
             </div>
 		</div>
 		<div class="singleDiv">

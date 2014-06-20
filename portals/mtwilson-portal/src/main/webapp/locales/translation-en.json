@@ -58,7 +58,17 @@
         "view_oem": "View OEM",
         "view_os": "View OS",
         "view_request": "View User",
-        "whitelist_config": "White List Configuration"
+        "whitelist_config": "White List Configuration",
+        "trust_assertion": "Trust Assertion",
+        "trust_report": "Trust Report",
+        "manifest_list_help":"Manifest List Help",
+        "upload_file_help":"Upload File Help",
+        "manifest_loader_tool_help":"Manifest Loader Tool Help",
+        "manifest_list":"Manifest List",
+        "upload_flat_file_help":"Upload Flat File Help",
+        "help":"Help",
+        "error": "Error",
+        "asset_tag": "Asset Tag Reference Implementation"
     },
     "header": {
         "about": "",
@@ -144,7 +154,9 @@
         "add_oem": "Add OEM",
         "add_os": "Add OS",
         "register": "Register",
-        "login": "Login"
+        "login": "Login",
+        "edit": "Edit",
+        "delete": "Delete"
     },
     "button": {
         "update_trust_status": "Update Trust Status",
@@ -169,7 +181,12 @@
         "retrieve_clusters": "Retrieve Clusters",
         "register_host": "Register Host",
         "rekey": "Re-Key",
-        "import_whitelist": "Import Whitelist"
+        "import_whitelist": "Import Whitelist",
+        "details": "Details",
+        "delete": "Delete",
+        "refresh": "Refresh",
+        "updating": "Updating",
+        "ok": "OK"
     },
     "select": {
         "flat_file": "Flat File",
@@ -180,7 +197,10 @@
         "host_bios_good_known": "Specified good known host only",
         "host_vmm_same": "Host with same OS/VMM builds",
         "host_oem_vmm_same": "OEM specific hosts with same OS/VMM builds",
-        "host_vmm_good_known": "Specified good known host only"
+        "host_vmm_good_known": "Specified good known host only",
+        "oem":"OEM",
+        "host":"Host",
+        "global":"Global"
     },
     "input": {
         "description": "Description:",
@@ -267,7 +287,15 @@
         "trust_report": "Trust Report",
         "add_on_conn_string": "Add On Connection String",
         "register": "Register",
-        "configuration": "Configuration"
+        "configuration": "Configuration",
+        "approved": "Approved",
+        "canceled": "Canceled",
+        "rejected": "Rejected",
+        "expired": "Expired",
+        "pending": "Pending",
+        "pcr_name": "PCR Name",
+        "pcr_value": "PCR Value",
+        "whitelist_value": "Whitelist Value"
     },
     "label": {
         "dl_root_ca": "Click on Download icon to download Root CA Certificate",
@@ -282,7 +310,22 @@
         "form_to_create_account": "Use the form below to create a new account",
         "password_requirement": "Passwords are required to be a minimum of 6 characters in length.",
         "click_download_saml": "Click on Download icon to download SAML Certificate",
-        "bios": "BIOS"
+        "bios": "BIOS",
+        "requested_roles_hint": "Roles requested by the user are highlighted.",
+        "role_security": "Security",
+        "role_whitelist": "Whitelist",
+        "role_attestation": "Attestation",
+        "role_report": "Report",
+        "role_audit": "Audit",
+        "role_assettagmanagement": "AssetTagManagement",
+        "expiring_api_time_start":"No Api Client keys are expiring in the next ",
+        "expiring_api_time_end":" month(s).",
+        "host_status_unreachable":"System is unreachable.",
+        "host_status_error_code":"ErrorCode",
+        "host_status_success": "Host trust status updated successfully.",
+        "host_status_false_result":"False result",
+        "no_module_logs":"This PCR does not have any Module Logs.",
+        "not_implemented":"This feature is currently not implemented."
     },
     "hover_title": {
         "manifest": "Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8"
@@ -290,5 +333,16 @@
     "error": {
         "login_expired": "Your Login Session is Expired. Please Login again.",
         "wl_config_error_msg": "Error While Getting MLE Data."
+    },
+    "help": {
+        "upload_flat_file_help":"<p>Provide a plain text file (.txt format) containing a list of hosts to be registered in the following formats:</p><p>Agent | Host_Name | connection string</p><br><p><b>For Open Source Based Hosts:</b></p><p>intel|Host_Name|Host_Port_no</p><p><i>e.g.   intel|myTrustAgent|1443</i></p><br><p><b>For VMWare Based Hosts:</b></p><p>vmware|Host_Name|Vmware_Connection_String*</p><p><i>e.g. vmware|myVmwareHost|https://192.168.1.0:443/sdk;Administrator;Password</i></p><br><p><b>For Citrix Type</b></p><p>citrix|Host_Name|Citrix_Connection_String*</p><p><i>e.g.   citrix|myCitrixHost|https://192.168.1.0:443/;Administrator;Password</i></p><br><p>* Connection strings must be valid urls.  Please notice the / after the port number.  This is required.</p>",
+        "vcenter_string_help":"<p>Please provide the hostname or IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.</p><p><i>Ex: hostname.com</i></p><p><i>Ex: 192.168.1.1</i></p><p><i>Ex: 192.168.1.0:444</i></p>",
+        "add_location_help":"<p>Please provide Location for server.</p>",
+        "required_pcr_values_help":"<p>This option allows the user to change the PCRs to be used for White Listing.</p><br><p>By default the tool selects the minimum required PCRs based on the host type.</p><p>PCR[0]- Holds the Core Root of Trust Measurement (CRTM) including BIOS start-up code, Power-on-self-test, and other OEM provided code such as embedded Option ROMs and other Host Platform Extensions.</p><p>PCR[1]- Host Platform Configuration measurement which includes BIOS setup or devices controlled by embedded Option ROMS.</p><p>PCR[2]- Option ROM Code measures option ROM code for add-in devices not provided by the OEM as an embedded device (e.g., PCI RAID adaptor, Network adaptor, etc.).</p><p>PCR[3]- Option ROM Configuration and Data - measures configuration data covered by option ROM code for add-in devices not provided by the OEM.</p><p>PCR[4]- IPL code that performs the initial boot, usually the Master Boot Record (MBR).</p><p>PCR[5]- IPL Configuration and Data (i.e., the configuration and data used by the IPL Code).</p><p>PCR[17]- Code and data associated with the secure launch process [SINIT, BIOS ACM, & Launch Control Policies.</p><p>PCR[18]- Measurement of the MLE [Tboot + First module in the grub.conf (if applicable)]</p><p>PCR[19-20]- Measurement of the core kernel module(s).</p>",
+        "applicable_whitelist_target_help":"<p>This option allows users to choose how the white list is configured.</p><br><p><b>BIOS Configuration</b></p><p>Select the <b>OEM</b> Option to provide whitelist for each OEM Type and BIOS Version.  All the Servers/Hosts of a given OEM Type & BIOS Version will be verified with this Whitelist.</p><p>Select the <b>HOST</b> option to provide whitelist by Host and BIOS Version. (ex: for HP Servers, by design PCR 0 measurement changes for every host).</p><br><p><b>Hypervisor (VMM) Configuration</b></p><p>Select the <b>OEM</b> Option to provide whitelist for each OEM Type and VMM/OS Version.  All the Servers/Hosts of a given OEM Type & VMM/OS Version will be verified with this Whitelist.</p><p>Select the <b>HOST</b> option to provide whitelist by Host and VMM/OS Version.  This whitelist will be used to verify <b>ONLY</b> the specified host.</p><p>Select the <b>GLOBAL</b> option to provide the whitelist for each VMM/OS version and build number.  All the servers/hosts across all OEM types run this specified VMM/OS version and build will be verified with this whitelist.</p>",
+        "configure_white_help":"<p>This option allows the user to choose the White Lists that need to be configured.</p><br><p>If both BIOS and VMM are selected, user will get an option to register the host also when he/she clicks on the 'Upload White List' button.</p>",
+        "pcr_help":"<p>PCR[0]- Holds the Core Root of Trust Measurement (CRTM) including BIOS start-up code, Power-on-self-test, and other OEM provided code such as embedded Option ROMs and other Host Platform Extensions.</p><p>PCR[1]- Host Platform Configuration measurement which includes BIOS setup or devices controlled by embedded Option ROMS.</p><p>PCR[2]- Option ROM Code � measures option ROM code for add-in devices not provided by the OEM as an embedded device (e.g., PCI RAID adaptor, Network adaptor, etc.).</p><p>PCR[3]- Option ROM Configuration and Data - measures configuration data covered by option ROM code for add-in devices not provided by the OEM.</p><p>PCR[4]- IPL code that performs the initial boot, usually the Master Boot Record (MBR).</p><p>PCR[5]- IPL Configuration and Data (i.e., the configuration and data used by the IPL Code).</p><p>PCR[17]- Code and data associated with the secure launch process.</p><p>PCR[18]- Measurement of the tBoot package.</p><p>PCR[19-20]- Measurement of the key packages of the of the MLE.</p>",
+        "upload_manifest_file_help":"<p>Please provide file in following format :</p><p>PCR Name:PCR Value</p><p><i>e.g.   17:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8</i></p>",
+        "manifest_loader_tool":"<p><b>White List Manifest Loader Tool :</b></p><br><br><p><i>* The White List Manifest Loader Tool installation package comes along with the WLM Portal installation. [C:\\inetpub\\wwwroot\\WLMPortal\\WLMLoaderToo\\].</i></p><p><i>* The tool can be installed either on the same server as the WLM portal or on system that is on the same network as the Mt. Wilson database.</i></p><p><i>* The pre-requisite for running the tool is the .NET Framework 4.0.</i></p><p><i>* Detailed documentation on the configuration and running of the tool would be available to the user post installation.</i></p>"
     }
 }

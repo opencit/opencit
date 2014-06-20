@@ -1,4 +1,5 @@
-<%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
          pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loMLEe.dtd">
@@ -28,7 +29,7 @@
                         <br>
                         <div id="mainDivForConfig">
                             <div class="singleDiv">
-                                <div class="labelDiv" data-i18n="input.config_wl_for"><span>Configure White List For:</span> <input type="image" onclick="showDialogConfigureWhiteHelp()" src="images/helpicon.png" class="helperImageClass"></div>
+                                <div class="labelDiv"><span data-i18n="input.config_wl_for">Configure White List For:</span> <input type="image" onclick="showDialogConfigureWhiteHelp()" src="images/helpicon.png" class="helperImageClass"></div>
                                 <div class="valueDivConfig">
                                     <input type="checkbox" id="Oem_Bios_Checkbox" onclick="fnChangeApplicableFor(checked, 'oem_bios_applicable_for', 'Hypervisor_Checkbox')">
                                     <span data-i18n="label.bios">BIOS</span>
@@ -43,14 +44,14 @@
                                 <div class="valueDivConfig">
                                     <select class="whiteListConfigDropDown" size="3" id="oem_bios_applicable_for" onchange="fnSelectWhiteListType(this, 'Oem_Bios_Checkbox')">
                                         <c:forEach var="BIOSWhiteListData" varStatus="rowCounter"  items="${BIOSWhiteList}">
-                                            <option>${BIOSWhiteListData}</option>
+                                            <option data-i18n="select.${fn:toLowerCase(BIOSWhiteListData)}">${BIOSWhiteListData}</option>
                                         </c:forEach>
                                     </select>
                                 </div>
                                 <div class="valueDivConfig">
                                     <select class="whiteListConfigDropDown" size="3" id="Hypervisor_bios_applicable_for" onchange="fnSelectWhiteListType(this, 'Hypervisor_Checkbox')">
                                         <c:forEach var="vmmWhiteListData" varStatus="rowCounter"  items="${vmmWhiteList}">
-                                            <option>${vmmWhiteListData}</option>
+                                            <option data-i18n="select.${fn:toLowerCase(vmmWhiteListData)}">${vmmWhiteListData}</option>
                                         </c:forEach>
                                     </select>
                                 </div>

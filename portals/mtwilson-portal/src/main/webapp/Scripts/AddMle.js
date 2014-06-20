@@ -197,25 +197,28 @@ function addNewMleSuccess(response) {
 /*method for show dialog*/
 
 function showDialogManifestList() {
-	var str = "";
-	for ( var iteam in pcrHelp) {
-		str+='<div class="pcrDivHelp">'+pcrHelp[iteam]+'</div>';
-	}
-	fnOpenDialog(str,"Manifest List Help",780,430,false);
+//	var str = "";
+//	for ( var iteam in pcrHelp) {
+//		str+='<div class="pcrDivHelp">'+pcrHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="pcrDivHelp" data-i18n="[html]help.pcr_help"></div>';
+	fnOpenDialog(str,"manifest_list_help",780,430,false);
 }
 
 function showDialogUploadFile() {
-	var str = "";
-	for ( var iteam in uploadManifestFileHelp) {
-		str+='<div class="pcrDivHelp">'+uploadManifestFileHelp[iteam]+'</div>';
-	}
-	fnOpenDialog(str,"Upload File Help",380,230,false);
+//	var str = "";
+//	for ( var iteam in uploadManifestFileHelp) {
+//		str+='<div class="pcrDivHelp">'+uploadManifestFileHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="pcrDivHelp" data-i18n="[html]help.upload_manifest_file_help"></div>';
+	fnOpenDialog(str,"upload_file_help",380,230,false);
 }
 
 function showDialogManifestloadertool() {
-	var str = "";
-	for ( var iteam in Manifestloadertool) {
-		str+='<div class="pcrDivHelp">'+Manifestloadertool[iteam]+'</div>';
-	}
-	fnOpenDialog(str,"Manifest Loader Tool Help",580,330,false);
+//	var str = "";
+//	for ( var iteam in Manifestloadertool) {
+//		str+='<div class="pcrDivHelp">'+Manifestloadertool[iteam]+'</div>';
+//	}
+        var str = '<div class="pcrDivHelp" data-i18n="[html]help.manifest_loader_tool"></div>';
+	fnOpenDialog(str,"manifest_loader_tool_help",580,330,false);
 }

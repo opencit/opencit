@@ -52,7 +52,7 @@ function fuCreateEditMleTable(mleData) {
                             displayAttestationTypeValue = moduleAttestationDisplayString;
                         }
 		str+='<tr class="'+classValue+'">'+
-		'<td class="row1"><a href="javascript:;" onclick="fnEditMleInfo(this)"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteMleInfo(this)"> Delete </a></td>'+
+		'<td class="row1"><a href="javascript:;" onclick="fnEditMleInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteMleInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
 		'<td class="rowr3" style="word-wrap: break-word;max-width:170px;" name="mleName">'+mleData[items].mleName+'</td>'+
 		'<td class="row2" name="mleVersion">'+mleData[items].mleVersion+'</td>'+
 		'<td class="rowr3" name="attestation_Type">'+displayAttestationTypeValue+'</td>';
@@ -196,7 +196,7 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 
 function getModuleTypeMleList(dataToSend){
     var str = '<div id="mainContainerForWhiteList"></div>';
-    fnOpenDialog(str, "Manifest List", 950, 600,false);
+    fnOpenDialog(str, "manifest_list", 950, 600,false);
     
     $('#mainContainerForWhiteList').prepend(disabledDiv);
     sendJSONAjaxRequest(false, 'getData/getWhiteListForMle.html',dataToSend , getModuleTypeMleListSuccess, null);

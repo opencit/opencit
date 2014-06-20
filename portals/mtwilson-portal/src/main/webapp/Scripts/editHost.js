@@ -22,7 +22,7 @@ function populateEditHostDataIntoTable(hostDetails) {
                 var vCenterDetails = hostDetails[item].vCenterDetails;
                 if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
 		str+='<tr class="'+classValue+'">'+
-			'<td hostID="'+hostDetails[item].hostId+'" class="editRow0"><a href="javascript:;" onclick="fnEditHostInfo(this)"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteHostInfo(this)"> Delete </a></td>'+
+			'<td hostID="'+hostDetails[item].hostId+'" class="editRow0"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
 			'<td class="editRow1">'+hostDetails[item].hostName+'</td>'+
 			//'<td class="editRow2">'+hostDetails[item].hostIPAddress+'&nbsp;</td>'+
 			'<td class="editRow3">'+hostDetails[item].hostPort+'&nbsp;</td>'+
