@@ -10,30 +10,35 @@ import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OemData;
-import com.intel.mtwilson.wlm.helper.BaseBO;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  *
  * @author dsmagadx
  */
-public class OemBO extends BaseBO {
+public class OemBO {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OemBO.class);
     TblOemJpaController tblOemJpaController = null;
 
     public OemBO() {
-        tblOemJpaController = new TblOemJpaController(getEntityManagerFactory());
+        try {
+            tblOemJpaController = My.jpa().mwOem();
+        } catch (IOException ex) {
+            log.error("Error during persistence manager initialization", ex);
+            throw new ASException(ErrorCode.SYSTEM_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     /**
-     * 
-     * @return 
+     *
+     * @return
      */
     public List<OemData> getAllOem() {
         List<OemData> allOemData = new ArrayList<OemData>();
@@ -45,12 +50,10 @@ public class OemBO extends BaseBO {
                 allOemData.add(oemData);
             }
 
-        }catch(ASException ase){
+        } catch (ASException ase) {
             throw ase;
         } catch (Exception e) {
             log.error("Error during retrieval of OEM details.", e);
-//            throw new ASException(ErrorCode.SYSTEM_ERROR, "Error while fetching OEM data." + e.getMessage(), e);
-            // throw new ASException(e);
             throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, e.getClass().getSimpleName());
         }
 
@@ -59,111 +62,107 @@ public class OemBO extends BaseBO {
     }
 
     /**
-     * 
+     *
      * @param oemData
-     * @return 
+     * @return
      */
     public String updateOem(OemData oemData, String uuid) {
         TblOem tblOem;
         try {
             // Feature: 917 - Added support for UUID
-            if (uuid != null && !uuid.isEmpty())
+            if (uuid != null && !uuid.isEmpty()) {
                 tblOem = tblOemJpaController.findTblOemByUUID(uuid);
-            else
+            } else {
                 tblOem = tblOemJpaController.findTblOemByName(oemData.getName());
-            
-            if(tblOem == null)
-                throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST,  oemData.getName());
-            
+            }
+
+            if (tblOem == null) {
+                throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST, oemData.getName());
+            }
+
             tblOem.setDescription(oemData.getDescription());
-            
+
             tblOemJpaController.edit(tblOem);
-            
-        } catch(ASException ase){
+
+        } catch (ASException ase) {
             throw ase;
         } catch (Exception e) {
-//            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while updating OEM '%s'. %s", 
-//                    oemData.getName(), e.getMessage()), e);
             log.error("Error during OEM update.", e);
-            // throw new ASException(e);
             throw new ASException(ErrorCode.WS_OEM_UPDATE_ERROR, e.getClass().getSimpleName());
         }
         return "true";
     }
 
     /**
-     * 
+     *
      * @param oemData
-     * @return 
+     * @return
      */
     public String createOem(OemData oemData, String uuid) {
         try {
             TblOem tblOem = tblOemJpaController.findTblOemByName(oemData.getName());
-            
-            if(tblOem != null)
+
+            if (tblOem != null) {
                 throw new ASException(ErrorCode.WS_OEM_ALREADY_EXISTS, oemData.getName());
-            
+            }
+
             tblOem = new TblOem();
             tblOem.setName(oemData.getName());
             tblOem.setDescription(oemData.getDescription());
             // Feature: 917 - Added support for UUID
-            if (uuid != null && !uuid.isEmpty())
+            if (uuid != null && !uuid.isEmpty()) {
                 tblOem.setUuid_hex(uuid);
-            else
+            } else {
                 tblOem.setUuid_hex(new UUID().toString());
-            
+            }
+
             tblOemJpaController.create(tblOem);
-            
-        } catch(ASException ase){
+
+        } catch (ASException ase) {
             throw ase;
         } catch (Exception e) {
-//            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while creating OEM '%s'. %s ", 
-//                    oemData.getName(), e.getMessage()), e);
             log.error("Error during OEM creation.", e);
-            // throw new ASException(e);
             throw new ASException(ErrorCode.WS_OEM_CREATE_ERROR, e.getClass().getSimpleName());
         }
         return "true";
     }
 
     /**
-     * 
+     *
      * @param oemName
-     * @return 
+     * @return
      */
-    public String deleteOem(String oemName,  String uuid) {
+    public String deleteOem(String oemName, String uuid) {
         TblOem tblOem;
-        try{
+        try {
             // Feature: 917 - Added support for UUID
-            if (uuid != null && !uuid.isEmpty())
+            if (uuid != null && !uuid.isEmpty()) {
                 tblOem = tblOemJpaController.findTblOemByUUID(uuid);
-            else
+            } else {
                 tblOem = tblOemJpaController.findTblOemByName(oemName);
-            
-            if(tblOem == null){
+            }
+
+            if (tblOem == null) {
                 throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST, oemName);
             }
-            
+
             Collection<TblMle> tblMleCollection = tblOem.getTblMleCollection();
-            if( tblMleCollection != null ) {
+            if (tblMleCollection != null) {
                 log.debug("OEM is currently associated with # MLEs: " + tblMleCollection.size());
-            
-                if(!tblMleCollection.isEmpty()){
+
+                if (!tblMleCollection.isEmpty()) {
                     throw new ASException(ErrorCode.WS_OEM_ASSOCIATION_EXISTS, oemName, tblMleCollection.size());
                 }
             }
-            
+
             tblOemJpaController.destroy(tblOem.getId());
-            } catch(ASException ase){
-                throw ase;
-                 
-            } catch (Exception e) {
-//                 throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while deleting OEM '%s'. %s ", 
-//                         osName, e.getMessage()), e);
+        } catch (ASException ase) {
+            throw ase;
+
+        } catch (Exception e) {
             log.error("Error during OEM deletion.", e);
-            // throw new ASException(e);
             throw new ASException(ErrorCode.WS_OEM_DELETE_ERROR, e.getClass().getSimpleName());
-            }
+        }
         return "true";
     }
 }

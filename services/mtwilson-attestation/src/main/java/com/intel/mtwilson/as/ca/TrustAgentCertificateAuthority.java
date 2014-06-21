@@ -9,15 +9,12 @@ import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
-import com.intel.mtwilson.as.BaseBO;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.x500.DN;
-import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,10 +27,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Map;
 import org.apache.commons.configuration.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.x509.X509Util;
 import java.security.cert.CertificateException;
 /**
@@ -52,11 +46,11 @@ import java.security.cert.CertificateException;
  * 
  * @author jbuhacoff
  */
-public class TrustAgentCertificateAuthority extends BaseBO {
+public class TrustAgentCertificateAuthority {
     public static final String KEYSTORE_NAME = "Mt Wilson CA";
     public static final String KEYSTORE_PROVIDER = "JKS";
     
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustAgentCertificateAuthority.class);
     private Configuration config = ASConfig.getConfiguration();
     private MwKeystoreJpaController keystoreJpa;  //new MwKeystoreJpaController(getEntityManagerFactory());
     private MwKeystore mwKeystore = null;

@@ -109,5 +109,14 @@ public class UserTest {
         
         client.deleteUser(createUser.getId().toString());
     }
+    
+    @Test
+    public void testUserDeleteSearchCriteria() throws Exception {
+
+        UserFilterCriteria criteria = new UserFilterCriteria();
+        criteria.nameContains = "Developer";
+        client.deleteUser(criteria);
+        
+    }
      
 }

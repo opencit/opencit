@@ -14,8 +14,6 @@ import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,7 +23,6 @@ import org.slf4j.LoggerFactory;
 @Path("/oss")
 public class Oss extends AbstractJsonapiResource<Os, OsCollection, OsFilterCriteria, NoLinks<Os>, OsLocator>{
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
     private OsRepository repository;
     
     public Oss() {

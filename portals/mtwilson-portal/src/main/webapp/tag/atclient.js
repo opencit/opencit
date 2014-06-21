@@ -1477,6 +1477,7 @@ document.observe("dom:loaded", function() {
             }
         }
     }
+    i18nInit();
 });
 
 

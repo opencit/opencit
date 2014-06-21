@@ -15,8 +15,6 @@ import com.intel.mtwilson.tls.policy.model.HostTlsPolicyLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
     
 /**
@@ -25,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, HostTlsPolicyLocator> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTlsPolicyRepository.class);
     
     @Override
     @RequiresPermissions("host_tls_policies:search")    

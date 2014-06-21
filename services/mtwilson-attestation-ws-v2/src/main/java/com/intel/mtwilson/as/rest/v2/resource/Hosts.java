@@ -13,8 +13,6 @@ import com.intel.mtwilson.as.rest.v2.repository.HostRepository;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 @Path("/hosts")
 public class Hosts extends AbstractJsonapiResource<Host, HostCollection, HostFilterCriteria, NoLinks<Host>, HostLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
     private HostRepository repository;
     
     public Hosts() {

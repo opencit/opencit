@@ -12,11 +12,16 @@ function fnDeleteRegistrationDetailsSuccess(responseJSON) {
 		for ( var item in request) {
 			var classValue = null;
 			if(item % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
+                        var roles = "";
+                        for (var role in request[item].roles) {
+                            roles += '<span data-i18n="label.role_' + request[item].roles[role].toLowerCase() + '" data-status="' + request[item].roles[role] + '">' + request[item].roles[role] + '</span>, ';
+                        }
+                        roles = roles.replace(/,\s*$/, "");
 			str+='<tr class="'+classValue+'" fingerprint="'+request[item].fingerprint+'">'+
 					'<td class="deleteRequestRow1" name="name">'+request[item].name+'</td>'+
-					'<td class="deleteRequestRow2" name="requestedRoles">'+request[item].roles.toString()+'</td>'+
+					'<td class="deleteRequestRow2" name="requestedRoles">'+roles+'</td>'+
 					'<td class="deleteRequestRow3" name="expires">'+fnGetFormatedDate(request[item].expires)+'</td>'+
-					'<td class="deleteRequestRow4"><input type="button" value="Delete" onclick="fnDeleteSelectedRequest(this)"></td>'+
+					'<td class="deleteRequestRow4"><input type="button" value="Delete" onclick="fnDeleteSelectedRequest(this)" data-i18n="[value]button.delete"></td>'+
 				'</tr>';
 		}
 		$('#deleteRegisterHostTableContent').html(str);

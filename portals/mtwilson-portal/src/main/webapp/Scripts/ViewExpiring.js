@@ -9,7 +9,7 @@ function fnViewExpiringRequestSuccess(responseJSON) {
 		var request = responseJSON.expiringApiClients;
             
                 if (request.length == 0) {
-                    $('#successMessage').html('<span> No Api Client keys are expiring in the next ' + responseJSON.expirationMonths + ' month(s).</span>');
+                    $('#successMessage').html('<span data-i18n="label.expiring_api_time_start">No Api Client keys are expiring in the next </span>' + responseJSON.expirationMonths + '<span data-i18n="label.expiring_api_time_end"> month(s).</span>');
                     return;
                 } 
             

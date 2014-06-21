@@ -39,21 +39,22 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
             DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_FILE).getQuery();
-            if( criteria.id != null ) {
-    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_FILE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-            }
-            if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_FILE.NAME.equalIgnoreCase(criteria.nameEqualTo));
-            }
-            if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_FILE.NAME.lower().contains(criteria.nameContains.toLowerCase()));
-            }
-            if( criteria.contentTypeEqualTo != null && criteria.contentTypeEqualTo.length() > 0 ) {
-                sql.addConditions(MW_FILE.CONTENTTYPE.equalIgnoreCase(criteria.contentTypeEqualTo));
-            }
-            if( criteria.contentTypeContains != null && criteria.contentTypeContains.length() > 0 ) {
-                sql.addConditions(MW_FILE.CONTENTTYPE.lower().startsWith(criteria.contentTypeContains.toLowerCase()));
+            if (criteria.filter) {
+                if( criteria.id != null ) {
+                    sql.addConditions(MW_FILE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                }
+                if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_FILE.NAME.equalIgnoreCase(criteria.nameEqualTo));
+                }
+                if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
+                    sql.addConditions(MW_FILE.NAME.lower().contains(criteria.nameContains.toLowerCase()));
+                }
+                if( criteria.contentTypeEqualTo != null && criteria.contentTypeEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_FILE.CONTENTTYPE.equalIgnoreCase(criteria.contentTypeEqualTo));
+                }
+                if( criteria.contentTypeContains != null && criteria.contentTypeContains.length() > 0 ) {
+                    sql.addConditions(MW_FILE.CONTENTTYPE.lower().startsWith(criteria.contentTypeContains.toLowerCase()));
+                }
             }
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
@@ -168,7 +169,18 @@ public class FileRepository implements SimpleRepository<File, FileCollection, Fi
     @Override
     @RequiresPermissions("files:delete,search")     
     public void delete(FileFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("File:Delete - Got request to delete file by search criteria.");        
+        FileCollection objCollection = search(criteria);
+        try { 
+            for (File obj : objCollection.getFiles()) {
+                FileLocator locator = new FileLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during File deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }

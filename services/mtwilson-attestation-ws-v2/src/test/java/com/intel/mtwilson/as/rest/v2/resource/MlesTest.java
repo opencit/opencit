@@ -148,7 +148,7 @@ public class MlesTest {
     public void testDeleteMleModule() throws Exception {
         MleModuleRepository repo = new MleModuleRepository();
         MleModuleLocator locator = new MleModuleLocator();
-        locator.moduleUuid = UUID.valueOf("69f9303a-e7e1-4233-87af-2ed8e78bb7ff");
+        locator.id = UUID.valueOf("69f9303a-e7e1-4233-87af-2ed8e78bb7ff");
         repo.delete(locator);
         
     }

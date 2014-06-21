@@ -14,23 +14,19 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManagerFactory;
 import org.apache.commons.configuration.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Accepts one option: --all indicates that even admin and
@@ -40,9 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class EraseUserAccounts implements Command {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
-    private MSPersistenceManager pm;
-    private EntityManagerFactory em;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EraseUserAccounts.class);
+
     private Configuration options = null;
     private HashSet<String> keepUsers = new HashSet<>();
 
@@ -66,9 +61,6 @@ public class EraseUserAccounts implements Command {
      */
     @Override
     public void execute(String[] args) throws Exception {
-        //Configuration serviceConf = MSConfig.getConfiguration();
-        pm = new MSPersistenceManager();
-        em = pm.getEntityManagerFactory("MSDataPU");
         if (options.containsKey("user")) {
             String username = options.getString("user");
             System.out.println("deleting user " + username);
@@ -129,7 +121,7 @@ public class EraseUserAccounts implements Command {
 
     private void deletePortalUser(String username) {
         try {
-            MwPortalUserJpaController jpa = new MwPortalUserJpaController(em); //My.jpa().mwPortalUser();
+            MwPortalUserJpaController jpa = My.jpa().mwPortalUser();
             MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
             jpa.destroy(portalUser.getId());
 //             System.out.println("Deleted " + portalUser.getUsername());
@@ -182,7 +174,7 @@ public class EraseUserAccounts implements Command {
     private void deletePortalUsers() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException {
         try {
             boolean verbose = options.getBoolean("verbose", false);
-            MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
+            MwPortalUserJpaController jpa = My.jpa().mwPortalUser();
             List<MwPortalUser> list = jpa.findMwPortalUserEntities();
 
             int count = 0;
@@ -218,8 +210,8 @@ public class EraseUserAccounts implements Command {
     private void deleteApiClients() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
         try {
             boolean verbose = options.getBoolean("verbose", false);
-            ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
-            ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
+            ApiClientX509JpaController jpa = My.jpa().mwApiClientX509();
+            ApiRoleX509JpaController rolejpa = My.jpa().mwApiRoleX509();
             List<ApiClientX509> list = jpa.findApiClientX509Entities();
 
             int count = 0;
@@ -247,8 +239,8 @@ public class EraseUserAccounts implements Command {
         try {
             //boolean deleteAll = options.getBoolean("all", false);
             boolean verbose = options.getBoolean("verbose", false);
-            ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
-            ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
+            ApiClientX509JpaController jpa = My.jpa().mwApiClientX509();
+            ApiRoleX509JpaController rolejpa = My.jpa().mwApiRoleX509();
             List<ApiClientX509> list = jpa.findApiClientX509Entities();
 
             int count = 0;

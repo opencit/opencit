@@ -24,10 +24,15 @@ function fnRetriveHostSuccess(responseJSON) {
                         apiClientList[request[item].fingerprint] = request[item];
 			var classValue = null;
 			if(item % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
+                        var roles = "";
+                        for (var role in request[item].requestedRoles) {
+                            roles += '<span data-i18n="label.role_' + request[item].requestedRoles[role].toLowerCase() + '" data-status="' + request[item].requestedRoles[role] + '">' + request[item].requestedRoles[role] + '</span>, ';
+                        }
+                        roles = roles.replace(/,\s*$/, "");
 			str+='<tr class="'+classValue+'">'+
 					'<td class="viewRequestRow1" name="name" fingerprint="'+request[item].fingerprint+'">'+request[item].name+'</td>'+
-					'<td class="viewRequestRow2" name="requestedRoles">'+request[item].requestedRoles.toString()+'</td>'+
-					'<td class="viewRequestRow3"><input type="button" value="Details" onclick="fnGetRequestDetails(this)"></td>'+
+					'<td class="viewRequestRow2" name="requestedRoles">'+roles+'</td>'+
+					'<td class="viewRequestRow3"><input type="button" value="Details" onclick="fnGetRequestDetails(this)" data-i18n="[value]button.details"></td>'+
 				'</tr>';
 		}
 		$('#approveRegisterHostTableContent').html(str);
@@ -59,10 +64,12 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	var str="";
         for (var globalRole in roleList) {
             var index = findIndex(roleList[globalRole], apiRoles);
+            if (roleList[globalRole] == 'Administrator')
+                str+='<br>';
             if (index != -1) {
-                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';               
+                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'" data-i18n="label.role_' + roleList[globalRole].toLowerCase() + '">'+ roleList[globalRole] +'</span>';               
             } else {
-                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';
+                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly" id="mainApiClient_'+ roleList[globalRole] +'" data-i18n="label.role_' + roleList[globalRole].toLowerCase() + '">'+ roleList[globalRole] +'</span>';
             }
         }
 	/*for ( var items in apiRoles) {
@@ -71,6 +78,7 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	
 	$('#mainApiClient_Roles').html('<div>'+str+'</div>');
 	$('#mainApiClient_Expires').val(data.expires);
+        $('#mainApiClient_Comments').val(data.comments);
 }
 
 //Add by Soni on 4th oct for bug 462
@@ -129,6 +137,8 @@ function rejectSelectedRequestSuccess() {
 function findIndex(item, arr) {
     var index;
     var arrSize = arr.length;
+    if (arrSize == 0) 
+        return -1; // since there are no roles requested by the user
     for (var i = 0; i < arrSize; i++) {
         index = (item == arr[i]) ? i : -1;
         if (-1 != index) break;

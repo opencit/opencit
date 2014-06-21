@@ -12,8 +12,6 @@ import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -23,7 +21,6 @@ import org.slf4j.LoggerFactory;
 @Path("/hosts/{host_id}/tls-policy") // Should the user specified parameter here match the filterCriteria??
 public class HostTlsPolicyResource extends AbstractJsonapiResource<com.intel.mtwilson.tls.policy.model.HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, NoLinks<com.intel.mtwilson.tls.policy.model.HostTlsPolicy>, HostTlsPolicyLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
     private HostTlsPolicyRepository repository;
     
     public HostTlsPolicyResource() {

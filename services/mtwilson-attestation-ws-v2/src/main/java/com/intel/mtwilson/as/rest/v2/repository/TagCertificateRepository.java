@@ -20,8 +20,6 @@ import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,11 +27,12 @@ import org.slf4j.LoggerFactory;
  */
 public class TagCertificateRepository implements SimpleRepository<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, TagCertificateLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TagCertificateRepository.class);
         
     @Override
     @RequiresPermissions("tag_certificates:search")
     public TagCertificateCollection search(TagCertificateFilterCriteria criteria) {
+        log.debug("TagCertificate:Search - Got request to search for the TagCertificates.");        
         TagCertificateCollection objCollection = new TagCertificateCollection();
         try {
             MwAssetTagCertificateJpaController jpaController = My.jpa().mwAssetTagCertificate();
@@ -59,6 +58,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
             log.error("Error during retrieval of asset tag certificate.", ex);
             throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_RETRIEVE_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("TagCertificate:Search - Returning back {} of results.", objCollection.getTagCertificates().size());                
         return objCollection;
     }
 
@@ -66,6 +66,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     @RequiresPermissions("tag_certificates:retrieve")
     public TagCertificate retrieve(TagCertificateLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
+        log.debug("TagCertificate:Retrieve - Got request to retrieve TagCertificate with id {}.", locator.id);                
         String id = locator.id.toString();
         try {
             MwAssetTagCertificateJpaController jpaController = My.jpa().mwAssetTagCertificate();
@@ -91,10 +92,12 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     @Override
     @RequiresPermissions("tag_certificates:import")
     public void create(TagCertificate item) {
+        log.debug("TagCertificate:Create - Got request to import a new TagCertificate.");
         AssetTagCertCreateRequest obj = new AssetTagCertCreateRequest();
         try {
             obj.setCertificate(item.getCertificate());
             new AssetTagCertBO().importAssetTagCertificate(obj, item.getId().toString());
+            log.debug("TagCertificate:Create - Imported the TagCertificate successfully.");
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -107,10 +110,12 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
     @RequiresPermissions("tag_certificates:revoke")
     public void delete(TagCertificateLocator locator) {
         if (locator == null || locator.id == null) { return; }
+        log.debug("TagCertificate:Delete - Got request to revoke TagCertificate with id {}.", locator.id.toString());        
         AssetTagCertRevokeRequest obj = new AssetTagCertRevokeRequest();
         try {
             obj.setSha1OfAssetCert(null);
             new AssetTagCertBO().revokeAssetTagCertificate(obj, locator.id.toString());
+            log.debug("TagCertificate:Delete - Revoked the TagCertificate with id {} successfully.", locator.id.toString());        
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {

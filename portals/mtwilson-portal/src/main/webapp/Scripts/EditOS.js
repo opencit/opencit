@@ -23,7 +23,7 @@ function fuCreateEditOSTable(osData) {
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 		str+='<tr class="'+classValue+'">'+
-		'<td class="row1"><a href="javascript:;" onclick="fnEditOSInfo(this)"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteOSInfo(this)"> Delete </a></td>'+
+		'<td class="row1"><a href="javascript:;" onclick="fnEditOSInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteOSInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
 		'<td class="row1" name="'+osData[items].osName+'" value="'+osData[items].osName+'" id="osName">'+osData[items].osName+'</td>'+
 		'<td class="row1" name="'+osData[items].osVersion+'" value="'+osData[items].osVersion+'" id="osVer">'+osData[items].osVersion+'</td>';
 		var val1 = osData[items].osDescription == undefined ? '' : osData[items].osDescription;

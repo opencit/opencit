@@ -13,8 +13,6 @@ import com.intel.mtwilson.as.rest.v2.repository.TagCertificateRepository;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractCertificateJsonapiResource;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 @Path("/host-tag-certificates")
 public class TagCertificates extends AbstractCertificateJsonapiResource<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, NoLinks<TagCertificate>, TagCertificateLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
     private TagCertificateRepository repository;
     
     public TagCertificates() {

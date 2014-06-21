@@ -4,18 +4,15 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
-import com.intel.mtwilson.as.BaseBO;
 
-import java.util.List;
-import javax.persistence.Persistence;
 import com.intel.mtwilson.as.data.TblMle;
-import javax.persistence.EntityManager;
+import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -28,9 +25,8 @@ public class TblMleJpaControllerTest {
     }
 
     @BeforeClass
-    public static void setUpClass() throws ASDataException {
-        BaseBO config = new BaseBO();
-        db = new TblMleJpaController(config.getEntityManagerFactory());
+    public static void setUpClass() throws ASDataException, IOException {
+        db = My.jpa().mwMle();
     }
 
     @AfterClass

@@ -4,28 +4,21 @@
  */
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.as.controller.MwCertificateX509JpaController;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.MwCertificateX509;
-import com.intel.dcsg.cpg.crypto.PasswordHash;
-import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.ms.controller.MwConfigurationJpaController;
-import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
-import com.intel.mtwilson.ms.BaseBO;
+import java.io.IOException;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dsmagadx
  */
-public class CertificateAuthorityBO extends BaseBO {
+public class CertificateAuthorityBO {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
-    private MwConfigurationJpaController mwConfigurationJPA = new MwConfigurationJpaController(getMSEntityManagerFactory());
-    private MwCertificateX509JpaController mwX509CertificateJPA = new MwCertificateX509JpaController(getMSEntityManagerFactory());
-    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateAuthorityBO.class);
+        
     public static final String CA_PASSWORD_CONF_KEY = "mtwilson.ca.password";
     public static final String CA_ENABLED_CONF_KEY = "mtwilson.ca.enabled";
     public static final String MTWILSON_ROOT_CA_PURPOSE = "MTWILSON_ROOT_CA";
@@ -62,9 +55,14 @@ public class CertificateAuthorityBO extends BaseBO {
 //    }
     
     public MwCertificateX509 getCaCertificate() {
-        List<MwCertificateX509> list = mwX509CertificateJPA.findCertificateByCommentLike(MTWILSON_ROOT_CA_PURPOSE);
-        if( list.isEmpty() ) { return null; }
-        MwCertificateX509 first = list.get(0);
-        return first;
+        try {
+            List<MwCertificateX509> list = My.jpa().mwCertificateX509().findCertificateByCommentLike(MTWILSON_ROOT_CA_PURPOSE);
+            if( list.isEmpty() ) { return null; }
+            MwCertificateX509 first = list.get(0);
+            return first;
+        } catch (IOException ex) {
+            log.error("Error during retrieval of CA root certificate.", ex);
+            throw new MSException(ErrorCode.MS_ROOT_CA_CERT_ERROR, ex.getClass().getSimpleName());
+        }
     }
 }

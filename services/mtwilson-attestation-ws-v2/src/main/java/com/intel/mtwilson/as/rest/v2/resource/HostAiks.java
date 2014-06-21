@@ -13,8 +13,6 @@ import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 @Path("/hosts/{host_id}/aiks")
 public class HostAiks extends AbstractJsonapiResource<HostAik, HostAikCollection, HostAikFilterCriteria, NoLinks<HostAik>, HostAikLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
     private HostAikRepository repository;
 
     public HostAiks(HostAikRepository repository) {

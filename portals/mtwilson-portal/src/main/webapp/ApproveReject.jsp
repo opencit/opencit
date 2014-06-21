@@ -28,13 +28,15 @@
 		</div>
                 <div class="singleDiv">
 			<div class="labelDiv" data-i18n="input.requested_roles">Requested Roles:</div>
-			<div class="valueDiv" id="mainApiClient_Roles">
+			<div class="valueDiv" id="mainApiClient_Roles" style="overflow-y:hidden;scroll">
 				
 			</div>
+                        
             <div class="valueHintDiv">
-            <span style="color: #555555; font-size: 0.9em">Roles requested by the user are highlighted.</span>
+            <span style="color: #555555; font-size: 0.9em" data-i18n="label.requested_roles_hint">Roles requested by the user are highlighted.</span>
             </div>
 		</div>
+            <br><br>
 		<div class="singleDiv">
 			<div class="labelDiv" data-i18n="input.expires">Expires:</div>
 			<div class="valueDiv">
