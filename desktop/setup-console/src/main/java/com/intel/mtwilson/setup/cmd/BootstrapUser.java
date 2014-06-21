@@ -6,28 +6,21 @@ package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.setup.helper.SCPersistenceManager;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
-import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import java.io.BufferedReader;
 import java.io.Console;
@@ -50,7 +43,6 @@ public class BootstrapUser implements Command {
 //    private MwPortalUserJpaController keystoreJpa ;// new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
     private static final Logger log = LoggerFactory.getLogger(BootstrapUser.class.getName());
     public static final Console console = System.console();
-    MSPersistenceManager persistenceManager = new MSPersistenceManager();
     MwPortalUserJpaController portalUserJpa; // new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
     
     

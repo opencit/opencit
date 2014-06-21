@@ -64,6 +64,8 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	var str="";
         for (var globalRole in roleList) {
             var index = findIndex(roleList[globalRole], apiRoles);
+            if (roleList[globalRole] == 'Administrator')
+                str+='<br>';
             if (index != -1) {
                 str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'" data-i18n="label.role_' + roleList[globalRole].toLowerCase() + '">'+ roleList[globalRole] +'</span>';               
             } else {
@@ -76,6 +78,7 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	
 	$('#mainApiClient_Roles').html('<div>'+str+'</div>');
 	$('#mainApiClient_Expires').val(data.expires);
+        $('#mainApiClient_Comments').val(data.comments);
 }
 
 //Add by Soni on 4th oct for bug 462
@@ -134,6 +137,8 @@ function rejectSelectedRequestSuccess() {
 function findIndex(item, arr) {
     var index;
     var arrSize = arr.length;
+    if (arrSize == 0) 
+        return -1; // since there are no roles requested by the user
     for (var i = 0; i < arrSize; i++) {
         index = (item == arr[i]) ? i : -1;
         if (-1 != index) break;

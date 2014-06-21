@@ -671,7 +671,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
 
             responseView.addObject("expiringApiClients", services.getApiClients(apiObj, ApiClientListType.EXPIRING));
-            responseView.addObject("expirationMonths", MCPConfig.getConfiguration().getString("mtwilson.mc.apiKeyExpirationNoticeInMonths"));
+            responseView.addObject("expirationMonths", MCPConfig.getConfiguration().getInt("mtwilson.mc.apiKeyExpirationNoticeInMonths", 3));
 
         } catch (Exception e) {
 

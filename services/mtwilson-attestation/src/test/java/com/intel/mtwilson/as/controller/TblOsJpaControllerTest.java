@@ -5,10 +5,11 @@
 package com.intel.mtwilson.as.controller;
 
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblOs;
-import com.intel.mtwilson.as.BaseBO;
+import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.BeforeClass;
@@ -35,14 +36,14 @@ public class TblOsJpaControllerTest {
      * Test of create method, of class TblOsJpaController.
      */
     @Test
-    public void testCreate() throws NonexistentEntityException, ASDataException {
+    public void testCreate() throws NonexistentEntityException, ASDataException, IOException {
         System.out.println("create");
         TblOs tblOs = new TblOs();
         //tblOs.setId(19);
         tblOs.setName("Hell");
         tblOs.setVersion("2.21");
         
-        TblOsJpaController instance = new TblOsJpaController(new BaseBO().getEntityManagerFactory());
+        TblOsJpaController instance = My.jpa().mwOs();
         instance.create(tblOs);
         
         tblOs.setVersion("2.22");
