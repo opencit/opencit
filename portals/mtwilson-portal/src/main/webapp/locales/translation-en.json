@@ -104,7 +104,9 @@
         "view_oem": "View OEM",
         "view_os": "View OS/Hypervisor Combination",
         "view_request": "View Registered API Clients",
-        "whitelist_config": "Import Whitelist from Trusted Host"
+        "whitelist_config": "Import Whitelist from Trusted Host",
+        "tag_creation":"Create New Tag",
+        "tag_browse":"Browse Tags"
     },
     "link": {
         "import": "Import...",

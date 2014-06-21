@@ -6,7 +6,7 @@
 
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=9" />
-        <title data-i18n="title.asset_tag">Asset Tag Reference Implementation </title>
+        <title data-i18n="title.asset_tag">Asset Tag Reference Implementation</title>
         <meta name="application-name" content="Mt Wilson Asset Tag Reference Implementation"/>
         <meta name="description" content="A web-based tool for defining tags and provisioning asset certificates" />
         <meta name="keywords" content="Mt Wilson, attestation, asset, inventory, management, security, cloud, data center" />
@@ -83,8 +83,8 @@
         <script type="text/javascript" src="Scripts/commonUtils.js"></script>
         <script type="text/javascript" src="Scripts/CommonMessage.js"></script>
         <script type="text/javascript" src="Scripts/home.js"></script>
-
-
+        <script type="text/javascript" src="../Scripts/i18next-1.7.1.min.js"></script>
+        <script type="text/javascript" src="../Scripts/i18n_util_tag.js"></script>
 
         <script type="text/javascript">
             var ws = mtwilson.atag; // local name for the asset tag web service
@@ -262,7 +262,7 @@ function isNumber(n) {
                             </script>
                             
                             <div class="nagPanel">Asset Tag Management &gt;</div>
-                            <div id="nameOfPage" class="NameHeader">Create New Tag</div> 
+                            <div id="nameOfPage" class="NameHeader" data-i18n="header.tag_creation">Create New Tag</div> 
                             
                             <form id="tag-create-form">
 
@@ -305,8 +305,9 @@ function isNumber(n) {
 
                             <!--div id="nameOfPage" class="NameHeader">Search Tags</div> 
                             <div class="singleDiv" style="height: 45px;"></div-->
-                            <div id="nameOfPage" class="NameHeader">Browse Tags&nbsp;&nbsp; 
-				<a href="javascript:toggleElementVisibility('tag-search-form')" style='font-size: 0.8em'>(Search)</a></div>
+                            <div id="nameOfPage" class="NameHeader" data-i18n="header.tag_browse">Browse Tags&nbsp;&nbsp; 
+				<a href="javascript:toggleElementVisibility('tag-search-form')" style='font-size: 0.8em'>(Search)</a>
+                            </div>
 
                             <form id="tag-search-form" action="#" onsubmit="return false;" style="display: none">
                                     <div class="singleDiv">
@@ -1338,7 +1339,7 @@ function isNumber(n) {
                 ws.loadCaCerts();
 		ws.loadHostsForProvisioning();
 //                ws.retrieveMainConfiguration();
-            
+                i18nInit();
             });
 
             
