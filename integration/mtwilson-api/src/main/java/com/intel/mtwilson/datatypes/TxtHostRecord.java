@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.Regex;
 import com.intel.dcsg.cpg.validation.Validator;
@@ -12,6 +13,7 @@ import java.net.MalformedURLException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 //import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 //import org.codehaus.jackson.annotate.JsonProperty;
 //import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -69,6 +71,8 @@ public class TxtHostRecord {
     @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
     public String Hardware_Uuid;
     
+    private TlsPolicyChoice tlsPolicyChoice;
+    
     public TxtHostRecord() {
         
     }
@@ -96,4 +100,21 @@ public class TxtHostRecord {
         AIK_SHA1 = input.getAikSha1();
         Hardware_Uuid = null;
     }
+
+    @JsonProperty
+    public void setTlsPolicyChoice(TlsPolicyChoice tlsPolicyChoice) {
+        this.tlsPolicyChoice = tlsPolicyChoice;
+    }
+
+    /**
+     * This field is ignored during serialization to maintain compatibility
+     * with Mt Wilson 1.2 Java clients which fail when unknown fields are
+     * included in the response.
+     * @return 
+     */
+    @JsonIgnore
+    public TlsPolicyChoice getTlsPolicyChoice() {
+        return tlsPolicyChoice;
+    }
+
 }

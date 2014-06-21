@@ -5,8 +5,8 @@
 package com.intel.mtwilson.attestation.client.jaxrs;
 
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyCollection;
-import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyFilterCriteria;
+import com.intel.mtwilson.tls.policy.model.HostTlsPolicyCollection;
+import com.intel.mtwilson.tls.policy.model.HostTlsPolicyFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
@@ -54,14 +54,14 @@ public class HostTlsPolicy extends MtWilsonClient {
      * com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy editHostTlsPolicy = client.editHostTlsPolicy(obj);
      * </pre>     
      */
-    public com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy editHostTlsPolicy(com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj) {
+    public com.intel.mtwilson.tls.policy.model.HostTlsPolicy editHostTlsPolicy(com.intel.mtwilson.tls.policy.model.HostTlsPolicy obj) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", obj.getHostUuid());
         map.put("id", obj.getHostUuid()); // See above as to why we are using the value of hostuuid again.
-        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy newObj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
+        com.intel.mtwilson.tls.policy.model.HostTlsPolicy newObj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
                 .resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON)
-                .put(Entity.json(obj), com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy.class);
+                .put(Entity.json(obj), com.intel.mtwilson.tls.policy.model.HostTlsPolicy.class);
         return newObj;
     }
         
@@ -84,7 +84,7 @@ public class HostTlsPolicy extends MtWilsonClient {
      *   com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy retrieveHostTlsPolicy = client.retrieveHostTlsPolicy("de07c08a-7fc6-4c07-be08-0ecb2f803681");
      * </pre>
      */
-    public com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy retrieveHostTlsPolicy(String hostUuid) {
+    public com.intel.mtwilson.tls.policy.model.HostTlsPolicy retrieveHostTlsPolicy(String hostUuid) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", hostUuid);
@@ -92,8 +92,8 @@ public class HostTlsPolicy extends MtWilsonClient {
         // search call instead of a retrieve call. Since there will be only one tlspolicy for a host, we can retrieve
         // the tlspolicy for the host uniquely with the host uuid itself.
         map.put("id", hostUuid);
-        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
-                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy.class);
+        com.intel.mtwilson.tls.policy.model.HostTlsPolicy obj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
+                .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(com.intel.mtwilson.tls.policy.model.HostTlsPolicy.class);
         return obj;
     }
     

@@ -71,7 +71,9 @@
     <module>mtwilson-rpc-jdbi</module>
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
-    <module>mtwilson-tls-policy</module>
+    <module>mtwilson-tls-policy-model</module>
+    <module>mtwilson-tls-policy-factory</module>
+	<module>mtwilson-tls-policy-jdbi</module>
     <module>mtwilson-util</module>
     <module>mtwilson-webservice-util</module>
     <module>mtwilson-whitelist-ws-v1</module>

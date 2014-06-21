@@ -210,12 +210,21 @@
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-module</artifactId>
             <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy</artifactId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-factory</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>

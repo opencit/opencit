@@ -84,8 +84,8 @@ public class RpcUtil {
     
     
     public static RpcAdapter findRpcForName(String name) {
-        ArrayList<Object> found = new ArrayList<Object>();
-        List<Object> rpcs = Extensions.findAll(RPC.class.getName());
+        ArrayList<Object> found = new ArrayList<>();
+        List<Object> rpcs = Extensions.findAllAnnotated(RPC.class);
         for(Object rpc : rpcs) {
             if( rpc.getClass().isAnnotationPresent(RPC.class) ) {
                 RPC rpcAnnotation = rpc.getClass().getAnnotation(RPC.class);

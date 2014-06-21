@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.jaxrs2.provider;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 //import org.codehaus.jackson.map.ObjectMapper;
@@ -59,7 +61,10 @@ public class JacksonXmlMapperProvider implements ContextResolver<XmlMapper> {
 //        JsonFactory jsonFactory = new JsonFactory();
 //        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
         XmlMapper mapper = new XmlMapper(/*jsonFactory*/);
-        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+//        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
  

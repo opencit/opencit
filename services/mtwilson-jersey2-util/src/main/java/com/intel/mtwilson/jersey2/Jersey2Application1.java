@@ -51,7 +51,7 @@ register(com.intel.mtwilson.jaxrs2.provider.V1JacksonObjectMapperProvider.class)
 register(com.intel.mtwilson.util.ASLocalizationFilter.class);
         
         // now get the list of classes that implement @V1 and @Path
-        List<Object> resources = Extensions.findAll(V1.class.getName()); // we could search for @Path but then we'd find v1 and v2 classes as well as utility classes for both such as the application.wadl generator ; we use .class.getName() and not just .class because we want the object instances, not the annotation itself as <T>
+        List<Object> resources = Extensions.findAllAnnotated(V1.class); // we could search for @Path but then we'd find v1 and v2 classes as well as utility classes for both such as the application.wadl generator
         for(Object resource : resources) {
             if( resource.getClass().isAnnotationPresent(Path.class) ) {
                 String resourcePath = resource.getClass().getAnnotation(Path.class).value();

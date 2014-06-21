@@ -110,6 +110,9 @@ public class TblHosts implements Serializable {
     @Column(name = "aik_publickey_sha1")
     private String aikPublicKeySha1;
     
+    @Column(name = "tls_policy_id")
+    private String tlsPolicyId;
+    
     @Column(name = "TlsPolicy")
     private String tlsPolicyName;
     
@@ -289,6 +292,25 @@ public class TblHosts implements Serializable {
     public void setAikPublicKeySha1(String aikPublicKeySha1) {
         this.aikPublicKeySha1 = aikPublicKeySha1;
     }
+
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
+    }
+
+    /**
+     * Setting the tls policy id to a non-null value 
+     * will automatically clear the tls policy name
+     * and the tls keystore
+     * @param tlsPolicyId 
+     */
+    public void setTlsPolicyId(String tlsPolicyId) {
+        this.tlsPolicyId = tlsPolicyId;
+        if( tlsPolicyId != null ) {
+            this.tlsPolicyName = null; 
+            this.tlsKeystore = null;
+        }
+    }
+    
     
     public String getTlsPolicyName() { return tlsPolicyName; }
     public void setTlsPolicyName(String sslPolicy) { 

@@ -611,6 +611,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
         <artifactId>commons-pool</artifactId>
         <version>1.6</version>
     </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.49</version>
+        </dependency>        
 
         		
     <dependency>
@@ -912,6 +917,11 @@ reference : https://java.net/jira/browse/JERSEY-2325
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-xml-provider</artifactId>
                 <version>2.3.2</version>
+            </dependency>
+            <dependency>
+              <groupId>com.fasterxml.jackson.dataformat</groupId>
+              <artifactId>jackson-dataformat-csv</artifactId>
+              <version>2.3.2</version>
             </dependency>
     
             <!-- other -->

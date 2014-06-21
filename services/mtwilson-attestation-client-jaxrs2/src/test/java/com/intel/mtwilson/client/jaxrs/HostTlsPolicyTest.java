@@ -7,8 +7,8 @@ package com.intel.mtwilson.client.jaxrs;
 import com.intel.mtwilson.attestation.client.jaxrs.HostTlsPolicy;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyCollection;
-import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyFilterCriteria;
+import com.intel.mtwilson.tls.policy.model.HostTlsPolicyCollection;
+import com.intel.mtwilson.tls.policy.model.HostTlsPolicyFilterCriteria;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class HostTlsPolicyTest {
        
     @Test
     public void testRetrieve() {
-        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy retrieveHostTlsPolicy = client.retrieveHostTlsPolicy("de07c08a-7fc6-4c07-be08-0ecb2f803681");
+        com.intel.mtwilson.tls.policy.model.HostTlsPolicy retrieveHostTlsPolicy = client.retrieveHostTlsPolicy("de07c08a-7fc6-4c07-be08-0ecb2f803681");
         log.debug("Tls policy for host with uuid {} is {}.", retrieveHostTlsPolicy.getHostUuid(),retrieveHostTlsPolicy.getName());
         
         HostTlsPolicyFilterCriteria criteria = new HostTlsPolicyFilterCriteria();
@@ -40,10 +40,10 @@ public class HostTlsPolicyTest {
 
     @Test
     public void testEdit() {
-        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy obj = new com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy();
+        com.intel.mtwilson.tls.policy.model.HostTlsPolicy obj = new com.intel.mtwilson.tls.policy.model.HostTlsPolicy();
         obj.setHostUuid("de07c08a-7fc6-4c07-be08-0ecb2f803681");
         obj.setName("TRUST_FIRST_CERTIFICATE");
-        com.intel.mtwilson.as.rest.v2.model.HostTlsPolicy editHostTlsPolicy = client.editHostTlsPolicy(obj);
+        com.intel.mtwilson.tls.policy.model.HostTlsPolicy editHostTlsPolicy = client.editHostTlsPolicy(obj);
         log.debug("Tls policy for host with uuid {} is {}.", editHostTlsPolicy.getHostUuid(),editHostTlsPolicy.getName());        
     }
 

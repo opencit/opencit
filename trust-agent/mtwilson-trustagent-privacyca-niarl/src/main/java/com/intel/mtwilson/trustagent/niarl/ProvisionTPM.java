@@ -8,8 +8,7 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
-import com.intel.mtwilson.My;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
 import com.intel.mtwilson.configuration.Configurable;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -89,7 +88,7 @@ public class ProvisionTPM implements Configurable, Runnable {
             log.debug("Requesting TPM endorsement from Privacy CA");
             // send the public endorsement key modulus to the privacy ca and receive the endorsement certificate
             
-            TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+            TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(config.getTrustagentKeystoreFile(), config.getTrustagentKeystorePassword()).build();
             TlsConnection tlsConnection = new TlsConnection(new URL(config.getMtWilsonApiUrl()), tlsPolicy);
 
             Properties clientConfiguration = new Properties();

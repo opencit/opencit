@@ -80,11 +80,16 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
         </dependency>
-      
-
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
+      
+
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>
         </dependency>
       
         <!--<version>1.9.13</version> in 1.0-RC2 we used 1.5.5 -->

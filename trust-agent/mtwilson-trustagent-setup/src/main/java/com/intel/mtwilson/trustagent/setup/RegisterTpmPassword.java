@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.io.PropertiesUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
 import com.intel.mtwilson.attestation.client.jaxrs.HostTpmPassword;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.tag.model.TpmPassword;
@@ -95,7 +95,7 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
         */
         log.debug("RegisterTpmPassword.validate creating strict TLS Policy using keystore");
-        TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+        TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(config.getTrustagentKeystoreFile(), config.getTrustagentKeystorePassword()).build();
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
         Properties clientConfiguration = new Properties();
@@ -138,7 +138,7 @@ public class RegisterTpmPassword extends AbstractSetupTask {
         
         // TODO: duplicate code here= (log.debug("Cf and download privacy ca certs
         log.debug("RegisterTpmPassword.execute creating strict TLS policy using keystore");
-        TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
+        TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(config.getTrustagentKeystoreFile(), config.getTrustagentKeystorePassword()).build();
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
         Properties clientConfiguration = new Properties();

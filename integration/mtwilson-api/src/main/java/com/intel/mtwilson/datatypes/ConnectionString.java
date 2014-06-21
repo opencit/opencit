@@ -176,7 +176,6 @@ public class ConnectionString {
      */
     public ConnectionString(String connectionString) throws MalformedURLException {
         this();
-        try {
             vendor = vendorFromURL(connectionString);
             // Let us first check if the connection string has the prefix of the vendor or not.
             if( vendor == null ) {
@@ -213,11 +212,6 @@ public class ConnectionString {
                 default:
                     throw new UnsupportedOperationException("Vendor not supported yet: "+vendor.toString());
             }
-        } catch (MalformedURLException ex) {
-            log.error(ex.toString());
-            ex.printStackTrace(System.err);
-            throw ex;
-        }
     }
 
     /**
@@ -887,17 +881,17 @@ public class ConnectionString {
         if( connectionString == null || connectionString.isEmpty() ) {
             if( host.HostName != null && !host.HostName.isEmpty() && host.Port != null ) {
                 connectionString = String.format("intel:https://%s:%d", host.HostName, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
+                log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() && host.Port != null ) {
                 connectionString = String.format("intel:https://%s:%d", host.IPAddress, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+                log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() ) {
                 connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility;  TODO: in future major version of Mt Wilson change default to 1443
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+                log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }
             throw new IllegalArgumentException("Host does not have a connection string or hostname set");

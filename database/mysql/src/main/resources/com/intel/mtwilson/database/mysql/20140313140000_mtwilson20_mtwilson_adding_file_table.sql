@@ -2,7 +2,7 @@
 
 -- This script creates the file table
 
-CREATE  TABLE `mw_as`.`mw_file` (
+CREATE  TABLE `mw_file` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NULL ,
   `contentType` VARCHAR(255) NULL ,
