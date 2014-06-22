@@ -5,14 +5,14 @@
 package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.mtwilson.jaxrs2.client.ReflectionUtil;
-import com.intel.mtwilson.attestation.client.jaxrs.Files;
+import com.intel.mtwilson.v2.file.client.jaxrs.Files;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
+import com.intel.mtwilson.v2.file.model.File;
+import com.intel.mtwilson.v2.file.model.FileCollection;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
+import com.intel.mtwilson.v2.file.model.FileFilterCriteria;
 import java.util.Map;
 
 /**

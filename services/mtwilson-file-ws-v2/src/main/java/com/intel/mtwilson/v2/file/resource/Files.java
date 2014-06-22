@@ -2,14 +2,10 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.rest.v2.resource;
+package com.intel.mtwilson.v2.file.resource;
 
-import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
+import com.intel.mtwilson.v2.file.model.*;
 import com.intel.mtwilson.jaxrs2.NoLinks;
-import com.intel.mtwilson.as.rest.v2.model.FileLocator;
-import com.intel.mtwilson.as.rest.v2.repository.FileRepository;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.BeanParam;

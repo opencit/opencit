@@ -2,17 +2,17 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.attestation.client.jaxrs;
+package com.intel.mtwilson.v2.file.client.jaxrs;
 
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
+import com.intel.mtwilson.v2.file.model.File;
+import com.intel.mtwilson.v2.file.model.FileCollection;
 import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.client.WebTarget;
-import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
+import com.intel.mtwilson.v2.file.model.FileFilterCriteria;
 import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import javax.ws.rs.core.Response;

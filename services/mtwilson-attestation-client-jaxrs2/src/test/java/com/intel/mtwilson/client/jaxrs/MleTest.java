@@ -39,7 +39,7 @@ import org.junit.Test;
  */
 public class MleTest {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleTest.class);
     private static Mles client = null;
     private static Oems oemClient = null;
     private static Oss osClient = null;

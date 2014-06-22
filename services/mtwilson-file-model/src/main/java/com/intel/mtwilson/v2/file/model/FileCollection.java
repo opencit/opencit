@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.rest.v2.model;
+package com.intel.mtwilson.v2.file.model;
 
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
 import com.fasterxml.jackson.annotation.JsonInclude;

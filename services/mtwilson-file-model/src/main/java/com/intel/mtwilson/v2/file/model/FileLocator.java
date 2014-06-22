@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.rest.v2.model;
+package com.intel.mtwilson.v2.file.model;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.Locator;

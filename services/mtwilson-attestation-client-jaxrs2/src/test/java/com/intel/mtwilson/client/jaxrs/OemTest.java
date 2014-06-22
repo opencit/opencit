@@ -19,7 +19,7 @@ import org.junit.Test;
  */
 public class OemTest {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OemTest.class);
 
     private static Oems client = null;
     

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * BOOKMARK TODO: move to tls policy ws and client project
  * <code>HostTlsPolicy</code> is the class that allows searching, accessing and updating TLS Policies of hosts
  * @author ssbangal 
  */
@@ -32,6 +33,7 @@ public class HostTlsPolicy extends MtWilsonClient {
     }
     
      /**
+      * BOOKMARK TODO: UPDATE DOCUMENTATION
      * Updates the host's TLS policy for the specified host in the system. 
      * @param HostTlsPolicy that needs to be updated.
      * @return Updated HostTlsPolicy object.
@@ -57,9 +59,8 @@ public class HostTlsPolicy extends MtWilsonClient {
     public com.intel.mtwilson.tls.policy.model.HostTlsPolicy editHostTlsPolicy(com.intel.mtwilson.tls.policy.model.HostTlsPolicy obj) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
-        map.put("host_id", obj.getHostUuid());
-        map.put("id", obj.getHostUuid()); // See above as to why we are using the value of hostuuid again.
-        com.intel.mtwilson.tls.policy.model.HostTlsPolicy newObj = getTarget().path("hosts/{host_id}/tls-policy/{id}")
+        map.put("id", obj.getId().toString()); // See above as to why we are using the value of hostuuid again.
+        com.intel.mtwilson.tls.policy.model.HostTlsPolicy newObj = getTarget().path("tls-policies/{id}")
                 .resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON)
                 .put(Entity.json(obj), com.intel.mtwilson.tls.policy.model.HostTlsPolicy.class);
         return newObj;
@@ -121,7 +122,7 @@ public class HostTlsPolicy extends MtWilsonClient {
     public HostTlsPolicyCollection searchHostTlsPolicy(HostTlsPolicyFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
         HashMap<String,Object> map = new HashMap<>();
-        map.put("host_id", criteria.hostUuid);
+        map.put("host_id", criteria.hostId);
         HostTlsPolicyCollection objCollection = getTargetPathWithQueryParams("hosts/{host_id}/tls-policy", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostTlsPolicyCollection.class);
         return objCollection;
