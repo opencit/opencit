@@ -333,8 +333,6 @@ public class HostBOTest {
         TxtHost hostObj = new TxtHost(hostInfo);
         
         TblHosts tblHosts = new TblHosts();
-        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-        tblHosts.setTlsKeystore(null);
         tblHosts.setName(hostName);
         tblHosts.setAddOnConnectionInfo(connString);
         tblHosts.setIPAddress(hostName);

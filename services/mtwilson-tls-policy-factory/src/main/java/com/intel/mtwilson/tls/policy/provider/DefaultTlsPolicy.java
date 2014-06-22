@@ -29,7 +29,7 @@ public class DefaultTlsPolicy implements TlsPolicyProvider {
         if( defaultTlsPolicyId.equals("INSECURE") || defaultTlsPolicyId.equals("TRUST_FIRST_CERTIFICATE") ) {
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
             tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
-            tlsPolicyChoice.getTlsPolicyDescriptor().setName(defaultTlsPolicyId);
+            tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType(defaultTlsPolicyId);
             return tlsPolicyChoice;
         }
         if( UUID.isValid(defaultTlsPolicyId)) {

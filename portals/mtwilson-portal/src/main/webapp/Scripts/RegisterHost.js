@@ -403,3 +403,20 @@ function fnSelectAllCheckBox(status) {
         $(this).find(':checkbox').attr('checked', status);
     });
 }
+
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div_vmware").hide();
+       	$("#tls_policy_input_div_flatfile").hide();
+       } else {
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_vmware"), choicesArray);
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_flatfile"), choicesArray);
+       	$("#tls_policy_input_div_vmware").show();
+       	$("#tls_policy_input_div_flatfile").show();
+	}
+    });
+});

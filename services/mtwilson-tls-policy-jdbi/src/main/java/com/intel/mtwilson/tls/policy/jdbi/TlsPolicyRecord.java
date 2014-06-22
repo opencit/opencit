@@ -7,10 +7,10 @@ package com.intel.mtwilson.tls.policy.jdbi;
 import com.intel.dcsg.cpg.io.UUID;
 
 /**
- *
+ * Represents a single row in the mw_tls_policy table.
  * @author jbuhacoff
  */
-public class TlsPolicyRecord /*extends Document*/ {
+public class TlsPolicyRecord {
    private UUID id;
    private String name;
    private boolean privateScope;

@@ -169,8 +169,7 @@ public class HostTrustBO {
             if (hostObj.Port != null) { hostObjToRegister.Port = hostObj.Port; }
             
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            tblHosts.setTlsKeystore(null);
+            // BOOKMARK JONATHAN TLS POLICY
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setIPAddress(hostObj.HostName);
@@ -1818,8 +1817,7 @@ public class HostTrustBO {
             TblMleJpaController mleJpa = My.jpa().mwMle();
             
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            tblHosts.setTlsKeystore(null);
+            // BOOKMARK JONATHAN TLS POLICY
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setIPAddress(hostObj.HostName);

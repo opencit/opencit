@@ -6,7 +6,6 @@ CREATE TABLE mw_tls_policy (
   id char(36) NOT NULL,
   name varchar(255) NOT NULL,
   private boolean NOT NULL,
-  --impl varchar(255) NOT NULL,
   content_type varchar(255) NOT NULL,
   content bytea NOT NULL,
   comment text NULL,

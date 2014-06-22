@@ -30,7 +30,7 @@ public class GlobalTlsPolicy implements TlsPolicyProvider {
         if( globalTlsPolicyId.equals("INSECURE") || globalTlsPolicyId.equals("TRUST_FIRST_CERTIFICATE") ) {
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
             tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
-            tlsPolicyChoice.getTlsPolicyDescriptor().setName(globalTlsPolicyId);
+            tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType(globalTlsPolicyId);
             return tlsPolicyChoice;
         }
         if( UUID.isValid(globalTlsPolicyId)) {

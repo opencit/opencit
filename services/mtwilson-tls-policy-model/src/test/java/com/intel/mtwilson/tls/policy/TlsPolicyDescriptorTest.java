@@ -55,7 +55,7 @@ public class TlsPolicyDescriptorTest {
     @Test
     public void testInsecureTlsPolicyDescriptor() throws JsonProcessingException, IOException {
        TlsPolicyDescriptor descriptor = new TlsPolicyDescriptor();
-       descriptor.setName("INSECURE");
+       descriptor.setPolicyType("INSECURE");
        log.debug("insecure descriptor json: {}", json.writeValueAsString(descriptor));
        log.debug("insecure descriptor xml: {}", xml.writeValueAsString(descriptor));
        TlsPolicyDescriptor copy = json.readValue(json.writeValueAsString(descriptor), TlsPolicyDescriptor.class);
@@ -65,7 +65,7 @@ public class TlsPolicyDescriptorTest {
     @Test
     public void testPublicKeyDigestTlsPolicyDescriptor() throws JsonProcessingException, IOException {
        TlsPolicyDescriptor descriptor = new TlsPolicyDescriptor();
-       descriptor.setName( "public-key-digest");
+       descriptor.setPolicyType( "public-key-digest");
        descriptor.setMeta(new HashMap<String,String>());
        descriptor.getMeta().put("digestAlgorithm", "SHA-256"); // MD5, SHA-1, SHA-256, SHA-384, SHA-512
        descriptor.getMeta().put("digestEncoding", "base64"); // base64 or hex
@@ -80,7 +80,7 @@ public class TlsPolicyDescriptorTest {
     @Test
     public void testTrustFirstCertificateTlsPolicyDescriptor() throws JsonProcessingException {
        TlsPolicyDescriptor descriptor = new TlsPolicyDescriptor();
-       descriptor.setName("TRUST_FIRST_CERTIFICATE");
+       descriptor.setPolicyType("TRUST_FIRST_CERTIFICATE");
        descriptor.setProtection(new TlsProtection());
        descriptor.getProtection().authentication = true;
        descriptor.getProtection().encryption = true;
@@ -94,7 +94,7 @@ public class TlsPolicyDescriptorTest {
     @Test(expected=IllegalArgumentException.class)
     public void testInvalidTrustFirstCertificateTlsPolicyDescriptor() throws JsonProcessingException {
        TlsPolicyDescriptor descriptor = new TlsPolicyDescriptor();
-       descriptor.setName("TRUST_FIRST_CERTIFICATE*"); // illegal character *  
+       descriptor.setPolicyType("TRUST_FIRST_CERTIFICATE*"); // illegal character *  
        descriptor.setProtection(new TlsProtection());
        descriptor.getProtection().authentication = true;
        descriptor.getProtection().encryption = true;

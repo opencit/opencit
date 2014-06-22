@@ -4,14 +4,12 @@
  */
 package com.intel.mtwilson.tls.policy.factory;
 
-import com.intel.dcsg.cpg.net.Hostname;
-
 /**
  *
  * @author jbuhacoff
  */
 public class TlsPolicyMigrationException extends RuntimeException {
-    private Hostname hostname;
+    private String hostId;
     
     public TlsPolicyMigrationException() {
         super();
@@ -21,27 +19,17 @@ public class TlsPolicyMigrationException extends RuntimeException {
         super(message);
     }
 
-    public TlsPolicyMigrationException(String message, Hostname hostname) {
-        super(message);
-        this.hostname = hostname;
-    }
-    
-    public TlsPolicyMigrationException(Throwable cause, Hostname hostname) {
-        super(cause);
-        this.hostname = hostname;
-    }
-
     public TlsPolicyMigrationException(String message, Throwable cause) {
         super(message, cause);
     }
     
-    public TlsPolicyMigrationException(String message, Throwable cause, Hostname hostname) {
+    public TlsPolicyMigrationException(String message, Throwable cause, String hostId) {
         super(message, cause);
-        this.hostname = hostname;
+        this.hostId = hostId;
     }
 
-    public Hostname getHostname() {
-        return hostname;
+    public String getHostId() {
+        return hostId;
     }
     
     

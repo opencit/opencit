@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tls.policy.reader.impl;
+package com.intel.mtwilson.tls.policy.creator.impl;
 
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
@@ -10,17 +10,17 @@ import com.intel.dcsg.cpg.tls.policy.TrustDelegate;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstPublicKeyTrustDelegate;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutablePublicKeyRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import com.intel.mtwilson.tls.policy.factory.TlsPolicyReader;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 
 /**
  *
  * @author jbuhacoff
  */
-public class InsecureTrustFirstCertificateDescriptor implements TlsPolicyReader {
+public class InsecureTrustFirstCertificateTlsPolicyCreator implements TlsPolicyCreator {
 
     @Override
     public TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
-        if( "TRUST_FIRST_CERTIFICATE".equalsIgnoreCase(tlsPolicyDescriptor.getName()) ) {
+        if( "TRUST_FIRST_CERTIFICATE".equalsIgnoreCase(tlsPolicyDescriptor.getPolicyType()) ) {
             HashSetMutablePublicKeyRepository repository = new HashSetMutablePublicKeyRepository();
             TrustDelegate delegate = new FirstPublicKeyTrustDelegate(repository);
             return TlsPolicyBuilder.factory().strict(repository).trustDelegate(delegate).skipHostnameVerification().build();

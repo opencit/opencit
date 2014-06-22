@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tls.policy.reader.impl;
+package com.intel.mtwilson.tls.policy.creator.impl;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
@@ -13,19 +13,19 @@ import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyDigestTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.DigestRepository;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutableDigestRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import com.intel.mtwilson.tls.policy.factory.TlsPolicyReader;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import org.apache.commons.codec.binary.Base64;
 
 /**
  *
  * @author jbuhacoff
  */
-public class PublicKeyDigestDescriptor implements TlsPolicyReader {
+public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
 
     
     @Override
     public TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
-        if( "public-key-digest".equalsIgnoreCase(tlsPolicyDescriptor.getName()) ) {
+        if( "public-key-digest".equalsIgnoreCase(tlsPolicyDescriptor.getPolicyType()) ) {
             try {
                 DigestRepository repository = getPublicKeyDigestRepository(tlsPolicyDescriptor);
                 return new PublicKeyDigestTlsPolicy(repository);
@@ -39,7 +39,7 @@ public class PublicKeyDigestDescriptor implements TlsPolicyReader {
     
     private DigestRepository getPublicKeyDigestRepository(TlsPolicyDescriptor tlsPolicyDescriptor) throws CryptographyException {
         HashSetMutableDigestRepository repository = new HashSetMutableDigestRepository();
-        if( "public-key-digest".equals(tlsPolicyDescriptor.getName()) && tlsPolicyDescriptor.getData() != null && tlsPolicyDescriptor.getMeta() != null ) {
+        if( "public-key-digest".equals(tlsPolicyDescriptor.getPolicyType()) && tlsPolicyDescriptor.getData() != null && tlsPolicyDescriptor.getMeta() != null ) {
             if( tlsPolicyDescriptor.getMeta().get("digestAlgorithm") == null || tlsPolicyDescriptor.getMeta().get("digestAlgorithm").isEmpty() ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates public key digests but does not declare digest algorithm");
             }

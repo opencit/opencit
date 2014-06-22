@@ -219,12 +219,32 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-model</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-ws-v2</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-file-client-jaxrs2</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tls-policy-model</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tls-policy-factory</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-ws-v2</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>

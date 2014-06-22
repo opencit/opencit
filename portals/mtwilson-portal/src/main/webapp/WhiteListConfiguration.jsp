@@ -165,6 +165,13 @@
                                 <br>
                             </div>
                         </div>
+                        <div id="tls_policy_input_div" class="singleDiv">
+                            <div class="labelDiv"><span data-i18n="input.tls_policy">TLS Policy</span></div>
+                            <div class="valueDivConfig">
+                            <select id="tls_policy_select" class="textBoxClass">
+                            </select>
+                            </div>
+                        </div> 
                         <div class="singleDiv">
                             <div class="labelDiv"><span data-i18n="input.register_host">Register Host:</span></div>
                             <div class="valueDivConfig">
@@ -196,6 +203,7 @@
             <br>
             <div id="whiteListMessage"></div>
         </div>
+	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
         <script type="text/javascript" src="Scripts/WhiteListConfig.js"></script>
     </body>
 </html>

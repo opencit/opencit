@@ -12,10 +12,10 @@ import com.intel.dcsg.cpg.tls.policy.impl.TrustKnownCertificateTlsPolicy;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
-import com.intel.mtwilson.tls.policy.factory.TlsPolicyReader;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.tls.policy.factory.impl.TxtHostRecordTlsPolicyFactory;
-import com.intel.mtwilson.tls.policy.reader.impl.InsecureDescriptor;
-import com.intel.mtwilson.tls.policy.reader.impl.InsecureTrustFirstCertificateDescriptor;
+import com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstCertificateTlsPolicyCreator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -34,7 +34,7 @@ public class TlsPolicyFactoryTest {
     @Test
     public void testTlsPolicyFactoryWithTxtHostRecordInsecure() {
         Extensions.register(TlsPolicyFactory.class, TxtHostRecordTlsPolicyFactory.class);
-        Extensions.register(TlsPolicyReader.class, InsecureDescriptor.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTlsPolicyCreator.class);
         TxtHostRecord host = new TxtHostRecord();
         host.HostName = "test1";
         host.AddOn_Connection_String = "intel:https://localhost:1443";
@@ -54,7 +54,7 @@ public class TlsPolicyFactoryTest {
     @Test
     public void testTlsPolicyFactoryWithTxtHostRecordTrustFirstCertificate() {
         Extensions.register(TlsPolicyFactory.class, TxtHostRecordTlsPolicyFactory.class);
-        Extensions.register(TlsPolicyReader.class, InsecureTrustFirstCertificateDescriptor.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTrustFirstCertificateTlsPolicyCreator.class);
         TxtHostRecord host = new TxtHostRecord();
         host.HostName = "test1";
         host.AddOn_Connection_String = "intel:https://localhost:1443";
@@ -76,7 +76,7 @@ public class TlsPolicyFactoryTest {
     @Test
     public void testTlsPolicyFactoryWithTxtHostRecordTrustDefaultInsecure() {
         Extensions.register(TlsPolicyFactory.class, TxtHostRecordTlsPolicyFactory.class);
-        Extensions.register(TlsPolicyReader.class, InsecureDescriptor.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTlsPolicyCreator.class);
         TxtHostRecord host = new TxtHostRecord();
         host.HostName = "test1";
         host.AddOn_Connection_String = "intel:https://localhost:1443";

@@ -244,12 +244,14 @@
             <artifactId>mtwilson-user-management-model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-attestation-ws-v2</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>

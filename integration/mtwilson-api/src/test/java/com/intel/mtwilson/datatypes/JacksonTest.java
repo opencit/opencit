@@ -70,7 +70,7 @@ public class JacksonTest {
         TxtHostRecord r = new TxtHostRecord();
         r.HostName = "localhost";
         TlsPolicyChoice choice = new TlsPolicyChoice();
-        choice.setTlsPolicyName("INSECURE");
+        choice.setTlsPolicyId("INSECURE");
         r.setTlsPolicyChoice(choice);
         ObjectMapper mapper = new ObjectMapper();
         log.debug("with tls policy name: {}", mapper.writeValueAsString(r));
@@ -84,11 +84,11 @@ public class JacksonTest {
 
     @Test
     public void testReadTxtHostRecordWithTlsPolicy() throws Exception {
-        String json = "{\"tlsPolicyChoice\":{\"tlsPolicyName\":\"INSECURE\"},\"HostName\":\"localhost\",\"IPAddress\":null,\"Port\":null,\"BIOS_Name\":null,\"BIOS_Version\":null,\"BIOS_Oem\":null,\"VMM_Name\":null,\"VMM_Version\":null,\"VMM_OSName\":null,\"VMM_OSVersion\":null,\"AddOn_Connection_String\":null,\"Description\":null,\"Email\":null,\"Location\":null,\"AIK_Certificate\":null,\"AIK_PublicKey\":null,\"AIK_SHA1\":null,\"Processor_Info\":null}";
+        String json = "{\"tlsPolicyChoice\":{\"tlsPolicyId\":\"INSECURE\"},\"HostName\":\"localhost\",\"IPAddress\":null,\"Port\":null,\"BIOS_Name\":null,\"BIOS_Version\":null,\"BIOS_Oem\":null,\"VMM_Name\":null,\"VMM_Version\":null,\"VMM_OSName\":null,\"VMM_OSVersion\":null,\"AddOn_Connection_String\":null,\"Description\":null,\"Email\":null,\"Location\":null,\"AIK_Certificate\":null,\"AIK_PublicKey\":null,\"AIK_SHA1\":null,\"Processor_Info\":null}";
         ObjectMapper mapper = new ObjectMapper();
         TxtHostRecord t = mapper.readValue(json, TxtHostRecord.class);
         log.debug("with tls policy after decoding: {}", mapper.writeValueAsString(t));
-        log.debug("tls policy: {}", t.getTlsPolicyChoice().getTlsPolicyName());
+        log.debug("tls policy: {}", t.getTlsPolicyChoice().getTlsPolicyId());
     }
 
 }

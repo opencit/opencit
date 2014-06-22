@@ -28,7 +28,7 @@ public class HostDetailsEntityVO implements Serializable {
 	private String location;
 	private String oemName;
 	private String vCenterDetails;
-	
+	private String tlsPolicyId;
 	/**
 	 * @return the vCenterDetails
 	 */
@@ -135,6 +135,16 @@ public class HostDetailsEntityVO implements Serializable {
 		return oemName;
 	}
 
+    /**
+     * 
+     * @return the UUID of the record in the mw_tls_policy table
+     */
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
+    }
+    
+    
+
 	/**
 	 * @param string the hostId to set
 	 */
@@ -227,6 +237,11 @@ public class HostDetailsEntityVO implements Serializable {
 		this.oemName = oemName;
 	}
 
+    public void setTlsPolicyId(String tlsPolicyId) {
+        this.tlsPolicyId = tlsPolicyId;
+    }
+
+    
 	@Override
 	public String toString() {
 		return "HostDetailsEntityVO [hostId=" + hostId + ", hostName="
@@ -235,7 +250,7 @@ public class HostDetailsEntityVO implements Serializable {
 				+ ", biosName=" + biosName + ", biosBuildNo=" + biosBuildNo
 				+ ", vmmName=" + vmmName + ", vmmBuildNo=" + vmmBuildNo
 				+ ", updatedOn=" + updatedOn + ", emailAddress=" + emailAddress
-				+ ", location=" + location + ", oemName=" + oemName + "]";
+				+ ", location=" + location + ", oemName=" + oemName + ", tlsPolicyId="+tlsPolicyId+"]";
 				// remove bad logs + ", vCenterDetails=" + vCenterDetails + 
 	}
 

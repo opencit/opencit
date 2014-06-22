@@ -122,6 +122,14 @@
 					<input type="text" maxlength="200" id="MainContent_tbEmailAddress" class="textBoxClass">
 				</div>
 			</div>
+			<div id="tls_policy_input_div" class="singleDiv">
+                                                <div class="valueDiv">&nbsp; </div>
+				<div class="labelDiv" data-i18n="input.tls_policy">TLS Policy:</div>
+				<div class="valueDiv">
+                            <select id="tls_policy_select"  class="textBoxClass">
+                            </select>
+				</div>
+			</div>
 			
 			<div class="singleDiv">
                                                 <div class="valueDiv">&nbsp; </div>
@@ -142,6 +150,7 @@
                         <div class="singleDiv" >&nbsp;</div>
 		<div id="mleMessage" class="errorDiv"></div>
 	</div>
+<script type="text/javascript" src="Scripts/tls_policy.js"></script>
 <script type="text/javascript" src="Scripts/addHost.js"></script>
 <script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
 <script type="text/javascript" src="Scripts/i18n_util.js"></script>

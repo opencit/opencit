@@ -21,8 +21,8 @@ public class TlsPolicyResultMapper implements ResultSetMapper<TlsPolicyRecord> {
         TlsPolicyRecord tlsPolicyRecord = new TlsPolicyRecord();
         tlsPolicyRecord.setId(UUID.valueOf(rs.getString("id")));
         tlsPolicyRecord.setName(rs.getString("name"));
-//        tlsPolicyRecord.setImpl(rs.getString("impl"));
-        tlsPolicyRecord.setContentType(rs.getString("contentType"));
+        tlsPolicyRecord.setPrivate(rs.getBoolean("private"));
+        tlsPolicyRecord.setContentType(rs.getString("content_type"));
         tlsPolicyRecord.setContent(rs.getBytes("content"));
         tlsPolicyRecord.setComment(rs.getString("comment"));
         return tlsPolicyRecord;

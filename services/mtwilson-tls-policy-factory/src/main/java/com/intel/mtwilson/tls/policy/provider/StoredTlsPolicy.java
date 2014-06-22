@@ -25,6 +25,7 @@ import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
+import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.KeyStoreException;
@@ -32,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.HashSet;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.binary.Base64;
@@ -75,11 +77,24 @@ public class StoredTlsPolicy implements TlsPolicyProvider {
             }
             if (hostRecord.getTlsPolicyName() != null) {
                 log.debug("StoredTlsPolicy name: {}", hostRecord.getTlsPolicyName());
-                if (hostRecord.getTlsPolicyName().equals("INSECURE") || hostRecord.getTlsPolicyName().equals("TRUST_FIRST_CERTIFICATE")) {
+                if (hostRecord.getTlsPolicyName().equals("INSECURE") ) {
                     TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
                     tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
-                    tlsPolicyChoice.getTlsPolicyDescriptor().setName(hostRecord.getTlsPolicyName());
+                    tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType("INSECURE");
                     return tlsPolicyChoice;
+                }
+                if (hostRecord.getTlsPolicyName().equals("TRUST_FIRST_CERTIFICATE")) {
+                    if (hostRecord.getTlsKeystore() != null) {
+                        // we treat a TRUST_FIRST_CERTIFICATE policy for which there is already a cert as a public key policy during migration, and if there is not already a cert then we convert it to the insecure policy
+                        // automatic data migration: load the certificates from the keystore, create a TlsPolicyDescriptor with the public keys, save it as a new private mw_tls_policy record, and update the mw_hosts record to point to it
+                        TlsPolicyChoice tlsPolicyChoice = migrateExistingTlsKeystoreToTlsPolicy(hostRecord, new PublicKeyTlsPolicyConverter());
+                        return tlsPolicyChoice;
+                    } else {
+                        TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+                        tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
+                        tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType("INSECURE");
+                        return tlsPolicyChoice;
+                    }
                 }
                 if (hostRecord.getTlsPolicyName().equals("TRUST_KNOWN_CERTIFICATE")) {
                     if (hostRecord.getTlsKeystore() != null) {
@@ -116,11 +131,14 @@ public class StoredTlsPolicy implements TlsPolicyProvider {
         @Override
         public TlsPolicyDescriptor convert(CertificateRepository repository) {
             TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+            tlsPolicyDescriptor.setPolicyType("public-key");
             tlsPolicyDescriptor.setProtection(new TlsProtection());
             tlsPolicyDescriptor.getProtection().encryption = true; 
             tlsPolicyDescriptor.getProtection().integrity = true;
             tlsPolicyDescriptor.getProtection().authentication = true;
             tlsPolicyDescriptor.getProtection().forwardSecrecy = true;
+            tlsPolicyDescriptor.setMeta(new HashMap<String,String>());
+            tlsPolicyDescriptor.getMeta().put("encoding", "base64");
             tlsPolicyDescriptor.setData(new HashSet<String>());
             for (X509Certificate certificate : repository.getCertificates()) {
                 String publicKey = Base64.encodeBase64String(certificate.getPublicKey().getEncoded());
@@ -135,11 +153,14 @@ public class StoredTlsPolicy implements TlsPolicyProvider {
         @Override
         public TlsPolicyDescriptor convert(CertificateRepository repository) {
             TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+            tlsPolicyDescriptor.setPolicyType("certificate");
             tlsPolicyDescriptor.setProtection(new TlsProtection());
             tlsPolicyDescriptor.getProtection().encryption = true;
             tlsPolicyDescriptor.getProtection().integrity = true;
             tlsPolicyDescriptor.getProtection().authentication = true;
             tlsPolicyDescriptor.getProtection().forwardSecrecy = true;
+            tlsPolicyDescriptor.setMeta(new HashMap<String,String>());
+            tlsPolicyDescriptor.getMeta().put("encoding", "base64");
             tlsPolicyDescriptor.setData(new HashSet<String>());
             for (X509Certificate certificate : repository.getCertificates()) {
                 try {
@@ -163,14 +184,13 @@ public class StoredTlsPolicy implements TlsPolicyProvider {
             
             // save the descriptor as a new record in mw_tls_policy
             try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
-                JacksonObjectMapperProvider mapperProvider = new JacksonObjectMapperProvider();
-                ObjectMapper mapper = mapperProvider.createDefaultMapper();
+                JsonTlsPolicyWriter writer = new JsonTlsPolicyWriter();
                 TlsPolicyRecord tlsPolicyRecord = new TlsPolicyRecord();
                 tlsPolicyRecord.setId(new UUID());
-                tlsPolicyRecord.setName(hostId);
+                tlsPolicyRecord.setName(hostRecord.getUuid_hex());
                 tlsPolicyRecord.setPrivate(true);
                 tlsPolicyRecord.setContentType(MediaType.APPLICATION_JSON);
-                tlsPolicyRecord.setContent(mapper.writeValueAsString(tlsPolicyDescriptor).getBytes(Charset.forName("UTF-8")));
+                tlsPolicyRecord.setContent(writer.write(tlsPolicyDescriptor));
                 tlsPolicyRecord.setComment("automatic migration");
                 dao.insertTlsPolicy(tlsPolicyRecord);
                 hostRecord.setTlsPolicyId(tlsPolicyRecord.getId().toString());
@@ -178,7 +198,7 @@ public class StoredTlsPolicy implements TlsPolicyProvider {
                     My.jpa().mwHosts().edit(hostRecord);
                 } catch (IllegalOrphanException | NonexistentEntityException | ASDataException | CryptographyException e) {
                     log.error("Cannot store host record for {}: {}", hostId, e.getMessage());
-                    throw new TlsPolicyMigrationException("Cannot store host record", new Hostname(hostId));
+                    throw new TlsPolicyMigrationException("Cannot store host record", e,hostId);
                 }
             }
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();

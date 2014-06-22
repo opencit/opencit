@@ -13,7 +13,7 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
 //import com.intel.dcsg.cpg.tls.policy.TrustCaAndVerifyHostnameTlsPolicy;
 //import com.intel.dcsg.cpg.tls.policy.TrustFirstCertificateTlsPolicy;
 //import com.intel.dcsg.cpg.tls.policy.TrustKnownCertificateTlsPolicy;
@@ -41,8 +41,6 @@ import java.util.List;
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<String,VendorHostAgentFactory> vendorFactoryMap = new HashMap<String,VendorHostAgentFactory>();
-    // XXX MOVED TO MTWILSON-TLS-POLICY TLSPOLICYFACTORY
-    private TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.getInstance();
     
     public HostAgentFactory() {
 //        vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());
@@ -79,11 +77,12 @@ public class HostAgentFactory {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName());
             String connectionString = getConnectionString(host);
-            String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
+//            String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
 //            ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO it's the responsibility of the caller to save the TblHosts record after calling this method if the policy is trust first certificate ; we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
-            String password = My.configuration().getTlsKeystorePassword(); 
-            SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); 
-            TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
+//            String password = My.configuration().getTlsKeystorePassword(); 
+//            SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); 
+            TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.createFactory(host);//getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
+            TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicy();
             HostAgent hostAgent = getHostAgent(hostAddress, connectionString, tlsPolicy);
             PcrManifest pcrManifest = hostAgent.getPcrManifest();
 //            host.setTlsKeystore(resource.toByteArray()); // if the tls policy is TRUST_FIRST_CERTIFICATE then it's possible a new cert has been saved in it and we have to make sure it gets saved to the host record;  for all other tls policies there would be no change so this is a no-op -  the byte array will be the same as the one we started with
@@ -144,12 +143,14 @@ public class HostAgentFactory {
     }
     
     public TlsPolicy getTlsPolicy(TblHosts host) throws KeyManagementException, IOException {
-        if( host.getTlsPolicyName() == null ) {
-            host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-        }
+//        if( host.getTlsPolicyName() == null ) {
+//            host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+//        }
 //        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
 //        KeyStore tlsKeystore = txtHost.getTlsKeystore(); // XXX TODO TxtHost doesn't have this field yet
-        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
+//        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
+        TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.createFactory(host);//getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
+        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicy();
         return tlsPolicy;
     }
 

@@ -31,6 +31,7 @@ public class TxtHost {
     private String aikCertificate;  // may be null
     private String aikPublicKey;  // may be null
     private String aikSha1;  // may be null
+    private String tlsPolicyId; // may be null
 
     public TxtHost(TxtHostRecord host, HostTrustStatus trustStatus) {
         this(host);
@@ -68,7 +69,7 @@ public class TxtHost {
         aikCertificate = host.AIK_Certificate; // may be null
         aikPublicKey = host.AIK_PublicKey; // may be null
         aikSha1 = host.AIK_SHA1; // may be null
-
+        tlsPolicyId = (host.getTlsPolicyChoice() == null ? null : host.getTlsPolicyChoice().getTlsPolicyId());
         // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory
 //        if (connectionString == null || connectionString.isEmpty()) {
 //            throw new IllegalArgumentException(String.format("Connection string for host or its vCenter (for ESX hosts) is required: %s", hostname));
@@ -173,6 +174,12 @@ public class TxtHost {
     public String getAikSha1() {
         return aikSha1;
     }
+
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
+    }
+    
+    
 
     final public boolean requiresConnectionString() {
         // BUG #497  now every host requies a connection string 

@@ -18,7 +18,7 @@ import javax.ws.rs.Path;
  * @author ssbangal
  */
 @V2
-@Path("/hosts/{host_id}/tls-policy") // Should the user specified parameter here match the filterCriteria??
+@Path("/tls-policies")
 public class HostTlsPolicyResource extends AbstractJsonapiResource<com.intel.mtwilson.tls.policy.model.HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, NoLinks<com.intel.mtwilson.tls.policy.model.HostTlsPolicy>, HostTlsPolicyLocator> {
 
     private HostTlsPolicyRepository repository;

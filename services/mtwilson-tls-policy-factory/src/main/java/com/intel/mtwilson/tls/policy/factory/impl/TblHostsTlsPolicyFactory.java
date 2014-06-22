@@ -80,13 +80,13 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
                 if( host.getTlsPolicyName().equals("INSECURE") ) {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
                     tlsPolicyNameChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
-                    tlsPolicyNameChoice.getTlsPolicyDescriptor().setName(host.getTlsPolicyName());
+                    tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType(host.getTlsPolicyName());
                     return tlsPolicyNameChoice;
                 }
                 else if( host.getTlsPolicyName().equals("TRUST_FIRST_CERTIFICATE") ) {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
                     tlsPolicyNameChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
-                    tlsPolicyNameChoice.getTlsPolicyDescriptor().setName(host.getTlsPolicyName());
+                    tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType(host.getTlsPolicyName());
                     // TODO:  need to provide something here for savnig the cert back???? no... must be provided via some other interface... because the choice/descriptor objects are data contains only, not pure oo...
                     return tlsPolicyNameChoice;
                 }

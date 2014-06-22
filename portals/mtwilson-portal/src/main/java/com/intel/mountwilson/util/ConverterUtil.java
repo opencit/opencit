@@ -22,6 +22,7 @@ import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 //import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import java.io.StringReader;
@@ -68,7 +69,11 @@ public class ConverterUtil {
 		hostRecord.HostName=dataVO.getHostName();
 		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
-		
+        if( dataVO.getTlsPolicyId() != null ) {
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyId(dataVO.getTlsPolicyId());
+            hostRecord.setTlsPolicyChoice(tlsPolicyChoice);
+        }
 		String[] osVMMInfo = dataVO.getVmmName().split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR));
 		String osNameWithVer = osVMMInfo[0];
 		String osName;

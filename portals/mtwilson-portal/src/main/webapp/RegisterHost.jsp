@@ -20,19 +20,34 @@
                         </select>
                     </div>
                 </div>
-                <br>
+                <br/>
                 
                 <div id="openSourcesHostType" style="display: none;">
                     <div class="singleDiv">
                         <div class="labelDiv" data-i18n="input.host_import_file">Host(s) File:</div>
                         <div class="valueDiv">
-                            <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="AuthorizationToken" id="AuthorizationToken" />
-                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50"  data-i18n="[value]button.choose_file" style="height: 24px"/>
+
+					<!-- removed attribute data-i18n="[value]button.choose_file"  from input element below because javascript is not allowed to set the value of a file upload element -->
+                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50"  style="height: 24px"/>
+                        </div>
+                    </div>
+                    <div id="tls_policy_input_div_flatfile" class="singleDiv">
+                        <div class="labelDiv" data-i18n="input.tls_policy">TLS Policy:</div>
+                        <div class="valueDiv">
+                            <select id="tls_policy_select_flatfile" class="textBoxClass">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="singleDiv">
+                        <div class="labelDiv"></div>
+                        <div class="valueDiv">
+                            <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
+				<input type="hidden" name="tlsPolicy"/>
                                 <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()" data-i18n="[value]button.retrieve_hosts"/>
-                            </form>
                             <input type="image" onclick="showDialogUpFlatFileHelp()" src="images/helpicon.png">
                             <span id="messageForFileUpload"></span>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -43,6 +58,13 @@
                         <div class="valueDiv">
                             <input type="text" class="textBox_Border" id="mainRegisterHost_vCenterServer">
                             <span class="requiredField">*</span>
+                        </div>
+                    </div>
+                    <div id="tls_policy_input_div_vmware" class="singleDiv">
+                        <div class="labelDiv" data-i18n="input.tls_policy">TLS Policy:</div>
+                        <div class="valueDiv">
+                            <select id="tls_policy_select_vmware" class="textBoxClass">
+                            </select>
                         </div>
                     </div>
                     <div class="singleDiv">
@@ -120,6 +142,7 @@
                 <div id="successMessage"></div>
             </div>
         </div>
+	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
         <script type="text/javascript" src="Scripts/RegisterHost.js"></script>
     </body>
 </html>

@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.tls.policy.factory;
 
-import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 
 /**
@@ -14,9 +13,9 @@ import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 public interface TlsPolicyReader {
     /**
      * 
-     * @param tlsPolicyDescriptor
-     * @return an implementation of TlsPolicy or null if the given TlsPolicyDescriptor is not supported by this reader
-     * @throws IllegalArgumentException if the TlsPolicyDescriptor is supported but has invalid data
+     * @param contentType for example "application/java-keystore" or "application/json"
+     * @return true if the reader can read that content type
      */
-    TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor);
+    boolean accept(String contentType);
+    TlsPolicyDescriptor read(byte[] content);
 }

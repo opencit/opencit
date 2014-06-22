@@ -10,17 +10,17 @@ import javax.ws.rs.PathParam;
 
 /**
  *
- * @author ssbangal
+ * @author ssbangal, jbuhacoff
  */
 public class HostTlsPolicyLocator implements Locator<HostTlsPolicy> {
 
-    @PathParam("host_id")
-    public UUID hostUuid;
+    @PathParam("id")
+    public UUID id;
 
     @Override
     public void copyTo(HostTlsPolicy item) {
-        if( hostUuid != null ) {
-//            item.setHostUuid(hostUuid.toString());
+        if( id != null ) {
+            item.setId(id);
         }        
     }
     

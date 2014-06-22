@@ -364,3 +364,16 @@ function fnSaveNewHostInfoSuccess(response,messageToDisplay) {
 }
 
 
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div").hide();
+       } else {
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select"), choicesArray);
+       	$("#tls_policy_input_div").show();
+	}
+    });
+});

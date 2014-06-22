@@ -13,6 +13,7 @@ import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * This policy strategy is able to load a different policy depending on the
@@ -39,8 +40,13 @@ public class StoredVendorTlsPolicy implements TlsPolicyProvider {
     public TlsPolicyChoice getTlsPolicyChoice() {
         if( vendor == null ) { return null; }
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
-            TlsPolicyRecord tlsPolicyRecord = dao.findTlsPolicyByName("auto vendor:"+vendor);
-            if( tlsPolicyRecord == null ) { return null; }
+            List<TlsPolicyRecord> tlsPolicyRecords = dao.findTlsPolicyByNameContains("auto vendor:"+vendor);
+            if( tlsPolicyRecords == null || tlsPolicyRecords.isEmpty() ) { return null; }
+            if( tlsPolicyRecords.size() > 1 ) {
+                log.warn("Multiple tls_policy records for vendor {}; skipping", vendor);
+                return null;
+            }
+            TlsPolicyRecord tlsPolicyRecord = tlsPolicyRecords.get(0);
             if( tlsPolicyRecord.isPrivate() ) { log.debug("Ignoring private vendor policy {}", tlsPolicyRecord.getId()); return null; }
             try {
                 TlsPolicyDescriptor tlsPolicyDescriptor = getTlsPolicyDescriptorFromTlsPolicyRecord(tlsPolicyRecord);

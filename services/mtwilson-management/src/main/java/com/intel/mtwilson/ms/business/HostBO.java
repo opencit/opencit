@@ -300,8 +300,7 @@ public class HostBO {
      
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            
+            // BOOKMARK JONATHAN TLS POLICY
             // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
             // first and make up the complete connection string.
             ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
@@ -700,10 +699,8 @@ public class HostBO {
                     ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 }
-                // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
-                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); 
-                tblHosts.setTlsKeystore(null); // XXX previously the default policy name was hardcoded to TRUST_FIRST_CERTIFICATE but is now configurable; but because we are still starting with a null keystore, the only two values that would work as a default are TRUST_FIRST_CERTIFICATE and INSECURE
+                // BOOKMARK JONATHAN TLS POLICY
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
                 tblHosts.setIPAddress(gkvHost.HostName);
