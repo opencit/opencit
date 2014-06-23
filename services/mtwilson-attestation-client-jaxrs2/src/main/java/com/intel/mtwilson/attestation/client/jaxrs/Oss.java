@@ -52,8 +52,7 @@ public class Oss extends MtWilsonClient {
      * </pre>
      * @mtwSampleApiCall
      * <pre>
-     *  Properties prop = My.configuration().getClientProperties();
-     *  Oss client = new Oss(prop);
+     *  Oss client = new Oss(My.configuration().getClientProperties());
      *  Os newOs = new Os();
      *  newOs.setName("TestOS1");
      *  newOs.setVersion("1.2.3");
@@ -81,14 +80,13 @@ public class Oss extends MtWilsonClient {
      * </pre>
      * @mtwSampleApiCall
      * <pre>
-     *  Properties prop = My.configuration().getClientProperties(); 
-     *  Oss client = new Oss(prop);
+     *  Oss client = new Oss(My.configuration().getClientProperties());
      *  client.deleteOs("e946ccec-4a55-4913-bdb6-5878c88a9e81");
      * </pre>
      */
     public void deleteOs(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("oss/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
@@ -97,6 +95,35 @@ public class Oss extends MtWilsonClient {
         }
     }
 
+    /**
+     * Deletes the Os(s) matching the specified search criteria. 
+     * @param criteria OsFilterCriteria object specifying the search criteria. The search options include
+     * id, nameEqualTo and nameContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oss:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/oss?nameContains=admin
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Oss client = new Oss(My.configuration().getClientProperties());
+     *  OsFilterCriteria criteria = new OsFilterCriteria();
+     *  criteria.nameContains = "admin";
+     *  client.deleteOs(criteria);
+     * </pre>
+     */
+    public void deleteOs(OsFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("oss", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete os failed");
+        }
+    }
+    
     /**
      * Updates the details of the Os in the system. Only the description of the OS can be updated. 
      * @param OS - Os object that needs to be updated. The caller needs to provide the ID of the object along with the description.
@@ -113,8 +140,7 @@ public class Oss extends MtWilsonClient {
      * </pre>
      * @mtwSampleApiCall
      * <pre>
-     * Properties prop = My.configuration().getClientProperties();
-     * Oss client = new Oss(prop);  
+     * Oss client = new Oss(My.configuration().getClientProperties());
      * Os os = new Os();
      * os.setId(UUID.valueOf("e946ccec-4a55-4913-bdb6-5878c88a9e81"));
      * os.setDescription("Added description");
@@ -123,7 +149,7 @@ public class Oss extends MtWilsonClient {
      */
     public Os editOs(Os obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", obj.getId().toString());
         Os newObj = getTarget().path("oss/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), Os.class);
         return newObj;
@@ -159,9 +185,10 @@ public class Oss extends MtWilsonClient {
 
     /**
      * Searches for the OS's with the specified set of criteria
-     * @param criteria - <code> OsFilterCriteria </code> expressing the filter criteria
-     *      The possible search options include id, nameEqualTo and nameContains.
-     * @return <code> OsCollection </code> that meets the filter criteria
+     * @param criteria OsFilterCriteria object specifying the filter criteria.
+     * The possible search options include id, nameEqualTo and nameContains. 
+     * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /v2/oss?filter=false]
+     * @return OsCollection having the list of Oss that meets the filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oss:search
      * @mtwContentTypeReturned JSON/XML/YAML

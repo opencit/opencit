@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -95,6 +96,38 @@ public class MleSources extends MtWilsonClient {
     }
     
     /**
+     * Deletes the existing mapping between the Mle and the host from which the white lists for the Mle were configured
+     * using the specified filter criteria.
+     * @param criteria MleFilterCriteria object specifying the search criteria. Search options supported
+     * include UUID of Mle.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_sources:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source/
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  MleSource client = new MleSource(My.configuration().getClientProperties());
+     *  MleSourceFilterCriteria criteria = new MleSourceFilterCriteria();
+     *  criteria.mleUuid = UUID.valueOf("9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1");
+     *  client.deleteMle(criteria);
+     * </pre>
+     */
+    public void deleteMleSource(MleSourceFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", criteria.mleUuid);
+        Response obj = getTargetPathWithQueryParams("mles/{mle_id}/source", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete Mle Source failed");
+        }
+    }
+    
+    /**
      * Updates the host name from which the white lists were retrieved for the specified Mle. 
      * @param obj - <code> MleSource </code> to be updated. 
      * @return <code>MleSource </code> that is updated.
@@ -149,7 +182,7 @@ public class MleSources extends MtWilsonClient {
      */
     public MleSource retrieveMleSource(String mleUuid, String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", mleUuid);
         map.put("id", uuid);
         MleSource obj = getTarget().path("mles/{mle_id}/source/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleSource.class);
@@ -157,11 +190,12 @@ public class MleSources extends MtWilsonClient {
     }
 
     /**
-     * Search for host that was used to configure the Mle with the whitelists.
-     * @param criteria <code> MleSourceFilterCriteria </code> used to specify the parameters of search. Currently the search is supported only by UUID of the Mle.
-     * @return <code> MleSourceCollection</code> having the source of the whitelist for the specified criteria.
+     * Searches for host that was used to configure the Mle with the whitelists.
+     * @param criteria MleSourceFilterCriteria object specifying the search criteria. Search options supported
+     * include UUID of Mle.
+     * @return MleSourceCollection having the source of the Mle whitelist specified.
      * @since Mt.Wilson 2.0
-     * @mtwRequiresPermissions mle_pcrs:search
+     * @mtwRequiresPermissions mle_sources:search
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
@@ -179,7 +213,7 @@ public class MleSources extends MtWilsonClient {
      */
     public MleSourceCollection searchMleSources(MleSourceFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", criteria.mleUuid);
         MleSourceCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/source", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MleSourceCollection.class);
