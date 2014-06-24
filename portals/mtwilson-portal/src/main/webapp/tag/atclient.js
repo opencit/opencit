@@ -706,6 +706,19 @@ mtwilson.atag = mtwilson.atag || {};
 		$('selection-search-form').hide();
                 break;
           case 'certificates_json':
+		if(data.certificates != null && data.hosts != null) {
+                        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                                continue;
+                                        }
+                                }
+                        }
+                        view.sync();
+                }
+
+
                 for(var loop = 0; loop < data.certificates.length; loop++) {
                         data.certificates[loop].status = "Active";
                         var now = new Date(event.memo.serverTime);
@@ -770,6 +783,19 @@ mtwilson.atag = mtwilson.atag || {};
                 data.selection_details = [];
                 break;
             case 'hosts':
+                if(data.certificates != null && data.hosts != null) {
+                        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                                continue;
+                                        }
+                                }
+                        }
+                        view.sync();
+                }
+
+
                 for(var i = data.hosts.length-1; i >= 0; i--) {
                     if(data.hosts[i].connection_url.indexOf('vmware') != -1) {// && data.hosts[i].connection_url.indexOf('vmware') == -1) {
                         data.hosts.splice(i, 1);

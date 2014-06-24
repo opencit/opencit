@@ -35,9 +35,10 @@
 					
 				</div>
 				<div id="editMlePaginationDiv"></div>					
-				<div id="messageSpace"></div>
 		</div>
 		</div>
+		<div id="errorEditMle" class="errorMessage">	</div>
+		<div id="messageSpace"></div>
 		
 	</div>
 	<script type="text/javascript" src="Scripts/EditMle.js"></script>

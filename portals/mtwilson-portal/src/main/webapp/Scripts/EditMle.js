@@ -19,7 +19,7 @@ function fnUpdateEditMleTable(responseJSON) {
 		fuCreateEditMleTable(responseJSON.MLEDataVo);
 		applyPagination('editMlePaginationDiv',responseJSON.noOfPages,fngetMleNextPageForEdit,1);
 	}else {
-		$('#messageSpace').html(responseJSON.message);
+		$('#errorEditMle').html(responseJSON.message);
 	}
 }
 
@@ -34,7 +34,7 @@ function fnUpdateEditMleTableForPage(responseJSON) {
 	if (responseJSON.result) {
 		fuCreateEditMleTable(responseJSON.MLEDataVo);
 	}else {
-		$('#messageSpace').html(responseJSON.message);
+		$('#errorEditMle').html(responseJSON.message);
 	}
 }
 
