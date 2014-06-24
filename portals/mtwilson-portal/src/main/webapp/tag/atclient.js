@@ -715,7 +715,6 @@ mtwilson.atag = mtwilson.atag || {};
                                         }
                                 }
                         }
-                        view.sync();
                 }
 
 
@@ -728,6 +727,7 @@ mtwilson.atag = mtwilson.atag || {};
                                 data.certificates[loop].status = 'Expired';
                         }
                 }
+                view.sync();
                 break;
             case 'certificateRequests':
                 if (event.memo.response.length > 0) {
