@@ -1,6 +1,6 @@
 // requires:  jQuery, i18next
 
-$( document ).ready(function() {
+jQuery( document ).ready(function() {
     // reference: http://i18next.com/pages/doc_init.html
     i18nInit();
 });
@@ -22,8 +22,8 @@ function i18nInit() {
             function(t) {
                 // this function is called with translation function t after the language has been loaded;  use this to automatically translate parts of the UI
                 // find all elements on the page that have data-i18n attribute and automatically translate them
-                $("[data-i18n]").not("[translate='no']").each(function() {
-                     $(this).i18n(); // translate it using built-in i18next rules
+                jQuery("[data-i18n]").not("[translate='no']").each(function() {
+                     jQuery(this).i18n(); // translate it using built-in i18next rules
                 });
             }
     );

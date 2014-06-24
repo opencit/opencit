@@ -274,7 +274,8 @@ public class SecurityFilter implements Filter {
             //dispatcher.forward(req, res);
             //res.setHeader("Refresh", "0;"+req.getContextPath()+"/login.htm");
             //res.sendRedirect(req.getContextPath()+"/login.htm");
-            res.addHeader("message", "Your Login Session is Expired. Please Login again.");
+//            res.addHeader("message", "Your Login Session is Expired. Please Login again.");
+            res.addHeader("message", "error.login_expired");
             res.addHeader("requiredLogin", "true");
             res.sendRedirect(req.getContextPath() + "/login.htm");
             //res.addHeader("Location", req.getContextPath()+"/login.htm");
@@ -289,7 +290,8 @@ public class SecurityFilter implements Filter {
     private void redirectToLogin(HttpServletRequest req, HttpServletResponse res) {
         try {
             RequestDispatcher dispatcher = req.getRequestDispatcher("/login.htm");
-            req.setAttribute("message", "Your Login Session is Expired. Please Login again.");
+//            req.setAttribute("message", "Your Login Session is Expired. Please Login again.");
+            req.setAttribute("message", "error.login_expired");
             dispatcher.forward(req, res);
         } catch (Exception e) {
             log.error("IOException Exception, Error While forwarding request to Login page.");

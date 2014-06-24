@@ -49,7 +49,7 @@
 	                </tbody>
                 </table>
 				</form>
-				<div class="errorMessage">${message}</div>
+				<div class="errorMessage" data-i18n="${message}">${message}</div>
         	</div>
         </div>
         <div class="footer">
