@@ -117,7 +117,6 @@ public class UserRepository implements SimpleRepository<User, UserCollection, Us
     }
 
     @Override
-    @RequiresPermissions("users:create")        
     public void create(User item) {
         log.debug("User:Create - Got request to create a new user {}.", item.getUsername());
          try (LoginDAO loginDAO = MyJdbi.authz()) {

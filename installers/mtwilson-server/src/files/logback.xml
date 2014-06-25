@@ -42,6 +42,6 @@
         <appender-ref ref="AUDIT_FILE" />
     </root>
 
-    <logger name="com.intel.mtwilson" level="DEBUG" />
+    <logger name="com.intel.mtwilson" level="INFO" />
     
 </configuration>
