@@ -459,10 +459,13 @@
                                 <configuration>
                                     <attach>true</attach>
                                     <includeDependencySources>true</includeDependencySources>
-                                    <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+                                    <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
                                     <dependencySourceIncludes>
-                                        <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
-                                        <dependencySourceInclude>com.intel.dcsg.cpg:cpg-validation</dependencySourceInclude>
+                                       <!-- <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.dcsg.cpg:cpg-validation</dependencySourceInclude> -->
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceInclude>
                                     </dependencySourceIncludes>
                                 </configuration>
                             </execution>
@@ -561,6 +564,12 @@
                                 <configuration>
                                     <shadedArtifactAttached>true</shadedArtifactAttached>
                                     <shadedClassifierName>with-dependencies</shadedClassifierName>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                            <resource>META-INF/BCKEY.SF</resource>
+                                            <resource>META-INF/BCKEY.DSA</resource>
+                                        </transformer>
+                                    </transformers>
                                 </configuration>
                             </execution>                            
                             <execution>
