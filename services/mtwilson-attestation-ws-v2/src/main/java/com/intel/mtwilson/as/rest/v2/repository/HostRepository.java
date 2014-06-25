@@ -278,6 +278,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
         convObj.setVmmMleUuid(obj.getVmm_mle_uuid_hex());
         convObj.setAikCertificate(obj.getAIKCertificate());
         convObj.setAikSha1(obj.getAikSha1());
+        convObj.setHardwareUuid(obj.getHardwareUuid());
+        log.error("------------------------------------" + obj.getHardwareUuid());
         return convObj;
     }
     
