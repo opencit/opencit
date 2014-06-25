@@ -166,7 +166,6 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
      * @param item 
      */
     @Override
-    @RequiresPermissions("user_login_certificates:create")        
     public void create(UserLoginCertificate item) {
         log.debug("UserLoginCertificate:Create - Got request to create a new user keystore.");
          try (LoginDAO loginDAO = MyJdbi.authz()) {
