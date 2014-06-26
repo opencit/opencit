@@ -76,11 +76,11 @@ function populateHostTrustDataIntoTable(hostDetails) {
 					
 				}*/
 				
-				str+='<td class="row9">'+hostDetails[item].updatedOn+'</td>'+
+				str+='<td align="center" class="row9">'+hostDetails[item].updatedOn+'</td>'+
 				'<td nowrap align="center" class="row10"><input class="tableButton" type="button"  value="Refresh" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh"></td>'+
 				'<td align="center" class="row11"><a><img src="images/trust_assertion.png" onclick="fnGetTrustSamlDetails(\''+hostDetails[item].hostName+'\')"/></a></td>'+
-			    '<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
-				'<td class="row12">';
+			    '<td align="center" class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
+				'<td align="center" class="row12">';
 				
 				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+hostDetails[item].errorMessage+'</textarea>';}
 				str+='</td>'+

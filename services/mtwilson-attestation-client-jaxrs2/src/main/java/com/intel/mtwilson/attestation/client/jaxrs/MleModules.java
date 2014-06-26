@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -111,6 +112,38 @@ public class MleModules extends MtWilsonClient {
     }
     
     /**
+     * Deletes the Module white lists of the specified MLE using the filter criteria.
+     * @param criteria MleModuleFilterCriteria object specifying the search criteria. Search options supported
+     * include id, nameContains, and valueEqualTo.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_modules:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules?nameContains=New
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   MleModules client = new MleModules(My.configuration().getClientProperties());
+     *   MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
+     *   criteria.mleUuid = UUID.valueOf("9a16973b-5b17-49a8-b508-3f5436c8f944");
+     *   criteria.nameContains = "New";
+     *  client.deleteMleModule(criteria);
+     * </pre>
+     */
+    public void deleteMleModule(MleModuleFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", criteria.mleUuid);
+        Response obj = getTargetPathWithQueryParams("mles/{mle_id}/modules", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete Mle modules failed");
+        }
+    }
+    
+    /**
      * Updates the module white list for the Mle specified. Only digest value and description fields are allowed to be updated..
      * @param obj - MleModule to be updated
      * @return - Updated MleModule object
@@ -174,9 +207,10 @@ public class MleModules extends MtWilsonClient {
     }
     
      /**
-     * Search for Module whitelist satisfying the specified filter criteria. 
-     * @param criteria <code> MleModuleFilterCriteria </code> used to specify the parameters of search. 
-     * Caller can search for the specified Mle based on the module name, value and id.
+     * Searches for the Module whitelist satisfying the specified filter criteria. 
+     * @param criteria MleModuleFilterCriteria  object specifying the filter criteria. Currently supported
+     * search options include id, nameContains, and valueEqualTo.
+     * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /modules?filter=false]
      * @return <code> MleModuleCollection</code> having the list of MleModules matching the specified criteria.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mle_modules:search
@@ -185,7 +219,7 @@ public class MleModules extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/mles/9a16973b-5b17-49a8-b508-3f5436c8f944/modules?nameContains=New
-     * Output: {"mle_modules":[{"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"f4b25e23-9114-46f1-b0cb-8e2654514f5d",
+     * Output: {"mle_modules":[{"id":"f4b25e23-9114-46f1-b0cb-8e2654514f5d","mle_uuid":"9a16973b-5b17-49a8-b508-3f5436c8f944",
      * "module_name":"componentName.New Module 1","event_name":"Vim25Api.HostTpmSoftwareComponentEventDetails",
      * "extended_to_pcr":"19","package_name":"PackageName","package_vendor":"VMware","description":"Module update testing"}]} 
      * </pre>
@@ -193,7 +227,7 @@ public class MleModules extends MtWilsonClient {
      * <pre>
      *   MleModules client = new MleModules(My.configuration().getClientProperties());
      *   MleModuleFilterCriteria criteria = new MleModuleFilterCriteria();
-     *   criteria.mleUuid = UUID.valueOf("66e999af-e9eb-43cc-9cbf-dcb73af1963b");
+     *   criteria.mleUuid = UUID.valueOf("9a16973b-5b17-49a8-b508-3f5436c8f944");
      *   criteria.nameContains = "New";
      *   MleModuleCollection searchMleModules = client.searchMleModules(criteria);
      * </pre>
