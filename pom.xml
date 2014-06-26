@@ -558,7 +558,7 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
     <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.8</version>
+        <version>1.9</version>
     </dependency>
 	<dependency>
 		<groupId>commons-collections</groupId>
@@ -929,6 +929,12 @@ reference : https://java.net/jira/browse/JERSEY-2325
                 <artifactId>joda-time</artifactId>
                 <version>2.3</version>
             </dependency>                        
+    
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.7</version>
+        </dependency>
     
     
         </dependencies>

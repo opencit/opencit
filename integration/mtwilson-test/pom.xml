@@ -96,7 +96,12 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-    
+
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>

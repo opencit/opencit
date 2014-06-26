@@ -886,3 +886,76 @@ text-align: center;
 .failureReportSubRow2{width: 100px;}
 .failureReportSubRow3{width: 390px;}
 
+/* styles for tls policy forms */
+
+form.tlsform fieldset {
+  margin-bottom: 10px;
+}
+form.tlsform legend {
+  padding: 0 2px;
+  font-weight: bold;
+}
+form.tlsform label {
+  display: inline-block;
+  line-height: 1.8;
+  vertical-align: top;
+}
+form.tlsform fieldset ol {
+  margin: 0;
+  padding: 0;
+}
+form.tlsform fieldset li {
+  list-style: none;
+  padding: 5px;
+  margin: 0;
+}
+form.tlsform fieldset fieldset {
+  border: none;
+  margin: 3px 0 0;
+}
+form.tlsform fieldset fieldset legend {
+  padding: 0 0 5px;
+  font-weight: normal;
+}
+form.tlsform fieldset fieldset label {
+  display: block;
+  width: auto;
+}
+form.tlsform em {
+  font-weight: bold;
+  font-style: normal;
+  color: #f00;
+}
+form.tlsform label {
+  width: 120px; /* Width of labels */
+}
+form.tlsform fieldset fieldset label {
+  margin-left: 123px; /* Width plus 3 (html space) */
+}
+
+form.tlsform ul.tlspolicy-content {
+  margin: 0;
+  padding: 0;
+}
+form.tlsform ul.tlspolicy-content li {
+  list-style: none;
+  padding: 5px;
+  margin: 0;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+}
+form.tlsform ul.tlspolicy-content li:last-child {
+  border-bottom: 1px solid black;
+}
+form.tlsform fieldset[data-policy-type] textarea.publickey-text {
+    height: 75px;
+    width: 300px;
+}
+form.tlsform fieldset[data-policy-type] label+textarea+button {
+    float: right;
+}
+ul.tlspolicy-certificate-list {
+    width: 300px;
+    overflow: auto;
+}

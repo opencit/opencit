@@ -165,6 +165,12 @@ function getAssetLogPage() {
         $('#AssetLogPage').html('<iframe  scrolling="no" frameborder="0" src="tag/index.html5?tab=log" width="100%" height="1000" > </iframe>');
 }
 
+function getTlsPolicyManagementPage() {
+	$('#mainContainer').html('<div id="TlsPolicyManagementPage"></div>');
+        //$('#AssetCertificatePage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/certificates.html" + '" width="100%" height="2000" > </iframe>');
+    //$('#TlsPolicyManagementPage').html('<iframe  scrolling="no" frameborder="0" src="tag/index.html5?tab=tls_policies" width="100%" height="1000" > </iframe>');
+	sendHTMLAjaxRequest(false, 'TlsPolicyManagement.html5', null, fnDisplayContent, null,'TlsPolicyManagementPage');
+}
 
 
 function getViewHostPage() {

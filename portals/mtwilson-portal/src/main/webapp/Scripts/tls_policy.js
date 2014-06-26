@@ -31,15 +31,17 @@ var mtwilsonTlsPolicyModule = {};
         }
         // next, any shared policies
         for(var i=0; i<m.tls_policies.length; i++) {
-            var id = m.tls_policies[i].id;
-            var name = m.tls_policies[i].name;
-            if( m.configuration["default"] == id ) {
-                name += " (server default)";
+            var choice = {};
+            choice.value = m.tls_policies[i].id || "";
+            choice.label = m.tls_policies[i].name;
+            choice.disabled = disabled;
+            if( m.configuration["default"] == choice.value ) {
+                choice.isDefault = true;
             }
-            if( m.configuration["global"] == id ) {
-                name += " (global)";
+            if( m.configuration["global"] == choice.value ) {
+                choice.isGlobal = true;
             }
-            choices.push({label:name, value:id, disabled:disabled});
+            choices.push(choice);
         }
         return choices;
     });
@@ -49,10 +51,19 @@ var mtwilsonTlsPolicyModule = {};
     defineFunction(m, "populateSelectOptionsWithTlsPolicyChoices", function(element,choicesArray) {
         $(element).empty();
         if(choicesArray.length===0) {
-            $(element).append("<option value='' disabled>None available</option>");
+            $(element).append("<option value='' data-i18n='tls.no_choices' disabled>None available</option>");
         }
+        var globalChoice, defaultChoice;
         for(var i=0; i<choicesArray.length; i++) {
+            if( choicesArray[i].isDefault ) { defaultChoice = choicesArray[i]; continue; }
+            if( choicesArray[i].isGlobal ) { globalChoice = choicesArray[i]; continue; }
             $(element).append("<option value='"+choicesArray[i].value+"' "+(choicesArray[i].disabled?"disabled":"")+">"+choicesArray[i].label+"</option>");
+        }
+        if( globalChoice ) {
+            $(element).append("<optgroup label='Global' data-i18n='[label]tls_policy.option.global'><option value='"+globalChoice.value+"'>"+globalChoice.label+"</option></optgroup>");
+        }
+        if( defaultChoice ) {
+            $(element).append("<optgroup label='Default' data-i18n='[label]tls_policy.option.default'><option value='"+defaultChoice.value+"' "+(defaultChoice.disabled?"disabled":"")+">"+defaultChoice.label+"</option></optgroup>");
         }
     });
     

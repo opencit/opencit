@@ -25,11 +25,11 @@ import org.skife.jdbi.v2.unstable.BindIn;
 @RegisterArgumentFactory({UUIDArgument.class})
 @RegisterMapper({TlsPolicyResultMapper.class,})
 public interface TlsPolicyDAO extends Closeable {
-    @SqlUpdate("insert into mw_tls_policy (id, name, private, content_type, content, comment) values (:id, :name, :privateScope, :contentType, :content, :comment)")
+    @SqlUpdate("insert into mw_tls_policy (id, name, private, content_type, content, comment) values (:id, :name, :private, :contentType, :content, :comment)")
      void insertTlsPolicy(@BindBean TlsPolicyRecord tlsPolicyRecord);
 //    void insertTlsPolicy(@Bind("id") String id, @Bind("name") String name, @Bind("impl") String impl, @Bind("content_type") String contentType, @Bind("content") byte[] content, @Bind("comment") String comment);
 
-    @SqlUpdate("update mw_tls_policy set name=:name, private=:privateScope, content_type=:contentType, content=:content, comment=:comment where id=:id")
+    @SqlUpdate("update mw_tls_policy set name=:name, private=:private, content_type=:contentType, content=:content, comment=:comment where id=:id")
     void updateTlsPolicy(@BindBean TlsPolicyRecord tlsPolicyRecord);
 //    void updateTlsPolicy(@Bind("id") String id, @Bind("name") String name, @Bind("impl") String impl, @Bind("content_type") String contentType, @Bind("content") byte[] content, @Bind("comment") String comment);
     @SqlQuery("select id, name, private, content_type, content, comment from mw_tls_policy")
