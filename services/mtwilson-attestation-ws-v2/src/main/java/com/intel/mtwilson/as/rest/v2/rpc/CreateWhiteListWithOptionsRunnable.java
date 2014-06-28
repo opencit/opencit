@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -39,6 +40,7 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     }
     
     @Override
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create,store","mle_modules:create","mle_sources:create"})
     public void run() {
         log.debug("Starting to process white list creation using host {}.", wlConfig.getTxtHostRecord().HostName);
         boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
