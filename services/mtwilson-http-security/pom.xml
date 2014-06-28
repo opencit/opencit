@@ -134,7 +134,7 @@
         <!-- end httpclient -->
     
         <!-- begin jersey 1.x support -->
-      
+        <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
@@ -147,21 +147,19 @@
             <version>${jersey-version}</version>
             <optional>true</optional>
         </dependency>
+        -->
         <!-- end jersey 1.x -->
     
         <!-- begin jersey 2.x support -->
-        <!--
     <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>2.4.1</version>
             <optional>true</optional>
         </dependency>
-        -->
+        
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.0</version>
             <optional>true</optional>
         </dependency>
         <dependency>

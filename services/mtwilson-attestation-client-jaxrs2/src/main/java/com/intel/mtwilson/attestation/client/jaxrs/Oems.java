@@ -5,9 +5,6 @@
 package com.intel.mtwilson.attestation.client.jaxrs;
 
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
@@ -16,7 +13,6 @@ import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
