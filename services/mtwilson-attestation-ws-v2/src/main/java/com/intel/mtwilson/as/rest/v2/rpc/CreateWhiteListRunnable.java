@@ -10,6 +10,7 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -41,6 +42,7 @@ public class CreateWhiteListRunnable implements Runnable{
     }
     
     @Override
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create,store","mle_modules:create","mle_sources:create"})
     public void run() {
         try {
             if (host != null) {

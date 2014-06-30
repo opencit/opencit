@@ -309,7 +309,7 @@ public class ApiClientBO {
         log.debug("Updating v2 user tables for {}", userName);
         try(LoginDAO loginDAO = MyJdbi.authz()) {
             log.debug("Looking up user login certificate {}", Hex.encodeHexString(apiClientUpdateRequest.fingerprint));
-            UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha1(apiClientUpdateRequest.fingerprint);
+            UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(apiClientUpdateRequest.fingerprint);
             if (userLoginCertificate != null) {
                 log.debug("Found user login certificate {}", userLoginCertificate.getId());
                 userLoginCertificate.setEnabled(apiClientUpdateRequest.enabled);
@@ -681,7 +681,7 @@ public class ApiClientBO {
     private ApiClientInfo convertToApiClientInfo(UserLoginCertificate userLoginCertificate) throws SQLException, IOException {
         ApiClientInfo info = new ApiClientInfo();
         info.certificate = userLoginCertificate.getCertificate();
-        info.fingerprint = userLoginCertificate.getSha1Hash();
+        info.fingerprint = userLoginCertificate.getSha256Hash();
         info.issuer = userLoginCertificate.getX509Certificate().getIssuerDN().getName();
         info.serialNumber = userLoginCertificate.getX509Certificate().getSerialNumber().intValue();
         info.expires = userLoginCertificate.getExpires();
