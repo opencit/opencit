@@ -416,6 +416,9 @@ function isNumber(n) {
     //                                }                                
                                 }
                                 function selection_create_form_onSelectTag(tagName) {
+                                    var tagNamesList = document.getElementById('selection-create-tags-select');
+                                    if(tagNamesList.selectedIndex <= 0 ) { return; }
+                                    tagName = tagNamesList.options[tagNamesList.selectedIndex].value;
                                     if(tagName == '') { return; }
                                     var tag = ws.findTagByName(tagName);
 //                                    log.debug("selection_create_form_onSelectTag: selected tag id: "+tagId);
@@ -513,7 +516,7 @@ function isNumber(n) {
                                     <div class="labelDiv" data-i18n="input.tags">Tags:</div> <!-- was: "Host Provided By" -->
                                     <div class="valueDiv">
                                         <select class="ddlBox_small_Border" id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
-                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name" data-bind-text="item.name"></option>
+                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name" data-bind-id="item.name" data-bind-text="item.name"></option>
                                         </select>
                                         <select class="ddlBox_small_Border" id="selection-create-tags-values" data-validator="selection_create_form_validateValues">
                                             <option data-bind-each-item="tagValues" data-bind-value="item.id" data-bind-text="item.value"></option>
@@ -948,7 +951,7 @@ function isNumber(n) {
                                 <table class="tableDisplayBind" cellpadding=0 cellspacing=0>
                                     <thead>
                                         <tr>
-                                            <th class="row9" data-i18n="label.host_id">Subject (Host ID)</th>
+                                            <th class="row9" data-i18n="label.host_id">Subject (Host Name)</th>
                                             <th class="row9" data-i18n="label.issuer">Issuer</th>
                                             <th class="row9" data-i18n="label.not_before">Not Before</th>
                                             <th class="row9" data-i18n="label.not_after">Not After</th>
@@ -964,7 +967,8 @@ function isNumber(n) {
                             <table id="certificate-browse-table" class="tableDisplayBind" cellpadding=0 cellspacing=0>
                                 <tbody>
                                     <tr class="evenRow" data-bind-each-item="certificates">
-                                        <td class="row9" align="center" data-bind-text="item.subject"></td>
+                                        <!--td class="row9" align="center" data-bind-text="item.subject"></td-->
+                                        <td class="row9" align="center" data-bind-text="item.subjectName"></td>
                                         <td class="row9" align="center" data-bind-text="item.issuer"></td>
                                         <td class="row9" align="center" data-bind-text="item.not_before | isodate"></td>
                                         <td class="row9" align="center" data-bind-text="item.not_after | isodate"></td>
