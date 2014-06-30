@@ -17,6 +17,9 @@ function populateEditHostDetails(responseJSON) {
 function populateEditHostDataIntoTable(hostDetails) {
 	var str = "";
 	for ( var item in hostDetails) {
+                if(item != parseInt(item)) {
+                        continue;
+                }
 		var classValue = null;
 		if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
                 var vCenterDetails = hostDetails[item].vCenterDetails;

@@ -44,6 +44,9 @@ function fuCreateEditMleTable(mleData) {
 	var str = "";
 	$('#editMleContentDiv table tbody').html("");
 	for ( var items in mleData) {
+                if(items != parseInt(items)) {
+                        continue;
+                }
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
                         // Changing the display value for Module attestation to PCR + Module since we attest both.
