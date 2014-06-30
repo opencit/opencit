@@ -194,12 +194,34 @@ public class TAHelper {
             IOUtils.write(secret, outSecret);
             }
 
+            String daaSecretFileName = getDaaSecretFileName(sessionId);
+            String daaAikProofFileName = getDaaAikProofFileName(sessionId);
+            String daaChallengeFileName = getDaaChallengeFileName(sessionId);
+            String rsaPubkeyFileName = getRSAPubkeyFileName(sessionId);
+            
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(daaSecretFileName)) {
+                log.warn("Escaping special characters in daaSecretFileName: {}", daaSecretFileName);
+                daaSecretFileName = CommandUtil.escapeShellArgument(daaSecretFileName);
+            }
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(daaAikProofFileName)) {
+                log.warn("Escaping special characters in daaAikProofFileName: {}", daaAikProofFileName);
+                daaAikProofFileName = CommandUtil.escapeShellArgument(daaAikProofFileName);
+            }
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(daaChallengeFileName)) {
+                log.warn("Escaping special characters in daaChallengeFileName: {}", daaChallengeFileName);
+                daaChallengeFileName = CommandUtil.escapeShellArgument(daaChallengeFileName);
+            }
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(rsaPubkeyFileName)) {
+                log.warn("Escaping special characters in rsaPubkeyFileName: {}", rsaPubkeyFileName);
+                rsaPubkeyFileName = CommandUtil.escapeShellArgument(rsaPubkeyFileName);
+            }
+            
             // encrypt DAA challenge secret using AIK public key so only TPM can read it
             CommandUtil.runCommand(String.format("aikchallenge %s %s %s %s",
-                    getDaaSecretFileName(sessionId),
-                    getDaaAikProofFileName(sessionId),
-                    getDaaChallengeFileName(sessionId),
-                    getRSAPubkeyFileName(sessionId)), false, "Aik Challenge");
+                    daaSecretFileName,
+                    daaAikProofFileName,
+                    daaChallengeFileName,
+                    rsaPubkeyFileName), false, "Aik Challenge");
 
             // send DAA challenge to Trust Agent and validate the response
             try(FileInputStream in = new FileInputStream(new File(getDaaChallengeFileName(sessionId)))) {
@@ -721,10 +743,29 @@ public class TAHelper {
 
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
 //        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
+        String nonceFileName = aikverifyhomeData + File.separator + getNonceFileName(sessionId);
+        String rsaPubkeyFileName = aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId);
+        String quoteFileName = aikverifyhomeData + File.separator + getQuoteFileName(sessionId);
+        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(aikverifyCmd)) {
+            log.warn("Escaping special characters in aikverifyCmd path: {}", aikverifyCmd);
+            aikverifyCmd = CommandUtil.escapeShellArgument(aikverifyCmd);
+        }
+        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(nonceFileName)) {
+            log.warn("Escaping special characters in nonceFileName path: {}", nonceFileName);
+            nonceFileName = CommandUtil.escapeShellArgument(nonceFileName);
+        }
+        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(rsaPubkeyFileName)) {
+            log.warn("Escaping special characters in rsaPubkeyFileName path: {}", rsaPubkeyFileName);
+            rsaPubkeyFileName = CommandUtil.escapeShellArgument(rsaPubkeyFileName);
+        }
+        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(quoteFileName)) {
+            log.warn("Escaping special characters in quoteFileName path: {}", quoteFileName);
+            quoteFileName = CommandUtil.escapeShellArgument(quoteFileName);
+        }
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
-        String command = String.format("%s -c %s %s %s", aikverifyCmd, aikverifyhomeData + File.separator + getNonceFileName(sessionId),
-                aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId), aikverifyhomeData + File.separator + getQuoteFileName(sessionId));
+        String command = String.format("%s -c %s %s %s", aikverifyCmd, nonceFileName,
+                rsaPubkeyFileName, quoteFileName);
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");

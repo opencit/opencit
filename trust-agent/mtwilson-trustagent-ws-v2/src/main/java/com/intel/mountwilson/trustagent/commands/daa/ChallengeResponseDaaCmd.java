@@ -34,9 +34,23 @@ public class ChallengeResponseDaaCmd implements ICommand {
             try (FileOutputStream out = new FileOutputStream(new File(context.getDaaChallengeFileName()))) {
                 IOUtils.copy(new ByteArrayInputStream(context.getDaaChallenge()), out);
             }
-            
+            String aikBlobFileName = context.getAikBlobFileName();
+            String daaChallengeFileName = context.getDaaChallengeFileName();
+            String daaResponseFileName = context.getDaaResponseFileName();
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(aikBlobFileName)) {
+                log.warn("Escaping special characters in aikBlobFileName: {}", aikBlobFileName);
+                aikBlobFileName = CommandUtil.escapeShellArgument(aikBlobFileName);
+            }
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(daaChallengeFileName)) {
+                log.warn("Escaping special characters in daaChallengeFileName: {}", daaChallengeFileName);
+                daaChallengeFileName = CommandUtil.escapeShellArgument(daaChallengeFileName);
+            }
+            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(daaResponseFileName)) {
+                log.warn("Escaping special characters in daaResponseFileName: {}", daaResponseFileName);
+                daaResponseFileName = CommandUtil.escapeShellArgument(daaResponseFileName);
+            }
             // prepare response to challenge
-            CommandUtil.runCommand(String.format("aikrespond %s %s %s", context.getAikBlobFileName(), context.getDaaChallengeFileName(), context.getDaaResponseFileName())); // safe; no arguments involved in this command line
+            CommandUtil.runCommand(String.format("aikrespond %s %s %s", aikBlobFileName, daaChallengeFileName, daaResponseFileName)); // safe; no arguments involved in this command line
             log.info( "Created response for DAA challenge");
 
             // read response and delete the response file
