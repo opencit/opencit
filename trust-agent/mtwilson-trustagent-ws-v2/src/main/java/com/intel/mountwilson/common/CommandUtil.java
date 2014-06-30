@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 public class CommandUtil {
     
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
+    private static final Pattern singleQuoteShellSpecialCharacters = Pattern.compile("[*?#~=%\\[]");
 
     public static CommandResult runCommand(String commandLine) throws TAException, IOException {
         return runCommand(commandLine, null);
@@ -156,6 +158,27 @@ public class CommandUtil {
                 + "</client_request>";
         return responseXML;
     }
-        
     
+    // This function returns true if the string input contains bash/shell single quote special characters
+    public static Boolean containsSingleQuoteShellSpecialCharacters(String input) {
+        Pattern p = Pattern.compile("(.*?)" + singleQuoteShellSpecialCharacters.pattern() + "(.*?)");
+        return input.matches(p.pattern());
+    }
+    
+    // This function will escape special characters in an argument being passed to the bash/shell command line
+    public static String escapeShellArgument(String input) {
+        return "'" + input.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "'";
+    }
+    
+    // This function will escape special characters in an option being passed to the bash/shell command line
+    public static String escapeShellOption(String input) {
+        if (input.contains("=")) {
+            String[] option = input.split("=", 2);
+            String parameter = option[0];
+            String value = option[1];
+            return parameter + "='" + value.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "'";
+        } else {
+            return escapeShellArgument(input);
+        }
+    }
 }
