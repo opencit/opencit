@@ -876,7 +876,7 @@ function isNumber(n) {
                                             <option value="After" data-i18n="select.after">after</option>
                                         </select>
 
-                                        <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" data-i18n="[placeholder]placeholder.date" onblur='(function(){var currentValue = $(this).value; if( currentValue ) { var parsedValue = Date.parse(currentValue); if( parsedValue ) { $(this).value = parsedValue.toISOString(); }}})()'/>
+                                        <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" data-i18n="[placeholder]placeholder.date" onblur='(function(){var currentValue = $("certificate-search-valid").value; if( currentValue ) { var parsedValue = Date.parse(currentValue); if( parsedValue ) { $("certificate-search-valid").value = parsedValue.toISOString(); }}})()'/>
                                         <script>console.log("timedelta is "+ajax.timeDelta); document.getElementById('certificate-search-valid').value = Date.parse('now').addMilliseconds(ajax.timeDelta).toISOString()</script>
                                         <span class="help" data-i18n="label.date_hint">Try "today", "next tuesday", or most reasonable date formats</span>
 
