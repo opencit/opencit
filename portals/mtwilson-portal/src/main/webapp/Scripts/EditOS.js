@@ -20,6 +20,9 @@ function fuCreateEditOSTable(osData) {
 	var str = "";
 	$('#editOSContentDiv table tbody').html("");
 	for ( var items in osData) {
+                if(items != parseInt(items)) {
+                        continue;
+                }
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 		str+='<tr class="'+classValue+'">'+

@@ -19,7 +19,10 @@ function fnUpdateEditOEMTable(responseJSON) {
 function fuCreateEditOEMTable(oemData) {
 	var str = "";
 	$('#editOEMContentDiv table tbody').html("");
-	for ( var items in oemData) {
+	for ( var items in oemData) {  
+                if(items != parseInt(items)) {
+                        continue;
+                }
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 		str+='<tr class="'+classValue+'">'+
