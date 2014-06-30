@@ -25,6 +25,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.User;
 import java.net.SocketException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -219,6 +220,8 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
         X509AuthenticationInfo info = new X509AuthenticationInfo();
         info.setPrincipals(principals);
         try {
+            X509Certificate decodeDerCertificate = X509Util.decodeDerCertificate(userLoginCertificate.getCertificate());
+            log.trace("Decoded DER certificate public key is {}", decodeDerCertificate.getPublicKey().toString());
             info.setCredentials(X509Util.decodeDerCertificate(userLoginCertificate.getCertificate()));
         }
         catch(CertificateException e) {
