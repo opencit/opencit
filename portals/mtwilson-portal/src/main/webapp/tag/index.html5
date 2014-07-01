@@ -876,7 +876,7 @@ function isNumber(n) {
                                             <option value="After" data-i18n="select.after">after</option>
                                         </select>
 
-                                        <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" data-i18n="[placeholder]placeholder.date" onblur='(function(){var currentValue = $(this).value; if( currentValue ) { var parsedValue = Date.parse(currentValue); if( parsedValue ) { $(this).value = parsedValue.toISOString(); }}})()'/>
+                                        <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" data-i18n="[placeholder]placeholder.date" onblur='(function(){var currentValue = $("certificate-search-valid").value; if( currentValue ) { var parsedValue = Date.parse(currentValue); if( parsedValue ) { $("certificate-search-valid").value = parsedValue.toISOString(); }}})()'/>
                                         <script>console.log("timedelta is "+ajax.timeDelta); document.getElementById('certificate-search-valid').value = Date.parse('now').addMilliseconds(ajax.timeDelta).toISOString()</script>
                                         <span class="help" data-i18n="label.date_hint">Try "today", "next tuesday", or most reasonable date formats</span>
 
@@ -951,7 +951,7 @@ function isNumber(n) {
                                 <table class="tableDisplayBind" cellpadding=0 cellspacing=0>
                                     <thead>
                                         <tr>
-                                            <th class="row9" data-i18n="label.host_id">Subject (Host ID)</th>
+                                            <th class="row9" data-i18n="label.host_id">Subject (Host Name)</th>
                                             <th class="row9" data-i18n="label.issuer">Issuer</th>
                                             <th class="row9" data-i18n="label.not_before">Not Before</th>
                                             <th class="row9" data-i18n="label.not_after">Not After</th>
@@ -968,7 +968,7 @@ function isNumber(n) {
                                 <tbody>
                                     <tr class="evenRow" data-bind-each-item="certificates">
                                         <!--td class="row9" align="center" data-bind-text="item.subject"></td-->
-                                        <td align="center" data-bind-text="item.subjectName"></td>
+                                        <td class="row9" align="center" data-bind-text="item.subjectName"></td>
                                         <td class="row9" align="center" data-bind-text="item.issuer"></td>
                                         <td class="row9" align="center" data-bind-text="item.not_before | isodate"></td>
                                         <td class="row9" align="center" data-bind-text="item.not_after | isodate"></td>
