@@ -48,15 +48,18 @@ function populateHostTrustDataIntoTable(hostDetails) {
 		VMWareHost = [];
 		VMWareHostLocation = [];
 		for ( var item in hostDetails) {
+			if(item != parseInt(item)) {
+				continue;
+			}
 			var classValue = null;
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
-			str+='<tr class="'+classValue+'" hostID="'+hostDetails[item].hostID+'" id="host_div_id_'+hostDetails[item].hostName.replace(/\./g,'_')+'">'+
+			str+='<tr class="'+classValue+'" hostID="'+ escapeForHTMLAttributes(hostDetails[item].hostID) +'" id="host_div_id_'+ escapeForHTMLAttributes(hostDetails[item].hostName.replace(/\./g,'_'))+'">'+
                                                 //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
 				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
-				'<td class="row2">'+hostDetails[item].hostName+'</td>'+
-				'<td align="center" class="row3"><img border="0" src="'+hostDetails[item].osName+'"></td>';
-				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+hostDetails[item].hypervisorName+'">' : '';
-				str+='<td align="center" class="row4">'+value+'</td>';
+				'<td class="row2">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</td>'+
+				'<td align="center" class="row3"><img border="0" src="'+ encodeURL(hostDetails[item].osName) +'"></td>';
+				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ encodeURL(hostDetails[item].hypervisorName)+'">' : '';
+				str+='<td align="center" class="row4">'+ value +'</td>';
 				//TODO : 
 				 // Loaction Policy 
 				 //according to email on Fri 9/14/2012 10:21 AM
@@ -65,10 +68,10 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			    value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
 				//value="";
 				
-                        str+='<td align="center" class="row5" title="'+hostDetails[item].assetTagDetails+'"><img border="0" src="'+hostDetails[item].assetTagStatus+'"></td>'+
-				'<td align="center" class="row6"><img border="0" src="'+hostDetails[item].biosStatus+'"></td>'+
-				'<td align="center" class="row7"><img border="0" src="'+hostDetails[item].vmmStatus+'"></td>'+
-				'<td align="center" class="row8"><img border="0" src="'+hostDetails[item].overAllStatus+'"></td>';
+                        str+='<td align="center" class="row5" title="'+ escapeForHTMLAttributes(hostDetails[item].assetTagDetails) +'"><img border="0" src="'+ encodeURL(hostDetails[item].assetTagStatus) +'"></td>'+
+				'<td align="center" class="row6"><img border="0" src="'+ encodeURL(hostDetails[item].biosStatus) +'"></td>'+
+				'<td align="center" class="row7"><img border="0" src="'+ encodeURL(hostDetails[item].vmmStatus) +'"></td>'+
+				'<td align="center" class="row8"><img border="0" src="'+ encodeURL(hostDetails[item].overAllStatus) +'"></td>';
 				/*if (!(hostDetails[item].overAllStatusBoolean)) {
 					str+='<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/helpicon.png" alt="Failure Report"></td>';
 				}else {
@@ -76,13 +79,13 @@ function populateHostTrustDataIntoTable(hostDetails) {
 					
 				}*/
 				
-				str+='<td align="center" class="row9">'+hostDetails[item].updatedOn+'</td>'+
+				str+='<td class="row9">'+ getHTMLEscapedMessage(hostDetails[item].updatedOn) +'</td>'+
 				'<td nowrap align="center" class="row10"><input class="tableButton" type="button"  value="Refresh" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh"></td>'+
 				'<td align="center" class="row11"><a><img src="images/trust_assertion.png" onclick="fnGetTrustSamlDetails(\''+hostDetails[item].hostName+'\')"/></a></td>'+
-			    '<td align="center" class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
-				'<td align="center" class="row12">';
+			    '<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
+				'<td class="row12">';
 				
-				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+hostDetails[item].errorMessage+'</textarea>';}
+				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+ getHTMLEscapedMessage(hostDetails[item].errorMessage) +'</textarea>';}
 				str+='</td>'+
 			'</tr>';
 				

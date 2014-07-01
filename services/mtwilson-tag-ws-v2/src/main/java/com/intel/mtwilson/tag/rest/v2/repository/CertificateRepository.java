@@ -164,14 +164,18 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     public void create(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-                        
-            dao.insert(item.getId(), item.getCertificate(), item.getSha1().toHexString(), 
-                    item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
-
+            Certificate newCert = dao.findById(item.getId());
+            if (newCert == null) {
+                newCert = Certificate.valueOf(item.getCertificate());
+                dao.insert(item.getId(), newCert.getCertificate(), newCert.getSha1().toHexString(), 
+                        newCert.getSha256().toHexString(), newCert.getSubject(), newCert.getIssuer(), newCert.getNotBefore(), newCert.getNotAfter());                
+            } else {
+                throw new WebApplicationException(Response.Status.CONFLICT);
+            }
         } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
-            log.error("Error during attribute creation.", ex);
+            log.error("Error during certificate creation.", ex);
             throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }

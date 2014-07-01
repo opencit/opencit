@@ -17,20 +17,23 @@ function populateViewHostDetails(responseJSON) {
 function populateViewHostDataIntoTable(hostDetails) {
 	var str = "";
 	for ( var item in hostDetails) {
+		if(item != parseInt(item)) {
+			continue;
+		}
 		var classValue = null;
 		if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
-        if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
+                if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
 		str+='<tr class="'+classValue+'">'+
-			'<td class="vh_viewRow1">'+hostDetails[item].hostName+'</td>'+
+			'<td class="vh_viewRow1">'+ getHTMLEscapedMessage(hostDetails[item].hostName) + '</td>'+
 			//'<td class="vh_viewRow2">'+hostDetails[item].hostIPAddress+'</td>'+
-			'<td class="vh_viewRow3">'+hostDetails[item].hostPort+'</td>'+
-			'<td class="vh_viewRow4">'+hostDetails[item].biosName+'</td>'+
-			'<td class="vh_viewRow5">'+hostDetails[item].biosBuildNo+'&nbsp;</td>'+
-			'<td class="vh_viewRow6">'+hostDetails[item].vmmName+'&nbsp;</td>'+
-			'<td class="vh_viewRow7">'+hostDetails[item].vmmBuildNo+'&nbsp;</td>'+
-			'<td class="vh_viewRow8">'+hostDetails[item].emailAddress+'&nbsp;</td>'+
-			'<td class="vh_viewRow9">'+hostDetails[item].vCenterDetails+'&nbsp;</td>'+
-			'<td class="vh_viewRow10">'+hostDetails[item].hostDescription+'&nbsp;</td>'+
+			'<td class="vh_viewRow3">'+ getHTMLEscapedMessage(hostDetails[item].hostPort) + '</td>'+
+			'<td class="vh_viewRow4">'+ getHTMLEscapedMessage(hostDetails[item].biosName) + '</td>'+
+			'<td class="vh_viewRow5">'+ getHTMLEscapedMessage(hostDetails[item].biosBuildNo) + '&nbsp;</td>'+
+			'<td class="vh_viewRow6">'+ getHTMLEscapedMessage(hostDetails[item].vmmName) + '&nbsp;</td>'+
+			'<td class="vh_viewRow7">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo) + '&nbsp;</td>'+
+			'<td class="vh_viewRow8">'+ getHTMLEscapedMessage(hostDetails[item].emailAddress) + '&nbsp;</td>'+
+			'<td class="vh_viewRow9">'+ getHTMLEscapedMessage(hostDetails[item].vCenterDetails) + '&nbsp;</td>'+
+			'<td class="vh_viewRow10">'+ getHTMLEscapedMessage(hostDetails[item].hostDescription) + '&nbsp;</td>'+
 		'</tr>';
 	}
     

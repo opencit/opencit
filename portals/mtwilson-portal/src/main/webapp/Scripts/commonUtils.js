@@ -921,12 +921,12 @@ function applyPagination(elementID,noOfPages,fuToCallOnButtonClick,startPageNo){
 }
 
 /*Function to change error message into html escaped String.*/
-function getHTMLEscapedMessage(message) {
+/*function getHTMLEscapedMessage(message) {
 	 var str = message;
      str =str.replace(/\</g, "&lt;");
      str =str.replace(/\>/g, "&gt;");
      return str;
-}
+}*/
 
 
 //function to check empty input:text value. If input is empty then add validationDiv into third div of a row for which we are checking the value.
@@ -1020,12 +1020,12 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
 
 
 /*Function to change error message into html escaped string.*/
-function getHTMLEscapedMessage(message) {
+/*function getHTMLEscapedMessage(message) {
 	 var str = message;
      str =str.replace(/\</g, "&lt;");
      str =str.replace(/\>/g, "&gt;");
      return str;
-}
+}*/
 
 //function to get vCenterServer Address 
 function getVCenterServerAddress(inputID) {

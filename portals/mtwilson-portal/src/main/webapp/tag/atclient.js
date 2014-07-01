@@ -278,7 +278,7 @@ mtwilson.atag = mtwilson.atag || {};
             default:
                 break;
         }
-        $('notifications').update(notice.text);
+        $('notifications').update(getHTMLEscapedMessage(notice.text));
         $('notifications').show();
         $('notifications').setOpacity(1.0);
 
@@ -717,7 +717,6 @@ mtwilson.atag = mtwilson.atag || {};
                                         }
                                 }
                         }
-                        view.sync();
                 }
 
 
@@ -730,6 +729,7 @@ mtwilson.atag = mtwilson.atag || {};
                                 data.certificates[loop].status = 'Expired';
                         }
                 }
+                view.sync();
                 break;
             case 'certificateRequests':
                 if (event.memo.response.length > 0) {
@@ -1617,7 +1617,7 @@ function parseSelectionXML(xml) {
 	mtwilson.atag.data.selection_details = [];
 	var attributes = xmlDoc.getElementsByTagName('attribute');
 	for(var loop = 0; loop < attributes.length; loop++) {
-		var text = (attributes[loop].getElementsByTagName('text')[0].innerHTML);
+		var text = (attributes[loop].getElementsByTagName('text')[0].textContent);
 		var split_vals = text.split('=');
 		mtwilson.atag.data.selection_details.push({
 			id: loop,
@@ -1706,7 +1706,7 @@ function getSelectedSelectionDetails(selection_id) {
 			jQuery('#' + selection_id).addClass('highlightSelectedSelection');
 		}
 	};
-	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml",true);
+	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml?rand=" + Math.random(),true);
 	xmlhttp.send();            
 
 }

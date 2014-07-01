@@ -17,7 +17,7 @@ public class HostAttestationFilterCriteria extends DefaultFilterCriteria impleme
     
     @QueryParam("id")
     public UUID id;
-    @QueryParam("host")
+    @QueryParam("host_id")
     public UUID hostUuid;
     @QueryParam("nameEqualTo")
     public String nameEqualTo;

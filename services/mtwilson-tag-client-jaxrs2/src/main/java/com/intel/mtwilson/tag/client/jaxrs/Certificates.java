@@ -37,7 +37,9 @@ public class Certificates  extends MtWilsonClient {
     /**
      * Creates a new certificate entry into the database that can be provisioned for the host. Note that the
      * certificate subject has to have the hardware uuid of the host to which the certificate has to be
-     * provisioned. The UUID can be obtained using the search method in the HostUuid resource.
+     * provisioned. The UUID can be obtained using the search method in the HostUuid resource. Also note that
+     * the certificate type is of Attribute certificate, which would store the attributes that needs to be
+     * associated with the host.
      * @param obj Certificate object that needs to be created. 
      * @return Created CertificateRequest object.
      * @since Mt.Wilson 2.0
@@ -53,9 +55,7 @@ public class Certificates  extends MtWilsonClient {
      * QSGFQExEAwOY3VzdG9tZXI9UGVwc2kwFgYFVQSGFQExDQwLY2l0eT1Gb2xzb20wDQYJKoZIhvcNAQELBQADggEBAH7+oMPKjZCVa3QuG/YgJrungrr32
      * xtbwb4d3tzln3KCtd/NjwWULRWPyNoXTeUh7lceNnAFZWBsm+iTke6hi1yjkou275MeXftIf8xVFJDie5BAq6aMENIalbEW7jYNUB5hDlebjOt4RgZ2n
      * efBB9M4/9BgInM6hcG3PXdmCeXLZBoKcu9Ae8I4C8WQB4JmgDco1u7pzamne2ZGQiwNuDIlkNqQqUwS7dul6KmzQHpv/7pPem7gGZFFmMAuqrC4ng4vJ
-     * clNV1ojUXHl0M/BteTfKyaEolzD+muf8JXM0dzhjWVxu13wOBYrric22mo+HtbdqqrgVOH+oh59ESFVtUM=",
-     * "sha1":"5b83754aedc10d1fe851b55e85baddf273af41c0","sha256":"b17585bf4f93e9c03ec09abb68a548a7871273f156aa41a8820b51d450e4d320",
-     * "subject":"064866ea-620d-11e0-b1a9-001e671043c4","issuer":"CN=assetTagService","not_before":1401344113000,"not_after":1432880113000}
+     * clNV1ojUXHl0M/BteTfKyaEolzD+muf8JXM0dzhjWVxu13wOBYrric22mo+HtbdqqrgVOH+oh59ESFVtUM="}
      * 
      * Output: {"id":"695e8d32-0dd8-46bb-90d6-d2520ff5e2f0","certificate":"MIICMjCCARoCAQEwH6EdpBswGTEXMBUGAWkE
      * EAZIZupiDRHgsakAHmcQQ8SgIDAepBwwGjEYMBYGA1UEAwwPYXNzZXRUYWdTZXJ2aWNlMA0GCSqGSIb3DQEBCwUAAgYBRkaePNswIhg
@@ -72,17 +72,20 @@ public class Certificates  extends MtWilsonClient {
      * @mtwSampleApiCall
      * <pre>
      *  Certificates client = new Certificates(My.configuration().getClientProperties());
-     *  Certificate obj = new Certificate();
-     *  obj.setCertificate(certificate); // assuming the certificate has been created.
-     *  obj.setSha1(Sha1Digest.digestOf(certificate).toByteArray());
-     *  obj.setSha256(Sha256Digest.digestOf(certificate()).toByteArray());
-     *  obj.setSubject("064866ea-620d-11e0-b1a9-001e671043c4");
+     *  KeyPair keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
+     *  AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
+     *  AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+     *  ContentSigner authority = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded()));
+     *  AttributeCertificateHolder holder = new AttributeCertificateHolder(new X500Name(new RDN[]{})); 
+     *  AttributeCertificateIssuer issuer = new AttributeCertificateIssuer(new X500Name(new RDN[]{}));
+     *  BigInteger serialNumber = new BigInteger(64, new SecureRandom());
      *  Date notBefore = new Date();
-     *  Date notAfter = new Date(notBefore.getTime() + (1000 * 60 * 60 * 24 * 365)); // one year
-     *  obj.setNotBefore(notBefore);
-     *  obj.setNotAfter(notAfter);
-     *  obj.setIssuer("CN=assetTagService");
-     *  Certificate createdObj = client.createCertificate(obj);
+     *  Date notAfter = new Date(notBefore.getTime() + TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
+     *  X509v2AttributeCertificateBuilder builder = new X509v2AttributeCertificateBuilder(holder, issuer, serialNumber, notBefore, notAfter);
+     *  X509AttributeCertificateHolder cert = builder.build(authority);                
+     *  Certificate obj = new Certificate();
+     *  obj.setCertificate(cert.getEncoded());
+     *  obj = client.createCertificate(obj);
      * </pre>
      */
     public Certificate createCertificate(Certificate obj) {

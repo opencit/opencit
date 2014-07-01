@@ -392,6 +392,7 @@
         "sha1_fingerprint":"Fingerprint (SHA-1)",
         "sha256_fingerprint":"Fingerprint (SHA256)",
         "active":"Active",
+        "expired":"Expired",
         "revoked":"Revoked",
         "available_servers":"Available servers",
         "servers_to_provision":"Servers to provision",
