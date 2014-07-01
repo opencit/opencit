@@ -118,7 +118,7 @@ function fnGetRequestVOForApprovalOrReject() {
 }
 
 function approveSelectedRequestSuccess(responseJSON) {
-	alert("Request is Approved Successfully.");
+	alert($("#alert_request_approved").text());
 	getApproveRequestPage();
 }
 
@@ -130,7 +130,7 @@ function fnRejectSelectedRequest() {
 }
 
 function rejectSelectedRequestSuccess() {
-	alert("Request is Rejected Successfully.");
+	alert($("#alert_request_rejected").text());
 	getApproveRequestPage();
 }
 

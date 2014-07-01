@@ -1478,10 +1478,10 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.updateCertificateAuthority = function(input) {
         var report = validate(input);
         if (report.isValid) {
-            alert("form is valid, update ca: " + Object.toJSON(report.input));
+            alert(jQuery("#alert_valid_ca").text() + ": " + Object.toJSON(report.input));
         }
         else {
-            alert("form NOT valid, update ca: " + Object.toJSON(report.input));
+            alert(jQuery("#alert_not_valid_ca").text() + ": " + Object.toJSON(report.input));
 
         }
         //alert("Update CA: "+Object.toJSON(cloneWithoutAltText(input)));
@@ -1578,7 +1578,7 @@ function getFileContents() {
 		fileContentsRead = true;
 	    }catch(Exception){
 		//document.getElementById("fileContents").innerHTML = "error reading file";
-		alert('Please select the tag XML to be provisioned.');
+		alert(jQuery("#alert_provision_select_tag_xml").text());
 		return false;
 	    }
 	}
@@ -1636,12 +1636,12 @@ function provisionTags() {
 
 	var selected_hosts = mtwilson.atag.data.selected_hosts;
 	if(selected_hosts.length == 0) {
-		alert('Select at least one server to provision the tags');
+		alert(jQuery("#alert_provision_select_server").text());
 		return false;
 	}
 
 	if(selectedSelectionXML == '') {
-		alert('Upload a tag XML or choose a selection to provision');
+                alert(jQuery("#alert_provision_upload_tag_xml").text());
 		return false;
 	}
         mtwilson.rivets.views['provision-sel-table'].sync();

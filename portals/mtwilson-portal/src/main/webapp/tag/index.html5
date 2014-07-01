@@ -1207,7 +1207,13 @@ function isNumber(n) {
                     <!-- content-wrap ends-->	
                 </div>
             </div>
-
+            <div>
+                <span id="alert_valid_ca" data-i18n="alert.valid_ca" style="display: none;">form is valid, update ca</span>
+                <span id="alert_not_valid_ca" data-i18n="alert.not_valid_ca" style="display: none;">form NOT valid, update ca</span>
+                <span id="alert_provision_select_tag_xml" data-i18n="alert.provision_select_tag_xml" style="display: none;">Please select the tag XML to be provisioned.</span>
+                <span id="alert_provision_select_server" data-i18n="alert.provision_select_server" style="display: none;">Select at least one server to provision the tags</span>
+                <span id="alert_provision_upload_tag_xml" data-i18n="alert.provision_upload_tag_xml" style="display: none;">Upload a tag XML or choose a selection to provision</span>
+            </div>
             
             <!-- footer starts -->
             <div class="footer" style="display: none;">

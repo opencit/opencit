@@ -57,7 +57,7 @@ function registerUserSuccess(responseJSON){
     $('#disabledDiv').remove();
     if(responseJSON.result){
     	/* Soni_Begin_18/09/2012_issue_RC2: Change the text after successful user registration_Bug#392  */
-        alert("User is successfully registered. Contact administrator for access approval before accessing the portal.");
+        alert($("#alert_successful_user_registration").text());
         /* Soni_End_18/09/2012_issue_RC2: Change the text after successful user registration_Bug#392  */
         window.location.href = "login.htm";
     }else{

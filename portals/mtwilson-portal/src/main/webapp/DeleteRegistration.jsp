@@ -30,6 +30,7 @@
 			<div id="successMessage"></div>
 			
 		</div>
+                <span id="alert_delete_request" data-i18n="alert.delete_request" style="display: none;">Are you sure you want to delete this request?</span>
 	</div>
 	<script type="text/javascript" src="Scripts/DeleteRegistration.js"></script>
 </body>

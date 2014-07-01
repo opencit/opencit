@@ -227,7 +227,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 				callbackSuccessFunction.apply(null,args);
 			}else{
-				alert("Response from Server is null.");
+				alert($("#alert_null_server_response").text());
 				fnSessionExpireLoginAgain();
 			}
                         i18nInit();
@@ -243,7 +243,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
-				alert("Error While Serving request. Please try again later.");
+				alert($("#alert_request_error").text());
 				fnSessionExpireLoginAgain();
 			}
                         i18nInit();

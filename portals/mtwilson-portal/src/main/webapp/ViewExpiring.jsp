@@ -30,6 +30,8 @@
 			<div id="successMessage"></div>
 			
 		</div>
+                <span id="alert_reregister_with_api" data-i18n="alert.reregister_with_api" style="display: none;">Please log into the system on which the client is installed and re-register the client using the API register functionality.</span>
+                <span id="alert_request_extended" data-i18n="alert.request_extended" style="display: none;">Request is extended successfully.</span>
 	</div>
 	<script type="text/javascript" src="Scripts/ViewExpiring.js"></script>
 </body>

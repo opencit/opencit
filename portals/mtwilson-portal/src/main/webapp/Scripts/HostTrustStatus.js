@@ -37,7 +37,7 @@ function populateHostTrustDetails(responsJSON) {
 }
 
 function updatePeerCert(responsJSON) {
-    alert("updating cert now");
+    alert($("#alert_updating_cert").text());
 }
 
 function updatePeerCertNo(responsJSON){}
@@ -247,7 +247,7 @@ function migrateVMToHost(element,hostName,vmName,hostID) {
     var constrains = checkConstrains(element);
     if (constrains){
 	var hostToTransfer = $(element).parent().find('select').val();
-        if(confirm("Are you sure you want to migrate this VM to "+hostToTransfer+" ?")){
+        if(confirm($("#alert_migrate_vm").text() + " " + hostToTransfer + " ?")){
          $('#errorMessage').html('');
 	$('#mainTrustDetailsDiv').prepend(disabledDiv);
         //var vmID = $(element).parent().parent().attr('vmid');

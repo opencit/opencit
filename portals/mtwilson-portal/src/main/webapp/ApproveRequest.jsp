@@ -30,6 +30,8 @@
 			<div id="successMessage"></div>
 			
 		</div>
+                <span id="alert_request_approved" data-i18n="alert.request_approved" style="display: none;">Request is approved successfully.</span>
+                <span id="alert_request_rejected" data-i18n="alert.request_rejected" style="display: none;">Request is rejected successfully.</span>
 	</div>
 	<script type="text/javascript" src="Scripts/ApproveRequest.js"></script>
 </body>

@@ -213,7 +213,7 @@ function fnUpdateOSInfo(element) {
      }
 		}
 	/* Soni_End_18/09/2012_issue_RC2:_Unable_to_remove_the_description_for_an_OS_Bug_387  */
-	if (confirm("Are you sure you want to update OS Info ?")) {
+	if (confirm($("#alert_update_os_info").text())) {
 		var data="";
 		var row = $(element).parent().parent();
 		row.find("td:not(:first-child)").each(function(){
@@ -237,7 +237,7 @@ function fnCancelOSInfo(element) {
 }
 
 function fnDeleteOSInfo(element) {
-	if (confirm("Are you sure you want to delete this OS ?")) {
+	if (confirm($("#alert_delete_os").text())) {
 		var data ='';
 		var row = $(element).parent().parent();
 		row.find("td:not(:first-child)").each(function(){
@@ -317,7 +317,7 @@ function fnAddNewOS(element) {
 	if (option.error) {
 		return false;
 	}else {
-		if (confirm("Are you sure want to add OS ?")) {
+		if (confirm($("#alert_add_os").text())) {
 			$('#addOSDataTable').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/addOSData.html', data, fnAddNewOSSuccess, null,element);
 		}
@@ -388,7 +388,7 @@ function fnAddOemData(element) {
 	if (option.error) {
 		return false;
 	}else {
-		if (confirm("Are you sure want to add OEM ?")) {
+		if (confirm($("#alert_add_oem").text())) {
 			//$('#messageSpace').html('<div>* Adding OEM. Please Wait....</div>');
 			$('#addOEMDataTable').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/addOEMData.html', data, fnAddOemSuccess, null,element);
@@ -418,7 +418,7 @@ function fnEditOEMInfo(element){
 }
 
 function fnUpdateOEMInfo(element) {
-	if (confirm("Are you sure you want to update OEM Info ?")) {
+	if (confirm($("#alert_update_oem_info").text())) {
 		var data="";
 		var row = $(element).parent().parent();
 		row.find("td:not(:first-child)").each(function(){
@@ -432,7 +432,7 @@ function fnUpdateOEMInfo(element) {
 }
 
 function fnDeleteOemInfo(element) {
-	if (confirm("Are you sure you want to delete this OEM ?")) {
+	if (confirm($("#alert_delete_oem").text())) {
 		var data ='';
 		var row = $(element).parent().parent();
 		row.find("td:not(:first-child)").each(function(){
@@ -532,7 +532,7 @@ function updateHostInfo() {
 		//}
             }
         }else{
-            alert("Please enter a valid IP address and try again.")
+            alert($("#alert_valid_ip").text());
         }
 }
 
@@ -542,7 +542,7 @@ function updateHostInfo() {
 */
 
 function fnDeleteHostInfo(element) {
-	if(confirm("Are you sure you want to delete this Host ?")){
+	if(confirm($("#alert_delete_host").text())){
 		var selectedHost = $(element).parent().attr('hostID');
 		var hostName = $(element).parent().parent().find('td:eq(1)').text();
 		$('#mainAddHostContainer').prepend(disabledDiv);
