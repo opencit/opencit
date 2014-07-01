@@ -197,10 +197,10 @@ public class TAHelper {
             
             // encrypt DAA challenge secret using AIK public key so only TPM can read it
             CommandUtil.runCommand(String.format("aikchallenge %s %s %s %s",
-                    CommandUtil.singleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
-                    CommandUtil.singleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
-                    CommandUtil.singleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
-                    CommandUtil.singleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
+                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
+                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
+                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
+                    CommandUtil.doubleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
 
             // send DAA challenge to Trust Agent and validate the response
             try(FileInputStream in = new FileInputStream(new File(getDaaChallengeFileName(sessionId)))) {
@@ -725,10 +725,10 @@ public class TAHelper {
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s",
-                CommandUtil.singleQuoteEscapeShellArgument(aikverifyCmd),
-                CommandUtil.singleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
-                CommandUtil.singleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
-                CommandUtil.singleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");

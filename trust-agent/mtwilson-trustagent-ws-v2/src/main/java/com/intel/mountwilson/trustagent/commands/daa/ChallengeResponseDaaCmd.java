@@ -36,9 +36,9 @@ public class ChallengeResponseDaaCmd implements ICommand {
             }
             // prepare response to challenge
             CommandUtil.runCommand(String.format("aikrespond %s %s %s",
-                    CommandUtil.singleQuoteEscapeShellArgument(context.getAikBlobFileName()),
-                    CommandUtil.singleQuoteEscapeShellArgument(context.getDaaChallengeFileName()),
-                    CommandUtil.singleQuoteEscapeShellArgument(context.getDaaResponseFileName()))); // safe; no arguments involved in this command line
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDaaChallengeFileName()),
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDaaResponseFileName()))); // safe; no arguments involved in this command line
             log.info( "Created response for DAA challenge");
 
             // read response and delete the response file

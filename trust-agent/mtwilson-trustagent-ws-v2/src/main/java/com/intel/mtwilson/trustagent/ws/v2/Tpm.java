@@ -115,7 +115,7 @@ public class Tpm {
             TpmQuoteResponse response = context.getTpmQuoteResponse();
             // delete temporary session directory
             CommandUtil.runCommand(String.format("rm -rf %s",
-                    CommandUtil.singleQuoteEscapeShellArgument(context.getDataFolder())));
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
             return response;
     }
     
