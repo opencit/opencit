@@ -24,6 +24,7 @@ import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.policy.TrustReport;
 
 import java.util.Date;
+import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.joda.time.DateTime;
 
@@ -49,30 +50,30 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
             if (criteria.id != null) {
                 TblTaLog obj = jpaController.findByUuid(criteria.id.toString());
                 if (obj != null) {
-                    objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
+                    TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(obj.getHost_uuid_hex());
+                    objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
                 }
-            } else if (criteria.hostUuid != null) {
-                TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(criteria.hostUuid.toString(), getCacheStaleAfter());
-                if (obj != null) {
-                    objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
+            } else {
+                TblHosts hostObj;
+                if (criteria.hostUuid != null) {
+                    hostObj = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
+                } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
+                    hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
+                } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                    hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
+                } else {
+                    // no condition specified
+                    hostObj = null;
                 }
-            } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
                 if (hostObj != null) {
-                    TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                    if (obj != null) {
-                        objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
+                    List<TblTaLog> taLogList = jpaController.findTrustStatusByHostId(hostObj.getId(), criteria.limit);
+                    if (taLogList != null && !taLogList.isEmpty()) {
+                        for (TblTaLog obj : taLogList) {
+                            objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
+                        }
                     }
                 }
-            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
-                if (hostObj != null) {
-                    TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                    if (obj != null) {
-                        objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
-                    }
-                }
-            }
+            } 
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
