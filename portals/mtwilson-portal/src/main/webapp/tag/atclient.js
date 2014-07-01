@@ -278,7 +278,7 @@ mtwilson.atag = mtwilson.atag || {};
             default:
                 break;
         }
-        $('notifications').update(notice.text);
+        $('notifications').update(getHTMLEscapedMessage(notice.text));
         $('notifications').show();
         $('notifications').setOpacity(1.0);
 
