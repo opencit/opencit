@@ -1615,7 +1615,7 @@ function parseSelectionXML(xml) {
 	mtwilson.atag.data.selection_details = [];
 	var attributes = xmlDoc.getElementsByTagName('attribute');
 	for(var loop = 0; loop < attributes.length; loop++) {
-		var text = (attributes[loop].getElementsByTagName('text')[0].innerHTML);
+		var text = (attributes[loop].getElementsByTagName('text')[0].textContent);
 		var split_vals = text.split('=');
 		mtwilson.atag.data.selection_details.push({
 			id: loop,
@@ -1704,7 +1704,7 @@ function getSelectedSelectionDetails(selection_id) {
 			jQuery('#' + selection_id).addClass('highlightSelectedSelection');
 		}
 	};
-	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml",true);
+	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml?rand=" + Math.random(),true);
 	xmlhttp.send();            
 
 }
