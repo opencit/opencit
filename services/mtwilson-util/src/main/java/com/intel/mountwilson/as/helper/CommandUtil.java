@@ -124,7 +124,7 @@ public class CommandUtil {
     
     // This function will escape special characters in an argument being passed to the bash/shell command line
     public static String singleQuoteEscapeShellArgument(String input) {
-        return "'" + input.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "'";
+        return "\"'" + input.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "'\"";
     }
     
     // This function will escape special characters in an option being passed to the bash/shell command line
@@ -133,7 +133,7 @@ public class CommandUtil {
             String[] option = input.split("=", 2);
             String parameter = option[0];
             String value = option[1];
-            return parameter + "='" + value.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "'";
+            return "\"" + parameter + "='" + value.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "'\"";
         } else {
             return singleQuoteEscapeShellArgument(input);
         }
