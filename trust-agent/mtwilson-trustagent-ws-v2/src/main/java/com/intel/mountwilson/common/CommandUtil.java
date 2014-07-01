@@ -25,7 +25,7 @@ public class CommandUtil {
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
     private static final Pattern singleQuoteShellSpecialCharacters = Pattern.compile("[*?#~=%\\[]");
     private static final Pattern anySingleQuoteShellSpecialCharacters = Pattern.compile("(.*?)" + singleQuoteShellSpecialCharacters.pattern() + "(.*?)");
-    private static final Pattern doubleQuoteShellSpecialCharacters = Pattern.compile("[$`\\\\]");
+    private static final Pattern doubleQuoteShellSpecialCharacters = Pattern.compile("[$`*@\\\\]");
     private static final Pattern anyDoubleQuoteShellSpecialCharacters = Pattern.compile("(.*?)" + doubleQuoteShellSpecialCharacters.pattern() + "(.*?)");
 
     public static CommandResult runCommand(String commandLine) throws TAException, IOException {

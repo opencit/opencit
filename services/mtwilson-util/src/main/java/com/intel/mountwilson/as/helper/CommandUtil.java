@@ -23,7 +23,7 @@ public class CommandUtil {
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class);
     private static final Pattern singleQuoteShellSpecialCharacters = Pattern.compile("[*?#~=%\\[]");
     private static final Pattern anySingleQuoteShellSpecialCharacters = Pattern.compile("(.*?)" + singleQuoteShellSpecialCharacters.pattern() + "(.*?)");
-    private static final Pattern doubleQuoteShellSpecialCharacters = Pattern.compile("[$`\\\\]");
+    private static final Pattern doubleQuoteShellSpecialCharacters = Pattern.compile("[$`*@\\\\]");
     private static final Pattern anyDoubleQuoteShellSpecialCharacters = Pattern.compile("(.*?)" + doubleQuoteShellSpecialCharacters.pattern() + "(.*?)");
 
     public static List<String> runCommand(String commandLine, boolean readResult, String commandAlias) {
