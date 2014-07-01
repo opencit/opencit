@@ -502,7 +502,6 @@
         "update_mle":"Are you Sure you want to update this MLE?",
         "delete_mle":"Are you sure you want to delete this MLE?",
         "migrate_vm":"Are you sure you want to migrate this VM to",
-        
         "update_os_info":"Are you sure you want to update OS info?",
         "delete_os":"Are you sure you want to delete this OS?",
         "add_os":"Are you sure want to add OS?",

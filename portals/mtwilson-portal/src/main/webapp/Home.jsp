@@ -221,7 +221,6 @@
             <span id="alert_null_server_response" data-i18n="alert.null_server_response" style="display: none;">Response from server is null.</span>
             <span id="alert_request_error" data-i18n="alert.request_error" style="display: none;">Error while serving request. Please try again later.</span>
             <span id="alert_valid_ip" data-i18n="alert.valid_ip" style="display: none;">Please enter a valid IP address and try again.</span>
-            
             <span id="alert_update_os_info" data-i18n="alert.update_os_info" style="display: none;">Are you sure you want to update OS info?</span>
             <span id="alert_delete_os" data-i18n="alert.delete_os" style="display: none;">Are you sure you want to delete this OS?</span>
             <span id="alert_add_os" data-i18n="alert.add_os" style="display: none;">Are you sure want to add OS?</span>
