@@ -670,6 +670,7 @@ mtwilson.atag = mtwilson.atag || {};
                 var iter = 0;
                 data.rearranged_tags[iter] = {};
                 data.rearranged_tags[iter].name = 'Select';
+                data.rearranged_tags[iter].text = i18n.t("select.select");
                 data.rearranged_tags[iter].tagValues = [];
                 iter++;
                 for (var i = 0; i < data.unfiltered_tags.length; i++) {
@@ -685,6 +686,7 @@ mtwilson.atag = mtwilson.atag || {};
                     if(!el_added) {
                         data.rearranged_tags[iter] = {};
                         data.rearranged_tags[iter].name = loop_obj.name;
+                        data.rearranged_tags[iter].text = loop_obj.name;
                         data.rearranged_tags[iter].tagValues = [{id: loop_obj.id, value: loop_obj.value}];
                         iter++;
                     }

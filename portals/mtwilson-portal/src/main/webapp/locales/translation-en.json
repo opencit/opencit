@@ -228,7 +228,8 @@
         "after":"after",
         "any":"Any",
         "active":"Active",
-        "revoked":"Revoked"
+        "revoked":"Revoked",
+        "select":"Select"
     },
     "input": {
         "description": "Description:",
@@ -357,6 +358,15 @@
         "role_report": "Report",
         "role_audit": "Audit",
         "role_assettagmanagement": "AssetTagManagement",
+        "role_administrator": "Administrator",
+        "role_assettagmanager": "AssetTagManager",
+        "role_auditor": "Auditor",
+        "role_challenger": "Challenger",
+        "role_hostmanager": "HostManager",
+        "role_reportmanager": "ReportManager",
+        "role_servermanager": "ServerManager",
+        "role_usermanager": "UserManager",
+        "role_whitelistmanager": "WhitelistManager",
         "expiring_api_time_start":"No Api Client keys are expiring in the next ",
         "expiring_api_time_end":" month(s).",
         "host_status_unreachable":"System is unreachable.",
@@ -387,7 +397,8 @@
         "servers_to_provision":"Servers to provision",
         "double_click_status":"Double click on the element to toggle the status",
         "available_selections":"Available Selections",
-        "upload_xml":"Upload XML"
+        "upload_xml":"Upload XML",
+        "no_pending_api_requests":"No requests are currently pending to be reviewed."
     },
     "placeholder": {
         "selection_name":"Name of this selection",

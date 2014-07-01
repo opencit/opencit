@@ -516,7 +516,7 @@ function isNumber(n) {
                                     <div class="labelDiv" data-i18n="input.tags">Tags:</div> <!-- was: "Host Provided By" -->
                                     <div class="valueDiv">
                                         <select class="ddlBox_small_Border" id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
-                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name" data-bind-id="item.name" data-bind-text="item.name"></option>
+                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name" data-bind-id="item.name" data-bind-text="item.text"></option>
                                         </select>
                                         <select class="ddlBox_small_Border" id="selection-create-tags-values" data-validator="selection_create_form_validateValues">
                                             <option data-bind-each-item="tagValues" data-bind-value="item.id" data-bind-text="item.value"></option>
