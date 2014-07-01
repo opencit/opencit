@@ -114,12 +114,8 @@ public class Tpm {
 //            return context.getResponseXML();
             TpmQuoteResponse response = context.getTpmQuoteResponse();
             // delete temporary session directory
-            String dataFolder = context.getDataFolder();
-            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(dataFolder)) {
-                log.warn("Escaping special characters in dataFolder: {}", dataFolder);
-                dataFolder = CommandUtil.escapeShellArgument(dataFolder);
-            }
-            CommandUtil.runCommand(String.format("rm -rf %s", dataFolder));
+            CommandUtil.runCommand(String.format("rm -rf %s",
+                    CommandUtil.singleQuoteEscapeShellArgument(context.getDataFolder())));
             return response;
     }
     

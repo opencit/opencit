@@ -50,15 +50,9 @@ public class GenerateModulesCmd implements ICommand {
      * @author skaja
      */
     private void getXmlFromMeasureLog() throws TAException, IOException {
-        
         log.debug("About to run the command: " + context.getMeasureLogLaunchScript());
-        String measureLogLaunchScript = context.getMeasureLogLaunchScript().getAbsolutePath();
-        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(measureLogLaunchScript)) {
-            log.warn("Escaping special characters in measureLogLaunchScript path: {}", measureLogLaunchScript);
-            measureLogLaunchScript = CommandUtil.escapeShellArgument(measureLogLaunchScript);
-        }
         long startTime = System.currentTimeMillis();
-        CommandUtil.runCommand(measureLogLaunchScript);
+        CommandUtil.runCommand(CommandUtil.singleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()));
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
@@ -66,14 +60,7 @@ public class GenerateModulesCmd implements ICommand {
         log.debug("Content of the XML file before getting modules: " + content);
         
         getModulesFromMeasureLogXml(content);
-
-        String measureLogXmlFile = context.getMeasureLogXmlFile().getAbsolutePath();
-        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(measureLogXmlFile)) {
-            log.warn("Escaping special characters in measureLogXmlFile path: {}", measureLogXmlFile);
-            measureLogXmlFile = CommandUtil.escapeShellArgument(measureLogXmlFile);
-        }
-        CommandUtil.runCommand(String.format("rm -fr %s", measureLogXmlFile));
-
+        CommandUtil.runCommand(String.format("rm -fr %s", CommandUtil.singleQuoteEscapeShellArgument(context.getMeasureLogXmlFile().getAbsolutePath())));
     }
 
     /**

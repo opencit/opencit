@@ -32,26 +32,14 @@ public class CreateIdentityDaaCmd implements ICommand {
 //            log.log(Level.INFO, "Created AIK Blob and AIK Certificate");
             
             // extract the EK
-            String ekCertFileName = context.getEKCertFileName();
-            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(ekCertFileName)) {
-                log.warn("Escaping special characters in ekCertFileName: {}", ekCertFileName);
-                ekCertFileName = CommandUtil.escapeShellArgument(ekCertFileName);
-            }
+            String ekCertFileName = CommandUtil.singleQuoteEscapeShellArgument(context.getEKCertFileName());
             CommandUtil.runCommand(String.format("getcert %s", ekCertFileName)); // safe; no arguments involved in this command line
             log.info( "Extracted EK Certificate");
 	
             // prepare the AIK for the DAA challenge
-            String aikCertFileName = context.getAikCertFileName();
-            String aikBlobFileName = context.getAikBlobFileName();
-            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(aikCertFileName)) {
-                log.warn("Escaping special characters in aikCertFileName: {}", aikCertFileName);
-                aikCertFileName = CommandUtil.escapeShellArgument(aikCertFileName);
-            }
-            if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(aikBlobFileName)) {
-                log.warn("Escaping special characters in aikBlobFileName: {}", aikBlobFileName);
-                aikBlobFileName = CommandUtil.escapeShellArgument(aikBlobFileName);
-            }
-            CommandUtil.runCommand(String.format("aikpublish %s %s", ekCertFileName, aikCertFileName, aikBlobFileName)); // safe; no arguments involved in this command line
+            CommandUtil.runCommand(String.format("aikpublish %s %s", ekCertFileName,
+                    CommandUtil.singleQuoteEscapeShellArgument(context.getAikCertFileName()),
+                    CommandUtil.singleQuoteEscapeShellArgument(context.getAikBlobFileName()))); // safe; no arguments involved in this command line
             log.info( "Created AIK Blob and AIK Certificate for DAA");
 
             // read the AIK certificate

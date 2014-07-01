@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class GenerateQuoteCmd implements ICommand {
     Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Pattern PCR_LIST_SSV = Pattern.compile("^[0-9][0-9 ]*$");
     
     private TADataContext context;
 
@@ -45,38 +46,23 @@ public class GenerateQuoteCmd implements ICommand {
     @Override
     public void execute() throws TAException {
         String identityAuthKey = context.getIdentityAuthKey();
-        String nonceFileName = context.getNonceFileName();
-        String aikBlobFileName = context.getAikBlobFileName();
         String selectedPcrs = context.getSelectedPCRs();
-        String quoteFileName = context.getQuoteFileName();
         
         if (!HexUtil.isHex(identityAuthKey)) {
-            log.error("identityAuthKey is not in hex format: {}", identityAuthKey);
-            throw new IllegalArgumentException(String.format("identityAuthKey is not in hex format: %s", identityAuthKey));
+            log.error("Aik secret password is not in hex format: {}", identityAuthKey);
+            throw new IllegalArgumentException(String.format("Aik secret password is not in hex format."));
         }
-        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(nonceFileName)) {
-            log.warn("Escaping special characters in nonceFileName: {}", nonceFileName);
-            nonceFileName = CommandUtil.escapeShellArgument(nonceFileName);
-        }
-        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(aikBlobFileName)) {
-            log.warn("Escaping special characters in aikBlobFileName: {}", aikBlobFileName);
-            aikBlobFileName = CommandUtil.escapeShellArgument(aikBlobFileName);
-        }
-        if (!selectedPcrs.matches(Pattern.compile("^[0-9 ]*$").pattern())) {
-            log.error("selectedPcrs do not match correct format: {}", selectedPcrs);
-            throw new IllegalArgumentException(String.format("selectedPcrs do not match correct format: %s", selectedPcrs));
-        }
-        if (!CommandUtil.containsSingleQuoteShellSpecialCharacters(quoteFileName)) {
-            log.warn("Escaping special characters in quoteFileName: {}", quoteFileName);
-            quoteFileName = CommandUtil.escapeShellArgument(quoteFileName);
+        if (!PCR_LIST_SSV.matcher(selectedPcrs).matches()) {
+            log.error("Selected PCRs do not match correct format: {}", selectedPcrs);
+            throw new IllegalArgumentException(String.format("Selected PCRs do not match correct format."));
         }
         
         String commandLine = String.format("aikquote -p %s -c %s %s %s %s",
                 identityAuthKey,
-                nonceFileName,
-                aikBlobFileName,
+                CommandUtil.singleQuoteEscapeShellArgument(context.getNonceFileName()),
+                CommandUtil.singleQuoteEscapeShellArgument(context.getAikBlobFileName()),
                 selectedPcrs,
-                quoteFileName); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
+                CommandUtil.singleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
         
 
         try {
