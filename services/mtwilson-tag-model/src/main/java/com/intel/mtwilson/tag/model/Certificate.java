@@ -9,6 +9,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.Unchecked;
 import com.intel.dcsg.cpg.x509.X509CertificateEncodingException;
 import com.intel.dcsg.cpg.x509.X509CertificateFormatException;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -46,6 +49,7 @@ public class Certificate extends CertificateDocument{
         this.certificate = certificate;
     }
 
+    @Unchecked
     public Sha1Digest getSha1() {
         return sha1;
     }
@@ -54,6 +58,8 @@ public class Certificate extends CertificateDocument{
         this.sha1 = sha1;
     }
 
+    @Unchecked
+    @Regex(RegexPatterns.ANY_VALUE)
     public Sha256Digest getSha256() {
         return sha256;
     }
@@ -69,7 +75,7 @@ public class Certificate extends CertificateDocument{
     public void setSubject(String subject) {
         this.subject = subject;
     }
-
+    
     public String getIssuer() {
         return issuer;
     }
