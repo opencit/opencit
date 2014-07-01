@@ -11,7 +11,7 @@ function fnUpdateEditOEMTable(responseJSON) {
 		fuCreateEditOEMTable(responseJSON.OEMDataVo)
 		applyPagination('editOEMPaginationDiv',responseJSON.noOfPages,fngetOEMNextPageForEdit,1);
 	}else {
-		$('#errorEditOEM').html(responseJSON.message);
+		$('#errorEditOEM').html(getHTMLEscapedMessage(responseJSON.message));
 	}
 }
 
@@ -27,9 +27,9 @@ function fuCreateEditOEMTable(oemData) {
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 		str+='<tr class="'+classValue+'">'+
 		'<td class="row1"><a href="javascript:;" onclick="fnEditOEMInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteOemInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
-		'<td class="row2" name="'+oemData[items].oemName+'" value="'+oemData[items].oemName+'" id="oemName">'+oemData[items].oemName+'</td>';
+		'<td class="row2" name="'+ escapeForHTMLAttributes(oemData[items].oemName) +'" value="'+ escapeForHTMLAttributes(oemData[items].oemName) +'" id="oemName">'+ getHTMLEscapedMessage(oemData[items].oemName) +'</td>';
 		var val1 = oemData[items].oemDescription == undefined ? ' ' : oemData[items].oemDescription;
-		str+='<td class="row4" name="'+val1+'" value="'+val1+'" id="oemDec">'+val1+'&nbsp;</td>';
+		str+='<td class="row4" name="'+ escapeForHTMLAttributes(val1) +'" value="'+ escapeForHTMLAttributes(val1) +'" id="oemDec">'+ getHTMLEscapedMessage(val1) +'&nbsp;</td>';
 	}
 	$('#editOEMContentDiv table tbody').html(str);
 }
@@ -46,7 +46,7 @@ function fnUpdateEditOEMTableForPage(responseJSON) {
 	if (responseJSON.result) {
 		fuCreateEditOEMTable(responseJSON.OEMDataVo);
 	}else {
-		$('#errorEditOEM').html(responseJSON.message);
+		$('#errorEditOEM').html(getHTMLEscapedMessage(responseJSON.message));
 	}
 }
 

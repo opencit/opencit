@@ -37,7 +37,7 @@ function fnRetriveHostSuccess(responseJSON) {
 		}
 		$('#approveRegisterHostTableContent').html(str);
 	}else {
-		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
+		$('#successMessage').html('<span class="errorMessage">'+ getHTMLEscapedMessage(responseJSON.message) +'</span>');
 	}
 }
 

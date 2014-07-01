@@ -25,17 +25,17 @@ function populateEditHostDataIntoTable(hostDetails) {
                 var vCenterDetails = hostDetails[item].vCenterDetails;
                 if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
 		str+='<tr class="'+classValue+'">'+
-			'<td hostID="'+hostDetails[item].hostId+'" class="editRow0"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
-			'<td class="editRow1">'+hostDetails[item].hostName+'</td>'+
+			'<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
+			'<td class="editRow1">' + getHTMLEscapedMessage(hostDetails[item].hostName) + '</td>'+
 			//'<td class="editRow2">'+hostDetails[item].hostIPAddress+'&nbsp;</td>'+
-			'<td class="editRow3">'+hostDetails[item].hostPort+'&nbsp;</td>'+
-			'<td class="editRow10">'+hostDetails[item].hostDescription+'&nbsp;</td>'+
-			'<td class="editRow4">'+hostDetails[item].biosName+'&nbsp;</td>'+
-			'<td class="editRow5">'+hostDetails[item].biosBuildNo+'&nbsp;</td>'+
-			'<td class="editRow6">'+hostDetails[item].vmmName+'&nbsp;</td>'+
-			'<td class="editRow7">'+hostDetails[item].vmmBuildNo+'&nbsp;</td>'+
-			'<td class="editRow8">'+hostDetails[item].emailAddress+'&nbsp;</td>'+
-			'<td class="editRow9">'+vCenterDetails+'&nbsp;</td>'+
+			'<td class="editRow3">'+ getHTMLEscapedMessage(hostDetails[item].hostPort) + '&nbsp;</td>'+
+			'<td class="editRow10">'+ getHTMLEscapedMessage(hostDetails[item].hostDescription) + '&nbsp;</td>'+
+			'<td class="editRow4">'+ getHTMLEscapedMessage(hostDetails[item].biosName) + '&nbsp;</td>'+
+			'<td class="editRow5">'+ getHTMLEscapedMessage(hostDetails[item].biosBuildNo) +'&nbsp;</td>'+
+			'<td class="editRow6">'+ getHTMLEscapedMessage(hostDetails[item].vmmName) +'&nbsp;</td>'+
+			'<td class="editRow7">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo) +'&nbsp;</td>'+
+			'<td class="editRow8">'+ getHTMLEscapedMessage(hostDetails[item].emailAddress) +'&nbsp;</td>'+
+			'<td class="editRow9">'+ getHTMLEscapedMessage(vCenterDetails) +'&nbsp;</td>'+
 		'</tr>';
 	}
 	$('#mainEditHostDetailsContent table').html(str);

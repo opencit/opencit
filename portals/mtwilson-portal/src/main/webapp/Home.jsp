@@ -29,6 +29,7 @@
     <script type="text/javascript" src="Scripts/JQuery/prettify.js"></script>
     
     <script type="text/javascript" src="Scripts/commonUtils.js"></script>
+        <script type="text/javascript" src="Scripts/safe.js"></script>
 	<script type="text/javascript" src="Scripts/CommonMessage.js"></script>
 	<script type="text/javascript" src="Scripts/home.js"></script>
 
