@@ -522,7 +522,7 @@ function isNumber(n) {
                                     <div class="labelDiv" data-i18n="input.tags">Tags:</div> <!-- was: "Host Provided By" -->
                                     <div class="valueDiv">
                                         <select class="ddlBox_small_Border" id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
-                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name | escapeAttribute" data-bind-id="item.name | escapeAttribute" data-bind-text="item.name"></option>
+                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name | escapeAttribute" data-bind-id="item.name | escapeAttribute" data-bind-text="item.name | escapeAttribute"></option>
                                         </select>
                                         <select class="ddlBox_small_Border" id="selection-create-tags-values" data-validator="selection_create_form_validateValues">
                                             <option data-bind-each-item="tagValues" data-bind-value="item.id | escapeAttribute" data-bind-text="item.value | escapeAttribute"></option>
@@ -1004,7 +1004,7 @@ function isNumber(n) {
                             <form id="tag-prov-form" style="display: block;" onsubmit="return false;">
 			    	<div class='provisionStep' data-i18n="header.servers_to_provision">Step 1: Select the servers to provision the tags</div>
 				<select multiple="multiple" id="my-select" name='my-select-inp'>
-				   <option data-bind-each-item="global.hosts" data-bind-value="item.name" data-bind-text="item.name"></option> 
+				   <option data-bind-each-item="global.hosts" data-bind-value="item.name | escapeAttribute " data-bind-text="item.name | escapeAttribute "></option> 
     				</select>
 				<small><i data-i18n="label.double_click_status">Double click on the element to toggle the status</i></small>
 
@@ -1017,7 +1017,7 @@ function isNumber(n) {
 					<div class='tagSelectionsDiv prov_sel_option' id='availSelectionsDiv'>
 						<table name='provision-sel-details' id='provision-avail-sel' class='ms-list tableDisplayBind' cellspacing=0 cellpadding=0>
                                                 	<tr  data-bind-each-item='global.selections' style='height: 30px'>
-								<td align="center" data-bind-text="item.name" data-bind-selId="item.id" class='ms-elem-selectable selection_entry' data-bind-id='item.id' onClick='getSelectedSelectionDetails(this.getAttribute("selId"))'></td>
+								<td align="center" data-bind-text="item.name | escapeAttribute" data-bind-selId="item.id | escapeAttribute" class='ms-elem-selectable selection_entry' data-bind-id='item.id' onClick='getSelectedSelectionDetails(this.getAttribute("selId"))'></td>
 							</tr>
 						</table>
 					</div>
@@ -1025,8 +1025,8 @@ function isNumber(n) {
 				<div class='tagSelectionsDiv' id='tagSelectionsDetailsDiv'>
 					<table style='width: 100%; height: 100%' name='provision-sel-details' id='provision-sel-details' class='ms-list tableDisplayBind' cellspacing=0 cellpadding=0>
                                                 <tr  data-bind-each-item='global.selection_details'>
-							<td align="center" data-bind-text="item.kv_attribute_name" class='ms-elem-selectable attribute_name'></td>
-							<td align="center" data-bind-text="item.kv_attribute_value" class='ms-elem-selectable attribute_value'></td>
+							<td align="center" data-bind-text="item.kv_attribute_name | escapeAttribute " class='ms-elem-selectable attribute_name'></td>
+							<td align="center" data-bind-text="item.kv_attribute_value | escapeAttribute " class='ms-elem-selectable attribute_value'></td>
 						</tr>
 					</table>
 				</div>
@@ -1044,8 +1044,8 @@ function isNumber(n) {
 				</thead>
 				<tbody>
 				<tr data-bind-each-item="selected_hosts" class="evenRow">
-					<td class="col_auto" data-bind-text='item.subject'></td>
-					<td style='border-right: 1px solid black' data-bind-text='item.status'></td>
+					<td class="col_auto" data-bind-text='item.subject | escapeAttribute '></td>
+					<td style='border-right: 1px solid black' data-bind-text='item.status | escapeAttribute '></td>
 				</tr></tbody>
 			    </table>
 			    <div id='hostProgressMessage' style='display: none; margin: 15px; font-size: 18px; font-weight: bold'><div>
