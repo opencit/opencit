@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.user.management.exceptions;
 
-import com.intel.mtwilson.i18n.ErrorCode;
-
 /**
  *
  * @author ssbangal
@@ -16,8 +14,16 @@ public class RepositoryResourceConflictException extends RepositoryException {
         super();
     }
 
-    public RepositoryResourceConflictException(ErrorCode errorCode) {
-        super(errorCode);
-    }        
-    
+    public RepositoryResourceConflictException(String message) {
+        super(message);
+    }
+
+    public RepositoryResourceConflictException(Throwable cause) {
+        super(cause);
+    }
+
+    public RepositoryResourceConflictException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

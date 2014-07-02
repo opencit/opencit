@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.user.management.exceptions;
 
-import com.intel.mtwilson.i18n.ErrorCode;
-
 /**
  *
  * @author ssbangal
@@ -16,8 +14,16 @@ public class RepositoryCreateException extends RepositoryException {
         super();
     }
 
-    public RepositoryCreateException(ErrorCode errorCode) {
-        super(errorCode);
-    }        
-    
+    public RepositoryCreateException(String message) {
+        super(message);
+    }
+
+    public RepositoryCreateException(Throwable cause) {
+        super(cause);
+    }
+
+    public RepositoryCreateException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

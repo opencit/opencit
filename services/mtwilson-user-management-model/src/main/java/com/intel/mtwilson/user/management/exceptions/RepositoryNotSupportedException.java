@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.user.management.exceptions;
 
-import com.intel.mtwilson.i18n.ErrorCode;
-
 /**
  *
  * @author ssbangal
@@ -16,8 +14,16 @@ public class RepositoryNotSupportedException extends RepositoryException {
         super();
     }
 
-    public RepositoryNotSupportedException(ErrorCode errorCode) {
-        super(errorCode);
-    }        
-    
+    public RepositoryNotSupportedException(String message) {
+        super(message);
+    }
+
+    public RepositoryNotSupportedException(Throwable cause) {
+        super(cause);
+    }
+
+    public RepositoryNotSupportedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

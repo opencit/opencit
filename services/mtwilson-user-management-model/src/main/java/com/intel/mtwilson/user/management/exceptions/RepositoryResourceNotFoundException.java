@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.user.management.exceptions;
 
-import com.intel.mtwilson.i18n.ErrorCode;
-
 /**
  *
  * @author ssbangal
@@ -16,8 +14,16 @@ public class RepositoryResourceNotFoundException extends RepositoryException {
         super();
     }
 
-    public RepositoryResourceNotFoundException(ErrorCode errorCode) {
-        super(errorCode);
-    }        
+    public RepositoryResourceNotFoundException(String message) {
+        super(message);
+    }
+
+    public RepositoryResourceNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    public RepositoryResourceNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
     
 }
