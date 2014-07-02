@@ -89,6 +89,35 @@ public class Roles extends MtWilsonClient {
     }
 
     /**
+     * Deletes the Role(s) matching the specified search criteria. 
+     * @param criteria RoleFilterCriteria object specifying the search criteria. The search options include
+     * id, nameEqualTo and nameContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions roles:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/roles?nameContains=admin
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Roles client = new Roles(My.configuration().getClientProperties());
+     *  RoleFilterCriteria criteria = new RoleFilterCriteria();
+     *  criteria.nameContains = "admin";
+     *  client.deleteRole(criteria);
+     * </pre>
+     */
+    public void deleteRole(RoleFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("roles", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete role failed");
+        }
+    }
+    
+    /**
      * Updates the details of the Role in the system. Only the comments can be updated.
      * @param role - Role object details that needs to be updated.
      * @return Updated role object.
@@ -149,7 +178,7 @@ public class Roles extends MtWilsonClient {
     /**
      * Searches for the Role's with the specified set of criteria.
      * @param RoleFilterCriteria object specifying the filter criteria. The search options include
-     * id and roleNameEqualTo. Also, if the caller wants to retrieve the list of all the registered
+     * id, nameEqualTo and nameContains. Also, if the caller wants to retrieve the list of all the registered
      * roles, the filter option can be disabled by setting the filter criteria to false. By default
      * the filter criteria is true. [Ex: /v2/roles?filter=false retrieves the list of all the roles]
      * @return RoleCollection with the Roles that meet the specified filter criteria

@@ -11,7 +11,7 @@ function fnUpdateEditOSTable(responseJSON) {
 		fuCreateEditOSTable(responseJSON.OSDataVo);
 		applyPagination('editOSPaginationDiv',responseJSON.noOfPages,fngetOSNextPageForEdit,1);
 	}else {
-		$('#errorEditOS').html(responseJSON.message);
+		$('#errorEditOS').html(getHTMLEscapedMessage(responseJSON.message));
 	}
 }
 
@@ -20,14 +20,17 @@ function fuCreateEditOSTable(osData) {
 	var str = "";
 	$('#editOSContentDiv table tbody').html("");
 	for ( var items in osData) {
+                if(items != parseInt(items)) {
+                        continue;
+                }
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 		str+='<tr class="'+classValue+'">'+
-		'<td class="row1"><a href="javascript:;" onclick="fnEditOSInfo(this)"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteOSInfo(this)"> Delete </a></td>'+
-		'<td class="row1" name="'+osData[items].osName+'" value="'+osData[items].osName+'" id="osName">'+osData[items].osName+'</td>'+
-		'<td class="row1" name="'+osData[items].osVersion+'" value="'+osData[items].osVersion+'" id="osVer">'+osData[items].osVersion+'</td>';
+		'<td class="row1"><a href="javascript:;" onclick="fnEditOSInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteOSInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
+		'<td class="row1" name="'+ escapeForHTMLAttributes(osData[items].osName) +'" value="'+ escapeForHTMLAttributes(osData[items].osName) +'" id="osName">'+ getHTMLEscapedMessage(osData[items].osName) +'</td>'+
+		'<td class="row1" name="'+ escapeForHTMLAttributes(osData[items].osVersion) +'" value="'+ escapeForHTMLAttributes(osData[items].osVersion) +'" id="osVer">'+ getHTMLEscapedMessage(osData[items].osVersion) +'</td>';
 		var val1 = osData[items].osDescription == undefined ? '' : osData[items].osDescription;
-		str+='<td class="row1" name="'+val1+'" value="'+val1+'" id="osDec">'+val1+'&nbsp;</td>';
+		str+='<td class="row1" name="'+ escapeForHTMLAttributes(val1) +'" value="'+ escapeForHTMLAttributes(val1) +'" id="osDec">'+ getHTMLEscapedMessage(val1) +'&nbsp;</td>';
 	}
 	$('#editOSContentDiv table tbody').html(str);
 }
@@ -44,7 +47,7 @@ function fnUpdateEditOSTableForPage(responseJSON) {
 	if (responseJSON.result) {
 		fuCreateEditOSTable(responseJSON.OSDataVo);
 	}else {
-		$('#errorEditOS').html(responseJSON.message);
+		$('#errorEditOS').html(getHTMLEscapedMessage(responseJSON.message));
 	}
 }
 

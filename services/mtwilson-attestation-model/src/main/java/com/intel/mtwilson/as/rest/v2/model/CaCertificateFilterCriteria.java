@@ -4,12 +4,13 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
+import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
 
 /**
  *
  * @author ssbangal
  */
-public class CaCertificateFilterCriteria implements FilterCriteria<CaCertificate>{
+public class CaCertificateFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<CaCertificate>{
     
 }

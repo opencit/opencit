@@ -6,11 +6,9 @@ package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
-import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -20,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="create_whitelist_with_options")
 public class CreateWhiteListWithOptionsRunnable implements Runnable {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateWhiteListWithOptionsRunnable.class);
     
     private WhitelistConfigurationData wlConfig;
     private String result;
@@ -42,6 +40,7 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     }
     
     @Override
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create,store","mle_modules:create","mle_sources:create"})
     public void run() {
         log.debug("Starting to process white list creation using host {}.", wlConfig.getTxtHostRecord().HostName);
         boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);

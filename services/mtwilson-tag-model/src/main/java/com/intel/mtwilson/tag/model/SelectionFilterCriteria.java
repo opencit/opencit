@@ -5,6 +5,7 @@
 package com.intel.mtwilson.tag.model;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import javax.ws.rs.QueryParam;
 
@@ -12,7 +13,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class SelectionFilterCriteria implements FilterCriteria<Selection>{
+public class SelectionFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<Selection>{
     
     @QueryParam("id")
     public UUID id;

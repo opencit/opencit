@@ -9,7 +9,7 @@ function fnViewExpiringRequestSuccess(responseJSON) {
 		var request = responseJSON.expiringApiClients;
             
                 if (request.length == 0) {
-                    $('#successMessage').html('<span> No Api Client keys are expiring in the next ' + responseJSON.expirationMonths + ' month(s).</span>');
+                    $('#successMessage').html('<span data-i18n="label.expiring_api_time_start">No Api Client keys are expiring in the next </span>' + responseJSON.expirationMonths + '<span data-i18n="label.expiring_api_time_end"> month(s).</span>');
                     return;
                 } 
             
@@ -32,7 +32,7 @@ function fnViewExpiringRequestSuccess(responseJSON) {
 }
 
 function fnGetRekeyApiClient(element) {
-    alert("Please log into the system on which the client is installed and re-register the client using the API register functionality.");
+    alert($("#alert_reregister_with_api").text());
     /*
 	var data = [];
 	var row = $(element).parent().parent();
@@ -93,6 +93,6 @@ function fnGetReKeyData() {
 }
 
 function reKeySelectedRequestSuccess() {
-	alert("Request is Extended Successfully.");
+	alert($("#alert_request_extended").text());
 	getViewExpiringPage();
 }

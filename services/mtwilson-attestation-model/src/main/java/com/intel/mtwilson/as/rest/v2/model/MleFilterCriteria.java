@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -13,7 +14,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class MleFilterCriteria implements FilterCriteria<Mle>{
+public class MleFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<Mle>{
     
     @QueryParam("id")
     public UUID id;

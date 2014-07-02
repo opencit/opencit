@@ -20,6 +20,7 @@ import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
+import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.model.Hostname;
 import java.io.IOException;
 import java.security.SignatureException;
@@ -109,7 +110,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                     throw ConnectionUtil.handleDemoPortalException(e);
             }
 		}else {
-			throw new DemoPortalException("Currently there are no hosts configured in the system.");
+			throw new DemoPortalException(ErrorCode.AS_NO_HOSTS_CONFIGURED.getMessage());
 		}
        
        return hostVOs;
@@ -136,7 +137,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		
 		//Check if Return list is empty or Not, if empty throw Exception to controller with Specific message. 
 		if (hostList==null || hostList.size() < 0) {
-			throw new DemoPortalException("Currently there are no hosts configured in the system.");
+			throw new DemoPortalException(ErrorCode.AS_NO_HOSTS_CONFIGURED.getMessage());
 		}
 		
 		//Statements to change data according to need, replace all null values with Empty String so it will not shown up on screen.

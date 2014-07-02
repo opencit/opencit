@@ -34,9 +34,11 @@ public class ChallengeResponseDaaCmd implements ICommand {
             try (FileOutputStream out = new FileOutputStream(new File(context.getDaaChallengeFileName()))) {
                 IOUtils.copy(new ByteArrayInputStream(context.getDaaChallenge()), out);
             }
-            
             // prepare response to challenge
-            CommandUtil.runCommand(String.format("aikrespond %s %s %s", context.getAikBlobFileName(), context.getDaaChallengeFileName(), context.getDaaResponseFileName())); // safe; no arguments involved in this command line
+            CommandUtil.runCommand(String.format("aikrespond %s %s %s",
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDaaChallengeFileName()),
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDaaResponseFileName()))); // safe; no arguments involved in this command line
             log.info( "Created response for DAA challenge");
 
             // read response and delete the response file

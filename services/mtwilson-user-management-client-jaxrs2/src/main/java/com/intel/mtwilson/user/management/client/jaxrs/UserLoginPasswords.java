@@ -180,7 +180,7 @@ public class UserLoginPasswords extends MtWilsonClient {
     /**
      * Searches for the User's login password entries with the specified set of criteria.
      * @param UserLoginPasswordFilterCriteria object specifying the filter criteria. The search options include
-     * userUuid, id, status and enabled. If the user just provides the user_id without any filter criteria, then the user login password entry
+     * userUuid, id, status and enabled. If the user provides filter criteria and sets it to false, then the user login password entry
      * for that user_id would be retrieved.
      * @return UserLoginPasswordCollection with the UserLoginPasswords that meet the specified filter criteria
      * @since Mt.Wilson 2.0
@@ -189,7 +189,7 @@ public class UserLoginPasswords extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8181/mtwilson/v2/users/981d5993-d380-4623-9f8b-1c6131ee8234/login-passwords
+     * https://server.com:8181/mtwilson/v2/users/981d5993-d380-4623-9f8b-1c6131ee8234/login-passwords?filter=false
      * Output: {"user_login_passwords":[{"id":"db108831-96d7-4a3c-afd6-5521e2defcbf","user_id":"981d5993-d380-4623-9f8b-1c6131ee8234",
      * "password_hash":"RZMrrSt/PvKvdqs1OgR0id0bDE0dvF4XbPKV7sF+oDg=","salt":"a9gDma0hUF8=","iterations":1,"algorithm":"SHA256",
      * "enabled":true,"status":"APPROVED","comment":"Automatically created during setup.","roles":["admin","administrator"]}]}

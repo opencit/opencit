@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CaCertificateRepository implements SimpleRepository<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CaCertificateRepository.class);
         
     @Override
     public CaCertificateCollection search(CaCertificateFilterCriteria criteria) {
@@ -40,6 +38,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
     @Override
     public CaCertificate retrieve(CaCertificateLocator locator) {
         if (locator == null || locator.id == null) { return null;}
+        log.debug("CaCertificate:Retrieve - Got request to retrieve CaCertificate with id {}.", locator.id);                
         CaCertificate caCert = new CaCertificate();
         String id = locator.id;
         if ("root".equals(id)) {

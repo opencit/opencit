@@ -47,7 +47,10 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
             if (criteria.userUuid != null) {
                 UserLoginCertificate obj = loginDAO.findUserLoginCertificateByUserId(criteria.userUuid);
                 if (obj != null) {
-                    if (criteria.id != null) {
+                    if (criteria.filter == false) {
+                        obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
+                        objCollection.getUserLoginCertificates().add(obj);                                                
+                    } else if (criteria.id != null) {
                         if (obj.getId().equals(criteria.id)) {
                             obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
                             objCollection.getUserLoginCertificates().add(obj);
@@ -77,10 +80,7 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
                             obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
                             objCollection.getUserLoginCertificates().add(obj);
                         }
-                    } else {
-                        obj.setRoles(getAssociateRolesForLoginCertificateId(obj.getId()));
-                        objCollection.getUserLoginCertificates().add(obj);                        
-                    }
+                    } 
                 }
             }
             
@@ -166,7 +166,6 @@ public class UserLoginCertificateRepository implements SimpleRepository<UserLogi
      * @param item 
      */
     @Override
-    @RequiresPermissions("user_login_certificates:create")        
     public void create(UserLoginCertificate item) {
         log.debug("UserLoginCertificate:Create - Got request to create a new user keystore.");
          try (LoginDAO loginDAO = MyJdbi.authz()) {

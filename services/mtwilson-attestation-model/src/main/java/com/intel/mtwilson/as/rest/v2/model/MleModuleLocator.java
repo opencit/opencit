@@ -17,15 +17,15 @@ public class MleModuleLocator implements Locator<MleModule> {
     @PathParam("mle_id")
     public UUID mleUuid;
     @PathParam("id")
-    public UUID moduleUuid;
+    public UUID id;
     
     @Override
     public void copyTo(MleModule item) {
         if( mleUuid != null ) {
             item.setMleUuid(mleUuid.toString());
         }  
-        if( moduleUuid != null ) {
-            item.setId(moduleUuid);
+        if( id != null ) {
+            item.setId(id);
         }
     }
     

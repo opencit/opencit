@@ -26,6 +26,7 @@ import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.transform.OutputKeys;
@@ -147,8 +149,10 @@ public class ConverterUtil {
                         }
                 
                         // Bug: 457 - Refresh button is not updating the time stamp
-                        hostVO.setUpdatedOn(trustAssertion.getDate().toString());
-
+//                        hostVO.setUpdatedOn(trustAssertion.getDate().toString());
+                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        hostVO.setUpdatedOn(df.format(trustAssertion.getDate()));
                 } else {
 			hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
 			hostVO.setVmmStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
@@ -157,7 +161,10 @@ public class ConverterUtil {
 			hostVO.setOverAllStatusBoolean(false);
 			hostVO.setErrorMessage(errorMessage);
                         // Bug: 445 - To shown the updated date when the host is in the unknown state
-                        hostVO.setUpdatedOn(new SimpleDateFormat("EEE MMM d HH:MM:ss z yyyy").format(new Date()));
+//                        hostVO.setUpdatedOn(new SimpleDateFormat("EEE MMM d HH:MM:ss z yyyy").format(new Date()));
+                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        hostVO.setUpdatedOn(df.format(new Date()));
                         hostVO.setErrorCode(1);                        
 		}
 		

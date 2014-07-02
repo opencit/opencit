@@ -47,39 +47,41 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
             DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_TAG_CERTIFICATE).getQuery();
-            if( criteria.id != null ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-            }
-            if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
-            }
-            if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
-            }
-            if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equalIgnoreCase(criteria.issuerEqualTo));
-            }
-            if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.lower().contains(criteria.issuerContains.toLowerCase()));
-            }
-            if( criteria.sha1 != null  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equalIgnoreCase(criteria.sha1.toHexString()));
-            }
-            if( criteria.sha256 != null  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
-            }
-            if( criteria.validOn != null ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));
-                sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validOn.getTime())));
-            }
-            if( criteria.validBefore != null ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validBefore.getTime())));
-            }
-            if( criteria.validAfter != null ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validAfter.getTime())));
-            }
-            if( criteria.revoked != null   ) {
-                sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
+            if (criteria.filter) {
+                if( criteria.id != null ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                }
+                if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
+                }
+                if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
+                }
+                if( criteria.issuerEqualTo != null  && criteria.issuerEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.equalIgnoreCase(criteria.issuerEqualTo));
+                }
+                if( criteria.issuerContains != null  && criteria.issuerContains.length() > 0  ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.ISSUER.lower().contains(criteria.issuerContains.toLowerCase()));
+                }
+                if( criteria.sha1 != null  ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.SHA1.equalIgnoreCase(criteria.sha1.toHexString()));
+                }
+                if( criteria.sha256 != null  ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.SHA256.equalIgnoreCase(criteria.sha256.toHexString()));
+                }
+                if( criteria.validOn != null ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validOn.getTime())));
+                    sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validOn.getTime())));
+                }
+                if( criteria.validBefore != null ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.NOTAFTER.greaterOrEqual(new Timestamp(criteria.validBefore.getTime())));
+                }
+                if( criteria.validAfter != null ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(criteria.validAfter.getTime())));
+                }
+                if( criteria.revoked != null   ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE.REVOKED.equal(criteria.revoked));
+                }
             }
             sql.addOrderBy(MW_TAG_CERTIFICATE.SUBJECT);
             Result<Record> result = sql.fetch();
@@ -162,14 +164,18 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     public void create(Certificate item) {
 
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-                        
-            dao.insert(item.getId(), item.getCertificate(), item.getSha1().toHexString(), 
-                    item.getSha256().toHexString(), item.getSubject(), item.getIssuer(), item.getNotBefore(), item.getNotAfter());
-
+            Certificate newCert = dao.findById(item.getId());
+            if (newCert == null) {
+                newCert = Certificate.valueOf(item.getCertificate());
+                dao.insert(item.getId(), newCert.getCertificate(), newCert.getSha1().toHexString(), 
+                        newCert.getSha256().toHexString(), newCert.getSubject(), newCert.getIssuer(), newCert.getNotBefore(), newCert.getNotAfter());                
+            } else {
+                throw new WebApplicationException(Response.Status.CONFLICT);
+            }
         } catch (WebApplicationException aex) {
             throw aex;            
         } catch (Exception ex) {
-            log.error("Error during attribute creation.", ex);
+            log.error("Error during certificate creation.", ex);
             throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
         }        
     }
@@ -178,9 +184,7 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     @RequiresPermissions("tag_certificates:delete") 
     public void delete(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return;}
-        CertificateDAO dao = null;
-        try {            
-            dao = TagJdbi.certificateDao();
+        try (CertificateDAO dao = TagJdbi.certificateDao()) {
             Certificate obj = dao.findById(locator.id);
             if (obj != null) {
                 dao.delete(locator.id);
@@ -192,16 +196,24 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
         } catch (Exception ex) {
             log.error("Error during certificate deletion.", ex);
             throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
-        } finally {
-            if (dao != null)
-                dao.close();
         }        
     }
     
     @Override
     @RequiresPermissions("tag_certificates:delete,search") 
     public void delete(CertificateFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Certificate:Delete - Got request to delete certificate by search criteria.");        
+        CertificateCollection objCollection = search(criteria);
+        try { 
+            for (Certificate obj : objCollection.getCertificates()) {
+                CertificateLocator locator = new CertificateLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Certificate deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }

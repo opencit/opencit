@@ -47,7 +47,6 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
              // all the data.
              if (criteria.filter) {
                 if( criteria.id != null ) {
-        //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
                     sql.addConditions(MW_TAG_KVATTRIBUTE.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
                 }
                 if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
@@ -196,7 +195,18 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     @Override
     @RequiresPermissions("tag_kv_attributes:delete,search")     
     public void delete(KvAttributeFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("KvAttribute:Delete - Got request to delete KvAttribute by search criteria.");        
+        KvAttributeCollection objCollection = search(criteria);
+        try { 
+            for (KvAttribute obj : objCollection.getKvAttributes()) {
+                KvAttributeLocator locator = new KvAttributeLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during KvAttribute deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }

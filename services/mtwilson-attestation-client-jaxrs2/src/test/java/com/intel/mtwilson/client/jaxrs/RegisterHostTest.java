@@ -24,7 +24,7 @@ import org.junit.Test;
  */
 public class RegisterHostTest {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterHostTest.class);
 
     private static RegisterHosts client = null;
     

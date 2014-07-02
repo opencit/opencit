@@ -18,9 +18,9 @@ import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,11 +28,12 @@ import org.slf4j.LoggerFactory;
  */
 public class MleModuleRepository implements SimpleRepository<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleModuleRepository.class);
     
     @Override
     @RequiresPermissions("mle_modules:search")    
     public MleModuleCollection search(MleModuleFilterCriteria criteria) {
+        log.debug("MleModule:Search - Got request to search for the Mle modules.");
         MleModuleCollection objCollection = new MleModuleCollection();
         try {
             TblModuleManifestJpaController jpaController = My.jpa().mwModuleManifest();
@@ -40,7 +41,11 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
                 List<TblModuleManifest> objList = jpaController.findTblModuleManifestByMleUuid(criteria.mleUuid.toString());
                 if (objList != null && !objList.isEmpty()) {                    
                     // Before we add to the collection we need to check if the user has specified any other search criteria
-                    if (criteria.id != null) {
+                    if (criteria.filter == false) {
+                        for(TblModuleManifest obj : objList) {
+                            objCollection.getMleModules().add(convert(obj));
+                        }                        
+                    } else if (criteria.id != null) {
                         for(TblModuleManifest obj : objList) {
                             if (obj.getUuid_hex().contains(criteria.id.toString()))
                                 objCollection.getMleModules().add(convert(obj));
@@ -55,11 +60,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
                             if (obj.getDigestValue().equalsIgnoreCase(criteria.valueEqualTo))
                                 objCollection.getMleModules().add(convert(obj));
                         }                        
-                    } else {
-                        for(TblModuleManifest obj : objList) {
-                            objCollection.getMleModules().add(convert(obj));
-                        }
-                    }
+                    } 
                 }                
             }
         } catch (ASException aex) {
@@ -68,16 +69,18 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
             log.error("Error during Module whitelist search.", ex);
             throw new ASException(ErrorCode.WS_MODULE_WHITELIST_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("MleModule:Search - Returning back {} of results.", objCollection.getMleModules().size());
         return objCollection;
     }
 
     @Override
     @RequiresPermissions("mle_modules:retrieve")    
     public MleModule retrieve(MleModuleLocator locator) {
-        if( locator.moduleUuid == null ) { return null; }
+        if( locator.id == null ) { return null; }
+        log.debug("MleModule:Retrieve - Got request to retrieve Mle Module with id {}.", locator.id);                        
         try {
             TblModuleManifestJpaController jpaController = My.jpa().mwModuleManifest();
-            TblModuleManifest obj = jpaController.findTblModuleManifestByUuid(locator.moduleUuid.toString());
+            TblModuleManifest obj = jpaController.findTblModuleManifestByUuid(locator.id.toString());
             if (obj != null) {
                 MleModule convObj = convert(obj);
                 return convObj;
@@ -94,6 +97,8 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     @Override
     @RequiresPermissions("mle_modules:store")    
     public void store(MleModule item) {
+        log.debug("MleModule:Store - Got request to update Mle module with id {}.", item.getId().toString());        
+        
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
             obj.setDigestValue(item.getModuleValue());
@@ -110,6 +115,8 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     @Override
     @RequiresPermissions("mle_modules:create")    
     public void create(MleModule item) {
+        log.debug("MleModule:Create - Got request to create a new Mle module.");
+        
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
             obj.setComponentName(item.getModuleName());
@@ -133,9 +140,10 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     @Override
     @RequiresPermissions("mle_modules:delete")    
     public void delete(MleModuleLocator locator) {
-        if (locator.moduleUuid == null) { return; }
+        if (locator.id == null) { return; }
+        log.debug("MleModule:Delete - Got request to delete Mle Module with id {}.", locator.id.toString());        
         try {
-            new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, locator.moduleUuid.toString());
+            new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, locator.id.toString());
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -162,7 +170,18 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     @Override
     @RequiresPermissions("mle_modules:delete,search")    
     public void delete(MleModuleFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("MleModule:Delete - Got request to delete MleModule by search criteria.");        
+        MleModuleCollection objCollection = search(criteria);
+        try { 
+            for (MleModule obj : objCollection.getMleModules()) {
+                MleModuleLocator locator = new MleModuleLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during MleModule deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
     
 }

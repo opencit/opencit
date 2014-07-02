@@ -18,14 +18,13 @@ import com.intel.mtwilson.as.rest.v2.model.HostLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,15 +32,23 @@ import org.slf4j.LoggerFactory;
  */
 public class HostRepository implements SimpleRepository<Host,HostCollection,HostFilterCriteria,HostLocator> {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostRepository.class);
     
     @Override
     @RequiresPermissions("hosts:search")    
     public HostCollection search(HostFilterCriteria criteria) {
+        log.debug("Host:Search - Got request to search for the Hosts.");        
         HostCollection objCollection = new HostCollection();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
-            if (criteria.id != null) {
+            if (criteria.filter == false) {
+                List<TblHosts> objList = jpaController.findTblHostsEntities();
+                if (objList != null && !objList.isEmpty()) {
+                    for(TblHosts obj : objList) {
+                        objCollection.getHosts().add(convert(obj));
+                    }
+                }                
+            } else if (criteria.id != null) {
                 TblHosts obj = jpaController.findHostByUuid(criteria.id.toString());
                 if (obj != null) {
                     objCollection.getHosts().add(convert(obj));
@@ -65,13 +72,6 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
                         objCollection.getHosts().add(convert(obj));
                     }
                 }                
-            }  else {
-                List<TblHosts> objList = jpaController.findTblHostsEntities();
-                if (objList != null && !objList.isEmpty()) {
-                    for(TblHosts obj : objList) {
-                        objCollection.getHosts().add(convert(obj));
-                    }
-                }
             }
         } catch (ASException aex) {
             throw aex;            
@@ -79,6 +79,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
             log.error("Error during search for hosts.", ex);
             throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("Host:Search - Returning back {} of results.", objCollection.getHosts().size());                
         return objCollection;
     }
 
@@ -86,6 +87,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     @RequiresPermissions("hosts:retrieve")    
     public Host retrieve(HostLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
+        log.debug("Host:Retrieve - Got request to retrieve Host with id {}.", locator.id);                
         String id = locator.id.toString();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -106,6 +108,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     @Override
     @RequiresPermissions("hosts:store")    
     public void store(Host item) {
+        log.debug("Host:Store - Got request to update Host with id {}.", item.getId().toString());        
         TxtHostRecord obj = new TxtHostRecord();
         try {
             
@@ -162,6 +165,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     @Override
     @RequiresPermissions("hosts:create")    
     public void create(Host item) {
+        log.debug("Host:Create - Got request to create a new Host.");
         TxtHostRecord obj = new TxtHostRecord();
         try {
             
@@ -219,7 +223,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
 	    }
 	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString(), tlsPolicyName, tlsCerts);*/
 	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
-           
+            log.debug("Host:Create - Created new host {} successfully.", item.getName());
+            
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -232,6 +237,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     @RequiresPermissions("hosts:delete")    
     public void delete(HostLocator locator) {
         if (locator == null || locator.id == null) { return; }
+        log.debug("User:Delete - Got request to delete user with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             new HostBO().deleteHost(null, id);
@@ -246,8 +252,18 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
     @Override
     @RequiresPermissions("hosts:delete,search")    
     public void delete(HostFilterCriteria criteria) {
-        // TODO: Call into the search function and delete all the items. Low priority for WW 14
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Host:Delete - Got request to delete Host by search criteria.");        
+        HostCollection objCollection = search(criteria);
+        try { 
+            for (Host obj : objCollection.getHosts()) {
+                HostLocator locator = new HostLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Host deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
     
 
@@ -262,6 +278,8 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
         convObj.setVmmMleUuid(obj.getVmm_mle_uuid_hex());
         convObj.setAikCertificate(obj.getAIKCertificate());
         convObj.setAikSha1(obj.getAikSha1());
+        convObj.setHardwareUuid(obj.getHardwareUuid());
+        log.error("------------------------------------" + obj.getHardwareUuid());
         return convObj;
     }
     

@@ -19,7 +19,7 @@ import org.junit.Test;
  */
 public class OsTest {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OsTest.class);
 
     private static Oss client = null;
     

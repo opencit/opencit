@@ -11,9 +11,8 @@ import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,7 +24,7 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="register_hosts")
 public class RegisterHostsRunnable implements Runnable{
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegisterHostsRunnable.class);
     
     private TxtHostRecordList hosts;
     private HostConfigResponseList result;
@@ -47,6 +46,7 @@ public class RegisterHostsRunnable implements Runnable{
     }
     
     @Override
+    @RequiresPermissions({"hosts:create,store"})
     public void run() {
         log.debug("Got request to register # {} of servers.", hosts.getHostRecords().size());
         result = new HostBO().registerHosts(hosts);

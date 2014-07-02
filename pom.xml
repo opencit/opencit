@@ -29,7 +29,6 @@
     <module>plugins</module> <!-- XXX TODO     leads to a circular dependency when we don't have everything properly refactored;  need to work more on plugin api's s othey don't depend on actual attestation service classes -->
     <module>services</module>
     <module>portals</module>
-    <module>tools</module>
     <module>desktop</module>
     <module>features</module>
     <module>installers</module>
@@ -920,7 +919,12 @@ reference : https://java.net/jira/browse/JERSEY-2325
                 <artifactId>joda-time</artifactId>
                 <version>2.3</version>
             </dependency>                        
-    
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
     
         </dependencies>
     </dependencyManagement>  

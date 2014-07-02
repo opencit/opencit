@@ -65,7 +65,7 @@ public class AbstractRpc {
             // use jersey classes to find the appropriate message body reader based on request's content type 
             final MessageBodyReader messageBodyReader =
                     workers.getMessageBodyReader(inputClass, inputClass,
-                    new Annotation[]{}, inputMediaType);
+                    inputClass.getAnnotations(), inputMediaType);
             if (messageBodyReader == null) {
                 throw new WebApplicationException(Response.Status.NOT_ACCEPTABLE); // TODO   make a more user friendly message and i18n
             }
@@ -73,7 +73,7 @@ public class AbstractRpc {
             MultivaluedHashMap<String, String> headerMap = RpcUtil.convertHeadersToMultivaluedMap(request);
             jaxrsHeaders.putAll(headerMap.getMap());
 
-            inputObject = messageBodyReader.readFrom(inputClass, inputClass, new Annotation[]{}, inputMediaType, jaxrsHeaders, new ByteArrayInputStream(input));
+            inputObject = messageBodyReader.readFrom(inputClass, inputClass, inputClass.getAnnotations(), inputMediaType, jaxrsHeaders, new ByteArrayInputStream(input));
 
         } catch (IOException e) {
             log.error ("IOException.", e);

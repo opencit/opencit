@@ -456,7 +456,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void checkTrustReportForXen() throws Exception {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
+        HostTrustBO hostTrustBO = new HostTrustBO();
         TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname);        
         log.debug(json.writeValueAsString(trustReport));
 //        log.debug(xml.writeValueAsString(trustReport)); // xml doesn't seem to seriailze the same info somehow... 
@@ -529,7 +529,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void checkHostTrustStatusForXen() throws Exception {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
+        HostTrustBO hostTrustBO = new HostTrustBO();
         HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(host, host.getName());        
         log.debug("Bios trusted? {}", trustStatus.bios);
         log.debug("Vmm trusted? {}", trustStatus.vmm);

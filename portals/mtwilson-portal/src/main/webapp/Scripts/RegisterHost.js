@@ -56,8 +56,12 @@ function fnuploadSuccess(responseHTML) {
         if ($(response).find('pre').html() != null) {
             validResponse = $(response).find('pre').html();
         }
-        validResponse = validResponse.split(':')[1];
-        validResponse = validResponse.substring(0, validResponse.length - 1);
+	if(validResponse == null || validResponse == '') {
+		validResponse = 'false';
+	}
+
+        //validResponse = validResponse.split(':')[1];
+        //validResponse = validResponse.substring(0, validResponse.length - 1);
     } else {
         validResponse = $.trim($(response).find('.bool').text());
     }
@@ -82,6 +86,9 @@ function updateListHostToBeRegister(responsJson) {
         var wlVMMList = responsJson.wlVMMList;
         // var selectionList = responsJson.selectionList;
         for (var val in values) {
+	    if (val != parseInt(val)) {
+		continue;
+	    }
             var str = "";
             var classValue = null;
             var portNo = null;
@@ -193,11 +200,12 @@ function fnCancelButtonHostConfig(element, nextDropDownID) {
 }
 
 function showDialogUpFlatFileHelp() {
-    var str = "";
-    for (var iteam in uploadFileHelp) {
-        str += '<div class="helpDiv">' + uploadFileHelp[iteam] + '</div>';
-    }
-    fnOpenDialog(str, "Upload Flat File Help", 500, 275, false);
+//    var str = "";
+//    for (var iteam in uploadFileHelp) {
+//        str += '<div class="helpDiv">' + uploadFileHelp[iteam] + '</div>';
+//    }
+    var str = '<div class="helpDiv" data-i18n="[html]help.upload_flat_file_help"></div>';
+    fnOpenDialog(str, "upload_flat_file_help", 500, 275, false);
 }
 
 function fnRetrieveDatacenters() {
@@ -224,7 +232,7 @@ function fnRetrieveDatacenters() {
             sendJSONAjaxRequest(false, 'getData/retrieveDatacenters.html', data, fnRetrieveDatacentersSuccess, null);
         }
     } else {
-        alert("Please enter a valid hostname or ip address and try again.");
+        alert($("#alert_valid_hostname_ip").text());
     }
 }
 
@@ -266,7 +274,7 @@ function fnRetrieveClusters() {
             sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
         }
     } else {
-        alert("Please enter a valid hostname or ip address and try again.");
+        alert($("#alert_valid_hostname_ip").text());
     }
 }
 
@@ -304,7 +312,7 @@ function fnRetriveHostFromCluster() {
             sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
         }
     } else {
-        alert("Please enter a valid hostname or ip address and try again.");
+        alert($("#alert_valid_hostname_ip").text());
     }
 }
 
@@ -388,10 +396,11 @@ function fnRegisterMultipleHostSuccess(responseJSON) {
 
 //function to show help for VCenter String in registerHost page
 function showHelpForVCenterServer() {
-    var str = "";
-    for (var iteam in vCenterStringHelp) {
-        str += '<div class="helpDiv">' + vCenterStringHelp[iteam] + '</div>';
-    }
+//    var str = "";
+//    for (var iteam in vCenterStringHelp) {
+//        str += '<div class="helpDiv">' + vCenterStringHelp[iteam] + '</div>';
+//    }
+    var str = '<div class="helpDiv" data-i18n="[html]help.vcenter_string_help"></div>';
     fnOpenDialog(str, "Help", 500, 285, false);
 }
 
