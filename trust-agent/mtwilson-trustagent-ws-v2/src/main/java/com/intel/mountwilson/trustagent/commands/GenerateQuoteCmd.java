@@ -59,10 +59,10 @@ public class GenerateQuoteCmd implements ICommand {
         
         String commandLine = String.format("aikquote -p %s -c %s %s %s %s",
                 identityAuthKey,
-                CommandUtil.singleQuoteEscapeShellArgument(context.getNonceFileName()),
-                CommandUtil.singleQuoteEscapeShellArgument(context.getAikBlobFileName()),
+                CommandUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()),
+                CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
                 selectedPcrs,
-                CommandUtil.singleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
+                CommandUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
         
 
         try {

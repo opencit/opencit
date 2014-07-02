@@ -34,7 +34,7 @@ function fnDeleteSelectedRequest(element) {
         $('#successMessage').html('');
 	var row = $(element).parent().parent();
 	var data="fingerprint="+$(row).attr('fingerprint');
-        if (confirm("Are you sure you want to delete this Request ?")) {
+        if (confirm($("#alert_delete_request").text())) {
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/deleteSelectedRequest.html', data, deleteSelectedRequestSuccess, null,element);
         }

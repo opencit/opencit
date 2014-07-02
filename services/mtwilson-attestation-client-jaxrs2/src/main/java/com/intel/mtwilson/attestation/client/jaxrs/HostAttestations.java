@@ -244,25 +244,27 @@ public class HostAttestations extends MtWilsonClient {
      * hosts matching the search criteria.If the user specifies the accept content type as "application/samlassertion+xml", then the latest valid cached SAML assertion
      * would be returned back to the caller.
      * @param HostAttestationFilterCriteria object that specifies the search criteria.
-     * The possible search options include host attestation id, host UUID, host AIK and host name. If the user
-     * specifies any of the host criteria, the latest attestation result would be returned back.
-     * @return <code> HostAttestationCollection</code> object with a list of attestations for the hosts that match the filter criteria. 
+     * The possible search options include host attestation id (id), host UUID(host_id), host AIK (aik) and host name(nameEqualTo). By
+     * default the last 10 attestation results would be returned back. The user can change this by additionally specifying the limit criteria (limit=5).
+     * @return HostAttestationCollection object with a list of attestations for the hosts that match the filter criteria. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:search
      * @mtwContentTypeReturned JSON/XML/YAML/SAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://10.1.71.234:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2
-     * Output: {"host_attestations":
-     *          [{"id":"32923691-9847-4493-86ee-3036a4f24940","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
-     *              "host_name":"192.168.0.2","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
+     * https://10.1.71.234:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2&limit=2
+     * Output: {"host_attestations":[{"id":"39cd1143-4f74-4767-8d82-9cb93d202115","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e",
+     * "host_name":"10.1.71.155","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}},
+     * {"id":"351408fd-53d4-4b65-8488-59e9867d091f","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e","host_name":"10.1.71.155",
+     * "host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestationFilterCriteria criteria = new HostAttestationFilterCriteria();
      *   criteria.nameEqualTo = "192.168.0.2";
+     *   criteria.limit = 2;
      *   HostAttestationCollection objCollection = client.searchHostAttestations(criteria);
      * </pre>
      */    

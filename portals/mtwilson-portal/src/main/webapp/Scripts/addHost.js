@@ -339,7 +339,7 @@ function addNewHost() {
 
         if(ipValid == true) {
             if (chechAddHostValidation()) {
-                if (confirm("Are you Sure you want to Add this Host ?")) {
+                if (confirm($("#alert_confirm_add_host").text())) {
                     var dataToSend = fnGetNewHostData();
                     dataToSend.hostId = null;
                     dataToSend = $.toJSON(dataToSend);
@@ -349,7 +349,7 @@ function addNewHost() {
                 }
             }
         }else{
-            alert("Please enter a valid IP address and try again.")
+            alert($("#alert_valid_ip").text())
         }
 }
 

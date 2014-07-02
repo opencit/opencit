@@ -522,7 +522,7 @@ function isNumber(n) {
                                     <div class="labelDiv" data-i18n="input.tags">Tags:</div> <!-- was: "Host Provided By" -->
                                     <div class="valueDiv">
                                         <select class="ddlBox_small_Border" id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
-                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name | escapeAttribute" data-bind-id="item.name | escapeAttribute" data-bind-text="item.name | escapeAttribute"></option>
+                                            <option data-bind-each-item="global.rearranged_tags" data-bind-value="item.name | escapeAttribute" data-bind-id="item.name | escapeAttribute" data-bind-text="item.text | escapeAttribute"></option>
                                         </select>
                                         <select class="ddlBox_small_Border" id="selection-create-tags-values" data-validator="selection_create_form_validateValues">
                                             <option data-bind-each-item="tagValues" data-bind-value="item.id | escapeAttribute" data-bind-text="item.value | escapeAttribute"></option>
@@ -1213,7 +1213,13 @@ function isNumber(n) {
                     <!-- content-wrap ends-->	
                 </div>
             </div>
-
+            <div>
+                <span id="alert_valid_ca" data-i18n="alert.valid_ca" style="display: none;">form is valid, update ca</span>
+                <span id="alert_not_valid_ca" data-i18n="alert.not_valid_ca" style="display: none;">form NOT valid, update ca</span>
+                <span id="alert_provision_select_tag_xml" data-i18n="alert.provision_select_tag_xml" style="display: none;">Please select the tag XML to be provisioned.</span>
+                <span id="alert_provision_select_server" data-i18n="alert.provision_select_server" style="display: none;">Select at least one server to provision the tags</span>
+                <span id="alert_provision_upload_tag_xml" data-i18n="alert.provision_upload_tag_xml" style="display: none;">Upload a tag XML or choose a selection to provision</span>
+            </div>
             
             <!-- footer starts -->
             <div class="footer" style="display: none;">

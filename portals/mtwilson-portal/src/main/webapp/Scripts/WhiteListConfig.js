@@ -83,7 +83,7 @@ function fnUploadWhiteListConfigurationData() {
                             "/;" + $('#whiteListCitrix_userName').val() + ";" + $('#whiteListCitrix_password').val();
                 }
             } else {
-                alert("Please enter a valid hostname or ip address and try again.");
+                alert($("#alert_valid_hostname_ip").text());
             }
         } else if (isVMWare == 1) { // get VMWare values
             if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val()) && fnValidateIpAddress($('#whiteListVMware_Host').val())) {
@@ -102,7 +102,7 @@ function fnUploadWhiteListConfigurationData() {
                     hostVo.hostPortNo = null;
                 }
             } else {
-                alert("Please enter a valid hostname or ip address and try again.");
+                alert($("#alert_valid_hostname_ip").text());
             }
         } else { // TA
 
@@ -124,7 +124,7 @@ function fnUploadWhiteListConfigurationData() {
                     hostVo.registered = false;
                 }
             } else {
-                alert("Please enter a valid hostname or ip address and try again.");
+                alert($("#alert_valid_hostname_ip").text());
             }
         }
 

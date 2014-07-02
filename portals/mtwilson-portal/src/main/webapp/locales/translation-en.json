@@ -228,7 +228,8 @@
         "after":"after",
         "any":"Any",
         "active":"Active",
-        "revoked":"Revoked"
+        "revoked":"Revoked",
+        "select":"Select"
     },
     "input": {
         "description": "Description:",
@@ -357,6 +358,15 @@
         "role_report": "Report",
         "role_audit": "Audit",
         "role_assettagmanagement": "AssetTagManagement",
+        "role_administrator": "Administrator",
+        "role_assettagmanager": "AssetTagManager",
+        "role_auditor": "Auditor",
+        "role_challenger": "Challenger",
+        "role_hostmanager": "HostManager",
+        "role_reportmanager": "ReportManager",
+        "role_servermanager": "ServerManager",
+        "role_usermanager": "UserManager",
+        "role_whitelistmanager": "WhitelistManager",
         "expiring_api_time_start":"No Api Client keys are expiring in the next ",
         "expiring_api_time_end":" month(s).",
         "host_status_unreachable":"System is unreachable.",
@@ -388,7 +398,8 @@
         "servers_to_provision":"Servers to provision",
         "double_click_status":"Double click on the element to toggle the status",
         "available_selections":"Available Selections",
-        "upload_xml":"Upload XML"
+        "upload_xml":"Upload XML",
+        "no_pending_api_requests":"No requests are currently pending to be reviewed."
     },
     "placeholder": {
         "selection_name":"Name of this selection",
@@ -479,6 +490,37 @@
     "error": {
         "login_expired": "Your Login Session is Expired. Please Login again.",
         "wl_config_error_msg": "Error While Getting MLE Data."
+    },
+    "alert": {
+        "add_host": "Are you sure you want to add this host?",
+        "valid_ip": "Please enter a valid IP address and try again.",
+        "request_approved":"Request is approved successfully.",
+        "request_rejected":"Request is rejected successfully.",
+        "no_root_ca":"This system is not currently configured with a Root CA",
+        "updating_cert":"updating cert now",
+        "successful_user_registration":"User is successfully registered. Contact administrator for access approval before accessing the portal.",
+        "valid_hostname_ip":"Please enter a valid hostname or ip address and try again.",
+        "reregister_with_api":"Please log into the system on which the client is installed and re-register the client using the API register functionality.",
+        "request_extended":"Request is extended successfully.",
+        "null_server_response":"Response from server is null.",
+        "request_error":"Error while serving request. Please try again later.",
+        "valid_ca":"form is valid, update ca",
+        "not_valid_ca":"form NOT valid, update ca",
+        "provision_select_tag_xml":"Please select the tag XML to be provisioned.",
+        "provision_select_server":"Select at least one server to provision the tags",
+        "provision_upload_tag_xml":"Upload a tag XML or choose a selection to provision",
+        "add_mle":"Are you sure you want to add this MLE?",
+        "delete_request":"Are you sure you want to delete this request?",
+        "update_mle":"Are you Sure you want to update this MLE?",
+        "delete_mle":"Are you sure you want to delete this MLE?",
+        "migrate_vm":"Are you sure you want to migrate this VM to",
+        "update_os_info":"Are you sure you want to update OS info?",
+        "delete_os":"Are you sure you want to delete this OS?",
+        "add_os":"Are you sure want to add OS?",
+        "add_oem":"Are you sure want to add OEM?",
+        "update_oem_info":"Are you sure you want to update OEM info?",
+        "delete_oem":"Are you sure you want to delete this OEM?",
+        "delete_host":"Are you sure you want to delete this host?"
     },
     "help": {
         "upload_flat_file_help":"<p>Provide a plain text file (.txt format) containing a list of hosts to be registered in the following formats:</p><p>Agent | Host_Name | connection string</p><br><p><b>For Open Source Based Hosts:</b></p><p>intel|Host_Name|Host_Port_no</p><p><i>e.g.   intel|myTrustAgent|1443</i></p><br><p><b>For VMWare Based Hosts:</b></p><p>vmware|Host_Name|Vmware_Connection_String*</p><p><i>e.g. vmware|myVmwareHost|https://192.168.1.0:443/sdk;Administrator;Password</i></p><br><p><b>For Citrix Type</b></p><p>citrix|Host_Name|Citrix_Connection_String*</p><p><i>e.g.   citrix|myCitrixHost|https://192.168.1.0:443/;Administrator;Password</i></p><br><p>* Connection strings must be valid urls.  Please notice the / after the port number.  This is required.</p>",

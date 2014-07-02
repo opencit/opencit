@@ -254,7 +254,7 @@ function getModuleTypeMleListSuccess(responseJSON){
 function updateMleInfo() {
 	var dataToSent = fnGetMleData(false);
 	if (dataToSent != "") {
-		if (confirm("Are you Sure you want to update this MLE ?")) {
+		if (confirm($("#alert_update_mle").text())) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=false", updateMleSuccess, null);
 		}
@@ -275,7 +275,7 @@ $('#disabledDiv').remove();
 
 
 function fnDeleteMleInfo(element) {
-	if (confirm("Are you sure you want to delete this MLE ?")) {
+	if (confirm($("#alert_delete_mle").text())) {
 		$('#messageSpace').html('');
 		var data = [] ;
 	    var row = $(element).parent().parent();

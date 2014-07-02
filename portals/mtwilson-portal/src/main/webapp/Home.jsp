@@ -218,6 +218,18 @@
         </div>
         <div class="main" id="mainContainer">
         </div>
+        <div>
+            <span id="alert_null_server_response" data-i18n="alert.null_server_response" style="display: none;">Response from server is null.</span>
+            <span id="alert_request_error" data-i18n="alert.request_error" style="display: none;">Error while serving request. Please try again later.</span>
+            <span id="alert_valid_ip" data-i18n="alert.valid_ip" style="display: none;">Please enter a valid IP address and try again.</span>
+            <span id="alert_update_os_info" data-i18n="alert.update_os_info" style="display: none;">Are you sure you want to update OS info?</span>
+            <span id="alert_delete_os" data-i18n="alert.delete_os" style="display: none;">Are you sure you want to delete this OS?</span>
+            <span id="alert_add_os" data-i18n="alert.add_os" style="display: none;">Are you sure want to add OS?</span>
+            <span id="alert_add_oem" data-i18n="alert.add_oem" style="display: none;">Are you sure want to add OEM?</span>
+            <span id="alert_update_oem_info" data-i18n="alert.update_oem_info" style="display: none;">Are you sure you want to update OEM info?</span>
+            <span id="alert_delete_oem" data-i18n="alert.delete_oem" style="display: none;">Are you sure you want to delete this OEM?</span>
+            <span id="alert_delete_host" data-i18n="alert.delete_host" style="display: none;">Are you sure you want to delete this host?</span>
+        </div>
         <div class="footer">
             <p>&copy; 2012-2014 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
         </div>

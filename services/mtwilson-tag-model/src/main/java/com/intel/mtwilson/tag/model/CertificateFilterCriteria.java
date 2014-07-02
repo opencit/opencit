@@ -11,6 +11,10 @@ import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
 import com.intel.mtwilson.jaxrs2.FilterCriteria;
 import java.util.Date;
 import javax.ws.rs.QueryParam;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.Unchecked;
+
 
 /**
  *
@@ -25,8 +29,10 @@ public class CertificateFilterCriteria extends DefaultFilterCriteria implements 
     @QueryParam("subjectContains")
     public String subjectContains;
     @QueryParam("issuerEqualTo")
+    @Regex(RegexPatterns.ANY_VALUE)    
     public String issuerEqualTo;
     @QueryParam("issuerContains")
+    @Regex(RegexPatterns.ANY_VALUE)    
     public String issuerContains;
     @QueryParam("statusEqualTo")
     public String statusEqualTo;
@@ -36,8 +42,10 @@ public class CertificateFilterCriteria extends DefaultFilterCriteria implements 
     public Date validBefore;
     @QueryParam("validAfter")
     public Date validAfter;
+    @Unchecked
     @QueryParam("sha1")
     public Sha1Digest sha1;
+    @Unchecked
     @QueryParam("sha256")
     public Sha256Digest sha256;
     @QueryParam("revoked")
