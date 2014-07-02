@@ -1078,6 +1078,11 @@ var // currently active contextMenu trigger
                     if (item.icon) {
                         $t.addClass("icon icon-" + item.icon);
                     }
+                    // jonathan modification to allow icons from html5 menu item
+                    if (item.iconurl) {
+                        $t.addClass("icon");
+                        $t.css("background-image", "url("+item.iconurl+")");
+                    }
                 }
                 
                 // cache contained elements
@@ -1558,6 +1563,10 @@ function menuChildren(items, $children, counter) {
                             disabled: !!$node.attr('disabled'),
                             callback: (function(){ return function(){ $node.click(); }; })()
                         };
+                        // jonathan added to enable icons on html5 menu items
+                        if( $node.attr('icon') ) {
+                            item.iconurl = $node.attr('icon');
+                        }
                         break;
                         
                     case 'checkbox':

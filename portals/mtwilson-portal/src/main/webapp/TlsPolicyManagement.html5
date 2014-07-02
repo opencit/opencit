@@ -43,7 +43,7 @@
                 <td class="tlspolicy_comment">{{comment}}</td>
                 <td class="tlspolicy_private" style="display: none;">
                     {{#if private}}
-                        <span data-i18n="tlspolicy.scope.private">Private</span>
+                        <span data-i18n="tlspolicy.scope.private">Per-host</span>
                     {{else}}
                         <span data-i18n="tlspolicy.scope.shared">Shared</span>
                     {{/if}}
@@ -63,8 +63,8 @@
         {{/each}}
 </script>
 <menu id="tlspolicy_browse_item_context_menu" type="context" style="display:none">
-    <command label="Edit" data-i18n="[label]action.edit" onclick="onEditCurrentTlsPolicy()"></command> 
-    <command label="Delete" data-i18n="[label]action.delete" onclick="onDeleteCurrentTlsPolicy()"></command> 
+    <menuitem label="Edit" data-i18n="[label]action.edit" icon="images/pencil_small_18.png" onclick="onEditCurrentTlsPolicy()"></menuitem> 
+    <menuitem label="Delete" data-i18n="[label]action.delete" icon="images/trash_empty_18.png" onclick="onDeleteCurrentTlsPolicy()"></menuitem> 
 </menu>
 <form id="tlspolicy_edit_form" style="display:none" class="tlsform" title="Edit TLS Policy" data-i18n="[title]form.edit_tls_policy">
     <fieldset>
@@ -76,7 +76,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_name" data-i18n="table.policy_name">Name</label>
-            <input id="tlspolicy_edit_name" type="input" name="name"/>
+            <input id="tlspolicy_edit_name" type="text" name="name"/>
         </li>
         <li>
             <label for="tlspolicy_edit_policy_type" data-i18n="table.policy_type">Policy Type</label>
@@ -93,7 +93,7 @@
             <label for="tlspolicy_edit_private" data-i18n="table.policy_scope">Scope</label>
             <select id="tlspolicy_edit_private" name="private">
                 <option value="false" data-i18n="tlspolicy.scope.shared">Shared</option>
-                <option value="true" data-i18n="tlspolicy.scope.private">Private</option>
+                <option value="true" data-i18n="tlspolicy.scope.private">Per-host</option>
             </select>
         </li>
         <li>
@@ -107,12 +107,29 @@
     <ol>
         <li>
             <label for="tlspolicy_edit_certificates_add" data-i18n="action.add_certificate">Add certificate</label>
-            <textarea id="tlspolicy_edit_certificates_add" class="publickey-text"></textarea>
+            <textarea id="tlspolicy_edit_certificates_add" class="publickey-text" placeholder="Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
     <ul id="tlspolicy_edit_certificate_list" class="tlspolicy-content tlspolicy-certificate-list">
     </ul>
+    <!--
+    TODO:  change the simple list to a table using handlebars to populate it and 
+    where we display the subject name and issuer name in the table, with a context
+    menu for the user to see the base64 cert in a popup, or the full certicicate details
+    in a popup (that one should be a global tool because there are also certificates in
+    other places) 
+    <table id="tlspolicy_edit_certificate_list" class="tlspolicy-content tlspolicy-certificate-list">
+    <thead>
+        <tr>
+            <th data-i18n="table.index">Index</th>
+            <th data-i18n="table.certificate">Certificate</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    </table>
+    -->
     </fieldset>
     <fieldset data-policy-type="certificate-digest" style="display:none;">
     <legend data-i18n="form.edit_tls_policy_certificate_digests">Certificate Digests</legend>
@@ -127,7 +144,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_certificate_digests_add" data-i18n="action.add_certificate_digest">Add certificate fingerprint</label>
-            <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text"></textarea>
+            <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text" placeholder="Base64-encoded digest using selected algorithm of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -139,7 +156,7 @@
     <ol>
         <li>
             <label for="tlspolicy_edit_public_keys_add" data-i18n="action.add_public_key">Add public key</label>
-            <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text"></textarea>
+            <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text" placeholder="Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -159,7 +176,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_public_key_digests_add" data-i18n="action.add_public_key_digest">Add public key fingerprint</label>
-            <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text"></textarea>
+            <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text" placeholder="Base64-encoded digest using selected algorithm of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -185,11 +202,11 @@
         </li>
         <li>
             <label for="tlspolicy_delete_confirmation_name" data-i18n="table.policy_name">Name</label>
-            <input id="tlspolicy_delete_confirmation_name" type="input" name="name" disabled/>
+            <input id="tlspolicy_delete_confirmation_name" type="text" name="name" disabled/>
         </li>
         <li>
             <label for="tlspolicy_delete_confirmation_hostrefcount" data-i18n="table.policy_hostrefcount">Referenced by</label>
-            <input id="tlspolicy_delete_confirmation_hostrefcount" type="input" name="hostrefcount" disabled/>
+            <input id="tlspolicy_delete_confirmation_hostrefcount" type="text" name="hostrefcount" disabled/>
         </li>
     </ol>
     </fieldset>
@@ -345,6 +362,7 @@ function onEditCurrentTlsPolicy() {
         $("#tlspolicy_edit_comment").val(currentTlsPolicyDataItem.comment);
         if( currentTlsPolicyDataItem.descriptor ) {
             $("#tlspolicy_edit_policy_type").val(currentTlsPolicyDataItem.descriptor.policy_type); // required policy type such as "certificate" or "certificate-digest"
+            $("#tlspolicy_edit_policy_type").change(); // trigger the on-change handler we defined, which doesn't get called when we use .val()
             if( currentTlsPolicyDataItem.descriptor.policy_type == "certificate" ) {
                 $("#tlspolicy_edit_certificate_list").empty();
                 // TODO: need a place to display the encoding, for now assume descriptor.meta.encoding == "base64"

@@ -391,6 +391,7 @@ function fnDisableOrEnableUploadButton(checkBox) {
     });
 }
 
+// see also addHost.js
 $(document).ready(function() {
     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
         console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
@@ -399,7 +400,13 @@ $(document).ready(function() {
        if( choicesArray.length === 0 ) {
        	$("#tls_policy_input_div").hide();
        } else {
-  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select"), choicesArray);
+           var el = $("#tls_policy_select");
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices(el, choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices(el, {
+            dataInputContainer: $('#tls_policy_data_container')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        $("#tls_policy_input_div").i18n();
        	$("#tls_policy_input_div").show();
 	}
     });

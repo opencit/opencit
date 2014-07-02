@@ -2,11 +2,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+	<!--[if lt IE 9]><script src="Scripts/html5.js"></script><![endif]-->
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
     <title data-i18n="title.home">Welcome</title>
-	
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.contextMenu.css" />

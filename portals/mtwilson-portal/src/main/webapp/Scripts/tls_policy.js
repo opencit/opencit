@@ -22,6 +22,10 @@ var mtwilsonTlsPolicyModule = {};
         // first, server global if it's defined
         var disabled = false;
         if( m.configuration["global"] ) {
+            disabled = true;
+        }
+        /*
+        if( m.configuration["global"] ) {
             choices.push({label:"Required policy (global)",value:null});
             disabled = true;
         }
@@ -29,17 +33,21 @@ var mtwilsonTlsPolicyModule = {};
         if( m.configuration["default"] ) {
             choices.push({label:"",value:null, disabled:disabled});
         }
+        */
         // next, any shared policies
         for(var i=0; i<m.tls_policies.length; i++) {
             var choice = {};
             choice.value = m.tls_policies[i].id || "";
             choice.label = m.tls_policies[i].name;
+            choice.policy_scope = (m.tls_policies[i].private ? "private" : "shared");
+            choice.policy_type = m.tls_policies[i].policy_type;
             choice.disabled = disabled;
             if( m.configuration["default"] == choice.value ) {
                 choice.isDefault = true;
             }
             if( m.configuration["global"] == choice.value ) {
                 choice.isGlobal = true;
+                choice.disabled = false; // enable the global option as a visual indication that it's what the server will allow
             }
             choices.push(choice);
         }
@@ -54,18 +62,97 @@ var mtwilsonTlsPolicyModule = {};
             $(element).append("<option value='' data-i18n='tls.no_choices' disabled>None available</option>");
         }
         var globalChoice, defaultChoice;
+        var shared = "";
         for(var i=0; i<choicesArray.length; i++) {
             if( choicesArray[i].isDefault ) { defaultChoice = choicesArray[i]; continue; }
             if( choicesArray[i].isGlobal ) { globalChoice = choicesArray[i]; continue; }
-            $(element).append("<option value='"+choicesArray[i].value+"' "+(choicesArray[i].disabled?"disabled":"")+">"+choicesArray[i].label+"</option>");
+            shared += "<option value='"+choicesArray[i].value+"' "+(choicesArray[i].disabled?"disabled":"")+">"+choicesArray[i].label+"</option>";
+        }
+        if( shared.length > 0 ) {
+            $(element).append("<optgroup label='Shared' data-i18n='[label]tls_policy.option.shared' data-tls-policy-scope='shared'>"+shared+"</optgroup>");
         }
         if( globalChoice ) {
-            $(element).append("<optgroup label='Global' data-i18n='[label]tls_policy.option.global'><option value='"+globalChoice.value+"'>"+globalChoice.label+"</option></optgroup>");
+            $(element).append("<optgroup label='Global' data-i18n='[label]tls_policy.option.global' data-tls-policy-scope='shared'><option value='"+globalChoice.value+"'>"+globalChoice.label+"</option></optgroup>");
         }
         if( defaultChoice ) {
-            $(element).append("<optgroup label='Default' data-i18n='[label]tls_policy.option.default'><option value='"+defaultChoice.value+"' "+(defaultChoice.disabled?"disabled":"")+">"+defaultChoice.label+"</option></optgroup>");
+            $(element).append("<optgroup label='Default' data-i18n='[label]tls_policy.option.default' data-tls-policy-scope='shared'><option value='"+defaultChoice.value+"' "+(defaultChoice.disabled?"disabled":"")+">"+defaultChoice.label+"</option></optgroup>");
         }
     });
-    
+    defineFunction(m, "insertSelectOptionsWithPerHostTlsPolicyChoices", function(selectElement, options) {
+        var perhost = "";
+        if( m.configuration.allow ) { 
+            if( m.configuration.allow.indexOf("certificate") > -1 ) {
+                perhost += "<option value='private-certificate' data-i18n='tls_policy.option.per_host_certificate' data-tls-policy-scope='private' data-tls-policy-type='certificate'>Host certificate</option>";
+            }
+            if( m.configuration.allow.indexOf("certificate-digest") > -1 ) {
+                perhost += "<option value='private-certificate-digest' data-i18n='tls_policy.option.per_host_certificate_digest' data-tls-policy-scope='private' data-tls-policy-type='certificate-digest'>Host certificate fingerprint</option>";
+            }
+            if( m.configuration.allow.indexOf("certificate") > -1 ) {
+                perhost += "<option value='private-public-key' data-i18n='tls_policy.option.per_host_public_key' data-tls-policy-scope='private' data-tls-policy-type='public-key'>Host public key</option>";
+            }
+            if( m.configuration.allow.indexOf("certificate-digest") > -1 ) {
+                perhost += "<option value='private-public-key-digest' data-i18n='tls_policy.option.per_host_public_key_digest' data-tls-policy-scope='private' data-tls-policy-type='public-key-digest'>Host public key fingerprint</option>";
+            }
+        }
+        $(selectElement).prepend("<optgroup label='Per-host' data-i18n='[label]tls_policy.option.private'>"+perhost+"</optgroup>");
+        if( options ) {
+            if( options.dataInputContainer  ) {
+                // dataInputContainer must be an element, probably a div or form, which contains extra inputs for each policy type
+                // the container is geared towards input of ONE certificate, public key, or digest value because we are implementing
+                // an abbreviated form for a per-host policy. an alternative is to open a complete "edit tls policy" dialog and
+                // let the user define or select any policy with that dialog, save that policy to the server and just populate the
+                // policy id back to the form.
+                var inputContainer = $(options.dataInputContainer);
+                // check if we already installed the handler
+                if( ! $(selectElement).data("tlspolicy-change-handler") ) {
+                    $(selectElement).change(function() {
+                        var newValue = $(selectElement).val();
+                        var optionElement = $(selectElement).find("option[value='"+newValue+"']").first().get();
+                        console.log("got selected element", optionElement);
+                        console.log("got selected element value", optionElement.value);
+                        
+                        var scope;
+                        if( $(optionElement).attr("data-tls-policy-scope") ) { scope = $(optionElement).attr("data-tls-policy-scope"); }
+                        else if( newValue.indexOf("private-") == 0 ) { scope = "private"; } // see perhost option values inserted to the select element, earlier in this function
+                        else { scope = "shared"; }
+                        
+                        var policyType;
+                        if( $(optionElement).attr("data-tls-policy-type") ) { policyType = $(optionElement).attr("data-tls-policy-type"); }
+                        
+                        var tlsPolicyInfo = {
+                            "value": newValue,
+                            "scope": scope,
+                            "policy_type": policyType
+                        };
+                        console.log("hey, got new tls policy selected", tlsPolicyInfo);
+                        
+                        if( scope == "private" ) {
+                            // hide all policy-type-specific input elements
+                            inputContainer.find("[class^='tlspolicy-input-']").hide();
+                            inputContainer.find("[class~='tlspolicy-input-"+policyType+"']").show();
+                            inputContainer.show();
+                        }
+                        else {
+                            inputContainer.hide();
+                        }
+                        
+                    });
+                    $(selectElement).data("tlspolicy-change-handler", true);
+                }
+            }
+        }
+        // TODO: we need to use the call back whenuser selects a per-host option because we need the page to display the inputs or existing values...
+    });
+    defineFunction(m, "selectDefaultTlsPolicyChoice", function(element, defaultValue) {
+        if( defaultValue ) {           
+            $(element).val(defaultValue);
+        }
+        else if( m.configuration["default"] ) {
+            $(element).val(m.configuration["default"]);
+        }
+        else {
+            $(element).val('');
+        }
+    });
 }(jQuery,mtwilsonTlsPolicyModule));
 

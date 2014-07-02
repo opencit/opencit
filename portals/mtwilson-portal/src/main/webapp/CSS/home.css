@@ -929,6 +929,12 @@ form.tlsform em {
 form.tlsform label {
   width: 120px; /* Width of labels */
 }
+form.tlsform input[type='text'] {
+    width: 300px;
+}
+form.tlsform textarea {
+    width: 300px;
+}
 form.tlsform fieldset fieldset label {
   margin-left: 123px; /* Width plus 3 (html space) */
 }
@@ -955,7 +961,11 @@ form.tlsform fieldset[data-policy-type] textarea.publickey-text {
 form.tlsform fieldset[data-policy-type] label+textarea+button {
     float: right;
 }
-ul.tlspolicy-certificate-list {
-    width: 300px;
+form.tlsform .tlspolicy-certificate-list {
+    width: 100%;
     overflow: auto;
+}
+.tlspolicy-input-container textarea {
+    width: 575px;
+    height: 35px;
 }
