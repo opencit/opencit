@@ -1,5 +1,6 @@
 var apiClientList = [];
 var roleList = [];
+var expire_date;
 
 $(function() {
 	$('#mainLoadingDiv').prepend(disabledDiv);
@@ -78,6 +79,7 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	
 	$('#mainApiClient_Roles').html('<div>'+str+'</div>');
         $('#mainApiClient_Expires').val(new Date(data.expires).toISOString());
+        expire_date = data.expires;
         $('#mainApiClient_Comments').val(data.comments);
 }
 
@@ -109,7 +111,8 @@ function fnGetRequestVOForApprovalOrReject() {
 		roles.push($(this).attr('role'));
 	});
 	vo.requestedRoles = roles;
-	vo.expires= $('#mainApiClient_Expires').val();
+        vo.expires = expire_date;
+	//vo.expires= $('#mainApiClient_Expires').val();
 	vo.comments= $('#mainApiClient_Comments').val();
 	//alert(vo.comments);
 	
