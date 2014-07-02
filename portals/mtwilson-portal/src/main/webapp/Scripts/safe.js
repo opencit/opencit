@@ -29,7 +29,7 @@ function getHTMLEscapedMessage(message) {
 	str =str.replace(/\&/g, "&amp;");
 	str =str.replace(/\"/g, "&quot;");
 	str =str.replace(/\'/g, "&#x27;");
-	str =str.replace(/\//g, "&#x24;");
+	str =str.replace(/\//g, "&#x2f;");
 	return str;
 }
 

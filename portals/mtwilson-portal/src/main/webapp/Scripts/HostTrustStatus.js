@@ -57,8 +57,8 @@ function populateHostTrustDataIntoTable(hostDetails) {
                                                 //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
 				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
 				'<td class="row2">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</td>'+
-				'<td align="center" class="row3"><img border="0" src="'+ encodeURL(hostDetails[item].osName) +'"></td>';
-				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ encodeURL(hostDetails[item].hypervisorName)+'">' : '';
+				'<td align="center" class="row3"><img border="0" src="'+ hostDetails[item].osName +'"></td>';
+				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ hostDetails[item].hypervisorName+'">' : '';
 				str+='<td align="center" class="row4">'+ value +'</td>';
 				//TODO : 
 				 // Loaction Policy 
@@ -68,10 +68,10 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			    value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
 				//value="";
 				
-                        str+='<td align="center" class="row5" title="'+ escapeForHTMLAttributes(hostDetails[item].assetTagDetails) +'"><img border="0" src="'+ encodeURL(hostDetails[item].assetTagStatus) +'"></td>'+
-				'<td align="center" class="row6"><img border="0" src="'+ encodeURL(hostDetails[item].biosStatus) +'"></td>'+
-				'<td align="center" class="row7"><img border="0" src="'+ encodeURL(hostDetails[item].vmmStatus) +'"></td>'+
-				'<td align="center" class="row8"><img border="0" src="'+ encodeURL(hostDetails[item].overAllStatus) +'"></td>';
+                        str+='<td align="center" class="row5" title="'+ escapeForHTMLAttributes(hostDetails[item].assetTagDetails) +'"><img border="0" src="'+ hostDetails[item].assetTagStatus +'"></td>'+
+				'<td align="center" class="row6"><img border="0" src="'+ hostDetails[item].biosStatus +'"></td>'+
+				'<td align="center" class="row7"><img border="0" src="'+ hostDetails[item].vmmStatus +'"></td>'+
+				'<td align="center" class="row8"><img border="0" src="'+ hostDetails[item].overAllStatus +'"></td>';
 				/*if (!(hostDetails[item].overAllStatusBoolean)) {
 					str+='<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/helpicon.png" alt="Failure Report"></td>';
 				}else {
