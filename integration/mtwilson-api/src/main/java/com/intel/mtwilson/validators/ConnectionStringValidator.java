@@ -17,7 +17,6 @@ import java.net.MalformedURLException;
 public class ConnectionStringValidator extends InputValidator<String> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConnectionStringValidator.class);
-    // TODO:  these need to be customized for what's valid on URLs, or maybe we need to look for encoded charactesr in URLs
     public static final String USERNAME = "(?:([a-zA-Z0-9_\\\\\\.@-]+))";
     public static final String PASSWORD = "(?:([a-zA-Z0-9_\\\\.\\\\, @!#$%^+=>?:{}()\\[\\]\\\"|;~`'*-]+))";
 

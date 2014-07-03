@@ -299,7 +299,6 @@
         }
     };
 
-    // @todo code related to "watchFunctions" is certainly buggy
     var methodNames = ['pop', 'push', 'reverse', 'shift', 'sort', 'slice', 'unshift'];
     var defineArrayMethodWatcher = function (obj, prop, original, methodName) {
         defineProp(obj[prop], methodName, function () {

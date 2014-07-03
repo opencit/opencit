@@ -108,7 +108,7 @@ public class SamlGenerator {
     
     public final void setIssuer(String issuer) {
         this.issuerName = issuer;
-        this.issuerServiceName = "AttestationService-0.5.4"; // TODO make this configurable ??? 
+        this.issuerServiceName = "AttestationService-0.5.4"; 
     }
     
     /**
@@ -152,9 +152,6 @@ public class SamlGenerator {
         
         samlAssertion.assertion =  XMLHelper.nodeToString(plaintextElement);
         System.out.println("Signed Assertion String: " + samlAssertion.assertion );
-        // TODO: now you can also add encryption....
-        
-        
         return samlAssertion;
     }
     
@@ -186,9 +183,7 @@ public class SamlGenerator {
 
             samlAssertion.assertion =  XMLHelper.nodeToString(plaintextElement);
             System.out.println("Signed Assertion String: " + samlAssertion.assertion );
-            // TODO: now you can also add encryption....
-
-
+            
             return samlAssertion;
         }
         catch(Exception e) {
@@ -224,7 +219,7 @@ public class SamlGenerator {
             SAMLObjectBuilder nameIdBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
             NameID nameId = (NameID) nameIdBuilder.buildObject();
             nameId.setValue(hostName);
-//            nameId.setNameQualifier(input.getStrNameQualifier()); optional:  TODO should be linked to the security domain
+//            nameId.setNameQualifier(input.getStrNameQualifier()); optional:  
             nameId.setFormat(NameID.UNSPECIFIED); // !!! CAN ALSO USE X509 SUBJECT FROM HOST CERTIFICATE instead of host name in database   
             return nameId;
         }
@@ -238,13 +233,13 @@ public class SamlGenerator {
         private SubjectConfirmation createSubjectConfirmation(TxtHost host) throws ConfigurationException, UnknownHostException {
             SAMLObjectBuilder subjectConfirmationBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
             SubjectConfirmation subjectConfirmation = (SubjectConfirmation) subjectConfirmationBuilder.buildObject();
-            subjectConfirmation.setMethod(SubjectConfirmation.METHOD_SENDER_VOUCHES); // XXX TODO !!! consider using the host's AIK Certificate name with "holder of key" method
+            subjectConfirmation.setMethod(SubjectConfirmation.METHOD_SENDER_VOUCHES); 
             subjectConfirmation.setSubjectConfirmationData(createSubjectConfirmationData(host));
             // Create the NameIdentifier
             SAMLObjectBuilder nameIdBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
             NameID nameId = (NameID) nameIdBuilder.buildObject();
             nameId.setValue(issuerServiceName);
-//            nameId.setNameQualifier(input.getStrNameQualifier()); optional:  TODO should be linked to the security domain
+//            nameId.setNameQualifier(input.getStrNameQualifier()); optional:  
             nameId.setFormat(NameID.UNSPECIFIED); // !!! CAN ALSO USE X509 SUBJECT FROM HOST CERTIFICATE instead of host name in database   
             subjectConfirmation.setNameID(nameId);
             return subjectConfirmation;
@@ -268,7 +263,7 @@ public class SamlGenerator {
             // Required to add to cache
             samlAssertion.created_ts = now.toDate();
             
-            confirmationMethod.setNotBefore(now); // XXX TODO: should put the date that we actually got the record into our database here; 
+            confirmationMethod.setNotBefore(now); 
             if( validitySeconds != null ) {
                 confirmationMethod.setNotOnOrAfter(now.plusSeconds(validitySeconds));
                 // Required to add to cache
@@ -384,10 +379,10 @@ public class SamlGenerator {
             SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
             AttributeStatement attrStatement = (AttributeStatement) attrStatementBuilder.buildObject();
             // add host attributes (both for single host and multi-host assertions)
-            attrStatement.getAttributes().add(createStringAttribute("Host_Name", host.getHostName().toString()));  // TODO:  need a revised object to replace TxtHost which combines hostname/ipaddress into one field,  and also if we are doing an anonymous assertion then this would be an AIK fingerprint and not a hostname at all
-            attrStatement.getAttributes().add(createStringAttribute("Host_Address", host.getIPAddress()));  // TODO:  need a revised object to replace TxtHost which combines hostname/ipaddress into one field,  and also if we are doing an anonymous assertion then this would be an AIK fingerprint and not a hostname at all
-//            attrStatement.getAttributes().add(createStringAttribute("Host_UUID", host.getUuid()));  // TODO:  need a revised object to replace TxtHost which includes the UUID of the host (arbitrary from our database) and the hardware UUID which we get from the host agent
-//            attrStatement.getAttributes().add(createStringAttribute("Host_AIK_SHA1", host.getUuid()));  // TODO:  need a revised object to replace TxtHost which includes the UUID of the host (arbitrary from our database) and the hardware UUID which we get from the host agent
+            attrStatement.getAttributes().add(createStringAttribute("Host_Name", host.getHostName().toString()));  
+            attrStatement.getAttributes().add(createStringAttribute("Host_Address", host.getIPAddress())); 
+//            attrStatement.getAttributes().add(createStringAttribute("Host_UUID", host.getUuid()));  
+//            attrStatement.getAttributes().add(createStringAttribute("Host_AIK_SHA1", host.getUuid()));  
             
 
             // Create the attribute statements that are trusted
@@ -426,7 +421,6 @@ public class SamlGenerator {
                     List<UTF8NameValueSequence> nameValueSequenceAttributes = tagCertificate.getAttributes(UTF8NameValueSequence.class);
                     for(UTF8NameValueSequence nameValueSequenceAttribute : nameValueSequenceAttributes) {
                         log.debug("namevaluesequence attribute OID {} name {} values {}", UTF8NameValueSequence.OID, nameValueSequenceAttribute.getName(), nameValueSequenceAttribute.getValues());
-                        // TODO:  should we make one saml attribute for each value... or enter them all in CSV format?    currently using CSV:
                         attrStatement.getAttributes().add(createStringAttribute(String.format("TAG[" + nameValueSequenceAttribute.getName() + "]"), StringUtils.join(nameValueSequenceAttribute.getValues(), ",")));
                     }
                     // all attributes including above and any other custom attributes will be available directly via the certificate

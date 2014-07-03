@@ -91,7 +91,6 @@ function fnTLSDownloadSuccess(responseJSON){
 	            if (!success)
 	            {   
 	            	/* below code is for saving contents in a file but file name will be the name of the contents itself  , this will work for mozilla and chrome */
-                        // TODO: we need to handle this on the server side for the next release
                         // http://stackoverflow.com/questions/8075044/save-as-dialog-box-in-firefox
                         document.location =  "data:application/octet-stream," +
                         encodeURIComponent(responseJSON.Certificate);
@@ -128,7 +127,6 @@ function fnPrivacyCAListDownloadSuccess(responseJSON){
 	            if (!success)
 	            {   
 	            	/* below code is for saving contents in a file but file name will be the name of the contents itself  , this will work for mozilla and chrome */
-                        // TODO: we need to handle this on the server side for the next release
                         // http://stackoverflow.com/questions/8075044/save-as-dialog-box-in-firefox
                         document.location =  "data:application/octet-stream," +
                         encodeURIComponent(responseJSON.Certificate);
@@ -164,7 +162,6 @@ function fnPrivacyCADownloadSuccess(responseJSON){
 	            if (!success)
 	            {   
 	            	/* below code is for saving contents in a file but file name will be the name of the contents itself  , this will work for mozilla and chrome */
-                        // TODO: we need to handle this on the server side for the next release
                         // http://stackoverflow.com/questions/8075044/save-as-dialog-box-in-firefox
                         document.location =  "data:application/octet-stream," +
                         encodeURIComponent(responseJSON.Certificate);
@@ -200,7 +197,6 @@ function fnRootCADownloadSuccess(responseJSON){
 	            if (!success)
 	            {   
 	            	/* below code is for saving contents in a file but file name will be the name of the contents itself  , this will work for mozilla and chrome */
-                        // TODO: we need to handle this on the server side for the next release
                         // http://stackoverflow.com/questions/8075044/save-as-dialog-box-in-firefox
                         document.location =  "data:application/octet-stream," +
                         encodeURIComponent(responseJSON.Certificate);

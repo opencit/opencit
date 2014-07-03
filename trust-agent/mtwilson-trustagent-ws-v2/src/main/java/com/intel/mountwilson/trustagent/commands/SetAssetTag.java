@@ -97,7 +97,6 @@ public class SetAssetTag implements ICommand{
     
     private void writeHashToFile() throws TAException, IOException {
         try {
-            // TODO: multiline output is concatenated... so we could be returning just a single string.
             CommandUtil.runCommand("/usr/local/bin/hex2bin " + context.getAssetTagHash() + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );

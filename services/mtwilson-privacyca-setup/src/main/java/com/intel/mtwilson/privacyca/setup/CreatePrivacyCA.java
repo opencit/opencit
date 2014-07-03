@@ -27,7 +27,6 @@ public class CreatePrivacyCA extends LocalSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        // TODO:  create a mtwilson-privacyca-configuration project or at least a PrivacyCAConfiguration  object in mtwilson-privacyca-ws-v2
         identityPemFile = My.configuration().getPrivacyCaIdentityCacertsFile();
         identityIssuer = My.configuration().getPrivacyCaIdentityIssuer();
         identityP12 = My.configuration().getPrivacyCaIdentityP12();
@@ -35,14 +34,13 @@ public class CreatePrivacyCA extends LocalSetupTask {
         identityCertificateValidityDays = My.configuration().getPrivacyCaIdentityValidityDays();
         
         if( identityPassword == null || identityPassword.isEmpty() ) {
-            identityPassword = RandomUtil.randomBase64String(16); // TODO:  use a larger alphabet
+            identityPassword = RandomUtil.randomBase64String(16); 
             getConfiguration().setString("mtwilson.privacyca.aik.p12.password", identityPassword);
         }
     }
 
     @Override
     protected void validate() throws Exception {
-       // TODO: open contents and verify certificate is correct
         if( !identityPemFile.exists() ) {
             validation("Privacy CA certs file does not exist");
         }
@@ -50,10 +48,9 @@ public class CreatePrivacyCA extends LocalSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        // TODO: touch the endorsementP12 file first and chmod 700 before writing to it ; that should be a method in the LocalSetupTask super class
         TpmUtils.createCaP12(2048, identityIssuer, identityPassword, identityP12.getAbsolutePath(), identityCertificateValidityDays);
         X509Certificate pcaCert = TpmUtils.certFromP12(identityP12.getAbsolutePath(), identityPassword);
-        FileUtils.writeStringToFile(identityPemFile, X509Util.encodePemCertificate(pcaCert)); // XXX should we check if it already exists and APPEND to it instead of overwriting?
+        FileUtils.writeStringToFile(identityPemFile, X509Util.encodePemCertificate(pcaCert)); 
     }
     
 }

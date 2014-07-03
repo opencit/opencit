@@ -45,7 +45,6 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
 public interface LoginDAO extends Closeable {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
     // use the .sql scripts in mtwilson-postgresql and mtwilson-mysql instead.  
-    // TODO: check if JDBI has an update for database system dialects.
 //    @SqlUpdate("create table certificate (id bigint primary key generated always as identity, uuid char(36), certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
 //    void create();
     

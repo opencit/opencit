@@ -156,7 +156,7 @@ public class VMwareClient implements TlsClient {
 //        sslsc.setSessionTimeout(0);
 //        sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);
 //        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-//        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier()); // XXX  assumes (correctly) TlsConnection registers tlsPolicy with TlsPolicyManager  but maybe we should just add a TlsConnection  getter for this... can't do getTlsPolicy().getHostnameVerifier()  because it's the non-tlspolicymanager one which will not work w/ multi-threading. must use tlspolicymanager's verifier.
+//        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier()); 
 
 //        HttpsURLConnection.setDefaultSSLSocketFactory(new TlsPolicyAwareSSLSocketFactory());
 //        HttpsURLConnection.setDefaultHostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier());
@@ -362,9 +362,6 @@ public class VMwareClient implements TlsClient {
         return serviceContent.getAbout().getVersion();
     }
 
-    /**
-     * XXX temporary public access until the code is refactored
-     */
     public HostTpmAttestationReport getAttestationReport(
             ManagedObjectReference hostObj) throws RuntimeFault, RemoteException {
         return vimPort.queryTpmAttestationReport(hostObj);
@@ -376,14 +373,6 @@ public class VMwareClient implements TlsClient {
      * per iteration of the comparison loop. see getHostReference for obtaining
      * a managed object reference for a specific host (instead of for all hosts
      * and then querying each one for the name)
-     *
-     *
-     * TODO: this method should return a VCenterHost object, and VCenterHost
-     * should provide convenient access to information such as "is tpm enabled"
-     * and "get attestation report" for that host, wrapping all of the calls
-     * with managed object references to the vmware api.
-     *
-     * XXX temporary public access until this code is refactored
      */
     public ManagedEntity getManagedObjectReference(String hostName) throws InvalidProperty, RuntimeFault, RemoteException {
         // Get the host objects in the vcenter
@@ -584,7 +573,7 @@ public class VMwareClient implements TlsClient {
         try {
             vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
         } catch (Exception e) {
-            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); // XXX could result in a leaked secret
+            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); 
         }
         try {
             // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet
@@ -1172,13 +1161,6 @@ public class VMwareClient implements TlsClient {
      * @param typeinfo 2D array of properties for each typename
      * @param recurse retrieve contents recursively from the root down
      *
-     * XXX  this function has several issues that make it unclear if it 
-     * is working as intended; it is only called from two places and both of 
-     * them use recurse=true, and if they didn't this function would throw a
-     * null pointer exception; also use of .equals without any branching seems
-     * useless - but it is apparently the way the vmware sdk implements some
-     * of the filter criteria. 
-     * 
      * @return retrieved object contents
      */
     private List<ObjectContent> getContentsRecursively(ManagedObjectReference collector,
@@ -1206,8 +1188,7 @@ public class VMwareClient implements TlsClient {
         if (recurse) {
             selectionSpecs = buildFullTraversal();
         }
-        // XXX if recurse == false there would be a null pointer exception below;  but this function is only called from two places in this class and both use recurse == true
-
+    
         List<PropertySpec> propspecary = buildPropertySpecArray(typeinfo);
         ObjectSpec objSpec = new ObjectSpec();
         objSpec.setObj(useroot);

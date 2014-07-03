@@ -84,7 +84,7 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
             if (item.getId() == null) {
                 item.setId(new UUID());
             }
-            getRepository().create(item); // XXX TODO   autmoatic multi-threading here so subclass doesn't have to ... also if one or more of the given items  already exist we should erturn an error. 
+            getRepository().create(item); 
         }
         return collection;
     }
@@ -105,7 +105,7 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
         log.debug("retrieveCollection");
         T item = getRepository().retrieve(locator); // subclass is responsible for validating id
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         C collection = createEmptyCollection();
         collection.getDocuments().add(item);
@@ -132,7 +132,7 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
         ValidationUtil.validate(collection);
         List<T> list = collection.getDocuments();
         if (list == null || list.isEmpty()) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST); // TODO i18n
+            throw new WebApplicationException(Response.Status.BAD_REQUEST); 
         }
         T item = list.get(0);
         locator.copyTo(item);
@@ -162,8 +162,6 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
     @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C patchJsonapiCollection(@BeanParam L locator /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
-        // TODO  ValidationUtil.validate(patchCollection)
-        // XXX TODO wire up to repository...
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
 //        HostFilterCriteria criteria = new HostFilterCriteria();
 //        criteria.id = UUID.valueOf(id);

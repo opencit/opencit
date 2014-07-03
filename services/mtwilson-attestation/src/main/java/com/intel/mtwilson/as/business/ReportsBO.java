@@ -172,7 +172,6 @@ public class ReportsBO extends BaseBO {
         }
     }
 
-    // BUG #497 XXX TODO needs rewrite to use HostAgentFactory and HostAgent interfaces
     public String getHostAttestationReport(Hostname hostName) {
         TblHosts tblHosts;
 
@@ -184,7 +183,6 @@ public class ReportsBO extends BaseBO {
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
             }
 
-            // XXX TODO all hosts will have connection strings soon so need to use HostAgentFactory to figure out which one to create, don't do this here.  use the capability methods in the HostAGent interface to figure out what it does or doesn't support.
             if (tblHosts.getAddOnConnectionInfo() != null && tblHosts.getAddOnConnectionInfo().contains("http")) {
 
                 throw new ASException(ErrorCode.AS_OPERATION_NOT_SUPPORTED, "getHostAttestationReport does not support VMWare hosts.");
@@ -328,7 +326,6 @@ public class ReportsBO extends BaseBO {
 //    }
     
     
-    // XXX the mw_ta_log and  mw_module_manifest_log tables are not adequate to express the results of policy evaluation... better to just store a serialized copy of the trust report and then read it in once using json mapper, or maybe yaml,  and then have all the info. 
     private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<>();
         
@@ -355,7 +352,7 @@ public class ReportsBO extends BaseBO {
                     }
                     else {
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
-                                moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); // XXX what? using the same value for both actual && whitelist?
+                                moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); 
                     }
                 }
             }

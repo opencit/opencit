@@ -37,7 +37,7 @@ import javax.persistence.Convert;
     @NamedQuery(name = "ApiClientX509.findByName", query = "SELECT a FROM ApiClientX509 a WHERE a.name = :name"),
     @NamedQuery(name = "ApiClientX509.findByNameLike", query = "SELECT a FROM ApiClientX509 a WHERE a.name LIKE :name"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "ApiClientX509.findByFingerprint", query = "SELECT a FROM ApiClientX509 a WHERE a.fingerprint = :fingerprint"), // added to facilitate authentication filter -jabuhacx 20120621
-    @NamedQuery(name = "ApiClientX509.findByFingerprintEnabled", query = "SELECT a FROM ApiClientX509 a WHERE a.fingerprint = :fingerprint AND a.enabled = :enabled"), // XXX UNTESTED: changed enabled=1 to enabled=:enabled to circumvent postgres compatibility issue // added to facilitate authentication filter -jabuhacx 20120621
+    @NamedQuery(name = "ApiClientX509.findByFingerprintEnabled", query = "SELECT a FROM ApiClientX509 a WHERE a.fingerprint = :fingerprint AND a.enabled = :enabled"), 
     @NamedQuery(name = "ApiClientX509.findByIssuer", query = "SELECT a FROM ApiClientX509 a WHERE a.issuer = :issuer"),
     @NamedQuery(name = "ApiClientX509.findBySerialNumber", query = "SELECT a FROM ApiClientX509 a WHERE a.serialNumber = :serialNumber"),
     @NamedQuery(name = "ApiClientX509.findByCommentLike", query = "SELECT a FROM ApiClientX509 a WHERE a.comment LIKE :comment"), // it's the caller's responsibility to add "%" before and/or after the name value
@@ -226,9 +226,6 @@ public class ApiClientX509 implements Serializable {
         this.user_uuid_hex = user_uuid_hex;
     }
 
-    
-    
-    // XXX TODO rewrite using cpg-io library com.intel.dcsg.cpg.x500.DN class like this:   DN dn = new DN(x509UserName); return dn.getCommonName(); 
     public String getUserNameFromName() {
         String x509UserName = name;
         String[] parts = x509UserName.split(",");
@@ -246,7 +243,6 @@ public class ApiClientX509 implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof ApiClientX509)) {
             return false;
         }

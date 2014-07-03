@@ -90,7 +90,7 @@ public class GenerateSamlSigningKey implements Command {
     }
     
     private void setupConfiguration() {
-        conf = ASConfig.getConfiguration(); // XXX TODO:  configuration needs to be passed to us from the caller... could be a UI, or command line, etc. it is NOT global; this command could be executed multiple times for different servers in a mt wilson cluster, each having its own SAML key but they are all signed by the same CA ...  also the CA private key & password could be local (desktop app) and not be on the server at all !!
+        conf = ASConfig.getConfiguration(); 
         samlKeystoreFileRC2 = conf.getString(SAML_KEYSTORE_FILE_CONF_KEY);
         samlKeystorePassword = conf.getString(SAML_KEYSTORE_PASSWORD_CONF_KEY);
         if( samlKeystorePassword == null ) {
@@ -110,7 +110,6 @@ public class GenerateSamlSigningKey implements Command {
             conf.setProperty(SAML_KEY_PASSWORD_CONF_KEY, samlKeyPassword);
             log.info("Generated SAML Key Password");
         }
-        // XXX do we need to save conf??? how???
     }
     
     private void setupDataAccess() {
@@ -164,7 +163,7 @@ public class GenerateSamlSigningKey implements Command {
 //        mwKeystore = keystoreJpa.findMwKeystoreByName(HostTrustBO.SAML_KEYSTORE_NAME);
 //        if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
 //            keystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
-            keystoreResource = new ByteArrayResource(); // XXX TODO: should we be loading it from somewhere ????
+            keystoreResource = new ByteArrayResource(); 
             keystore = new SimpleKeystore(keystoreResource, samlKeystorePassword);
 //            log.info("Loaded SAML Keystore from database");
 //        }

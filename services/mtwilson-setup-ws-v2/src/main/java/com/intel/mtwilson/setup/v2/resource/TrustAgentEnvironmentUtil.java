@@ -62,8 +62,6 @@ public class TrustAgentEnvironmentUtil {
         public String content;
     }
 
-    // TODO:  there needs to be a repository object for the tls certificate,
-    //        this boilerplate is duplicated in too many places:
     //         SimpleKeystore keystore = new SimpleKeystore(new FileResource(My.configuration().getTlsKeystoreFile()), My.configuration().getTlsKeystorePassword());
     protected X509Certificate getTlsCertificate() throws FileNotFoundException, IOException, CertificateException {
         // code duplicated from CaCertificatesRepository in mtwilson-attestation-ws-v2

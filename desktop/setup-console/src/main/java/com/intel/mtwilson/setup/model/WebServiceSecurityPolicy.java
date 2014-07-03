@@ -10,5 +10,5 @@ package com.intel.mtwilson.setup.model;
  */
 public class WebServiceSecurityPolicy {
     public boolean isTlsRequired = true;
-    public String[] trustedClients = new String[] { }; // do not require authentication;   XXX TODO should be retyped as InternetAddress
+    public String[] trustedClients = new String[] { }; // do not require authentication;   
 }

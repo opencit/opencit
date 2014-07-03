@@ -23,8 +23,6 @@ import org.eclipse.persistence.config.HintValues;
 import org.eclipse.persistence.config.QueryHints;
 
 /**
- * TODO:  this is part of the mtwilson-portal project and should be moved to
- * a new mtwilson-portal-jpa project.
  * @author jbuhacoff
  */
 public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser> implements Serializable {

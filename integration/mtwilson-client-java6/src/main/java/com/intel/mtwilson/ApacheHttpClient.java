@@ -88,12 +88,6 @@ public class ApacheHttpClient implements java.io.Closeable {
      * SystemConfiguration() so that users can set system properties and have
      * them passed through to this object.
      *
-     * TODO: in addition to passing in a keystore object, we should support the
-     * standard java properties for the keystore location and password: String
-     * truststore = System.getProperty("javax.net.ssl.trustStore"); String
-     * truststorePassword =
-     * System.getProperty("javax.net.ssl.trustStorePassword");
-     *
      * @param baseURL for the server to access (all requests are based on this
      * URL)
      * @param credentials to use when signing HTTP requests, or null if you want
@@ -509,7 +503,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if (message != null && message.content != null) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
-        //System.out.println("XXX debug|HTTP POST message content: " + message.content);
+        //System.out.println("debug|HTTP POST message content: " + message.content);
 
         addLocaleHeader(request);
         setDateHeader(request);
@@ -521,7 +515,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
-        //System.out.println("XXX debug|HTTP Response content: " + new String(apiResponse.content, Charset.forName("UTF-8")));
+        //System.out.println("debug|HTTP Response content: " + new String(apiResponse.content, Charset.forName("UTF-8")));
         request.releaseConnection();
         return apiResponse;
     }

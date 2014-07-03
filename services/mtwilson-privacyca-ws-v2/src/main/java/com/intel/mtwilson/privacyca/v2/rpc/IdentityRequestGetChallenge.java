@@ -78,7 +78,6 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
         return endorsementCerts;
     }
     
-    // TODO:   fix the implementation... apparently  HisPrivacyCAWebService2Impl  was using member variables to store info between two requests steps, but we are stateless so need to address that somehow.
     @Override
     public byte[] call() throws Exception {
         log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
@@ -90,7 +89,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
         
 			//decrypt identityRequest and endorsementCertificate
 			TpmIdentityRequest idReq = new TpmIdentityRequest(identityRequest);
-            TpmIdentityProof idProof = idReq.decrypt(caPrivKey); // TODO   how to transfer this to the id request submit response?
+            TpmIdentityProof idProof = idReq.decrypt(caPrivKey); 
 			TpmIdentityRequest tempEC = new TpmIdentityRequest(endorsementCertificate);
 			X509Certificate ekCert = TpmUtils.certFromBytes(tempEC.decryptRaw(caPrivKey));
             log.debug("Validating endorsement certificate");
@@ -107,7 +106,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
             
             // save the challenge and idproof for use in identity request submit response if the client successfully answers the challenge
             // the filename is the challenge (in hex) and the content is the idproof
-            File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); // TODO:  put this in a privacyca configuration class
+            File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); 
             if( !datadir.exists() ) { datadir.mkdirs(); }
             String filename = TpmUtils.byteArrayToHexString(identityRequestChallenge); //Hex.encodeHexString(identityRequestChallenge)
             log.debug("Filename: {}", filename);

@@ -64,7 +64,7 @@ public class CreateDatabase {
         }
     }
     
-    /* TODO:   need all dao's to extend a GenericDAO interface that declares create() and close()  in order to do this:
+    /* 
     private <T extends GenericDAO> void createTable(String name, Class<T> daoClass, DBI dbi) {
         T dao = dbi.open(daoClass);
         if( !Derby.tableExists(name) ) { dao.create(); }        

@@ -89,7 +89,6 @@ public class KvAttributes extends MtWilsonClient {
         map.put("id", uuid);
         Response kvObj = getTarget().path("tag-kv-attributes/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         if( !kvObj.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
-            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
             throw new WebApplicationException("Delete key-value attribute failed");
         }
     }

@@ -17,7 +17,6 @@
         
     <!-- the file appender is important to capture output from the restlet service when running junit tests -->
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <!-- TODO: try <file>${MTWILSON_HOME}/logs/mtwilson.jetty.log</file> -->
         <file>C:/mtwilson/logs/mtwilson.jetty.log</file>
         <append>true</append>
         <encoder>

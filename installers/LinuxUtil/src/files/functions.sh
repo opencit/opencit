@@ -443,7 +443,6 @@ using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; e
  
 ### FUNCTION LIBARRY: conditional execution functions
 
-# TODO: rename to positive_condition
 # parameters: condition variable name, status line, code to run
 # Will print "status line... " and then "OK" or "FAILED"
 action_condition() {
@@ -465,7 +464,6 @@ action_condition() {
     fi
   fi
 }
-# TODO: rename to negative_condition
 # similar to action_condition but reverses the logic: empty is OK, defined is FAILED
 inaction_condition() {
   local condvar="${1}"
@@ -637,13 +635,6 @@ configure_api_baseurl() {
 }
 
 ### FUNCTION LIBRARY: package management
-
-# TODO  replace all the other yum|rpm|...*detect
-# with one function like package_manager_detect() that 
-# detects all of them. then only one function needs to be
-# called at the beginning and the results can be used
-# any time.
-# package_manager_detect() { ... }
 
 # RedHat and CentOS may have yum and rpm
 
@@ -1488,7 +1479,6 @@ postgres_server_detect() {
   echo "postgres_pghb_conf=$postgres_pghb_conf" >> $INSTALL_LOG_FILE
   echo "postgres_conf=$postgres_conf" >> $INSTALL_LOG_FILE
   echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
-  # TODO:  add >> $INSTALL_LOG_FILE  to above three lines
   return 0
 }
 postgres_version(){
@@ -2103,7 +2093,6 @@ glassfish_install() {
     echo "Glassfish is already installed in $GLASSFISH_HOME"
   fi
 
-  # TODO this functionality is moving to the java tool ; completely remove it from here
   #if [ -n "${MTWILSON_SERVER}" ]; then
   #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
   #else
@@ -2278,12 +2267,6 @@ glassfish_sslcert_report() {
 # used by attestation_service_install to create a new domain just for attestation service
 # parameters:  domain name, domain dir (absolute path)
 # example: glassfish_create_domain "intel-as" "${ATTESTATION_SERVICE_HOME}/glassfish/domain"
-# TODO ??? if attestation-service is configured to be deployed into a specific domain instead of
-# the default domain, then we should define glassfish commands that abstract it so that
-# the attestatioN_service_start/stop  don't need to really know that. 
-# TODO !!! the create-domain command outputs the following lines which we need to capture so
-# we can know the URL's for the new domain:
-#
 #Default port 4848 for Admin is in use. Using 39766
 #Default port 8080 for HTTP Instance is in use. Using 41112
 #Default port 7676 for JMS is in use. Using 52108
@@ -2299,12 +2282,6 @@ glassfish_create_domain() {
   fi
 }
 
-# ??? see comment below about deleting the domain dir.  MAYBE the answer is
-# to not provide a domain deletion command at all???? just create the domain if
-# it does not exist and if it does install into it and we never delete the domain
-# or its log files. OR, on uninstall we can delete the domain but just let the
-# log files stay and sysadmin will have to clean that up if he wants to reinstall???
-# or better to just undeploy the app on uninstall and leave the domain alone. 
 glassfish_delete_domain() {
   local domain_name=${1}
   local domain_dir=${2}
@@ -2312,15 +2289,7 @@ glassfish_delete_domain() {
   if [ -n "$glassfish" ]; then
     local domain_found=`$glassfish list-domains --domaindir "${domain_dir}" | grep "${domain_name}"`
     if [ -n "$domain_found" ]; then
-      $glassfish delete-domain --domaindir "${domain_dir}" "${domain_name}"
-      # TODO !!! after a domain is running there is a server.log file in the domain directory,
-      # and the delete-domain command deletes everything except the log files... and if there is any
-      # file still in the domain directory then a subsequent create-domain command will fail. so 
-      # we need to delete the domain_dir/domain_name folder completely. but since this script will
-      # probably be run as root, we want to be sure that we don't accidentally rm -rf /  or /opt etc.
-      # SO, we need to check that domain_name is not blank and that domain_dir is not blank or just "/"...
-      # but don't even try to do that manually because we'll miss something, like "/.././" 
-      #rm -rf "${domain_dir}/${domain_name}"
+      $glassfish delete-domain --domaindir "${domain_dir}" "${domain_name}"      
     fi
   fi
 }
@@ -2356,10 +2325,8 @@ function valid_ip() {
     return $stat
 }
 
-# TODO this functionality is moving to the java tool ; completely remove it from here
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
-# XXX this function assumes we're using the first glassfish domain... usually "domain1"
 glassfish_create_ssl_cert() {
 #  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
 #  return
@@ -2744,7 +2711,6 @@ tomcat_create_ssl_cert_prompt() {
     fi
 }
 
-# TODO this functionality is moving to the java tool ; completely remove it from here
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 tomcat_create_ssl_cert() {
@@ -3273,7 +3239,6 @@ webservice_running() {
   if using_glassfish; then
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
-      # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
       WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
         WEBSERVICE_RUNNING=`$glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
@@ -3668,7 +3633,6 @@ encrypt_file() {
   fi
 }
 
-# TODO: remove variables from mtwilson 1.2 that are deprecated in mtwilson 2.0
 load_conf() {
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
@@ -3832,7 +3796,6 @@ load_conf() {
   return 0
 }
 
-# TODO: remove variables from mtwilson 1.2 that are deprecated in mtwilson 2.0
 load_defaults() {
   export DEFAULT_MTWILSON_SERVER=""
   export DEFAULT_DATABASE_HOSTNAME=""

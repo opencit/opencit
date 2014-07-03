@@ -162,7 +162,7 @@ public class TAHelper {
     //    public void verifyAikWithDaa(String hostIpAddress, int port) {
     public void verifyAikWithDaa(TblHosts tblHosts) throws XMLStreamException {
         try {
-            //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 TODO need to replace with use of HostAgentFactory
+            //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 
             HostAgentFactory factory = new HostAgentFactory();
             TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts);
             String connectionString = tblHosts.getAddOnConnectionInfo();
@@ -183,8 +183,6 @@ public class TAHelper {
             try(FileOutputStream outAikProof = new FileOutputStream(new File(getDaaAikProofFileName(sessionId)))) {
             IOUtils.write(aikproof, outAikProof);
             }
-
-            // TODO: verify issuer chain for the certificate so we can attest to the hardware if we recognize the manufacturer
 
             // create DAA challenge secret
             SecureRandom random = new SecureRandom();
@@ -215,8 +213,6 @@ public class TAHelper {
                 }
             }
             }
-
-            // TODO: Trust Agent is validated so now save the AIK certificate and RSA public key in the DATABASE ... 
 
         } catch (KeyManagementException | JAXBException | NoSuchAlgorithmException | IOException ex) {
             log.error("Cannot verify AIK: " + ex.getMessage(), ex);
@@ -297,7 +293,7 @@ public class TAHelper {
 
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException,
             UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
-        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
         File q;
         File n;
         File c;
@@ -342,7 +338,7 @@ public class TAHelper {
             c = saveCertificate(aikCertificate, sessionId);
             log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
-            c = saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
+            c = saveCertificate(trustedAik, sessionId); 
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
@@ -400,7 +396,7 @@ public class TAHelper {
     //        with the ip address like the v1 does)
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException,
             UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException {
-        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        //  BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
         File q;
         File n;
         File c;
@@ -443,7 +439,7 @@ public class TAHelper {
             c = saveCertificate(aikCertificate, sessionId);
             log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
-            c = saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
+            c = saveCertificate(trustedAik, sessionId); 
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
@@ -507,8 +503,6 @@ public class TAHelper {
          }
          * */
         
-        // TODO: figure out from the trust agent output if a TPM is installed, if Intel TXT is enabled and activated, etc. 
-        // XXX   assuming it supports TPM since it's trust agent and we got a pcr manifest (which we only get from getQuoteInformationFromHost if the tpm quote was verified, which means we saved the AIK certificate when we did that)
         boolean tpmSupport = true;  
 
 
@@ -632,7 +626,6 @@ public class TAHelper {
     private File saveCertificate(String aikCertificate, String sessionId) throws IOException, CertificateException {
 
         /*
-         // XXX this block of code where we fix the PEM format can be replaced with mtwilson-crypto X509Util.encodePemCertificate(X509Util.decodePemCertificate(...input...))
          // first get a consistent newline character
          aikCertificate = aikCertificate.replace('\r', '\n').replace("\n\n", "\n");
          if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
@@ -833,7 +826,7 @@ public class TAHelper {
         HashMap<String, String> info = new HashMap<String, String>();
         info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
         // Removing the prefix of "OpenSource" as it is being captured in the event type
-        info.put("ComponentName", moduleName); // XXX TODO remove the "componentName." prefix because we are capturing this now in EventType
+        info.put("ComponentName", moduleName); 
         info.put("PackageName", "");
         info.put("PackageVendor", "");
         info.put("PackageVersion", "");

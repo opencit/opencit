@@ -8,21 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO:  convert all error codes (except OK) to specific exception classes
- * with parameters (and no text); use those fully-qualified class names
- * as the keys in the localization bundle, replacing the enum constants used
- * here
- * TODO:  error codes and localized messages should be sent to the client
- * via HTTP headers instead of the ErrorResponse object serialized as JSON -
- * because if the client is expecting an X509 certificate, or XML file, or
- * some other format, the error handling is needlessly complicated by having
- * to de-serialize a different media type than requested to get the error code,
- * whereas the headers are always available and are independent of the 
- * requested media type.
- * TODO:  when this class is removed, the mtwilson-client-java6 project must
- * also be deleted because the v1 APIs depend on this ErrorCode class for
- * error processing
- * 
  * @author dsmagadx
  */
 public enum ErrorCode {
@@ -205,7 +190,7 @@ public enum ErrorCode {
     MS_EXPIRED_CERTIFICATE(3101, "Client certificate has already expired. %s"),
     MS_CERTIFICATE_NOT_YET_VALID(3102, "Client certificate is not yet valid. Validity date is in the future. %s"),
     MS_DUPLICATE_CERTIFICATE(3103, "Certificate already registered in the system."),
-    MS_CERTIFICATE_ENCODING_ERROR(3104, "Error in certificate encoding. %s"), // TODO: replace with cpg-crypto X509CertificateFormatError (bytes->cert) or X509CertificateEncodingError (cert->bytes)
+    MS_CERTIFICATE_ENCODING_ERROR(3104, "Error in certificate encoding. %s"), 
     MS_BAD_CERTIFICATE_FILE(3105,"Certificate file is not valid."),
     MS_MISSING_CERTIFICATE_FILE(3106, "Certificate file is missing."),
     MS_UN_SUPPORTED_HASH_ALGORITHM(3107, "Error generating fingerprint. Hash algorithm not supported. %s"),

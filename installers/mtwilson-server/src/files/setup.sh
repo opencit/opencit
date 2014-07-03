@@ -721,7 +721,6 @@ update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properti
 
 # remaining properties
 prompt_with_default TAG_PROVISION_EXTERNAL "Use external CA instead of the built-in CA? " ${TAG_PROVISION_EXTERNAL:-false}
-# TODO: remove the nocache option; client will specify with each request whether cached certificate is acceptable
 prompt_with_default TAG_PROVISION_XML_ENCRYPTION_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_ENCRYPTION_REQUIRED:-false}
 prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD:-$(generate_password 16)}
 #prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
@@ -804,7 +803,6 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
-#TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
   ./$monit_installer  >> $INSTALL_LOG_FILE 

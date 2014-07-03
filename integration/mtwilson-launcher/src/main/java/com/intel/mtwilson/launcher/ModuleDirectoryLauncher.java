@@ -75,11 +75,9 @@ public class ModuleDirectoryLauncher {
     }
 
     /**
-     * XXX TODO  should launch, loadModules, and addShutdownHook move into an AbstractLauncher? 
      * Initialize everything but do NOT start the event loop (caller must start it and stop it as needed)
      */
     public void launch() throws IOException, ContainerException {
-        // XXX TODO  should we check for container == null and throw illegalstateexception ? or illegalargumentexception?
         loadModules();
 
         // add a shutdown hook so we can automatically shut down the container if the VM is exiting
@@ -114,11 +112,6 @@ public class ModuleDirectoryLauncher {
         continueEventLoop = false;
     }
 
-    /**
-     * XXX TODO same code here and in MavenLauncher
-     * See also: http://hellotojavaworld.blogspot.com/2010/11/runtimeaddshutdownhook.html
-     * http://stackoverflow.com/questions/2921945/useful-example-of-a-shutdown-hook-in-java
-     */
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread("MtWilson Shutdown Hook") {
             @Override
@@ -135,7 +128,6 @@ public class ModuleDirectoryLauncher {
         });
     }
 
-    // XXX TODO  similar code here and in MavenLauncher
     public void loadModules() throws IOException {
         DirectoryResolver resolver = new DirectoryResolver(directory);
 //        JarFileIterator it = new JarFileIterator(directory); // scans directory and its subdirectories for jar files
@@ -188,7 +180,6 @@ public class ModuleDirectoryLauncher {
     // for jar files ... 
     // if you need a non-recursive list of jars you can use simply:
     // Iterator<File> it = new ArrayIterator<File>( directory.listFiles(jarfilter) );
-    // TODO:  if a jar file contains embedded jar files, we should recurse into that as well
     public static class RecursiveJarFileIterator implements Iterator<File> {
 
         private final FileTree tree = new FileTree();

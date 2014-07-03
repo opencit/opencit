@@ -96,7 +96,7 @@ public class ConverterUtil {
 		TrustedHostVO hostVO = new TrustedHostVO();
 		hostVO.setHostName(hostDetailsEntityVO.getHostName());
 		if (trustAssertion != null) {
-        		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName()); // TODO:  is this always valid? 
+        		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName());  
 			if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.Trusted_BIOS))) {
 				hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
 			}else {
@@ -115,8 +115,6 @@ public class ConverterUtil {
 				hostVO.setOverAllStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
 				hostVO.setOverAllStatusBoolean(false);
 			}
-
-// XXX MERGE WARNING 20131119 TODO make sure this was merged correctly
 
                         if (hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
                             if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {
@@ -203,7 +201,6 @@ public class ConverterUtil {
 				}
 			}
 			
-			// TODO : add date once available from saml assertion for time been its empty.
 			//hostVO.setUpdatedOn(formatter.format(hostDetailsEntityVO.getUpdatedOn()));//
 //                        if (trustAssertion != null)
 //                            hostVO.setUpdatedOn(trustAssertion.getDate().toString());

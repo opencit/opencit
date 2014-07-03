@@ -68,14 +68,6 @@ public class PasswordLogin {
 
         PasswordLoginResponse passwordLoginResponse = loginRequest(request, response, passwordLoginRequest);
         log.debug("Successfully processed login request with auth token {}.", passwordLoginResponse.getAuthorizationToken());
-        /*
-         * XXX TODO  should we return HTML response?  
-         * HTML body would just be <html><head><meta …/></head></html>  
-         * and client is expected to look for the meta tag and grab the 
-         * authorization token from there…. or maybe it would include a 
-         * javascript which would set the authorization tken in a global 
-         * variable?  
-         */
     }
 
     @RequiresGuest

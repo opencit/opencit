@@ -62,7 +62,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
     public void setRequestValidator(HttpBasicRequestVerifier validator) {this.httpBasicAuthorization = validator;}
     public void setTrustedRemoteAddress(String[] ipAddressOrSubnet) { trustWhitelist = ipAddressOrSubnet; } // should be set by mtwilson.api.trust=ipaddresslist
     public void setSslRequired(boolean required) { sslRequired = required; } // should be set by mtwilson.ssl.required=true/false
-//    public void setAntiReplayEnabled(boolean enabled) { antiReplayEnabled = enabled; } // bug #380. should be set by configuration...   XXX currently we are not enabling this feature;  if customer needs anti-replay protection they should use TLS.
+//    public void setAntiReplayEnabled(boolean enabled) { antiReplayEnabled = enabled; } // bug #380. should be set by configuration...   
     
     @javax.ws.rs.core.Context HttpServletRequest servletRequest;
     
@@ -86,7 +86,6 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         log.debug("AuthenticationJerseyFilter: Request URI="+request.getUriInfo().getRequestUri());
         log.debug("AuthenticationJerseyFilter: Secure/https="+request.getSecurityContext().isSecure());
         
-        // TODO: the servletRequest is not being populated. maybe it's for "servlets" and the info doesn't get passed to the filter. fidn another way!!!
         if( servletRequest != null ) {
             log.debug("AuthenticationJerseyFilter: Remote Address="+servletRequest.getRemoteAddr());            
         }
@@ -114,7 +113,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
                     User user = new User(servletRequest.getRemoteAddr(), new Role[] { Role.Attestation, Role.Audit, Role.Report, Role.Security, Role.Whitelist }, servletRequest.getRemoteAddr(), Md5Digest.valueOf((request.getMethod()+" "+request.getUriInfo().getPath()+" "+String.valueOf(request.getHeaderString("Date"))).getBytes("UTF-8")));
                     request.setSecurityContext(new MtWilsonSecurityContext(user, request.getSecurityContext().isSecure()));
                     requestInfo.source = servletRequest.getRemoteAddr();
-                    requestInfo.md5Hash = user.getMd5Hash().toByteArray(); // XXX for trusted ip's only the hash is of the httpp method and the url
+                    requestInfo.md5Hash = user.getMd5Hash().toByteArray(); 
                     // MtWilsonThreadLocal.set(new MtWilsonSecurityContext(user, request.isSecure()));
                     //requestLog.logRequestInfo(requestInfo); // bug #380.  NOTE: for trusted ip clients, we DO NOT check for replay attacks. 
 //                    return request;

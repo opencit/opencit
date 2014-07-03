@@ -67,7 +67,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
             Authorization authorization = getAuthorization(httpRequest);
             // clients MUST include a Date header in the request covered by a signature (we compare it to the anti-replay protection window)
             if(!ArrayUtils.contains(authorization.headerNames, "Date")) {
-                throw new IllegalArgumentException("Request must include Date header"); // TODO: i18n
+                throw new IllegalArgumentException("Request must include Date header"); 
             }
             
             RsaSignatureInput signatureInput = getSignatureInputFromHttpRequest(httpRequest, authorization);

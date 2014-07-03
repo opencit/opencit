@@ -41,8 +41,8 @@ public class TlsPolicyFactory {
 
     public TlsPolicy getTlsPolicyWithKeystore(String tlsPolicyName, Resource resource) throws KeyManagementException, IOException {
         String password = My.configuration().getTlsKeystorePassword();
-        SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); // XXX TODO only because txthost doesn't have the field yet... we should get the keystore from the txthost object
-        TlsPolicy tlsPolicy = getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
+        SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); 
+        TlsPolicy tlsPolicy = getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore); 
         return tlsPolicy;
     }
 
@@ -53,9 +53,9 @@ public class TlsPolicyFactory {
     public TlsPolicy getTlsPolicyWithKeystore(String tlsPolicyName, SimpleKeystore tlsKeystore) throws IOException, KeyManagementException {
         if (tlsPolicyName == null) {
             tlsPolicyName = My.configuration().getDefaultTlsPolicyName();
-        } // XXX for backwards compatibility with records that don't have a policy set, but maybe this isn't the place to put it - maybe it should be in the DAO that provides us the txthost object.
+        } 
         String ucName = tlsPolicyName.toUpperCase();
-        if (ucName.equals("TRUST_CA_VERIFY_HOSTNAME")) { // XXX TODO   use TlsPolicyName  
+        if (ucName.equals("TRUST_CA_VERIFY_HOSTNAME")) {
             initTlsTrustedCertificateAuthorities();
             for (X509Certificate cacert : tlsAuthorities) {
                 log.debug("Adding trusted TLS CA certificate {}", cacert.getSubjectX500Principal().getName());
@@ -69,16 +69,16 @@ public class TlsPolicyFactory {
 //            return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
             return TlsPolicyBuilder.factory().strict(tlsKeystore.getRepository()).build();
         }
-        if (ucName.equals("TRUST_FIRST_CERTIFICATE")) {// XXX TODO   use TlsPolicyName  
+        if (ucName.equals("TRUST_FIRST_CERTIFICATE")) {
 //            return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
             KeystoreCertificateRepository repository = tlsKeystore.getRepository();
             return TlsPolicyBuilder.factory().strict(repository).trustDelegate(new FirstCertificateTrustDelegate(repository)).skipHostnameVerification().build();
         }
-        if (ucName.equals("TRUST_KNOWN_CERTIFICATE")) {// XXX TODO   use TlsPolicyName  
+        if (ucName.equals("TRUST_KNOWN_CERTIFICATE")) {
 //            return new TrustKnownCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
             return TlsPolicyBuilder.factory().strict(tlsKeystore.getRepository()).skipHostnameVerification().build();
         }
-        if (ucName.equals("INSECURE")) {// XXX TODO   use TlsPolicyName  
+        if (ucName.equals("INSECURE")) {
             return new InsecureTlsPolicy();
         }
         throw new IllegalArgumentException("Unknown TLS Policy: " + tlsPolicyName);
@@ -90,7 +90,7 @@ public class TlsPolicyFactory {
         String tlsCaFilename = My.configuration().getConfiguration().getString("mtwilson.tls.certificate.file", "mtwilson-tls.pem");
         if (tlsCaFilename != null) {
             if (!tlsCaFilename.startsWith("/")) {
-                tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);// XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+                tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);
             }
             if (tlsCaFilename.endsWith(".pem")) {
                 File tlsPemFile = new File(tlsCaFilename);

@@ -42,11 +42,6 @@ TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
 
-# TODO: since we are setting TRUSTAGENT_HOME and TRUSTAGENT_CONF environment
-#       variables,  we should NOT be passing -Dfs.name to the application 
-#       since our environment variables should be adequate for pointing the
-#       application to the correct locations
-
 ###################################################################################################
 
 # load environment variables (these may override the defaults set above)
@@ -83,13 +78,10 @@ trustagent_setup() {
   elif [ "$tasklist" == "--force" ]; then
     tasklist="$TRUSTAGENT_SETUP_TASKS --force"
   fi
-  # TODO:  else if tasklist is not empty, check if configure-from-environment is in there and if not automatically prepend it
   java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup configure-from-environment $tasklist
   return $?
 }
 
-# TPM_OWNER_SECRET and TPM_SRK_SECRET are also required but assumed to already
-# be set in the trustagent.properties
 trustagent_authorize() {
   local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
   local default_value
@@ -166,7 +158,6 @@ trustagent_uninstall() {
 }
 
 # stops monit and removes its configuration
-# TODO if we didn't install monit we should uninstall it
 monit_uninstall() {
   echo "Stopping Monit service..."
   service monit stop &> /dev/null
@@ -182,7 +173,6 @@ monit_uninstall() {
 
 print_help() {
     echo "Usage: $0 start|stop|authorize|start-http-server"
-    # TODO:  add the "register" command when it's implemented
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo configure-from-environment
@@ -264,9 +254,6 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
-      # TODO: check java version against JAVA_REQUIRED_VERSION and exit if not
-      #       acceptable; requires the functions file / linux utilities which
-      #       isn't integrated into the new trustagent installer yet.
       java $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
     fi
     ;;

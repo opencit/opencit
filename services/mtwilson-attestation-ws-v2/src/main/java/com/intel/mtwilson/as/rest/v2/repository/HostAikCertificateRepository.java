@@ -37,7 +37,7 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
                 if (obj != null) {
                     objCollection.getAikCertificates().add(convert(obj));
                 }
-            } // TODO: Need to add the AIKSha1 search criteria later when we have the capability of multiple AIKs
+            } 
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {

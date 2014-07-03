@@ -41,7 +41,6 @@ import java.util.List;
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<String,VendorHostAgentFactory> vendorFactoryMap = new HashMap<String,VendorHostAgentFactory>();
-    // XXX MOVED TO MTWILSON-TLS-POLICY TLSPOLICYFACTORY
     private TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.getInstance();
     
     public HostAgentFactory() {
@@ -65,12 +64,6 @@ public class HostAgentFactory {
     
     
     /**
-     * XXX TODO this method is moved here from the previous interface ManifestStrategy.
-     * It's currently here to minimize code changes for the current release
-     * but its functionality needs to be moved somewhere else - the trust utils
-     * library should not know about the mt wilson database structure.
-     * This implementation is a combination of getHostAgent and code from the original getManifest.
-     * XXX as of May 2014 this is not being used at all.
      * @deprecated in mtwilson 2.0, use implementations of HostAgent instead
      * @param host
      * @return 
@@ -79,8 +72,8 @@ public class HostAgentFactory {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName());
             String connectionString = getConnectionString(host);
-            String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
-//            ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO it's the responsibility of the caller to save the TblHosts record after calling this method if the policy is trust first certificate ; we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
+            String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  
+//            ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore());
             String password = My.configuration().getTlsKeystorePassword(); 
             SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); 
             TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
@@ -105,7 +98,7 @@ public class HostAgentFactory {
     public HostAgent getHostAgent(TblHosts host) {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName()); // switching from Hostname to InternetAddress (better support for both hostname and ip address)
-            // here we figure out if it's vmware or intel  and ensure we have a valid connection string starting with the vendor scheme.  XXX TODO should not be here, everyone should have valid connection strings like vmware:*, intel:*, citrix:*, etc. 
+            // here we figure out if it's vmware or intel  and ensure we have a valid connection string starting with the vendor scheme.  
             // no special case for citrix, since that support was added recently they should always come with citrix: prepended.
 //            System.out.println("host cs = " + host.getAddOnConnectionInfo());
             String connectionString = getConnectionString(host);
@@ -113,7 +106,7 @@ public class HostAgentFactory {
             log.debug("Retrieving TLS policy...");
             TlsPolicy tlsPolicy = getTlsPolicy(host);
             log.debug("Creating Host Agent for host: " + host.getName());
-            HostAgent ha = getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
+            HostAgent ha = getHostAgent(hostAddress, connectionString, tlsPolicy); 
             log.debug("Host Agent created.");
             return ha;
         }
@@ -123,7 +116,6 @@ public class HostAgentFactory {
     }
     
     /*
-     * XXX TODO this functionality moved to ConnectionString.from() , need to change all references & delete this one
      * given a host, it returns the complete connection string starting with vendor scheme
      * 
      * @deprecated
@@ -147,8 +139,8 @@ public class HostAgentFactory {
         if( host.getTlsPolicyName() == null ) {
             host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
         }
-//        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
-//        KeyStore tlsKeystore = txtHost.getTlsKeystore(); // XXX TODO TxtHost doesn't have this field yet
+//        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); 
+//        KeyStore tlsKeystore = txtHost.getTlsKeystore(); 
         TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
         return tlsPolicy;
     }
@@ -160,7 +152,7 @@ public class HostAgentFactory {
      */
     private HostAgent getHostAgent(InternetAddress hostAddress, String connectionString, TlsPolicy tlsPolicy) throws IOException {
         if( connectionString == null ) {
-            throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
+            throw new IllegalArgumentException("Connection info missing"); 
         }
         ConnectionString cs = new ConnectionString(connectionString);
         String vendorProtocol = cs.getVendor().name().toLowerCase(); // INTEL, CITRIX, VMWARE becomes intel, citrix, vmware
@@ -177,7 +169,7 @@ public class HostAgentFactory {
     
     public HostAgent getHostAgent(ConnectionString hostConnection, TlsPolicy tlsPolicy) throws IOException {
         if( hostConnection == null ) {
-            throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
+            throw new IllegalArgumentException("Connection info missing"); 
         }
         String vendorProtocol = hostConnection.getVendor().name().toLowerCase();
         if( vendorFactoryMap.containsKey(vendorProtocol) ) { // intel, citrix, vmware

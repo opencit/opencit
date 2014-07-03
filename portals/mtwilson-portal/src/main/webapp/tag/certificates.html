@@ -316,7 +316,6 @@ function isNumber(n) {
                         <form id="selection-create-form" action="#" onsubmit="return false;">
                             <ul>
                                 <li><label for="selection-create-name">Name</label><input type="text" id="selection-create-name" name="name" data-bind-value="input.name" placeholder="Name of this selection" class="required"/></li>
-                                <!-- XXX TODO future release should add a host selection here too:  so selection is list of selected tags and (optional) list of selected hosts to apply them to -->
                                 <li><label for="selection-create-tags-select">Tags</label>
                                     <select id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
                                         <option data-bind-each-item="global.tags" data-bind-text="item.name" data-bind-value="item.oid"></option>

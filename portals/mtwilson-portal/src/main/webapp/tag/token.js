@@ -37,7 +37,6 @@ function setTokenInHttpEquiv(token) {
     }
 }
 function getAuthorizationToken() {
-    // XXX TODO look for expiration header with token and set a timer; if token has expired get a new one, otherwise use existing token
     // first look for an authorization token embedded in the current page
     var meta = $$("meta[http-equiv=AuthorizationToken]");
     if( meta.length ) {

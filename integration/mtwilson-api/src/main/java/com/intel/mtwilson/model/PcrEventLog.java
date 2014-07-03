@@ -11,10 +11,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * Represents an ordered list of modules (hash,description), options, or other data that
  * are extended into a specific PCR.
  * 
- * XXX this used to be called PcrModuleManifest, which was very confusing because it referred to ONE
- * pcr whereas the PcrManifest class referred to  a list of ALL pcr's. 
- * maybe rename this PcrHistory? or PcrMeasurementList?
- * 
  * One PcrModuleManifest is equal to another PcrModuleManifest if they specify exactly
  * the same set of module values, in any order. Subsets and supersets
  * are not considered equal.

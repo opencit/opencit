@@ -77,8 +77,8 @@ public class VMWare51Esxi51   {
 					HostTpmSoftwareComponentEventDetails componentEventDetails = (HostTpmSoftwareComponentEventDetails)logEventDetails;
                     log.debug("Event name {}", componentEventDetails.getComponentName());
 					info.put("EventType", "HostTpmSoftwareComponentEvent"); // new, properly capture the type of event in a separate field
-					info.put("EventName", "Vim25Api.HostTpmSoftwareComponentEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
-					info.put("ComponentName", "componentName." + componentEventDetails.getComponentName()); // XXX TODO remove the "componentName." prefix because we are capturing this now in EventType
+					info.put("EventName", "Vim25Api.HostTpmSoftwareComponentEventDetails"); 
+					info.put("ComponentName", "componentName." + componentEventDetails.getComponentName()); 
 					info.put("PackageName", componentEventDetails.getVibName());
 					info.put("PackageVendor", componentEventDetails.getVibVendor());
 					info.put("PackageVersion", componentEventDetails.getVibVersion());
@@ -105,8 +105,8 @@ public class VMWare51Esxi51   {
                     log.debug("Event name {}", commandEventDetails.getCommandLine());
 
 					info.put("EventType", "HostTpmCommandEvent"); // new, properly capture the type of event in a separate field
-					info.put("EventName", "Vim25Api.HostTpmCommandEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
-					info.put("ComponentName", "commandLine."+ getCommandLine(commandEventDetails)); // XXX TODO remove the "commandLine." prefix because we are capturing this now in EventType
+					info.put("EventName", "Vim25Api.HostTpmCommandEventDetails"); 
+					info.put("ComponentName", "commandLine."+ getCommandLine(commandEventDetails));
                     info.put("UUID", getUuidFromCommandLine(commandEventDetails.getCommandLine()));
                     log.debug("UUID is {}", info.get("UUID"));
 //                    label = String.format("%s: %s", info.get("EventType"), getCommandLine(commandEventDetails) );
@@ -117,17 +117,16 @@ public class VMWare51Esxi51   {
                     log.debug("Event name {}", optionEventDetails.getOptionsFileName());
 
 					info.put("EventType", "HostTpmOptionEvent"); // new, properly capture the type of event in a separate field
-					info.put("EventName", "Vim25Api.HostTpmOptionEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
-					info.put("ComponentName", "bootOptions."+ optionEventDetails.getOptionsFileName()); // XXX TODO remove the "bootOptions." prefix because we are capturing this now in EventType
-                    // XXX TODO we can get the actual options with   info.put("BootOptions", VMwareClient.byteArrayToHexString(optionEventDetails.getBootOptions()); ... right now we are only capture the file name and not its contents;  probably ok since what the policy checks is the DIGEST anyway
+					info.put("EventName", "Vim25Api.HostTpmOptionEventDetails"); 
+					info.put("ComponentName", "bootOptions."+ optionEventDetails.getOptionsFileName()); 
 //                    label = String.format("%s: %s", info.get("EventType"), optionEventDetails.getOptionsFileName() );
                     label = optionEventDetails.getOptionsFileName(); // String.format("%s", optionEventDetails.getOptionsFileName())
 				} else if (logEventDetails instanceof HostTpmBootSecurityOptionEventDetails) { // BootSecurityOption and DataHash
 					HostTpmBootSecurityOptionEventDetails optionEventDetails = (HostTpmBootSecurityOptionEventDetails)logEventDetails;
                     log.debug("Event name {}", optionEventDetails.getBootSecurityOption());
 					info.put("EventType", "HostTpmBootSecurityOptionEvent"); // new, properly capture the type of event in a separate field
-					info.put("EventName", "Vim25Api.HostTpmBootSecurityOptionEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
-					info.put("ComponentName", "bootSecurityOption."+ optionEventDetails.getBootSecurityOption()); // XXX TODO remove the "bootSecurityOption." prefix because we are capturing this now in EventType
+					info.put("EventName", "Vim25Api.HostTpmBootSecurityOptionEventDetails"); 
+					info.put("ComponentName", "bootSecurityOption."+ optionEventDetails.getBootSecurityOption()); 
 //                    label = String.format("%s: %s", info.get("EventType"), optionEventDetails.getBootSecurityOption() );
                     label = optionEventDetails.getBootSecurityOption();
 				} else {
@@ -142,7 +141,6 @@ public class VMWare51Esxi51   {
 				}
                 
                 log.debug("Event Digest is {}", digest);
-                // XXX for some reasons some measurements come in as 40 bytes (80 hex digits) instead of 20 bytes (40 hex digits)..  and those seem to be all zeros'
                 if( digest.length() == 40 ) { // sha1 is 20 bytes, so 40 hex digits
                     return new Measurement(new Sha1Digest(digest), label, info );
                     
@@ -152,7 +150,7 @@ public class VMWare51Esxi51   {
                     return new Measurement(Sha1Digest.ZERO, label, info );
                 }
                 /**
-                 * XXX the following lines may cause a problem.  If you are reading this, it's probably because
+                 * The following lines may cause a problem.  If you are reading this, it's probably because
                  * you are troubleshooting a measurement that is misbehaving.  Need to find out why vmware is
                  * sending event logs with digests more than 20 bytes that are not zero... 
                  * You can't extend a PCR with something more than 20 bytes.  The TPM spec for PCR extend is PCRi = SHA1(PCRi||20-bytes-data).
@@ -161,16 +159,16 @@ public class VMWare51Esxi51   {
                  */
                 log.error("Event Digest is non-zero longer than 20 bytes: {}  -- trying to decode it", digest);
                 try{
-                return new Measurement(Sha1Digest.valueOf(Hex.decodeHex(digest.toCharArray())), label, info ); // XXX need some thought on how to handle this.  maybe change the Measurement class to accept ANY SIZE byte[]  instead of a Sha1Digest ??
+                return new Measurement(Sha1Digest.valueOf(Hex.decodeHex(digest.toCharArray())), label, info ); 
                 }
                 catch(DecoderException e) {
-                    throw new IllegalArgumentException(digest); // XXX TODO throw a MWException with appropriate ErrorCode for invalid measurement data
+                    throw new IllegalArgumentException(digest); 
                 }
     }
 
 	private static String getCommandLine(HostTpmCommandEventDetails commandEventDetails) {
 		String commandLine = commandEventDetails.getCommandLine();
-        if (commandLine != null && commandLine.contains("no-auto-partition")){ // XXX this is the original logic... dont' know what value there is in deleting the information... a UI could always show it abbreviated with "..."
+        if (commandLine != null && commandLine.contains("no-auto-partition")){ 
 			commandLine = "";
 		}
 		return commandLine;

@@ -264,7 +264,6 @@ function provisionCert() {
      #xml2 < $certFile > $certFileValues
      #dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
      
-     #XXX TODO: convert binary cert data to hex and display
      #openssl x509 -in $certFile -text -noout > $certFileValues
  #    less $certFile
  #  fi

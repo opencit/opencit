@@ -13,7 +13,7 @@ import javax.ws.rs.QueryParam;
  * @author jbuhacoff
  */
 public class VersionFilterCriteria implements FilterCriteria<Version> {
-    // TODO also allow administrators to filter by plugin, dependency, etc,
+    
 /*    
     @QueryParam("id")
     public UUID id;

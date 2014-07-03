@@ -29,25 +29,21 @@ public class AssetTagCertAssociateRequest {
         this.hostId = hostID;
     }
 
-    // TODO:  should be "tag"
     @JsonProperty("SHA1Hash")
     public byte[] getSha1OfAssetCert() {
         return tag;
     }
 
-    // TODO:  should be "tag"
     @JsonProperty("SHA1Hash")
     public void setSha1OfAssetCert(byte[] sha1OfAssetCert) {
         this.tag = sha1OfAssetCert;
     }
 
-    // TODO: should be "host_id" ; or allow the mapping framework to do it based on the default rules which would result in host_id
     @JsonProperty("Host_ID")
     public int getHostID() {
         return hostId;
     }
 
-    // TODO: should be "host_id" ; or allow the mapping framework to do it based on the default rules which would result in host_id
     @JsonProperty("Host_ID")
     public void setHostID(int hostID) {
         this.hostId = hostID;

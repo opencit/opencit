@@ -393,7 +393,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             else {
                 for( String value : query.get(key) ) {
                     try {
-                        params.add(key+"="+urlsafe.encode(value)); // XXX assumes that the keys don't have any special characters
+                        params.add(key+"="+urlsafe.encode(value)); 
                     } catch (EncoderException ex) {
                         log.error("Cannot encode query parameter: {}", value, ex);
                     }
@@ -570,7 +570,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }
     
     private <T> T xml(ApiResponse response, Class<T> valueType) throws IOException, ApiException {
-        if( response.httpStatusCode == HttpStatus.SC_OK && response.contentType.isCompatible(APPLICATION_XML_TYPE) ) { // XXX or isCompatible(TEXT_XML_TYPE)
+        if( response.httpStatusCode == HttpStatus.SC_OK && response.contentType.isCompatible(APPLICATION_XML_TYPE) ) { 
             return xml(new String(response.content, "UTF-8"), valueType);                
         }
         else if( response.httpStatusCode == HttpStatus.SC_OK ) {
@@ -730,7 +730,6 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     @Override
     public X509Certificate getTlsCertificateForTrustedHost(Hostname hostname) throws IOException, ApiException, SignatureException {
         throw new UnsupportedOperationException("Not supported yet.");
-        // TODO: getSamlForHost(), then verifyTrustAssertion(), then extract the host's TLS Certificate (RC3 feature) from the TrustAssertion object (Because it's included in the SAML)
     }
 
     /**
@@ -852,12 +851,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
 
    /* @Override
     public CaInfo getCaStatus() throws IOException, ApiException, SignatureException {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // TODO: create a CaInfo object, which combines data from two sources:  1) the Mt Wilson CA Certificate, 2) the "ca" user in the HMAC users table
+        throw new UnsupportedOperationException("Not supported yet.");        
     }*/
 
     /**
-     * XXX needs a rename, because we're talking about the host provisioning ca specifically
      * @param newPasswordString to authorize new hosts
      * @throws IOException
      * @throws ApiException
@@ -866,7 +863,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
   /*  @Override
     public void enableCaWithPassword(String newPasswordString) throws IOException, ApiException, SignatureException {
         try {
-            Password newPassword = new Password(newPasswordString, new byte[0]); // XXX currently using an empty salt, so the user doesn't need to also copy the salt, but maybe we should use a generated salt and return it to the user to paste when using the password....
+            Password newPassword = new Password(newPasswordString, new byte[0]); 
             // String result = 
             text(httpPost(msurl("/ca/enable"), toJSON(newPassword.toString())));
             //return "true".equals(result);          
@@ -877,7 +874,6 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }*/
 
     /**
-     * XXX needs a rename, because we're talking about the host provisioning ca specifically
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException 
@@ -886,7 +882,6 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public void disableCa() throws IOException, ApiException, SignatureException {
             //String result = 
             text(httpPost(msurl("/ca/disable"), null));
-        // TODO:  an update on the "ca" user in the HMAC users table,  set enabled=false
     }*/
 
     @Override
@@ -1035,9 +1030,6 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }
     
     /**
-     * XXX TODO inputs to this are the same as HostTrustStatusRequest in the datatypes project but that class requires username and password in the constructor
-     * so we need to clean it up before using it. Also because the parameters here are distinct (Collection<Hostname>, boolean) the change is a low priority since there
-     * cannot be any confusion about the parameters to this method.
      * @param hostnames
      * @param forceVerify
      * @return
@@ -1047,15 +1039,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      */
     @Override
     public List<HostTrustXmlResponse> getSamlForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) throws IOException, ApiException, SignatureException {
-        // prepare the request
-        String hostnamesCSV = StringUtils.join(hostnames, ","); // calls toString() on each hostname
-        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
-        query.add("hosts", hostnamesCSV);
-        query.add("force_verify", Boolean.toString(forceVerify));
-        // make the request and parse the xml response
-        HostTrustXmlResponseList list = xml(httpGet(asurl("/hosts/bulk/trust/saml", query)), HostTrustXmlResponseList.class);
-        return list.getHost(); // get the list of <Host> elements inside the root <Hosts> element... it's an automatically generated method name. would have been nice if they named it getHostList()
-    }
+            // prepare the request
+            String hostnamesCSV = StringUtils.join(hostnames, ","); // calls toString() on each hostname
+            MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+            query.add("hosts", hostnamesCSV);
+            query.add("force_verify", Boolean.toString(forceVerify));
+            // make the request and parse the xml response
+            HostTrustXmlResponseList list = xml(httpGet(asurl("/hosts/bulk/trust/saml", query)), HostTrustXmlResponseList.class);
+            return list.getHost(); // get the list of <Host> elements inside the root <Hosts> element... it's an automatically generated method name. would have been nice if they named it getHostList()
+        }
     
     /**
      *  this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
@@ -1273,14 +1265,14 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public List<ApiClientInfo> listPendingAccessRequests() throws IOException, ApiException, SignatureException {        
         ApiClientSearchCriteria criteria = new ApiClientSearchCriteria();
         criteria.enabledEqualTo = false;
-        criteria.statusEqualTo = "Pending"; // XXX TODO status codes should be in enum in datatypes project ; see com.intel.mtwilson.user.management.rest.v2.model.Status enum for v2
+        criteria.statusEqualTo = "Pending"; 
         return searchApiClients(criteria);
     }
 
     @Override
     public boolean updateApiClient(ApiClientUpdateRequest apiClient) throws IOException, ApiException, SignatureException {
         httpPut(msurl("/apiclient"), toJSON(apiClient));
-        return true; // XXX TODO need actual return code here, but the web service currently does not return anything, it's either success or we'll get an ApiExceptoin
+        return true; 
     }
 
     @Override

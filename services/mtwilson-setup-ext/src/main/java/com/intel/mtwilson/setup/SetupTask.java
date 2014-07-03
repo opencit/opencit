@@ -9,9 +9,6 @@ import com.intel.dcsg.cpg.validation.Fault;
 import java.util.List;
 
 /**
- * XXX TODO  maybe instead of extending Runnable we need to extend Task from
- * cpg-performance  and get progress info etc. 
- * 
  * Each implementation of SetupTask is a bean with attributes (setters and getters)
  * that
  * can be used by the application to configure that bean before execution and
@@ -31,29 +28,6 @@ import java.util.List;
  * 
  * Update: required was changed to validated so in the above table required = !validated. 
  * 
- * 
- * TODO:  should there be a migration interface, like migrate(Configuration previous, Configuration current) to automatically import
- * data from one to the other?  could be used to migrate between versions or even on the same instance if the administrator changes
- * the configuration then if there is anything that can be migrated it can happen, while other files that are not needed may be 
- * discarded or archived. For example if saml certificate distinguished name is changed, user can choose to keep the old cert as 
- * a revoked cert for verifying assertions made while it was valid, or deleting it. Without the migration interface, the administrator
- * would have to manually revoke and import the old cert or delete it.
- * 
- * TODO:  the conversion between bean attributes and configuration properties that is done by the setup task implementations
- * may be something that is generally useful as an improvement for My.configuration()  to allow the application to get 
- * the necessary configuration directly like X509Certificate getSamlCertificate() instead of getting 4 properties for the 
- * keystore location and password and certificate alias and password within the keystore and then repeating the code for
- * loading it.  The limit on how far the abstraction goes may be defined in different ways:
- * 1. it can be the business layer itself - the configuration interface is
- * only responsible for loading concrete pieces that can be used by the application in any way. So the configuration interface
- * would not be used to load the saml business object itself which signs documents,  but it would be used to load objects
- * that may be set on the saml business object using its setters in order to configure it. 
- * 2. it can be anything in java.lang.  - that is, any object that is part of the JRE can be referenced in the configuration
- * but anything in another package is outside the scope. that makes it easy to draw the line and prevent scope creep into
- * the business layer.
- * 3. configuration can be anything including complete business objects; this is something that has already been solved
- * by the Spring project so it might be good to integrate spring configuration and a generic viewer that can look up and down
- * the object hierarchy to expose configuration at any depth 
  * 
  * @author jbuhacoff
  */

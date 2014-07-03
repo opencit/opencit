@@ -221,7 +221,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("delete");
         T item = retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
         delete(id);
     }
@@ -243,7 +243,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("retrieve");
         T item = retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         return item;
     }
@@ -279,7 +279,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         return item;
     }
 
-    // the patch method only accepts the patch content type (TODO - DEFINE IT  - actually yaml might be a good choice because it's compact, uses multiple lines for display, and has language features that can help deserialize into java easier than json or xml)  
+    // the patch method only accepts the patch content type 
     /**
      * Update an item in the collection. Input Content-Type is a special patch
      * document format. Output Content-Type is any of application/json,
@@ -299,24 +299,20 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("patch");
         T item = retrieve(id); // subclass is responsible for validating id
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         ValidationUtil.validate(patchArray);
         for (int i = 0; i < patchArray.length; i++) {
             log.debug("Processing patch #{} of {}", i + 1, patchArray.length);
-            // XXX TODO check if patchArray[i].getSelect() == null  (expected) , and if it's not null then use abstract method to check that id == id   (like have a method that takes a string id and a filtercriteria and decides if they refer to the same record)
-            // XXX TODO need an abstract method for applying patches for subclasses
             if (false /* error during processing */) {
                 // 400 bad request or 500 internal server error
                 return null;
             }
 
         }
-        // XXX TODO wire up to repository...
-        // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
         //return new Host();
 //        return patch(null);
-        return null; // XXX TODO return final item with changes
+        return null; 
     }
 
     ///////////////////////////       JSON API      ///////////////////////////
@@ -342,7 +338,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
             if (item.getId() == null) {
                 item.setId(new UUID());
             }
-            create(item); // XXX TODO   autmoatic multi-threading here so subclass doesn't have to ... also if one or more of the given items  already exist we should erturn an error. 
+            create(item); 
         }
         return collection;
     }
@@ -363,7 +359,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("retrieveCollection");
         T item = retrieve(id); // subclass is responsible for validating id
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         C collection = createEmptyCollection();
         collection.getDocuments().add(item);
@@ -390,7 +386,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         ValidationUtil.validate(collection);
         List<T> list = collection.getDocuments();
         if (list == null || list.isEmpty()) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST); // TODO i18n
+            throw new WebApplicationException(Response.Status.BAD_REQUEST); 
         }
         T item = list.get(0);
         if (item == null) {
@@ -419,9 +415,6 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces(DataMediaType.APPLICATION_VND_API_JSON)
     public C patchCollection(@PathParam("id") String id /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
-        // TODO  ValidationUtil.validate(patchCollection)
-        // XXX TODO wire up to repository...
-        // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
 //        HostFilterCriteria criteria = new HostFilterCriteria();
 //        criteria.id = UUID.valueOf(id);
 //        return searchCollection(criteria);

@@ -24,7 +24,6 @@ public class LoginHostPrincipal implements Serializable, Principal {
 
     @Override
     public String getName() {
-//      TODO: when hostname login is from database  return String.format("%s [%s] from [%s]", username, userId, hostname);
         return host;
     }
 

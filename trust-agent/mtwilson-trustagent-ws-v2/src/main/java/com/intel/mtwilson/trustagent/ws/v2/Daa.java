@@ -33,7 +33,6 @@ public class Daa {
         if( !configuration.isDaaEnabled() ) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
         }
-        // TODO:  eliminate the TADataContext "middle man" and implement that daa command to accept DaaChallenge and return DaaResponse directly
         TADataContext context = new TADataContext();
         context.setDaaChallenge(daaChallenge.getChallenge());
         new ChallengeResponseDaaCmd(context).execute();

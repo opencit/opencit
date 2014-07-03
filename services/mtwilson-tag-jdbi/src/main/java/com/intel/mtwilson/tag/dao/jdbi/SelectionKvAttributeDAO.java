@@ -71,7 +71,7 @@ public interface SelectionKvAttributeDAO extends Closeable{
     void deleteAll(@Bind("selectionId") UUID selectionId);
 
     @SqlUpdate("delete from mw_tag_selection_kvattribute where id=:id")
-    void delete(@Bind("id") UUID id); // TODO: rename to deleteById
+    void delete(@Bind("id") UUID id); 
     
     @Override
     void close();

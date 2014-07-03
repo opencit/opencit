@@ -68,7 +68,6 @@ public class HttpBasicRequestVerifier {
             throw new CryptographyException("Either the user name or password specified is not correct.");
         }
 
-        // XXX since HTTP BASIC requests don't have a cryptographic signature and are inherently vulnerable to replay, we cannot really do anything to prevent it within the standard;  so we just hash something that will change on every request... if we used something like md5(authorization) then it would be the same on every request and all the user's requests will be rejected after the first one within the recent window, and that would be bad.        
         String insecureRequestSummary = httpMethod+ " "+requestUrl + " "+String.valueOf(headers.getFirst("Date")); // the hash of this complete value will not be used in anti-replay protection, but it will be logged in the database with the request.
         
         // Because of security reasons, the users using HttpBasic would be able to just retrieve the attestation status and will 

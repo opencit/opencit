@@ -64,7 +64,7 @@ function fnUploadWhiteListConfigurationData() {
         // alert(hostVo.hostType);
         //hostVo.hostType=$('#MainContent_ddlHOSTType').val();
         hostVo.status = null;
-        // at this point isVMWare = 1 == VMWare, 2 == Citrix, 0 == TA    // TODO need to change this logic to just use the vendor name instead of 0..2
+        // at this point isVMWare = 1 == VMWare, 2 == Citrix, 0 == TA       
         // get citrix values
         if (isVMWare == 2) {
             if (fnValidateIpAddress($('#whiteListCitrix_Host').val())) {

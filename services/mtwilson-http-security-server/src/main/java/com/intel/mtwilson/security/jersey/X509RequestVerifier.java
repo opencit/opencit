@@ -103,7 +103,6 @@ public class X509RequestVerifier {
             //log.debug("X509CertificateAuthorization: Signed content ("+content.length()+") follows:\n{}", content);
             
             // locate the public key or x509 certificate that can verify the signature
-            // XXX TODO: need to also load the roles from the database (in case we're successful, so we don't do 2 queries) and also in future versions the roles may be in the x509 certificate so we need to get it directly and save it so we can examine after verifying
             byte[] document = content.getBytes("UTF-8");
             byte[] signature = Base64.decodeBase64(a.signatureBase64);
             String signatureAlgorithm = signatureAlgorithm(a.signatureAlgorithm);
@@ -144,7 +143,6 @@ public class X509RequestVerifier {
                 log.warn("X509CertificateAuthorization: Actual URL did not match Signed URL");
                 log.debug("  Actual URL: "+requestUrl);
                 log.debug("  Signed URL: "+signatureBlock.url);
-                //XXX TODO:  we need to abort this request and re-route according to the signed URL... http method and url path could be completely different... original request could be GET /kitty and could be redirected to DELETE /pokemon by using X-Original-URL and X-HTTP-Method-Override... so we need to route request according to the SIGNED CONTENT.  BUG #383
             }
             
 

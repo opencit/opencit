@@ -40,7 +40,7 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
         File file = new File();
         file.setName("testfile");
         file.setContentType("text/plain");
-        file.setContent(null); // XXX the search query should NOT include the content; search is only to show "search results" from which the client can select a file to download using /files/{id}/content 
+        file.setContent(null); 
         files.getFiles().add(file);
         return files;
     }
@@ -50,14 +50,14 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     public File retrieve(FileLocator locator) {
 //        String id = locator.id;
         log.debug("File retrieve: {}", locator.id);
-//        if( !UUID.isValid(id) ) { return null; } // XXX TODO or a localizable input validation error via throw exception (if we don't validate here, UUID.valueOf() will throw IllegalArgumentException if it's not a valid uuid)
+//        if( !UUID.isValid(id) ) { return null; } 
         File file = new File();
 //        file.setId(UUID.valueOf(id));
         file.setId(locator.id);
         file.setName("testfile");
         file.setContentType("text/plain");
-        file.setContent(null); // XXX  content should be linked from the links section;  meaning our select 1 query should NOT return the content to us from the db, that would be wasteful 
-        file.getMeta().put("content_href", String.format("/files/%s/content", locator.id.toString())); // XXX  or meta.links = [ { rel: content, href: ... } ]  or links.content = "/files/{id}/content"  but nothing in the "linked" section 
+        file.setContent(null); 
+        file.getMeta().put("content_href", String.format("/files/%s/content", locator.id.toString())); 
         return file;
     }
     
@@ -65,14 +65,14 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     public File retrieveWithContent(FileLocator locator) {
 //        String id = locator.id;
         log.debug("File retrieve: {}", locator.id);
-//        if( !UUID.isValid(id) ) { return null; } // XXX TODO or a localizable input validation error via throw exception (if we don't validate here, UUID.valueOf() will throw IllegalArgumentException if it's not a valid uuid)
+//        if( !UUID.isValid(id) ) { return null; } 
         File file = new File();
 //        file.setId(UUID.valueOf(id));
         file.setId(locator.id);
         file.setName("testfile");
         file.setContentType("text/plain");
-        file.setContent("simulated content here"); // XXX  content should be linked from the links section;  meaning our select 1 query should NOT return the content to us from the db, that would be wasteful 
-        file.getMeta().put("content_href", String.format("/files/%s/content", locator.id.toString())); // XXX  or meta.links = [ { rel: content, href: ... } ]  or links.content = "/files/{id}/content"  but nothing in the "linked" section 
+        file.setContent("simulated content here"); 
+        file.getMeta().put("content_href", String.format("/files/%s/content", locator.id.toString())); 
         return file;        
     }
 

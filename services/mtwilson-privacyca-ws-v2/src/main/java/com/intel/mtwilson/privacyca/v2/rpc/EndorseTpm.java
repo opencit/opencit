@@ -32,7 +32,6 @@ public class EndorseTpm implements Callable<X509Certificate> {
         return ekModulus;
     }
     
-    // INSECURE, NEED TODO:    permission allowed  "tpm:endorse:*" 
     @Override
     public X509Certificate call() throws Exception {
         // load privacy ca ek signing key (cakey) and corresponding certificate (cacert)

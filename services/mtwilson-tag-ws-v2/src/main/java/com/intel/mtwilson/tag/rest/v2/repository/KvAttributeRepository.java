@@ -81,7 +81,7 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
 //                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID, uuidConverter));
 //                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID));
                 obj.setName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
-                obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); //TODO: Change these after creating new JOOQ tables.
+                obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); 
                 objCollection.getKvAttributes().add(obj);
             }
             sql.close();
@@ -153,7 +153,6 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
                     log.error("Invalid input specified by the user.");
                     throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
                 }
-                //TODO: Create the unique name value pair mapping in the DB.
                 KvAttributeFilterCriteria fc = new KvAttributeFilterCriteria();
                 fc.nameEqualTo = item.getName();
                 fc.valueEqualTo = item.getValue();
@@ -181,7 +180,6 @@ public class KvAttributeRepository implements SimpleRepository<KvAttribute, KvAt
     public void delete(KvAttributeLocator locator) {
         if( locator == null || locator.id == null ) { return; }
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
-            // TODO: Catch the SQLException -- see how JDBI returns the # of rows affected.
             dao.delete(locator.id);           
             
         } catch (WebApplicationException aex) {

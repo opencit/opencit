@@ -51,7 +51,6 @@ public class TagCertificateTrusted extends BaseRule {
                             ca.checkValidity(hostReport.tagCertificate.getNotBefore());
                             log.debug("Verifying CA end date : {} with tag certificate end date : {}", ca.getNotAfter(), hostReport.tagCertificate.getNotAfter());
                             ca.checkValidity(hostReport.tagCertificate.getNotAfter());
-                            // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
                             validCaSignature = true;
                         } else {
                             log.debug("TagCertificate is not valid");

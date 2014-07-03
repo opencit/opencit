@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * XXX TODO this is a draft of the interface that Linux, Citrix, and Vmware
+ * This is a draft of the interface that Linux, Citrix, and Vmware
  * agents should implement for communicating information about their hosts
  * to Mt Wilson. THis will allow Mt Wilson to treat them uniformly and move
  * all the platform-specific calls and procedures into those agents in a 
@@ -64,37 +64,22 @@ public interface HostAgent {
 
     /**
      * Whether the platform supports Intel TXT - is the right hardware present (not including the TPM)
-     * XXX for now all hosts return true until we implement all the detection mechanism
      * @return 
      */
     boolean isIntelTxtSupported();
     
     /**
      * Whether Intel TXT  has been enabled on the platform (usually through the BIOS)
-     * XXX for now all hosts return true until we implement all the detection mechanism
      * @return 
      */
     boolean isIntelTxtEnabled();
     
     
     /**
-     * XXX for now probably all hosts will return true, until we implement all the detection mechanisms
-     * Available means the TPM hardware is present.
-     * Linux, Citrix, and Vmware agents should contact the host and find out
-     * if it has a TPM before determining the return value.
      * @return true if the host has a TPM
      */
     boolean isTpmPresent();
     
-    /**
-     * XXX for now probably all hosts will return true, until we implement all the detection mechanisms
-     * Linux, Citrix agents should contact the host and find out
-     * if its TPM is enabled (BIOS enabled and also if the agents have ownership).
-     * In this case, "enabled" means it has an owner set AND that owner is
-     * cooperating with Mt Wilson. 
-     * Vmware agents can return true if isTpmAvailable() returns true.
-     * @return 
-     */
     boolean isTpmEnabled();
 
     
@@ -129,13 +114,13 @@ public interface HostAgent {
     boolean isAikCaAvailable();
     
     /**
-     * XXX draft - maybe it should return an X509Certificate object
+     * Draft - maybe it should return an X509Certificate object
      * @return 
      */
     X509Certificate getAikCertificate();
     
     /**
-     * XXX draft - maybe it should return an X509Certificate object
+     * Draft - maybe it should return an X509Certificate object
      * @return the Privacy CA certificate that is mentioned in the AIK Certificate
      */
     X509Certificate getAikCaCertificate(); 
@@ -151,7 +136,7 @@ public interface HostAgent {
     
     
     /**
-     * XXX draft to approximate getting the bios/os/vmm details from the host...
+     * Draft to approximate getting the bios/os/vmm details from the host...
      * maybe split it up into those three functions? or return a host information
      * object with those details? should be similar to or the same as the host portion of the mle 
      * object ?
@@ -173,7 +158,7 @@ public interface HostAgent {
     String getVendorHostReport()  throws IOException;
     
     /**
-     * XXX this is a draft - need to check it against linux & citrix requirements
+     * This is a draft - need to check it against linux & citrix requirements
      * to ensure it makes sense. 
      * Vmware agent must throw unsupported operation exception since it doesn't
      * provide quotes, only "pcr information" through it's API. 
@@ -195,16 +180,6 @@ public interface HostAgent {
      * Agents should return the entire set of module measurements from the host.
      * The attestation service will then choose what to verify and how. 
      * 
-     * XXX TODO this method is moved here from the previous interface ManifestStrategy.
-     * It's currently here to minimize code changes for the current release
-     * but its functionality needs to be moved to the other HostAgent methods.
-     * The VCenterHost was written with abstract methods for processDigest() and
-     * processReport() and these were overridden "on the fly" with anonymous
-     * subclasses in two places.  No time right now to rewrite it properly but
-     * they are essentially post-processing the results we obtain from vcenter.
-     * So in this adapted getManifest() method, we just provide the subclass
-     * instance so it can be called for the post-processing.
-     * 
      * Bug #607 changed return type to PcrManifest and removed post-processing argument - 
      * each host agent implementation is reponsible for completing all its processing.
      * @param host
@@ -213,8 +188,6 @@ public interface HostAgent {
     PcrManifest getPcrManifest() throws IOException;
     
     /**
-     * XXX TODO adapter for existing interface
-     * 
      * SAMPLE OUTPUT FROM VMWare Host:
      * BIOS - OEM:Intel Corporation
      * BIOS - Version:S5500.86B.01.00.0060.090920111354

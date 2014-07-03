@@ -31,8 +31,6 @@ public class DataSourceFactory {
     }
 
     /**
-     * XXX currently not being used, see cpg-jpa PersistenceManager which has similar code
-     * 
      * @param ds
      * @param configuration
      * @return

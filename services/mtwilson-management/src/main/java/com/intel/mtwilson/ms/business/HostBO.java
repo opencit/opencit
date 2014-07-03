@@ -313,11 +313,6 @@ public class HostBO extends BaseBO {
             ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
             hostObj.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
             
-            // TODO: Check with jonathan on the policy used.
-            // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a 
-            //man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default 
-            //policy (including global default trusted certs or ca's) to choose here and that way instead of us making this 
-            //assumption, it's the operator who knows the environment.
             tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
@@ -651,11 +646,6 @@ public class HostBO extends BaseBO {
     }
 
     /**
-     * XXX TODO reduce duplication of logic;  the attestation service HostBO
-     * already has an addHost function; logic for what is a valid registration,
-     * aik checks, etc. must be in one place only.
-     * 
-     * 
      * This function using the white list configuration settings including pcr details, whether the whitelist is for an
      * individual host/for OEM specific host/global white list, etc, configures the DB with the whitelist from the
      * specified good known host.
@@ -709,7 +699,7 @@ public class HostBO extends BaseBO {
                 // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
                 tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); 
-                tblHosts.setTlsKeystore(null); // XXX previously the default policy name was hardcoded to TRUST_FIRST_CERTIFICATE but is now configurable; but because we are still starting with a null keystore, the only two values that would work as a default are TRUST_FIRST_CERTIFICATE and INSECURE
+                tblHosts.setTlsKeystore(null); 
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
                 tblHosts.setIPAddress(gkvHost.HostName);
@@ -752,7 +742,7 @@ public class HostBO extends BaseBO {
                         // we have to check that the aik certificate was signed by a trusted privacy ca
                         X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate()); //agent.getAikCertificate();
                         hostAikCert.checkValidity(); // AIK certificate must be valid today
-                        boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
+                        boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
                         if (!validCaSignature) {
                             throw new MSException(ErrorCode.MS_INVALID_AIK_CERTIFICATE, gkvHost.HostName);
                         }
@@ -1414,7 +1404,7 @@ public class HostBO extends BaseBO {
                                 // If the vendor is Citrix, then only we need to write the PCR 19. Otherwise we need to null it out. 
                                 if (! hostObj.AddOn_Connection_String.toLowerCase().contains("citrix")) {
                                     if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
-                                        pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
+                                        pcrObj.setPcrDigest(""); 
                                     }
                                 }
 
@@ -1526,14 +1516,13 @@ public class HostBO extends BaseBO {
     }
    
     /**
-     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN ATTESTATION SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * THIS IS A DUPLICATE OF WHAT IS THERE IN ATTESTATION SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
      * CHANGE IT IN THE OTHER LOCATION AS WELL.
      * @param hostAikCert
      * @return 
      */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
-        // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         List<X509Certificate> privacyCaCerts;
@@ -1564,8 +1553,6 @@ public class HostBO extends BaseBO {
                     log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
-                    // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
-                    // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
                     validCaSignature = true;
                 }
             }

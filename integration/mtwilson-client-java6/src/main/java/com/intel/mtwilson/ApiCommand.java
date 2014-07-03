@@ -157,7 +157,6 @@ public class ApiCommand {
                 c.register(user);
             }
             catch(javax.net.ssl.SSLException e) {
-                // XXX TODO can this be rewritten to use TlsPolicy settings (we will have to add them to a configuration file for this purpose) 
                 if( e.getMessage().contains("hostname in certificate didn't match")  && !"false".equals(System.getenv("MTWILSON_API_SSL_VERIFY_HOSTNAME")) ) {
                     System.err.println(e.getMessage());
                     System.out.print("Do you want to continue anyway? [Y/N] ");
@@ -203,7 +202,7 @@ public class ApiCommand {
             update.enabled = true;
             update.roles = roles;
             update.status = ApiClientStatus.APPROVED.toString();
-            update.comment = "via command line from "+getLocalhost()+" at "+Rfc822Date.format(new Date()); // TODO: insert "from <local ip>" just before "at <date>"
+            update.comment = "via command line from "+getLocalhost()+" at "+Rfc822Date.format(new Date()); 
             c.updateApiClient(update); // ApiException, SignatureException
             
             // restore previous mtwilson.api.trust setting
@@ -260,13 +259,12 @@ public class ApiCommand {
             update.enabled = true;
             update.roles = roles;
             update.status = ApiClientStatus.APPROVED.toString();
-            update.comment = "via command line from "+getLocalhost()+" at "+Rfc822Date.format(new Date()); // TODO: insert "from <local ip>" just before "at <date>"
+                update.comment = "via command line from "+getLocalhost()+" at "+Rfc822Date.format(new Date()); 
             
             try {
                 c.updateApiClient(update); // ApiException, SignatureException
             }
             catch(javax.net.ssl.SSLException e) {
-                // XXX TODO can this be rewritten to use TlsPolicy settings (we will have to add them to a configuration file for this purpose) 
                 if( e.getMessage().contains("hostname in certificate didn't match")  && !"false".equals(System.getenv("MTWILSON_API_SSL_VERIFY_HOSTNAME")) ) {
                     System.err.println(e.getMessage());
                     System.out.print("Do you want to continue anyway? [Y/N] ");

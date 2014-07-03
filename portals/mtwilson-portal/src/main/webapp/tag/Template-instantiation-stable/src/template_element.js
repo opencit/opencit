@@ -543,12 +543,8 @@
     return ensureScheduled;
   }();
 
-  // FIXME: Observe templates being added/removed from documents
-  // FIXME: Expose imperative API to decorate and observe templates in
-  // "disconnected tress" (e.g. ShadowRoot)
   document.addEventListener('DOMContentLoaded', function(e) {
     bootstrapTemplatesRecursivelyFrom(document);
-    // FIXME: Is this needed? Seems like it shouldn't be.
     Platform.performMicrotaskCheckpoint();
   }, false);
 
@@ -600,8 +596,6 @@
       return doc;
     var d = templateContentsOwnerTable.get(doc);
     if (!d) {
-      // TODO(arv): This should either be a Document or HTMLDocument depending
-      // on doc.
       d = doc.implementation.createHTMLDocument('');
       while (d.lastChild) {
         d.removeChild(d.lastChild);
@@ -703,10 +697,6 @@
     return true;
   };
 
-  // TODO(rafaelw): This used to decorate recursively all templates from a given
-  // node. This happens by default on 'DOMContentLoaded', but may be needed
-  // in subtrees not descendent from document (e.g. ShadowRoot).
-  // Review whether this is the right public API.
   HTMLTemplateElement.bootstrap = bootstrapTemplatesRecursivelyFrom;
 
   var htmlElement = global.HTMLUnknownElement || HTMLElement;
@@ -741,7 +731,6 @@
       }
     } else {
       mixin(el, HTMLTemplateElement.prototype);
-      // FIXME: Won't need this when webkit methods move to the prototype.
       Object.defineProperty(el, 'content', contentDescriptor);
     }
   }
@@ -805,8 +794,6 @@
       var content = this.ref.content;
       var map = contentBindingMapTable.get(content);
       if (!map) {
-        // TODO(rafaelw): Setup a MutationObserver on content to detect
-        // when the instanceMap is invalid.
         map = createInstanceBindingMap(content) || [];
         contentBindingMapTable.set(content, map);
       }
@@ -815,9 +802,6 @@
           deepCloneIgnoreTemplateContent(content) : content.cloneNode(true);
 
       addMapBindings(instance, map, model, delegate, bound);
-      // TODO(rafaelw): We can do this more lazily, but setting a sentinel
-      // in the parent of the template element, and creating it when it's
-      // asked for by walking back to find the iterating template.
       addTemplateInstanceRecord(instance, model);
       return instance;
     },
@@ -1082,9 +1066,6 @@
   }
 
   function TemplateInstance(firstNode, lastNode, model) {
-    // TODO(rafaelw): firstNode & lastNode should be read-synchronous
-    // in cases where script has modified the template instance boundary.
-    // All should be read-only.
     this.firstNode = firstNode;
     this.lastNode = lastNode;
     this.model = model;
@@ -1157,9 +1138,6 @@
         this.scheduleResolve();
     },
 
-    // TODO(rafaelw): Is this the right processing model?
-    // TODO(rafaelw): Consider having a seperate ChangeSummary for
-    // CompoundBindings so to excess dirtyChecks.
     scheduleResolve: function() {
       if (this.scheduled)
         return;
@@ -1274,8 +1252,6 @@
       return subIterator.getTerminatorAt(subIterator.terminators.length/2 - 1);
     },
 
-    // TODO(rafaelw): If we inserting sequences of instances we can probably
-    // avoid lots of calls to getTerminatorAt(), or cache its result.
     insertInstanceAt: function(index, fragment, instanceNodes, bound) {
       var previousTerminator = this.getTerminatorAt(index - 1);
       var terminator = fragment ? fragment.lastChild || previousTerminator :

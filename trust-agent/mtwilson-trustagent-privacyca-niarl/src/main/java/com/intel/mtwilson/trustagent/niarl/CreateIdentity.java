@@ -67,12 +67,11 @@ public class CreateIdentity implements Configurable, Runnable {
             
             // create the identity request
             boolean shortcut = true;
-            String HisIdentityLabel = "HIS Identity Key"; // TODO:  is there anything else reasonable to put in an AIK cert subject?  it's for anonymity so putting anything there at all that identifies the server would be counterproductive
+            String HisIdentityLabel = "HIS Identity Key"; 
             TpmIdentity newId = TpmModule.collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, !shortcut);
 //             TpmKey aik = new TpmKey(newId.getAikBlob());
             
-            // XXX TODO issue #497 issue #541 need to allow caller to specify a TlsPolicy; use a secure default StrictTlsPolicy if not specified; do not use NopX509HostnameVerifier it's deprecated; if user wants insecure policy use InsecureTlsPolicy
-//            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
+//            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); 
 
             TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(config.getTrustagentKeystoreFile().getAbsolutePath(), config.getTrustagentKeystorePassword());
             TlsConnection tlsConnection = new TlsConnection(new URL(config.getMtWilsonApiUrl()), tlsPolicy);

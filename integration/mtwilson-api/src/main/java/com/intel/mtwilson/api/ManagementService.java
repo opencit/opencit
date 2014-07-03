@@ -42,7 +42,6 @@ public interface ManagementService {
     
     boolean configureWhiteList(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException;
 
-    // TODO: deprecate in next release in favor of getSamlCertificates()
     X509Certificate getSamlCertificate() throws IOException, ApiException, SignatureException;
 
     Set<X509Certificate> getRootCaCertificates() throws IOException, ApiException, SignatureException;

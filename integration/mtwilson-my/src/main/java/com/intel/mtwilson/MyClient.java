@@ -30,7 +30,7 @@ public class MyClient {
                 My.configuration().getKeystoreUsername(),
                 My.configuration().getKeystorePassword(),
                 My.configuration().getMtWilsonURL(),
-                new InsecureTlsPolicy() // XXX TODO need to load the policy name, then instantiate the right one using the keystore file 
+                new InsecureTlsPolicy() 
                 );
             
         }

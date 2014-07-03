@@ -46,7 +46,6 @@ public class HostTlsPolicy extends Document {
         this.insecure = insecure;
     }
     
-    // TODO  need to use a regex for base64
     @Regex(RegexPatterns.ANY_VALUE)
     public String[] getCertificates() {
         return certificates;

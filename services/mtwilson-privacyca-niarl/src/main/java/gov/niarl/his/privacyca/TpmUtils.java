@@ -485,7 +485,7 @@ public class TpmUtils {
 	 * @return <b>True</b>, if EK certificate passes verification.
 	 */
 	public static boolean verifyTPM(X509Certificate ekCred) {
-		return true; // TODO: check the EK certificate for authenticity. Only EK certificates signed by trusted sources should be trusted.
+		return true;
 	}
 	/**
 	 * Creates a string of uppercase hexidecimal duples representing the supplied byte array. They are placed in lines containing a specified number of duples..
@@ -770,10 +770,8 @@ public class TpmUtils {
 			BadPaddingException,
 			IllegalBlockSizeException,
 			IOException {
-		//TODO: Get the following from Tcsip_MakeIdentity
 		byte [] identityBinding = "".getBytes();
 		byte [] identityKey = "".getBytes(); //must be just the modulus!!!
-		//TODO: Get the following from the NV-RAM, if desired
 		byte [] endorsementCert = "".getBytes();
 		byte [] platformCert = "".getBytes();
 		byte [] conformanceCert = "".getBytes();

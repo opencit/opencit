@@ -54,7 +54,6 @@ public class MtWilsonImportTagCertificate extends MtWilsonClient {
         log.debug("target: {}", getTarget().getUri().toString());
         Response obj = getTarget().path("rpc/mtwilson-import-tag-certificate").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(certificateId));
         if( !obj.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
-            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
             throw new WebApplicationException("Import tag certificate to Mt Wilson failed");
         }
     }

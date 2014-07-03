@@ -91,7 +91,7 @@ var rivets_watch_findx_adapter =  {
             //log.debug("rivets publish keypath: "+keypath+" value: "+value+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
         } // xxx jonathan
         if( typeof obj === 'string'  ) {
-            //log.debug("writing keypath "+keypath+" on string: "+obj+" with value: "+value); // XXX TODO do we need to do anything here?
+
         }
         else if( typeof obj === 'object') {
             obj.setx(keypath, value);            

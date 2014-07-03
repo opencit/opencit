@@ -77,8 +77,7 @@ public class RegisterUser extends AbstractCommand {
             
             
             SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
-            // XXX TODO need to comply with user's specified tls policy, or assume "trust first certificate" if no policy is configured
-            // download server's ssl certificates and add them to the keystore  and display for user to confirm later XXX TODO maybe prompt user to accept/decline them before adding, instaed of checking what was added after;  or be able to set an ssl policy here so if we already trust the root CA this should work seamlessly.
+            // download server's ssl certificates and add them to the keystore  and display for user to confirm later
             String[] tlsCertAliases0 = keystore.listTrustedSslCertificates();
             TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
             String[] tlsCertAliases = keystore.listTrustedSslCertificates();
@@ -106,7 +105,6 @@ public class RegisterUser extends AbstractCommand {
                 c.register(user);
             }
             catch(javax.net.ssl.SSLException e) {
-                // XXX TODO can this be rewritten to use TlsPolicy settings (we will have to add them to a configuration file for this purpose) 
                 if( e.getMessage().contains("hostname in certificate didn't match") && !"false".equals(System.getenv("MTWILSON_API_SSL_VERIFY_HOSTNAME")) ) {
                     System.err.println(e.getMessage());
                     System.out.print("Do you want to continue anyway? [Y/N] ");
@@ -127,14 +125,14 @@ public class RegisterUser extends AbstractCommand {
                 }
             }
             
-            // download all ca certs from the server (root ca, privacy ca, saml ca, etc)  
-            try {
-                Set<X509Certificate> cacerts = c.getRootCaCertificates();
-                for(X509Certificate cacert : cacerts) {
-                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
-                    log.debug("Added CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
+                // download all ca certs from the server (root ca, privacy ca, saml ca, etc)  
+                try {
+                    Set<X509Certificate> cacerts = c.getRootCaCertificates();
+                    for(X509Certificate cacert : cacerts) {
+                        keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); 
+                        log.debug("Added CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
+                    }
                 }
-            }
             catch(Exception e) {
                 log.error("Cannot download Mt Wilson Root CA certificate from server");
             }
@@ -142,7 +140,7 @@ public class RegisterUser extends AbstractCommand {
             try {
                 Set<X509Certificate> cacerts = c.getPrivacyCaCertificates();
                 for(X509Certificate cacert : cacerts) {
-                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); 
                     log.debug("Added Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
                 }
             }
@@ -158,7 +156,7 @@ public class RegisterUser extends AbstractCommand {
                         log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost());
                     }
                     else {
-                        keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                        keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); 
                         log.debug("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost());
                     }
                 }

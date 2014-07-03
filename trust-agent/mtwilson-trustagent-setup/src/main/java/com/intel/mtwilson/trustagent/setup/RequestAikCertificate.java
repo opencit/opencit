@@ -61,10 +61,6 @@ public class RequestAikCertificate extends AbstractSetupTask {
         
         if( config.getTrustagentKeystoreFile().exists() ) {
         keystore = new SimpleKeystore(new FileResource(config.getTrustagentKeystoreFile()), config.getTrustagentKeystorePassword());
-        // TODO:  the SimpleKeystore needs an api for checking if a certificate exists and returning null if it doesn't
-        //        exist, instead of an exception , like findCertificate,  so that we don't need to use a try/catch block
-        //        if we want to check its existence before using it, as opposed to just trying to use it and throwing
-        //        an exception if it's missing. 
         try {
             privacyCA = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
         }
@@ -121,7 +117,6 @@ public class RequestAikCertificate extends AbstractSetupTask {
     @Override
     protected void execute() throws Exception {
         /*
-        // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());

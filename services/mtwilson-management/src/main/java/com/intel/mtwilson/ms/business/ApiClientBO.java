@@ -206,7 +206,6 @@ public class ApiClientBO extends BaseBO {
             apiClientX509.setSerialNumber(x509Certificate.getSerialNumber().intValue());
             apiClientX509.setStatus(ApiClientStatus.PENDING.toString());
             apiClientX509.setComment(commentWithRequestedRoles(apiClientRequest.getRoles()));
-            // XXX SAVY TODO api client set Uuid and Locale
             //apiClientX509.setUuid_hex(null);
             //apiClientX509.setLocale(apiClientRequest.);
 
@@ -238,8 +237,6 @@ public class ApiClientBO extends BaseBO {
     }
     public ObjectMapper getUserCommentMapper() { return yaml; }
     
-    // TODO XXX This function would become the main logic in this BO during the host registration. For backward compatibility
-    // we are populating all the tables now.
     private void populateShiroUserTables(ApiClientCreateRequest apiClientRequest, X509Certificate x509Certificate) {
         log.debug("Adding new v2 user {}", x509Certificate.getSubjectX500Principal().getName());
         try(LoginDAO loginDAO = MyJdbi.authz()) {
@@ -269,7 +266,6 @@ public class ApiClientBO extends BaseBO {
                 userLoginCertificate.setSha256Hash(getFingerPrint(x509Certificate));//Sha256Digest.digestOf(apiClientRequest.getCertificate()).toByteArray());
                 userLoginCertificate.setStatus(Status.PENDING);
                 userLoginCertificate.setUserId(user.getId());
-                // TODO: there is another form we can use where we pass the complete object; that would be less repetitive
                 loginDAO.insertUserLoginCertificate(userLoginCertificate.getId(), userLoginCertificate.getUserId(), userLoginCertificate.getCertificate(), 
                         userLoginCertificate.getSha1Hash(), userLoginCertificate.getSha256Hash(), userLoginCertificate.getExpires(), 
                         userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
@@ -297,8 +293,6 @@ public class ApiClientBO extends BaseBO {
 
     }
 
-    // TODO XXX This function would become the main logic in this BO during the user registration. For backward compatibility
-    // we are populating all the tables now.
     private void updateShiroUserTables(ApiClientUpdateRequest apiClientUpdateRequest, String userName) {
         log.debug("Updating v2 user tables for {}", userName);
         try(LoginDAO loginDAO = MyJdbi.authz()) {
@@ -504,7 +498,6 @@ public class ApiClientBO extends BaseBO {
         }
         */
         // set the roles array from new user login certificate tables
-        // TODO:  instead of using LoginDAO here,  use the UserLoginCertificateRepository or the RoleRepository
         try(LoginDAO dao = MyJdbi.authz()) {
             log.debug("searching for user login certificate with sha1 {}", Sha1Digest.digestOf(info.certificate).toHexString());
             UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateBySha1(Sha1Digest.digestOf(info.certificate).toByteArray());

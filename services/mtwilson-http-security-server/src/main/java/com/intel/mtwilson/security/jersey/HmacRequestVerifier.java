@@ -147,7 +147,7 @@ public class HmacRequestVerifier {
                         throw new IllegalArgumentException("Date is not in ISO8601 format: "+signatureBlock.timestamp, e);
                 }
                 
-                return new User(username, new Role[] { Role.Attestation, Role.Whitelist }, username,  Md5Digest.valueOf(Base64.decodeBase64(signature))); // XXX default permissions for secretkey clients... TODO should create a role table for secret key clients and manage that like rsa clients... 
+                return new User(username, new Role[] { Role.Attestation, Role.Whitelist }, username,  Md5Digest.valueOf(Base64.decodeBase64(signature))); 
             }
     /*
         }

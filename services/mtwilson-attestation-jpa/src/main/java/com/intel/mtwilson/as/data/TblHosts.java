@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblHosts.findAll", query = "SELECT t FROM TblHosts t"),
     @NamedQuery(name = "TblHosts.findById", query = "SELECT t FROM TblHosts t WHERE t.id = :id"),
     @NamedQuery(name = "TblHosts.findByName", query = "SELECT t FROM TblHosts t WHERE t.name = :name"),
-    @NamedQuery(name = "TblHosts.findByAikSha1", query = "SELECT t FROM TblHosts t WHERE t.aikSha1 = :aikSha1"), // XXX TODO NEED TO ADD A COLUMN TO DATABASE, AND POPULATE IT WITH SHA1(AIK) WHENEVER WE UPDATE THE AIK ITSELF
+    @NamedQuery(name = "TblHosts.findByAikSha1", query = "SELECT t FROM TblHosts t WHERE t.aikSha1 = :aikSha1"), 
     @NamedQuery(name = "TblHosts.findByAikPublicKeySha1", query = "SELECT t FROM TblHosts t WHERE t.aikPublicKeySha1 = :aikPublicKeySha1"),
     @NamedQuery(name = "TblHosts.findByIPAddress", query = "SELECT t FROM TblHosts t WHERE t.iPAddress = :iPAddress"),
     @NamedQuery(name = "TblHosts.findByPort", query = "SELECT t FROM TblHosts t WHERE t.port = :port"),
@@ -188,13 +188,6 @@ public class TblHosts implements Serializable {
         this.iPAddress = iPAddress;
     }
 
-    /**
-     * XXX TODO the port field is only used for Linux hosts running Trust Agent
-     * and needs to be removed;  all agent connection information should be
-     * stored in the "AddOn_Connection_String" in a URI format. For Linux hosts
-     * with Trust Agent that format might be "intel:https://hostname:9999"
-     * @return 
-     */
     public int getPort() {
         return port;
     }
@@ -236,7 +229,6 @@ public class TblHosts implements Serializable {
 
     public void setAddOnConnectionInfo(String addOnConnectionInfo) {
         this.addOnConnectionInfo_plainText = addOnConnectionInfo;
-        // TODO  encrypt it and set addOnConnectionInfo_cipherText
         if( addOnConnectionInfo == null ) { addOnConnectionInfo_cipherText = null; }
         else {
              addOnConnectionInfo_cipherText = ASDataCipher.cipher.encryptString(addOnConnectionInfo_plainText);
@@ -412,7 +404,6 @@ public class TblHosts implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof TblHosts)) {
             return false;
         }

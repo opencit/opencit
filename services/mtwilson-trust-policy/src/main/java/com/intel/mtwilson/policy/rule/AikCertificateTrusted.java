@@ -51,8 +51,6 @@ public class AikCertificateTrusted extends BaseRule {
                         log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
                         pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate - if it's not valid an exception is thrown and is caught and suppressed below
                         hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
-                        // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
-                        // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
                         validCaSignature = true;
                     }
                 } catch (Exception e) {

@@ -31,8 +31,6 @@ public class MyJdbi {
     private static Logger log = LoggerFactory.getLogger(MyJdbi.class);
   
   /*
-   * XXX TODO  calling code must be sure to close the dbi connection when done!!
-   * 
   public static <T> T openDAO(T clazz) {
     DBI dbi = new DBI(getDataSource());
     T dao = dbi.open(clazz.getClass());

@@ -19,8 +19,6 @@ import javax.ws.rs.core.MediaType;
  */
 public class Util {
 
-    // XXX TODO  jersey already has this but doesn't appear to be available from the context of an Exception Mapper 
-    // so just basic implementation right now for json, xml, yaml.  use first one we know about.
     public static MediaType getAcceptableMediaType( List<MediaType> acceptableMediaTypes) {
         if( acceptableMediaTypes.isEmpty() ) { return MediaType.WILDCARD_TYPE; }
         for(MediaType type : acceptableMediaTypes) {

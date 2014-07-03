@@ -109,12 +109,9 @@ bootstrap_ms_approve_user() {
     echo_failure "Missing mtwilson command line tool"
     return 1
   fi
-  ## XXX technically correct:
   #local encoded_key_alias=`echo "${key_alias}" | mtwilson api EncodeUsername -`
-  # XXX there are too many places where filename is just alias and not encoded, so if it exists we just use it:
   if [ -f "${key_dir}/${key_alias}" ]; then encoded_key_alias="${key_alias}"; else encoded_key_alias=`echo "${key_alias}" | call_setupcommand EncodeUsername -`; fi
 
-  # XXX TODO: unsafe to pass the password on command line, but keytool does not support getting it from environment. maybe add a command to RsaUtil/RsaCommmand in api client for exporting a certificate to replace the keytool here?
   $keytool -export -alias ${key_alias} -keystore ${key_dir}/${encoded_key_alias}.jks  -storepass ${key_password} -file ${key_dir}/${encoded_key_alias}.crt
   local datestr=`date +%Y-%m-%d.%H%M`
   local cert_id=`shasum -a 256 -b ${key_dir}/${encoded_key_alias}.crt | awk '{ print $1 }'`

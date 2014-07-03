@@ -41,7 +41,6 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     @RequiresPermissions("tag_certificates:search") 
     public CertificateCollection search(CertificateFilterCriteria criteria) {
         CertificateCollection objCollection = new CertificateCollection();
-        // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
         
         try(JooqContainer jc = TagJdbi.jooq()) {
             DSLContext jooq = jc.getDslContext();

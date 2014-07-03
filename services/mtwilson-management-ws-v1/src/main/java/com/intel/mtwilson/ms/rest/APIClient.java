@@ -100,12 +100,12 @@ public class APIClient {
      * @return an instance of java.lang.String
      */
     @Path("/availableRoles")
-    @RequiresPermissions("users:search")   // TODO:  this is a separate resource, should  be roles:search  and for companion api's the actions retrieve,create,delete,store
+    @RequiresPermissions("users:search")   
     //@RolesAllowed({"Security"})
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Role[] listAvailableRoles() {
-        return new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement }; // XXX intentionally omitting the cache role, because we are removing AH from the design, and anyway the cache needs a "real" permission to read whatever it is caching.
+        return new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement }; 
     }
     
     
@@ -131,7 +131,7 @@ public class APIClient {
             @QueryParam("serialNumberEqualTo") String serialNumberEqualTo,
             @QueryParam("statusEqualTo") String statusEqualTo
             ) {
-        // first, construct an ApiClientSearchCriteria object. XXX would be nice if we had an automated mapper from query strings to objects like we do from json to objects.
+        // first, construct an ApiClientSearchCriteria object. 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         ApiClientSearchCriteria criteria = new ApiClientSearchCriteria();
         try {
@@ -220,7 +220,6 @@ public class APIClient {
         byte[] fingerprint = fromHex(fingerprintHex);
         ApiClientBO bo = new ApiClientBO();
         ApiClientInfo info = bo.find(fingerprint);
-        // TODO implement this... maybe by setting enabled=0 and status=Deleted ?
         ApiClientUpdateRequest apiClientRequest = new ApiClientUpdateRequest();
         apiClientRequest.fingerprint = fingerprint;
         apiClientRequest.enabled = false;

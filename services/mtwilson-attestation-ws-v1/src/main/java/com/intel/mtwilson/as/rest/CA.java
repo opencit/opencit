@@ -39,7 +39,6 @@ public class CA {
     public CA() {
         /*
         try {
-            // XXX disabled this while working on installation because it's throwing an error // Exception Description: Deployment of PersistenceUnit [ASDataPU] failed. Close all factories for this PersistenceUnit.
             ca = new TrustAgentCertificateAuthority();
         }
         catch(IOException e) {
@@ -59,11 +58,6 @@ public class CA {
     /**
      * Sign a Trust Agent's SSL Certificate. 
      * 
-     * XXX we are taking a shortcut and using a self-signed certificate as the CSR instead
-     * of PKCS#10 because there doesn't seem to be a convenient Java package to work with
-     * PKCS#10 files, and all the information we need is already encoded in an SSL certificate - 
-     * requestor's public key, algorithm, etc. all signed by requestor's private key.
-     * 
      * Sample request:
      * POST http://localhost:8080/AttestationService/resources/ca/signTrustAgentSsl
      * Authorization: HMAC ... hash of self-signed certificate, nonce, and current time using CA password, so server can verify...
@@ -75,8 +69,6 @@ public class CA {
      * See also http://tools.ietf.org/html/rfc2986 (PKCS#10)
      * 
      * @return the CA-signed X509 Certificate with HTTP Status 200 OK on success, or other HTTP Status codes on error (403 if CA signing password is wrong, 400 if request does not include a self-signed cert)
-     * 
-     * TODO: change this from PermitAll to permit only requests authenticated using our HMAC scheme (proving user knows CA password, without actually sending the password in the request...);  or require user to use an Api Client with RSA private key in order to make this request. which means sysetm admin needs to copy his .jks file to each host when installing trust agent...
      */
     //@PermitAll  // or should we require the "Security" role? Or a new "CA" role??  and do we need an annotation to indicate that authentication should be done with HMAC ???   so we could maintain an hmac users table too, and define a "ca" user that way admin can easily set the password for this via website
     @POST

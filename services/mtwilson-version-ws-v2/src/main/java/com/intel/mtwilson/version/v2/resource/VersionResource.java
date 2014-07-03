@@ -33,7 +33,7 @@ public class VersionResource extends AbstractResource<Version,VersionCollection,
 
     @Override
     protected Version retrieve(String id) {
-        if( !UUID.isValid(id) ) { return null; } // XXX TODO or a localizable input validation error via throw exception (if we don't validate here, UUID.valueOf() will throw IllegalArgumentException if it's not a valid uuid)
+        if( !UUID.isValid(id) ) { return null; }
         Version version = new Version();
         return version;
     }

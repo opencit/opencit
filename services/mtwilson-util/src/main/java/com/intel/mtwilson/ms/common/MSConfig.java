@@ -28,14 +28,14 @@ public class MSConfig  {
     public Properties getDefaults() {
         Properties defaults = new Properties();
 
-//        defaults.setProperty("mtwilson.saml.certificate", "saml.cer");// XXX TODO remove this; deprecated in mtwilson-1.1  in favor of mtwilson.saml.certificate.file (PEM format)
+//        defaults.setProperty("mtwilson.saml.certificate", "saml.cer");
         
         defaults.setProperty("mtwilson.ms.biosPCRs", "0;17");
         defaults.setProperty("mtwilson.ms.vmmPCRs", "18;19;20");
-//        defaults.setProperty("mtwilson.ms.portalDBConnectionString", "jdbc:mysql://127.0.0.1:3306/cloudportal"); // XXX TODO deprecated;   cloudportal database has been dropped as of 1.0-RC2
+//        defaults.setProperty("mtwilson.ms.portalDBConnectionString", "jdbc:mysql://127.0.0.1:3306/cloudportal"); 
 //        defaults.setProperty("mtwilson.ms.portalDBUserName", "root");
 //        defaults.setProperty("mtwilson.ms.portalDBPassword", "password");        
-        defaults.setProperty("mtwilson.ms.keystore.dir", "/var/opt/intel/management-service/users"); // XXX TODO make a linux default and windows default, utiilizing some centralized configuration functions suh as getDataDirectory() which would already provide an os-specific directory that has already been created (or with a function to create it)
+        defaults.setProperty("mtwilson.ms.keystore.dir", "/var/opt/intel/management-service/users"); 
 
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
         defaults.setProperty("mtwilson.api.keystore", "/etc/intel/cloudsecurity/mw.jks");
@@ -49,7 +49,6 @@ public class MSConfig  {
         //defaults.setProperty("mtwilson.api.trust", "127.0.0.1"); // this setting is disabled because it violates "secure by default"
         // mtwilson.privacyca.certificate.list.file=PrivacyCA.list.pem
         // default props used by CA rest service
-        // XXX-TODO generate the ssl file name based on ip address during install
         defaults.setProperty("mtwilson.tls.certificate.file", "/etc/intel/cloudsecurity/ssl.crt.pem");
         defaults.setProperty("mtwilson.privacyca.cert.file", "/etc/intel/cloudsecurity/PrivacyCA.pem");
         defaults.setProperty("mtwilson.rootca.certficate.file", "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); 

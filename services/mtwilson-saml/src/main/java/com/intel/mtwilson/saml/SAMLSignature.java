@@ -69,10 +69,10 @@ public class SAMLSignature {
 //            InputStream keystoreInputStream = keystoreResource.getInputStream(); // this obtains it from the database (or whatever resource is provided)
 //            keyStore = KeyStoreUtil.getKeyStore(SAMLSignature.class.getResourceAsStream(config.getString ("keystore")),config.getString ("storepass"));
         try (FileInputStream keystoreInputStream = new FileInputStream(keystoreFile)) {
-            keyStore = getKeyStore(keystoreInputStream, saml.getSamlKeystorePassword()); /*configuration.getString("saml.keystore.password"*//*,System.getenv("SAMLPASSWORD")*/ // XXX bug #733 add support for SAMLPASSWORD environment variable... but this should be removed, it's better to encrypt the entire configuration file with "mtwilson setup ImportConfig|ExportConfig"
+            keyStore = getKeyStore(keystoreInputStream, saml.getSamlKeystorePassword()); /*configuration.getString("saml.keystore.password"*//*,System.getenv("SAMLPASSWORD")*/ 
         }
         KeyStore.PrivateKeyEntry entry = (KeyStore.PrivateKeyEntry) keyStore.getEntry(saml.getSamlKeyAlias(), //  /*configuration.getString("saml.key.alias"),*/
-                new KeyStore.PasswordProtection(saml.getSamlKeyPassword().toCharArray()));    //configuration.getString("saml.key.password"/*, System.getenv("SAMLPASSWORD")*/).toCharArray()));// XXX bug #733 add support for SAMLPASSWORD environment variable... but this should be removed, it's better to encrypt the entire configuration file with "mtwilson setup ImportConfig|ExportConfig"
+                new KeyStore.PasswordProtection(saml.getSamlKeyPassword().toCharArray()));    //configuration.getString("saml.key.password"/*, System.getenv("SAMLPASSWORD")*/).toCharArray()));
         keyPair = new KeyPair(entry.getCertificate().getPublicKey(),
                 entry.getPrivateKey());
 

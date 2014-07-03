@@ -18,7 +18,6 @@ import org.apache.http.HttpRequest;
 
 /**
  * This class adds an http Authorization header using the "MtWilson" custom scheme.
- * TODO move this to an apache http-client specific utility project
  * 
  * @since 0.5.2
  * @author jbuhacoff

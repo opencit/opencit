@@ -35,12 +35,10 @@ public class ConfigureDatabase extends LocalSetupTask {
         return databaseDriver;
     }
 
-    // XXX TODO INSECURE  need to protect this with apache shiro so it will require administrator permission to view
     public String getDatabaseUsername() {
         return databaseUsername;
     }
 
-    // XXX TODO INSECURE  need to protect this with apache shiro so it will require administrator permission to view
     public String getDatabasePassword() {
         return databasePassword;
     }
@@ -65,7 +63,7 @@ public class ConfigureDatabase extends LocalSetupTask {
             configuration("Database URL not configured");
         }
         else {
-            log.debug("Database URL: {}", databaseUrl); // XXX TODO INSECURE do not print this in the log after things are worknig
+            log.debug("Database URL: {}", databaseUrl);
         }
         getConfiguration().setString("mtwilson.db.host", databaseHost);
         getConfiguration().setString("mtwilson.db.port", databasePort);
@@ -79,7 +77,7 @@ public class ConfigureDatabase extends LocalSetupTask {
     protected void validate() throws Exception {
         try (Connection c = My.jdbc().connection()) {
             try (Statement s = c.createStatement()) {
-                s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
+                s.executeQuery("SELECT 1"); 
             } catch (Exception ex) {
                 log.error("Error creating select statement",ex);
                 validation("Error creating select statement");

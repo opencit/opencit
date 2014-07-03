@@ -271,8 +271,6 @@ public class MyConfiguration {
 
 
         // seventh priority are properties defined on the classpath (for example defaults provided with the application, or placed in the web server container)
-        // XXX should these be reprioritized to be after system properties and before the list of files? that way an application can be packaged with specific
-        // settings that cannot be overridden... but it's easy enough to extract from the jar so that's not likey to stop anyone
         String propertiesFilename = "mtwilson.properties";
         InputStream in = getClass().getResourceAsStream(
                 "/" + propertiesFilename);
@@ -512,10 +510,10 @@ public class MyConfiguration {
         }
         if (conf.containsKey("mountwilson.as.db.protocol")) {
             conf.getString("mountwilson.as.db.protocol", "postgresql");
-        } // XXX deprecate old properties in a future release
+        } 
         if (conf.containsKey("mountwilson.ms.db.protocol")) {
             conf.getString("mountwilson.ms.db.protocol", "postgresql");
-        } // XXX deprecate old properties in a future release
+        } 
         if (conf.containsKey("mtwilson.db.driver")) {
             String driver = conf.getString("mtwilson.db.driver", "");
             if (driver.equals("org.postgresql.Driver")) {
@@ -543,10 +541,10 @@ public class MyConfiguration {
         }
         if (conf.containsKey("mountwilson.as.db.driver")) {
             conf.getString("mountwilson.as.db.driver", "org.postgresql.Driver");
-        } // XXX deprecate old properties in a future release
+        } 
         if (conf.containsKey("mountwilson.ms.db.driver")) {
             conf.getString("mountwilson.ms.db.driver", "org.postgresql.Driver");
-        } // XXX deprecate old properties in a future release
+        } 
         if (conf.containsKey("mtwilson.db.protocol")) {
             String protocol = conf.getString("mtwilson.db.protocol", "");
             if (protocol.equals("postgresql")) {
@@ -574,10 +572,10 @@ public class MyConfiguration {
         }
         if (conf.containsKey("mountwilson.as.db.port")) {
             conf.getString("mountwilson.as.db.port", "5432");
-        } // XXX deprecate old properties in a future release
+        } 
         if (conf.containsKey("mountwilson.ms.db.port")) {
             conf.getString("mountwilson.ms.db.port", "5432");
-        } // XXX deprecate old properties in a future release
+        } 
         if (conf.containsKey("mtwilson.db.protocol")) {
             String protocol = conf.getString("mtwilson.db.protocol", "");
             if (protocol.equals("postgresql")) {
@@ -608,7 +606,7 @@ public class MyConfiguration {
     }
 
     public String getDatabasePassword() {
-        return conf.getString("mtwilson.db.password", conf.getString("PGPASSWORD", "")); // removing default in mtwilson 1.2;  was "password";   // bug #733 XXX the "PGPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("mtwilson.db.password", conf.getString("PGPASSWORD", "")); // removing default in mtwilson 1.2;  was "password";   // bug #733 
     }
 
     public String getDatabaseSchema() {
@@ -684,7 +682,7 @@ public class MyConfiguration {
     }
 
     public String getSamlKeystorePassword() {
-        return conf.getString("saml.key.password"); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("saml.key.password"); // bug #733 
     }
 
     ///////////////////////// tls policy  //////////////////////////////////
@@ -692,7 +690,6 @@ public class MyConfiguration {
         return conf.getString("mtwilson.default.tls.policy.name", "TRUST_CA_VERIFY_HOSTNAME"); // issue #871 default should be secure;  customer can explicitly set to TRUST_FIRST_CERTIFICATE if that's what they want
     }
 
-    // XXX TODO   if using glassfish or tomcat need to point to where they keep their keystores.... or configure them to use this one (but only if WE install them... not if we deploy mtwilson onto an existing web server which already has its keystore)
     public File getTlsKeystoreFile() {
         return new File(conf.getString("mtwilson.tls.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-tls.jks"));
     }
@@ -705,7 +702,6 @@ public class MyConfiguration {
         return conf.getBoolean("mtwilson.as.autoUpdateHost", false);
     }
 
-    // TODO:   there is a TagConfiguration class in mtwilson-tag-ws-v2 ; that one should be used instead of the following methods.
     // asset tagging html5 resources (used by the reference implementation)
     public String getAssetTagHtml5Dir() {
         return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
@@ -772,7 +768,6 @@ public class MyConfiguration {
      * @return /opt/mtwilson on Linux or value of MTWILSON_HOME
      */
     public String getMtWilsonHome() {
-        // XXX TODO SETUP use MyFilesystem
         String mtwilsonHome = System.getenv("MTWILSON_HOME");
         log.debug("MTWILSON_HOME={}", mtwilsonHome);
         if (mtwilsonHome == null) {
@@ -796,7 +791,6 @@ public class MyConfiguration {
      * @return /etc/mtwilson on Linux or value of MTWILSON_CONF
      */
     public String getMtWilsonConf() {
-        // XXX TODO SETUP use MyFilesystem
         String mtwilsonConf = System.getenv("MTWILSON_CONF");
         log.debug("MTWILSON_CONF={}", mtwilsonConf);
         if (mtwilsonConf == null) {
@@ -821,7 +815,6 @@ public class MyConfiguration {
      * @return /opt/mtwilson/bin on Linux or MTWILSON_HOME/bin
      */
     public String getMtWilsonBin() {
-        // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "bin";
     }
 
@@ -830,7 +823,6 @@ public class MyConfiguration {
      * @return /opt/mtwilson/env.d on Linux or MTWILSON_HOME/env.d
      */
     public String getMtWilsonEnv() {
-        // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "env.d";
     }
 
@@ -856,7 +848,6 @@ public class MyConfiguration {
      * @return /opt/mtwilson/util.d on Linux or MTWILSON_HOME/util.d
      */
     public String getMtWilsonUtil() {
-        // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "util.d";
     }
 
@@ -865,7 +856,6 @@ public class MyConfiguration {
      * @return /opt/mtwilson/resource on Linux or MTWILSON_HOME/resource
      */
     public String getMtWilsonResource() {
-        // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "resource";
     }
 
@@ -874,25 +864,14 @@ public class MyConfiguration {
      * @return /opt/mtwilson/license.d on Linux or MTWILSON_HOME/license.d
      */
     public String getMtWilsonLicense() {
-        // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "license.d";
     }
 
     ///////////////////////// certificate authority //////////////////////////////////
-    // XXX TODO this assumes the CA keystore is on disk... it might be in
-    // the database, which means this should really be encapsulated into a
-    // CA plugin that declares a repository interface so we can swap out
-    // the storage mechanism as needed
-    // XXX TODO INSECURE need to specify the encryption and integrity 
-    // algorithms IAW our minimum requirements
-    // another alternative is to use a zip/gzip file that uses our
-    // encryption and integrity format over the entire zip/gzip file ,
-    // so it simply contains one key or cert per file inside it
     public File getCaKeystoreFile() {
         return new File(getMtWilsonConf() + File.separator + "cakey.pem");
     }
-    // XXX TODO INSECURE needs to be integrity protected 
-
+    
     public File getCaCertsFile() {
         return new File(getMtWilsonConf() + File.separator + "cacerts.pem");
     }

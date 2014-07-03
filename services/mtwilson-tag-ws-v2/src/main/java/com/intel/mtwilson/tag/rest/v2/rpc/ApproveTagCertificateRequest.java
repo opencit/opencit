@@ -81,7 +81,6 @@ public class ApproveTagCertificateRequest implements Runnable{
                 certDao.insert(certificate.getId(), certificate.getCertificate(), certificate.getSha1().toHexString(), certificate.getSha256().toHexString(), 
                         certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
                 
-                // XXX TODO need to validate tags in the input certificate... that we have those tags defined & that values are known, or maybe automatically add new values to our list o fpre-defined values if they are not alraedy there (which means we need to maybe mark values with their source so we can tell if they are still in use ...)
                 //certRequestdao.updateApproved(certificateRequestId.toString(), newCertId.toString()); // automatically sets status to 'Done' in db
                 certRequestdao.updateStatus(certificateRequestId, "Done");
             } else {

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * XXX TODO rewrite and move to cpg-console
  * @author dsmagadX
  */
 public class CommandUtil {
