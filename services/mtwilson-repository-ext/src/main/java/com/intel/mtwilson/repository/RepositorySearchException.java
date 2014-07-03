@@ -9,7 +9,8 @@ package com.intel.mtwilson.repository;
  * @author ssbangal
  */
 public class RepositorySearchException extends RepositoryException {
-
+    private FilterCriteria query = null;
+    
     public RepositorySearchException() {
         super();
     }
@@ -22,8 +23,19 @@ public class RepositorySearchException extends RepositoryException {
         super(cause);
     }
 
+    public RepositorySearchException(Throwable cause, FilterCriteria query) {
+        super(cause);
+        this.query = query;
+    }
+    
     public RepositorySearchException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public FilterCriteria getQuery() {
+        return query;
+    }
+    
+    
 
 }

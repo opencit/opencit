@@ -8,31 +8,32 @@ package com.intel.mtwilson.repository;
  *
  * @author ssbangal
  */
-public class RepositoryRetrieveException extends RepositoryException {
+public class RepositoryDeleteException extends RepositoryException {
     private Locator locator;
-    
-    public RepositoryRetrieveException() {
+
+    public RepositoryDeleteException() {
         super();
     }
 
-    public RepositoryRetrieveException(String message) {
+    public RepositoryDeleteException(String message) {
         super(message);
     }
 
-    public RepositoryRetrieveException(Throwable cause) {
+    public RepositoryDeleteException(Throwable cause) {
         super(cause);
     }
 
-    public RepositoryRetrieveException(Throwable cause, Locator locator) {
+    public RepositoryDeleteException(Throwable cause, Locator locator) {
         super(cause);
+        this.locator = locator;
     }
     
-    public RepositoryRetrieveException(String message, Throwable cause) {
+    public RepositoryDeleteException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public Locator getLocator() {
         return locator;
     }
-    
+   
 }

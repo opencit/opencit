@@ -12,6 +12,14 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreConflictException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateFilterCriteria;
@@ -68,7 +76,8 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
             }
         } catch (Exception ex) {
             log.error("Error during user search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            //throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("User:Search - Returning back {} of results.", userCollection.getUsers().size());                
         return userCollection;
@@ -86,7 +95,8 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
             }
         } catch (Exception ex) {
             log.error("Error during user search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            //throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -95,6 +105,8 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
     @RequiresPermissions("users:store")        
     public void store(User item) {
         log.debug("User:Create - Got request to update user with id {}.", item.getId().toString());        
+        UserLocator locator = new UserLocator(); // will be used if we need to throw an exception
+        locator.id = item.getId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             User user = loginDAO.findUserById(item.getId());
             if (user != null) {
@@ -105,13 +117,14 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 log.debug("User:Store - Updated the user {} successfully.", user.getUsername());
             } else {
                 log.error("User:Store - User {} will not be updated since it does not exist.");
-                throw new WebApplicationException(Response.Status.NOT_FOUND);
-            }            
-        } catch (WebApplicationException wex) {
-            throw wex;
+                //throw new WebApplicationException(Response.Status.NOT_FOUND);
+                throw new RepositoryStoreConflictException(locator);
+            }
+         } catch(RepositoryException e) { throw e; 
         } catch (Exception ex) {
             log.error("Error during user update.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
+            //throw new ASException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryStoreException(ex, locator);
         }
         
     }
@@ -119,6 +132,8 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
     @Override
     public void create(User item) {
         log.debug("User:Create - Got request to create a new user {}.", item.getUsername());
+        UserLocator locator = new UserLocator(); // will be used if we need to throw an exception
+        locator.id = item.getId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             User user = loginDAO.findUserByName(item.getUsername());
             if (user == null) {
@@ -133,13 +148,15 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 log.debug("User:Create - Created the user {} successfully.", item.getUsername());
             } else {
                 log.error("User:Create - User {} will not be created since a duplicate user already exists.", item.getUsername());
-                throw new WebApplicationException(Response.Status.CONFLICT);
+                //throw new WebApplicationException(Response.Status.CONFLICT);
+                throw new RepositoryCreateConflictException(locator);
             }            
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException e) {
+            throw e;
         } catch (Exception ex) {
             log.error("Error during user creation.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            //throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -171,7 +188,8 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
             }
         } catch (Exception ex) {
             log.error("Error during user deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_DELETION_ERROR, ex.getClass().getSimpleName());
+            //throw new ASException(ErrorCode.MS_API_USER_DELETION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
     
@@ -185,9 +203,12 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch(RepositoryException e) {
+            throw e;
         } catch (Exception ex) {
             log.error("Error during User deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            //throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryDeleteException(ex);
         }
     }
     
