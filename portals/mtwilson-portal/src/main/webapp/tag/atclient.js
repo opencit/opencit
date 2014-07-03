@@ -1285,7 +1285,7 @@ mtwilson.atag = mtwilson.atag || {};
         // we form parameters like nameEqualTo=argument  or nameContains=argument
         var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
 	if ($('certificate-search-valid').value.trim() == '') {
-        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'revoked'];
 	}
         var i;
         for (i = 0; i < fields.length; i++) {
