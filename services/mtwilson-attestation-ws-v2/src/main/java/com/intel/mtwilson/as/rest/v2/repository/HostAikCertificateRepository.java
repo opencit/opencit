@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
@@ -17,8 +16,6 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -26,11 +23,12 @@ import org.slf4j.LoggerFactory;
  */
 public class HostAikCertificateRepository implements DocumentRepository<HostAikCertificate, HostAikCertificateCollection, HostAikCertificateFilterCriteria, HostAikCertificateLocator> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAikCertificateRepository.class);
 
     @Override
     @RequiresPermissions("host_aik_certificates:search")    
     public HostAikCertificateCollection search(HostAikCertificateFilterCriteria criteria) {
+        log.debug("AikCertificate:Search - Got request to search for the Host Aik Certificates.");        
         HostAikCertificateCollection objCollection = new HostAikCertificateCollection();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -46,6 +44,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
             log.error("Error during search for hosts.", ex);
             throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("AikCertificate:Search - Returning back {} of results.", objCollection.getAikCertificates().size());                
         return objCollection;
     }
 
@@ -53,6 +52,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
     @RequiresPermissions("host_aik_certificates:retrieve")    
     public HostAikCertificate retrieve(HostAikCertificateLocator locator) {
         if (locator == null || locator.hostUuid == null) { return null; }
+        log.debug("AikCertificate:Retrieve - Got request to retrieve Aik certificate for host with id {}.", locator.hostUuid);                
         String id = locator.hostUuid.toString();
         
         try {
@@ -80,6 +80,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
     @Override
     @RequiresPermissions("host_aik_certificates:create")    
     public void create(HostAikCertificate item) {
+        log.debug("AikCertificate:Create - Got request to create a new Aik certificate.");
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             TblHosts obj = jpaController.findHostByUuid(item.getHostUuid());

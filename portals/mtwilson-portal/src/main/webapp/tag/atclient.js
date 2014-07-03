@@ -278,7 +278,7 @@ mtwilson.atag = mtwilson.atag || {};
             default:
                 break;
         }
-        $('notifications').update(notice.text);
+        $('notifications').update(getHTMLEscapedMessage(notice.text));
         $('notifications').show();
         $('notifications').setOpacity(1.0);
 
@@ -298,19 +298,19 @@ mtwilson.atag = mtwilson.atag || {};
         log.debug("httpPostSuccess: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags_json':
-                mtwilson.atag.notify({text: 'Created tag',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_tag_success"),clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', value: ''});
                 tag_create_form_removeValue();
                 mtwilson.atag.searchTags('tag-search-form');
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Created RDF triple',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_rdf_triple_success"),clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections_json':
                 console.log("------------ In the selections case -----------");
                 console.log(event.memo.message);
-                mtwilson.atag.notify({text: 'Created selection',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_selection_success"),clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 var i = pres_selections.input.selection.length;
                 console.log(i);
@@ -339,7 +339,7 @@ mtwilson.atag = mtwilson.atag || {};
 
                     break;
                 }
-                mtwilson.atag.notify({text: 'Created certificate request',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_certificate_request_success"),clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
                 
                 log.debug("automatically setting current time for follow-up search");
@@ -349,28 +349,28 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.searchCertificates($('searchCertButton'))
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Created certificate',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_certificate_success"),clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'provision-certificate':
                 if(event.memo.resource.func == 'bulk_provisioning') {
                     updateHostProvisioningStatus(event.memo.content.host, 'Deployed successfully');
                     break;
                 }
-                mtwilson.atag.notify({text: 'Provisioned certificate',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.provision_certificate_success"),clearAfter: 'AUTO', status: 'INFO'});
                 $('certificate-provision-host').clear();
                 $('certificate-provision-form').hide();
                 break;
             case 'deploy-certificate':
-                mtwilson.atag.notify({text: 'Deployed certificate',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.deploy_certificate_success"),clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'revoke-certificate':
-                mtwilson.atag.notify({text: 'Revoked certificate',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.revoke_certificate_success"),clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Created configuration',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_configuration_success"),clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Created file',clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_file_success"),clearAfter: 'AUTO', status: 'INFO'});
                 break;
             default:
                 log.debug("No handler for successful HTTP POST of " + event.memo.resource.name);
@@ -393,6 +393,7 @@ mtwilson.atag = mtwilson.atag || {};
          //            $('tag-create-values').value = '';
          }
          */
+        i18nInit();
     });
     
     document.observe("ajax:httpPostFailure", function(event) {
@@ -401,56 +402,57 @@ mtwilson.atag = mtwilson.atag || {};
         if( event.memo.unauthorized ) { link = " <a href='../login.htm' target='_top'>login</a>"; }
         switch (event.memo.resource.name) {
             case 'tags_json':
-                mtwilson.atag.notify({text: 'Create tag failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_tag_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Create RDF triple failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_rdf_triple_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'selections_json':
-                mtwilson.atag.notify({text: 'Create selection failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_selection_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
                 if(event.memo.resource.func == 'bulk_provisioning') {
                     updateHostProvisioningStatus(event.memo.resource.app, 'Failed');
                     break;
                 }
-                mtwilson.atag.notify({text: 'Create certificate request failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_certificate_request_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Create certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_certificate_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'provision-certificate':
                 if(event.memo.resource.func == 'bulk_provisioning') {
                     updateHostProvisioningStatus(event.memo.resource.app, 'Failed');
                     break;
                 }
-                mtwilson.atag.notify({text: 'Provision certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.provision_certificate_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'deploy-certificate':
-                mtwilson.atag.notify({text: 'Deploy certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.deploy_certificate_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'revoke-certificate':
-                mtwilson.atag.notify({text: 'Revoke certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.revoke_certificate_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Create configuration failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_configuration_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Create file failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.create_file_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             default:
                 log.debug("No handler for failure HTTP POST of " + event.memo.resource.name);
-                mtwilson.atag.notify({text: 'Failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
         }
         ;
+        i18nInit();
     });
 
     document.observe("ajax:httpDeleteSuccess", function(event) {
         log.debug("httpDeleteSuccess: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Deleted tag', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_tag_success"), clearAfter: 'AUTO', status: 'INFO'});
                 var i;
                 for (i = data.tags.length - 1; i >= 0; i--) {
                     if (('id' in data.tags[i]) && data.tags[i].id == event.memo.content.id) {
@@ -463,7 +465,7 @@ mtwilson.atag = mtwilson.atag || {};
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Deleted RDF triple', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_rdf_triple_success"), clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("delete rdf triples after notify: "+event.memo.content.uuid);
                 var i;
                 for (i = data.rdfTriples.length - 1; i >= 0; i--) {
@@ -477,7 +479,7 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
             case 'selections':
 //                log.debug("deleted selection notification...");
-                mtwilson.atag.notify({text: 'Deleted selection', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_selection_success"), clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("deleted selection input merge...");
                 var i;
                 for (i = data.selections.length - 1; i >= 0; i--) {
@@ -491,7 +493,7 @@ mtwilson.atag = mtwilson.atag || {};
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Deleted certificate request', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_certificate_request_success"), clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("delete certificate requests after notify: "+event.memo.content.uuid);
                 var i;
                 for (i = data.certificateRequests.length - 1; i >= 0; i--) {
@@ -506,7 +508,7 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.searchCertificates($('searchCertButton'))
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Deleted certificate', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_certificate_success"), clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("delete certificates after notify: "+event.memo.content.id);
                 var i;
                 for (i = data.certificates.length - 1; i >= 0; i--) {
@@ -518,11 +520,11 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.rivets.views['certificate-browse-table'].sync();
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Deleted configuration', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_configuration_success"), clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Deleted file', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_file_success"), clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             default:
@@ -530,6 +532,7 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
         }
         ;
+        i18nInit();
     });
     
     document.observe("ajax:httpDeleteFailure", function(event) {
@@ -538,64 +541,65 @@ mtwilson.atag = mtwilson.atag || {};
         if( event.memo.unauthorized ) { link = " <a href='../login.htm' target='_top'>login</a>"; }
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Delete tag failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_tag_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Delete RDF triple failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_rdf_triple_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Delete selection failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_selection_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Delete certificate request failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_certificate_request_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Delete certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_certificate_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Delete configuration failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_configuration_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Delete file failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.delete_file_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             default:
                 log.debug("No handler for failure HTTP DELETE of " + event.memo.resource.name);
-                mtwilson.atag.notify({text: 'Failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
         }
         ;
+        i18nInit();
     });
 
     document.observe("ajax:httpPutSuccess", function(event) {
         log.debug("httpPutSuccess: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Updated tag', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_tag_success"), clearAfter: 'AUTO', status: 'INFO'});
                 tag_create_form_removeValue();
                 mtwilson.atag.searchTags('tag-search-form');
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Updated RDF triple', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_rdf_triple_success"), clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Updated selection', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_selection_success"), clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Updated certificate request', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_certificate_request_success"), clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Updated certificate', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_certificate_success"), clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Updated configuration', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_configuration_success"), clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Updated file', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_file_success"), clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             default:
@@ -603,6 +607,7 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
         }
         ;
+        i18nInit();
     });
     
     document.observe("ajax:httpPutFailure", function(event) {
@@ -611,32 +616,33 @@ mtwilson.atag = mtwilson.atag || {};
         if( event.memo.unauthorized ) { link = " <a href='../login.htm' target='_top'>login</a>"; }
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Update tag failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_tag_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Update RDF triple failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_rdf_triple_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Update selection failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_selection_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Update certificate request failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_certificate_request_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Update certificate failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_certificate_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Update configuration failed:' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_configuration_failure") + ':' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Update file failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.update_file_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             default:
                 log.debug("No handler for failure HTTP PUT of " + event.memo.resource.name);
-                mtwilson.atag.notify({text: 'Failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
         }
         ;
+        i18nInit();
     });
 
     document.observe("ajax:httpGetSuccess", function(event) {
@@ -645,7 +651,7 @@ mtwilson.atag = mtwilson.atag || {};
         switch (event.memo.resource.name) {
             case 'resources':
                 log.debug("resources: " + Object.toJSON(ajax.data.getx("event.memo.resource.datapath")));
-                mtwilson.atag.notify({text: 'Retrieved resource', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_resources_success"), clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'tags':
                 // update various controls that refer to the tags... 
@@ -653,9 +659,9 @@ mtwilson.atag = mtwilson.atag || {};
                 $('tag-search-form').hide();
 
                 if (event.memo.response.length > 0) {
-                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' tags', clearAfter: 'AUTO', status: 'INFO'});
+                    mtwilson.atag.notify({text: event.memo.response.length + ' ' + i18n.t("notify.retrieve_tags_success"), clearAfter: 'AUTO', status: 'INFO'});
                 } else {
-                    mtwilson.atag.notify({text: 'No tags available. Create a tag first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                    mtwilson.atag.notify({text: i18n.t("notify.retrieve_tags_warning"), clearAfter: 'CONFIRM', status: 'WARN'});
                 }
                 break;
             case 'unfiltered_tags':
@@ -664,6 +670,7 @@ mtwilson.atag = mtwilson.atag || {};
                 var iter = 0;
                 data.rearranged_tags[iter] = {};
                 data.rearranged_tags[iter].name = 'Select';
+                data.rearranged_tags[iter].text = i18n.t("select.select");
                 data.rearranged_tags[iter].tagValues = [];
                 iter++;
                 for (var i = 0; i < data.unfiltered_tags.length; i++) {
@@ -679,6 +686,7 @@ mtwilson.atag = mtwilson.atag || {};
                     if(!el_added) {
                         data.rearranged_tags[iter] = {};
                         data.rearranged_tags[iter].name = loop_obj.name;
+                        data.rearranged_tags[iter].text = loop_obj.name;
                         data.rearranged_tags[iter].tagValues = [{id: loop_obj.id, value: loop_obj.value}];
                         iter++;
                     }
@@ -687,19 +695,31 @@ mtwilson.atag = mtwilson.atag || {};
                 //data.rearranged_tags = [{name: 'select', tagValues: []}, {name: 'state', tagValues: [{uui: '123', value: 'CA'}]}, {name: 'country', tagValues: [{id: '123', value: 'US'}]}];
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Retrieved RDF triple', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_rdf_triples_success"), clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'selections':
                 //log.debug("got selections! "+Object.toJSON(event.memo));
 //                    automatic-tag-selection-name
                 if (event.memo.response.length > 0) {
-                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' selections', clearAfter: 'AUTO', status: 'INFO'});
+                    mtwilson.atag.notify({text: event.memo.response.length + ' ' + i18n.t("notify.retrieve_selections_success"), clearAfter: 'AUTO', status: 'INFO'});
                 } else {
-                    mtwilson.atag.notify({text: 'No selections available. Create a selection first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                    mtwilson.atag.notify({text: i18n.t("notify.retrieve_selections_warning"), clearAfter: 'CONFIRM', status: 'WARN'});
                 }
 		$('selection-search-form').hide();
                 break;
           case 'certificates_json':
+		if(data.certificates != null && data.hosts != null) {
+                        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+
+
                 for(var loop = 0; loop < data.certificates.length; loop++) {
                         data.certificates[loop].status = "Active";
                         var now = new Date(event.memo.serverTime);
@@ -709,19 +729,20 @@ mtwilson.atag = mtwilson.atag || {};
                                 data.certificates[loop].status = 'Expired';
                         }
                 }
+                view.sync();
                 break;
             case 'certificateRequests':
                 if (event.memo.response.length > 0) {
-                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' certificate requests', clearAfter: 'AUTO', status: 'INFO'});
+                    mtwilson.atag.notify({text: event.memo.response.length + ' ' + i18n.t("notify.retrieve_certificate_requests_success"), clearAfter: 'AUTO', status: 'INFO'});
                 } else {
-                    mtwilson.atag.notify({text: 'No certificate requests available. Create a certificate request first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                    mtwilson.atag.notify({text: i18n.t("notify.retrieve_certificate_requests_warning"), clearAfter: 'CONFIRM', status: 'WARN'});
                 }
                 break;
             case 'certificates':
                 if (event.memo.response.length > 0) {
-                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' certificates', clearAfter: 'AUTO', status: 'INFO'});
+                    mtwilson.atag.notify({text: event.memo.response.length + ' ' + i18n.t("notify.retrieve_certificates_success"), clearAfter: 'AUTO', status: 'INFO'});
                 } else {
-                    mtwilson.atag.notify({text: 'No certificates available. Create a certificate first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                    mtwilson.atag.notify({text: i18n.t("notify.retrieve_certificates_warning"), clearAfter: 'CONFIRM', status: 'WARN'});
                 }
 		$('certificate-search-form').hide();
                 break;
@@ -730,16 +751,16 @@ mtwilson.atag = mtwilson.atag || {};
                     event.memo.resource.callback(event.memo);
                 }
                 if (event.memo.response.length > 0) {
-                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' configurations', clearAfter: 'AUTO', status: 'INFO'});
+                    mtwilson.atag.notify({text: event.memo.response.length + ' ' + i18n.t("notify.retrieve_configurations_success"), clearAfter: 'AUTO', status: 'INFO'});
                 } else {
-                    mtwilson.atag.notify({text: 'No configurations available. Create a configuration first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                    mtwilson.atag.notify({text: i18n.t("notify.retrieve_configurations_warning"), clearAfter: 'CONFIRM', status: 'WARN'});
                 }
                 break;
             case 'files':
                 if (event.memo.resource.callback) {
                     event.memo.resource.callback(event.memo);
                 }
-                mtwilson.atag.notify({text: 'Retrieved file', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_file_success"), clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'selection_kv_attributes':
                 var tmp_dictionary = {};
@@ -764,6 +785,19 @@ mtwilson.atag = mtwilson.atag || {};
                 data.selection_details = [];
                 break;
             case 'hosts':
+                if(data.certificates != null && data.hosts != null) {
+                        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                                continue;
+                                        }
+                                }
+                        }
+                        view.sync();
+                }
+
+
                 for(var i = data.hosts.length-1; i >= 0; i--) {
                     if(data.hosts[i].connection_url.indexOf('vmware') != -1) {// && data.hosts[i].connection_url.indexOf('vmware') == -1) {
                         data.hosts.splice(i, 1);
@@ -771,7 +805,7 @@ mtwilson.atag = mtwilson.atag || {};
                 }
                 ajax.view.sync();
 
-                jQuery('#my-select').multiSelect({'dblClick': true, 'selectionFooter': '<div class="custom-header">Servers to provision</div>', 'selectableFooter': '<div class="custom-header">Available servers</div>',
+                jQuery('#my-select').multiSelect({'dblClick': true, 'selectionFooter': '<div class="custom-header" data-i18n="label.servers_to_provision">Servers to provision</div>', 'selectableFooter': '<div class="custom-header" data-i18n="label.available_servers">Available servers</div>',
                         afterSelect: function(value){
                                 addElement2SelectedHosts(value[0]);
                         },
@@ -792,6 +826,7 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
         }
         ;
+        i18nInit();
     });
     
     document.observe("ajax:httpGetFailure", function(event) {
@@ -801,38 +836,39 @@ mtwilson.atag = mtwilson.atag || {};
         if( event.memo.unauthorized ) { link = " <a href='../login.htm' target='_top'>login</a>"; }
         switch (event.memo.resource.name) {
             case 'resources':
-                //mtwilson.atag.notify({text: 'Retrieve resource failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                //mtwilson.atag.notify({text: i18n.t("notify.retrieve_resources_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'tags':
-                mtwilson.atag.notify({text: 'Retrieve tags failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_tags_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Retrieve RDF triple failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_rdf_triples_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Retrieve selections failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_selections_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Retrieve certificate requests failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_certificate_requests_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Retrieve certificates failed.', clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_certificates_failure"), clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Retrieve configurations failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_configurations_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Retrieve file failed: ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_file_failure") + ': ' + event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'uuid':
-                mtwilson.atag.notify({text: 'Retrieve UUID failed (is the host registered in Mt. Wilson?) '+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.retrieve_uuid_failure") + ' '+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 //alert("getUUID:" + event.memo.response);
             default:
                 log.debug("No handler for failure HTTP GET of " + event.memo.resource.name);
-                mtwilson.atag.notify({text: 'Failed: '+event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: i18n.t("notify.failure") + ': '+event.memo.message+link, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
         }
         ;
+        i18nInit();
     });
 
     mtwilson.atag.createTag = function(input) {
@@ -1444,10 +1480,10 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.updateCertificateAuthority = function(input) {
         var report = validate(input);
         if (report.isValid) {
-            alert("form is valid, update ca: " + Object.toJSON(report.input));
+            alert(jQuery("#alert_valid_ca").text() + ": " + Object.toJSON(report.input));
         }
         else {
-            alert("form NOT valid, update ca: " + Object.toJSON(report.input));
+            alert(jQuery("#alert_not_valid_ca").text() + ": " + Object.toJSON(report.input));
 
         }
         //alert("Update CA: "+Object.toJSON(cloneWithoutAltText(input)));
@@ -1477,6 +1513,7 @@ document.observe("dom:loaded", function() {
             }
         }
     }
+    i18nInit();
 });
 
 
@@ -1543,7 +1580,7 @@ function getFileContents() {
 		fileContentsRead = true;
 	    }catch(Exception){
 		//document.getElementById("fileContents").innerHTML = "error reading file";
-		alert('Please select the tag XML to be provisioned.');
+		alert(jQuery("#alert_provision_select_tag_xml").text());
 		return false;
 	    }
 	}
@@ -1580,7 +1617,7 @@ function parseSelectionXML(xml) {
 	mtwilson.atag.data.selection_details = [];
 	var attributes = xmlDoc.getElementsByTagName('attribute');
 	for(var loop = 0; loop < attributes.length; loop++) {
-		var text = (attributes[loop].getElementsByTagName('text')[0].innerHTML);
+		var text = (attributes[loop].getElementsByTagName('text')[0].textContent);
 		var split_vals = text.split('=');
 		mtwilson.atag.data.selection_details.push({
 			id: loop,
@@ -1601,12 +1638,12 @@ function provisionTags() {
 
 	var selected_hosts = mtwilson.atag.data.selected_hosts;
 	if(selected_hosts.length == 0) {
-		alert('Select at least one server to provision the tags');
+		alert(jQuery("#alert_provision_select_server").text());
 		return false;
 	}
 
 	if(selectedSelectionXML == '') {
-		alert('Upload a tag XML or choose a selection to provision');
+                alert(jQuery("#alert_provision_upload_tag_xml").text());
 		return false;
 	}
         mtwilson.rivets.views['provision-sel-table'].sync();
@@ -1669,7 +1706,7 @@ function getSelectedSelectionDetails(selection_id) {
 			jQuery('#' + selection_id).addClass('highlightSelectedSelection');
 		}
 	};
-	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml",true);
+	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml?rand=" + Math.random(),true);
 	xmlhttp.send();            
 
 }

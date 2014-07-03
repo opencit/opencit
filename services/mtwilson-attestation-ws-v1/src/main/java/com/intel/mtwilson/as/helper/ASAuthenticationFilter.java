@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.as.helper;
 
-import com.intel.mtwilson.as.ASPersistenceManager;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.security.jersey.AuthenticationJerseyFilter;
 import com.intel.mtwilson.security.jersey.HmacRequestVerifier;
@@ -14,7 +14,7 @@ import com.intel.mtwilson.security.jpa.ApiClientBO;
 import com.intel.mtwilson.security.jpa.ApiClientHttpBasicBO;
 import com.intel.mtwilson.security.jpa.ApiClientX509BO;
 import com.intel.mtwilson.security.jpa.RequestLogBO;
-//import com.sun.jersey.spi.container.ContainerRequestFilter;
+import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +27,14 @@ import org.slf4j.LoggerFactory;
  */
 public class ASAuthenticationFilter extends AuthenticationJerseyFilter implements ContainerRequestFilter {
     private static Logger log = LoggerFactory.getLogger(ASAuthenticationFilter.class);
-    private ASPersistenceManager persistenceManager = new ASPersistenceManager();
     
-    public ASAuthenticationFilter() {
+    public ASAuthenticationFilter() throws IOException {
         // application-specific configuration
-        setRequestLog(new RequestLogBO(persistenceManager.getEntityManagerFactory("ASDataPU")));
-        setRequestValidator(new HmacRequestVerifier(new ApiClientBO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
-        setRequestValidator(new X509RequestVerifier(new ApiClientX509BO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
+        setRequestLog(new RequestLogBO(My.persistenceManager().getASData()));
+        setRequestValidator(new HmacRequestVerifier(new ApiClientBO(My.persistenceManager().getMSData())));
+        setRequestValidator(new X509RequestVerifier(new ApiClientX509BO(My.persistenceManager().getMSData())));
         // Since we might want to support HttpBasic in OpenSource, we have added the corresponding JPA controller in the AttestationService
-        setRequestValidator(new HttpBasicRequestVerifier(new ApiClientHttpBasicBO(persistenceManager.getEntityManagerFactory("ASDataPU"))));
+        setRequestValidator(new HttpBasicRequestVerifier(new ApiClientHttpBasicBO(My.persistenceManager().getASData())));
         setTrustedRemoteAddress(MSConfig.getConfiguration().getStringArray("mtwilson.api.trust"));        
         setSslRequired(MSConfig.getConfiguration().getBoolean("mtwilson.ssl.required", true));
     }

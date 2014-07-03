@@ -153,6 +153,60 @@ echo_warning() {
   return 1
 }
 
+function validate_path_configuration() {
+  local file_path="${1}"
+  if [[ "$file_path" == *..* ]]; then
+    echo_warning "Path specified is not absolute: $file_path"
+  fi
+  file_path=`readlink -f "$file_path"` #make file path absolute
+
+  if [[ "$file_path" != '/etc/'* && "$file_path" != '/opt/'* ]]; then
+    echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
+    return 1
+  fi
+  
+  if [[ -f "$file_path" ]]; then
+    chmod 600 "${file_path}"
+  fi
+  return 0
+}
+
+function validate_path_data() {
+  local file_path="${1}"
+  if [[ "$file_path" == *..* ]]; then
+    echo_warning "Path specified is not absolute: $file_path"
+  fi
+  file_path=`readlink -f "$file_path"` #make file path absolute
+
+  if [[ "$file_path" != '/var/'* && "$file_path" != '/opt/'* ]]; then
+    echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
+    return 1
+  fi
+  
+  if [[ -f "$file_path" ]]; then
+    chmod 600 "${file_path}"
+  fi
+  return 0
+}
+
+function validate_path_executable() {
+  local file_path="${1}"
+  if [[ "$file_path" == *..* ]]; then
+    echo_warning "Path specified is not absolute: $file_path"
+  fi
+  file_path=`readlink -f "$file_path"` #make file path absolute
+
+  if [[ "$file_path" != '/usr/'* && "$file_path" != '/opt/'* ]]; then
+    echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
+    return 1
+  fi
+  
+  if [[ -f "$file_path" ]]; then
+    chmod 755 "${file_path}"
+  fi
+  return 0
+}
+
 ### SHELL FUNCTIONS
 
 # parameters: space-separated list of files to include (shell functions or configuration)
@@ -546,6 +600,7 @@ backup_file() {
 read_property_from_file() {
   local property="${1}"
   local filename="${2}"
+  if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     local found=`cat "$filename" | grep "^$property"`
     if [ -n "$found" ]; then
@@ -564,6 +619,7 @@ update_property_in_file() {
   local value="${3}"
   local encrypted="false"
 
+  if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     # Decrypt if needed
     if file_encrypted "$filename"; then
@@ -702,7 +758,7 @@ register_startup_script() {
   local absolute_filename="${1}"
   local startup_name="${2}"
   shift; shift;
-
+  
   # try to install it as a startup script
   if [ -d /etc/init.d ]; then
     local prevdir=`pwd`
@@ -3639,6 +3695,7 @@ file_encrypted() {
 decrypt_file() {
   local filename="${1}"
   export PASSWORD="${2}"
+  if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     #echo -n "Decrypting file [$filename]....."
     call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
@@ -3657,6 +3714,7 @@ decrypt_file() {
 encrypt_file() {
   local filename="${1}"
   export PASSWORD="${2}"
+  if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     #echo -n "Encrypting file [$filename]....."
     call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"

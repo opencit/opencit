@@ -11,11 +11,11 @@ import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.setup.SetupContext;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.setup.SetupException;
+import java.io.IOException;
 import java.util.List;
 import org.apache.commons.configuration.Configuration;
 
@@ -42,15 +42,14 @@ public class EraseHostRegistrationData implements Command {
         deleteHostRegistrationRecords(serviceConf);
     }
     
-    private void deleteHostRegistrationRecords(Configuration conf) throws SetupException, CryptographyException, IllegalOrphanException, NonexistentEntityException {
-        ASPersistenceManager pm = new ASPersistenceManager();
-        TblHostSpecificManifestJpaController hsmJpa = new TblHostSpecificManifestJpaController(pm.getEntityManagerFactory("ASDataPU"));
+    private void deleteHostRegistrationRecords(Configuration conf) throws SetupException, CryptographyException, IllegalOrphanException, NonexistentEntityException, IOException {
+        TblHostSpecificManifestJpaController hsmJpa = My.jpa().mwHostSpecificManifest();
         List<TblHostSpecificManifest> hsmList = hsmJpa.findTblHostSpecificManifestEntities();
         for(TblHostSpecificManifest hsm : hsmList) {
             hsmJpa.destroy(hsm.getId());
         }
 //        byte[] dek = Base64.decodeBase64(ASConfig.getConfiguration().getString("mtwilson.as.dek"));
-        TblHostsJpaController jpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"));
+        TblHostsJpaController jpa = My.jpa().mwHosts();
         List<TblHosts> list = jpa.findTblHostsEntities();
         for(TblHosts host : list) {
             System.out.println("Deleting host #"+host.getId()+": "+host.getName());

@@ -27,6 +27,7 @@ import com.intel.mountwilson.datamodel.MLEDataVO;
 import com.intel.mountwilson.datamodel.OEMDataVO;
 import com.intel.mountwilson.datamodel.OSDataVO;
 import com.intel.mountwilson.datamodel.VmmHostDataVo;
+import com.intel.mountwilson.util.BasicView;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
@@ -118,7 +119,8 @@ public class ManagementConsoleDataController extends MultiActionController {
     public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req, HttpServletResponse res) {
         log.debug("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
         req.getSession().removeAttribute("hostVO");
-        ModelAndView responseView = new ModelAndView(new JSONView());
+        //ModelAndView responseView = new ModelAndView(new JSONView());
+        ModelAndView responseView = new ModelAndView(new BasicView());
         List<HostDetails> listOfRegisterHost = new ArrayList<>();
 
         log.debug("Action is :{}", req.getMethod());
@@ -194,6 +196,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         }
 
         //log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
+        //responseView.addObject("result", true);
         return responseView;
     }
 
@@ -671,7 +674,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
 
             responseView.addObject("expiringApiClients", services.getApiClients(apiObj, ApiClientListType.EXPIRING));
-            responseView.addObject("expirationMonths", MCPConfig.getConfiguration().getString("mtwilson.mc.apiKeyExpirationNoticeInMonths"));
+            responseView.addObject("expirationMonths", MCPConfig.getConfiguration().getInt("mtwilson.mc.apiKeyExpirationNoticeInMonths", 3));
 
         } catch (Exception e) {
 

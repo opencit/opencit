@@ -9,6 +9,9 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.data.TblPcrManifest;
+import com.intel.mtwilson.as.rest.v2.model.MleModule;
+import com.intel.mtwilson.as.rest.v2.model.MleModuleCollection;
+import com.intel.mtwilson.as.rest.v2.model.MleModuleLocator;
 import com.intel.mtwilson.as.rest.v2.model.MlePcr;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrCollection;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrFilterCriteria;
@@ -18,6 +21,8 @@ import com.intel.mtwilson.datatypes.PCRWhiteList;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +38,18 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:search")    
     public MlePcrCollection search(MlePcrFilterCriteria criteria) {
+        log.debug("MlePcr:Search - Got request to search for the Mle PCRs.");
         MlePcrCollection objCollection = new MlePcrCollection();
         try {
             TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
             if (criteria.mleUuid != null) {
                 List<TblPcrManifest> objList = jpaController.findTblPcrManifestByMleUuid(criteria.mleUuid.toString());
                 if (objList != null && !objList.isEmpty()) {
-                    // Before we add to the collection we need to check if the user has specified any other search criteria
-                    if (criteria.id != null) {
+                    if (criteria.filter == false) {
+                        for(TblPcrManifest obj : objList) {
+                            objCollection.getMlePcrs().add(convert(obj));
+                        }                        
+                    } else if (criteria.id != null) {
                         for(TblPcrManifest obj : objList) {
                             if (obj.getUuid_hex().equalsIgnoreCase(criteria.id.toString()))
                                 objCollection.getMlePcrs().add(convert(obj));
@@ -55,10 +64,6 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
                             if (obj.getValue().equalsIgnoreCase(criteria.valueEqualTo))
                                 objCollection.getMlePcrs().add(convert(obj));
                         }                        
-                    } else {
-                        for(TblPcrManifest obj : objList) {
-                            objCollection.getMlePcrs().add(convert(obj));
-                        }
                     }
                 }                
             }
@@ -68,6 +73,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
             log.error("Error during search of PCR whitelists for MLE.", ex);
             throw new ASException(ErrorCode.WS_PCR_WHITELIST_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("MlePcr:Search - Returning back {} of results.", objCollection.getMlePcrs().size());
         return objCollection;
     }
 
@@ -75,6 +81,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @RequiresPermissions("mle_pcrs:retrieve")    
     public MlePcr retrieve(MlePcrLocator locator) {
         if (locator.mleUuid == null || locator.pcrIndex == null) { return null;}
+        log.debug("MlePcr:Retrieve - Got request to retrieve Mle PCR with id {}.", locator.pcrIndex);                        
         String mleUuid = locator.mleUuid.toString();
         String pcrIndex = locator.pcrIndex;
         try {
@@ -98,6 +105,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:store")    
     public void store(MlePcr item) {
+        log.debug("MlePcr:Store - Got request to update Mle PCR with id {}.", item.getPcrIndex().toString());        
         PCRWhiteList obj = new PCRWhiteList();
         try {
             obj.setPcrName(item.getPcrIndex());
@@ -121,6 +129,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:create")    
     public void create(MlePcr item) {
+        log.debug("MlePcr:Store - Create a new Mle PCR with id {}.", item.getPcrIndex().toString());        
         PCRWhiteList obj = new PCRWhiteList();
         try {
             obj.setPcrName(item.getPcrIndex());
@@ -139,6 +148,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @RequiresPermissions("mle_pcrs:delete")    
     public void delete(MlePcrLocator locator) {
         if (locator.mleUuid == null || locator.pcrIndex == null) { return ;}
+        log.debug("MlePcr:Create - Got request to create a new Mle PCR.");
         String mleUuid = locator.mleUuid.toString();
         String pcrIndex = locator.pcrIndex;
         try {
@@ -170,7 +180,19 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:delete,search")    
     public void delete(MlePcrFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("MlePcr:Delete - Got request to delete Mle PCR by search criteria.");        
+        MlePcrCollection objCollection = search(criteria);
+        try { 
+            for (MlePcr obj : objCollection.getMlePcrs()) {
+                MlePcrLocator locator = new MlePcrLocator();
+                locator.mleUuid = UUID.valueOf(obj.getMleUuid());
+                locator.pcrIndex = obj.getPcrIndex();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during MlePcr deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
     
 }

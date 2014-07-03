@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.api.*;
-//import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.MwProcessorMappingJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
@@ -34,9 +33,6 @@ import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.ms.BaseBO;
-import com.intel.mtwilson.ms.MSPersistenceManager;
-//import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.util.ResourceFinder;
 import com.intel.mtwilson.wlm.business.MleBO;
 import com.intel.mtwilson.wlm.business.OemBO;
@@ -62,14 +58,12 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class HostBO extends BaseBO {
+public class HostBO {
 
     private static int MAX_BIOS_PCR = 17;
     private static int LOCATION_PCR = 22;
@@ -78,7 +72,7 @@ public class HostBO extends BaseBO {
     private static String OPENSOURCE_PCRs = "18";
     private static String CITRIX_PCRs = "18"; //"17,18";
     
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
 
     /**
      * Private class to support multithreading to retrieve the attestation report from the target host.

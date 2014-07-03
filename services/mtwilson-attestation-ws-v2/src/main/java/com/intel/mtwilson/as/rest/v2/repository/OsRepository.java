@@ -19,9 +19,9 @@ import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.OsBO;
 
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,16 +29,23 @@ import org.slf4j.LoggerFactory;
  */
 public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilterCriteria, OsLocator>{
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OsRepository.class);
     
     @Override
     @RequiresPermissions("oss:search")    
     public OsCollection search(OsFilterCriteria criteria) {
-        // start with a collection instance; if we don't find anything we'll return the empty collection
+        log.debug("Os:Search - Got request to search for the Os.");        
         OsCollection osCollection = new OsCollection();
         try {
             TblOsJpaController osJpaController = My.jpa().mwOs();
-            if (criteria.id != null) {
+            if (criteria.filter == false) {
+                List<TblOs> osList = osJpaController.findTblOsEntities();
+                if (osList != null && !osList.isEmpty()) {
+                    for(TblOs tblOsObj : osList) {
+                        osCollection.getOss().add(convert(tblOsObj));
+                    }
+                }                                
+            } else if (criteria.id != null) {
                 TblOs tblOs = osJpaController.findTblOsByUUID(criteria.id.toString());
                 if (tblOs != null) {
                     osCollection.getOss().add(convert(tblOs));
@@ -64,6 +71,7 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
             log.error("Error during OS search.", ex);
             throw new ASException(ErrorCode.WS_OS_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("Os:Search - Returning back {} of results.", osCollection.getOss().size());                
         return osCollection;
     }
 
@@ -71,6 +79,7 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
     @RequiresPermissions("oss:retrieve")    
     public Os retrieve(OsLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
+        log.debug("Os:Retrieve - Got request to retrieve Os with id {}.", locator.id);                
         String id = locator.id.toString();
         try {
             TblOsJpaController osJpaController = My.jpa().mwOs();            
@@ -91,11 +100,14 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
     @Override
     @RequiresPermissions("oss:store")    
     public void store(Os item) {
+        if (item == null || item.getId() == null) { throw new WebApplicationException(Response.Status.BAD_REQUEST);}
+        log.debug("Os:Store - Got request to update Os with id {}.", item.getId().toString());        
         OsData obj = new OsData();
         try {
             obj.setName(item.getName());
             obj.setDescription(item.getDescription());
             new OsBO().updateOs(obj, item.getId().toString());
+            log.debug("Os:Store - Updated the Os with id {} successfully.", item.getId().toString());                    
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -107,12 +119,14 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
     @Override
     @RequiresPermissions("oss:create")    
     public void create(Os item) {
+        log.debug("Os:Create - Got request to create a new role.");
         OsData obj = new OsData();
         try {
             obj.setName(item.getName());
             obj.setVersion(item.getVersion());
             obj.setDescription(item.getDescription());
             new OsBO().createOs(obj, item.getId().toString());
+            log.debug("Os:Store - Created the Os {} successfully.", item.getName());                                
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -125,9 +139,11 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
     @RequiresPermissions("oss:delete")    
     public void delete(OsLocator locator) {
         if( locator == null || locator.id == null ) { return; }
+        log.debug("Os:Delete - Got request to delete Os with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             new OsBO().deleteOs(null, null, id);
+            log.debug("Os:Delete - Deleted the Os with id {} successfully.", locator.id.toString()); 
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -148,7 +164,18 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
     @Override
     @RequiresPermissions("oss:delete,search")    
     public void delete(OsFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Os:Delete - Got request to delete Os by search criteria.");        
+        OsCollection objCollection = search(criteria);
+        try { 
+            for (Os obj : objCollection.getOss()) {
+                OsLocator locator = new OsLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Os deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
     
 }

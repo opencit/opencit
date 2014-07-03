@@ -24,10 +24,9 @@ import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.policy.TrustReport;
 
 import java.util.Date;
+import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostAttestationRepository implements DocumentRepository<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLocator> {
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAttestationRepository.class);
     
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
@@ -44,42 +43,44 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @Override
     @RequiresPermissions("host_attestations:search")    
     public HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
+        log.debug("HostAttestation:Search - Got request to search for the roles.");        
         HostAttestationCollection objCollection = new HostAttestationCollection();
         try {
             TblTaLogJpaController jpaController = My.jpa().mwTaLog();
             if (criteria.id != null) {
                 TblTaLog obj = jpaController.findByUuid(criteria.id.toString());
                 if (obj != null) {
-                    objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
+                    TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(obj.getHost_uuid_hex());
+                    objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
                 }
-            } else if (criteria.hostUuid != null) {
-                TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(criteria.hostUuid.toString(), getCacheStaleAfter());
-                if (obj != null) {
-                    objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
+            } else {
+                TblHosts hostObj;
+                if (criteria.hostUuid != null) {
+                    hostObj = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
+                } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
+                    hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
+                } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                    hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
+                } else {
+                    // no condition specified
+                    hostObj = null;
                 }
-            } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
                 if (hostObj != null) {
-                    TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                    if (obj != null) {
-                        objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
+                    List<TblTaLog> taLogList = jpaController.findTrustStatusByHostId(hostObj.getId(), criteria.limit);
+                    if (taLogList != null && !taLogList.isEmpty()) {
+                        for (TblTaLog obj : taLogList) {
+                            objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
+                        }
                     }
                 }
-            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
-                if (hostObj != null) {
-                    TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                    if (obj != null) {
-                        objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
-                    }
-                }
-            }
+            } 
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
             log.error("Error during retrieval of host attestation status from cache.", ex);
             throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("HostAttestation:Search - Returning back {} of results.", objCollection.getHostAttestations().size());                
         return objCollection;
     }
 
@@ -87,6 +88,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @RequiresPermissions("host_attestations:retrieve")    
     public HostAttestation retrieve(HostAttestationLocator locator) {
         if (locator == null || locator.id == null) { return null;}
+        log.debug("HostAttestation:Store - Got request to retrieve the host attestation role with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             TblTaLog obj = My.jpa().mwTaLog().findByUuid(id);
@@ -112,6 +114,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @Override
     @RequiresPermissions("host_attestations:create")    
     public void create(HostAttestation item) {
+        log.debug("HostAttestation:Store - Got request to create host attestation.");        
         try {
             HostTrustBO asBO = new HostTrustBO();
             TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());

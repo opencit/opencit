@@ -50,26 +50,28 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
                     .on(MW_TAG_KVATTRIBUTE.ID.equal(MW_TAG_SELECTION_KVATTRIBUTE.KVATTRIBUTEID))
                     .join(MW_TAG_SELECTION, JoinType.JOIN).on(MW_TAG_SELECTION_KVATTRIBUTE.SELECTIONID.equal(MW_TAG_SELECTION.ID)))                    
                     .getQuery();
-            if( criteria.attrNameEqualTo != null  && criteria.attrNameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equalIgnoreCase(criteria.attrNameEqualTo));
-            }
-            if( criteria.attrNameContains != null  && criteria.attrNameContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.lower().contains(criteria.attrNameContains.toLowerCase()));
-            }
-            if( criteria.attrValueEqualTo != null  && criteria.attrValueEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equalIgnoreCase(criteria.attrValueEqualTo));
-            }
-            if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
-                sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.lower().contains(criteria.attrValueContains.toLowerCase()));
-            }
-            if( criteria.id != null ) {
-                sql.addConditions(MW_TAG_SELECTION.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-            }
-            if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_SELECTION.NAME.equalIgnoreCase(criteria.nameEqualTo));
-            }
-            if( criteria.nameContains != null  && criteria.nameContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_SELECTION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
+            if (criteria.filter) {
+                if( criteria.attrNameEqualTo != null  && criteria.attrNameEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.equalIgnoreCase(criteria.attrNameEqualTo));
+                }
+                if( criteria.attrNameContains != null  && criteria.attrNameContains.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.NAME.lower().contains(criteria.attrNameContains.toLowerCase()));
+                }
+                if( criteria.attrValueEqualTo != null  && criteria.attrValueEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.equalIgnoreCase(criteria.attrValueEqualTo));
+                }
+                if( criteria.attrValueContains != null  && criteria.attrValueContains.length() > 0 ) {
+                    sql.addConditions(MW_TAG_KVATTRIBUTE.VALUE.lower().contains(criteria.attrValueContains.toLowerCase()));
+                }
+                if( criteria.id != null ) {
+                    sql.addConditions(MW_TAG_SELECTION.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                }
+                if( criteria.nameEqualTo != null  && criteria.nameEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_SELECTION.NAME.equalIgnoreCase(criteria.nameEqualTo));
+                }
+                if( criteria.nameContains != null  && criteria.nameContains.length() > 0  ) {
+                    sql.addConditions(MW_TAG_SELECTION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
+                }
             }
             sql.addOrderBy(MW_TAG_SELECTION.NAME);
             Result<Record> result = sql.fetch();
@@ -179,7 +181,18 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
     @Override
     @RequiresPermissions("tag_selection_kv_attributes:delete,search")         
     public void delete(SelectionKvAttributeFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("SelectionKvAttribute:Delete - Got request to delete SelectionKvAttribute by search criteria.");        
+        SelectionKvAttributeCollection objCollection = search(criteria);
+        try { 
+            for (SelectionKvAttribute obj : objCollection.getSelectionKvAttributeValues()) {
+                SelectionKvAttributeLocator locator = new SelectionKvAttributeLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during SelectionKvAttribute deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }

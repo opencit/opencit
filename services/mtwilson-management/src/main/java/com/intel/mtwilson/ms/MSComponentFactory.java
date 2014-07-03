@@ -4,9 +4,7 @@
  */
 package com.intel.mtwilson.ms;
 
-import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.ms.business.HostBO;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

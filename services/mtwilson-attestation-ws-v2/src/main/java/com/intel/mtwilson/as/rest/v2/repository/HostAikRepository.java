@@ -16,8 +16,6 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,11 +23,12 @@ import org.slf4j.LoggerFactory;
  */
 public class HostAikRepository implements DocumentRepository<HostAik, HostAikCollection, HostAikFilterCriteria, HostAikLocator> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAikRepository.class);
 
     @Override
     @RequiresPermissions("host_aiks:search")    
     public HostAikCollection search(HostAikFilterCriteria criteria) {
+        log.debug("HostAik:Search - Got request to search for the roles.");        
         HostAikCollection objCollection = new HostAikCollection();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -45,6 +44,7 @@ public class HostAikRepository implements DocumentRepository<HostAik, HostAikCol
             log.error("Error during search for hosts.", ex);
             throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("HostAik:Search - Returning back {} of results.", objCollection.getAiks().size());                
         return objCollection;
     }
 
@@ -52,6 +52,7 @@ public class HostAikRepository implements DocumentRepository<HostAik, HostAikCol
     @RequiresPermissions("host_aiks:retrieve")    
     public HostAik retrieve(HostAikLocator locator) {
         if (locator == null || locator.hostUuid == null) { return null; }
+        log.debug("HostAik:Retrieve - Got request to retrieve Aik for host with id {}.", locator.hostUuid);                
         String id = locator.hostUuid.toString();
         
         try {

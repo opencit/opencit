@@ -46,14 +46,16 @@ public class ConfigurationRepository implements DocumentRepository<Configuration
             DSLContext jooq = jc.getDslContext();
             
             SelectQuery sql = jooq.select().from(MW_CONFIGURATION).getQuery();
-            if( criteria.id != null ) {
-                sql.addConditions(MW_CONFIGURATION.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-            }
-            if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.NAME.equalIgnoreCase(criteria.nameEqualTo));
-            }
-            if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
-                sql.addConditions(MW_CONFIGURATION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
+            if (criteria.filter) {
+                if( criteria.id != null ) {
+                    sql.addConditions(MW_CONFIGURATION.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                }
+                if( criteria.nameEqualTo != null && criteria.nameEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_CONFIGURATION.NAME.equalIgnoreCase(criteria.nameEqualTo));
+                }
+                if( criteria.nameContains != null && criteria.nameContains.length() > 0 ) {
+                    sql.addConditions(MW_CONFIGURATION.NAME.lower().contains(criteria.nameContains.toLowerCase()));
+                }
             }
             Result<Record> result = sql.fetch();
             log.debug("Got {} records", result.size());
@@ -161,7 +163,18 @@ public class ConfigurationRepository implements DocumentRepository<Configuration
     @Override
     @RequiresPermissions("configurations:delete,search")     
     public void delete(ConfigurationFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Configuration:Delete - Got request to delete configuration by search criteria.");        
+        ConfigurationCollection objCollection = search(criteria);
+        try { 
+            for (Configuration obj : objCollection.getConfigurations()) {
+                ConfigurationLocator locator = new ConfigurationLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Configuration deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }

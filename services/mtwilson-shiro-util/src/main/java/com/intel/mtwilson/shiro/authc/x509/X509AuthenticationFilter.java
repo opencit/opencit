@@ -77,7 +77,9 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
             byte[] signature = Base64.decodeBase64(authorization.signatureBase64);
             String signatureAlgorithm = signatureAlgorithm(authorization.signatureAlgorithm);
             byte[] fingerprint = Base64.decodeBase64(authorization.fingerprintBase64);
-
+            log.trace("Signature being added to token is {}", Hex.encodeHexString(signature));
+            log.trace("Fingerprint being added to token is {}", Hex.encodeHexString(fingerprint));
+            log.trace("Document being added to token is {}", Hex.encodeHexString(document));
             byte[] digest = getDigest(document, signatureAlgorithm); // example: 3031300d060960864801650304020105000420 8373ed7ae4a499534f3eb02fb898a0eafea48a334e2f0a5703e7dc474360786a   the space between the two hex parts shows where the alg id ends and the sha256 digest of the document itself begins
             log.debug("Digest with alg id included is: {}", Hex.encodeHexString(digest));
             X509AuthenticationToken token = new X509AuthenticationToken(new Fingerprint(fingerprint), new Credential(signature, digest), signatureInput, request.getRemoteAddr());
@@ -273,7 +275,7 @@ Authorization: X509 realm="Example", fingerprint="0685bd9184jfhq22",
         }
         if (a.realm == null || a.realm.isEmpty()) {
             log.warn("Authorization is missing realm"); //            throw new IllegalArgumentException("Authorization is missing realm"); // currently we allow undefined realm because we only have one database of users. in the future we could require a realm if we have moer than one and we need to know where to look things up.
-        }
+            }
         if (a.fingerprintBase64 == null || a.fingerprintBase64.isEmpty()) {
             throw new IllegalArgumentException("Authorization is missing id/fingerprint");
         }

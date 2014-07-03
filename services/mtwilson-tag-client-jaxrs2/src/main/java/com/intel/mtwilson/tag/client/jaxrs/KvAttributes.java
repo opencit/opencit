@@ -95,6 +95,36 @@ public class KvAttributes extends MtWilsonClient {
     }
     
     /**
+     * Deletes the key value pairs matching the specified search criteria. 
+     * @param criteria KvAttributeFilterCriteria object specifying the search criteria. Possible search options include 
+     * nameEqualTo, nameContains, valueEqualTo and valueContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions tag_kv_attributes:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/tag-kv-attributes?nameEqualTo=country
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  KvAttributes client = new KvAttributes(My.configuration().getClientProperties());
+     *  KvAttributeFilterCriteria criteria = new KvAttributeFilterCriteria();
+     *  criteria.nameEqualTo = "country";
+     *  client.deleteKvAttribute(criteria);
+     * </pre>
+     */
+    public void deleteKvAttribute(KvAttributeFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("tag-kv-attributes", criteria).request(MediaType.APPLICATION_JSON).delete();
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete KvAttribute failed");
+        }
+    }
+    
+    /**
      * Allows the user to edit an existing key value pair. Note that only the value of the key-value
      * pair can be edited. The user has to specify the ID on the query string and the value to be updated
      * in the body. If the specified ID does not exist in the system, appropriate error would be returned

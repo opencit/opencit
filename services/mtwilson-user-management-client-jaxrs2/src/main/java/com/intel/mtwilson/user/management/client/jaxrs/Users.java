@@ -92,6 +92,35 @@ public class Users extends MtWilsonClient {
     }
 
     /**
+     * Deletes the User(s) matching the specified search criteria. 
+     * @param criteria UserFilterCriteria object specifying the search criteria. The search options include
+     * id, nameEqualTo and nameContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions roles:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/users?nameContains=admin
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Users client = new Users(My.configuration().getClientProperties());
+     *  UserFilterCriteria criteria = new UserFilterCriteria();
+     *  criteria.nameContains = "admin";
+     *  client.deleteUser(criteria);
+     * </pre>
+     */
+    public void deleteUser(UserFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("users", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete user failed");
+        }
+    }
+    
+    /**
      * Updates the details of the User in the system. The locale and the comments fields can be updated.
      * @param user - User object details that needs to be updated.
      * @return Updated user object.

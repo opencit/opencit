@@ -10,9 +10,7 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -22,7 +20,7 @@ import org.slf4j.LoggerFactory;
 @JacksonXmlRootElement(localName="create_whitelist")
 public class CreateWhiteListRunnable implements Runnable{
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateWhiteListRunnable.class);
 
     private TxtHostRecord host;
     private String result;
@@ -44,6 +42,7 @@ public class CreateWhiteListRunnable implements Runnable{
     }
     
     @Override
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create,store","mle_modules:create","mle_sources:create"})
     public void run() {
         try {
             if (host != null) {

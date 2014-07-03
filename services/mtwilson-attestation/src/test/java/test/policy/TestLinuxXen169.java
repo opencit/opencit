@@ -21,17 +21,13 @@ import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
-import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-//import org.codehaus.jackson.map.ObjectMapper;
-//import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -445,7 +441,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void checkTrustReportForXen() throws Exception {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
+        HostTrustBO hostTrustBO = new HostTrustBO();
         TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname);        
         log.debug(json.writeValueAsString(trustReport));
 //        log.debug(xml.writeValueAsString(trustReport)); // xml doesn't seem to seriailze the same info somehow... 
@@ -518,7 +514,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void checkHostTrustStatusForXen() throws Exception {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
+        HostTrustBO hostTrustBO = new HostTrustBO();
         HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(host, host.getName());        
         log.debug("Bios trusted? {}", trustStatus.bios);
         log.debug("Vmm trusted? {}", trustStatus.vmm);

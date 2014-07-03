@@ -54,5 +54,14 @@ public class RoleTest {
         
         client.deleteRole(roleId.toString());
     }
-     
+ 
+    @Test
+    public void testRoleDeleteSearchCriteria() throws Exception {
+
+        RoleFilterCriteria criteria = new RoleFilterCriteria();
+        criteria.nameContains = "Developer";
+        client.deleteRole(criteria);
+        
+    }
+    
 }

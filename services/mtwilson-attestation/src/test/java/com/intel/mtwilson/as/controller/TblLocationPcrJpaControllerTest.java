@@ -1,17 +1,16 @@
 package com.intel.mtwilson.as.controller;
 
-import static org.junit.Assert.*;
 
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import org.junit.Test;
 
-import com.intel.mtwilson.as.BaseBO;
 
 public class TblLocationPcrJpaControllerTest {
 
 	@Test
-	public void test() {
-		BaseBO config = new BaseBO();
-		String location = new TblLocationPcrJpaController(config.getEntityManagerFactory()).findTblLocationPcrByPcrValue("Hello");
+	public void test() throws IOException {
+		String location = My.jpa().mwLocationPcr().findTblLocationPcrByPcrValue("Hello");
 		System.out.println("Location is " + location);
 	}
 

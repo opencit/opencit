@@ -25,7 +25,6 @@ import com.intel.mtwilson.as.data.TblSamlAssertion;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.mtwilson.as.BaseBO;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
@@ -64,11 +63,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author dsmagadx
  */
-public class HostBO extends BaseBO {
+public class HostBO {
 
 	private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
 	public static final PcrIndex LOCATION_PCR = PcrIndex.PCR22;
-        private Logger log = LoggerFactory.getLogger(getClass());
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
 //        private byte[] dataEncryptionKey = null;
@@ -97,10 +96,10 @@ public class HostBO extends BaseBO {
    
     }
     
-    public HostBO(PersistenceManager pm) {
-        super(pm);
-       
-    }
+//    public HostBO(PersistenceManager pm) {
+//        super(pm);
+//       
+//    }
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {

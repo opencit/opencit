@@ -19,26 +19,39 @@ import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.OemBO;
 
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
+<<<<<<< HEAD
 public class OemRepository implements DocumentRepository<Oem, OemCollection, OemFilterCriteria, OemLocator>{
     private Logger log = LoggerFactory.getLogger(getClass().getName());
         
+=======
+public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFilterCriteria, OemLocator>{
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OemRepository.class);
+    
+>>>>>>> bd29d08c853e9e3de3146865a2ce2f02c196172a
     @Override
     @RequiresPermissions("oems:search")    
     public OemCollection search(OemFilterCriteria criteria) {
-        // start with a collection instance; if we don't find anything we'll return the empty collection
+        log.debug("Oem:Search - Got request to search for the Oems.");        
         OemCollection oemCollection = new OemCollection();
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
-            if (criteria.id != null) {
-                // re-arranged slightly to look more like the nameContains case below
+            if (criteria.filter == false) {
+                List<TblOem> oemList = oemJpaController.findTblOemEntities();
+                if (oemList != null && !oemList.isEmpty()) {
+                    for(TblOem tblOemObj : oemList) {
+                        oemCollection.getOems().add(convert(tblOemObj));
+                    }
+                }                                
+            } else if (criteria.id != null) {
                 TblOem tblOem = oemJpaController.findTblOemByUUID(criteria.id.toString());
                 if( tblOem != null ) {
                     oemCollection.getOems().add(convert(tblOem));
@@ -63,6 +76,7 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
             log.error("Error during OEM search.", ex);
             throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
+        log.debug("Oem:Search - Returning back {} of results.", oemCollection.getOems().size());                
         return oemCollection;
     }
 
@@ -70,6 +84,7 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @RequiresPermissions("oems:retrieve")    
     public Oem retrieve(OemLocator locator) {
         if( locator == null || locator.id == null ) { return null; }
+        log.debug("Oem:Retrieve - Got request to retrieve Oem with id {}.", locator.id);                
         String id = locator.id.toString();
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
@@ -90,14 +105,14 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @Override
     @RequiresPermissions("oems:store")    
     public void store(Oem item) {
+        if (item == null || item.getId() == null) { throw new WebApplicationException(Response.Status.BAD_REQUEST);}
+        log.debug("Oem:Store - Got request to update Oem with id {}.", item.getId().toString());        
+        
         OemData obj = new OemData();
-        try {
-            // Since the name cannot be updated, appropriate error has to be returned back.
-            if (item.getName() != null && !item.getName().isEmpty())
-                throw new ASException(ErrorCode.AS_NOT_EDITABLE_PARAMETER, item.getName());
-            
+        try {            
             obj.setDescription(item.getDescription());
             new OemBO().updateOem(obj, item.getId().toString());
+            log.debug("Oem:Store - Updated the Oem with id {} successfully.", item.getId().toString()); 
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -109,11 +124,13 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @Override
     @RequiresPermissions("oems:create")    
     public void create(Oem item) {
+        log.debug("Oem:Create - Got request to create a new Oem.");
         OemData obj = new OemData();
         try {
             obj.setName(item.getName());
             obj.setDescription(item.getDescription());
             new OemBO().createOem(obj, item.getId().toString());
+            log.debug("Oem:Store - Created the Oem {} successfully.", item.getName()); 
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -126,9 +143,11 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @RequiresPermissions("oems:delete")    
     public void delete(OemLocator locator) {
         if( locator == null || locator.id == null ) { return; }
+        log.debug("Oem:Delete - Got request to delete Oem with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             new OemBO().deleteOem(null, id);
+            log.debug("Oem:Delete - Deleted the Oem with id {} successfully.", locator.id.toString());
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -151,7 +170,18 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @Override
     @RequiresPermissions("oems:delete,search")    
     public void delete(OemFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Oem:Delete - Got request to delete Oem by search criteria.");        
+        OemCollection objCollection = search(criteria);
+        try { 
+            for (Oem obj : objCollection.getOems()) {
+                OemLocator locator = new OemLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Oem deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
     
 }

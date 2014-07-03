@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.MlePcrFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -99,6 +100,38 @@ public class MlePcrs extends MtWilsonClient {
     }
     
     /**
+     * Deletes the PCR white lists of the specified MLE using the filter criteria.
+     * @param criteria MlePcrFilterCriteria object specifying the search criteria. Search options supported
+     * include id, indexEqualTo and valueEqualTo.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mle_pcrs:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs?indexEqualTo=18
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  MlePcr client = new MlePcr(My.configuration().getClientProperties());
+     *  MlePcrFilterCriteria criteria = new MlePcrFilterCriteria();
+     *  criteria.mleUuid = UUID.valueOf("31021a8a-de64-4c5f-b314-8d3f077a55e5");
+     *  criteria.indexEqualTo = "18";
+     *  client.deleteMlePcr(criteria);
+     * </pre>
+     */
+    public void deleteMlePcr(MlePcrFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("mle_id", criteria.mleUuid);
+        Response obj = getTargetPathWithQueryParams("mles/{mle_id}/pcrs", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete Mle PCR failed");
+        }
+    }
+    
+    /**
      * Updates the value of the specified whitelist.
      * @param obj - MlePcr to be updated
      * @return  Updated <code> MlePCR </code>.
@@ -155,7 +188,7 @@ public class MlePcrs extends MtWilsonClient {
      */
     public MlePcr retrieveMlePcr(String mleUuid, String pcrIndex) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", mleUuid);
         map.put("id", pcrIndex);
         MlePcr obj = getTarget().path("mles/{mle_id}/pcrs/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MlePcr.class);
@@ -164,9 +197,10 @@ public class MlePcrs extends MtWilsonClient {
     
      /**
      * Searches for PCR whitelists matching the specified criteria.
-     * @param criteria <code> MlePcrFilterCriteria </code> used to specify the parameters of search. 
-     *  Criteria can be one of indexEqualTo, valueEqualTo and id
-     * @return <code> MlePcrCollection </code> having the list of the PCR whitelists that match the specified criteria.
+     * @param criteria MlePcrFilterCriteria object specifying the filter criteria. Currently supported
+     * search options include id, indexEqualTo and valueEqualTo.
+     * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /pcrs?filter=false]
+     * @return MlePcrCollection having the list of the PCR whitelists that match the specified criteria.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mle_pcrs:search
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -189,7 +223,7 @@ public class MlePcrs extends MtWilsonClient {
     
     public MlePcrCollection searchMlePcrs(MlePcrFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("mle_id", criteria.mleUuid);
         MlePcrCollection objCollection = getTargetPathWithQueryParams("mles/{mle_id}/pcrs", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(MlePcrCollection.class);

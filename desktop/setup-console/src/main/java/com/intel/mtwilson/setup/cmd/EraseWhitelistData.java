@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.as.controller.MwMleSourceJpaController;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
@@ -21,9 +20,9 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
-import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.setup.SetupContext;
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
@@ -35,10 +34,6 @@ import org.apache.commons.configuration.Configuration;
  */
 public class EraseWhitelistData implements Command {
    
-    private ASPersistenceManager pm;
-    private EntityManagerFactory em;
-    
-
     private Configuration options = null;
     @Override
     public void setOptions(Configuration options) {
@@ -53,8 +48,6 @@ public class EraseWhitelistData implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         //Configuration serviceConf = ASConfig.getConfiguration();
-        pm = new ASPersistenceManager();
-        em = pm.getEntityManagerFactory("ASDataPU");
         deleteMleSource();
         deleteModuleManifest();
         deletePcrManifest();
@@ -63,17 +56,17 @@ public class EraseWhitelistData implements Command {
         deleteOem();
     }
     
-    private void deleteMleSource() throws NonexistentEntityException {
-        MwMleSourceJpaController jpa = new MwMleSourceJpaController(em);
+    private void deleteMleSource() throws NonexistentEntityException, IOException {
+        MwMleSourceJpaController jpa = My.jpa().mwMleSource();
         List<MwMleSource> list = jpa.findMwMleSourceEntities();
         for(MwMleSource record : list) {
             jpa.destroy(record.getId());
         }
     }
     
-    private void deleteModuleManifest() throws NonexistentEntityException, IllegalOrphanException {
-        TblModuleManifestJpaController jpa = new TblModuleManifestJpaController(em);
-        TblHostSpecificManifestJpaController hsmjpa = new TblHostSpecificManifestJpaController(em);
+    private void deleteModuleManifest() throws NonexistentEntityException, IllegalOrphanException, IOException {
+        TblModuleManifestJpaController jpa = My.jpa().mwModuleManifest();
+        TblHostSpecificManifestJpaController hsmjpa = My.jpa().mwHostSpecificManifest();
         List<TblModuleManifest> list = jpa.findTblModuleManifestEntities();
         for(TblModuleManifest record : list) {
             Collection<TblHostSpecificManifest> hsmlist = record.getTblHostSpecificManifestCollection();
@@ -84,32 +77,32 @@ public class EraseWhitelistData implements Command {
         }
     }
     
-    private void deletePcrManifest() throws NonexistentEntityException {
-        TblPcrManifestJpaController jpa = new TblPcrManifestJpaController(em);
+    private void deletePcrManifest() throws NonexistentEntityException, IOException {
+        TblPcrManifestJpaController jpa = My.jpa().mwPcrManifest();
         List<TblPcrManifest> list = jpa.findTblPcrManifestEntities();
         for(TblPcrManifest record : list) {
             jpa.destroy(record.getId());
         }
     }
 
-    private void deleteMle() throws NonexistentEntityException, IllegalOrphanException {
-        TblMleJpaController jpa = new TblMleJpaController(em);
+    private void deleteMle() throws NonexistentEntityException, IllegalOrphanException, IOException {
+        TblMleJpaController jpa = My.jpa().mwMle();
         List<TblMle> list = jpa.findTblMleEntities();
         for(TblMle record : list) {
             jpa.destroy(record.getId());
         }
     }
 
-    private void deleteOs() throws NonexistentEntityException, IllegalOrphanException {
-        TblOsJpaController jpa = new TblOsJpaController(em);
+    private void deleteOs() throws NonexistentEntityException, IllegalOrphanException, IOException {
+        TblOsJpaController jpa = My.jpa().mwOs();
         List<TblOs> list = jpa.findTblOsEntities();
         for(TblOs record : list) {
             jpa.destroy(record.getId());
         }
     }
 
-    private void deleteOem() throws NonexistentEntityException, IllegalOrphanException {
-        TblOemJpaController jpa = new TblOemJpaController(em);
+    private void deleteOem() throws NonexistentEntityException, IllegalOrphanException, IOException {
+        TblOemJpaController jpa = My.jpa().mwOem();
         List<TblOem> list = jpa.findTblOemEntities();
         for(TblOem record : list) {
             jpa.destroy(record.getId());

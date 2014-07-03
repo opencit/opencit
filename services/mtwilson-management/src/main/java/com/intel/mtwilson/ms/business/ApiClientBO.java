@@ -29,7 +29,6 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509PK;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import com.intel.mtwilson.ms.BaseBO;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
@@ -46,11 +45,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -58,13 +53,24 @@ import org.slf4j.MarkerFactory;
  *
  * @author dsmagadx
  */
-public class ApiClientBO extends BaseBO {
+public class ApiClientBO {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApiClientBO.class);
+
     Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.USER_CONFIGURATION.getValue());
     private final ObjectMapper yaml;
+    private ApiClientX509JpaController apiClientX509JpaController ;
+    private ApiRoleX509JpaController apiRoleX509JpaController;
+    
     public ApiClientBO() {
-        yaml = createYamlMapper();
+        try {
+            yaml = createYamlMapper();
+            apiClientX509JpaController = My.jpa().mwApiClientX509();
+            apiRoleX509JpaController = My.jpa().mwApiRoleX509();
+        } catch (IOException ex) {
+            log.error("Error during persistence manager initialization", ex);
+            throw new MSException(ErrorCode.SYSTEM_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     public void create(ApiClientCreateRequest apiClientRequest) {
@@ -210,7 +216,7 @@ public class ApiClientBO extends BaseBO {
             //apiClientX509.setUuid_hex(null);
             //apiClientX509.setLocale(apiClientRequest.);
 
-            new ApiClientX509JpaController(getMSEntityManagerFactory()).create(apiClientX509);
+            apiClientX509JpaController.create(apiClientX509);
             setRolesForApiClient(apiClientX509, apiClientRequest.getRoles());
             populateShiroUserTables(apiClientRequest, x509Certificate);
             
@@ -360,7 +366,6 @@ public class ApiClientBO extends BaseBO {
      * @param apiClientX509 
      */
     private void clearRolesForApiClient(ApiClientX509 apiClientX509)  {
-        ApiRoleX509JpaController apiRoleX509JpaController = new ApiRoleX509JpaController(getMSEntityManagerFactory());
         for (ApiRoleX509 role : apiClientX509.getApiRoleX509Collection()) {
             try {
                 apiRoleX509JpaController.destroy(role.getApiRoleX509PK());
@@ -378,7 +383,6 @@ public class ApiClientBO extends BaseBO {
      * @param roles 
      */
     private void setRolesForApiClient(ApiClientX509 apiClientX509, String[] roles) {
-        ApiRoleX509JpaController apiRoleX509JpaController = new ApiRoleX509JpaController(getMSEntityManagerFactory());
         for (String role : roles) {
             try {
                 log.debug("Adding v1 role {} to new user {}", role, apiClientX509.getName());
@@ -423,8 +427,6 @@ public class ApiClientBO extends BaseBO {
         ApiClientX509 apiClientX509;
         String userName;
         try {
-            ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
-
             if (uuid != null && !uuid.isEmpty()) {
                 apiClientX509 = apiClientX509JpaController.findApiClientX509ByUUID(uuid);
                 userName = uuid;
@@ -433,28 +435,43 @@ public class ApiClientBO extends BaseBO {
                 userName = apiClientRequest.fingerprint.toString();
             }
 
-            if (apiClientX509 == null) {
-                log.error("Specified user does not exist in the system.");
-                throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
+            if (apiClientX509 != null) {
+                // User also exists in the V1 API tables. So, they have to be updated accordingly
+                log.info("Specified user has been created using the V1 APIs.");
+                apiClientX509.setEnabled(apiClientRequest.enabled);
+                apiClientX509.setStatus(apiClientRequest.status);
+
+                // Update the comment if there is value. Otherwise we might overwrite an existing value.
+                if (apiClientRequest.comment != null && !apiClientRequest.comment.isEmpty())
+                    apiClientX509.setComment(apiClientRequest.comment);            
+
+                apiClientX509JpaController.edit(apiClientX509); // IllegalOrphanException, NonexistentEntityException, Exception
+
+                // Clear the existing roles and update it with the new ones only if specified by the user
+                if (apiClientRequest.roles != null && apiClientRequest.roles.length > 0) {
+                    clearRolesForApiClient(apiClientX509);
+                    setRolesForApiClient(apiClientX509, apiClientRequest.roles);
+                }
+                userName = apiClientX509.getUserNameFromName();                
+            } else {
+                // Check if the user is in the V2 table. Otherwise we need to throw an error
+                try (LoginDAO loginDao = MyJdbi.authz()) {
+                    UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha1(apiClientRequest.fingerprint);
+                    if (userLoginCertificate == null) {
+                        log.error("User with fingerprint {} is not configured in the system.", Sha1Digest.valueOf(apiClientRequest.fingerprint).toHexString());
+                        throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
+                    } else {
+                        User user = loginDao.findUserById(userLoginCertificate.getUserId());
+                        if (user != null) {
+                            userName = user.getUsername();
+                        }
+                    }
+                }
             }
             
-            apiClientX509.setEnabled(apiClientRequest.enabled);
-            apiClientX509.setStatus(apiClientRequest.status);
-            
-            // Update the comment if there is value. Otherwise we might overwrite an existing value.
-            if (apiClientRequest.comment != null && !apiClientRequest.comment.isEmpty())
-                apiClientX509.setComment(apiClientRequest.comment);            
-
-            apiClientX509JpaController.edit(apiClientX509); // IllegalOrphanException, NonexistentEntityException, Exception
-
-            // Clear the existing roles and update it with the new ones only if specified by the user
-            if (apiClientRequest.roles != null && apiClientRequest.roles.length > 0) {
-                clearRolesForApiClient(apiClientX509);
-                setRolesForApiClient(apiClientX509, apiClientRequest.roles);
-            }
                         
             MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser();//new MwPortalUserJpaController(getMSEntityManagerFactory());
-            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(apiClientX509.getUserNameFromName());
+            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(userName);
             if(portalUser != null) {
                 portalUser.setEnabled(apiClientRequest.enabled);
                 portalUser.setStatus(apiClientRequest.status);
@@ -463,10 +480,10 @@ public class ApiClientBO extends BaseBO {
                 mwPortalUserJpaController.edit(portalUser);
             }
             
-            updateShiroUserTables(apiClientRequest, apiClientX509.getUserNameFromName());
+            updateShiroUserTables(apiClientRequest, userName);
             
             // Capture the change in the syslog
-            Object[] paramArray = {Hex.encodeHexString(apiClientX509.getFingerprint()), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            Object[] paramArray = {userName, Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
             log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {
@@ -528,7 +545,6 @@ public class ApiClientBO extends BaseBO {
     public ApiClientInfo find(byte[] fingerprint) {
         
         try {
-            ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
 
             ApiClientX509 apiClientX509 = apiClientX509JpaController.findApiClientX509ByFingerprint(fingerprint);
 
@@ -555,7 +571,45 @@ public class ApiClientBO extends BaseBO {
      */
     public List<ApiClientInfo> search(ApiClientSearchCriteria criteria) {
         
-        try {
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
+            log.debug("Searching for users based on the criteria.");
+            List<ApiClientInfo> list = new ArrayList<>();
+
+            if( criteria.enabledEqualTo != null && criteria.statusEqualTo != null ) {
+                List<UserLoginCertificate> userLoginCertificates = loginDAO.findUserLoginCertificatesByStatusAndEnabled(Status.valueOf(criteria.statusEqualTo), criteria.enabledEqualTo);
+                if (userLoginCertificates != null && userLoginCertificates.size() > 0) {
+                    for (UserLoginCertificate userLoginCertificate : userLoginCertificates) {
+                        list.add(convertToApiClientInfo(userLoginCertificate));
+                    }
+                }
+            } else if (criteria.statusEqualTo != null) {
+                List<UserLoginCertificate> userLoginCertificates = loginDAO.findUserLoginCertificatesByStatus(Status.valueOf(criteria.statusEqualTo));
+                if (userLoginCertificates != null && userLoginCertificates.size() > 0) {
+                    for (UserLoginCertificate userLoginCertificate : userLoginCertificates) {
+                        list.add(convertToApiClientInfo(userLoginCertificate));
+                    }
+                }
+            } else if (criteria.enabledEqualTo != null) {
+                List<UserLoginCertificate> userLoginCertificates = loginDAO.findUserLoginCertificatesByEnabled(criteria.enabledEqualTo);
+                if (userLoginCertificates != null && userLoginCertificates.size() > 0) {
+                    for (UserLoginCertificate userLoginCertificate : userLoginCertificates) {
+                        list.add(convertToApiClientInfo(userLoginCertificate));
+                    }
+                }
+            } else if (criteria.fingerprintEqualTo != null) {
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha1(criteria.fingerprintEqualTo);
+                if (userLoginCertificate != null) {
+                    list.add(convertToApiClientInfo(userLoginCertificate));
+                }
+            } else if (criteria.nameEqualTo != null) {
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateByUsername(criteria.nameEqualTo);
+                if (userLoginCertificate != null) {
+                    list.add(convertToApiClientInfo(userLoginCertificate));
+                }
+            }
+            
+            return list;
+        /*try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
             List<ApiClientX509> list;
             if( criteria.enabledEqualTo != null && criteria.statusEqualTo != null ) {
@@ -605,7 +659,7 @@ public class ApiClientBO extends BaseBO {
                 response.add(toApiClientInfo(apiClientX509));
             }
             
-            return response;
+            return response;*/
             
         } catch (MSException me) {
             log.error("Error during searching for the API Client information. " + me.getErrorMessage());            
@@ -622,5 +676,33 @@ public class ApiClientBO extends BaseBO {
         String certName = x509Certificate.getSubjectX500Principal().getName();
         certName = certName.substring((certName.indexOf("CN=")+(("CN=").length())), certName.indexOf(",OU="));
         return certName;
+    }
+    
+    private ApiClientInfo convertToApiClientInfo(UserLoginCertificate userLoginCertificate) throws SQLException, IOException {
+        ApiClientInfo info = new ApiClientInfo();
+        info.certificate = userLoginCertificate.getCertificate();
+        info.fingerprint = userLoginCertificate.getSha256Hash();
+        info.issuer = userLoginCertificate.getX509Certificate().getIssuerDN().getName();
+        info.serialNumber = userLoginCertificate.getX509Certificate().getSerialNumber().intValue();
+        info.expires = userLoginCertificate.getExpires();
+        info.enabled = userLoginCertificate.isEnabled();
+        info.status = userLoginCertificate.getStatus().toString();
+        info.comment = userLoginCertificate.getComment();
+        // set the roles array
+        ArrayList<String> roleNames = new ArrayList<>();
+
+        try(LoginDAO dao = MyJdbi.authz()) {
+            List<com.intel.mtwilson.user.management.rest.v2.model.Role> v2roles = dao.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+            log.debug("found {} roles", v2roles.size());
+            for(com.intel.mtwilson.user.management.rest.v2.model.Role v2role : v2roles) {
+                log.debug("found role name: {}", v2role.getRoleName());
+                roleNames.add(v2role.getRoleName());
+            }
+            User findUserById = dao.findUserById(userLoginCertificate.getUserId());
+            if (findUserById != null)
+                info.name = findUserById.getUsername();
+        }
+        info.roles = roleNames.toArray(new String[0]);
+        return info;        
     }
 }

@@ -5,9 +5,6 @@
 package com.intel.mtwilson.attestation.client.jaxrs;
 
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.as.rest.v2.model.File;
-import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
@@ -16,7 +13,6 @@ import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -35,9 +31,6 @@ public class Oems extends MtWilsonClient {
         super(url);
     }
 
-    /**
-     * @example. This is testing
-     */
     public Oems(Properties properties) throws Exception {
         super(properties);
     }
@@ -95,7 +88,7 @@ public class Oems extends MtWilsonClient {
      */
     public void deleteOem(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("oems/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
@@ -104,6 +97,35 @@ public class Oems extends MtWilsonClient {
         }
     }
 
+    /**
+     * Deletes the Oem(s) matching the specified search criteria. 
+     * @param criteria OemFilterCriteria object specifying the search criteria. The search options include
+     * id, nameEqualTo and nameContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions oems:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/oems?nameContains=admin
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Oems client = new Oems(My.configuration().getClientProperties());
+     *  OemFilterCriteria criteria = new OemFilterCriteria();
+     *  criteria.nameContains = "admin";
+     *  client.deleteOem(criteria);
+     * </pre>
+     */
+    public void deleteOem(OemFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("oems", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete oem failed");
+        }
+    }
+    
     /**
      * Updates the details of the Oem in the system. Only description of the Oem can be updated.
      * @param oem - Oem that needs to be updated.
@@ -130,7 +152,7 @@ public class Oems extends MtWilsonClient {
      */
     public Oem editOem(Oem oem) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", oem.getId().toString());
         Oem newOem = getTarget().path("oems/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(oem), Oem.class);
         return newOem;
@@ -158,7 +180,7 @@ public class Oems extends MtWilsonClient {
      */
     public Oem retrieveOem(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Oem oem = getTarget().path("oems/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Oem.class);
         return oem;
@@ -166,9 +188,10 @@ public class Oems extends MtWilsonClient {
     
     /**
      * Searches for the Oem's with the specified set of criteria
-     * @param criteria - <code> OemFilterCriteria </code> expressing the filter criteria
-     *      The possible search options include nameEqualTo and nameContains.
-     * @return <code> OemCollection </code> with the Oems that meet the specified filter criteria
+     * @param criteria OemFilterCriteria specifying the filter criteria.
+     * The possible search options include id, nameEqualTo and nameContains. 
+     * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /v2/oems?filter=false]
+     * @return OemCollection having the list of Oems that meet the specified filter criteria
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oems:search
      * @mtwContentTypeReturned JSON/XML/YAML

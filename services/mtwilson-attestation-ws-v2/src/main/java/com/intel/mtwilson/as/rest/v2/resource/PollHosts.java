@@ -14,8 +14,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,14 +23,16 @@ import org.slf4j.LoggerFactory;
 @Path("/integrations/openstack/PollHosts")
 public class PollHosts  {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PollHosts.class);
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public OpenStackHostTrustLevelReport getOpenStackHostTrustReport(OpenStackHostTrustLevelQuery request) {
+        log.debug("Got request to retrieve the attestation report for {} number of hosts.", request.hosts.length);
         ValidationUtil.validate(request);
         OpenStackHostTrustLevelReport pollHosts = new HostTrustBO().getPollHosts(request);
+        log.debug("Successfully processed the attestation report for {} number of hosts.", pollHosts.pollHosts.size());        
         return pollHosts;
     }
             

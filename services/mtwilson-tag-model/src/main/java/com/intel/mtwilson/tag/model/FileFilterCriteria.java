@@ -6,13 +6,14 @@ package com.intel.mtwilson.tag.model;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.repository.FilterCriteria;
+import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
 import javax.ws.rs.QueryParam;
 
 /**
  *
  * @author jbuhacoff
  */
-public class FileFilterCriteria implements FilterCriteria<File> {
+public class FileFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<File> {
     
     @QueryParam("id")
     public UUID id;

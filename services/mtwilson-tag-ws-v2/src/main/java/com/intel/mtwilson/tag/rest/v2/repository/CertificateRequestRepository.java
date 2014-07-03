@@ -45,22 +45,20 @@ public class CertificateRequestRepository implements DocumentRepository<Certific
         try(JooqContainer jc = TagJdbi.jooq()) {
             DSLContext jooq = jc.getDslContext();
             
-            SelectQuery sql = jooq.select()
-                    .from(MW_TAG_CERTIFICATE_REQUEST) // .join(CERTIFICATE_REQUEST_TAG_VALUE)
-                    //.on(CERTIFICATE_REQUEST_TAG_VALUE.CERTIFICATEREQUESTID.equal(CERTIFICATE_REQUEST.ID)))
-                    .getQuery();
-            if( criteria.id != null ) {
-    //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
-            }
-            if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
-            }
-            if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
-            }
-            if( criteria.statusEqualTo != null  && criteria.statusEqualTo.length() > 0 ) {
-                sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equalIgnoreCase(criteria.statusEqualTo));
+            SelectQuery sql = jooq.select().from(MW_TAG_CERTIFICATE_REQUEST).getQuery();
+            if (criteria.filter) {
+                if( criteria.id != null ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.ID.equalIgnoreCase(criteria.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
+                }
+                if( criteria.subjectEqualTo != null  && criteria.subjectEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.equalIgnoreCase(criteria.subjectEqualTo));
+                }
+                if( criteria.subjectContains != null  && criteria.subjectContains.length() > 0  ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.SUBJECT.lower().contains(criteria.subjectContains.toLowerCase()));
+                }
+                if( criteria.statusEqualTo != null  && criteria.statusEqualTo.length() > 0 ) {
+                    sql.addConditions(MW_TAG_CERTIFICATE_REQUEST.STATUS.equalIgnoreCase(criteria.statusEqualTo));
+                }
             }
             sql.addOrderBy(MW_TAG_CERTIFICATE_REQUEST.ID);
             Result<Record> result = sql.fetch();
@@ -210,7 +208,18 @@ public class CertificateRequestRepository implements DocumentRepository<Certific
     @Override
     @RequiresPermissions("tag_certificate_requests:delete,search") 
     public void delete(CertificateRequestFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("CertificateRequest:Delete - Got request to delete certificate requests by search criteria.");        
+        CertificateRequestCollection objCollection = search(criteria);
+        try { 
+            for (CertificateRequest obj : objCollection.getCertificateRequests()) {
+                CertificateRequestLocator locator = new CertificateRequestLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during Certificate Request deletion.", ex);
+            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
         
 }

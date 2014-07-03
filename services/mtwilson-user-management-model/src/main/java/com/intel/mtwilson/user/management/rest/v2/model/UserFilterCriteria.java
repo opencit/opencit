@@ -17,6 +17,9 @@ public class UserFilterCriteria extends DefaultFilterCriteria implements FilterC
 
     @QueryParam("id")
     public UUID id;
-    @QueryParam("userNameEqualTo")
-    public String userNameEqualTo;
+    @QueryParam("nameEqualTo")
+    public String nameEqualTo;
+    @QueryParam("nameContains")
+    public String nameContains;
+    
 }

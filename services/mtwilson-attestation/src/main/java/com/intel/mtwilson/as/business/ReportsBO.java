@@ -9,7 +9,6 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.business.trust.Util;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.i18n.ErrorCode;
 //import com.intel.mtwilson.model;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
@@ -27,16 +26,13 @@ import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Hostname;
 import java.util.*;
 import java.io.IOException;
-//import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dsmagadx
  */
-public class ReportsBO extends BaseBO {
-    Logger logger = LoggerFactory.getLogger(getClass().getName());
+public class ReportsBO {
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ReportsBO.class);
     private static String ASSET_TAG_PCR = "22";
     
 
@@ -44,9 +40,9 @@ public class ReportsBO extends BaseBO {
         super();
     }
     
-    public ReportsBO(PersistenceManager pm) {
-        super(pm);
-    }
+//    public ReportsBO(PersistenceManager pm) {
+//        super(pm);
+//    }
 
     public HostsTrustReportType getTrustReport(Collection<Hostname> hostNames) { // datatype.Hostname
 
@@ -228,11 +224,12 @@ public class ReportsBO extends BaseBO {
             throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
         }
 
-        Date lastStatusTs = new TblTaLogJpaController(getEntityManagerFactory()).findLastStatusTs(tblHosts.getId());
+        TblTaLogJpaController tblTaLogJpaController = My.jpa().mwTaLog();
+        Date lastStatusTs = tblTaLogJpaController.findLastStatusTs(tblHosts.getId());
 
 
         if (lastStatusTs != null) {
-            List<TblTaLog> logs = new TblTaLogJpaController(getEntityManagerFactory()).findLogsByHostId(tblHosts.getId(), lastStatusTs);
+            List<TblTaLog> logs = tblTaLogJpaController.findLogsByHostId(tblHosts.getId(), lastStatusTs);
             com.intel.mountwilson.as.hostmanifestreport.data.HostType hostType = new com.intel.mountwilson.as.hostmanifestreport.data.HostType();
             hostType.setName(hostName.toString()); // datatype.Hostname
             if (logs != null) {

@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -92,12 +93,41 @@ public class Hosts extends MtWilsonClient {
      */
     public void deleteHost(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("hosts/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         log.debug(obj.toString());
     }
 
+    /**
+     * Deletes the hosts matching the specified filter criteria.
+     * @param criteria HostFilterCriteria object specifying the search criteria. Search options supported
+     * include id, nameEqualTo, nameContains and descriptionContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions hosts:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/hosts?nameContains=192
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *   Hosts client = new Hosts(My.configuration().getClientProperties());
+     *   HostFilterCriteria criteria = new HostFilterCriteria();
+     *   criteria.nameContains = "192";
+     *  client.deleteHost(criteria);
+     * </pre>
+     */
+    public void deleteHost(HostFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("hosts", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete hosts failed");
+        }
+    }
+    
     /**
      * Updates the host with the specified attributes. Except for the host name, all other attributes can be updated.
      * @param Host object with the values to be updated. 
@@ -159,7 +189,7 @@ public class Hosts extends MtWilsonClient {
     */
     public Host retrieveHost(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Host obj = getTarget().path("hosts/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Host.class);
         return obj;
@@ -169,14 +199,15 @@ public class Hosts extends MtWilsonClient {
      * Searches for the hosts with the specified criteria.
      * @param HostFilterCriteria object that specifies the search criteria.
      * The possible search options include id, nameEqualTo, nameContains and descriptionContains.
-     * @return <code> HostCollection</code> object with a list of Hosts that match the filter/search criteria.
+     * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /hosts?filter=false]
+     * @return HostCollection object with a list of Hosts that match the filter criteria.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:search
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8181/mtwilson/v2/hosts?nameContains=10
+     * https://server.com:8181/mtwilson/v2/hosts?nameContains=192
      * Output: {"hosts":[{"id":"de07c08a-7fc6-4c07-be08-0ecb2f803681","name":"192.168.0.2", "connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
      * "bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985","vmm_mle_uuid":"45c03402-e33d-4b54-9893-de3bbd1f1681"}]}
      * </pre>
@@ -185,7 +216,7 @@ public class Hosts extends MtWilsonClient {
      *   Properties prop = My.configuration().getClientProperties();
      *   Hosts client = new Hosts(prop);
      *   HostFilterCriteria criteria = new HostFilterCriteria();
-     *   criteria.nameContains = "10";
+     *   criteria.nameContains = "192";
      *   HostCollection objCollection = client.searchHosts(criteria);
      * </pre>
      */

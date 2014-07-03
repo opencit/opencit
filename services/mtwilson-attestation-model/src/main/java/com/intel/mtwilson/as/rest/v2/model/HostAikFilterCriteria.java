@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.intel.mtwilson.repository.FilterCriteria;
+import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
@@ -12,7 +13,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class HostAikFilterCriteria implements FilterCriteria<HostAik> {
+public class HostAikFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<HostAik> {
     
     @PathParam("host_id")
     public String hostUuid;

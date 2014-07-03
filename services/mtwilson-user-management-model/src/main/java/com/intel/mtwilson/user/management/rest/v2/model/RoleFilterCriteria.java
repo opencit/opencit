@@ -17,6 +17,8 @@ public class RoleFilterCriteria extends DefaultFilterCriteria implements FilterC
 
     @QueryParam("id")
     public UUID id;
-    @QueryParam("roleNameEqualTo")
-    public String roleNameEqualTo;
+    @QueryParam("nameEqualTo")
+    public String nameEqualTo;
+    @QueryParam("nameContains")
+    public String nameContains;
 }

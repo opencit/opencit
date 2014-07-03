@@ -47,10 +47,17 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
                 if (obj != null) {
                     objCollection.getRoles().add(obj);
                 }
-            } else if (criteria.roleNameEqualTo != null && !criteria.roleNameEqualTo.isEmpty()) {
-                Role obj = loginDAO.findRoleByName(criteria.roleNameEqualTo);
+            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                Role obj = loginDAO.findRoleByName(criteria.nameEqualTo);
                 if (obj != null) {
                     objCollection.getRoles().add(obj);
+                }
+            } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
+                List<Role> roles = loginDAO.findRoleByNameLike("%"+criteria.nameContains+"%");
+                if (roles != null && roles.size() > 0) {
+                    for (Role role : roles) {
+                        objCollection.getRoles().add(role);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -168,7 +175,18 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
     @Override
     @RequiresPermissions("roles:delete,search")        
     public void delete(RoleFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("Role:Delete - Got request to delete role permission by search criteria.");        
+        RoleCollection objCollection = search(criteria);
+        try { 
+            for (Role obj : objCollection.getRoles()) {
+                RoleLocator locator = new RoleLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (Exception ex) {
+            log.error("Error during role deletion.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+        }
     }
     
 }

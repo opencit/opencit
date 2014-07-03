@@ -44,7 +44,10 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
             if (criteria.userUuid != null) {
                 UserLoginPassword obj = loginDAO.findUserLoginPasswordByUserId(criteria.userUuid);
                 if (obj != null) {
-                    if (criteria.id != null) {
+                    if (criteria.filter == false) {
+                        obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
+                        objCollection.getUserLoginPasswords().add(obj);                                                
+                    } else if (criteria.id != null) {
                         if (obj.getId().equals(criteria.id)) {
                             obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
                             objCollection.getUserLoginPasswords().add(obj);
@@ -64,10 +67,7 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
                             obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
                             objCollection.getUserLoginPasswords().add(obj);
                         }
-                    } else {
-                        obj.setRoles(getAssociateRolesForLoginPasswordId(obj.getId()));
-                        objCollection.getUserLoginPasswords().add(obj);                        
-                    }
+                    } 
                 }
             }
         } catch (Exception ex) {

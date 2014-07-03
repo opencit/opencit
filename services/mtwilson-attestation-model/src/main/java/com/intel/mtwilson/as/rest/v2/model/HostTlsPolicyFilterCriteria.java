@@ -5,14 +5,19 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.intel.dcsg.cpg.io.UUID;
+<<<<<<< HEAD
 import com.intel.mtwilson.repository.FilterCriteria;
+=======
+import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
+import com.intel.mtwilson.jaxrs2.FilterCriteria;
+>>>>>>> bd29d08c853e9e3de3146865a2ce2f02c196172a
 import javax.ws.rs.PathParam;
 
 /**
  *
  * @author ssbangal
  */
-public class HostTlsPolicyFilterCriteria implements FilterCriteria<HostTlsPolicy> {
+public class HostTlsPolicyFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<HostTlsPolicy> {
     
     @PathParam("host_id")
     public UUID hostUuid;    

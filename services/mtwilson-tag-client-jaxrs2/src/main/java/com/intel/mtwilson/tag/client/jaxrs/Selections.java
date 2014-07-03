@@ -91,6 +91,38 @@ public class Selections extends MtWilsonClient {
     }
     
     /**
+     * Deletes the list of selections based on the search criteria specified. 
+     * @param criteria - SelectionFilterCriteria object specifying the filter criteria. The 
+     * possible search options include nameEqualTo, nameContains, descriptionEqualTo and descriptionContains.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions tag_selections:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/tag-selections?nameEqualTo=default
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Selections client = new Selections(My.configuration().getClientProperties());
+     *  SelectionFilterCriteria criteria = new SelectionFilterCriteria();
+     *  criteria.nameEqualTo = "default";
+     *  client.deleteSelection(criteria);
+     * </pre>
+     */
+    public void deleteSelection(SelectionFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("tag-selections", criteria).request(MediaType.APPLICATION_JSON).delete();
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete Selection failed");
+        }
+    }
+    
+
+    
+    /**
      * Allows the user to edit an existing selection. Note that only the description of the selection
      * can be edited.  
      * @param obj Selection object having the value that needs to be updated. 
