@@ -44,14 +44,14 @@
                                 <div class="valueDivConfig">
                                     <select class="whiteListConfigDropDown" size="3" id="oem_bios_applicable_for" onchange="fnSelectWhiteListType(this, 'Oem_Bios_Checkbox')">
                                         <c:forEach var="BIOSWhiteListData" varStatus="rowCounter"  items="${BIOSWhiteList}">
-                                            <option data-i18n="select.${fn:toLowerCase(BIOSWhiteListData)}">${BIOSWhiteListData}</option>
+                                            <option value="${BIOSWhiteListData}" data-i18n="[text]select.${fn:toLowerCase(BIOSWhiteListData)}">${BIOSWhiteListData}</option>
                                         </c:forEach>
                                     </select>
                                 </div>
                                 <div class="valueDivConfig">
                                     <select class="whiteListConfigDropDown" size="3" id="Hypervisor_bios_applicable_for" onchange="fnSelectWhiteListType(this, 'Hypervisor_Checkbox')">
                                         <c:forEach var="vmmWhiteListData" varStatus="rowCounter"  items="${vmmWhiteList}">
-                                            <option data-i18n="select.${fn:toLowerCase(vmmWhiteListData)}">${vmmWhiteListData}</option>
+                                            <option value="${vmmWhiteListData}" data-i18n="[text]select.${fn:toLowerCase(vmmWhiteListData)}">${vmmWhiteListData}</option>
                                         </c:forEach>
                                     </select>
                                 </div>
@@ -211,6 +211,7 @@
             </c:choose>
             <br>
             <div id="whiteListMessage"></div>
+            <span id="alert_valid_hostname_ip" data-i18n="alert.valid_hostname_ip" style="display: none;">Please enter a valid hostname or ip address and try again.</span>
         </div>
 	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
         <script type="text/javascript" src="Scripts/WhiteListConfig.js"></script>

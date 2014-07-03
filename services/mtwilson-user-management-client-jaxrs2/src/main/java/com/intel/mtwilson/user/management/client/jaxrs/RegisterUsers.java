@@ -75,7 +75,7 @@ public class RegisterUsers extends MtWilsonClient {
         if (result.getClass().equals(LinkedHashMap.class)) {
             LinkedHashMap resultMap = (LinkedHashMap)result;
             if (resultMap.containsKey("result")) {
-                isUserRegistered = (boolean) resultMap.get("result");
+                isUserRegistered = Boolean.parseBoolean(resultMap.get("result").toString().trim());
                 log.debug("Result of user registration with certificate is {}.", isUserRegistered);
             }
         }

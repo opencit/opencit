@@ -177,6 +177,7 @@
 			
 		</div>
 		<div id="mleMessage"></div>
+                <span id="alert_add_mle" data-i18n="alert.add_mle" style="display: none;">Are you sure you want to add this MLE?</span>
 	</div>
 
 

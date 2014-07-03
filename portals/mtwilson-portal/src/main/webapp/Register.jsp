@@ -74,6 +74,7 @@
                     </form>
                     <div id="errorMessage"></div>
         	</div>
+            <span id="alert_successful_user_registration" data-i18n="alert.successful_user_registration" style="display: none;">User is successfully registered. Contact administrator for access approval before accessing the portal.</span>
         </div>
         <div class="footer">
             <p>&copy; 2012-2013 Intel Corporation.</p>

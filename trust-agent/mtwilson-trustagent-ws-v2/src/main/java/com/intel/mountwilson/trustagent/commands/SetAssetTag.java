@@ -15,6 +15,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.dcsg.cpg.io.HexUtil;
 import com.intel.mountwilson.common.CommandResult;
 import com.intel.mountwilson.common.TAConfig;
 
@@ -85,6 +86,10 @@ public class SetAssetTag implements ICommand{
         try {
             //String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
+            if (!HexUtil.isHex(NvramPassword)) {
+                log.error("NvramPassword is not in hex format: {}", NvramPassword);
+                throw new IllegalArgumentException(String.format("NvramPassword is not in hex format: %s", NvramPassword));
+            }
             log.debug("running command tpm_nvwrite -x -i " + index + " -pXXXX -f /tmp/hash");
             String[] variables = { "NvramPassword=" + NvramPassword };
             CommandUtil.runCommand("tpm_nvwrite -x -t -i " + index + " -pNvramPassword -f /tmp/hash", variables);
@@ -97,8 +102,13 @@ public class SetAssetTag implements ICommand{
     
     private void writeHashToFile() throws TAException, IOException {
         try {
+            String assetTagHash = context.getAssetTagHash();
+            if (!HexUtil.isHex(assetTagHash)) {
+                log.error("assetTagHash is not in hex format: {}", assetTagHash);
+                throw new IllegalArgumentException(String.format("assetTagHash is not in hex format: %s", assetTagHash));
+            }
             // TODO: multiline output is concatenated... so we could be returning just a single string.
-            CommandUtil.runCommand("/usr/local/bin/hex2bin " + context.getAssetTagHash() + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
+            CommandUtil.runCommand("/usr/local/bin/hex2bin " + assetTagHash + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -106,9 +116,16 @@ public class SetAssetTag implements ICommand{
     }
     
     private boolean createIndex(String NvramPassword) throws TAException, IOException {
-        List<String> result;
         try {
             String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
+            if (!HexUtil.isHex(NvramPassword)) {
+                log.error("NvramPassword is not in hex format: {}", NvramPassword);
+                throw new IllegalArgumentException(String.format("NvramPassword is not in hex format: %s", NvramPassword));
+            }
+            if (!HexUtil.isHex(tpmOwnerPass)) {
+                log.error("tpmOwnerPass is not in hex format: {}", tpmOwnerPass);
+                throw new IllegalArgumentException(String.format("tpmOwnerPass is not in hex format: %s", tpmOwnerPass));
+            }
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
             log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -aXXXX -oXXXX --permissions=AUTHWRITE");
             String[] variables = { "tpmOwnerPass=" + tpmOwnerPass, "NvramPassword=" + NvramPassword };
@@ -123,6 +140,10 @@ public class SetAssetTag implements ICommand{
     private boolean releaseIndex() throws TAException, IOException {
         try {
             String tpmOwnerPass = TAConfig.getConfiguration().getString("tpm.owner.secret");
+            if (!HexUtil.isHex(tpmOwnerPass)) {
+                log.error("tpmOwnerPass is not in hex format: {}", tpmOwnerPass);
+                throw new IllegalArgumentException(String.format("tpmOwnerPass is not in hex format: %s", tpmOwnerPass));
+            }
             log.debug("running command tpm_nvrelease -x -t -i " + index + " -oXXXX");
             String[] variables = { "tpmOwnerPass=" + tpmOwnerPass };
             CommandUtil.runCommand("tpm_nvrelease -x -t -i " + index + " -otpmOwnerPass", variables);

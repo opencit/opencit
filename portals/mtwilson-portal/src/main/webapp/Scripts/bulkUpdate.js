@@ -26,11 +26,11 @@ function populateBulkHostDataIntoTable(hostDetails) {
 			if(selectedHost[hostDetails[item].hostName] != undefined ){checked="checked";}
 			str+='<tr class="'+classValue+'">'+
 			'<td class="reportViewRow1"><input type="checkbox" checked='+checked+' onclick="selectHostForUpdate(this,checked)"></td>'+
-			'<td class="reportViewRow2">'+hostDetails[item].hostName+'</td>'+
-			'<td class="reportViewRow3">'+hostDetails[item].biosName+'</td>'+
-			'<td class="reportViewRow4">'+hostDetails[item].biosBuildNo+'&nbsp;</td>'+
-			'<td class="reportViewRow5">'+hostDetails[item].vmmName+'&nbsp;</td>'+
-			'<td class="reportViewRow6">'+hostDetails[item].vmmBuildNo+'&nbsp;</td>'+
+			'<td class="reportViewRow2">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</td>'+
+			'<td class="reportViewRow3">'+ getHTMLEscapedMessage(hostDetails[item].biosName)+'</td>'+
+			'<td class="reportViewRow4">'+ getHTMLEscapedMessage(hostDetails[item].biosBuildNo)+'&nbsp;</td>'+
+			'<td class="reportViewRow5">'+ getHTMLEscapedMessage(hostDetails[item].vmmName)+'&nbsp;</td>'+
+			'<td class="reportViewRow6">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo)+'&nbsp;</td>'+
 			'</tr>';
 		}
 		$('#mainBulkHostDetailsContent table').html(str);

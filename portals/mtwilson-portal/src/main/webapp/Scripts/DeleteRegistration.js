@@ -17,8 +17,8 @@ function fnDeleteRegistrationDetailsSuccess(responseJSON) {
                             roles += '<span data-i18n="label.role_' + request[item].roles[role].toLowerCase() + '" data-status="' + request[item].roles[role] + '">' + request[item].roles[role] + '</span>, ';
                         }
                         roles = roles.replace(/,\s*$/, "");
-			str+='<tr class="'+classValue+'" fingerprint="'+request[item].fingerprint+'">'+
-					'<td class="deleteRequestRow1" name="name">'+request[item].name+'</td>'+
+			str+='<tr class="'+classValue+'" fingerprint="'+ escapeForHTMLAttributes(request[item].fingerprint) +'">'+
+					'<td class="deleteRequestRow1" name="name">'+ getHTMLEscapedMessage(request[item].name) +'</td>'+
 					'<td class="deleteRequestRow2" name="requestedRoles">'+roles+'</td>'+
 					'<td class="deleteRequestRow3" name="expires">'+fnGetFormatedDate(request[item].expires)+'</td>'+
 					'<td class="deleteRequestRow4"><input type="button" value="Delete" onclick="fnDeleteSelectedRequest(this)" data-i18n="[value]button.delete"></td>'+
@@ -26,7 +26,7 @@ function fnDeleteRegistrationDetailsSuccess(responseJSON) {
 		}
 		$('#deleteRegisterHostTableContent').html(str);
 	}else {
-		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
+		$('#successMessage').html('<span class="errorMessage">'+ getHTMLEscapedMessage(responseJSON.message)+'</span>');
 	}
 }
 
@@ -34,7 +34,7 @@ function fnDeleteSelectedRequest(element) {
         $('#successMessage').html('');
 	var row = $(element).parent().parent();
 	var data="fingerprint="+$(row).attr('fingerprint');
-        if (confirm("Are you sure you want to delete this Request ?")) {
+        if (confirm($("#alert_delete_request").text())) {
             $('#mainLoadingDiv').prepend(disabledDiv);
             sendJSONAjaxRequest(false, 'getData/deleteSelectedRequest.html', data, deleteSelectedRequestSuccess, null,element);
         }
@@ -46,7 +46,7 @@ function deleteSelectedRequestSuccess(responsJSON,element) {
             $('#successMessage').html('<div class="successMessage">Request has been successfully deleted.</div>');
             $(element).parent().parent().remove();
         }else{
-            $('#successMessage').html('<div class="errorMessage">'+responsJSON.message+'</div>');
+            $('#successMessage').html('<div class="errorMessage">'+ getHTMLEscapedMessage(responsJSON.message)+'</div>');
         }
         
 }

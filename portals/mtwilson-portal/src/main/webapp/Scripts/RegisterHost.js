@@ -56,8 +56,12 @@ function fnuploadSuccess(responseHTML) {
         if ($(response).find('pre').html() != null) {
             validResponse = $(response).find('pre').html();
         }
-        validResponse = validResponse.split(':')[1];
-        validResponse = validResponse.substring(0, validResponse.length - 1);
+	if(validResponse == null || validResponse == '') {
+		validResponse = 'false';
+	}
+
+        //validResponse = validResponse.split(':')[1];
+        //validResponse = validResponse.substring(0, validResponse.length - 1);
     } else {
         validResponse = $.trim($(response).find('.bool').text());
     }
@@ -82,6 +86,9 @@ function updateListHostToBeRegister(responsJson) {
         var wlVMMList = responsJson.wlVMMList;
         // var selectionList = responsJson.selectionList;
         for (var val in values) {
+	    if (val != parseInt(val)) {
+		continue;
+	    }
             var str = "";
             var classValue = null;
             var portNo = null;
@@ -225,7 +232,7 @@ function fnRetrieveDatacenters() {
             sendJSONAjaxRequest(false, 'getData/retrieveDatacenters.html', data, fnRetrieveDatacentersSuccess, null);
         }
     } else {
-        alert("Please enter a valid hostname or ip address and try again.");
+        alert($("#alert_valid_hostname_ip").text());
     }
 }
 
@@ -267,7 +274,7 @@ function fnRetrieveClusters() {
             sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
         }
     } else {
-        alert("Please enter a valid hostname or ip address and try again.");
+        alert($("#alert_valid_hostname_ip").text());
     }
 }
 
@@ -305,7 +312,7 @@ function fnRetriveHostFromCluster() {
             sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
         }
     } else {
-        alert("Please enter a valid hostname or ip address and try again.");
+        alert($("#alert_valid_hostname_ip").text());
     }
 }
 

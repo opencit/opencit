@@ -19,7 +19,7 @@ function fnUpdateEditMleTable(responseJSON) {
 		fuCreateEditMleTable(responseJSON.MLEDataVo);
 		applyPagination('editMlePaginationDiv',responseJSON.noOfPages,fngetMleNextPageForEdit,1);
 	}else {
-		$('#messageSpace').html(responseJSON.message);
+		$('#errorEditMle').html(getHTMLEscapedMessage(responseJSON.message));
 	}
 }
 
@@ -34,7 +34,7 @@ function fnUpdateEditMleTableForPage(responseJSON) {
 	if (responseJSON.result) {
 		fuCreateEditMleTable(responseJSON.MLEDataVo);
 	}else {
-		$('#messageSpace').html(responseJSON.message);
+		$('#errorEditMle').html(getHTMLEscapedMessage(responseJSON.message));
 	}
 }
 
@@ -44,6 +44,9 @@ function fuCreateEditMleTable(mleData) {
 	var str = "";
 	$('#editMleContentDiv table tbody').html("");
 	for ( var items in mleData) {
+                if(items != parseInt(items)) {
+                        continue;
+                }
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
                         // Changing the display value for Module attestation to PCR + Module since we attest both.
@@ -53,20 +56,20 @@ function fuCreateEditMleTable(mleData) {
                         }
 		str+='<tr class="'+classValue+'">'+
 		'<td class="row1"><a href="javascript:;" onclick="fnEditMleInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteMleInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
-		'<td class="rowr3" style="word-wrap: break-word;max-width:170px;" name="mleName">'+mleData[items].mleName+'</td>'+
-		'<td class="row2" name="mleVersion">'+mleData[items].mleVersion+'</td>'+
-		'<td class="rowr3" name="attestation_Type">'+displayAttestationTypeValue+'</td>';
+		'<td class="rowr3" style="word-wrap: break-word;max-width:170px;" name="mleName">'+ getHTMLEscapedMessage(mleData[items].mleName) +'</td>'+
+		'<td class="row2" name="mleVersion">'+getHTMLEscapedMessage(mleData[items].mleVersion) +'</td>'+
+		'<td class="rowr3" name="attestation_Type">'+ getHTMLEscapedMessage(displayAttestationTypeValue) +'</td>';
 		var val1 = mleData[items].manifestList == undefined ? ' ' : mleData[items].manifestList;
 		
 		 //str+='<td class="rowr7" name="manifestList">'+val1+'&nbsp;</td>'+
-		str+='<td class="row4" name="mleType">'+mleData[items].mleType+'</td>';
+		str+='<td class="row4" name="mleType">'+ getHTMLEscapedMessage(mleData[items].mleType) +'</td>';
 		val1 = mleData[items].osName == undefined ? ' ' : mleData[items].osName;
 		var val2 = mleData[items].osVersion == undefined ? ' ' : mleData[items].osVersion;
-		str+='<td class="rowr4" name="osName" version="'+val2+'" osName="'+val1+'">'+val1 +' '+val2+'&nbsp;</td>';
+		str+='<td class="rowr4" name="osName" version="'+ escapeForHTMLAttributes(val2) +'" osName="' + escapeForHTMLAttributes(val1) +'">'+ getHTMLEscapedMessage(val1) +' ' + getHTMLEscapedMessage(val2) +'&nbsp;</td>';
 		val1 = mleData[items].oemName == undefined ? ' ' : mleData[items].oemName;
-		str+='<td class="rowr2" name="oemName">'+val1+'&nbsp;</td>';
+		str+='<td class="rowr2" name="oemName">'+ getHTMLEscapedMessage(val1) +'&nbsp;</td>';
 		val1 = mleData[items].mleDescription == undefined ? ' ' : mleData[items].mleDescription;
-		str+='<td class="rowr3"  style="word-wrap: break-word;max-width:170px;"name="mleDescription">'+val1+'&nbsp;</td></tr>';
+		str+='<td class="rowr3"  style="word-wrap: break-word;max-width:170px;"name="mleDescription">'+ getHTMLEscapedMessage(val1)+'&nbsp;</td></tr>';
 	}
 	$('#editMleContentDiv table tbody').html(str);
 }
@@ -125,12 +128,12 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 		var host = isVMM ? response.osName+" "+response.osVersion : response.oemName;
 		
 		$('#MainContent_ddlMLEType').attr('disabled','disabled');
-		$('#MainContent_ddlHostOs').html('<option value="'+host+'" >'+host+'</option>');
+		$('#MainContent_ddlHostOs').html('<option value="'+ escapeForHTMLAttributes(host) +'" >'+getHTMLEscapedMessage(host) +'</option>');
 		$('#MainContent_ddlHostOs').attr('disabled','disabled');
 		
-		$('#mleTypeNameValue').html('<input id="MainContent_ddlMLEName" type="text" class="inputs textBox_Border" disabled="disabled" value="'+response.mleName+'" >');
+		$('#mleTypeNameValue').html('<input id="MainContent_ddlMLEName" type="text" class="inputs textBox_Border" disabled="disabled" value="'+ escapeForHTMLAttributes(response.mleName) +'" >');
 		
-		$('#MainContent_tbVersion').attr('value',response.mleVersion);
+		$('#MainContent_tbVersion').attr('value', escapeForHTMLAttributes(response.mleVersion));
 		$('#MainContent_tbVersion').attr('disabled','disabled');
                         // In the UI for Module attestation type, we want to show the user that Module attestation, both PCR and Modules
                         // will be verified. For that we will just update the UI for that
@@ -163,7 +166,7 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 				$('#MainContent_check_gkvs'+response.manifestList[pcr].Name).attr('checked','checked');
                                 //Bug:434 - Module manifests should not be allowed to change in this screen.
                                 $('#MainContent_check_gkvs'+response.manifestList[pcr].Name).attr('disabled','disabled');
-                                $('#MainContent_check_gkvs'+response.manifestList[pcr].Name).attr('value',response.manifestList[pcr].Value);
+                                $('#MainContent_check_gkvs'+response.manifestList[pcr].Name).attr('value', escapeForHTMLAttributes(response.manifestList[pcr].Value));
 			}
                         var str= '<div class="singleDiv"><div class="labelDiv">Manifest List :</div><div class="valueDiv">'+
 				'<input type="button" class="button" value="Show Manifest" onclick="getModuleTypeMleList(\''+dataToSend+'\')"/></div></div>';
@@ -251,7 +254,7 @@ function getModuleTypeMleListSuccess(responseJSON){
 function updateMleInfo() {
 	var dataToSent = fnGetMleData(false);
 	if (dataToSent != "") {
-		if (confirm("Are you Sure you want to update this MLE ?")) {
+		if (confirm($("#alert_update_mle").text())) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=false", updateMleSuccess, null);
 		}
@@ -272,7 +275,7 @@ $('#disabledDiv').remove();
 
 
 function fnDeleteMleInfo(element) {
-	if (confirm("Are you sure you want to delete this MLE ?")) {
+	if (confirm($("#alert_delete_mle").text())) {
 		$('#messageSpace').html('');
 		var data = [] ;
 	    var row = $(element).parent().parent();
@@ -317,7 +320,7 @@ function fnDeleteMleInfoSuccess(response,element,mleName) {
 	}else{
 		/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */
 		//$('#messageSpace').html('<div class="errorMessage">* MLE "'+mleName+'" is not deleted, '+response.message+'</div>');
-		$('#messageSpace').html('<div class="errorMessage">'+response.message+'</div>');
+		$('#messageSpace').html('<div class="errorMessage">'+getHTMLEscapedMessage(response.message)+'</div>');
 		/* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
 	}
 }

@@ -4,12 +4,22 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.saml.TrustAssertion;
+import java.io.File;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
@@ -25,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public class HostAttestations extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
+    Properties properties = null;
 
     public HostAttestations(URL url) throws Exception{
         super(url);
@@ -32,6 +43,7 @@ public class HostAttestations extends MtWilsonClient {
 
     public HostAttestations(Properties properties) throws Exception {
         super(properties);
+        this.properties = properties;
     }
        
     /**
@@ -182,7 +194,7 @@ public class HostAttestations extends MtWilsonClient {
      */
     public void deleteHostAttestation(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("host-attestations/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         log.debug(obj.toString());
@@ -221,7 +233,7 @@ public class HostAttestations extends MtWilsonClient {
     */    
     public HostAttestation retrieveHostAttestation(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         HostAttestation obj = getTarget().path("host-attestations/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostAttestation.class);
         return obj;
@@ -232,25 +244,27 @@ public class HostAttestations extends MtWilsonClient {
      * hosts matching the search criteria.If the user specifies the accept content type as "application/samlassertion+xml", then the latest valid cached SAML assertion
      * would be returned back to the caller.
      * @param HostAttestationFilterCriteria object that specifies the search criteria.
-     * The possible search options include host attestation id, host UUID, host AIK and host name. If the user
-     * specifies any of the host criteria, the latest attestation result would be returned back.
-     * @return <code> HostAttestationCollection</code> object with a list of attestations for the hosts that match the filter criteria. 
+     * The possible search options include host attestation id (id), host UUID(host_id), host AIK (aik) and host name(nameEqualTo). By
+     * default the last 10 attestation results would be returned back. The user can change this by additionally specifying the limit criteria (limit=5).
+     * @return HostAttestationCollection object with a list of attestations for the hosts that match the filter criteria. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:search
      * @mtwContentTypeReturned JSON/XML/YAML/SAML
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://10.1.71.234:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2
-     * Output: {"host_attestations":
-     *          [{"id":"32923691-9847-4493-86ee-3036a4f24940","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
-     *              "host_name":"192.168.0.2","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
+     * https://10.1.71.234:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2&limit=2
+     * Output: {"host_attestations":[{"id":"39cd1143-4f74-4767-8d82-9cb93d202115","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e",
+     * "host_name":"10.1.71.155","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}},
+     * {"id":"351408fd-53d4-4b65-8488-59e9867d091f","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e","host_name":"10.1.71.155",
+     * "host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
      *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
      *   HostAttestationFilterCriteria criteria = new HostAttestationFilterCriteria();
      *   criteria.nameEqualTo = "192.168.0.2";
+     *   criteria.limit = 2;
      *   HostAttestationCollection objCollection = client.searchHostAttestations(criteria);
      * </pre>
      */    
@@ -291,4 +305,22 @@ public class HostAttestations extends MtWilsonClient {
         return hostSaml;
     }
     
+    public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
+        if (properties != null && !properties.getProperty("mtwilson.api.keystore").isEmpty() && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
+            SimpleKeystore keystore = new SimpleKeystore(new File(properties.getProperty("mtwilson.api.keystore")), properties.getProperty("mtwilson.api.keystore.password"));
+            X509Certificate[] trustedSamlCertificates;
+            try {
+                trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
+            }
+            catch(KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
+                throw e;
+            }
+            catch(Exception e) {
+                throw e;
+            }
+            TrustAssertion trustAssertion = new TrustAssertion(trustedSamlCertificates, saml);
+            return trustAssertion;            
+        }
+        return null;
+    }
 }

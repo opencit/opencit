@@ -32,11 +32,14 @@ public class CreateIdentityDaaCmd implements ICommand {
 //            log.log(Level.INFO, "Created AIK Blob and AIK Certificate");
             
             // extract the EK
-            CommandUtil.runCommand(String.format("getcert %s", context.getEKCertFileName())); // safe; no arguments involved in this command line
+            String ekCertFileName = CommandUtil.doubleQuoteEscapeShellArgument(context.getEKCertFileName());
+            CommandUtil.runCommand(String.format("getcert %s", ekCertFileName)); // safe; no arguments involved in this command line
             log.info( "Extracted EK Certificate");
 	
             // prepare the AIK for the DAA challenge
-            CommandUtil.runCommand(String.format("aikpublish %s %s", context.getEKCertFileName(), context.getAikCertFileName(), context.getAikBlobFileName())); // safe; no arguments involved in this command line
+            CommandUtil.runCommand(String.format("aikpublish %s %s", ekCertFileName,
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikCertFileName()),
+                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()))); // safe; no arguments involved in this command line
             log.info( "Created AIK Blob and AIK Certificate for DAA");
 
             // read the AIK certificate

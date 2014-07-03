@@ -159,6 +159,8 @@
 		</div>
                         <div class="singleDiv" >&nbsp;</div>
 		<div id="mleMessage" class="errorDiv"></div>
+                <span id="alert_confirm_add_host" data-i18n="alert.add_host" style="display: none;">Are you sure you want to add this host?</span>
+                <span id="alert_valid_ip" data-i18n="alert.valid_ip" style="display: none;">Please enter a valid IP address and try again.</span>
 	</div>
 <script type="text/javascript" src="Scripts/tls_policy.js"></script>
 <script type="text/javascript" src="Scripts/addHost.js"></script>

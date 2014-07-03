@@ -1,5 +1,6 @@
 var apiClientList = [];
 var roleList = [];
+var expire_date;
 
 $(function() {
 	$('#mainLoadingDiv').prepend(disabledDiv);
@@ -11,7 +12,7 @@ function fnRetriveHostSuccess(responseJSON) {
 	if (responseJSON.result) {
 		var request = responseJSON.pendingRequest;
                 if (request.length == 0) {
-                    $('#successMessage').html('<span> No requests are currently pending to be reviewed.</span>');
+                    $('#successMessage').html('<span data-i18n="label.no_pending_api_requests">No requests are currently pending to be reviewed.</span>');
                     return;
                 } 
 
@@ -37,7 +38,7 @@ function fnRetriveHostSuccess(responseJSON) {
 		}
 		$('#approveRegisterHostTableContent').html(str);
 	}else {
-		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
+		$('#successMessage').html('<span class="errorMessage">'+ getHTMLEscapedMessage(responseJSON.message) +'</span>');
 	}
 }
 
@@ -77,7 +78,8 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	}*/
 	
 	$('#mainApiClient_Roles').html('<div>'+str+'</div>');
-	$('#mainApiClient_Expires').val(data.expires);
+        $('#mainApiClient_Expires').val(new Date(data.expires).toISOString());
+        expire_date = data.expires;
         $('#mainApiClient_Comments').val(data.comments);
 }
 
@@ -109,7 +111,8 @@ function fnGetRequestVOForApprovalOrReject() {
 		roles.push($(this).attr('role'));
 	});
 	vo.requestedRoles = roles;
-	vo.expires= $('#mainApiClient_Expires').val();
+        vo.expires = expire_date;
+	//vo.expires= $('#mainApiClient_Expires').val();
 	vo.comments= $('#mainApiClient_Comments').val();
 	//alert(vo.comments);
 	
@@ -118,7 +121,7 @@ function fnGetRequestVOForApprovalOrReject() {
 }
 
 function approveSelectedRequestSuccess(responseJSON) {
-	alert("Request is Approved Successfully.");
+	alert($("#alert_request_approved").text());
 	getApproveRequestPage();
 }
 
@@ -130,7 +133,7 @@ function fnRejectSelectedRequest() {
 }
 
 function rejectSelectedRequestSuccess() {
-	alert("Request is Rejected Successfully.");
+	alert($("#alert_request_rejected").text());
 	getApproveRequestPage();
 }
 
@@ -144,4 +147,9 @@ function findIndex(item, arr) {
         if (-1 != index) break;
     }
     return index;
+}
+
+function showDialogRoleHelp() {
+        var str = '<div class="helpDiv" data-i18n="[html]help.role_description_help"></div>';
+	fnOpenDialog(str, "Help", 500, 350,false);
 }

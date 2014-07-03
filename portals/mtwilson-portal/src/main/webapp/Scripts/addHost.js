@@ -65,7 +65,7 @@ function fnGetAllOemInfoSuccess(responseJSON) {
 		oemInfo = responseJSON.oemInfo;
 		var options = "";
 		for ( var str in oemInfo) {
-			options +='<option value="'+str+'">'+str+'</option>';
+			options +='<option value="' + escapeForHTMLAttributes(str) + '">' + getHTMLEscapedMessage(str) + '</option>';
 		}
 		$('#MainContent_ddlOEM').html(options);
 		sendJSONAjaxRequest(false, 'getData/getOSVMMInfo.html', null, fnGetOSVMMInfoSuccess, null);
@@ -83,7 +83,7 @@ function fnGetOSVMMInfoSuccess(responsJSON) {
 	if (responsJSON.result) {
 		var options = "";
 		for ( var str in responsJSON.osInfo) {
-			options +='<option isvmware="'+responsJSON.osInfo[str]+'" value="'+str+'">'+str+'</option>';
+			options +='<option isvmware="'+ escapeForHTMLAttributes(responsJSON.osInfo[str]) + '" value="' + escapeForHTMLAttributes(str) +'">' + getHTMLEscapedMessage(str) + '</option>';
 		}
                 if (options != "") {
                     $('#MainContent_LstVmm').html(options);
@@ -111,7 +111,7 @@ function fnChangeOEMVender() {
 			var options = "";
 			for ( var name in oemInfo[oem]) {
 				for ( var val in oemInfo[oem][name]) {
-					options +='<option biosName="'+val+'" biosVer="'+oemInfo[oem][name][val]+'">'+val+' '+oemInfo[oem][name][val]+'</option>';
+					options +='<option biosName="' + escapeForHTMLAttributes(val) + '" biosVer="' + escapeForHTMLAttributes(oemInfo[oem][name][val]) + '">' + getHTMLEscapedMessage(val) + ' ' + getHTMLEscapedMessage(oemInfo[oem][name][val]) + '</option>';
 				}
 			}
 			$('#MainContent_LstBIOS').html(options);
@@ -339,7 +339,7 @@ function addNewHost() {
 
         if(ipValid == true) {
             if (chechAddHostValidation()) {
-                if (confirm("Are you Sure you want to Add this Host ?")) {
+                if (confirm($("#alert_confirm_add_host").text())) {
                     var dataToSend = fnGetNewHostData();
                     dataToSend.hostId = null;
                     dataToSend = $.toJSON(dataToSend);
@@ -349,7 +349,7 @@ function addNewHost() {
                 }
             }
         }else{
-            alert("Please enter a valid IP address and try again.")
+            alert($("#alert_valid_ip").text())
         }
 }
 

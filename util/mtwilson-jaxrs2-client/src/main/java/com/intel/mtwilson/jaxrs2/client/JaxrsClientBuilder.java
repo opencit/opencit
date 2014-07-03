@@ -116,8 +116,9 @@ public class JaxrsClientBuilder {
         }
         if (keystore != null && configuration.getString("mtwilson.api.key.alias") != null && configuration.getString("mtwilson.api.key.password") != null) {
             log.debug("Registering X509 credentials for {}", configuration.getString("mtwilson.api.key.alias"));
-//            log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
+            log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.key.password"));
+            log.debug(credential.getPublicKey().toString());
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
         // HMAC authorization

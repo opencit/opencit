@@ -40,6 +40,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
+import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
@@ -193,13 +194,13 @@ public class TAHelper {
             try(FileOutputStream outSecret = new FileOutputStream(new File(getDaaSecretFileName(sessionId)))) {
             IOUtils.write(secret, outSecret);
             }
-
+            
             // encrypt DAA challenge secret using AIK public key so only TPM can read it
             CommandUtil.runCommand(String.format("aikchallenge %s %s %s %s",
-                    getDaaSecretFileName(sessionId),
-                    getDaaAikProofFileName(sessionId),
-                    getDaaChallengeFileName(sessionId),
-                    getRSAPubkeyFileName(sessionId)), false, "Aik Challenge");
+                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
+                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
+                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
+                    CommandUtil.doubleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
 
             // send DAA challenge to Trust Agent and validate the response
             try(FileInputStream in = new FileInputStream(new File(getDaaChallengeFileName(sessionId)))) {
@@ -723,8 +724,11 @@ public class TAHelper {
 //        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
-        String command = String.format("%s -c %s %s %s", aikverifyCmd, aikverifyhomeData + File.separator + getNonceFileName(sessionId),
-                aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId), aikverifyhomeData + File.separator + getQuoteFileName(sessionId));
+        String command = String.format("%s -c %s %s %s",
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
+                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");

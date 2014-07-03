@@ -44,7 +44,8 @@
         		<div id="hostTrustPaginationDiv"></div>
         		<div id="errorMessage" style="padding-top: 20px;text-align: left;"></div>
         		</div>
-        		
+                        <span id="alert_updating_cert" data-i18n="alert.updating_cert" style="display: none;">updating cert now</span>
+                        <span id="alert_migrate_vm" data-i18n="alert.migrate_vm" style="display: none;">Are you sure you want to migrate this VM?</span>
         	</div>
         	<script type="text/javascript" src="Scripts/HostTrustStatus.js"></script>
 </body>

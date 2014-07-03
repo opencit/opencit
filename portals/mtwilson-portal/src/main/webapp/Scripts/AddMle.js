@@ -171,7 +171,7 @@ function updateManifestList(responsJson) {
 function addNewMle() {
 	var dataToSent = fnGetMleData(true);
 	if (dataToSent != "") {
-		if (confirm("Are you sure you want to add this MLE ?")) {
+		if (confirm($("#alert_add_mle").text())) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=true", addNewMleSuccess, null);
 		}

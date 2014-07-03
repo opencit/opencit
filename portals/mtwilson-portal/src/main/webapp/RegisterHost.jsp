@@ -141,6 +141,7 @@
                 </div>
                 <div id="successMessage"></div>
             </div>
+            <span id="alert_valid_hostname_ip" data-i18n="alert.valid_hostname_ip" style="display: none;">Please enter a valid hostname or ip address and try again.</span>
         </div>
 	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
         <script type="text/javascript" src="Scripts/RegisterHost.js"></script>

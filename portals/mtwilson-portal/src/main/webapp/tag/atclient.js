@@ -278,7 +278,7 @@ mtwilson.atag = mtwilson.atag || {};
             default:
                 break;
         }
-        $('notifications').update(notice.text);
+        $('notifications').update(getHTMLEscapedMessage(notice.text));
         $('notifications').show();
         $('notifications').setOpacity(1.0);
 
@@ -670,6 +670,7 @@ mtwilson.atag = mtwilson.atag || {};
                 var iter = 0;
                 data.rearranged_tags[iter] = {};
                 data.rearranged_tags[iter].name = 'Select';
+                data.rearranged_tags[iter].text = i18n.t("select.select");
                 data.rearranged_tags[iter].tagValues = [];
                 iter++;
                 for (var i = 0; i < data.unfiltered_tags.length; i++) {
@@ -685,6 +686,7 @@ mtwilson.atag = mtwilson.atag || {};
                     if(!el_added) {
                         data.rearranged_tags[iter] = {};
                         data.rearranged_tags[iter].name = loop_obj.name;
+                        data.rearranged_tags[iter].text = loop_obj.name;
                         data.rearranged_tags[iter].tagValues = [{id: loop_obj.id, value: loop_obj.value}];
                         iter++;
                     }
@@ -706,6 +708,18 @@ mtwilson.atag = mtwilson.atag || {};
 		$('selection-search-form').hide();
                 break;
           case 'certificates_json':
+		if(data.certificates != null && data.hosts != null) {
+                        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                                continue;
+                                        }
+                                }
+                        }
+                }
+
+
                 for(var loop = 0; loop < data.certificates.length; loop++) {
                         data.certificates[loop].status = "Active";
                         var now = new Date(event.memo.serverTime);
@@ -715,6 +729,7 @@ mtwilson.atag = mtwilson.atag || {};
                                 data.certificates[loop].status = 'Expired';
                         }
                 }
+                view.sync();
                 break;
             case 'certificateRequests':
                 if (event.memo.response.length > 0) {
@@ -770,6 +785,19 @@ mtwilson.atag = mtwilson.atag || {};
                 data.selection_details = [];
                 break;
             case 'hosts':
+                if(data.certificates != null && data.hosts != null) {
+                        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                                continue;
+                                        }
+                                }
+                        }
+                        view.sync();
+                }
+
+
                 for(var i = data.hosts.length-1; i >= 0; i--) {
                     if(data.hosts[i].connection_url.indexOf('vmware') != -1) {// && data.hosts[i].connection_url.indexOf('vmware') == -1) {
                         data.hosts.splice(i, 1);
@@ -1255,9 +1283,9 @@ mtwilson.atag = mtwilson.atag || {};
 //    if( report.isValid ) { ... }
         // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
         // we form parameters like nameEqualTo=argument  or nameContains=argument
-        var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+        var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'revoked'];
 	if ($('certificate-search-valid').value.trim() == '') {
-        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'revoked'];
 	}
         var i;
         for (i = 0; i < fields.length; i++) {
@@ -1452,10 +1480,10 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.updateCertificateAuthority = function(input) {
         var report = validate(input);
         if (report.isValid) {
-            alert("form is valid, update ca: " + Object.toJSON(report.input));
+            alert(jQuery("#alert_valid_ca").text() + ": " + Object.toJSON(report.input));
         }
         else {
-            alert("form NOT valid, update ca: " + Object.toJSON(report.input));
+            alert(jQuery("#alert_not_valid_ca").text() + ": " + Object.toJSON(report.input));
 
         }
         //alert("Update CA: "+Object.toJSON(cloneWithoutAltText(input)));
@@ -1552,7 +1580,7 @@ function getFileContents() {
 		fileContentsRead = true;
 	    }catch(Exception){
 		//document.getElementById("fileContents").innerHTML = "error reading file";
-		alert('Please select the tag XML to be provisioned.');
+		alert(jQuery("#alert_provision_select_tag_xml").text());
 		return false;
 	    }
 	}
@@ -1589,7 +1617,7 @@ function parseSelectionXML(xml) {
 	mtwilson.atag.data.selection_details = [];
 	var attributes = xmlDoc.getElementsByTagName('attribute');
 	for(var loop = 0; loop < attributes.length; loop++) {
-		var text = (attributes[loop].getElementsByTagName('text')[0].innerHTML);
+		var text = (attributes[loop].getElementsByTagName('text')[0].textContent);
 		var split_vals = text.split('=');
 		mtwilson.atag.data.selection_details.push({
 			id: loop,
@@ -1610,12 +1638,12 @@ function provisionTags() {
 
 	var selected_hosts = mtwilson.atag.data.selected_hosts;
 	if(selected_hosts.length == 0) {
-		alert('Select at least one server to provision the tags');
+		alert(jQuery("#alert_provision_select_server").text());
 		return false;
 	}
 
 	if(selectedSelectionXML == '') {
-		alert('Upload a tag XML or choose a selection to provision');
+                alert(jQuery("#alert_provision_upload_tag_xml").text());
 		return false;
 	}
         mtwilson.rivets.views['provision-sel-table'].sync();
@@ -1678,7 +1706,7 @@ function getSelectedSelectionDetails(selection_id) {
 			jQuery('#' + selection_id).addClass('highlightSelectedSelection');
 		}
 	};
-	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml",true);
+	xmlhttp.open("GET","/mtwilson-portal/v2proxy/tag-selections/" + selection_id + ".xml?rand=" + Math.random(),true);
 	xmlhttp.send();            
 
 }
