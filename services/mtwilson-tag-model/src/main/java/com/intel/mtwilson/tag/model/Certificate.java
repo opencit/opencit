@@ -59,7 +59,6 @@ public class Certificate extends CertificateDocument{
     }
 
     @Unchecked
-    @Regex(RegexPatterns.ANY_VALUE)
     public Sha256Digest getSha256() {
         return sha256;
     }
@@ -76,6 +75,7 @@ public class Certificate extends CertificateDocument{
         this.subject = subject;
     }
     
+    @Regex(RegexPatterns.ANY_VALUE)    
     public String getIssuer() {
         return issuer;
     }

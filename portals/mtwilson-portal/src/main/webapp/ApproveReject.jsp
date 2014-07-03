@@ -27,7 +27,7 @@
 			</div>
 		</div>
                 <div class="singleDiv">
-			<div class="labelDiv" data-i18n="input.requested_roles">Requested Roles:</div>
+                    <div class="labelDiv"><span data-i18n="input.requested_roles">Requested Roles:</span><input type="image" onclick="showDialogRoleHelp()" src="images/helpicon.png" class="helperImageClass"></div>
 			<div class="valueDiv" id="mainApiClient_Roles" style="overflow-y:hidden;scroll">
 				
 			</div>

@@ -1283,9 +1283,9 @@ mtwilson.atag = mtwilson.atag || {};
 //    if( report.isValid ) { ... }
         // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
         // we form parameters like nameEqualTo=argument  or nameContains=argument
-        var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+        var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'revoked'];
 	if ($('certificate-search-valid').value.trim() == '') {
-        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'pcrEvent', 'revoked'];
+        	fields = ['subject', 'issuer', 'sha1', 'sha256', 'revoked'];
 	}
         var i;
         for (i = 0; i < fields.length; i++) {
