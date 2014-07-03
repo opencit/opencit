@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import java.io.File;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CaCertificateRepository implements SimpleRepository<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLocator> {
+public class CaCertificateRepository implements DocumentRepository<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
         

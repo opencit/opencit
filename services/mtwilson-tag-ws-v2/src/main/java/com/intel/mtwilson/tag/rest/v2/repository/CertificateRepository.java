@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.Certificate;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CertificateRepository implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
+public class CertificateRepository implements DocumentRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRepository.class);
     
     @Override

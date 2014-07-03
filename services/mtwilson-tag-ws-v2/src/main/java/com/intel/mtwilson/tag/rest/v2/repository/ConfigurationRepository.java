@@ -7,7 +7,7 @@ package com.intel.mtwilson.tag.rest.v2.repository;
 import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_CONFIGURATION;
 import com.intel.mtwilson.tag.dao.jdbi.ConfigurationDAO;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class ConfigurationRepository implements SimpleRepository<Configuration, ConfigurationCollection, ConfigurationFilterCriteria, ConfigurationLocator> {
+public class ConfigurationRepository implements DocumentRepository<Configuration, ConfigurationCollection, ConfigurationFilterCriteria, ConfigurationLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationRepository.class);
     

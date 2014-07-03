@@ -21,7 +21,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleLocator;
 import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.MleData;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFilterCriteria, MleLocator> {
+public class MleRepository implements DocumentRepository<Mle, MleCollection, MleFilterCriteria, MleLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
 

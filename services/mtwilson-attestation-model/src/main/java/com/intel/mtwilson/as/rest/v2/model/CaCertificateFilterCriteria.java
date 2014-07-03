@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import com.intel.mtwilson.repository.FilterCriteria;
 
 /**
  *

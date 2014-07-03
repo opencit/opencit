@@ -15,7 +15,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleSourceCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -23,7 +23,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class MleSourceRepository implements SimpleRepository<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLocator>{
+public class MleSourceRepository implements DocumentRepository<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLocator>{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources.class);
     
     @Override

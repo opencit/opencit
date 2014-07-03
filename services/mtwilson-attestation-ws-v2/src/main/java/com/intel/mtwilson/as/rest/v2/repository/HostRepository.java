@@ -20,7 +20,7 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
-public class HostRepository implements SimpleRepository<Host,HostCollection,HostFilterCriteria,HostLocator> {
+public class HostRepository implements DocumentRepository<Host,HostCollection,HostFilterCriteria,HostLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     

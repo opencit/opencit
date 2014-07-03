@@ -17,7 +17,7 @@ import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class TagCertificateRepository implements SimpleRepository<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, TagCertificateLocator> {
+public class TagCertificateRepository implements DocumentRepository<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, TagCertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
         

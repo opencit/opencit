@@ -7,7 +7,7 @@ package com.intel.mtwilson.tag.model;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import com.intel.mtwilson.repository.FilterCriteria;
 import java.util.Date;
 import javax.ws.rs.QueryParam;
 

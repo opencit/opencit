@@ -14,7 +14,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAikFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostAikLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class HostAikRepository implements SimpleRepository<HostAik, HostAikCollection, HostAikFilterCriteria, HostAikLocator> {
+public class HostAikRepository implements DocumentRepository<HostAik, HostAikCollection, HostAikFilterCriteria, HostAikLocator> {
 
     Logger log = LoggerFactory.getLogger(getClass().getName());
 

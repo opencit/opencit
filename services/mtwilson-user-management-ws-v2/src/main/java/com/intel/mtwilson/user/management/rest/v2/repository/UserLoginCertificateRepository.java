@@ -13,7 +13,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateColl
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
@@ -34,7 +34,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class UserLoginCertificateRepository implements SimpleRepository<UserLoginCertificate, UserLoginCertificateCollection, UserLoginCertificateFilterCriteria, UserLoginCertificateLocator> {
+public class UserLoginCertificateRepository implements DocumentRepository<UserLoginCertificate, UserLoginCertificateCollection, UserLoginCertificateFilterCriteria, UserLoginCertificateLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserLoginCertificateRepository.class);
     

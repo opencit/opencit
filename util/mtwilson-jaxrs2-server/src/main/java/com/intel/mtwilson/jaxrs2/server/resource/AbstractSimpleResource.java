@@ -16,8 +16,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
-import com.intel.mtwilson.jaxrs2.Locator;
+import com.intel.mtwilson.repository.FilterCriteria;
+import com.intel.mtwilson.repository.Locator;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
@@ -87,7 +87,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     
     protected SimpleRepository<T,C,F,L> getRepository() { return repository; }
     */
-    protected abstract SimpleRepository<T,C,F,L> getRepository();
+    protected abstract DocumentRepository<T,C,F,L> getRepository();
     
     @GET
     public C searchCollection(@BeanParam F selector) {

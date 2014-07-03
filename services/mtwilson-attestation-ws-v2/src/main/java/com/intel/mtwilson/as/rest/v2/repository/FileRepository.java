@@ -11,14 +11,14 @@ import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import com.intel.mtwilson.as.rest.v2.model.FileLocator;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author jbuhacoff
  */
-public class FileRepository implements SimpleRepository<File,FileCollection,FileFilterCriteria,FileLocator> {
+public class FileRepository implements DocumentRepository<File,FileCollection,FileFilterCriteria,FileLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Files.class);
     private ObjectMapper mapper;
     

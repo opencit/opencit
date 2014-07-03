@@ -7,7 +7,7 @@ package com.intel.mtwilson.tag.rest.v2.repository;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.dao.jdbi.FileDAO;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_FILE;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.File;
@@ -26,7 +26,7 @@ import org.jooq.SelectQuery;
  *
  * @author ssbangal
  */
-public class FileRepository implements SimpleRepository<File, FileCollection, FileFilterCriteria, FileLocator> {
+public class FileRepository implements DocumentRepository<File, FileCollection, FileFilterCriteria, FileLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileRepository.class);
     

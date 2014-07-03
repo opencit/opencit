@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.OsLocator;
 import com.intel.mtwilson.as.rest.v2.repository.OsRepository;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class Oss extends AbstractJsonapiResource<Os, OsCollection, OsFilterCrite
     }
 
     @Override
-    protected SimpleRepository<Os, OsCollection, OsFilterCriteria, OsLocator> getRepository() {
+    protected DocumentRepository<Os, OsCollection, OsFilterCriteria, OsLocator> getRepository() {
         return repository;
     }
         

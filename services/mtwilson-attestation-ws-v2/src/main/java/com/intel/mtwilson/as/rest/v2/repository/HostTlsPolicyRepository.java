@@ -13,7 +13,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsPolicyLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, HostTlsPolicyLocator> {
+public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, HostTlsPolicyLocator> {
 
     Logger log = LoggerFactory.getLogger(getClass().getName());
     

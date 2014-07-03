@@ -20,7 +20,7 @@ import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.policy.TrustReport;
 
 import java.util.Date;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class HostAttestationRepository implements SimpleRepository<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLocator> {
+public class HostAttestationRepository implements DocumentRepository<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLocator> {
     
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     

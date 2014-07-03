@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.mtwilson.tag.dao.jdbi.TpmPasswordDAO;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.TpmPassword;
 import com.intel.mtwilson.tag.model.TpmPasswordCollection;
@@ -20,7 +20,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class TpmPasswordRepository implements SimpleRepository<TpmPassword, TpmPasswordCollection, TpmPasswordFilterCriteria, TpmPasswordLocator> {
+public class TpmPasswordRepository implements DocumentRepository<TpmPassword, TpmPasswordCollection, TpmPasswordFilterCriteria, TpmPasswordLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmPasswordRepository.class);
     

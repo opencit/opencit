@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE_REQUEST;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateRequestDAO;
@@ -33,7 +33,7 @@ import org.jooq.SelectQuery;
  *
  * @author ssbangal
  */
-public class CertificateRequestRepository implements SimpleRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
+public class CertificateRequestRepository implements DocumentRepository<CertificateRequest, CertificateRequestCollection, CertificateRequestFilterCriteria, CertificateRequestLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRequestRepository.class);
     

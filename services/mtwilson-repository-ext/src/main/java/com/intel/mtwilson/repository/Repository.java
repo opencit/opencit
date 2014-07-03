@@ -2,38 +2,16 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.jaxrs2.server.resource;
+package com.intel.mtwilson.repository;
 
-import com.intel.mtwilson.jaxrs2.Document;
-import com.intel.mtwilson.jaxrs2.DocumentCollection;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
-import com.intel.mtwilson.jaxrs2.Locator;
+import com.intel.mtwilson.repository.Locator;
 
 /**
- * TODO:  possibly create a CollectionRepository interface which adds the
- * following methods:
- * 
- * create(C items);
- * store(C items);
- * 
- * which would then possibly take advantage of database-specific features,
- * such as a multi-row insert/update, or it might use multithreading, etc.
- * which might be better than the client having to loop through a collection
- * or do multithreading code at the business layer for something that might become
- * common.
- * 
+ *
  * @author jbuhacoff
  */
-public interface SimpleRepository<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, L extends Locator<T>> {
-    /**
-     * Given criteria encapsulated in a POJO, returns a collection of items
-     * matching the criteria.
-     *
-     * @param criteria
-     * @return
-     */
-    C search(F criteria);
-
+public interface Repository<T, L extends Locator<T>> {
+    
     /**
      * Given an item identifier, returns the specified item if it exists or null
      * if the item doesn't exist.
@@ -82,11 +60,5 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      */
     void delete(L locator);
 //    void delete(String id);
-
-    /**
-     * 
-     * @param criteria 
-     */
-    void delete(F criteria);
 
 }

@@ -7,7 +7,7 @@ package com.intel.mtwilson.jaxrs2.client;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import com.intel.mtwilson.repository.FilterCriteria;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import javax.ws.rs.client.Entity;

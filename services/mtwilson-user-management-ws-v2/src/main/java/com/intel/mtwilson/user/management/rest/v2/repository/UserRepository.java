@@ -11,7 +11,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateFilterCriteria;
@@ -29,7 +29,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class UserRepository implements SimpleRepository<User, UserCollection, UserFilterCriteria, UserLocator> {
+public class UserRepository implements DocumentRepository<User, UserCollection, UserFilterCriteria, UserLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserRepository.class);
     

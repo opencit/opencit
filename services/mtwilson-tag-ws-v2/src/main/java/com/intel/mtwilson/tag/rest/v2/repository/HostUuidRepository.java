@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.model.HostUuid;
 import com.intel.mtwilson.tag.model.HostUuidCollection;
@@ -20,7 +20,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class HostUuidRepository implements SimpleRepository<HostUuid, HostUuidCollection, HostUuidFilterCriteria, HostUuidLocator> {
+public class HostUuidRepository implements DocumentRepository<HostUuid, HostUuidCollection, HostUuidFilterCriteria, HostUuidLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostUuidRepository.class);
     

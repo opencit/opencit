@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
@@ -30,7 +30,7 @@ import org.jooq.SelectQuery;
  *
  * @author ssbangal
  */
-public class SelectionRepository implements SimpleRepository<Selection, SelectionCollection, SelectionFilterCriteria, SelectionLocator> {
+public class SelectionRepository implements DocumentRepository<Selection, SelectionCollection, SelectionFilterCriteria, SelectionLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionRepository.class);
     

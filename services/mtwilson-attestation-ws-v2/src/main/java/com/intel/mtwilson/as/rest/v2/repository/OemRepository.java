@@ -15,7 +15,7 @@ import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OemLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OemData;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.OemBO;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFilterCriteria, OemLocator>{
+public class OemRepository implements DocumentRepository<Oem, OemCollection, OemFilterCriteria, OemLocator>{
     private Logger log = LoggerFactory.getLogger(getClass().getName());
         
     @Override

@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tag.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
@@ -33,7 +33,7 @@ import org.jooq.SelectQuery;
  *
  * @author ssbangal
  */
-public class SelectionKvAttributeRepository implements SimpleRepository<SelectionKvAttribute, SelectionKvAttributeCollection, SelectionKvAttributeFilterCriteria, SelectionKvAttributeLocator> {
+public class SelectionKvAttributeRepository implements DocumentRepository<SelectionKvAttribute, SelectionKvAttributeCollection, SelectionKvAttributeFilterCriteria, SelectionKvAttributeLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionKvAttributeRepository.class);
     

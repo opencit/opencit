@@ -15,7 +15,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class MleModuleRepository implements SimpleRepository<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLocator> {
+public class MleModuleRepository implements DocumentRepository<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     

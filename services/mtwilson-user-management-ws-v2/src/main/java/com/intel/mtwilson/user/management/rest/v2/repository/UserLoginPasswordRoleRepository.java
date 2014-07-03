@@ -10,7 +10,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleCol
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
@@ -22,7 +22,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class UserLoginPasswordRoleRepository implements SimpleRepository<UserLoginPasswordRole, UserLoginPasswordRoleCollection, UserLoginPasswordRoleFilterCriteria, UserLoginPasswordRoleLocator> {
+public class UserLoginPasswordRoleRepository implements DocumentRepository<UserLoginPasswordRole, UserLoginPasswordRoleCollection, UserLoginPasswordRoleFilterCriteria, UserLoginPasswordRoleLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserLoginPasswordRoleRepository.class);
     

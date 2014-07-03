@@ -11,7 +11,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordCollect
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
@@ -31,7 +31,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class UserLoginPasswordRepository implements SimpleRepository<UserLoginPassword, UserLoginPasswordCollection, UserLoginPasswordFilterCriteria, UserLoginPasswordLocator> {
+public class UserLoginPasswordRepository implements DocumentRepository<UserLoginPassword, UserLoginPasswordCollection, UserLoginPasswordFilterCriteria, UserLoginPasswordLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserLoginPasswordRepository.class);
     
