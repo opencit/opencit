@@ -148,3 +148,8 @@ function findIndex(item, arr) {
     }
     return index;
 }
+
+function showDialogRoleHelp() {
+        var str = '<div class="helpDiv" data-i18n="[html]help.role_description_help"></div>';
+	fnOpenDialog(str, "Help", 500, 350,false);
+}
