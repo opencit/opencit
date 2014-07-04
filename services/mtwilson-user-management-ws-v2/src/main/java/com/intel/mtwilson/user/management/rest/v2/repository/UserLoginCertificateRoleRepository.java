@@ -4,17 +4,18 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRole;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificateRoleLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
@@ -49,7 +50,7 @@ public class UserLoginCertificateRoleRepository implements DocumentRepository<Us
             }  
         } catch (Exception ex) {
             log.error("Error during user login certificate role search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("UserLoginCertificateRole:Search - Returning back {} of results.", objCollection.getUserLoginCertificateRoles().size());                
         return objCollection;
@@ -94,13 +95,12 @@ public class UserLoginCertificateRoleRepository implements DocumentRepository<Us
                 log.debug("UserLoginCertificateRole:Create - Created the user login certificate role successfully.");
             } else {
                 log.info("UserLoginCertificateRole:Create - User login certificate role specified already exists.");
-                //throw new WebApplicationException(Response.Status.CONFLICT);
             }            
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user creation.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during User login certificate role creation.", ex);
+            throw new RepositoryCreateException(ex);
         }
     }
 
@@ -125,9 +125,11 @@ public class UserLoginCertificateRoleRepository implements DocumentRepository<Us
             for (UserLoginCertificateRole obj : objList.getUserLoginCertificateRoles()) {
                 loginDAO.deleteUserLoginCertificateRole(obj.getLoginCertificateId(), obj.getRoleId());
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Error during user login certificate role deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryDeleteException(ex);
         }
     }
     

@@ -5,13 +5,19 @@
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPassword;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreConflictException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
@@ -22,8 +28,6 @@ import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import com.intel.mtwilson.user.management.rest.v2.model.Status;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
@@ -38,7 +42,7 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
     @Override
     @RequiresPermissions("user_login_passwords:search")        
     public UserLoginPasswordCollection search(UserLoginPasswordFilterCriteria criteria) {
-        log.debug("UserLoginPassword:Search - Got request to search for the users login passwords.");        
+        log.debug("UserLoginPassword:Search - Got request to search for the user login passwords.");        
         UserLoginPasswordCollection objCollection = new UserLoginPasswordCollection();
         try (LoginDAO loginDAO = MyJdbi.authz()) {
             if (criteria.userUuid != null) {
@@ -72,7 +76,7 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
             }
         } catch (Exception ex) {
             log.error("Error during user login password search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("UserLoginPassword:Search - Returning back {} of results.", objCollection.getUserLoginPasswords().size());                
         return objCollection;
@@ -91,7 +95,7 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
             }
         } catch (Exception ex) {
             log.error("Error during user login password retrieve.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -99,7 +103,9 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
     @Override
     @RequiresPermissions("user_login_passwords:store")        
     public void store(UserLoginPassword item) {
-        log.debug("UserLoginPassword:Store - Got request to update user login password with id {}.", item.getId().toString());        
+        log.debug("UserLoginPassword:Store - Got request to update user login password with id {}.", item.getId().toString());     
+        UserLoginPasswordLocator locator = new UserLoginPasswordLocator();
+        locator.id = item.getId();        
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             UserLoginPassword obj = loginDAO.findUserLoginPasswordById(item.getId());
             if (obj != null) {
@@ -146,14 +152,14 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
                 }                
             } else {
                 log.error("UserLoginPassword:Store - User login password will not be updated since it does not exist.");
-                throw new WebApplicationException(Response.Status.NOT_FOUND);
+                throw new RepositoryStoreConflictException(locator);
             }
             
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user update.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during user login password update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }
         
     }
@@ -161,7 +167,10 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
     @Override
     @RequiresPermissions("user_login_passwords:create")        
     public void create(UserLoginPassword item) {
-        log.debug("UserLoginPassword:Create - Got request to create a new user keystore.");
+        log.debug("UserLoginPassword:Create - Got request to create a new user login password.");
+        UserLoginPasswordLocator locator = new UserLoginPasswordLocator();
+        locator.id = item.getId();
+        locator.userId = item.getUserId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             UserLoginPassword obj = loginDAO.findUserLoginPasswordByUserId(item.getUserId());
             if (obj == null) {
@@ -181,13 +190,13 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
                 log.debug("UserLoginPassword:Create - Created the user login password for user with id {} successfully.", obj.getUserId());
             } else {
                 log.error("UserLoginPassword:Create - User login password for user with Id {} will not be created since a duplicate already exists.", obj.getUserId());
-                throw new WebApplicationException(Response.Status.CONFLICT);
+                throw new RepositoryCreateConflictException(locator);
             }  
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user creation.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during user login password creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -212,8 +221,8 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
                 log.info("UserLoginPassword:Delete - User login password does not exist in the system.");
             }
         } catch (Exception ex) {
-            log.error("Error during user deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_DELETION_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during user login password deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
     
@@ -221,11 +230,18 @@ public class UserLoginPasswordRepository implements DocumentRepository<UserLogin
     @RequiresPermissions("user_login_passwords:delete,search")        
     public void delete(UserLoginPasswordFilterCriteria criteria) {
         log.debug("UserLoginPassword:Delete - Got request to delete login passwords by search criteria.");        
-        UserLoginPasswordCollection objList = search(criteria);
-        for (UserLoginPassword obj : objList.getUserLoginPasswords()) {
-            UserLoginPasswordLocator locator = new UserLoginPasswordLocator();
-            locator.id = obj.getId();
-            delete(locator);
+        try {
+            UserLoginPasswordCollection objList = search(criteria);
+            for (UserLoginPassword obj : objList.getUserLoginPasswords()) {
+                UserLoginPasswordLocator locator = new UserLoginPasswordLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch(RepositoryException re) {
+            throw re;
+        } catch (Exception ex) {
+            log.error("Error during User login password deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     

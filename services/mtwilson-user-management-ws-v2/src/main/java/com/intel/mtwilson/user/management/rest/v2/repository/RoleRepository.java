@@ -4,19 +4,24 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.Role;
 import com.intel.mtwilson.user.management.rest.v2.model.RoleCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.RoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.RoleLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteConflictException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreConflictException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionFilterCriteria;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
@@ -61,8 +66,8 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
                 }
             }
         } catch (Exception ex) {
-            log.error("Error during user role search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during role search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("Role:Search - Returning back {} of results.", objCollection.getRoles().size());                
         return objCollection;
@@ -80,7 +85,7 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
             }
         } catch (Exception ex) {
             log.error("Error during role search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -88,7 +93,9 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
     @Override
     @RequiresPermissions("roles:store")        
     public void store(Role item) {
-        log.debug("Role:Store - Got request to update role with id {}.", item.getId().toString());        
+        log.debug("Role:Store - Got request to update role with id {}.", item.getId().toString());   
+        RoleLocator locator = new RoleLocator();
+        locator.id = item.getId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             Role obj = loginDAO.findRoleById(item.getId());
             if (obj != null) {
@@ -100,14 +107,14 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
                 
             } else {
                 log.error("Role:Store - Role will not be updated since it does not exist.");
-                throw new WebApplicationException(Response.Status.NOT_FOUND);
+                throw new RepositoryStoreConflictException(locator);
             }
             
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user update.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during role update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }
         
     }
@@ -116,6 +123,8 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
     @RequiresPermissions("roles:create")        
     public void create(Role item) {
         log.debug("Role:Create - Got request to create a new role.");
+        RoleLocator locator = new RoleLocator();
+        locator.id = item.getId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             Role obj = loginDAO.findRoleByName(item.getRoleName());
             if (obj == null) {
@@ -127,13 +136,13 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
                 log.debug("Role:Create - Created the role with name {} successfully.", item.getRoleName());
             } else {
                 log.error("Role:Create - Role with name {} will not be created since a duplicate already exists.", item.getRoleName());
-                throw new WebApplicationException(Response.Status.CONFLICT);
+                throw new RepositoryCreateConflictException(locator);
             }  
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Error during role creation.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -150,7 +159,7 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
                         //(loginDAO.findUserLoginHmacRolesByRoleId(obj.getId()).size() > 0) ||
                         (loginDAO.findUserLoginPasswordRolesByRoleId(obj.getId()).size() > 0)) {
                     log.error("Role with id {} cannot be deleted since it is associated to users.");
-                    throw new WebApplicationException("Role cannot be deleted as it is being assigned to users.", Response.Status.PRECONDITION_FAILED);
+                    throw new RepositoryDeleteConflictException(locator);
                 }
                 // Since no user has been assigned this role, it can be deleted. But before deleting the role, the associated permission entries need to be cleared.
                 RolePermissionRepository rpRepo = new RolePermissionRepository();
@@ -164,18 +173,18 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
             } else {
                 log.info("Role:Delete - Role does not exist in the system.");
             }
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Error during role deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_DELETION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
     
     @Override
     @RequiresPermissions("roles:delete,search")        
     public void delete(RoleFilterCriteria criteria) {
-        log.debug("Role:Delete - Got request to delete role permission by search criteria.");        
+        log.debug("Role:Delete - Got request to delete role by search criteria.");        
         RoleCollection objCollection = search(criteria);
         try { 
             for (Role obj : objCollection.getRoles()) {
@@ -183,9 +192,11 @@ public class RoleRepository implements DocumentRepository<Role, RoleCollection, 
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Error during role deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryDeleteException(ex);
         }
     }
     
