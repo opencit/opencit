@@ -27,16 +27,10 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-<<<<<<< HEAD
 public class OemRepository implements DocumentRepository<Oem, OemCollection, OemFilterCriteria, OemLocator>{
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
-        
-=======
-public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFilterCriteria, OemLocator>{
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OemRepository.class);
     
->>>>>>> bd29d08c853e9e3de3146865a2ce2f02c196172a
     @Override
     @RequiresPermissions("oems:search")    
     public OemCollection search(OemFilterCriteria criteria) {
