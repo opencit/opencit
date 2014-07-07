@@ -9,7 +9,15 @@ import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUT
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreConflictException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.tag.dao.TagJdbi;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.KvAttributeCollection;
 import com.intel.mtwilson.tag.model.KvAttributeFilterCriteria;
@@ -21,9 +29,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
 
 /**
  *
@@ -37,6 +42,7 @@ public class KvAttributeRepository implements DocumentRepository<KvAttribute, Kv
     @Override
     @RequiresPermissions("tag_kv_attributes:search")     
     public KvAttributeCollection search(KvAttributeFilterCriteria criteria) {
+        log.debug("KvAttribute:Search - Got request to search for the KvAttributes.");        
         KvAttributeCollection objCollection = new KvAttributeCollection();
         try(JooqContainer jc = TagJdbi.jooq()) {
             DSLContext jooq = jc.getDslContext();
@@ -85,15 +91,11 @@ public class KvAttributeRepository implements DocumentRepository<KvAttribute, Kv
                 objCollection.getKvAttributes().add(obj);
             }
             sql.close();
-            log.debug("Closing tag-value dao");
-            log.debug("Returning {} tags", objCollection.getKvAttributes().size());
-            //return tags;
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during attribute search.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("KvAttribute:Search - Error during attribute search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }        
+        log.debug("KvAttribute:Search - Returning back {} of results.", objCollection.getKvAttributes().size());                                
         return objCollection;
     }
 
@@ -101,17 +103,16 @@ public class KvAttributeRepository implements DocumentRepository<KvAttribute, Kv
     @RequiresPermissions("tag_kv_attributes:retrieve")     
     public KvAttribute retrieve(KvAttributeLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
+        log.debug("KvAttribute:Retrieve - Got request to retrieve KvAttribute with id {}.", locator.id);                
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
             KvAttribute obj = dao.findById(locator.id);
             if (obj != null)
                 return obj;
                                     
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during attribute update.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("KvAttribute:Retrieve - Error during attribute update.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }        
         return null;
     }
@@ -119,76 +120,60 @@ public class KvAttributeRepository implements DocumentRepository<KvAttribute, Kv
     @Override
     @RequiresPermissions("tag_kv_attributes:store")     
     public void store(KvAttribute item) {
+        log.debug("KvAttribute:Store - Got request to update KvAttribute with id {}.", item.getId().toString());        
+        KvAttributeLocator locator = new KvAttributeLocator();
+        locator.id = item.getId();
         
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
             
             KvAttribute obj = dao.findById(item.getId());
             // Allowing the user to only edit the value.
-            if (obj != null)
+            if (obj != null) {
                 dao.update(item.getId(), obj.getName(), item.getValue());
-            else {
-                throw new WebApplicationException("Object not found.", Response.Status.NOT_FOUND);
-            }
-                                    
-        } catch (WebApplicationException aex) {
-            throw aex;            
+                log.debug("KvAttribute:Store - Updated the KvAttribute {} successfully.", item.getId().toString());                                
+            } else {
+                log.error("KvAttribute:Store - KvAttribute will not be updated since it does not exist.");
+                throw new RepositoryStoreConflictException(locator);
+            }                                    
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during attribute update.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("KvAttribute:Store - Error during KvAttribute update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }        
     }
 
     @Override
     @RequiresPermissions("tag_kv_attributes:create")     
     public void create(KvAttribute item) {
-
+        log.debug("KvAttribute:Create - Got request to create a new KvAttribute {}.", item.getId().toString());
+        CertificateLocator locator = new CertificateLocator();
+        locator.id = item.getId();
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
 
             dao.insert(item.getId(), item.getName(), item.getValue());
-            
-            /*KvAttribute obj = dao.findById(item.getId());
-            // Allowing the user to add only if it does not exist.
-            if (obj == null) {
-                if (item.getName() == null || item.getName().isEmpty() || item.getValue() == null || item.getValue().isEmpty()) {
-                    log.error("Invalid input specified by the user.");
-                    throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
-                }
-                //TODO: Create the unique name value pair mapping in the DB.
-                KvAttributeFilterCriteria fc = new KvAttributeFilterCriteria();
-                fc.nameEqualTo = item.getName();
-                fc.valueEqualTo = item.getValue();
-                KvAttributeCollection objCollection = search(fc);
-                if (objCollection.getKvAttributes().size() == 0)
-                    dao.insert(item.getId(), item.getName(), item.getValue());   
-                else {
-                    log.error("The key value pair already exists.");
-                    throw new WebApplicationException("The key value pair already exists.", Response.Status.CONFLICT);
-                }
-            } else {
-                throw new WebApplicationException("Object with specified id already exists.", Response.Status.CONFLICT);
-            } */
-                        
-        } catch (WebApplicationException aex) {
-            throw aex;            
+                log.debug("KvAttribute:Create - Created the KvAttribute {} successfully.", item.getId().toString());
+                                    
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during attribute creation.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
-        }         
+            log.error("KvAttribute:Create - Error during KvAttribute creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
+        }        
     }
 
     @Override
     @RequiresPermissions("tag_kv_attributes:delete")     
     public void delete(KvAttributeLocator locator) {
         if( locator == null || locator.id == null ) { return; }
+        log.debug("KvAttribute:Delete - Got request to delete KvAttribute with id {}.", locator.id.toString());                
         try(KvAttributeDAO dao = TagJdbi.kvAttributeDao()) {
-            // TODO: Catch the SQLException -- see how JDBI returns the # of rows affected.
+            
             dao.delete(locator.id);           
             
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during attribute deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("KvAttribute:Delete - Error during KvAttribute deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }        
     }
     
@@ -203,9 +188,11 @@ public class KvAttributeRepository implements DocumentRepository<KvAttribute, Kv
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during KvAttribute deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("KvAttribute:Delete - Error during KvAttribute deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
         

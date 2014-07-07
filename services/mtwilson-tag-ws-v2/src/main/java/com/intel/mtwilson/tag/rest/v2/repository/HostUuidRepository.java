@@ -4,16 +4,18 @@
  */
 package com.intel.mtwilson.tag.rest.v2.repository;
 
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.model.HostUuid;
 import com.intel.mtwilson.tag.model.HostUuidCollection;
 import com.intel.mtwilson.tag.model.HostUuidFilterCriteria;
 import com.intel.mtwilson.tag.model.HostUuidLocator;
+import java.io.IOException;
+import java.security.SignatureException;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -33,20 +35,17 @@ public class HostUuidRepository implements DocumentRepository<HostUuid, HostUuid
         try {
             String ip = criteria.hostId;
             List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip,true);
-            if(hostList == null || hostList.size() < 1) {
-                log.debug("host uuid didn't return back any results");
-                throw new Exception("No host records found");
+            if(hostList != null && !hostList.isEmpty()) {
+                log.debug("Search for host uuid returned " + hostList.get(0).Hardware_Uuid);
+                HostUuid obj = new HostUuid();
+                obj.setHardwareUuid(hostList.get(0).Hardware_Uuid);
+                objCollection.getHostUuids().add(obj);
             }
-            log.debug("Search for host uuid returned " + hostList.get(0).Hardware_Uuid);
-            HostUuid obj = new HostUuid();
-            obj.setHardwareUuid(hostList.get(0).Hardware_Uuid);
-            objCollection.getHostUuids().add(obj);
-        } catch (WebApplicationException aex) {
-            throw aex;            
-        } catch (Exception ex) {
-            log.error("Error during search for host hardware uuid.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (IOException | ApiException | SignatureException ex) {
+            log.error("HostUuid:Search - Error during search for host hardware uuid.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }        
+        log.debug("HostUuid:Search - Returning back {} of results.", objCollection.getHostUuids().size());                                
         return objCollection;
     }
 

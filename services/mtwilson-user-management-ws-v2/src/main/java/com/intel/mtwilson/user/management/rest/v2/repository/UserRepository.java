@@ -68,7 +68,7 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 }                
             }
         } catch (Exception ex) {
-            log.error("Error during user search.", ex);
+            log.error("User:Search - Error during user search.", ex);
             throw new RepositorySearchException(ex, criteria);
         }
         log.debug("User:Search - Returning back {} of results.", userCollection.getUsers().size());                
@@ -86,7 +86,7 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 return user;
             }
         } catch (Exception ex) {
-            log.error("Error during user search.", ex);
+            log.error("User:Retrieve - Error during user search.", ex);
             throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
@@ -95,7 +95,7 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
     @Override
     @RequiresPermissions("users:store")        
     public void store(User item) {
-        log.debug("User:Create - Got request to update user with id {}.", item.getId().toString());        
+        log.debug("User:Store - Got request to update user with id {}.", item.getId().toString());        
         UserLocator locator = new UserLocator(); // will be used if we need to throw an exception
         locator.id = item.getId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
@@ -107,12 +107,13 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 loginDAO.updateUser(user.getId(), LocaleUtil.toLanguageTag(user.getLocale()), user.getComment());
                 log.debug("User:Store - Updated the user {} successfully.", user.getUsername());
             } else {
-                log.error("User:Store - User {} will not be updated since it does not exist.");
+                log.error("User:Store - User will not be updated since it does not exist.");
                 throw new RepositoryStoreConflictException(locator);
             }
-         } catch(RepositoryException e) { throw e; 
+         } catch(RepositoryException re) { 
+             throw re; 
         } catch (Exception ex) {
-            log.error("Error during user update.", ex);
+            log.error("User:Store - Error during user update.", ex);
             throw new RepositoryStoreException(ex, locator);
         }
         
@@ -139,10 +140,10 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 log.error("User:Create - User {} will not be created since a duplicate user already exists.", item.getUsername());
                 throw new RepositoryCreateConflictException(locator);
             }            
-        } catch (RepositoryException e) {
-            throw e;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user creation.", ex);
+            log.error("User:Create - Error during user creation.", ex);
             throw new RepositoryCreateException(ex, locator);
         }
     }
@@ -174,7 +175,7 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
                 log.info("User:Delete - User does not exist in the system.");
             }
         } catch (Exception ex) {
-            log.error("Error during user deletion.", ex);
+            log.error("User:Delete - Error during user deletion.", ex);
             throw new RepositoryDeleteException(ex, locator);
         }
     }
@@ -192,7 +193,7 @@ public class UserRepository implements DocumentRepository<User, UserCollection, 
         } catch(RepositoryException re) {
             throw re;
         } catch (Exception ex) {
-            log.error("Error during User deletion.", ex);
+            log.error("User:Delete - Error during User deletion.", ex);
             throw new RepositoryDeleteException(ex);
         }
     }

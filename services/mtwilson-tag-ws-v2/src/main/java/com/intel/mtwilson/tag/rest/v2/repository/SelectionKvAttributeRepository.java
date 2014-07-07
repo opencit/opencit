@@ -7,6 +7,13 @@ package com.intel.mtwilson.tag.rest.v2.repository;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.KvAttributeDAO;
 import com.intel.mtwilson.tag.dao.jdbi.SelectionDAO;
@@ -18,10 +25,9 @@ import com.intel.mtwilson.tag.model.SelectionKvAttributeLocator;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_SELECTION_KVATTRIBUTE;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_KVATTRIBUTE;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import com.intel.mtwilson.tag.model.KvAttribute;
 import com.intel.mtwilson.tag.model.Selection;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
@@ -41,6 +47,7 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
     @Override
     @RequiresPermissions("tag_selection_kv_attributes:search")         
     public SelectionKvAttributeCollection search(SelectionKvAttributeFilterCriteria criteria) {
+        log.debug("SelectionKvAttribute:Search - Got request to search for the SelectionKvAttributes.");        
         SelectionKvAttributeCollection objCollection = new SelectionKvAttributeCollection();
         try(JooqContainer jc = TagJdbi.jooq()) {
             DSLContext jooq = jc.getDslContext();
@@ -89,13 +96,11 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
                 objCollection.getSelectionKvAttributeValues().add(sAttr);
             }
             sql.close();
-            log.debug("Closed jooq sql statement");
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
             log.error("Error during attribute search.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            throw new RepositorySearchException(ex, criteria);
         }
+        log.debug("SelectionKvAttribute:Search - Returning back {} of results.", objCollection.getSelectionKvAttributeValues().size());                                
         return objCollection;
     }
 
@@ -103,17 +108,16 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
     @RequiresPermissions("tag_selection_kv_attributes:retrieve")         
     public SelectionKvAttribute retrieve(SelectionKvAttributeLocator locator) {
         if (locator == null || locator.id == null ) { return null;}
+        log.debug("SelectionKvAttribute:Retrieve - Got request to retrieve SelectionKvAttribute with id {}.", locator.id);                
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
             
             SelectionKvAttribute obj = dao.findById(locator.id);
             if (obj != null)
                 return obj;
                                     
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during Selection search.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("SelectionKvAttribute:Retrieve - Error during SelectionKvAttribute retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }        
         return null;
     }
@@ -127,6 +131,9 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
     @Override
     @RequiresPermissions("tag_selection_kv_attributes:create")         
     public void create(SelectionKvAttribute item) {
+        log.debug("SelectionKvAttribute:Create - Got request to create a new SelectionKvAttribute {}.", item.getId().toString());
+        CertificateLocator locator = new CertificateLocator();
+        locator.id = item.getId();
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao();
                 SelectionDAO selectionDao = TagJdbi.selectionDao();
                 KvAttributeDAO attrDao = TagJdbi.kvAttributeDao()) {
@@ -135,46 +142,52 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
             SelectionKvAttribute obj = dao.findById(item.getId());
             if (obj == null) {
                 if (item.getSelectionName() == null || item.getKvAttributeId() == null) {
-                    log.error("Invalid input specified by the user.");
-                    throw new WebApplicationException("Invalid input specified by the user.", Response.Status.PRECONDITION_FAILED);
+                    log.error("SelectionKvAttribute:Create - Invalid input specified by the user.");
+                    throw new RepositoryInvalidInputException(locator);
                 }
                 
                 selectionObj = selectionDao.findByName(item.getSelectionName());
                 if (selectionObj == null) {
-                    log.error("Invalid input specified by the user. Specified selection is not configured.");
-                    throw new WebApplicationException("Invalid input specified by the user. Specified selection is not configured.", Response.Status.PRECONDITION_FAILED);                    
+                    log.error("SelectionKvAttribute:Create - Invalid input specified by the user. Specified selection is not configured.");
+                    throw new RepositoryInvalidInputException(locator);
                 }
                 
                 KvAttribute attrObj = attrDao.findById(item.getKvAttributeId());
                 if (attrObj == null) {
-                    log.error("Invalid input specified by the user. Specified attribute is not configured.");
-                    throw new WebApplicationException("Invalid input specified by the user. Specified attribute is not configured.", Response.Status.PRECONDITION_FAILED);                                        
+                    log.error("SelectionKvAttribute:Create - Invalid input specified by the user. Specified attribute is not configured.");
+                    throw new RepositoryInvalidInputException(locator);
                 }
                 dao.insert(item.getId(), selectionObj.getId(), item.getKvAttributeId());
+                log.debug("SelectionKvAttribute:Create - Created the SelectionKvAttribute {} successfully.", item.getId().toString());
+            } else {
+                log.error("SelectionKvAttribute:Create - SelectionKvAttribute {} will not be created since a duplicate SelectionKvAttribute already exists.", item.getId().toString());                
+                throw new RepositoryCreateConflictException(locator);
             }
                         
-        } catch (WebApplicationException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during selection attribute creation.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
-        }         
+            log.error("SelectionKvAttribute:Create - Error during SelectionKvAttribute creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
+        }        
     }
 
     @Override
     @RequiresPermissions("tag_selection_kv_attributes:delete")         
     public void delete(SelectionKvAttributeLocator locator) {
         if (locator == null || locator.id == null) { return; }
-        
+        log.debug("SelectionKvAttribute:Delete - Got request to delete SelectionKvAttribute with id {}.", locator.id.toString());                        
         try(SelectionKvAttributeDAO dao = TagJdbi.selectionKvAttributeDao()) {
-
-            dao.delete(locator.id);
-                        
-        } catch (WebApplicationException aex) {
-            throw aex;            
+            SelectionKvAttribute obj = dao.findById(locator.id);
+            if (obj != null) {
+                dao.delete(locator.id);
+                log.debug("SelectionKvAttribute:Delete - Deleted the SelectionKvAttribute {} successfully.", locator.id.toString());                                
+            } else {
+                log.info("SelectionKvAttribute:Delete - SelectionKvAttribute does not exist in the system.");                                
+            }                        
         } catch (Exception ex) {
-            log.error("Error during selection attribute deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("SelectionKvAttribute:Delete - Error during SelectionKvAttribute deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);            
         }         
     }
     
@@ -189,9 +202,11 @@ public class SelectionKvAttributeRepository implements DocumentRepository<Select
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during SelectionKvAttribute deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("SelectionKvAttribute:Delete - Error during Certificate deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
         
