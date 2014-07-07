@@ -5,27 +5,24 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.data.TblPcrManifest;
-import com.intel.mtwilson.as.rest.v2.model.MleModule;
-import com.intel.mtwilson.as.rest.v2.model.MleModuleCollection;
-import com.intel.mtwilson.as.rest.v2.model.MleModuleLocator;
 import com.intel.mtwilson.as.rest.v2.model.MlePcr;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrCollection;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MlePcrLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.PCRWhiteList;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollection, MlePcrFilterCriteria, MlePcrLocator>{
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MlePcrRepository.class);
     
     @Override
     @RequiresPermissions("mle_pcrs:search")    
@@ -67,11 +64,9 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
                     }
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during search of PCR whitelists for MLE.", ex);
-            throw new ASException(ErrorCode.WS_PCR_WHITELIST_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("MlePcr:Search - Error during search of PCR whitelists for MLE.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("MlePcr:Search - Returning back {} of results.", objCollection.getMlePcrs().size());
         return objCollection;
@@ -93,11 +88,9 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
                     return obj;
                 }
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during retrieval of PCR whitelists for MLE.", ex);
-            throw new ASException(ErrorCode.WS_PCR_WHITELIST_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("MlePcr:Retrieve - Error during retrieval of PCR whitelists for MLE.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -105,7 +98,11 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:store")    
     public void store(MlePcr item) {
-        log.debug("MlePcr:Store - Got request to update Mle PCR with id {}.", item.getPcrIndex().toString());        
+        log.debug("MlePcr:Store - Got request to update Mle PCR with id {}.", item.getPcrIndex().toString()); 
+        MlePcrLocator locator = new MlePcrLocator();
+        locator.mleUuid = UUID.valueOf(item.getMleUuid());
+        locator.pcrIndex = item.getPcrIndex();
+        
         PCRWhiteList obj = new PCRWhiteList();
         try {
             obj.setPcrName(item.getPcrIndex());
@@ -117,30 +114,31 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
                     new MleBO().updatePCRWhiteList(obj, null, pcr.getUuid_hex());
                 }
             }            
+            log.debug("MlePcr:Store - Updated the MlePcrs for MLE with id {} successfully.", item.getMleUuid()); 
             
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during PCR whitelist update.", ex);
-            throw new ASException(ErrorCode.WS_PCR_WHITELIST_UPDATE_ERROR, ex.getClass().getSimpleName());
+            log.error("MlePcr:Store - Error during PCR whitelist update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }        
     }
 
     @Override
     @RequiresPermissions("mle_pcrs:create")    
     public void create(MlePcr item) {
-        log.debug("MlePcr:Store - Create a new Mle PCR with id {}.", item.getPcrIndex().toString());        
+        log.debug("MlePcr:Create - Create a new Mle PCR with id {}.", item.getPcrIndex().toString());        
+        MlePcrLocator locator = new MlePcrLocator();
+        locator.mleUuid = UUID.valueOf(item.getMleUuid());
+        locator.pcrIndex = item.getPcrIndex();
+
         PCRWhiteList obj = new PCRWhiteList();
         try {
             obj.setPcrName(item.getPcrIndex());
             obj.setPcrDigest(item.getPcrValue());
-            log.debug("About to add pcr {} with value {} & UUID {} for MLE {}", obj.getPcrName(), obj.getPcrDigest(), item.getId().toString(), item.getMleUuid());
+            log.debug("MlePcr:Create - About to add pcr {} with value {} & UUID {} for MLE {}", obj.getPcrName(), obj.getPcrDigest(), item.getId().toString(), item.getMleUuid());
             new MleBO().addPCRWhiteList(obj, null, item.getId().toString(), item.getMleUuid());
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during PCR whitelist creation.", ex);
-            throw new ASException(ErrorCode.WS_PCR_WHITELIST_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("MlePcr:Create - Error during PCR whitelist creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }        
     }
 
@@ -148,22 +146,20 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @RequiresPermissions("mle_pcrs:delete")    
     public void delete(MlePcrLocator locator) {
         if (locator.mleUuid == null || locator.pcrIndex == null) { return ;}
-        log.debug("MlePcr:Create - Got request to create a new Mle PCR.");
+        log.debug("MlePcr:Delete - Got request to create a new Mle PCR.");
         String mleUuid = locator.mleUuid.toString();
         String pcrIndex = locator.pcrIndex;
         try {
             List<TblPcrManifest> pcrs = My.jpa().mwPcrManifest().findTblPcrManifestByMleUuid(mleUuid);
             for (TblPcrManifest pcr : pcrs) {
                 if (pcr.getName().equalsIgnoreCase(pcrIndex)) {
-                    log.debug("About to delete pcr index {} for mle with uuid {}.", locator.pcrIndex, locator.mleUuid.toString());
+                    log.debug("MlePcr:Delete - About to delete pcr index {} for mle with uuid {}.", locator.pcrIndex, locator.mleUuid.toString());
                     new MleBO().deletePCRWhiteList(null, null, null, null, null, null, pcr.getUuid_hex());
                 }
             }            
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during PCR whitelist deletion.", ex);
-            throw new ASException(ErrorCode.WS_PCR_WHITELIST_DELETE_ERROR, ex.getClass().getSimpleName());
+            log.error("MlePcr:Delete - Error during PCR whitelist deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
     
@@ -189,9 +185,11 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
                 locator.pcrIndex = obj.getPcrIndex();
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during MlePcr deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("MlePcr:Delete - Error during PCR whitelist deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     

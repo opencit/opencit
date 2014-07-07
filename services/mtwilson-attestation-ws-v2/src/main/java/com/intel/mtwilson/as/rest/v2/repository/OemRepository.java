@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.data.TblOem;
@@ -13,14 +12,18 @@ import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OemLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.OemBO;
 
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -34,7 +37,7 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @Override
     @RequiresPermissions("oems:search")    
     public OemCollection search(OemFilterCriteria criteria) {
-        log.debug("Oem:Search - Got request to search for the Oems.");        
+        log.debug("Oem:Search - Oem:Got request to search for the Oems.");        
         OemCollection oemCollection = new OemCollection();
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
@@ -64,11 +67,9 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
                     }
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OEM search.", ex);
-            throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Oem:Search - Error during OEM search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("Oem:Search - Returning back {} of results.", oemCollection.getOems().size());                
         return oemCollection;
@@ -87,11 +88,9 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
                 Oem oem = convert(tblOem);
                 return oem;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OEM retrieval.", ex);
-            throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Oem:Retrieve - Error during OEM retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -99,37 +98,37 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
     @Override
     @RequiresPermissions("oems:store")    
     public void store(Oem item) {
-        if (item == null || item.getId() == null) { throw new WebApplicationException(Response.Status.BAD_REQUEST);}
+        if (item == null || item.getId() == null) { throw new RepositoryInvalidInputException();}
         log.debug("Oem:Store - Got request to update Oem with id {}.", item.getId().toString());        
+        OemLocator locator = new OemLocator();
+        locator.id = item.getId();
         
         OemData obj = new OemData();
         try {            
             obj.setDescription(item.getDescription());
             new OemBO().updateOem(obj, item.getId().toString());
             log.debug("Oem:Store - Updated the Oem with id {} successfully.", item.getId().toString()); 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OEM update.", ex);
-            throw new ASException(ErrorCode.WS_OEM_UPDATE_ERROR, ex.getClass().getSimpleName());
-        }        
+            log.error("Oem:Store - Error during Oem update.", ex);
+            throw new RepositoryStoreException(ex, locator);
+        }
     }
 
     @Override
     @RequiresPermissions("oems:create")    
     public void create(Oem item) {
         log.debug("Oem:Create - Got request to create a new Oem.");
+        OemLocator locator = new OemLocator();
+        locator.id = item.getId();
         OemData obj = new OemData();
         try {
             obj.setName(item.getName());
             obj.setDescription(item.getDescription());
             new OemBO().createOem(obj, item.getId().toString());
-            log.debug("Oem:Store - Created the Oem {} successfully.", item.getName()); 
-        } catch (ASException aex) {
-            throw aex;            
+            log.debug("Oem:Create - Created the Oem {} successfully.", item.getName()); 
         } catch (Exception ex) {
-            log.error("Error during OEM creation.", ex);
-            throw new ASException(ErrorCode.WS_OEM_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("Oem:Create - Error during role creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -142,11 +141,9 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
         try {
             new OemBO().deleteOem(null, id);
             log.debug("Oem:Delete - Deleted the Oem with id {} successfully.", locator.id.toString());
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OEM delete.", ex);
-            throw new ASException(ErrorCode.WS_OEM_DELETE_ERROR, ex.getClass().getSimpleName());
+            log.error("Oem:Delete - Error during Oem deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
 
@@ -172,9 +169,11 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during Oem deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Oem:Delete - Error during Oem deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     
