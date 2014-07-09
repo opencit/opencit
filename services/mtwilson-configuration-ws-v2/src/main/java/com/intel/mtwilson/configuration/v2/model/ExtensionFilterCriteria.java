@@ -5,7 +5,7 @@
 package com.intel.mtwilson.configuration.v2.model;
 
 import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import com.intel.mtwilson.repository.FilterCriteria;
 import javax.ws.rs.QueryParam;
 
 /**

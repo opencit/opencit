@@ -26,6 +26,11 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-repository-ext</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-rpc-model</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -5,11 +5,11 @@
 package com.intel.mtwilson.tls.policy.repository;
 
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicy;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicyCollection;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicyFilterCriteria;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicyLocator;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
@@ -27,7 +27,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, HostTlsPolicyLocator> {
+public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, HostTlsPolicyLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostTlsPolicyRepository.class);
 
