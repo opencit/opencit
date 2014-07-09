@@ -102,7 +102,7 @@ public class Host {
     }
 
     //@RolesAllowed({"Whitelist"})
-    @RequiresPermissions({"hosts:create","oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
     @POST
     @Path("/whitelist")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -114,7 +114,7 @@ public class Host {
     }
 
     //@RolesAllowed({"Whitelist"})
-    @RequiresPermissions({"hosts:create","oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
     @POST
     @Path("/whitelist/custom")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -123,6 +123,12 @@ public class Host {
         ValidationUtil.validate(hostConfigObj);
         WhitelistConfigurationData wlConfigData = new WhitelistConfigurationData(hostConfigObj);
         boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(wlConfigData);
+        log.info("Status of white list configuration is {}.", Boolean.toString(result));
+        if (hostConfigObj.isRegisterHost()) {
+            String registerHost = registerHost(hostConfigObj);
+            log.info("Status of host registration is {}.", registerHost);
+            return registerHost;
+        }
         return Boolean.toString(result);
     }
 

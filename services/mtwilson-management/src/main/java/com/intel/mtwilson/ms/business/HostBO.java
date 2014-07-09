@@ -866,7 +866,7 @@ public class HostBO {
                 log.debug("TIMETAKEN: for uploading to DB: {}", (System.currentTimeMillis() - configWLStart));
                 
                 // Register host only if required.
-                if (hostConfigObj.isRegisterHost() == true) {
+                /*if (hostConfigObj.isRegisterHost() == true) {
                     com.intel.mtwilson.as.business.HostBO hostbo = new com.intel.mtwilson.as.business.HostBO();
                     // First let us check if the host is already configured. If yes, we will return back success
                     TblHosts hostSearchObj = hostsJpaController.findByName(gkvHost.HostName);
@@ -890,7 +890,7 @@ public class HostBO {
                     }
                 }
 
-                log.debug("TIMETAKEN: for registering host: {} ", (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for registering host: {} ", (System.currentTimeMillis() - configWLStart));*/
                 
                 // Now we need to configure the MleSource table with the details of the host that was used for white listing the MLE.
                 if (hostConfigObj.addBiosWhiteList()) {
