@@ -369,7 +369,7 @@ function fnRegisterMultipleHost() {
 
 function fnRegisterMultipleHostSuccess(responseJSON) {
     // alert( $.toJSON(responseJSON.hostVOs.hostRecords));
-    if (responseJSON.hostVOs.hostRecords) {
+    if (responseJSON.result == true) {
         var values = responseJSON.hostVOs.hostRecords;
         for (var val in values) {
             // alert(values[val].hostName);
@@ -391,6 +391,7 @@ function fnRegisterMultipleHostSuccess(responseJSON) {
         }
     } else {
         $('#successMessage').html('<span class="errorMessage">' + responseJSON.message + '</span>');
+        $('#disabledDiv').remove();
     }
 }
 
