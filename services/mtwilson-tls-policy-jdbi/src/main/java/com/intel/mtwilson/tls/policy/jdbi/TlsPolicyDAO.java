@@ -42,7 +42,7 @@ public interface TlsPolicyDAO extends Closeable {
     List<TlsPolicyRecord> findTlsPolicyByIds(@BindIn("ids") Set<String> ids);
 
     @SqlQuery("select id, name, private, content_type, content, comment from mw_tls_policy where private=true and name=:host_id")
-    TlsPolicyRecord findTlsPolicyByHostId(@Bind("host_id") String host_id);
+    TlsPolicyRecord findPrivateTlsPolicyByHostId(@Bind("host_id") String host_id);
     
     @SqlQuery("select id, name, private, content_type, content, comment from mw_tls_policy where name=:name")
     TlsPolicyRecord findTlsPolicyByNameEqualTo(@Bind("name") String name);
@@ -61,5 +61,8 @@ public interface TlsPolicyDAO extends Closeable {
     
     @SqlUpdate("delete from mw_tls_policy where id=:id")
     void deleteTlsPolicyById(@Bind("id") UUID id);
+
+    @SqlUpdate("delete from mw_tls_policy where private=true and name=:host_id")
+    void deletePrivateTlsPolicyByHostId(@Bind("host_id") String host_id);
     
 }

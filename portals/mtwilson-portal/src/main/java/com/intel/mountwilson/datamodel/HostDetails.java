@@ -20,6 +20,10 @@ public class HostDetails {
         //private String selectionTarget;
         private boolean registered;
 	
+        private String tlsPolicyId; // optional
+        private String tlsPolicyType; // optional, typically used instead of tlsPolicyId
+        private String tlsPolicyData; // optional extra data to accompany tlsPolicyType, for example hex-encoded certificate fingerprint or a complete base64-encoded certificate or public key
+        
         // Modified the BIOS and VMM target variables to be of String instead of HostWhiteListTarget for easier reverse mapping when it would be used in the ManagementConsoleServiceImpl file.
         public String getVmmWLtarget() {
                 return vmmWLtarget;
@@ -93,14 +97,38 @@ public class HostDetails {
         public void setStatus(String status) {
                 this.status = status;
         }
+
+    //public void setSelectionTarget(String selectionTarget) {
+    //    this.selectionTarget = selectionTarget;
+    //}
+    //public String getSelectionTarget() {
+    //    return this.selectionTarget;
+    //}
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
+    }
+
+    public String getTlsPolicyType() {
+        return tlsPolicyType;
+    }
+
+    public String getTlsPolicyData() {
+        return tlsPolicyData;
+    }
+
+    public void setTlsPolicyId(String tlsPolicyId) {
+        this.tlsPolicyId = tlsPolicyId;
+    }
+
+    public void setTlsPolicyType(String tlsPolicyType) {
+        this.tlsPolicyType = tlsPolicyType;
+    }
+
+    public void setTlsPolicyData(String tlsPolicyData) {
+        this.tlsPolicyData = tlsPolicyData;
+    }
         
-        //public void setSelectionTarget(String selectionTarget) {
-        //    this.selectionTarget = selectionTarget;
-        //}
         
-        //public String getSelectionTarget() {
-        //    return this.selectionTarget;
-        //}
         
         @Override
         public String toString() {

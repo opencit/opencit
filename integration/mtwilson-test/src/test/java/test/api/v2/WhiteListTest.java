@@ -13,6 +13,8 @@ import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListRunnable;
 import com.intel.mtwilson.as.rest.v2.rpc.RegisterHostsRunnable;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import java.util.ArrayList;
 import java.util.List;

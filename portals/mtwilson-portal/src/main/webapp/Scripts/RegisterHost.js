@@ -333,6 +333,29 @@ function fnRegisterMultipleHost() {
     $('#successMessage').html('');
     var listOfHost = [];
     var checked = false;
+    
+    var tlsPolicyChoice = {}; // will be populated with tlsPolicyId or tlsPolicyType and tlsPolicyData which we will copy to each host record we send to the server
+    if( $('#MainContent_ddlHOSTProvider').val() == "Flat File" ) {
+            // the bulk registration screen allows selection of one shared tls policy to apply to all hosts when using a flatfile (tls_policy_select_flatfile)
+            // but allows a custom policy when using the vcenter retrieval (tls_policy_select_vmware)
+            mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+                'tls_policy_select': $('#tls_policy_select_flatfile').val(),
+                'tls_policy_data_certificate': '',
+                'tls_policy_data_certificate_digest': '',
+                'tls_policy_data_public_key': '',
+                'tls_policy_data_public_key_digest': ''
+            }, tlsPolicyChoice);
+    }
+    else if( $('#MainContent_ddlHOSTProvider').val() == "VMware Cluster" ) {
+            mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+                'tls_policy_select': $('#tls_policy_select_vmware').val(),
+                'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+                'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+                'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+                'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+            }, tlsPolicyChoice);
+    }
+    
     $('#registerHostTableContent tr').each(function() {
         var row = $(this);
         var checkBoxValue = $(row).find('td:eq(3)').find('input:checkbox').attr('checked');
@@ -355,6 +378,11 @@ function fnRegisterMultipleHost() {
             host.vmmWLtarget = $(row).find('td:eq(5)').find('select').val();
 //            host.selectionTarget = $(row).find('td:eq(6)').find('select').val();
             host.registered = $(row).attr("registered") == "true" ? true : false;
+            
+            host.tlsPolicyId = tlsPolicyChoice.tlsPolicyId;
+            host.tlsPolicyType = tlsPolicyChoice.tlsPolicyType;
+            host.tlsPolicyData = tlsPolicyChoice.tlsPolicyData;
+            
             listOfHost.push(host);
         }
     });
@@ -422,6 +450,11 @@ $(document).ready(function() {
        } else {
   		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_vmware"), choicesArray);
   		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_flatfile"), choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices($("#tls_policy_select_vmware"), {
+            dataInputContainer: $('#tls_policy_data_container_vmware')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice($("#tls_policy_select_vmware"));
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice($("#tls_policy_select_flatfile"));
        	$("#tls_policy_input_div_vmware").show();
        	$("#tls_policy_input_div_flatfile").show();
 	}

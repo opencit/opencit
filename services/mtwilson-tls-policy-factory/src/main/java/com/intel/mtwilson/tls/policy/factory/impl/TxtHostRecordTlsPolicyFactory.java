@@ -4,8 +4,10 @@
  */
 package com.intel.mtwilson.tls.policy.factory.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
@@ -28,6 +30,13 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
 
     public TxtHostRecordTlsPolicyFactory(TxtHostRecord txtHostRecord) {
         super();
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("TxtHostRecordTlsPolicyFactory constructor: {}", mapper.writeValueAsString(txtHostRecord));
+        }
+        catch(Exception e) {
+            log.warn("Cannot write debug log", e);
+        }
 //        this.txtHostRecord = txtHostRecord;
         this.objectTlsPolicyProvider = new TxtHostRecordObjectTlsPolicy(txtHostRecord);
         this.hostDescriptor = new TxtHostRecordHostDescriptor(txtHostRecord);
@@ -60,8 +69,13 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
 
         private TlsPolicyChoice tlsPolicyChoice;
 
+        /*
         public TxtHostRecordObjectTlsPolicy(TxtHostRecord txtHostRecord) {
-            this.tlsPolicyChoice = txtHostRecord.getTlsPolicyChoice();
+            this.tlsPolicyChoice = null;
+        }
+        */
+        public TxtHostRecordObjectTlsPolicy(TxtHostRecord txtHostRecord) {
+            this.tlsPolicyChoice = txtHostRecord.tlsPolicyChoice;
         }
 
         @Override
@@ -80,7 +94,7 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
             if( str == null ) {
                 throw new IllegalArgumentException(String.format("Cannot determine connection string for host: ",txtHostRecord.HostName));
             }
-            this.hostname = new InternetAddress(str.getHostname().toString()); // not using tblHosts.getName() because in case of vcenter or xencenter the hostname is not the address we're connecting to
+            this.hostname = new InternetAddress(str.getManagementServerName()); // not using tblHosts.getName() because in case of vcenter or xencenter the hostname is not the address we're connecting to; but the ConnectionString class always presents the connection target a this attribute
         }
 
         @Override

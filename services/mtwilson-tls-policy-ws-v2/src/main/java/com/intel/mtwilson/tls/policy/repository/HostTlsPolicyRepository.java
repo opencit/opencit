@@ -54,7 +54,7 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
                         result.addAll(tlsPolicyRecords);
                     }
                 } else if (criteria.hostId != null) {
-                    TlsPolicyRecord tlsPolicyRecord = dao.findTlsPolicyByHostId(criteria.hostId);
+                    TlsPolicyRecord tlsPolicyRecord = dao.findPrivateTlsPolicyByHostId(criteria.hostId);
                     if (tlsPolicyRecord != null) {
                         result.add(tlsPolicyRecord);
                     }

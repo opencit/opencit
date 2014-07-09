@@ -245,7 +245,7 @@ public class ConnectionString {
             connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
         } else if (this.vendor == Vendor.VMWARE) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
-                    String.format("https://%s:%d/sdk;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
+                    String.format("https://%s:%d/sdk;%s;%s;h=%s", this.managementServerName, this.port, this.userName, this.password, this.hostname.toString()) : 
                     String.format("%s", this.addOnConnectionString);
         } else if (this.vendor == Vendor.CITRIX) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
@@ -890,14 +890,20 @@ public class ConnectionString {
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility;  TODO: in future major version of Mt Wilson change default to 1443
+                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility; : in future major version of Mt Wilson we may change the default to 1443 for mtwilson 2.x trust agent or throw an illegal argument exception for a missing port number
                 log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }
             throw new IllegalArgumentException("Host does not have a connection string or hostname set");
         }
-        else if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
+        else if (connectionString.startsWith("intel") ) {
             return new ConnectionString(connectionString);
+        }
+        else if ( connectionString.startsWith("vmware")  || connectionString.startsWith("citrix") ) {
+            // ensure the hostname itself is present as a parameter on the connection string, since we have that information in the TxtHostRecord object 
+            ConnectionString cs = new ConnectionString(connectionString);
+            cs.hostname = new InternetAddress(host.HostName);
+            return cs;
         }
         else {
             // use a combination of connection string and other information in the record (port number, vmm name, ...)

@@ -315,7 +315,16 @@ function fnGetNewHostData() {
                                              "/;"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
         
     }
-	
+
+    mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+        'tls_policy_select': $('#tls_policy_select').val(),
+        'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+        'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+        'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+        'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+    }, hostVo);
+    
+    
 	//setting unwanted values to null or default
 	hostVo.location = null;
 	hostVo.updatedOn = null;

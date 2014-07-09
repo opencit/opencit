@@ -19,6 +19,8 @@ import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.datatypes.TxtHost;
+import com.intel.mtwilson.datatypes.TxtHost;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
 
 import java.util.List;

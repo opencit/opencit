@@ -67,6 +67,15 @@
                             </select>
                         </div>
                     </div>
+                        <div id="tls_policy_data_container_vmware" class="tlspolicy-input-container singleDiv" style="display: none; padding-bottom: 15px;">
+                            <div class="labelDiv">&nbsp;</div>
+                            <div class="valueDiv">
+                                    <textarea class="tlspolicy-input-certificate" id="tls_policy_data_certificate" placeholder="Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
+                                    <textarea class="tlspolicy-input-certificate-digest" id="tls_policy_data_certificate_digest" placeholder="Base64-encoded digest of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
+                                    <textarea class="tlspolicy-input-public-key" id="tls_policy_data_public_key" placeholder="Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>  
+                                    <textarea class="tlspolicy-input-public-key-digest" id="tls_policy_data_public_key_digest" placeholder="Base64-encoded digest of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>                                    
+                            </div>
+                        </div>
                     <div class="singleDiv">
                         <div class="labelDiv" data-i18n="input.login_id">Login ID:</div>
                         <div class="valueDiv">

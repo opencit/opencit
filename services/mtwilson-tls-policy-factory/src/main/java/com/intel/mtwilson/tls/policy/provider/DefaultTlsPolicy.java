@@ -13,26 +13,27 @@ import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 /**
  * Loads default TLS Policy from value of mtwilson.default.tls.policy.id in
  * mtwilson.properties or in database configuration table.
- * 
+ *
  * @author jbuhacoff
  */
 public class DefaultTlsPolicy implements TlsPolicyProvider {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultTlsPolicy.class);
-    
+
     @Override
     public TlsPolicyChoice getTlsPolicyChoice() {
         String defaultTlsPolicyId = My.configuration().getDefaultTlsPolicyId();
         log.debug("DefaultTlsPolicy: {}", defaultTlsPolicyId);
-        if( defaultTlsPolicyId == null || defaultTlsPolicyId.isEmpty()) {
+        if (defaultTlsPolicyId == null || defaultTlsPolicyId.isEmpty()) {
             return null;
         }
-        if( defaultTlsPolicyId.equals("INSECURE") || defaultTlsPolicyId.equals("TRUST_FIRST_CERTIFICATE") ) {
+        if (defaultTlsPolicyId.equals("INSECURE") || defaultTlsPolicyId.equals("TRUST_FIRST_CERTIFICATE")) {
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
             tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
             tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType(defaultTlsPolicyId);
             return tlsPolicyChoice;
         }
-        if( UUID.isValid(defaultTlsPolicyId)) {
+        if (UUID.isValid(defaultTlsPolicyId)) {
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
             tlsPolicyChoice.setTlsPolicyId(defaultTlsPolicyId);
             return tlsPolicyChoice;
@@ -40,5 +41,4 @@ public class DefaultTlsPolicy implements TlsPolicyProvider {
         log.debug("DefaultTlsPolicy not found");
         return null;
     }
-    
 }

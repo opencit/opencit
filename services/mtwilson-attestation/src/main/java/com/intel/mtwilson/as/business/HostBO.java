@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.business;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
@@ -35,6 +36,13 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.factory.impl.TblHostsTlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
+import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyReader;
+import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyWriter;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -103,6 +111,15 @@ public class HostBO {
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("addHost input: {}", mapper.writeValueAsString(host));
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to addHost", e);
+                }
+            }
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -124,7 +141,8 @@ public class HostBO {
                         // BOOKMARK JONATHAN TLS POLICY
                         TblHosts tblHosts = new TblHosts();
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
-                        tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());                        
+                        setTlsPolicyFields(tblHosts, host);
                         
                         // Using the connection string we will find out the type of the host. This information would be used later
                         ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
@@ -305,8 +323,89 @@ public class HostBO {
         }
     }
 
+    private void deletePrivateTlsPolicy(TblHosts target) throws IOException {
+        try(TlsPolicyDAO tlsPolicyDao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+            tlsPolicyDao.deletePrivateTlsPolicyByHostId(target.getUuid_hex());
+        }        
+    }
+
+        private void setTlsPolicyFields(TblHosts target, TxtHost from) throws IOException {
+            setTlsPolicyFields(target, from.getTlsPolicyChoice());
+        }
+    private void setTlsPolicyFields(TblHosts target, TlsPolicyChoice from) throws IOException {
+                        // if there is a tls policy id, we save it directly in the host record
+                        // but if there is a tls policy descriptor, we need to create or update a per-from.(private) tls policy and 
+                        // then set its id on the host record
+                        if( from != null && from.getTlsPolicyDescriptor() != null ) {
+                            target.setTlsPolicyId(null);
+                            target.setTlsPolicyDescriptor(from.getTlsPolicyDescriptor());
+                            target.setTlsKeystore(null);
+                            target.setTlsPolicyName(null);
+                        }
+                        else if( from != null && from.getTlsPolicyId() != null && !from.getTlsPolicyId().isEmpty() ) {
+                            // a private tls policy may or may not exist but the host refers to one anyway
+                            target.setTlsPolicyId(from.getTlsPolicyId()); // automatically clears the old tls policy name and tls keystore fields as well as the new tls policy descriptor field
+                            target.setTlsPolicyDescriptor(null);
+                            target.setTlsKeystore(null);
+                            target.setTlsPolicyName(null);
+                        }
+                        else {
+                            target.setTlsPolicyId(null);
+                            target.setTlsPolicyDescriptor(null);
+                            target.setTlsKeystore(null);
+                            target.setTlsPolicyName(null);
+                        }        
+    }
+    private void storePrivateTlsPolicy(TblHosts target) throws IOException {
+        // look for an existing private tls policy record - we ignore the (possibly) existing tls policy id in target because it might be a shared policy and we dont' want to update that one; if it's a private policy the dao will find it
+        try(TlsPolicyDAO tlsPolicyDao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+            if( target.getTlsPolicyDescriptor() != null ) {
+                // a descriptor is set so we assume a private policy and look to either update an existing one or create a new one
+                TlsPolicyRecord existingTlsPolicy = tlsPolicyDao.findPrivateTlsPolicyByHostId(target.getUuid_hex()); // will only return a private policy if one is associated with this host
+                if( existingTlsPolicy == null ) {
+                    log.debug("storePrivateTlsPolicy creating new private policy");
+                    // no private tls policy exists yet for this host; so we create a new one and we'll save it
+                    TlsPolicyRecord newTlsPolicy = new TlsPolicyRecord();
+                    newTlsPolicy.setId(new UUID());
+                    newTlsPolicy.setName(target.getUuid_hex());
+                    newTlsPolicy.setPrivate(true);
+                    newTlsPolicy.setContentType("application/json");
+                    JsonTlsPolicyWriter tlsPolicyWriter = new JsonTlsPolicyWriter();
+                    newTlsPolicy.setContent(tlsPolicyWriter.write(target.getTlsPolicyDescriptor()));
+                    tlsPolicyDao.insertTlsPolicy(newTlsPolicy);
+                    target.setTlsPolicyId(newTlsPolicy.getId().toString()); // automatically clears the old tls policy name and tls keystore fields as well as the new tls policy descriptor field
+                }
+                else {
+                    log.debug("storePrivateTlsPolicy updating existing private policy");
+                    // a private tls policy already exists for this host, so update it with the new descriptor
+                    existingTlsPolicy.setContentType("application/json");
+                    JsonTlsPolicyWriter tlsPolicyWriter = new JsonTlsPolicyWriter();
+                    existingTlsPolicy.setContent(tlsPolicyWriter.write(target.getTlsPolicyDescriptor()));
+                    tlsPolicyDao.updateTlsPolicy(existingTlsPolicy);
+                    target.setTlsPolicyId(existingTlsPolicy.getId().toString()); // automatically clears the old tls policy name and tls keystore fields as well as the new tls policy descriptor field
+                }
+            }
+            else if( target.getTlsPolicyId() != null ) {
+                TlsPolicyRecord existingTlsPolicy = tlsPolicyDao.findPrivateTlsPolicyByHostId(target.getUuid_hex()); // will only return a private policy if one is associated with this host
+                if( existingTlsPolicy != null && !target.getTlsPolicyId().equalsIgnoreCase(existingTlsPolicy.getId().toString()) ) {
+                    log.debug("storePrivateTlsPolicy deleting existing private policy because host is now linked to a shared policy");
+                    // an id is set so we assume a shared policy, and therefore try to delete any existing private policy for the host
+                    deletePrivateTlsPolicy(target);
+                }
+            }
+        }
+    }
 
         public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("updateHost input: {}", mapper.writeValueAsString(host));
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to updateHost", e);
+                }
+            }
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -324,8 +423,23 @@ public class HostBO {
                         TblMle  vmmMleId = findVmmMleForHost(host); 
             
                         // BOOKMARK JONATHAN TLS POLICY
-//                        tblHosts.setTlsKeystore(null);  // XXX new code to test: it's either null or it's already set so don't change it // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        setTlsPolicyFields(tblHosts, host);
+
+            if( log.isDebugEnabled() ) {
+		log.debug("updateHost after setTlsPolicyFields TlsPolicyName {}", tblHosts.getTlsPolicyName());
+		log.debug("updateHost after setTlsPolicyFields TlsKeystoreLength {}", (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
+		log.debug("updateHost after setTlsPolicyFields tlsPolicyId {}", tblHosts.getTlsPolicyId());
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+		log.debug("updateHost after setTlsPolicyFields tlsPolicyDescriptor {}", mapper.writeValueAsString(tblHosts.getTlsPolicyDescriptor()));
+        }
+        catch(IOException e) {
+            log.debug("cannot log tls policy descriptor in updateHost after setTlsPolicyFields", e);
+        }
+            }
+                        
+                        
                         
                         // Using the connection string we will find out the type of the host. This information would be used later
                         ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
@@ -398,6 +512,8 @@ public class HostBO {
                         tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
                         tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
 
+                storePrivateTlsPolicy(tblHosts); // will create a new private policy, or update an existing one, or delete an existing private policy (if host now has a shared policy)
+                        
 			My.jpa().mwHosts().edit(tblHosts);
 			log.info("Updated host: {}", tblHosts.getName());
                         
@@ -445,6 +561,8 @@ public class HostBO {
                         deleteTALogs(tblHosts.getId());
 
                         deleteSAMLAssertions(tblHosts);
+                        
+                        deletePrivateTlsPolicy(tblHosts);
 
                         My.jpa().mwHosts().destroy(tblHosts.getId());
                         log.info("Deleted host: {}", hostName.toString());
@@ -648,8 +766,18 @@ public class HostBO {
 	private synchronized void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId, String uuid) throws CryptographyException, MalformedURLException, IOException {
 		checkForDuplicate(host);
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
-		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
-		
+        if(log.isDebugEnabled() ) {
+		log.debug("saveHostInDatabase TlsPolicyName {}", tblHosts.getTlsPolicyName());
+		log.debug("saveHostInDatabase TlsKeystoreLength {}", (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
+		log.debug("saveHostInDatabase tlsPolicyId {}", tblHosts.getTlsPolicyId());
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+		log.debug("saveHostInDatabase tlsPolicyDescriptor {}", mapper.writeValueAsString(tblHosts.getTlsPolicyDescriptor()));
+        }
+        catch(IOException e) {
+            log.debug("cannot log tls policy descriptor in saveHostInDatabase", e);
+        }
+        }		
 		String cs = host.getAddOn_Connection_String();
                 //log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
@@ -678,6 +806,9 @@ public class HostBO {
                     tblHosts.setUuid_hex(new UUID().toString());
                 tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
                 tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
+
+                
+                storePrivateTlsPolicy(tblHosts); // will create a new private policy, or update an existing one, or delete an existing private policy (if host now has a shared policy)
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
@@ -962,6 +1093,37 @@ public class HostBO {
                     log.debug("not adding in hardware uuid");
                     hostObj.Hardware_Uuid = null;
                 }
+                
+                // if the host already has a mtwilson 1.x tls keystore, automatically convert it to the new tls policy descriptor
+                if( tblHost.getTlsPolicyName() != null || tblHost.getTlsKeystore() != null ) {
+                    TblHostsTlsPolicyFactory.TblHostsObjectTlsPolicy tlsPolicyFactory = new TblHostsTlsPolicyFactory.TblHostsObjectTlsPolicy(tblHost);
+                    hostObj.tlsPolicyChoice = tlsPolicyFactory.getTlsPolicyChoice();
+                }
+                else if( tblHost.getTlsPolicyId() != null ) {
+                    // there is a policy id, but for the UI edit host page we need to provide the id for a shared policy, or the descriptor for a private policy
+                    try(TlsPolicyDAO tlsPolicyDao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+                        TlsPolicyRecord tlsPolicyRecord = tlsPolicyDao.findPrivateTlsPolicyByHostId(tblHost.getUuid_hex());
+                        if( tlsPolicyRecord != null && tblHost.getTlsPolicyId().equalsIgnoreCase(tlsPolicyRecord.getId().toString()) ) {
+                            // found the private policy for this host, so set the descriptor on the host record
+                            JsonTlsPolicyReader reader = new JsonTlsPolicyReader();
+                            hostObj.tlsPolicyChoice = new TlsPolicyChoice();
+                            hostObj.tlsPolicyChoice.setTlsPolicyDescriptor(reader.read(tlsPolicyRecord.getContent()));
+                        }
+                        else {
+                            // either didn't find a private policy OR we found one but the host actually links to a shared policy - so keep the tls policy id
+                            hostObj.tlsPolicyChoice = new TlsPolicyChoice();
+                            hostObj.tlsPolicyChoice.setTlsPolicyId(tblHost.getTlsPolicyId());
+                        }
+                    }
+                    catch(IOException e) {
+                        log.debug("Cannot lookup tlsPolicyId {}", tblHost.getTlsPolicyId(), e);
+                    }
+                }
+                else if( tblHost.getTlsPolicyDescriptor() != null ) {
+                    hostObj.tlsPolicyChoice = new TlsPolicyChoice();
+                    hostObj.tlsPolicyChoice.setTlsPolicyDescriptor(tblHost.getTlsPolicyDescriptor());
+                }
+                
                 return hostObj;
         }
 

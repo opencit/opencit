@@ -48,7 +48,7 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
                 throw new UnsupportedAlgorithmException(alg);
             }
             for(String certificateDigestBase64 : tlsPolicyDescriptor.getData()) {
-                Digest digest = new Digest(alg, Base64.decodeBase64(certificateDigestBase64));
+                Digest digest = new Digest(alg, Base64.decodeBase64(certificateDigestBase64)); // decodeBase64 ignores spaces and colons
                 repository.addDigest(digest);
             }
             return repository;

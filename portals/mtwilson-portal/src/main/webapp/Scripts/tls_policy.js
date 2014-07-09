@@ -19,21 +19,16 @@ var mtwilsonTlsPolicyModule = {};
     
     defineFunction(m, "getTlsPolicyChoices", function() {
         var choices = []; // each element will be { label:"...", value:"..." }
-        // first, server global if it's defined
+        // first, server global if it's defined will cause ALL policy choices to be disabled because the user needs to know the server will force a global policy and the user doesn't get a choice
         var disabled = false;
         if( m.configuration["global"] ) {
             disabled = true;
+            choices.push({value:"",label:m.configuration["global"],policy_scope:"global",policy_type:"", isGlobal:true, disabled:false});
         }
-        /*
-        if( m.configuration["global"] ) {
-            choices.push({label:"Required policy (global)",value:null});
-            disabled = true;
-        }
-        // next, server default if it's available
+        // second, server default if it's defined
         if( m.configuration["default"] ) {
-            choices.push({label:"",value:null, disabled:disabled});
+            choices.push({value:"",label:m.configuration["default"],policy_scope:"default",policy_type:"", isDefault:true, disabled:disabled});
         }
-        */
         // next, any shared policies
         for(var i=0; i<m.tls_policies.length; i++) {
             var choice = {};
@@ -43,11 +38,10 @@ var mtwilsonTlsPolicyModule = {};
             choice.policy_type = m.tls_policies[i].policy_type;
             choice.disabled = disabled;
             if( m.configuration["default"] == choice.value ) {
-                choice.isDefault = true;
+                choice.isDefault = true; //the UI may indicate to the user that this policy is the current server default; user can select this one specifically to retain it even when the default changes
             }
             if( m.configuration["global"] == choice.value ) {
                 choice.isGlobal = true;
-                choice.disabled = false; // enable the global option as a visual indication that it's what the server will allow
             }
             choices.push(choice);
         }
@@ -64,37 +58,45 @@ var mtwilsonTlsPolicyModule = {};
         var globalChoice, defaultChoice;
         var shared = "";
         for(var i=0; i<choicesArray.length; i++) {
-            if( choicesArray[i].isDefault ) { defaultChoice = choicesArray[i]; continue; }
-            if( choicesArray[i].isGlobal ) { globalChoice = choicesArray[i]; continue; }
-            shared += "<option value='"+choicesArray[i].value+"' "+(choicesArray[i].disabled?"disabled":"")+">"+choicesArray[i].label+"</option>";
+            if( choicesArray[i].isDefault ) { defaultChoice = choicesArray[i]; }
+            if( choicesArray[i].isGlobal ) { globalChoice = choicesArray[i]; }
+            if( choicesArray[i].policy_scope == "shared" ) {
+                shared += "<option value='"+choicesArray[i].value+"' "+(choicesArray[i].disabled?"disabled":"")+">"+choicesArray[i].label+"</option>";
+            }
         }
         if( shared.length > 0 ) {
-            $(element).append("<optgroup label='Shared' data-i18n='[label]tls_policy.option.shared' data-tls-policy-scope='shared'>"+shared+"</optgroup>");
+            $(element).append("<optgroup label='Shared' data-i18n='[label]tls_policy.option.shared'>"+shared+"</optgroup>"); // data-tls-policy-scope='shared' 
         }
         if( globalChoice ) {
-            $(element).append("<optgroup label='Global' data-i18n='[label]tls_policy.option.global' data-tls-policy-scope='shared'><option value='"+globalChoice.value+"'>"+globalChoice.label+"</option></optgroup>");
+            $(element).append("<optgroup label='Global' data-i18n='[label]tls_policy.option.global'><option value='"+globalChoice.value+"' selected>"+globalChoice.label+"</option></optgroup>"); // data-tls-policy-scope='shared' 
         }
         if( defaultChoice ) {
-            $(element).append("<optgroup label='Default' data-i18n='[label]tls_policy.option.default' data-tls-policy-scope='shared'><option value='"+defaultChoice.value+"' "+(defaultChoice.disabled?"disabled":"")+">"+defaultChoice.label+"</option></optgroup>");
+            $(element).append("<optgroup label='Default' data-i18n='[label]tls_policy.option.default'><option value='"+defaultChoice.value+"' "+(defaultChoice.disabled?"disabled":"selected")+">"+defaultChoice.label+"</option></optgroup>"); // data-tls-policy-scope='shared' 
         }
     });
     defineFunction(m, "insertSelectOptionsWithPerHostTlsPolicyChoices", function(selectElement, options) {
         var perhost = "";
+        var disabled = false;
+        if( m.configuration["global"] ) {
+            disabled = true;
+        }
         if( m.configuration.allow ) { 
             if( m.configuration.allow.indexOf("certificate") > -1 ) {
-                perhost += "<option value='private-certificate' data-i18n='tls_policy.option.per_host_certificate' data-tls-policy-scope='private' data-tls-policy-type='certificate'>Host certificate</option>";
+                perhost += "<option value='private-certificate' data-i18n='tls_policy.option.per_host_certificate' data-tls-policy-scope='private' data-tls-policy-type='certificate' "+(disabled?"disabled":"")+">Host certificate</option>";
             }
             if( m.configuration.allow.indexOf("certificate-digest") > -1 ) {
-                perhost += "<option value='private-certificate-digest' data-i18n='tls_policy.option.per_host_certificate_digest' data-tls-policy-scope='private' data-tls-policy-type='certificate-digest'>Host certificate fingerprint</option>";
+                perhost += "<option value='private-certificate-digest' data-i18n='tls_policy.option.per_host_certificate_digest' data-tls-policy-scope='private' data-tls-policy-type='certificate-digest' "+(disabled?"disabled":"")+">Host certificate fingerprint</option>";
             }
-            if( m.configuration.allow.indexOf("certificate") > -1 ) {
-                perhost += "<option value='private-public-key' data-i18n='tls_policy.option.per_host_public_key' data-tls-policy-scope='private' data-tls-policy-type='public-key'>Host public key</option>";
+            if( m.configuration.allow.indexOf("public-key") > -1 ) {
+                perhost += "<option value='private-public-key' data-i18n='tls_policy.option.per_host_public_key' data-tls-policy-scope='private' data-tls-policy-type='public-key' "+(disabled?"disabled":"")+">Host public key</option>";
             }
-            if( m.configuration.allow.indexOf("certificate-digest") > -1 ) {
-                perhost += "<option value='private-public-key-digest' data-i18n='tls_policy.option.per_host_public_key_digest' data-tls-policy-scope='private' data-tls-policy-type='public-key-digest'>Host public key fingerprint</option>";
+            if( m.configuration.allow.indexOf("public-key-digest") > -1 ) {
+                perhost += "<option value='private-public-key-digest' data-i18n='tls_policy.option.per_host_public_key_digest' data-tls-policy-scope='private' data-tls-policy-type='public-key-digest' "+(disabled?"disabled":"")+">Host public key fingerprint</option>";
             }
         }
-        $(selectElement).prepend("<optgroup label='Per-host' data-i18n='[label]tls_policy.option.private'>"+perhost+"</optgroup>");
+        if( perhost.length ) {
+            $(selectElement).prepend("<optgroup label='Per-host' data-i18n='[label]tls_policy.option.private'>"+perhost+"</optgroup>");
+        }
         if( options ) {
             if( options.dataInputContainer  ) {
                 // dataInputContainer must be an element, probably a div or form, which contains extra inputs for each policy type
@@ -108,8 +110,6 @@ var mtwilsonTlsPolicyModule = {};
                     $(selectElement).change(function() {
                         var newValue = $(selectElement).val();
                         var optionElement = $(selectElement).find("option[value='"+newValue+"']").first().get();
-                        console.log("got selected element", optionElement);
-                        console.log("got selected element value", optionElement.value);
                         
                         var scope;
                         if( $(optionElement).attr("data-tls-policy-scope") ) { scope = $(optionElement).attr("data-tls-policy-scope"); }
@@ -124,12 +124,10 @@ var mtwilsonTlsPolicyModule = {};
                             "scope": scope,
                             "policy_type": policyType
                         };
-                        console.log("hey, got new tls policy selected", tlsPolicyInfo);
                         
                         if( scope == "private" ) {
-                            // hide all policy-type-specific input elements
-                            inputContainer.find("[class^='tlspolicy-input-']").hide();
-                            inputContainer.find("[class~='tlspolicy-input-"+policyType+"']").show();
+                            inputContainer.find("[class^='tlspolicy-input-']").hide(); // hide all policy-type-specific input elements
+                            inputContainer.find("[class~='tlspolicy-input-"+policyType+"']").show(); // show only the elements with the selected policy type
                             inputContainer.show();
                         }
                         else {
@@ -144,6 +142,16 @@ var mtwilsonTlsPolicyModule = {};
         // TODO: we need to use the call back whenuser selects a per-host option because we need the page to display the inputs or existing values...
     });
     defineFunction(m, "selectDefaultTlsPolicyChoice", function(element, defaultValue) {
+        // the server default choice will already have the 'selected' attribute so no javascript required for that
+        // in this function, we look to see if host.js has set a host-specific tls policy id on the tls_policy_select element
+        // (because it may have loaded that info before we populated the select options) and if it's there we select it
+        var selectedValue = $(element).prop("data-selected");
+        if( selectedValue ) {
+            if( $(element).find("option[value='"+selectedValue+"']") ) {
+                $(element).val( selectedValue );
+            }
+        }
+        /*
         if( defaultValue ) {           
             $(element).val(defaultValue);
         }
@@ -152,6 +160,46 @@ var mtwilsonTlsPolicyModule = {};
         }
         else {
             $(element).val('');
+        }
+        */
+    });
+    // input.tls_policy_select is the tls_policy_select 
+    // input.tls_policy_data_certificate
+    // input.tls_policy_data_certificate_digest
+    // input.tls_policy_data_public_key
+    // input.tls_policy_data_public_key_digest
+    // hostDetails is from new RegisterHostVo(); from WhiteListConfig.js or AddHost.js or RegisterHost.js, which has three fields tlsPolicyId, tlsPolicyType, and tlsPolicyData
+    defineFunction(m, "copyTlsPolicyChoiceToHostDetailsVO", function(input, hostDetails) {
+        var tlsPolicySelect = input.tls_policy_select || "";
+        if( tlsPolicySelect == "INSECURE" ) {
+            hostDetails.tlsPolicyType = "INSECURE";
+            hostDetails.tlsPolicyData = null;
+        }
+        else if( tlsPolicySelect == "TRUST_FIRST_CERTIFICATE" ) {
+            hostDetails.tlsPolicyType = "TRUST_FIRST_CERTIFICATE";
+            hostDetails.tlsPolicyData = null;
+        }
+        else if( tlsPolicySelect == "private-certificate" ) {
+            hostDetails.tlsPolicyType = "certificate";
+            hostDetails.tlsPolicyData = input.tls_policy_data_certificate;
+        }
+        else if( tlsPolicySelect == "private-certificate-digest" ) {
+            hostDetails.tlsPolicyType = "certificate-digest";
+            hostDetails.tlsPolicyData = input.tls_policy_data_certificate_digest;
+        }
+        else if( tlsPolicySelect == "private-public-key" ) {
+            hostDetails.tlsPolicyType = "public-key";
+            hostDetails.tlsPolicyData = input.tls_policy_data_public_key;
+        }
+        else if( tlsPolicySelect == "private-public-key-digest" ) {
+            hostDetails.tlsPolicyType = "public-key-digest";
+            hostDetails.tlsPolicyData = input.tls_policy_data_public_key_digest;
+        }
+        else {
+            // anything else is assumed to be a shared policy id
+            hostDetails.tlsPolicyId = tlsPolicySelect;
+            hostDetails.tlsPolicyType = null;
+            hostDetails.tlsPolicyData = null;
         }
     });
 }(jQuery,mtwilsonTlsPolicyModule));

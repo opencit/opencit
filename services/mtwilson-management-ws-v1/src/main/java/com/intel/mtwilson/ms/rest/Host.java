@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.MSComponentFactory;
@@ -121,6 +122,14 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
+        
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("configureWhiteList: {}", mapper.writeValueAsString(hostConfigObj));
+        } catch(Exception e) { log.error("configureWhiteList cannot serialize input" ,e); }
+        // debug only
+        
         WhitelistConfigurationData wlConfigData = new WhitelistConfigurationData(hostConfigObj);
         boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(wlConfigData);
         return Boolean.toString(result);
@@ -146,7 +155,7 @@ public class Host {
         ValidationUtil.validate(hostRecords);
         TxtHostRecordList newHostRecords = new TxtHostRecordList();
         
-        for (HostConfigData host : hostRecords.getHostRecords().toArray(new HostConfigData[0])) {
+        for (HostConfigData host : hostRecords.getHostRecords()) {
             if (host.getTxtHostRecord().HostName.isEmpty() || host.getTxtHostRecord().HostName == null) {
                 throw new MSException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT, "host");
             } else {

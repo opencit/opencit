@@ -13,6 +13,8 @@ import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.HostResponse;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import java.util.ArrayList;
 import java.util.HashSet;

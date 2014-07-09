@@ -127,6 +127,14 @@ function fnUploadWhiteListConfigurationData() {
                 alert($("#alert_valid_hostname_ip").text());
             }
         }
+        
+        mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+            'tls_policy_select': $('#tls_policy_select').val(),
+            'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+            'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+            'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+            'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+        }, hostVo);
 
         if (validation) {
             var data = "registerHostVo=" + $.toJSON(hostVo) + "&biosWLTagrget=" + configurationSaved.biosWLTarget + "&vmmWLTarget=" + configurationSaved.vmmWLTarget;

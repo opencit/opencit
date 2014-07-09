@@ -26,6 +26,7 @@ import com.intel.mtwilson.security.annotations.*;
 import java.io.IOException;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -34,6 +35,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * REST Web Service *
+ * 
+ * BACKWARD COMPATIBILITY:
+ * Some POST and PUT methods accept TxtHost2 or TxtHostRecord2 with extended fields.
+ * However, this class MUST NOT respond with those to the client because it would
+ * break v1 clients. The v1 contract does not allow extra fields.
+ * Therefore this class responds with TxtHost and TxtHostRecord.
+ * 
  */
 @V1
 //@Stateless
@@ -331,16 +339,27 @@ public class Host {
         @RequiresPermissions("hosts:search") 
         @GET
         @Produces({MediaType.APPLICATION_JSON})
-        public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria,@QueryParam("includeHardwareUuid")  @DefaultValue("false") boolean includeHardwareUuid) {
+        public List<TxtHostRecord> queryForHosts(
+                    @QueryParam("searchCriteria") String searchCriteria,
+                    @QueryParam("includeHardwareUuid")  @DefaultValue("false") boolean includeHardwareUuid,
+                    @QueryParam("includeTlsPolicy")  @DefaultValue("false") boolean includeTlsPolicy) {
             log.debug("queryForHosts api searchCriteria["+searchCriteria+"] ");
             ValidationUtil.validate(searchCriteria);
                 //if( searchCriteria == null || searchCriteria.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
                 //else 
-            if(includeHardwareUuid != false) {
-                return hostBO.queryForHosts(searchCriteria,includeHardwareUuid);
+            List<TxtHostRecord> resultset;
+            if(includeHardwareUuid) {
+                resultset = hostBO.queryForHosts(searchCriteria,includeHardwareUuid);
             }else{
-                return hostBO.queryForHosts(searchCriteria);
+                resultset = hostBO.queryForHosts(searchCriteria);
             }
+            
+            if( !includeTlsPolicy ) {
+                for(TxtHostRecord record : resultset) {
+                    record.tlsPolicyChoice = null;
+                }
+            }
+            return resultset;
         }
 
         //@RolesAllowed({"Attestation"})

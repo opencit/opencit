@@ -28,7 +28,16 @@ public class HostDetailsEntityVO implements Serializable {
 	private String location;
 	private String oemName;
 	private String vCenterDetails;
+    /**
+     *  tlsPolicyId indicates a shared policy
+     */
 	private String tlsPolicyId;
+    /**
+     * tlsPolicyType and tlsPolicyData indicate a private policy
+     */
+    private String tlsPolicyType;
+    private String tlsPolicyData;
+    
 	/**
 	 * @return the vCenterDetails
 	 */
@@ -142,6 +151,22 @@ public class HostDetailsEntityVO implements Serializable {
     public String getTlsPolicyId() {
         return tlsPolicyId;
     }
+
+    /**
+     * null if tls policy id is set,  or a policy type like "certificate" or "INSECURE"
+     * @return 
+     */
+    public String getTlsPolicyType() {
+        return tlsPolicyType;
+    }
+
+    /**
+     * only set if tlsPolicyType is set to a type that requires additional data (certificate, public key, or digest)
+     * @return 
+     */
+    public String getTlsPolicyData() {
+        return tlsPolicyData;
+    }
     
     
 
@@ -241,6 +266,15 @@ public class HostDetailsEntityVO implements Serializable {
         this.tlsPolicyId = tlsPolicyId;
     }
 
+    public void setTlsPolicyType(String tlsPolicyType) {
+        this.tlsPolicyType = tlsPolicyType;
+    }
+
+    public void setTlsPolicyData(String tlsPolicyData) {
+        this.tlsPolicyData = tlsPolicyData;
+    }
+
+    
     
 	@Override
 	public String toString() {

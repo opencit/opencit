@@ -896,7 +896,11 @@ mtwilson.atag = mtwilson.atag || {};
         subject_id = $F("uuid-populate-host");
         selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-            if( true ) { // TODO:  find out if encrypted xmls are required by checking something like  data.currentConfiguration['tag.encrypted.xml.required'] == 'true'  after the configuration is available via the API again
+            // currently we always request the encrypted selection xml and then we use it for our certificate request
+            // that always works but if we want to save some processing, we can first check if encrypted xmls are 
+            // required by checking the server configuration for tag.encrypted.xml.required and only use encrypted
+            // selection xmls when required
+            if( true ) {
                 var requestObject = "";
                 console.log("Certificate request: " + Object.toJSON(requestObject));
 
@@ -905,8 +909,7 @@ mtwilson.atag = mtwilson.atag || {};
                 xmlhttp.onreadystatechange=function() {
                     if (xmlhttp.readyState==4 && xmlhttp.status==200) {
                         var requestObject = xmlhttp.responseText;
-                        // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
-                        //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
+                        //requestObject is a message/rfc822 formatted string containing an encrypted selection like {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
                         ajax.custom.post('certificateRequests', requestObject, {app: report, contentType: 'message/rfc822', accept: 'application/pkix-cert'}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
                     }
                 };
@@ -923,8 +926,7 @@ mtwilson.atag = mtwilson.atag || {};
                 xmlhttp.onreadystatechange=function() {
                     if (xmlhttp.readyState==4 && xmlhttp.status==200) {
                         var requestObject = xmlhttp.responseText.evalJSON();
-                        // JONATHAN BOOKMARK  IF ENCRYPTED XML REQUIRED, THEN REQUEST THE ENCRYPTED SELECTION FIRST .... instead of this json one.
-                        //requestObject = {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
+                        //requestObject looks like {"selections":[{"attributes":[{"text":{"value":"city=Folsom"},"oid":"2.5.4.789.1"},{"text":{"value":"state=CA"},"oid":"2.5.4.789.1"},{"text":{"value":"city=Santa Clara"},"oid":"2.5.4.789.1"}]}]}
                         ajax.json.post('certificateRequests', requestObject, {app: report}, {subject: subject_id}); // pass {app:report} so it will be passed to the event handler after the request is complete
                     }
                 };

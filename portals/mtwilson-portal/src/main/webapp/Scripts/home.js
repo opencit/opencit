@@ -508,6 +508,33 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
 		}
 		value = responseJSON.hostData.emailAddress == 'null' || responseJSON.hostData.emailAddress == undefined ? "" : responseJSON.hostData.emailAddress;
 		$('#MainContent_tbEmailAddress').val(value);
+        
+        if( responseJSON.hostData.tlsPolicyId ) {
+            // tls_policy_select is populated by tls_policy.js so we also store the selected value in a property in case the options haven't been populated yet
+            $('#tls_policy_select').prop('data-selected', responseJSON.hostData.tlsPolicyId);
+            $('#tls_policy_select').val(responseJSON.hostData.tlsPolicyId);
+        }
+        if( responseJSON.hostData.tlsPolicyType ) {
+            $('#tls_policy_select').prop('data-selected', "private-"+responseJSON.hostData.tlsPolicyType);
+            $('#tls_policy_select').val("private-"+responseJSON.hostData.tlsPolicyType);
+            if( responseJSON.hostData.tlsPolicyData ) {
+                if( responseJSON.hostData.tlsPolicyType == "certificate" ) {
+                    $('#tls_policy_data_certificate').val(responseJSON.hostData.tlsPolicyData);
+                }
+                if( responseJSON.hostData.tlsPolicyType == "certificate-digest" ) {
+                    $('#tls_policy_data_certificate_digest').val(responseJSON.hostData.tlsPolicyData);
+                }
+                if( responseJSON.hostData.tlsPolicyType == "public-key" ) {
+                    $('#tls_policy_data_public_key').val(responseJSON.hostData.tlsPolicyData);
+                }
+                if( responseJSON.hostData.tlsPolicyType == "public-key-digest" ) {
+                    $('#tls_policy_data_public_key_digest').val(responseJSON.hostData.tlsPolicyData);
+                }
+                $('#tls_policy_select').change();
+            }
+        }
+        
+        
 	}else {
 		$('#mleMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(responseJSON.message)+'</div>');
 	}

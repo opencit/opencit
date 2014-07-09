@@ -349,8 +349,7 @@ public class TestVmwareEsxi51 {
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
         HostAgentFactory agentFactory = new HostAgentFactory();
-        TlsPolicy tlsPolicy = agentFactory.getTlsPolicy(host);
-        HostAgent agent = agentFactory.getHostAgent(new ConnectionString(connection), tlsPolicy);//agentFactory.getHostAgent(host);
+        HostAgent agent = agentFactory.getHostAgent(host); // new ConnectionString(connection));//agentFactory.getHostAgent(host);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = agent.getPcrManifest();
         hostReport.variables = agent.getHostAttributes();

@@ -347,9 +347,6 @@ public class HostBOTest {
         Resource resource = tblHosts.getTlsKeystoreResource();
         SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
         
-        System.err.println("SAVY001 factory tls policy: " + factory.getTlsPolicy(tblHosts).toString());
-        System.err.println("SAVY002 tblHosts tls policy: " + tblHosts.getTlsPolicyName());
-        System.err.println("SAVY003 tblHosts tls keystore: " + tblHosts.getTlsKeystore());
     }
     @Test
     public void SavyTest() throws IOException, CryptographyException, KeyManagementException {

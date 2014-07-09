@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.TrustKnownCertificateTlsPolicy;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
@@ -40,7 +41,7 @@ public class TlsPolicyFactoryTest {
         host.AddOn_Connection_String = "intel:https://localhost:1443";
         TlsPolicyChoice insecureChoice = new TlsPolicyChoice();
         insecureChoice.setTlsPolicyId("INSECURE");
-        host.setTlsPolicyChoice(insecureChoice);
+        host.tlsPolicyChoice = insecureChoice;
         TlsPolicyFactory factory = TlsPolicyFactory.createFactory(host);
         TlsPolicy tlsPolicy = factory.getTlsPolicy();
         assertEquals(InsecureTlsPolicy.class, tlsPolicy.getClass());
@@ -60,7 +61,7 @@ public class TlsPolicyFactoryTest {
         host.AddOn_Connection_String = "intel:https://localhost:1443";
         TlsPolicyChoice insecureChoice = new TlsPolicyChoice();
         insecureChoice.setTlsPolicyId("TRUST_FIRST_CERTIFICATE");
-        host.setTlsPolicyChoice(insecureChoice);
+        host.tlsPolicyChoice = insecureChoice;
         TlsPolicyFactory factory = TlsPolicyFactory.createFactory(host);
         TlsPolicy tlsPolicy = factory.getTlsPolicy();
         assertEquals(TrustKnownCertificateTlsPolicy.class, tlsPolicy.getClass()); // the "trust first certificate" is implemented by TrustKnownCertificateTlsPolicy with a FirstCertificateTrustDelegate

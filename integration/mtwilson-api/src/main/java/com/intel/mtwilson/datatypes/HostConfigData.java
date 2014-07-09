@@ -1,12 +1,14 @@
 package com.intel.mtwilson.datatypes;
 
-import com.intel.dcsg.cpg.validation.RegexPatterns;
-import com.intel.dcsg.cpg.validation.Regex;
 import com.fasterxml.jackson.annotation.JsonProperty;
-//import org.codehaus.jackson.annotate.JsonProperty;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 
+/**
+ * @author ssbangal
+ */
 public class HostConfigData {
-   
+
     private boolean biosWhiteList;
     private boolean vmmWhiteList;    
     private HostWhiteListTarget biosWLTarget;
@@ -18,6 +20,7 @@ public class HostConfigData {
     private HostVMMType hostVmmType;
     private TxtHostRecord txtHostRecord;
     private boolean overWriteWhiteList;
+    
 
     // By default we will use the OEM as the white list target for both BIOS and VMM.
     public HostConfigData() {
@@ -33,6 +36,7 @@ public class HostConfigData {
         this.txtHostRecord = null;
         this.overWriteWhiteList = false;
     }
+    
     
     public HostConfigData(HostConfigData obj) {
         this.biosWhiteList = obj.biosWhiteList;
@@ -168,5 +172,4 @@ public class HostConfigData {
                     + hostLocation + ", registerHost=" + registerHost + "]";
     }
 
-	
 }

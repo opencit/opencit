@@ -1365,9 +1365,7 @@ function isNumber(n) {
 //                ws.retrieveMainConfiguration();
                 i18nInit();
             });
-
             
         </script>
-
     </body>
 </html>

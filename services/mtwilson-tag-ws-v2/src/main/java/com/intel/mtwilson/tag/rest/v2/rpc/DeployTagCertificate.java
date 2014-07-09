@@ -81,6 +81,9 @@ public class DeployTagCertificate implements Runnable{
                 }
                 
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
+                // TODO: need to call business object / data layer directly or use a V2 API so we get the v2 TxtHostRecord with TLS Policy,
+                // because we're going to need it when we call deployAssetTagToHost.  so right now the policy info isn't making it to 
+                // deployAssetTagToHost so the TlsPolicyFactory has to load it from the database.
                 List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
                 if(hostList == null || hostList.isEmpty() ) {
                     log.error("No hosts were returned back matching name " + host.toString());
@@ -112,9 +115,10 @@ public class DeployTagCertificate implements Runnable{
     private void deployAssetTagToHost(Sha1Digest tag, TxtHostRecord hostRecord) throws IOException {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         //ByteArrayResource tlsKeystore = new ByteArrayResource();
-        ConnectionString connectionString = ConnectionString.from(hostRecord);
+//        ConnectionString connectionString = ConnectionString.from(hostRecord);
         // XXX TODO use the tls policy factory with the keystore for this host ... from the host tls keystore table
-        HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
+//        HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
+        HostAgent hostAgent = hostAgentFactory.getHostAgent(hostRecord);
         hostAgent.setAssetTag(tag);
     }
     
