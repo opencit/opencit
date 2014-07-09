@@ -46,6 +46,15 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
         boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
         result = Boolean.toString(configureWhiteListFromHost);
         log.debug("Completed processing of the white list using host {} with result {}", wlConfig.getTxtHostRecord().HostName, result);
+        if (wlConfig.isRegisterHost())
+            registerHost();
     }
     
+    @RequiresPermissions({"hosts:create"})
+    private void registerHost() {
+        log.debug("Starting to process the registration request for host {}.", wlConfig.getTxtHostRecord().HostName);
+        boolean registerHostFromCustomData = new HostBO().registerHostFromCustomData(wlConfig);
+        result = Boolean.toString(registerHostFromCustomData);
+        log.debug("Completed processing of the registering host {} with result {}", wlConfig.getTxtHostRecord().HostName, result);
+    }
 }

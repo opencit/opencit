@@ -99,24 +99,25 @@ public class WhiteList extends MtWilsonClient {
      * customization options.
      * @return boolean value indicating whether the whitelist was successfully created or not.
      * @since Mt.Wilson 2.0
-     * @mtwRequiresPermissions oems:create,oss:create,mles:create,mle_pcrs:create,mle_pcrs:store,mle_modules:create,mle_sources:create
+     * @mtwRequiresPermissions oems:create,oss:create,mles:create,mle_pcrs:create,mle_pcrs:store,mle_modules:create,mle_sources:create. hosts:create is
+     * needed if register_host flag is set to true.
      * @mtwContentTypeReturned JSON/XML/YAML
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8443/mtwilson/v2/rpc/create-whitelist-with-options
-     * Input: {"config":{"add_bios_white_list":true,"add_vmm_white_list":true,"bios_white_list_target":"BIOS_OEM",
-     * "vmm_white_list_target":"VMM_OEM","bios_pcrs":"0","vmm_pcrs":"18,19,20","register_host":true,"overwrite_whitelist":false,"bios_mle_name":"","vmm_mle_name":"",
+     * Input: {"wl_config":{"add_bios_white_list":true,"add_vmm_white_list":true,"bios_white_list_target":"BIOS_OEM","vmm_white_list_target":"VMM_OEM",
+     * "bios_pcrs":"0,17","vmm_pcrs":"18,19,20","register_host":true,"overwrite_whitelist":false,"bios_mle_name":"Custom_BIOS_Name","vmm_mle_name":"Custom_VMM_Name"
      * "txt_host_record":{"host_name":"192.168.0.2","add_on_connection_string":"vmware:https://192.168.0.1:443/sdk;admin;pwd"}}}
      * 
-     * Output: {"config":{"add_bios_white_list":true,"add_vmm_white_list":true,"bios_white_list_target":"BIOS_OEM",
-     * "vmm_white_list_target":"VMM_OEM","bios_pcrs":"0","vmm_pcrs":"18,19,20","host_location":"",
-     * "register_host":true,"host_vmm_type":null,"txt_host_record":{"host_name":"192.168.0.2","ipaddress":null,
-     * "port":null,"bios_name":"Intel_Corporation","bios_version":"01.00.0060","bios_oem":"Intel Corporation",
-     * "vmm_name":"Intel_Thurley_VMware_ESXi","vmm_version":"5.1.0-799733","vmm_osname":"VMware_ESXi",
-     * "vmm_osversion":"5.1.0","add_on_connection_string":"vmware:https://192.168.0.1:443/sdk;admin;pwd",
-     * "description":null,"email":null,"location":null,"aik_certificate":null,"aik_public_key":null,
-     * "aik_sha1":null,"processor_info":"Westmere"},"overwrite_whitelist":false},"result":"true"}
+     * Output: {"wl_config":{"bios_mle_name":"Custom_BIOS_Name","vmm_mle_name":"Custom_VMM_Name","add_bios_white_list":true,"add_vmm_white_list":true,
+     * "bios_white_list_target":"BIOS_OEM","vmm_white_list_target":"VMM_OEM","bios_pcrs":"0,17","vmm_pcrs":"18,19,20","host_location":"",
+     * "register_host":true,"host_vmm_type":null,"txt_host_record":{"host_name":"192.168.0.2","ipaddress":null,"port":null,"bios_name":"Intel_Corporation",
+     * "bios_version":"01.00.0060","bios_oem":"Intel Corporation","vmm_name":"Intel_Thurley_VMware_ESXi","vmm_version":"5.1.0-799733",
+     * "vmm_osname":"VMware_ESXi","vmm_osversion":"5.1.0","add_on_connection_string":"vmware:https://192.168.0.1:443/sdk;admin;pwd",
+     * "description":null,"email":null,"location":null,"aik_certificate":null,"aik_public_key":null,"aik_sha1":null,"processor_info":"Westmere"},
+     * "overwrite_whitelist":false},"result":"true"}
+     * 
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -125,11 +126,18 @@ public class WhiteList extends MtWilsonClient {
      *  TxtHostRecord gkvHost = new TxtHostRecord();
      *  gkvHost.HostName = "192.168.0.10";
      *  gkvHost.AddOn_Connection_String = "vmware:https://192.168.0.1:443/sdk;admin;pwd";
-     *  HostConfigData config = new HostConfigData();
-     *  config.setRegisterHost(true);
+     *  WhitelistConfigurationData config = new WhitelistConfigurationData();
+     *  config.setBiosWhiteList(true);
+     *  config.setVmmWhiteList(true);
+     *  config.setBiosPCRs("0,17");
+     *  config.setVmmPCRs("18,19,20");
+     *  config.setOverWriteWhiteList(false);
+     *  config.setRegisterHost(false);
+     *  config.setBiosMleName("Custom_BIOS_Name");
+     *  config.setVmmMleName("Custom_VMM_Name");
      *  config.setTxtHostRecord(gkvHost);
      *  CreateWhiteListWithOptionsRpcInput rpcInput = new CreateWhiteListWithOptionsRpcInput();
-     *  rpcInput.setConfig(config);        
+     *  rpcInput.setWlConfig(config);        
      *  boolean rpcOutput = client.createWhitelistWithOptions(rpcInput);
      * </pre>
      */
