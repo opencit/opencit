@@ -17,10 +17,7 @@ response.setHeader("Content-Disposition",
 <div class="container">
 		<div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.cert_download">Download Certificates</span></div> <!-- was: "Management Console Certificate &gt; View " -->
 		<div id="nameOfPage" class="NameHeader" data-i18n="header.cert_download">Certificate Download</div>
-		<div id="mainLoadingDiv" class="mainContainer">
-                <!-- stdalex 1/18 the following downloads are disabled in 1.1 due to the files they require are
-                     not created as part of install.  These will be back in 1.2 when we can do core vs. premium
-                     TODO-stdalex -->
+		<div id="mainLoadingDiv" class="mainContainer">                
               
             <div  id ="fdownloadRCA"class="registerUser"><span data-i18n="label.dl_root_ca">Click on Download icon to download Root Ca Certificate</span>
 			<input type="image" onclick="fnforRootCACertificate()" src="images/download.jpg"></div>

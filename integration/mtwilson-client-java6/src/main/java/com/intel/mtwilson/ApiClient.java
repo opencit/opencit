@@ -511,9 +511,6 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         }
     }
     
-    // xxx: don't know if it's better to define just one serialize method or to have each api call choose what form its response should come in...
-    // one call is more flexible and easier to maintain...
-    // this gets called only for successful responses; error codes 400, 500, etc. are thrown as ApiException by the http client so we'd never get to this.
     /*
     private <T> T deserialize(HttpResponse response, Class<T> valueType) throws IOException, ApiException {
         String body = responsebody(response);

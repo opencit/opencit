@@ -9,7 +9,7 @@ CREATE TABLE changelog (
 
 --INSERT INTO changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (to_number( to_char(current_timestamp, 'YYYYMMDDHH24MISS'), '99999999999999'),NOW(),'create changelog');
 
--- backdate an entry for the bootstrap sql file since the changelog didn't exist then;   TODO move the changelog into the bootstrap sql or move the content of the bootstrap sql into a create-api-client sql AFTER create-changelog and delete the bootstrap.sql
+-- backdate an entry for the bootstrap sql file since the changelog didn't exist then;  
 INSERT INTO changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20120101000000,NOW(),'bootstrap');
 
 -- Spring's ResourceDatabasePopulator does not recognize the "delimiter" command

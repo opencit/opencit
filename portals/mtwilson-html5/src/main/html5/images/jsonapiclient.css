@@ -83,7 +83,6 @@ section div.data-view table caption {
 	padding: 2px;
 	background-color: #dddddd;
 }
-/* XXX temporary: hide the table footers since we haven't yet implemented paging */ #main tfoot { display: none; }
 section div.data-view table tfoot td {
 	border: 1px solid black;
 	text-align: center;

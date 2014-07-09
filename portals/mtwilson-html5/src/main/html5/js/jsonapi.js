@@ -101,7 +101,7 @@ var jsonapi = {};
         var elementId;
         i = dataviews.length;
         while(i--) {
-            elementId = dataviews[i].id; // XXX TODO  what if it doesn't have an id ? create one randomly? move up to nearest parent that has an id and bind there??
+            elementId = dataviews[i].id; 
             log.debug("Creating view data area: "+elementId);
             jsonapi.rivets.views[ elementId ] = rivets.bind(dataviews[i], client.data);        
         }
@@ -147,16 +147,13 @@ var jsonapi = {};
                 }
             }
         }
-        // XXX TODO  initiate loading of any missing linked documents
     };
 
-    // standard processing for application/vnd.api+json documents ; XXX TODO should we have one process map {}  with the content type like 'application/vnd.api+json' as keys and functions as values?
+    // standard processing for application/vnd.api+json documents ; 
     // this document type is ALWAYS a collection. the collection itself does NOT have an id attribute but each individual resource in it will have an id attribute. The collection and also each individual resource MAY have "meta" and "links" attributes. ONLY the collection MAY have a "linked" attribute for side-loaded documents. 
     // in this implementation we create a "linked" attribute on each resource to hold the references to documents mentioned in its "links" attribute. this way the "links" attribute is not modified yet when rendering the actual references will be available under "linked" so a renderer does not need to have the entire data context or know how to navigate it.
-    // XXX TODO when a link references a document that has not yet been loaded (and is not in the collection's "linked" documents) we need to async. request it from the server and add it to our data context  (the new data loaded event should trigger any view refreshes)
     jsonapi.processApplicationVndApiJson = function (json, options) {
         Log.debug("processApplicationVndApiJson");
-        // TODO: apply any automation elements from meta section to body (for example, url templates for links)
         // Store documents and any linked documents in the data context (replacing any existing documents of the same id - not merging unless we get specific instructions to merge in the meta section indicating it's a partial update)
         var collectionName = options.collection;// where we will store the data 
         if( !collectionName && json.meta && json.meta.data ) { // if not specifeid as an option we accept a hint from the document itself, assuming  that we should store it using the same collection name the resource itself uses
@@ -165,7 +162,7 @@ var jsonapi = {};
         // first store our primary documents
         var jsonArray = [];
         if( json.meta.data ) { jsonArray = json.getx(json.meta.data); }
-        else { } // XXX TODO maybe we can guess the data name from the url path.... for example a response from GET baseurl/widgets   would go into jsonapi.data.widgets 
+        else { } 
         if( jsonapi.data[collectionName] && Object.isArray(jsonapi.data[collectionName]) ) {
             jsonapi.data[collectionName].merge(jsonArray);
         }
@@ -226,7 +223,6 @@ var jsonapi = {};
                 else if( datapath && json[datapath] && Object.isArray(json[datapath]) ) {
                     ptr = json.getx(datapath);
                 }
-                // XXX TODO if json[options.datapath] is string or number, need to handle same as below...
                 // process array of records
                 if( jsonapi.data[collection] && Object.isArray(jsonapi.data[collection]) ) { // must be an array
                     if( options.remove ) { jsonapi.data[collection].removeAll(null); } // automated data binding tends to break for null objects
@@ -235,15 +231,13 @@ var jsonapi = {};
                 else {
                     jsonapi.data[collection] = ptr;
                 } 
-                //jsonapi.data.setx(keyPath, existingData);  // XXX this would be for merging into an arbitrary location in the store... which is not supported right now.
+                //jsonapi.data.setx(keyPath, existingData);  
                 
             }
         }
         if( typeof json === 'string' ) {
-            // XXX TODO: what to do about a single string returned from the server?
         }
         if( typeof json === 'number' ) {
-            // XXX TODO: what to do about a single number returned from the server?
         }
     };
 
@@ -260,7 +254,7 @@ var jsonapi = {};
                 var response = transport.responseText || "no response text";
                 Log.debug("Success! \n\n" + response);
                 var json = transport.responseJSON;
-                jsonapi.processApplicationJson(json, my); // XXX TODO this call needs to be dispatched based on content type reported by http content-type header
+                jsonapi.processApplicationJson(json, my); 
                 jsonapi.event.fire("httpPostSuccess", { resource:my, content:postObject });
             }    
         });
@@ -282,7 +276,7 @@ var jsonapi = {};
                 var json = transport.responseJSON;
                 Log.debug("GET JSON = "+Object.toJSON(json));
                 my.replace = true; // indicates that data from this get should replace any previous data in the store (should be set to true for 'search' queries, and false for any 'add more data' queries)
-                jsonapi.processApplicationJson(json, my); // XXX TODO this call needs to be dispatched based on content type reported by http content-type header
+                jsonapi.processApplicationJson(json, my); 
                 jsonapi.event.fire("httpGetSuccess", { resource:my, params:params });
             } /*,
             onFailure: function(a,b) {
@@ -319,7 +313,7 @@ var jsonapi = {};
                 var response = transport.responseText || "no response text";
                 Log.debug("Success! \n\n" + response);
                 var json = transport.responseJSON;
-                jsonapi.processApplicationJson(json, my); // XXX TODO this call needs to be dispatched based on content type reported by http content-type header
+                jsonapi.processApplicationJson(json, my); 
                 jsonapi.event.fire("httpPutSuccess", { resource:my, content:putObject });
             }    
         });
@@ -336,8 +330,7 @@ var jsonapi = {};
                 Log.debug("Success! \n\n" + response);
                 if( transport.responseText ) {
                     var json = transport.responseJSON;
-                    // XXX do we need pass a delete option? what will we get from the response text?
-                    jsonapi.processApplicationJson(json, my); // XXX TODO this call needs to be dispatched based on content type reported by http content-type header
+                    jsonapi.processApplicationJson(json, my); 
                 }
                 jsonapi.event.fire("httpDeleteSuccess", { resource:my, content:deleteObject });
             }    
@@ -362,7 +355,7 @@ var jsonapi = {};
             Log.debug("loadResourcesFromLink(object)");
         }
         spec.merge(options);
-        jsonapi.get(spec.model, null, {uri:spec.href,datapath:spec.model}); // spec.model like "resources" ... XXX might change
+        jsonapi.get(spec.model, null, {uri:spec.href,datapath:spec.model}); // spec.model like "resources" 
     };
     
 	// must be called after DOM is loaded
@@ -420,7 +413,7 @@ var jsonapi = {};
         /*
          if( typeof input === 'object' ) {
          model = input;
-         validator = null; // XXX TODO maybe we can use an optional second parameter to identify the form?? or maybe we shouldn'ta ccept obejcts... ??
+         validator = null; 
          }
          */
         if (validator) {
@@ -489,7 +482,7 @@ var jsonapi = {};
         log.debug("HTTP POST OK: "+event.memo.resource.name);
 	/*
         switch(event.memo.resource.name) {
-			// XXX TODO   call out to a specific class for that resource, if it exists ...  or loaded on demand from the server !!!
+			
             default:
                 log.debug("No handler for successful HTTP POST of "+event.memo.resource.name);
         };
@@ -499,8 +492,7 @@ var jsonapi = {};
             //$('tag-create-form').reset();
             // reset the form's data model, and rivets will automatically update the form GUI. 
             // you CANNOT just set forms['tag-create-form'] = { name:'', oid:'', values:[] } because that will 
-            // replace the reference and will cause rivets to lose the connection between the model & the form.
-            // (XXX TODO maybe fix this in rivets or in how we configure it)
+            // replace the reference and will cause rivets to lose the connection between the model & the form.            
 //            event.memo.resource.app.input.name = ''; //jsonapi.rivets.forms['tag-create-form'].name = ''; 
 //            event.memo.resource.app.input.oid = '';//jsonapi.rivets.forms['tag-create-form'].oid = ''; 
 //            event.memo.resource.app.input.values = [];//jsonapi.rivets.forms['tag-create-form'].values = []; 
@@ -517,7 +509,6 @@ var jsonapi = {};
         Log.debug("httpDeleteSuccess: "+Object.toJSON(event.memo));
 	/*
         switch(event.memo.resource.name) {
-			// XXX TODO   call out to a specific class for that resource, if it exists ...  or loaded on demand from the server !!!
             default:
                 log.debug("No handler for successful HTTP DELETE of "+event.memo.resource.name);
         };
@@ -529,7 +520,6 @@ var jsonapi = {};
         Log.debug("HTTP PUT OK: "+event.memo.resource.name);
 	/*
         switch(event.memo.resource.name) {
-			// XXX TODO   call out to a specific class for that resource, if it exists ...  or loaded on demand from the server !!!
             default:
                 log.debug("No handler for successful HTTP PUT of "+event.memo.resource.name);
         };
@@ -614,7 +604,6 @@ var jsonapi = {};
                 var itemViews = templateViews({resources:jsonapi.data.resources}); // resources is an array, with each element like { "one": "notice", "many": "notices", "label_one":"Notice", "label_many":"Notices", "uri":"/notices" };
                 $('resource-views').childElements().invoke('remove'); // clear any previous entries
                 $('resource-views').insert({bottom: itemViews});
-                // XXX should be in view code: ...  requires both links and the referenced eleemnts to exist on the page
                 /*
                 jsonapi.navTabs.initialize('resourcenavtabs',{
                     activeClassName: 'current',
@@ -626,7 +615,6 @@ var jsonapi = {};
                 }); */
                 
                 break;
-			// XXX TODO   call out to a specific class for that resource, if it exists ...  or loaded on demand from the server !!!
             default:
                 Log.debug("No handler for successful HTTP GET of "+event.memo.resource.name);
         };
@@ -635,7 +623,7 @@ var jsonapi = {};
     
     // this could be in a utility library, it's a somewhat generic function to convert an array of objects into a table (array of arrays) with option for specific header fields to include (if not specified then data will be scanned and all attributes will be used) and option for specifying a formatting/filter function for specific attributes to be used for pre-processing data before it's applied to a view template
     // collection:  an array of objects    (for example  jsonapi.data.hosts)   
-    // options:  can include a header.columns attribute to indicate which attributes to use,   XXX TODO  can include a filter attribute to pass the entire object to and receive an entire object back (pre-processed)
+    // options:  can include a header.columns attribute to indicate which attributes to use
     jsonapi.createTable = function(collection, options) {
         if( !collection || !Object.isArray(collection) ) {
             Log.error("createTable on non-array returning empty array");
@@ -646,7 +634,7 @@ var jsonapi = {};
             headerColumnNames.pushArray(options.header.columns); // pushArray defined in array.js
         }
         else {
-            // collect the list of attributes to show as table headers by scanning the data ... XXX TODO if the resource metadata provides specific headers to use (in order) then use that instead of collecting here
+            // collect the list of attributes to show as table headers by scanning the data 
             for(var i=0; i<collection.length; i++) {
                 headerColumnNames.pushArray(collection[i].keys());// pushArray defined in array.js
             }
@@ -667,7 +655,6 @@ var jsonapi = {};
         return { "header":{"columns":headerColumnNames}, "body":bodyArray };
     };
     
-    // XXX TODO this implements a generic table, but if the resource provides a specific template we should use that... databinding should include the jsonapi.data[collectionName] array under "data" and also the resource metadata under "meta" if available 
     jsonapi.refreshDataView = function(collectionName) {
         var sections = $$("section[data-model=\""+collectionName+"\"]");
         if( sections && sections.length > 0 ) {
@@ -731,7 +718,6 @@ var jsonapi = {};
                     jsonapi.data[model].push(formdata);
                     jsonapi.event.fire("formSubmitInsert", {data:formdata, form:form, collectionName:model});
                 }
-                // XXX TODO  search, edit, delete
                 Log.debug("Submitting form -- can intercept here and submit via ajax to the appropriate resource url");
                 if(event) { event.preventDefault(); }  // officially stop the event, otherwise it will submit the form even though we return false below
                 return false;  // before html5 we have to return false to stop the form submit

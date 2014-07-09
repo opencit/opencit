@@ -32,8 +32,6 @@ License: BSD3
 Version: 0.1
 Requires: no dependencies
 
-ISSUES/TODO:
-need to wrap it in a class or object and re-arrange
 */
 
 // example: setSelectOptions('upload-enc-image-select', files, {'emptyText':"No encrypted images"});
