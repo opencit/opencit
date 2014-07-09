@@ -345,8 +345,9 @@ public class ApiClientBO {
                 // Let us add the new roles
                 log.debug("Adding roles");
                 for (String role : apiClientUpdateRequest.roles) {
-                    log.debug("Adding role {}", role);
-                    com.intel.mtwilson.user.management.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(role);
+                    String roleName = Role.valueOf(role).getName();
+                    log.debug("Adding role {} with value {}.", role, roleName);
+                    com.intel.mtwilson.user.management.rest.v2.model.Role findRoleByName = loginDAO.findRoleByName(roleName);
                     if (findRoleByName != null) {
                         log.debug("Adding role {} to user {}", findRoleByName.getRoleName(), userName);
                         loginDAO.insertUserLoginCertificateRole(userLoginCertificate.getId(), findRoleByName.getId());

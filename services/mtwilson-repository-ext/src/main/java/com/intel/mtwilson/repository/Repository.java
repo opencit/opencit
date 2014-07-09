@@ -2,38 +2,14 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.jaxrs2.server.resource;
-
-import com.intel.mtwilson.jaxrs2.Document;
-import com.intel.mtwilson.jaxrs2.DocumentCollection;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
-import com.intel.mtwilson.jaxrs2.Locator;
+package com.intel.mtwilson.repository;
 
 /**
- * TODO:  possibly create a CollectionRepository interface which adds the
- * following methods:
- * 
- * create(C items);
- * store(C items);
- * 
- * which would then possibly take advantage of database-specific features,
- * such as a multi-row insert/update, or it might use multithreading, etc.
- * which might be better than the client having to loop through a collection
- * or do multithreading code at the business layer for something that might become
- * common.
- * 
+ *
  * @author jbuhacoff
  */
-public interface SimpleRepository<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, L extends Locator<T>> {
-    /**
-     * Given criteria encapsulated in a POJO, returns a collection of items
-     * matching the criteria.
-     *
-     * @param criteria
-     * @return
-     */
-    C search(F criteria);
-
+public interface Repository<T, L extends Locator<T>> {
+    
     /**
      * Given an item identifier, returns the specified item if it exists or null
      * if the item doesn't exist.
@@ -42,9 +18,12 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      * Most will return null if !UUID.isValid(id)  but we don't do it here because
      * a resource might want to allow using something other than uuid as the url
      * key, for example a Host resource might accept uuid OR hostname as {id}
+     * 
+     * Implementations should return null if the item is not found. 
      *
      * @param id
-     * @return
+     * @return the requested item or null if it is not found
+     * @throws RepositoryRetrieveException if an error occurs while trying to locate or retrieve the item
      */
     T retrieve(L locator);
 
@@ -58,6 +37,8 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      *
      * @param id
      * @param item
+     * @throws RepositoryStoreException if an error occurs while trying to store the item
+     * @throws RepositoryStoreConflictException if the item to be stored conflicts with an existing item; indicating the application should retrieve the existing item, resolve the conflict, and attempt to store again
      */
     void store(T item);
 
@@ -68,6 +49,8 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      *
      * @param id
      * @param item
+     * @throws RepositoryCreateException if an error occurs while trying to create the item
+     * @throws RepositoryCreateConflictException if the given item has the same primary key as an existing item
      */
     void create(T item);
 
@@ -79,14 +62,9 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      * not an error to request deletion of an non-existent item.
      *
      * @param id
+     * @throws RepositoryDeleteException if an error occurs while trying to delete the item
      */
     void delete(L locator);
 //    void delete(String id);
-
-    /**
-     * 
-     * @param criteria 
-     */
-    void delete(F criteria);
 
 }

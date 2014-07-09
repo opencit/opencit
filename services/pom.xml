@@ -35,6 +35,7 @@
 	<module>mtwilson-privacyca-niarl</module>
 	<module>mtwilson-privacyca-setup</module>
 	<module>mtwilson-privacyca-ws-v2</module>
+	<module>mtwilson-repository-ext</module>
 	<module>mtwilson-saml-verifier</module>
 	<module>mtwilson-saml</module>
 	<module>mtwilson-setup-ext</module>

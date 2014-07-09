@@ -399,7 +399,9 @@
         "double_click_status":"Double click on the element to toggle the status",
         "available_selections":"Available Selections",
         "upload_xml":"Upload XML",
-        "no_pending_api_requests":"No requests are currently pending to be reviewed."
+        "no_pending_api_requests":"No requests are currently pending to be reviewed.",
+        "mtw_1x_roles":"Mt Wilson 1.x roles for backward compatibility:",
+        "mtw_2x_roles":"Mt Wilson 2.x roles:"
     },
     "placeholder": {
         "selection_name":"Name of this selection",

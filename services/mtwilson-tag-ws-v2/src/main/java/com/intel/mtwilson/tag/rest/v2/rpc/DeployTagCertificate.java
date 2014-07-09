@@ -6,7 +6,6 @@ package com.intel.mtwilson.tag.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
@@ -15,19 +14,18 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The "deploy" link next to each certificate in the UI calls this RPC
@@ -64,20 +62,22 @@ public class DeployTagCertificate implements Runnable{
     @Override
     @RequiresPermissions({"tag_certificates:deploy","hosts:search"})         
     public void run() {
-        log.debug("Got request to deploy certificate with ID {}.", certificateId);        
+        log.debug("RPC: DeployTagCertificate - Got request to deploy certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-        
+            CertificateLocator locator = new CertificateLocator();
+            locator.id = certificateId;
+            
             Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
                 // verify the certificate validity first
                 Date today = new Date();
-                log.debug("Certificate not before {}", obj.getNotBefore());
-                log.debug("Certificate not after {}", obj.getNotAfter());
-                log.debug("Current date {}", today);
+                log.debug("RPC: DeployTagCertificate - Certificate not before {}", obj.getNotBefore());
+                log.debug("RPC: DeployTagCertificate - Certificate not after {}", obj.getNotAfter());
+                log.debug("RPC: DeployTagCertificate - Current date {}", today);
                 if (today.before(obj.getNotBefore()) || today.after(obj.getNotAfter())) {
-                    log.error("Certificate with subject {} is expired/invalid. Will not be deployed.", obj.getSubject());
-                    throw new WebApplicationException("Certificate is not currently valid; will not be deployed", Response.Status.BAD_REQUEST);
+                    log.error("RPC: DeployTagCertificate - Certificate with subject {} is expired/invalid. Will not be deployed.", obj.getSubject());
+                    throw new RepositoryInvalidInputException(locator);
                 }
                 
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
@@ -86,28 +86,27 @@ public class DeployTagCertificate implements Runnable{
                 // deployAssetTagToHost so the TlsPolicyFactory has to load it from the database.
                 List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
                 if(hostList == null || hostList.isEmpty() ) {
-                    log.error("No hosts were returned back matching name " + host.toString());
-                    Response.status(Response.Status.NOT_FOUND);
-                    throw new WebApplicationException("No hosts were found matching the specified criteria.", Response.Status.NOT_FOUND);
+                    log.error("RPC: DeployTagCertificate - No hosts were returned back matching name " + host.toString());
+                    throw new RepositoryInvalidInputException(locator);
                 }
                 TxtHostRecord hostRecord = hostList.get(0);
                 
                 if (!hostRecord.Hardware_Uuid.equals(obj.getSubject())) {
-                    log.error("The certificate provided [{}] does not map to the host specified [{}]. Certificate will not be deployed on the host.", obj.getSubject(), hostRecord.Hardware_Uuid);
-                    throw new WebApplicationException("The certificate provided does not map to the host specified. Certificate will not be deployed on the host.", Response.Status.CONFLICT);
+                    log.error("RPC: DeployTagCertificate - The certificate provided [{}] does not map to the host specified [{}]. Certificate will not be deployed on the host.", obj.getSubject(), hostRecord.Hardware_Uuid);
+                    throw new RepositoryInvalidInputException(locator);
                 }
                 
                 deployAssetTagToHost(obj.getSha1(), hostRecord);
             } else {
-                log.error("Failed to retreive certificate while trying to discover host by certificate ID.");
-                throw new WebApplicationException("Failed to retreive certificate while trying to discover host by certificate ID.", Response.Status.BAD_REQUEST);
+                log.error("RPC: DeployTagCertificate - Failed to retreive certificate while trying to discover host by certificate ID.");
+                throw new RepositoryInvalidInputException(locator);
             }
 
-        } catch (WebApplicationException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during certificate deployment.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("RPC: DeployTagCertificate - Error during certificate deployment.", ex);
+            throw new RepositoryException(ex);
         } 
         
     }

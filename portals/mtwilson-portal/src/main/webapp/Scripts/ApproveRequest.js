@@ -62,11 +62,11 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	$('#mainApiClient_Issuer').val(data.issuer);
         
 	var apiRoles = data.requestedRoles; //.toString().split(',');
-	var str="";
+	var str='<span style="font-weight: bold; color: #555555; font-size: 0.9em" data-i18n="label.mtw_1x_roles">Mt Wilson 1.x roles for backward compatibility:</span><br>';
         for (var globalRole in roleList) {
             var index = findIndex(roleList[globalRole], apiRoles);
             if (roleList[globalRole] == 'Administrator')
-                str+='<br>';
+                str+='<br><br><span style="font-weight: bold; color: #555555; font-size: 0.9em" data-i18n="label.mtw_2x_roles">Mt Wilson 2.x roles:</span><br>';
             if (index != -1) {
                 str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'" data-i18n="label.role_' + roleList[globalRole].toLowerCase() + '">'+ roleList[globalRole] +'</span>';               
             } else {

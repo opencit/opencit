@@ -7,17 +7,13 @@ package com.intel.mtwilson.user.management.rest.v2.rpc;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.User;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
-import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertificate;
+import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserLoginCertificateRepository;
 import com.intel.mtwilson.user.management.rest.v2.repository.UserRepository;
-import java.security.cert.X509Certificate;
-import java.util.Locale;
 
 
 /**
@@ -96,7 +92,7 @@ public class RegisterUserWithCertificateRunnable implements Runnable{
             }
         } catch (Exception ex) {
             log.error("Exception during registration of user with certificate.", ex);
-            throw new ASException(ex);
+            throw new RepositoryCreateException(ex);
         }
     }
     

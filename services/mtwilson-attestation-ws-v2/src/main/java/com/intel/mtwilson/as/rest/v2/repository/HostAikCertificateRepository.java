@@ -14,14 +14,14 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class HostAikCertificateRepository implements SimpleRepository<HostAikCertificate, HostAikCertificateCollection, HostAikCertificateFilterCriteria, HostAikCertificateLocator> {
+public class HostAikCertificateRepository implements DocumentRepository<HostAikCertificate, HostAikCertificateCollection, HostAikCertificateFilterCriteria, HostAikCertificateLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAikCertificateRepository.class);
 

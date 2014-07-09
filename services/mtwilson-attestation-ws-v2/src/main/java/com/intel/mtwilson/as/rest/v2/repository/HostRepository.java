@@ -21,7 +21,7 @@ import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
@@ -32,7 +32,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author jbuhacoff
  */
-public class HostRepository implements SimpleRepository<Host,HostCollection,HostFilterCriteria,HostLocator> {
+public class HostRepository implements DocumentRepository<Host,HostCollection,HostFilterCriteria,HostLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostRepository.class);
     
