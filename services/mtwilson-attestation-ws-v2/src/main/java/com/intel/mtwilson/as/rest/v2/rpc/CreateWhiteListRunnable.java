@@ -5,11 +5,10 @@
 package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
+import com.intel.mtwilson.repository.RepositoryCreateException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -51,8 +50,9 @@ public class CreateWhiteListRunnable implements Runnable{
                 result = Boolean.toString(configureWhiteListFromHost);
                 log.debug("Completed processing of the white list using host {} with result {}", host.HostName, result);
             }
-        } catch (ApiException aex) {
-            throw new ASException(aex);
+        } catch (Exception ex) {
+            log.error("Error during white list configuration.", ex);
+            throw new RepositoryCreateException();
         }
     }
     

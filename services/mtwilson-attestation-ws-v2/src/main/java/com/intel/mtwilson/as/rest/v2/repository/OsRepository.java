@@ -24,8 +24,6 @@ import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.OsBO;
 
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**

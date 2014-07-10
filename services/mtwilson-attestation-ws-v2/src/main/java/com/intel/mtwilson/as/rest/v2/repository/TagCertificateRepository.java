@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwAssetTagCertificateJpaController;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
@@ -13,11 +12,15 @@ import com.intel.mtwilson.as.rest.v2.model.TagCertificate;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.TagCertificateLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -52,11 +55,9 @@ public class TagCertificateRepository implements DocumentRepository<TagCertifica
                 }                
             }
 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during retrieval of asset tag certificate.", ex);
-            throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_RETRIEVE_ERROR, ex.getClass().getSimpleName());
+            log.error("TagCertificate:Search - Error during retrieval of asset tag certificate.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("TagCertificate:Search - Returning back {} of results.", objCollection.getTagCertificates().size());                
         return objCollection;
@@ -75,11 +76,9 @@ public class TagCertificateRepository implements DocumentRepository<TagCertifica
                 TagCertificate convObj = convert(objList.get(0)); // there should always be only one row matching.
                 return convObj;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during retrieval of asset tag certificate.", ex);
-            throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_RETRIEVE_ERROR, ex.getClass().getSimpleName());
+            log.error("TagCertificate:Retrieve - Error during retrieval of asset tag certificate.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -93,16 +92,17 @@ public class TagCertificateRepository implements DocumentRepository<TagCertifica
     @RequiresPermissions("tag_certificates:import")
     public void create(TagCertificate item) {
         log.debug("TagCertificate:Create - Got request to import a new TagCertificate.");
+        TagCertificateLocator locator = new TagCertificateLocator();
+        locator.id = item.getId();
+        
         AssetTagCertCreateRequest obj = new AssetTagCertCreateRequest();
         try {
             obj.setCertificate(item.getCertificate());
             new AssetTagCertBO().importAssetTagCertificate(obj, item.getId().toString());
             log.debug("TagCertificate:Create - Imported the TagCertificate successfully.");
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during creation of asset tag certificate.", ex);
-            throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("TagCertificate:Create - Error during import of asset tag certificate.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }        
     }
 
@@ -116,25 +116,31 @@ public class TagCertificateRepository implements DocumentRepository<TagCertifica
             obj.setSha1OfAssetCert(null);
             new AssetTagCertBO().revokeAssetTagCertificate(obj, locator.id.toString());
             log.debug("TagCertificate:Delete - Revoked the TagCertificate with id {} successfully.", locator.id.toString());        
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during update of asset tag certificate.", ex);
-            throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_UPDATE_ERROR, ex.getClass().getSimpleName());
+            log.error("TagCertificate:Delete - Error during revocation of asset tag certificate.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }                
     }
     
     @Override
     @RequiresPermissions("tag_certificates:delete,search")
     public void delete(TagCertificateFilterCriteria criteria) {
+        log.debug("TagCertificate:Delete - Got request to revoke asset tag certificate by search criteria.");        
         TagCertificateCollection objCollection = search(criteria);
-        if (objCollection != null && !objCollection.getTagCertificates().isEmpty()) {
-            for (TagCertificate obj : objCollection.getTagCertificates()) {
-                TagCertificateLocator locator = new TagCertificateLocator();
-                locator.id = obj.getId();
-                delete(locator);
+        try {
+            if (objCollection != null && !objCollection.getTagCertificates().isEmpty()) {
+                for (TagCertificate obj : objCollection.getTagCertificates()) {
+                    TagCertificateLocator locator = new TagCertificateLocator();
+                    locator.id = obj.getId();
+                    delete(locator);
+                }
             }
-        }
+        } catch (RepositoryException re) {
+            throw re;
+        } catch (Exception ex) {
+            log.error("TagCertificate:Delete - Error during revocation of asset tag certificate.", ex);
+            throw new RepositoryDeleteException(ex);
+        }                
     }
 
     private TagCertificate convert(MwAssetTagCertificate obj) {

@@ -8,24 +8,25 @@ import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.rest.v2.model.HostLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -75,11 +76,9 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                     }
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during search for hosts.", ex);
-            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("Host:Search - Error during search for hosts.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("Host:Search - Returning back {} of results.", objCollection.getHosts().size());                
         return objCollection;
@@ -98,11 +97,9 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                 Host host = convert(obj);
                 return host;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during search for hosts.", ex);
-            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("Host:Retrieve - Error during search for hosts.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -110,7 +107,10 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
     @Override
     @RequiresPermissions("hosts:store")    
     public void store(Host item) {
-        log.debug("Host:Store - Got request to update Host with id {}.", item.getId().toString());        
+        log.debug("Host:Store - Got request to update Host with id {}.", item.getId().toString());
+        HostLocator locator = new HostLocator();
+        locator.id = item.getId();
+        
         TxtHostRecord obj = new TxtHostRecord();
         try {
             
@@ -129,12 +129,12 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                     obj.BIOS_Oem = bios.getOemId().getName();
                     obj.BIOS_Version = bios.getVersion();
                 } else {
-                    log.error("UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
-                    throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid());
+                    log.error("Host:Store - UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
+                    throw new RepositoryInvalidInputException(locator);
                 }                
             } else {
-                log.error("UUID specified for BIOS MLE is not valid.");
-                throw new ASException(ErrorCode.AS_INVALID_INPUT);
+                log.error("Host:Store - UUID specified for BIOS MLE is not valid.");
+                throw new RepositoryInvalidInputException(locator);
             }
             
             if (item.getVmmMleUuid()!= null && !item.getVmmMleUuid().isEmpty()) {
@@ -146,21 +146,21 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                     obj.VMM_OSName = vmm.getOsId().getName();
                     obj.VMM_OSVersion = vmm.getOsId().getVersion();
                 } else {
-                    log.error("UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid());
-                    throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid());                    
+                    log.error("Host:Store - UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid());
+                    throw new RepositoryInvalidInputException(locator);                    
                 }                
             } else {
-                log.error("UUID specified for VMM MLE is not valid.");
-                throw new ASException(ErrorCode.AS_INVALID_INPUT);
+                log.error("Host:Store - UUID specified for VMM MLE is not valid.");
+                throw new RepositoryInvalidInputException(locator);
             }
             
             new HostBO().updateHost(new TxtHost(obj), null, null, item.getId().toString());
                         
-        } catch (ASException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during host update.", ex);
-            throw new ASException(ErrorCode.AS_UPDATE_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("Host:Store - Error during host update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }        
     }
 
@@ -168,6 +168,9 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
     @RequiresPermissions("hosts:create")    
     public void create(Host item) {
         log.debug("Host:Create - Got request to create a new Host.");
+        HostLocator locator = new HostLocator();
+        locator.id = item.getId();
+
         TxtHostRecord obj = new TxtHostRecord();
         try {
             
@@ -186,12 +189,12 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                     obj.BIOS_Oem = bios.getOemId().getName();
                     obj.BIOS_Version = bios.getVersion();
                 } else {
-                    log.error("UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
-                    throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid());                    
+                    log.error("Host:Create - UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
+                    throw new RepositoryInvalidInputException(locator);                    
                 }                
             } else {
-                log.error("UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
-                throw new ASException(ErrorCode.AS_INVALID_BIOS_MLE, item.getBiosMleUuid());
+                log.error("Host:Create - UUID specified {} for BIOS MLE is not valid.", item.getBiosMleUuid());
+                throw new RepositoryInvalidInputException(locator);
             }
             
             if (item.getVmmMleUuid()!= null && !item.getVmmMleUuid().isEmpty()) {
@@ -203,12 +206,12 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                     obj.VMM_OSName = vmm.getOsId().getName();
                     obj.VMM_OSVersion = vmm.getOsId().getVersion();
                 } else {
-                    log.error("UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid());
-                    throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid());                    
+                    log.error("Host:Create - UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid());
+                    throw new RepositoryInvalidInputException(locator);                    
                 }                
             } else {
-                log.error("UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid());
-                throw new ASException(ErrorCode.AS_INVALID_VMM_MLE, item.getVmmMleUuid());
+                log.error("Host:Create - UUID specified {} for VMM MLE is not valid.", item.getVmmMleUuid());
+                throw new RepositoryInvalidInputException(locator);
             }
                
 	    /*String tlsPolicyName = My.configuration().getDefaultTlsPolicyName();
@@ -227,11 +230,11 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
 	    new HostBO().addHost(new TxtHost(obj), null, null, item.getId().toString());
             log.debug("Host:Create - Created new host {} successfully.", item.getName());
             
-        } catch (ASException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during host creation.", ex);
-            throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("Host:Create - Error during host creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }        
     }
 
@@ -239,15 +242,13 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
     @RequiresPermissions("hosts:delete")    
     public void delete(HostLocator locator) {
         if (locator == null || locator.id == null) { return; }
-        log.debug("User:Delete - Got request to delete user with id {}.", locator.id.toString());        
+        log.debug("Host:Delete - Got request to delete host with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             new HostBO().deleteHost(null, id);
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OEM deletion.", ex);
-            throw new ASException(ErrorCode.AS_DELETE_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("Host:Delete - Error during Host deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
 
@@ -262,9 +263,11 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during Host deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Host:Delete - Error during Host deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     
@@ -281,7 +284,7 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
         convObj.setAikCertificate(obj.getAIKCertificate());
         convObj.setAikSha1(obj.getAikSha1());
         convObj.setHardwareUuid(obj.getHardwareUuid());
-        log.error("------------------------------------" + obj.getHardwareUuid());
+        log.debug("------------------------------------" + obj.getHardwareUuid());
         return convObj;
     }
     
