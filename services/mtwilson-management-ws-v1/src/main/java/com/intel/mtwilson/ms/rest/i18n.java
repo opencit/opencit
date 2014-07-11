@@ -60,7 +60,7 @@ public class i18n {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
     //@RolesAllowed({"Security"})
-    @RequiresPermissions("users:retrieve")
+//    @RequiresPermissions("users:retrieve")
     public String getLocaleForUser(
             @QueryParam("username") String username) throws IOException, SQLException {
         log.debug("Retrieving information from database for user: {}", username);
@@ -89,7 +89,7 @@ public class i18n {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
     //@RolesAllowed({"Security"})
-    @RequiresPermissions("users:store")
+//    @RequiresPermissions("users:store")
     public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException, SQLException {
         log.debug("Retrieving user [{}] from database.", pul.getUser());
         LoginDAO loginDAO = MyJdbi.authz();
