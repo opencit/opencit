@@ -81,11 +81,6 @@ public class ExtensionLauncher {
         }
     }
     
-    /**
-     * XXX TODO same code here and in MavenLauncher
-     * See also: http://hellotojavaworld.blogspot.com/2010/11/runtimeaddshutdownhook.html
-     * http://stackoverflow.com/questions/2921945/useful-example-of-a-shutdown-hook-in-java
-     */
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread("MtWilson Shutdown Hook") {
             @Override

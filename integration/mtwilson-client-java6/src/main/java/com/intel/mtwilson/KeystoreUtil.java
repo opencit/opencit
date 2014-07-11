@@ -89,7 +89,7 @@ public class KeystoreUtil {
      * @throws CertificateException 
      */
     public static KeyStore fromInputStream(InputStream keystoreIn, String keystorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. XXX TODO we need to implement AES-128 keystore encryption provider
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. 
         ks.load(keystoreIn, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
         return ks;
     }
@@ -121,7 +121,7 @@ public class KeystoreUtil {
      * @deprecated use fromInputStream instead
      */
     public static KeyStore open(InputStream keystoreIn, String keystorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. XXX TODO we need to implement AES-128 keystore encryption provider
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. 
         // load keystore
         try {
             ks.load(keystoreIn, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
@@ -268,7 +268,7 @@ public class KeystoreUtil {
     }
 /*    
     public static void create(File file, String password) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        KeyStore keystore = KeyStore.getInstance("JKS"); // KeyStoreException.  XXX TODO we need to supply type as a parameter because we will need to support multiple keystore types (Java default JKS and also our custom AES-128 keystore)
+        KeyStore keystore = KeyStore.getInstance("JKS"); // KeyStoreException.  
         keystore.load(null, null);
         keystore.store(new FileOutputStream(file), password.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
     }
@@ -312,7 +312,6 @@ public class KeystoreUtil {
      * @throws Exception 
      */
     public static SimpleKeystore createUserInDirectory(File directory, String username, String password, URL server, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
-        // XXX TODO instead of this basic check, should either use a regex to allow only specific character sets OR use an encoding such as url encoding (but make sure to also encode slashes) so that username can be arbitrary
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
@@ -351,11 +350,6 @@ public class KeystoreUtil {
      * and downloads the Mt Wilson SSL Certificate and SAML Signing Certificate
      * to the new keystore. Also any CA certificates available will be added
      * to the keystore. 
-     * 
-     * XXX TODO: there is no mechanism right now for the user to confirm the
-     * server's TLS certificate fingerprint.  That is necessary for security.
-     * The user could confirm after calling this function and before using
-     * the keystore. Should we provide a helper method?
      * 
      * The underlying Resource implementation determines the location where the
      * keystore will be saved.
@@ -400,7 +394,7 @@ public class KeystoreUtil {
         try {
             // download server's ssl certificates and add them to the keystore
 //            Properties p = new Properties();
-//            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); // XXX TODO it is currently the user's responsibility to verify the ssl certificate after they register;  need to move this out of here and make it controllable via the api;  we should not be embedding a hard-coded policy in a utility function
+//            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); 
 //            Configuration config = new MapConfiguration(p);
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
@@ -424,7 +418,7 @@ public class KeystoreUtil {
             for(X509Certificate cacert : cacerts) {
                 try {
                     log.debug("Adding CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
-                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); 
                 }
                 catch(CertificateEncodingException | KeyManagementException e) {
                     log.error(e.toString());
@@ -441,7 +435,7 @@ public class KeystoreUtil {
             for(X509Certificate cacert : cacerts) {
                 try {
                     log.debug("Adding Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
-                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); 
                 }
                 catch(CertificateEncodingException | KeyManagementException e) {
                     log.error(e.toString());
@@ -463,7 +457,7 @@ public class KeystoreUtil {
                         log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() );
                     }
                     else {
-                        keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                        keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); 
                         log.debug("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost());
                     }
                 }

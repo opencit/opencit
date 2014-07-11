@@ -49,12 +49,12 @@ public class IntelHostAgent implements HostAgent {
     public boolean isTpmPresent() {
 //        throw new UnsupportedOperationException("Not supported yet.");
         // bug #538  for now assuming all trust-agent hosts have tpm since we don't have a separate capabilities call
-        return true; //  XXX TODO need to have a separate call to trust agent to get host capabilities  ... see bug #540
+        return true; 
     }
 
     @Override
     public boolean isTpmEnabled() {
-        return true; // XXX TODO we need a capability to get this from the host!!  throw new UnsupportedOperationException("Not supported yet.");
+        return true; 
     }
 
     @Override
@@ -63,12 +63,12 @@ public class IntelHostAgent implements HostAgent {
     }
 
     @Override
-    public boolean isAikAvailable() { // XXX TODO need to distinguish between "the host system could have an AIK" (maybe isAikSupported) and "the host system actually does have an AIK" (isAikAvailable)
+    public boolean isAikAvailable() { 
         return true;  // assume we can always get an AIK from a trust agent,  for now
     }
 
     @Override
-    public boolean isAikCaAvailable() { // XXX TODO probably needs to be separated like isAik*  into isAikCaSupported and isAikCaAvailable .    AikCa is synonym for PrivacyCa.
+    public boolean isAikCaAvailable() { 
         return true; // assume hosts running trust agent always use a privacy ca,  for now
     }
 
@@ -94,8 +94,7 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public X509Certificate getAikCaCertificate() {
-        throw new UnsupportedOperationException("Not supported yet.");  // XXX TODO we need a new API for trust agent to return the privacy ca public key ... corresponding to its aik cert (it should get it from privacy ca when the aik cert is signed ) ... that will allow AS to check that AIK CERT was signed by this AIK CA CERT (PRIVACY CA) and then it can check that the PRIVACY CA cert is in the list of trusted certs. this way if the privacy ca is NOT in the list,  we have some info to display to the administrator.  the other way to do it is to try and look up the privacy ca cert based on the issuer name in the AIK CERT,  but then if it's not in the list the only thing we have to display to the administrator is the AIK CERT info, which only mentinos teh issuer's name.   in the case of a mt wilson privacy ca,  the issuer name is useless because it doesn't say which server its on, etc. 
-//        return null; // XXX TODO throw exception or return null? call should first check isAikCaAvailable  // vmware does not make the Privacy CA Certificate available through its API, if it even uses a Privacy CA
+        throw new UnsupportedOperationException("Not supported yet.");  
     }
 
     @Override
@@ -110,7 +109,7 @@ public class IntelHostAgent implements HostAgent {
     
     @Override
     public TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<PcrIndex> pcr) {
-        throw new UnsupportedOperationException("Not supported  yet."); // XXX TODO throw exception or return null?
+        throw new UnsupportedOperationException("Not supported  yet."); 
     }
 
 
@@ -119,7 +118,7 @@ public class IntelHostAgent implements HostAgent {
         if( pcrManifest == null ) {
             try {
                 TAHelper helper = new TAHelper();
-                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient); // XXX TODO we should save the entire quote structure so we can return the quote itself with another method to allow the caller to later verify the manifest they just got.
+                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient); 
             }
             catch(Exception e) {
                 throw new IOException("Cannot retrieve PCR Manifest from "+hostAddress.toString(), e);
@@ -132,7 +131,7 @@ public class IntelHostAgent implements HostAgent {
     public TxtHostRecord getHostDetails() throws IOException {
         HostInfo hostInfo = trustAgentClient.getHostInfo();
         TxtHostRecord host = new TxtHostRecord();
-        host.BIOS_Name = hostInfo.getBiosOem().trim(); // XXX TODO the HostInfo class doesn't have a getBiosName() function!!
+        host.BIOS_Name = hostInfo.getBiosOem().trim(); 
         host.BIOS_Oem = hostInfo.getBiosOem().trim();
         host.BIOS_Version = hostInfo.getBiosVersion().trim();
         host.VMM_Name = hostInfo.getVmmName().trim();
@@ -143,7 +142,7 @@ public class IntelHostAgent implements HostAgent {
         // C2 06 02 00 FF FB EB BF
         host.Processor_Info = hostInfo.getProcessorInfo().trim().substring(0, 8).toUpperCase();
         // now set some state we need for getHostAttestationReport
-        vmmName = host.VMM_Name; // XXX maybe we should maintain the entire TxtHostRecord or something similar
+        vmmName = host.VMM_Name; 
         return host;
     }
 
@@ -152,12 +151,10 @@ public class IntelHostAgent implements HostAgent {
         if( vendorHostReport != null ) { return vendorHostReport; }
         if( vmmName == null ) { getHostDetails(); }
 //        throw new UnsupportedOperationException("Not supported yet.");
-        // XXX TODO huge kludge, we are relying on the OpenSourceVMMHelper for this, which uses API Client to call Attestation Service, which then creates a TrustAgentSecureClient to get some information from the host but also grabs some from the database and then generates the XML format we need
 //        OpenSourceVMMHelper helper = new OpenSourceVMMHelper();
 //        return help.getHostAttestationReport(hostAddress);
         try {
             TAHelper helper = new TAHelper();
-            // XXX the PCR information returned here is NOT verified using the host's trusted AIk certificate from our database... must call helper.setTrustedAik(...) before calling helper.getQuoteInformationForHost(...) in order to verify the quote
             // currently the getHostAttestationReport function is ONLY called from Management Service HostBO.configureWhiteListFromCustomData(...)  so there wouldn't be any saved trusted AIK in the database anyway
             pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient);
             vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrManifest, vmmName);
@@ -172,12 +169,12 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public boolean isIntelTxtSupported() {
-        return true; // XXX TODO need to implement detection
+        return true; 
     }
 
     @Override
     public boolean isIntelTxtEnabled() {
-        return true; // XXX TODO need to implement detection
+        return true; 
     }
 
     @Override

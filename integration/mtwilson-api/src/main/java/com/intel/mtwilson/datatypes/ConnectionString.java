@@ -15,15 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX TODO  instead of getters for "connectionstring" and "addonconnectionstring" we should have getters for
- * the connection string with and without vendor-specific login credentials or other optional parameters. 
- * so for each vendor we need to define methods to get the host url by itself, and the host url with options.
- * for example:
- * citrixConnection.getURL()  would be like https://server.com:443  
- * citrixConnection.getURLWithOptions()  would be like https://server.com:443;u=username;p=password
- * and maybe add another method to get just the options:
- * citrixConnection.getOptions()  would return a Map<String,String> with "u" and "p" as keys with their corresponding values
- * 
  * The general connection string format is   vendor:url;options
  * The vendor-specific URL can be anything that does not include a semicolon, but is expected to be an https URL.
  * If it must include semicolons they should be percent-encoded as %3B   (see https://en.wikipedia.org/wiki/Percent-encoding)
@@ -98,7 +89,7 @@ public class ConnectionString {
         for(String keyValuePair : keyValuePairs) {
             String[] keyValue = keyValuePair.trim().split("=");
             if( keyValue.length == 2 && !keyValue[0].isEmpty() ) {
-                p.setProperty(keyValue[0], keyValue[1]); // TODO: decode any escaped characters for example = is %3D and ; is %3B
+                p.setProperty(keyValue[0], keyValue[1]); 
             }
             // ignore any options that are not in key=value format
         }
@@ -146,7 +137,6 @@ public class ConnectionString {
 
     /**
      * URL must be something like https://intelhost.com:9999  or https://citrixhost.com:443  or https://vcenter.com:443/sdk
-     * TODO: should make best effort with and without port numbers
      * @param url
      * @return 
      */
@@ -223,7 +213,7 @@ public class ConnectionString {
      * @return
      */
     public String getConnectionStringWithPrefix() {
-        if( this.vendor == null ) { return ""; } // XXX should we return null to indicate an error? or maybe this shouldn't even be possible to have a ConnectionString object without a vendor?
+        if( this.vendor == null ) { return ""; } 
         String connStr = getConnectionString();
         if( connStr.toLowerCase().startsWith(this.vendor.name().toLowerCase())) {
             return connStr;
@@ -890,7 +880,7 @@ public class ConnectionString {
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility; : in future major version of Mt Wilson we may change the default to 1443 for mtwilson 2.x trust agent or throw an illegal argument exception for a missing port number
+                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility;
                 log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }

@@ -14,7 +14,7 @@ public class NoLocator<T> implements Locator<T> {
 
     @Override
     public void copyTo(T item) {
-        // TODO  delete this class after all resources have locators
+       
     }
     
 }

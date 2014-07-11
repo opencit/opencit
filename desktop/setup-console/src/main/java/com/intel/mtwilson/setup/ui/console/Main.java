@@ -35,16 +35,6 @@ import org.apache.commons.configuration.Configuration;
  * How to run it for creating a configuration template to apply to selected remote instances:
  * java -cp setup-console-0.5.4-SNAPSHOT-with-dependencies.jar com.intel.mtwilson.setup.ui.console.Main cluster   (not implemented yet)
  * 
- * TODO: Currently the program prompts user to confirm the host key. This is ok, but
- * can be improved by allowing user to set known hosts file (maybe through environment variable)
- * or to check the windows registry (when running on windows) for the Putty known_hosts information.
- * See also: 
- * http://www.davidc.net/programming/java/reading-windows-registry-java-without-jni
- * http://stackoverflow.com/questions/62289/read-write-to-windows-registry-using-java
- * http://superuser.com/questions/197489/where-does-putty-store-known-hosts-information-on-windows
- * http://kobowi.co.uk/blog/2011/08/convert-winscpputty-ssh-host-keys-to-known_hosts-format/
- * https://bitbucket.org/kobowi/reg2kh/  (python tool that exports putty and winscp registry keys to a known hosts file format)
- * 
  * @author jbuhacoff
  */
 public class Main {

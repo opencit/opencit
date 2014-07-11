@@ -207,11 +207,6 @@ public class LoginPassword implements Command {
                 }
             }
 
-            /* XXX TODO comment:
-             1) add a query to the dao to see which users have a specific role by id
-             2) if more than one user has this role then create a new role just for this user and add permissions there then ensure this user login password only has that new role
-             3) if only this user has that role then just update the existing role
-             */
             log.debug("removing permissions");
             removePermissions(username);
             log.debug("getting permissions");

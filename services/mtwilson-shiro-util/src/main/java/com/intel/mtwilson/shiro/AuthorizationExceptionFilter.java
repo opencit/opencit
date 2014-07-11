@@ -21,9 +21,6 @@ import javax.ws.rs.core.Response.Status;
  * Without this filter, clients would get 500 internal server error when
  * the org.apache.shiro.authz.AuthorizationException are thrown.
  * 
- * XXX TODO because this filter is defined in web.xml as a filter, its error
- * messages will not be localized by the jersey response filter.
- * 
  * @author jbuhacoff
  */
 public class AuthorizationExceptionFilter implements Filter {

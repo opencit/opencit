@@ -62,7 +62,6 @@ suite('Text bindings', function() {
     Platform.performMicrotaskCheckpoint();
     assert.strictEqual('2', text.data);
 
-    // TODO(rafaelw): Throw on binding to unavailable property?
   });
 
   test('Text - No Path', function() {

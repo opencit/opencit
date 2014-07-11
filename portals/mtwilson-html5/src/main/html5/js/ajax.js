@@ -89,13 +89,6 @@ ajax.view = {
 };
 ajax.options = {};
 ajax.options.baseurl = "";  // optional, prepends a url like "/api/v2" to all resource names
-//
-//  TODO:  mock currently not implemented.  ideally define a transport that behaves like xhr but keeps a map
-//  as shown here with the developer's resources that it returns when it detects certain requests... need
-//  to make it use callbacks etc. to allow developer to test error handling code as well.  so do this in a 
-//  later version. 
-//ajax.options.transport = null; // to force specific responses for development (if the server isn't ready yet)
-// for example:  ajax.options.transport = { 'GET /resource1': response1, 'POST /resource1': response2, ... }
 
 ajax.requests = []; // active requests; new requests are pushed here, completed requests are removed
 
@@ -306,7 +299,6 @@ ajax.json = {
                     }
                 }
                 Log.debug("Server response for delete: "+Object.toJSON(ptr));
-                // XXX TODO: should we call   data.setx(keypath, null); ? or setx {} or [] ? or deletex ??
                 }
                 ajax.event.fire("httpDeleteSuccess", { resource:my, content:deleteObject });
 //                ajax.view.sync();
@@ -323,12 +315,12 @@ foo=bar&baz=The+first+line.&#37;0D%0AThe+second+line.%0D%0A
  * 
  */
 ajax.form = {
-    'enctype': 'application/x-www-form-urlencoded'    
-    /* UNSUPPORTED OPERATION - TODO: FORM SUBMISSION */
+    'enctype': 'application/x-www-form-urlencoded'  
+    /* UNSUPPORTED OPERATION  */
 };
 ajax.xml = {
     'enctype': 'text/plain'
-    /* UNSUPPORTED OPERATION - TODO: XML APIS */    
+    /* UNSUPPORTED OPERATION  */    
 };
 /*
 Content-Type: multipart/form-data; boundary=---------------------------314911788813839
@@ -347,13 +339,11 @@ The second line.
  */
 ajax.file = {
     'enctype': 'multipart/form-data'
-    /* UNSUPPORTED OPERATION - TODO: FILE UPLOAD */
+    /* UNSUPPORTED OPERATION  */
 }
 
 
     /*
-     * TODO rename this to getResource
-     *
      * Options:
      * merge: true|false     specify { merge: true } to merge the results with existing data (applies only to arrays and objects) instead of replacing them
      *
@@ -485,7 +475,6 @@ Log.error("exception: a:"+a+"  b: "+b);
             //parameters: objectArray,
             contentType: 'application/json',
             postBody:  Object.toJSON(objectArray), // if this is enabled then 'parameters' is ignored
-            // XXX TODO need to provide the objectArray as post body, serialized as json
             // Note: the onSuccess function is the same here as it is for GET because we expect
             // the server to return a possibly revised form of the same resources we posted -
             // and we need to merge those into our data model. That's why opt[merge] is set to true above.

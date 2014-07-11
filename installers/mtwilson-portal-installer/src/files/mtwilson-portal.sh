@@ -58,7 +58,6 @@ bootstrap_first_user() {
   fi
   local datestr=`date +%Y-%m-%d.%H%M`
 
-  # XXX as implemented, the BootstrapUser command only works when Management Console is on same server as Management Service... TODO need to add ssh for remote access, or ask for adtabase connection details and just go and approve it oursevels (well, from the java code)
 #  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
   prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
   export MC_FIRST_USERNAME="$MC_FIRST_USERNAME"
@@ -148,7 +147,7 @@ setup_interactive_install() {
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson-portal.war
     
     #echo -n "Waiting for ${webservice_application_name} to become accessible... "
-    #sleep 50s        #XXX TODO: remove when we have solution for webserver up
+    #sleep 50s        
     #echo "Done"
     webservice_running_report_wait "${webservice_application_name}"
   fi

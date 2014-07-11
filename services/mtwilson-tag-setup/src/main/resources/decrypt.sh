@@ -85,9 +85,6 @@ export AUTH_PASSWORD
 
   # decrypt using the hints in the content type parameters
   cat $encfile | awk 'BEGIN { RS="\n\n" } NR==2 { print }' | openssl enc -d -$enc_alg -pass env:ENC_PASSWORD -md $enc_digest_alg $PBKDF2_OPTS -base64 > $txtfile
-
-  # TODO  if enc_enclosed == application/zip  we might want to give that txt file a .zip extension ? for now we let the caller specify where they want the output
-  
 }
 
 verify_signature() {
@@ -131,7 +128,6 @@ inputmac=$(awk 'BEGIN { RS="\n\n" } NR==2 { print }' $sigfile)
  cat $infile >> $docfile
 
 # calculate the hmac over the entire input file  
-# TODO:  add to this the headers in the sig file... 
 calcmac=$(openssl dgst -$sig_digest_alg -$sig_alg $AUTH_PASSWORD -binary $docfile | openssl enc -base64)
 #echo "calcmac: $calcmac"
 

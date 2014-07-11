@@ -24,7 +24,4 @@ public class RpcFilterCriteria implements FilterCriteria<Rpc> {
     @QueryParam("statusEqualTo")
     public Rpc.Status status;
     
-    // TODO also allow administrators to filter by user,
-    // createdOn, updatedOn, whether it has inline input or a link to a file,
-    // current progress, or status
 }

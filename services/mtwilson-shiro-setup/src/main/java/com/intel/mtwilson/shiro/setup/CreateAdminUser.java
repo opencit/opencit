@@ -69,7 +69,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 public class CreateAdminUser extends DatabaseSetupTask {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateAdminUser.class);
-    public static final String ADMINISTRATOR_ROLE = "administrator"; // TODO: move this to mtwilson-shiro-util ?
+    public static final String ADMINISTRATOR_ROLE = "administrator"; 
     public static final String APPROVED = "APPROVED";
     private String username;
     private String password;
@@ -351,7 +351,6 @@ public class CreateAdminUser extends DatabaseSetupTask {
         if (userLoginCertificate == null) {
             
             // first load the ca key
-            // XXX TODO  this code is duplicated from CreateCertificateAuthorityKey  validate()  -  needs to be refactored to a CA repository layer so they can both just say getCAPrivateKey() etc
             byte[] combinedPrivateKeyAndCertPemBytes;
             try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
                 combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
@@ -476,8 +475,6 @@ public class CreateAdminUser extends DatabaseSetupTask {
         FileUtils.writeStringToFile(passwordFile, String.format("%s\n", password));
     }
     
-    // TODO:  duplicated code from setup task CreateSamlCertificate , should be 
-    // refactored to a SAML repository or business layer
     private X509Certificate getSamlCertificate() throws KeyManagementException, KeyStoreException {
         SimpleKeystore samlKeystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
         for (String alias : samlKeystore.aliases()) {
@@ -494,8 +491,6 @@ public class CreateAdminUser extends DatabaseSetupTask {
         }
         return null;
     }
-    // TODO:  duplicated code from setup task CreateTlsCertificate , should be 
-    // refactored to a TLS repository or business layer
     private X509Certificate getTlsCertificate() throws KeyManagementException, KeyStoreException  {
         SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), My.configuration().getTlsKeystorePassword());
         for (String alias : tlsKeystore.aliases()) {

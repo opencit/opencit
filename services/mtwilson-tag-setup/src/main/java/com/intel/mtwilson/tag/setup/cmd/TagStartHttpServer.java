@@ -49,7 +49,6 @@ package com.intel.mtwilson.tag.setup.cmd;
 //        Server server = component.getServers().add(Protocol.HTTPS, port);
 //        Series<Parameter> parameters = server.getContext().getParameters();
 //        
-//        // TODO-stdalex these values need to come from a config file
 //        parameters.add("sslContextFactory", "org.restlet.ext.ssl.PkixSslContextFactory");
 //        parameters.add("keystorePath", My.configuration().getAssetTagKeyStorePath());
 //        parameters.add("keystorePassword", My.configuration().getAssetTagKeyStorePassword());

@@ -394,7 +394,6 @@ suite('Template Element', function() {
     addExpandos(template.nextSibling);
     checkExpandos(template.nextSibling);
 
-    // TODO(rafaelw): Re-enable when Object.observe/sort bug is fixed.
     // model.sort(function(a, b) { return a.val - b.val; });
     // Platform.performMicrotaskCheckpoint();
     // checkExpandos(template.nextSibling);

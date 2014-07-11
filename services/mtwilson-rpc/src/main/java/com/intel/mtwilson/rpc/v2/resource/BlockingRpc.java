@@ -92,11 +92,6 @@ public class BlockingRpc extends AbstractRpc {
         // now serialize the input object with xstream;  even though we're going to process immediately, we are still going to record the call in the RPC table so we need the xml
         byte[] inputXml = toXml(inputObject);
 
-
-
-//   TODO:  loop on   request.getHeaderNames()  to get list of values for each one,  put it in MultivaluedMap  and serialize with xstream  ...
-        //  TODO: store the query string...
-
         // prepare the rpc task with the input
         RpcPriv rpc = new RpcPriv();
         rpc.setId(new UUID());
@@ -109,8 +104,6 @@ public class BlockingRpc extends AbstractRpc {
         // store it
         repository.create(rpc);
 
-        // TODO  because in a blocking rpc the output is the data, we should include a custom header in the response indicating the rpc id so if the client wants to get the data again w/o redundant processing  the client can just go to /rpcs/{id}/output  to retrieve it;  or if there is an error during processing the client knows where to get error details .   do it here so the header will be present in any errors or output from this point forward. 
-        
         // from this point forward the implmentation is a duplicate of what is in RpcInvoker after it deserializes the task object
         Object outputObject;
         try {
@@ -123,7 +116,6 @@ public class BlockingRpc extends AbstractRpc {
                 for (Fault fault : faults) {
                     log.error("Error during RPC execution: {}", fault.toString());
                 }
-                // TODO: create a specific exception class that can take a List<Fault> argument so the API layer can make it available to the client
                 throw new Exception("Error during RPC execution"); // this will get converted to the web application exception in the catch block.
             }
 //            ((Runnable)inputObject).run();

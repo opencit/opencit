@@ -11,10 +11,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 //import org.codehaus.jackson.annotate.JsonValue;
 
 /**
- * XXX TODO this class is just a draft. It needs to be finished.
- * Intent is to be a thin wrapper around byte[] so that we have type safety
- * and readability in our Java code.
- * 
  * If support for base64 and hex is required they should be implemented as
  * Nonce.fromBase64 and Nonce.fromHex because a String constructor would be
  * ambiguous.
@@ -22,14 +18,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public class Nonce extends ObjectModel {
     private byte[] data;
-    public Nonce() {
-        // TODO: default constructor should create a random number
-    }
+    public Nonce() {}
     public Nonce(byte[] array) {
         data = array;
     }
     public Nonce(BigInteger nonce) {
-        data = nonce.toByteArray(); // XXX watch out for 2's complement representation
+        data = nonce.toByteArray(); 
     }
     
     public byte[] toByteArray() { return data; }

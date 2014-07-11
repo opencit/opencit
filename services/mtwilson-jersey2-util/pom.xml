@@ -30,9 +30,6 @@
             <artifactId>cpg-extensions</artifactId>
         </dependency>
         
-        <!-- TODO:  the code in the com.intel.mtwilson.jersey2 package which
-        depends on mtwilson-launcher should probably be moved to 
-        mtwilson-launcher-webapp -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher</artifactId>

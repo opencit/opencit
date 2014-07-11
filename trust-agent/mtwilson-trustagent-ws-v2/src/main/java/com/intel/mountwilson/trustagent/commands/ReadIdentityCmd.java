@@ -50,7 +50,6 @@ public class ReadIdentityCmd implements ICommand {
         } 
         */
         
-        // XXX code duplicated from com.intel.mtwislon.trustagent.ws.v2 ... TODO there should be a repository class or even more conevenience methdos inTrustagentConfigruation to cnosolidate this boilerplate code into one place
         try {
             TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
             File aikCertificateFile = configuration.getAikCertificateFile();

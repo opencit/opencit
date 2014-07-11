@@ -1,13 +1,5 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:xf="http://www.w3.org/2002/xforms">
 
-    <!-- 
-    XXX NOTE this document is not a working example
-    in order for xforms to work on the browser, we need:
-    1. a server-side xslt to transform xforms into html5 forms
-    2. a javascript library on the client for data binding and manipulation of output elements and clicking command buttons
-    And in addition, this example doesn't completely specify the tag values as an array ...
-    -->
-
     <head>
         <title>Create Tag</title>
         <meta name="description" content="A form to create a new tag" />

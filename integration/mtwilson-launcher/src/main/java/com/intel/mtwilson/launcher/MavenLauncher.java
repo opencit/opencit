@@ -124,13 +124,11 @@ public class MavenLauncher {
 
 
     /**
-     * XXX TODO  should launch, loadModules, and addShutdownHook move into an AbstractLauncher? 
      * Initialize everything but do NOT start the event loop (caller must start it and stop it as needed)
      */
     public void launch() throws IOException, ContainerException {
         init();
         
-        // XXX TODO  should we check for container == null and throw illegalstateexception ? or illegalargumentexception?
         loadModules();
 
         // add a shutdown hook so we can automatically shut down the container if the VM is exiting
@@ -147,13 +145,12 @@ public class MavenLauncher {
 
     }
     
-    // XXX TODO  similar code here and in DirectoryLauncher
     public void loadModules() throws IOException {
         for (String moduleName : moduleNames) {
             File moduleJarFile = locateModuleJarFile(moduleName);
             if (ModuleUtil.isModule(moduleJarFile)) {
                 Manifest manifest = JarUtil.readManifest(moduleJarFile);
-                //                Set<File> classpath = resolver.resolveClasspath(module.getManifest()); // XXX TODO  need to make the class loader strategy aware of the resolver?? should be a DirectoryResolver and a MavenResolver ... each needs to know the jar File and Manifest (for classpath or maven-classpath)
+                //                Set<File> classpath = resolver.resolveClasspath(module.getManifest()); 
                 Module module = new Module(moduleJarFile, manifest, classLoadingStrategy.getClassLoader(moduleJarFile, manifest, resolver));
                 log.debug("Module: {}", module.getImplementationTitle() + "-" + module.getImplementationVersion());
                 log.debug("Class-Path: {}", (Object[])module.getClasspath());
@@ -192,11 +189,6 @@ public class MavenLauncher {
         continueEventLoop = false;
     }
 
-    /**
-     * XXX TODO same code here and in MavenLauncher
-     * See also: http://hellotojavaworld.blogspot.com/2010/11/runtimeaddshutdownhook.html
-     * http://stackoverflow.com/questions/2921945/useful-example-of-a-shutdown-hook-in-java
-     */
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread("MtWilson Shutdown Hook") {
             @Override

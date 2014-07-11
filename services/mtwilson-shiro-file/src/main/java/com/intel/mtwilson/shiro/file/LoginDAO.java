@@ -26,8 +26,8 @@ import org.apache.shiro.util.StringUtils;
 public class LoginDAO  {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginDAO.class);
 
-    private final File userFile; // TODO:  support password-protection for this file (or detached signature) so it cannot be tampered with ...
-    private final File permissionFile; // TODO:  support password-protection for this file (or detached signature) so it cannot be tampered with ...
+    private final File userFile; 
+    private final File permissionFile; 
     private final Map<String,UserPassword> users;
     private final Map<String,List<UserPermission>> permissions;
     

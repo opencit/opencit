@@ -128,7 +128,7 @@ public class HostAgentFactory {
             log.debug("Retrieving TLS policy...");
             TlsPolicy tlsPolicy = getTlsPolicy(host);
             log.debug("Creating Host Agent for host: {}" , address);
-            HostAgent ha = getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
+            HostAgent ha = getHostAgent(hostAddress, connectionString, tlsPolicy); 
             log.debug("Host Agent created.");
             return ha;
         }
@@ -141,8 +141,8 @@ public class HostAgentFactory {
 //        if( host.getTlsPolicyName() == null ) {
 //            host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
 //        }
-//        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
-//        KeyStore tlsKeystore = txtHost.getTlsKeystore(); // XXX TODO TxtHost doesn't have this field yet
+//        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); 
+//        KeyStore tlsKeystore = txtHost.getTlsKeystore(); 
 //        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
         TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.createFactory(host);//getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
         TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicy();
@@ -156,7 +156,7 @@ public class HostAgentFactory {
      */
     private HostAgent getHostAgent(InternetAddress hostAddress, ConnectionString cs, TlsPolicy tlsPolicy) throws IOException {
         if( cs == null ) {
-            throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
+            throw new IllegalArgumentException("Connection info missing"); 
         }
         String vendorProtocol = cs.getVendor().name().toLowerCase(); // INTEL, CITRIX, VMWARE becomes intel, citrix, vmware
         if( vendorFactoryMap.containsKey(vendorProtocol) ) {
@@ -172,7 +172,7 @@ public class HostAgentFactory {
     
     public HostAgent getHostAgent(ConnectionString hostConnection, TlsPolicy tlsPolicy) throws IOException {
         if( hostConnection == null ) {
-            throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
+            throw new IllegalArgumentException("Connection info missing"); 
         }
         String vendorProtocol = hostConnection.getVendor().name().toLowerCase();
         if( vendorFactoryMap.containsKey(vendorProtocol) ) { // intel, citrix, vmware

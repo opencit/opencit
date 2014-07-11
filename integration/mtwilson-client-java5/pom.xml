@@ -107,7 +107,6 @@
 	    http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
 	    -->
 	    
-	    <!-- XXX TODO curerntly the problem with the shade plugin is that we can only specify artifacts... but what we need to build from is the folder of backported jar files, which are not maven artifacts -->
 	    <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

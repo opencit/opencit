@@ -54,8 +54,6 @@
       <artifactId>mtwilson-webservice-util</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-	<!-- TODO:   add the aikquote and other linux commands as necessary -->
 			
   </dependencies>
 

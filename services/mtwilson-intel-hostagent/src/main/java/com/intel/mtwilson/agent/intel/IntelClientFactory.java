@@ -51,7 +51,7 @@ public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnec
     @Override
     public boolean validateObject(TlsConnection tlsConnection, TrustAgentSecureClient client) {
 //        return client.isConnected(); 
-        return true; // XXX TODO is there a way to validate the trust agent client connection? maybe try sending a request for host info? or something else lightweight, with a really small timeout
+        return true; 
     }
     
     /**

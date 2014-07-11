@@ -26,10 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX TODO:  all this database encryption code should be moved to EncryptDatabase command. 
- * XXX TODO:  this SetupWizard is really just a controller of the setup process... so it should
- * be the one directing to check whether this or that artifact is present and then to configure
- * it if it is, and saving the configuration info to share to all components, etc.
  * @author jbuhacoff
  */
 public class SetupWizard {
@@ -43,7 +39,6 @@ public class SetupWizard {
     public Connection getDatabaseConnection() throws SetupException, IOException {
         try {
             Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
-            // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
             Class.forName(p.getProperty("javax.persistence.jdbc.driver"));
             String url =  p.getProperty("javax.persistence.jdbc.url");
             String user =  p.getProperty("javax.persistence.jdbc.user");
@@ -118,7 +113,7 @@ public class SetupWizard {
                  }
                  */
                 String dekBase64 = loadOrCreateSecretKeyAes128("mtwilson.as.dek");
-                encryptAllNonEmptyFieldsInTableWithKey(c, "mw_hosts", "AddOn_Connection_Info", dekBase64); // XXX mw_hosts in 1.1,  tbl_hosts in 1.0-RC2
+                encryptAllNonEmptyFieldsInTableWithKey(c, "mw_hosts", "AddOn_Connection_Info", dekBase64); 
             }
         } catch (SQLException e) {
             throw new SetupException("Error while closing database connection", e);
@@ -153,9 +148,6 @@ public class SetupWizard {
     }
     
     /**
-     * TODO: is it practical to use annotations on the TblHosts class to determine table name and column names?
-     * TODO: should take field name to check as a parameter
-     * TODO: should take other field names to include in log statement & the log statement format as parameters
      * @param c
      * @param tableName
      * @param beginWith
@@ -187,7 +179,6 @@ public class SetupWizard {
     */
     
     /**
-     * TODO: fix update statement assumes an "ID" column
      * @param c
      * @param tableName
      * @param fieldName
@@ -200,7 +191,7 @@ public class SetupWizard {
             try (PreparedStatement update = c.prepareStatement(String.format("UPDATE %s SET %s=? WHERE ID=?", tableName, fieldName));Statement query = c.createStatement();ResultSet rs = query.executeQuery(String.format("SELECT ID,%s FROM %s", fieldName, tableName))) {
                 while (rs.next()) {
                     String value = rs.getString(fieldName);
-                    if (value != null && !value.isEmpty() && value.startsWith("http")) { // XXX TODO: make the value.startsWith(http) a filter function that can be passed into the method to determine which records should be encrypted
+                    if (value != null && !value.isEmpty() && value.startsWith("http")) { 
                         log.debug(String.format("Encrypting record %d field %s", rs.getInt("ID"), fieldName)); // do not log the value being encrypted because that leaks sensitive information to log
                         String encrypted = aes.encryptString(value);
                         update.setString(1, encrypted);

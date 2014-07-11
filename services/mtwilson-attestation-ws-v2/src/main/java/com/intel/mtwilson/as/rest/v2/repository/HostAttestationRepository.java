@@ -141,7 +141,6 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @RequiresPermissions("host_attestations:delete")    
     public void delete(HostAttestationLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        //TODO : We should be able to delete the report in the future. If possible by GA release
     }
 
     @Override

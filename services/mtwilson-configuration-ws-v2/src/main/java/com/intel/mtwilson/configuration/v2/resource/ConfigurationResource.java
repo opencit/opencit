@@ -41,7 +41,6 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
     @Override
     protected ConfigurationCollection search(ConfigurationFilterCriteria criteria) {
         ConfigurationCollection configurations = new ConfigurationCollection();
-        // TODO  collect all available configurations... local and database
         Configuration configuration = retrieve("local");
         configurations.getConfigurations().add(configuration);
         return configurations;
@@ -56,15 +55,11 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
             configuration = new Configuration();
             configuration.setName("local");
             try {
-                // XXX TODO this one is compiled from a bunch of different files... via the API we want to be able to expose which file provided which config so the client can be smart about editing the right source for a given property, while maintaining a view of what is the effective configuration when all are combined
-                // XXX TODO  so we want to separate what comes from environment, mtwilson.properties, etc.
                 org.apache.commons.configuration.Configuration conf = My.configuration().getConfiguration(); 
                 Iterator<String> it = conf.getKeys();
                 while(it.hasNext()) {
                     String key = it.next();
                     String value = conf.getString(key);
-                    // XXX there are some properties we should probably remove because they should only be visible from the local host's shell
-                    // other properties we need to remove because they are useless or won't encode for example there's one "=ExitCode" which would not be a valid XML tag but would display fine as JSON or YAML
                     if( !xmlTagName.matcher(value).matches() ) {
                         log.debug("Skipping poperty {}", key);
                         continue;
@@ -73,7 +68,7 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
                 }
             }
             catch(Exception e) {
-                throw new WebApplicationException("Cannot load configuration"); // XXX TODO create specific exception for this (for i18n)
+                throw new WebApplicationException("Cannot load configuration"); 
             }
         }
         else if( "my".equals(id) ) {
@@ -105,9 +100,8 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
             }
             }
             catch(Exception e) {
-                throw new WebApplicationException("Cannot load configuration"); // XXX TODO c reate  ErrorCode for this and throw an i18n exception                
-            }
-            
+                throw new WebApplicationException("Cannot load configuration"); 
+            }            
         }
         else if( "cluster".equals(id) ) {
             // load from database ...

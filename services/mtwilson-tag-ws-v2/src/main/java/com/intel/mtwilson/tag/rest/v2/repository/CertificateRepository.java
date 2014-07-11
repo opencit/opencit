@@ -43,7 +43,6 @@ public class CertificateRepository implements DocumentRepository<Certificate, Ce
     public CertificateCollection search(CertificateFilterCriteria criteria) {
         log.debug("Certificate:Search - Got request to search for the Certificates.");        
         CertificateCollection objCollection = new CertificateCollection();
-        // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
         
         try(JooqContainer jc = TagJdbi.jooq()) {
             DSLContext jooq = jc.getDslContext();

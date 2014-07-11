@@ -12,12 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX TODO this class really isn't needed, other than to have a "something" into which
- * both a host report and any policy may be input, and a result obtained.
- * maybe move the convenience methods applyAll and applyAny
- * into a utility class?      PolicyUtil.applyAll(HostReport hostReport, TrustPolicy... policies) and
- * PolicyUtil.applyAny(HostReport hostReport, TrustPolicy... policies)  ??
- * 
  * @author jbuhacoff
  */
 public class PolicyEngine {

@@ -57,7 +57,6 @@ var JsonFileStore = {};
     JsonFileStore.search = function(criteria) {
         // because we're using read-only file resources, in order to search for a record we need to 
         // read in the entire collection and then search in memory 
-        // TODO:  read the json file at collectionUrl, then search it with criteria and return results
     };
     
 })(JsonFileStore);

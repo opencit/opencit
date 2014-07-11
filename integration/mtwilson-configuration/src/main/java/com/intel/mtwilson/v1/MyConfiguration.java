@@ -212,8 +212,6 @@ public class MyConfiguration {
 
         
         // seventh priority are properties defined on the classpath (for example defaults provided with the application, or placed in the web server container)
-        // XXX should these be reprioritized to be after system properties and before the list of files? that way an application can be packaged with specific
-        // settings that cannot be overridden... but it's easy enough to extract from the jar so that's not likey to stop anyone
         String propertiesFilename = "mtwilson.properties";
         InputStream in = getClass().getResourceAsStream(
                 "/" + propertiesFilename);
@@ -366,7 +364,7 @@ public class MyConfiguration {
     }
 
     public String getKeystorePassword() {
-        return conf.getString("mtwilson.api.password", conf.getString("KEYSTOREPASSWORD", "password")); // bug #733 XXX the "KEYSTOREPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("mtwilson.api.password", conf.getString("KEYSTOREPASSWORD", "password")); 
     }
 
     public URL getMtWilsonURL() throws MalformedURLException {
@@ -391,8 +389,8 @@ public class MyConfiguration {
 
     public String getDatabaseProtocol() {
         if( conf.containsKey("mtwilson.db.protocol") ) { conf.getString("mtwilson.db.protocol", "postgresql"); }
-        if( conf.containsKey("mountwilson.as.db.protocol") ) { conf.getString("mountwilson.as.db.protocol", "postgresql"); } // XXX deprecate old properties in a future release
-        if( conf.containsKey("mountwilson.ms.db.protocol") ) { conf.getString("mountwilson.ms.db.protocol", "postgresql"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.as.db.protocol") ) { conf.getString("mountwilson.as.db.protocol", "postgresql"); } 
+        if( conf.containsKey("mountwilson.ms.db.protocol") ) { conf.getString("mountwilson.ms.db.protocol", "postgresql"); } 
         if( conf.containsKey("mtwilson.db.driver") ) {
             String driver = conf.getString("mtwilson.db.driver", "");
             if( driver.equals("org.postgresql.Driver") ) { return "postgresql"; }
@@ -408,8 +406,8 @@ public class MyConfiguration {
     
     public String getDatabaseDriver() {
         if( conf.containsKey("mtwilson.db.driver") ) { conf.getString("mtwilson.db.driver", "org.postgresql.Driver"); }
-        if( conf.containsKey("mountwilson.as.db.driver") ) { conf.getString("mountwilson.as.db.driver", "org.postgresql.Driver"); } // XXX deprecate old properties in a future release
-        if( conf.containsKey("mountwilson.ms.db.driver") ) { conf.getString("mountwilson.ms.db.driver", "org.postgresql.Driver"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.as.db.driver") ) { conf.getString("mountwilson.as.db.driver", "org.postgresql.Driver"); } 
+        if( conf.containsKey("mountwilson.ms.db.driver") ) { conf.getString("mountwilson.ms.db.driver", "org.postgresql.Driver"); } 
         if( conf.containsKey("mtwilson.db.protocol") ) {
             String protocol = conf.getString("mtwilson.db.protocol", "");
             if( protocol.equals("postgresql") ) { return "org.postgresql.Driver"; }
@@ -425,8 +423,8 @@ public class MyConfiguration {
 
     public String getDatabasePort() {
         if( conf.containsKey("mtwilson.db.port") ) { conf.getString("mtwilson.db.port", "5432"); }
-        if( conf.containsKey("mountwilson.as.db.port") ) { conf.getString("mountwilson.as.db.port", "5432"); } // XXX deprecate old properties in a future release
-        if( conf.containsKey("mountwilson.ms.db.port") ) { conf.getString("mountwilson.ms.db.port", "5432"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.as.db.port") ) { conf.getString("mountwilson.as.db.port", "5432"); } 
+        if( conf.containsKey("mountwilson.ms.db.port") ) { conf.getString("mountwilson.ms.db.port", "5432"); } 
         if( conf.containsKey("mtwilson.db.protocol") ) {
             String protocol = conf.getString("mtwilson.db.protocol", "");
             if( protocol.equals("postgresql") ) { return "5432"; }
@@ -449,7 +447,7 @@ public class MyConfiguration {
     }
 
     public String getDatabasePassword() {
-        return conf.getString("mtwilson.db.password", conf.getString("PGPASSWORD", "")); // removing default in mtwilson 1.2;  was "password";   // bug #733 XXX the "PGPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("mtwilson.db.password", conf.getString("PGPASSWORD", "")); // removing default in mtwilson 1.2;  was "password";   // bug #733 
     }
 
     public String getDatabaseSchema() {
@@ -466,7 +464,7 @@ public class MyConfiguration {
         return new File(conf.getString("saml.keystore.file", getDirectoryPath() + File.separator + "mtwilson-saml.jks"));
     }
     public String getSamlKeystorePassword() {
-        return conf.getString("saml.key.password", ""); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("saml.key.password", ""); // bug #733 
     }
     
     ///////////////////////// tls policy  //////////////////////////////////
@@ -474,7 +472,6 @@ public class MyConfiguration {
         return conf.getString("mtwilson.default.tls.policy.name", "TRUST_CA_VERIFY_HOSTNAME"); // issue #871 default should be secure;  customer can explicitly set to TRUST_FIRST_CERTIFICATE if that's what they want
     }
 
-    // XXX TODO   if using glassfish or tomcat need to point to where they keep their keystores.... or configure them to use this one (but only if WE install them... not if we deploy mtwilson onto an existing web server which already has its keystore)
     public File getTlsKeystoreFile() {
         return new File(conf.getString("mtwilson.tls.keystore.file",getDirectoryPath() + File.separator + "mtwilson-tls.jks"));
     }

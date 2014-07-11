@@ -10,8 +10,8 @@ import com.intel.dcsg.cpg.validation.Model;
 
 
 /**
- * XXX just a draft
- * XXX TODO Replace with an XML model that is fully navigable? That way the UI
+ * just a draft
+ * Replace with an XML model that is fully navigable? That way the UI
  * has complete control over how it presents it... could be single page, or
  * wizard, etc.
  * @author jbuhacoff

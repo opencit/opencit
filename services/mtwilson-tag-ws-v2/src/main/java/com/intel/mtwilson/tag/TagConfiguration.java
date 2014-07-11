@@ -41,7 +41,7 @@ public class TagConfiguration extends AbstractConfiguration {
     public static final String TAG_AUTO_IMPORT_TO_MTWILSON = "tag.provision.autoimport";
     public static final String TAG_PROVISION_EXTERNAL_CA = "tag.provision.external";
     public static final String TAG_PROVISION_SELECTION_DEFAULT = "tag.provision.selection.default";
-    public static final String TAG_PROVISION_XML_ENCRYPTION_PASSWORD = "tag.provision.xml.encryption.password"; // TODO:  move this into database and allow one password per user ;  username would be obtained from client authentication or header of encrypted file. 
+    public static final String TAG_PROVISION_XML_ENCRYPTION_PASSWORD = "tag.provision.xml.encryption.password"; 
     public static final String TAG_PROVISION_XML_ENCRYPTION_REQUIRED = "tag.provision.xml.encryption.required";
     
     public TagConfiguration(Configuration configuration) {

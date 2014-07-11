@@ -65,7 +65,6 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             
             TpmPassword obj = dao.findById(locator.id);
             if (obj != null) {
-                // TODO INSECURE: decrypt
                 return obj;
             }
                                     
@@ -86,7 +85,6 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             
             TpmPassword obj = dao.findById(item.getId());
             if (obj != null) {
-                // TODO INSECURE: encrypt password
                 Date modifiedOn = new Date();
                 dao.update(item.getId(), item.getPassword(), modifiedOn);
                 item.setModifiedOn(modifiedOn);
@@ -114,7 +112,6 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             
             TpmPassword obj = dao.findById(item.getId());
             if (obj == null){
-                // TODO INSECURE: encrypt password
                 Date modifiedOn = new Date();
                 dao.insert(item.getId(), item.getPassword(), modifiedOn);
                 item.setModifiedOn(modifiedOn);

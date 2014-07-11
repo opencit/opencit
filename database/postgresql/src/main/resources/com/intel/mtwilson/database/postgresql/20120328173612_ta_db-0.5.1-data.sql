@@ -1,4 +1,3 @@
--- TODO: remove this line for RC3; get username from security context (premium only)
 INSERT INTO tbl_db_portal_user (ID, Login, Password, First_Name, Last_Name) VALUES (1, 'root','root','root','root');
 -- the following are ok
 INSERT INTO tbl_event_type (ID, Name, FieldName) VALUES (1,'Vim25Api.HostTpmSoftwareComponentEventDetails','componentName');

@@ -29,7 +29,6 @@
             <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
         </init-param>
         <!--
-        XXX TODO replace this with apache shiro
         <init-param>
             <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
             <param-value>com.intel.mtwilson.security.jersey.RolesAllowedResourceFilterFactory</param-value>

@@ -39,7 +39,7 @@ public class CreateAdminUser extends LocalSetupTask {
             return System.getenv("TRUSTAGENT_ADMIN_PASSWORD");
         }
         isNewPassword = true;
-        return RandomUtil.randomBase64String(8).replace("=","_"); // TODO: use a larger alphabet with more special characters
+        return RandomUtil.randomBase64String(8).replace("=","_"); 
     }
     
     
@@ -97,7 +97,6 @@ public class CreateAdminUser extends LocalSetupTask {
             }
             FileUtils.writeStringToFile(passwordFile, password);            
         }
-        // TODO: also create a guest "challenger" user with only tpm:quote permission, and a "hostmanager" user with tpm:quote and host:info which mtwilson would need.
     }
     
 }

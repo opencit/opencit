@@ -50,7 +50,10 @@ jQuery.extend({
                 return form;
         },
         ajaxFileUpload: function(s) {
+<<<<<<< HEAD
+=======
                 // TODO introduce global settings, allowing the client to modify them for all requests, not only timeout
+>>>>>>> aea2c917d2bded452f248a22c7be9ec604b68677
                 s = jQuery.extend({}, jQuery.ajaxSettings, s);
                 var id = new Date().getTime()
                 var form = jQuery.createUploadForm(id, s.fileElementId, (typeof(s.data) == 'undefined' ? false : s.data));

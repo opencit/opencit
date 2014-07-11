@@ -59,7 +59,6 @@ public class AbstractRpc {
         try {
             String inputAccept = RpcUtil.getPreferredTypeFromAccept(request.getHeader(HttpHeaders.ACCEPT));
             log.debug("Client prefers content type: {}", inputAccept);
-            // XXX TODO  call ValidationUtil with inputAccept and a good regex for that header... should allow letters, digits, hyphens, underscores, commas, semicolons, periods - no quotes or other puncutation
             MediaType inputMediaType = MediaType.valueOf(inputAccept);
 
             // use jersey classes to find the appropriate message body reader based on request's content type 
@@ -67,7 +66,7 @@ public class AbstractRpc {
                     workers.getMessageBodyReader(inputClass, inputClass,
                     inputClass.getAnnotations(), inputMediaType);
             if (messageBodyReader == null) {
-                throw new WebApplicationException(Response.Status.NOT_ACCEPTABLE); // TODO   make a more user friendly message and i18n
+                throw new WebApplicationException(Response.Status.NOT_ACCEPTABLE);
             }
             javax.ws.rs.core.MultivaluedHashMap jaxrsHeaders = new javax.ws.rs.core.MultivaluedHashMap();
             MultivaluedHashMap<String, String> headerMap = RpcUtil.convertHeadersToMultivaluedMap(request);
@@ -77,7 +76,7 @@ public class AbstractRpc {
 
         } catch (IOException e) {
             log.error ("IOException.", e);
-            throw new WebApplicationException("Invalid input to RPC", e); // TODO  i18n mesasge
+            throw new WebApplicationException("Invalid input to RPC", e); 
         }
         return inputObject;
     }

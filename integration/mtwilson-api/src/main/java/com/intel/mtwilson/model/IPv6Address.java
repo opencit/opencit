@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
  * Mixed: IPv6 and IPv4 notation together. Usually when IPv6 is an extension of an IPv4 space.
  *    Example: FA47:0:0:0:0:D39:10.0.92.21
  * 
- * TODO: regexp for compact notation and compact-mixed notation;  see the Regular Expressions Cookbook.
- * 
  * @author jbuhacoff
  */
 public class IPv6Address extends ObjectModel {
@@ -56,7 +54,7 @@ public class IPv6Address extends ObjectModel {
             notation = Notation.MIXED;
             return;
         }
-        // TODO: compact and compact-mixed
+        
         fault("Unrecognized IPv6 format: %s", input);
     }
     
@@ -68,12 +66,12 @@ public class IPv6Address extends ObjectModel {
     public byte[] toByteArray() { 
         if( !isValid() ) { return null; }
         try {
-            return Inet6Address.getByName(input).getAddress(); // XXX is this ok or is there another way?
+            return Inet6Address.getByName(input).getAddress(); 
         }
         catch(UnknownHostException e) {
             return null;
         }
     }
     
-    public static enum Notation { STANDARD, MIXED; } // TODO: COMPACT, COMPACT_MIXED
+    public static enum Notation { STANDARD, MIXED; } 
 }

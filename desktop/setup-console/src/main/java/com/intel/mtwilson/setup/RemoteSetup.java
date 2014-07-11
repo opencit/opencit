@@ -177,7 +177,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      * @throws IOException which could also be a ConnectionException or  TransportException
      */
     private boolean existsRemoteFile(String remotePath) throws IOException {
-        String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); // XXX using this only internally (no for arbitrary user input) so this should be ok, but it is a good idea to shell-escape it anyway
+        String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); 
         if( result == null || result.isEmpty() ) { return false; }
         return true;
     }
@@ -269,7 +269,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 MemoryDstFile file = downloadRemoteFile(attestationServicePropertiesFilePath);
                 Properties asprops = new Properties();
                 asprops.load(file.getInputStream());
-//                asprops.store(System.out, "Attestation Service Properties"); // XXX for debugging only
+//                asprops.store(System.out, "Attestation Service Properties"); // for debugging only
                 importAttestationServiceProperties(asprops, mwprops);
         }
 
@@ -279,7 +279,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 MemoryDstFile file = downloadRemoteFile(managementServicePropertiesFilePath);
                 Properties asprops = new Properties();
                 asprops.load(file.getInputStream());
-//                asprops.store(System.out, "Management Service Properties"); // XXX for debugging only
+//                asprops.store(System.out, "Management Service Properties"); // for debugging only
                 importManagementServiceProperties(asprops, mwprops);
         }
         
@@ -289,7 +289,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 MemoryDstFile file = downloadRemoteFile(auditPropertiesFilePath);
                 Properties asprops = new Properties();
                 asprops.load(file.getInputStream());
-//                asprops.store(System.out, "Audit Properties"); // XXX for debugging only
+//                asprops.store(System.out, "Audit Properties"); // for debugging only
                 importAuditHandlerProperties(asprops, mwprops);
         }
 
@@ -299,7 +299,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 MemoryDstFile file = downloadRemoteFile(managementConsolePropertiesFilePath);
                 Properties asprops = new Properties();
                 asprops.load(file.getInputStream());
-//                asprops.store(System.out, "Management Console Properties"); // XXX for debugging only
+//                asprops.store(System.out, "Management Console Properties"); // for debugging only
                 importManagementConsoleProperties(asprops, mwprops);
         }
         
@@ -309,7 +309,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 MemoryDstFile file = downloadRemoteFile(privacyCAPropertiesFilePath);
                 Properties asprops = new Properties();
                 asprops.load(file.getInputStream());
-//                asprops.store(System.out, "Management Console Properties"); // XXX for debugging only
+//                asprops.store(System.out, "Management Console Properties"); // for debugging only
                 importPrivacyCAProperties(asprops, mwprops);
         }
         
@@ -323,9 +323,8 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      */
     public void deployRootCACertToServer() throws IOException, CertificateEncodingException {
 //        MemorySrcFile caCertDer = new MemorySrcFile();
-        uploadLocalFile(ctx.rootCa.getCertificate().getEncoded(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt"); // XXX probably don't need this,  server only uses the .pem version
-         String pem = X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
-         // XXX should get the ca file name from server's management-service.properties
+        uploadLocalFile(ctx.rootCa.getCertificate().getEncoded(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt");
+        String pem = X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
         uploadLocalFile(pem.getBytes(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); // we also do a PEM version because if customer wants to bring our entire certificate hierarchy under theirs they need to sign our root ca with their certificate - and then append their certificate to this PEM file.
    }
     
@@ -337,7 +336,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         boolean hasSamlCertFile = existsRemoteFile(ctx.samlCertificateFile);
         if( !hasSamlCertFile ) {
-            // SAML cert file is not there; TODO we could check if the keystore is there and try to extract it, but for now we just abort
+            // SAML cert file is not there;
             fault("Cannot download SAML cert from server: file is missing");
             return;
         }
@@ -346,7 +345,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         String fileContent = IOUtils.toString(in);
         IOUtils.closeQuietly(in);
         try {
-            ctx.samlCertificate = X509Util.decodePemCertificate(fileContent); // XXX TODO assuming only one right now -  could be a chain, in which case we need to decide (or ask the user) if we want to sign the first one (end certificate) or the last one (top-most CA)
+            ctx.samlCertificate = X509Util.decodePemCertificate(fileContent); 
         }
         catch(CertificateException e) {
             fault(e, "Cannot read SAML certificate");
@@ -385,9 +384,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
 
     
     /**
-     * XXX TODO  this varies by web container / proxy ... for tomcat we need to upload the cert for administrator convenience but for functionality we need to update the java keystore... that might be similar procedure to tomcat but it will not be the same for apache and nginx
-     * Right now assuming GLASSFISH,  bu tthis method should be adapted for apache and nginx instead since for glassfish we use the downloadTlsKeystoreFromServer method INSTEAD OF THIS ONE.
-     * 
      * @throws IOException 
      */
     public void downloadTlsCertFromServer() throws IOException  {
@@ -397,7 +393,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         boolean hasTlsCertFile = existsRemoteFile(ctx.tlsCertificateFile);
         if( !hasTlsCertFile ) {
-            // SAML cert file is not there; TODO we could check if the keystore is there and try to extract it, but for now we just abort
+            // SAML cert file is not there; 
             fault("Cannot download TLS cert from server: file is missing");
             return;
         }
@@ -419,7 +415,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      * file and opens it using the known password to obtain the current TLS
      * certificate.  This method can be used INSTEAD OF downloadTlsCertFromServer.
      * 
-     * XXX TODO this is web server dependent... should be implemented in object-oriented fashion;  right now assuming GLASSFISH
      * 
      * @throws IOException 
      */
@@ -430,7 +425,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         boolean hasTlsKeystoreFile = existsRemoteFile(ctx.tlsKeystoreFile);
         if( !hasTlsKeystoreFile ) {
-            // SAML cert file is not there; TODO we could check if the keystore is there and try to extract it, but for now we just abort
+            // SAML cert file is not there; 
             fault("Cannot download TLS keystore from server: file is missing");
             return;
         }
@@ -441,9 +436,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         try {
             ByteArrayResource resource = new ByteArrayResource(fileContent);
             ctx.tlsKeystore = new SimpleKeystore(resource, ctx.tlsKeystorePassword);
-            // XXX hack - using same password for key as for the keystore;  this happens to be the glassfish default but it may not always be true
             ctx.tlsKeyPassword = ctx.tlsKeystorePassword;
-            // XXX hack,  glassfish cert is either in "s1as" or in "glassfish-instance" , but it could be anything so we need to grab the actual alias name from the glassfish configuration in getRemoteSetings()
             if( ctx.tlsKeyAlias == null && ArrayUtils.contains(ctx.tlsKeystore.aliases(), "s1as") ) {
                 ctx.tlsKeyAlias = "s1as";
             }
@@ -497,7 +490,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     }
     
     /**
-     * XXX TODO  this varies by web container / proxy ... for tomcat we need to upload the cert for administrator convenience but for functionality we need to update the java keystore... that might be similar procedure to tomcat but it will not be the same for apache and nginx
      * @throws CertificateEncodingException
      * @throws IOException 
      */
@@ -514,11 +506,10 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      * It also saves tls.rootCa certificate into the keystore as an additional
      * trusted certificate.
      * 
-     * XXX TODO:  instead of throwing the exceptions, catch them and add faults instead
      */
     public void uploadTlsKeystoreToServer() throws KeyManagementException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         ctx.tlsKeystore.addTrustedCaCertificate(ctx.rootCa.getCertificate(), "mtwilson-rootca");
-        ctx.tlsKeystore.addKeyPairX509(ctx.tlsKeypair.getPrivate(), ctx.tlsCertificate, ctx.tlsKeyAlias, ctx.tlsKeyPassword); // XXX TODO  assumes Glassfish default alias; also, do we need to delete the previous one first???
+        ctx.tlsKeystore.addKeyPairX509(ctx.tlsKeypair.getPrivate(), ctx.tlsCertificate, ctx.tlsKeyAlias, ctx.tlsKeyPassword); 
 //        ctx.tlsKeystore.addTrustedCertificate(ctx.tlsCertificate, ctx.tlsKeyAlias); // can't use it because glassfish stores the cert along witht the private key, so we need to replace the entire entry, which is password protected
         ctx.tlsKeystore.save(); // saves to bytearrayresource we created when downloaded it
         uploadLocalFile(IOUtils.toByteArray(ctx.tlsKeystore.getResource().getInputStream()), ctx.tlsKeystoreFile);        
@@ -537,7 +528,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     //commenting out unused function (6/11 1.2)
     /*
     private List<String> listRemoteFiles(String remotePath) throws IOException {
-        String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); // XXX using this only internally (no for arbitrary user input) so this should be ok, but it is a good idea to shell-escape it anyway
+        String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); //  using this only internally (no for arbitrary user input) so this should be ok, but it is a good idea to shell-escape it anyway
         if( result == null || result.isEmpty() ) { return Collections.EMPTY_LIST; }
         ArrayList<String> list = new ArrayList<String>();
         String[] lines = StringUtils.split(result, "\n");
@@ -567,7 +558,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
             ByteArrayResource resource = new ByteArrayResource(fileContent);
             ctx.privacyCA.keystore = new Pkcs12(resource, ctx.privacyCA.ekSigningKeyPassword);
             // pkcs12 files either don't have aliases or the aliases are just the key index; either way for the PrivacyCA.p12 file that mt wilson generates, the alias name is "1"
-//                ctx.tlsCertificate = ctx.tlsKeystore.getX509Certificate(ctx.tlsKeyAlias); // doesn't work, because the certificate is protected by a password since it's part of a privatekeyeentry  ... XXX TODO : assuming Glassfish *and* assuming default TLS alias 
+//                ctx.tlsCertificate = ctx.tlsKeystore.getX509Certificate(ctx.tlsKeyAlias); // doesn't work, because the certificate is protected by a password since it's part of a privatekeyeentry  ...  assuming Glassfish *and* assuming default TLS alias 
             RsaCredentialX509 x509 = ctx.privacyCA.keystore.getRsaCredentialX509("1", ctx.privacyCA.ekSigningKeyPassword);
             ctx.privacyCA.ekSigningKeyPair = new KeyPair(x509.getPublicKey(), x509.getPrivateKey());
             ctx.privacyCA.ekSigningKeyCertificate = x509.getCertificate();
@@ -618,7 +609,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
             return;
         }
         RsaCredentialX509 x509 = new RsaCredentialX509(ctx.privacyCA.ekSigningKeyPair.getPrivate(), ctx.privacyCA.ekSigningKeyCertificate);
-        ctx.privacyCA.keystore.setRsaCredentialX509(x509, new X509Certificate[] { ctx.rootCa.getCertificate() }, "1", ctx.privacyCA.ekSigningKeyPassword); // XXX TODO  assumes Glassfish default alias; also, do we need to delete the previous one first???
+            ctx.privacyCA.keystore.setRsaCredentialX509(x509, new X509Certificate[] { ctx.rootCa.getCertificate() }, "1", ctx.privacyCA.ekSigningKeyPassword); 
         ctx.privacyCA.keystore.save(); // saves to bytearrayresource we created when downloaded it
         uploadLocalFile(IOUtils.toByteArray(ctx.privacyCA.keystore.getResource().getInputStream()), ctx.privacyCA.ekSigningKeyFilename);        
         String pem = X509Util.encodePemCertificate(ctx.privacyCA.ekSigningKeyCertificate)+X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
@@ -631,7 +622,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      */
     private void importAttestationServiceProperties(Properties asprops, Properties mwprops) {
         ctx.attestationServiceDatabase = new Database();
-        // XXX TODO should use a differnent class that handles all the defaults etc. that is also used by attestation service.  thought of ASConfig get defaults but even that needs to be rewritten to look for mountwilson.as.db.driver, then mtwilson.db.driver, etc. 
         ctx.attestationServiceDatabase.driver = asprops.getProperty("mountwilson.as.db.driver", asprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
         ctx.attestationServiceDatabase.username = asprops.getProperty("mountwilson.as.db.user", asprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
         ctx.attestationServiceDatabase.password = asprops.getProperty("mountwilson.as.db.password", asprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
@@ -654,7 +644,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
 
 
-        // XXX TODO:  this configuration item should be deprecated. see comments in SetupContext
         ctx.aikqverifyHome = asprops.getProperty("com.intel.mountwilson.as.home"); // such as "/var/opt/intel/aikverifyhome", but we cannot set default here, same detection issue as the command names.
         ctx.aikqverifyCommand = asprops.getProperty("com.intel.mountwilson.as.aikqverify.cmd"); // even if we wanted to set a default here, we have to use the TARGET SERVER platform choice, not our local choice (since we are likely running on windows and server is likely linux)
         ctx.opensslCommand = asprops.getProperty("com.intel.mountwilson.as.openssl.cmd"); // same issue as aikqverify
@@ -667,7 +656,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         ctx.samlKeystorePassword = asprops.getProperty("saml.keystore.password", "changeit");
         ctx.samlValidityPeriodInSeconds = Integer.valueOf(asprops.getProperty("saml.validity.seconds", "3600")); // in seconds
-        ctx.samlIssuer = asprops.getProperty("saml.issuer", ctx.serverAddress.toString()); // XXX TODO should not be configurable, should be what is in the saml certificate subject.  unless a URL is required (looks like it), in that case we should create it automatically using server address.
+        ctx.samlIssuer = asprops.getProperty("saml.issuer", ctx.serverAddress.toString()); 
 
         if( asprops.getProperty("com.intel.mountwilson.as.trustagent.timeout") != null ) {
             ctx.trustAgentTimeout = new Timeout(Integer.valueOf(asprops.getProperty("com.intel.mountwilson.as.trustagent.timeout")), TimeUnit.SECONDS);
@@ -692,7 +681,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     
     private void importManagementServiceProperties(Properties msprops, Properties mwprops) {
         ctx.managementServiceDatabase = new Database();
-        // XXX TODO should use a differnent class that handles all the defaults etc. that is also used by attestation service.  thought of ASConfig get defaults but even that needs to be rewritten to look for mountwilson.ms.db.driver, then mtwilson.db.driver, etc. 
         ctx.managementServiceDatabase.driver = msprops.getProperty("mountwilson.ms.db.driver", msprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
         ctx.managementServiceDatabase.username = msprops.getProperty("mountwilson.ms.db.user", msprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
         ctx.managementServiceDatabase.password = msprops.getProperty("mountwilson.ms.db.password", msprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
@@ -720,7 +708,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
             }
             catch(MalformedURLException e) {
                 console.printf("Ignoring MalformedURL exception caught during importManagmentServiceProperties");
-                // XXX TODO: we need to extend ObjectModel so we can log all the faults with the configuration!!!  or maybe this belongs in SetupContext which should extend ObjectModel?  but this means all the interpretation of the prpoerties (converting from string to whatever other datataypes) must havppen inside the validate() method of that object.  which actually sounds just fine.
             }
         }
         
@@ -761,7 +748,6 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     
     private void importAuditHandlerProperties(Properties ahprops, Properties mwprops) {
         ctx.auditDatabase = new Database();
-        // XXX TODO should use a differnent class that handles all the defaults etc. that is also used by attestation service.  thought of ASConfig get defaults but even that needs to be rewritten to look for mountwilson.audit.db.driver, then mtwilson.db.driver, etc. 
         ctx.auditDatabase.driver = ahprops.getProperty("mountwilson.audit.db.driver", ahprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
         ctx.auditDatabase.username = ahprops.getProperty("mountwilson.audit.db.user", ahprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
         ctx.auditDatabase.password = ahprops.getProperty("mountwilson.audit.db.password", ahprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
@@ -796,8 +782,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     }
     
     
-    // XXX TODO:  what about trust-dashboard.properties and whitelist-portal.properies?   they are either same as management console (keystore dir, session timeout) or they are so UI-specific that maybe we don't care, and it's ok for them to be in separate files.... 
-
+    
     private void importPrivacyCAProperties(Properties pcaprops, Properties mwprops) {
         if( ctx.privacyCA == null ) { // importAttestationServiceProperties may have already created it
             ctx.privacyCA = new PrivacyCA();
@@ -812,11 +797,11 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         ctx.privacyCA.ekSigningKeyDownloadPassword = pcaprops.getProperty("ClientFilesDownloadPassword");
         ctx.privacyCA.pcaCertificateValidity = new Timeout(Integer.valueOf(pcaprops.getProperty("PrivCaCertValiditydays", "3652")), TimeUnit.DAYS);
     }
-    // XXX-stdalex commenting out unused function for removal later
+    // commenting out unused function for removal later
     //private void importGlassfishProperties() {
         // hmm... just need location of keystore and exported certificate to replace with our ca-signed copy
     //}
-    // XXX-stdalex commenting out unused function for removal later
+    // commenting out unused function for removal later
     //private void importTomcatProperties() {
     //    // hmm... just need location of keystore and exported certificate to replace with our ca-signed copy
     //}
@@ -828,20 +813,16 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 MemoryDstFile file = downloadRemoteFile(envFilePath);
                 Properties asprops = new Properties(); // this works for MOST shell-style variables, and comments are the same as in properties files
                 asprops.load(file.getInputStream());
-//                asprops.store(System.out, "Attestation Service Environment"); // XXX for debugging only
+//                asprops.store(System.out, "Attestation Service Environment"); // for debugging only
                 if( asprops.getProperty("GLASSFISH_HOME") != null ) {
                     ctx.webContainerType = WebContainerType.GLASSFISH;
                     ctx.tlsKeystoreFile = asprops.getProperty("GLASSFISH_HOME") + "/domains/domain1/config/keystore.jks";
                     ctx.tlsKeystorePassword = "changeit";
                     ctx.tlsCertificateFile = asprops.getProperty("GLASSFISH_HOME") + "/domains/domain1/config/ssl."+ctx.serverAddress.toString()+".crt";
-                    // TODO maybe move this to importGlassfishProperties ?
                 }
                 else if( asprops.getProperty("CATALINA_HOME") != null ) {
                     ctx.webContainerType = WebContainerType.TOMCAT;
-                    // XXX TODO ... see http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html about finding tomcat's ssl certificate
-                    // TODO maybe move this to importTomcatProperties ?
                 }
-                // XXX TODO:  also need to handle a situation where Apache or Nginx is configured for SSL and proxies plaintext to a local tomcat or glassfish 
         }
         
     }

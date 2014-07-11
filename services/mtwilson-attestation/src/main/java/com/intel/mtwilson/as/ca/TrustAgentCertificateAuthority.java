@@ -87,11 +87,6 @@ public class TrustAgentCertificateAuthority {
      * throws an Exception if there is any error.  See preconditions for 
      * required inputs.
      * 
-     * TODO: define a way for this object to report to the caller the preconditions
-     * (same method to be used in all setup objects) so that setup wizard can
-     * intelligently prompt user for what is needed.  Input key name, description,
-     * data format, etc.
-     * 
      * @throws CryptographyException
      * @throws GeneralSecurityException
      * @throws IOException

@@ -35,7 +35,6 @@ public class FilePasswordRealm extends AuthorizingRealm {
     private String userFilePath;
     private String permissionFilePath;
 
-    // TODO: password protection for integrity of these two files
     public void setUserFilePath(String userFilePath) {
         this.userFilePath = userFilePath;
     }
@@ -72,7 +71,7 @@ public class FilePasswordRealm extends AuthorizingRealm {
             }
         } catch (Exception e) {
             log.debug("doGetAuthorizationInfo error", e);
-            throw new AuthenticationException("Internal server error", e); // TODO: i18n
+            throw new AuthenticationException("Internal server error", e); 
         }
 
         return authzInfo;
@@ -96,7 +95,7 @@ public class FilePasswordRealm extends AuthorizingRealm {
             }
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);
-            throw new AuthenticationException("Internal server error", e); // TODO: i18n
+            throw new AuthenticationException("Internal server error", e); 
         }
         log.debug("doGetAuthenticationInfo found user {}", userLoginPassword.getUsername());
         SimplePrincipalCollection principals = new SimplePrincipalCollection();

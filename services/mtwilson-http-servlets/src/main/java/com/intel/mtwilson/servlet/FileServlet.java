@@ -14,7 +14,6 @@ import javax.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 
 /**
- * TODO maybe move this servlet into a different module like mtwilson-servlet-util
  * @author jbuhacoff
  */
 public class FileServlet extends HttpServlet {
@@ -37,7 +36,6 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
                                throws ServletException, IOException {
 
     if( directory == null ) {
-        // TODO  get the location from My.configuration() 
         setDirectory(My.configuration().getPortalHtml5Dir());
         log.info("Static content directory: {}", directory);
     }
@@ -49,8 +47,6 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
     // Get the file to view
     String path = request.getPathInfo();
     if (path == null) { path = ""; }
-    
-//  XXX TODO: Review path validation here
     
     File file = new File(directory, path);
     
@@ -69,7 +65,6 @@ public void doGet(HttpServletRequest request, HttpServletResponse response)
             response.setStatus(400);
             return;
         }
-        // XXX TODO: Encoding the query string before passing to client would make this more secure
         response.sendRedirect(request.getRequestURI() + "/" + queryString);
         return;
     }

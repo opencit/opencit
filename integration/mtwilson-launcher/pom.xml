@@ -53,13 +53,6 @@
             <artifactId>cpg-io</artifactId>
         </dependency>
 
-                
-        <!-- XXX was going to include mtwilson-crypto for decrypting mtwilson.properties but probably it should
-        be read and decrypted bya mtwilson-configuration plugin .... that way the config would be available to
-other moduels via a published API and not something implied by the container.   TODO need to update install and setup
-documentation to reflect that mtwilson.properties is read by mtwilson-configuration and not by the launcher.
-the launcher only needs to know MTWILSON_HOME so it can load the modules.
-        -->
 <!--
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
@@ -69,7 +62,6 @@ the launcher only needs to know MTWILSON_HOME so it can load the modules.
             
         -->
             
-            <!-- XXX TODO  move to cpg-extensions if it works out well to use this for scanning entire classpath before using findAll ... -->
             <!--
 <dependency>
          <groupId>org.reflections</groupId>

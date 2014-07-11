@@ -48,7 +48,6 @@
       <artifactId>mtwilson-version</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<!-- TODO database support needs to be separated into distinct features -->
     <dependency>
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -71,7 +70,6 @@
       <version>${project.version}</version>
     </dependency>
     
-	<!-- todo: a separate feature with asset tag components -->
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-attestation</artifactId>
@@ -132,7 +130,7 @@
       <artifactId>mtwilson-audit-data</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<!-- TODO:  the host agents already have feature projects, so when we're able to load features separately from main app remove them from here -->
+
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-citrix-hostagent</artifactId>
@@ -248,8 +246,7 @@
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-shiro-ws-v2</artifactId>
       <version>${project.version}</version>
-    </dependency>
-	<!-- todo:   remove test web services before production release -->
+    </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-test-ws-v1</artifactId>

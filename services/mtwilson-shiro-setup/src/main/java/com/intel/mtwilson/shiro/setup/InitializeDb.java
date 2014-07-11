@@ -19,16 +19,6 @@ import java.util.Map;
  * we do not store the admin username or password in configuration - the application
  * must display them to the administrator
  * 
- * TODO: this task should take a text file as input which defines each role
- * and its permissions, instead of using constants here.  the text file should
- * be an abbreviated serialization of the mw_role and mw_role_permissions  tables
- * so it can include role names and comments and the associated permissions 
- * but no uuid's - the uuid's should be generated automatically when inserting
- * to the database.
- * 
- * TODO: rename this task to be more specifically initializing roles and permissions
- * in the database, because there are already two other tasks called InitDatabase
- * 
  * @author jbuhacoff
  */
 public class InitializeDb extends DatabaseSetupTask {

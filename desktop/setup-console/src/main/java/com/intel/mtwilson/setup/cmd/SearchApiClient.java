@@ -90,8 +90,6 @@ public class SearchApiClient implements Command {
     }
 
     
-    // XXX see also RemoteCommand in com.intel.mtwilson.setup (not used) and com.intel.mtwilson (in api-client)
-    // XXX-stdalex 2/14 commenting out unused function for removal later
     //private static String getLocalHostAddress() {
     //    try {
     //        InetAddress addr = InetAddress.getLocalHost();

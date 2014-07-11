@@ -22,9 +22,6 @@ import org.slf4j.LoggerFactory;
  * For that reason, also renamed "isValid" to "isTrusted", to make it clear it's not a "Model"
  * implementation.
  * 
- * TODO:  add mirror methods for "ok"  so policies can record POSITIVE things when they pass, 
- * so that observers can see which policies WERE CHECKED in addition to which failed.
- * 
  * @author jbuhacoff
  */
 public class RuleResult {
@@ -46,12 +43,10 @@ public class RuleResult {
         faults.add(fault);
     }
 
-    // TODO: need a mirror "ok" for this
     public final void fault(String description) {
         faults.add(new Fault(description));
     }
     
-    // TODO: need a mirror "ok" for this
     public final void fault(String format, Object... args) {
         faults.add(new Fault(format, args));
     }

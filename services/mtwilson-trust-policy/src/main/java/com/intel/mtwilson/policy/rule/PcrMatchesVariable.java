@@ -39,7 +39,7 @@ public class PcrMatchesVariable extends BaseRule {
     public RuleResult apply(HostReport hostReport) {
         RuleResult report = new RuleResult(this);
 //        report.check(this);
-//        report.check("%s: PCR %s is variable", getClass().getSimpleName(),pcrIndex.toString()); // XXX TODO need to find a way to express what we are checking!
+//        report.check("%s: PCR %s is variable", getClass().getSimpleName(),pcrIndex.toString()); 
         if( hostReport.pcrManifest == null ) {
             report.fault(new PcrManifestMissing());            
         }
@@ -50,7 +50,6 @@ public class PcrMatchesVariable extends BaseRule {
             }
             else {
                 /**
-                 * XXX TODO   need to compute the expected value:
                  * 1) create a new database table mw_host_info where we can store host-specific constants UUID when we register a host 
                  * 2) use Rhino javascript interpreter to create javascript binding for certain utility classes (not yet written) so that
                  *    we can write something like     PCR[0] = sha1(Host.Module.BIOS + sha1(Host.UUID))   and have that be part of the 

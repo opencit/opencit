@@ -32,11 +32,6 @@ import org.slf4j.LoggerFactory;
  * 
  * See also PublicKeyRequestVerifier/MtWilsonAuthorization
  * 
- * TODO: protect from timing attacks by performing all checks and only returning
- * the result at the very end; when something fails early use dummy data for the
- * remaining checks so they will be guaranteed to fail but still take approximately
- * the same amount of time to evaluate as good data.
- * 
  * @since 0.5.2
  * @author jbuhacoff
  */
@@ -108,7 +103,6 @@ public class PublicKeyRequestVerifier {
             //log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             
             // locate the public key or x509 certificate that can verify the signature
-            // XXX TODO: need to also load the roles from the database (in case we're successful, so we don't do 2 queries) and also in future versions the roles may be in the x509 certificate so we need to get it directly and save it so we can examine after verifying
             byte[] document = content.getBytes("UTF-8");
             byte[] signature = Base64.decodeBase64(a.signatureBase64);
             String signatureAlgorithm = signatureAlgorithm(a.signatureAlgorithm);

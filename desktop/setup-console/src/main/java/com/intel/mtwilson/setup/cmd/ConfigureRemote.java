@@ -104,18 +104,18 @@ public class ConfigureRemote implements Command {
                             remote.deployRootCACertToServer(); // using ssh, write the root CA cert to file on disk so server can trust it
                             // saml
                             remote.downloadSamlCertFromServer();
-                            remote.signSamlCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
+                            remote.signSamlCertWithCaCert();
                             remote.uploadSamlCertToServer();
                             // tls
-                            remote.downloadTlsKeystoreFromServer(); // XXX TODO we are assuming GLASSFISH,  need to make this dependent on webContainerType , probably with an object-oriented design
+                            remote.downloadTlsKeystoreFromServer(); 
                             if( ctx.tlsCertificate == null ) {
                                 System.err.println("FAILED TO READ TLS CERT"); 
                                 printFaults(remote);
                                 remote.close(); return; 
                             }
     //                        remote.downloadTlsCertFromServer();
-                            remote.signTlsCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
-                            remote.uploadTlsCertToServer(); // XXX TODO  needs to be rewritten for apache/nginx 
+                            remote.signTlsCertWithCaCert();
+                            remote.uploadTlsCertToServer(); 
                             remote.uploadTlsKeystoreToServer(); 
                             // privacy ca
                             remote.downloadPrivacyCaKeystoreFromServer();
@@ -163,7 +163,6 @@ public class ConfigureRemote implements Command {
             // key did not match, ask user if s/he wants to accept the new key - with a warning
             System.err.println("WARNING: The remote host key has changed.");
             System.out.println("Remote host key ("+serverPublicKey.getAlgorithm()+"): "+SecurityUtils.getFingerprint(serverPublicKey)); // can't just do Md5Digest.valueOf(remote.getRemoteHostKey().publicKey.getEncoded()).toString()) because ssh key fingerprints have a specific encoding, for example "ssh-rsa" followed by exponent length, exponent, modulus length, modulus... which is not the same as the byte from publickey.getEncoded() 
-//            TODO:  show previously trusted key information? 
             boolean trustRemoteHost = getRequiredYesNoWithPrompt("Trust this remote host? (run 'mtwilson fingerprint' on remote host to see ssh key)");            
             if( trustRemoteHost ) {
                 prefs.putByteArray(server, serverPublicKey.getEncoded());
@@ -208,7 +207,7 @@ public class ConfigureRemote implements Command {
             }
             else {
     //            inputDistinguishedNameForCertificates();
-//                generateRootCAKey(); // TODO: we might already have one created & saved locally... but user may want a new one... so if we find one existing we need to ask
+//                generateRootCAKey(); // 
 //                deployRootCACertToServer(); // using ssh, write the root CA cert to file on disk so server can trust it
 //                createServerTlsCertificate();
 //                deployServerTlsCertificateToServer(); // using ssh, write it to glassfish keystore.jks
@@ -335,8 +334,7 @@ public class ConfigureRemote implements Command {
             }
             else {
                 printFaults(model);
-            }            
-            // TODO: allow user to break by typing 'exit', 'cancel', 'abort', etc, and we can throw an exception like UserAbortException (must create it) so the main program can have a chance to save what has already been validated and exit, or skip to the next step, or something.
+            } 
         }
     }
     
@@ -385,12 +383,10 @@ public class ConfigureRemote implements Command {
                 return model.value();
             }
             else {
-                // TODO: print faults
                 for(Fault f : model.getFaults()) {
                     System.err.println(f.toString());
                 }
-            }            
-            // TODO: allow user to break by typing 'exit', 'cancel', 'abort', etc, and we can throw an exception like UserAbortException (must create it) so the main program can have a chance to save what has already been validated and exit, or skip to the next step, or something.
+            }
         }
     }
     
@@ -464,7 +460,6 @@ public class ConfigureRemote implements Command {
         db.password = getRequiredPasswordWithPrompt("Database password");
         
         ctx.attestationServiceDatabase = db;
-        // TODO: verify the connection & login;  maybe do it outside this function so the entire thing can be repeated as necessary.
     }
     
     public void inputEkSigningKeyCredentials() throws IOException {
@@ -486,7 +481,6 @@ public class ConfigureRemote implements Command {
         
         ctx.admin = admin;
     }
-    // XXX-stdalex 2/14 commenting out unused function for removal later
     //private void inputDistinguishedNameForCertificates() {
     //    System.out.println("The X509 Certificates are customized with your organization's details. All of these fields are optional. Press enter without entering anything to leave them blank.");
     //    DistinguishedName dn = new DistinguishedName();
@@ -501,7 +495,6 @@ public class ConfigureRemote implements Command {
     //}
 
     /**
-     * TODO:  rewrite using X509Builder
      * Precondition:  ctx.serverAddress must be defined
      * @throws NoSuchAlgorithmException
      * @throws CryptographyException
@@ -523,7 +516,6 @@ public class ConfigureRemote implements Command {
     }
     
     /**
-     * TODO: rewrite using X509Builder
      * @throws NoSuchAlgorithmException
      * @throws CryptographyException
      * @throws IOException T
@@ -558,17 +550,6 @@ public class ConfigureRemote implements Command {
      * 
      * Because this class is a UI class, an explicit package name is provided for
      * the preferences.
-     * 
-     * XXX We only support one root CA key in the preferences at
-     * a time. If there is a business need later to support multiple root Ca keys,
-     * we can easily add support for storing them in files or multiple keys in the
-     * preferences at that time. It's also possible to implement a different Preferences
-     * backing store and specify it as a JVM parameter when starting the program - 
-     * See also http://docs.oracle.com/javase/1.4.2/docs/guide/lang/preferences.html and
-     * http://docs.oracle.com/javase/6/docs/api/java/util/prefs/PreferencesFactory.html and
-     * http://docs.oracle.com/javase/6/docs/api/java/util/prefs/Preferences.html and
-     * the java System Property "java.util.prefs.PreferencesFactory"
-     * The Preferences API also has an XML import/export facility.
      * 
      * Note that max length of a Preferences value is 8192 characters, and 
      * typical size of a keystore with one key is about 2200 characters.
@@ -615,7 +596,6 @@ public class ConfigureRemote implements Command {
             prefs.putByteArray(ROOT,mwKeystoreResource.toByteArray());
             
             /*
-            // XXX debugging only... let's see that keystore
             System.out.println("the keystore now has aliases: "+StringUtils.join(keystore.aliases(), ", "));
             System.out.println("the resource has "+mwKeystoreResource.toByteArray().length+" bytes");
             FileOutputStream tmp = new FileOutputStream(new File(System.getProperty("user.home")+File.separator+"tmpkeystore2.jks"));
@@ -628,7 +608,6 @@ public class ConfigureRemote implements Command {
             ByteArrayResource mwKeystoreResource = new ByteArrayResource(keystoreBytes);       
             
             /*
-            // XXX debugging only... let's see that keystore
             FileOutputStream tmp = new FileOutputStream(new File(System.getProperty("user.home")+File.separator+"tmpkeystore.jks"));
             IOUtils.copy(mwKeystoreResource.getInputStream(), tmp);
             tmp.close();

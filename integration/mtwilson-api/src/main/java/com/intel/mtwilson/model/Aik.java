@@ -11,7 +11,7 @@ import com.intel.mtwilson.jackson.PublicKeySerializer;
 import com.intel.mtwilson.jackson.X509CertificateSerializer;
 
 /**
- * XXX draft
+ * draft
  * @author jbuhacoff
  */
 public class Aik {

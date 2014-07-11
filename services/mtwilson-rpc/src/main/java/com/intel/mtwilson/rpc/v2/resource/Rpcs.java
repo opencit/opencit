@@ -40,7 +40,7 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Rpcs.class);
   
     private RpcRepository repository;
-    private ObjectMapper mapper = new ObjectMapper(); // XXX for debugging only
+    private ObjectMapper mapper = new ObjectMapper();
     
     public Rpcs() {
 //        super();
@@ -61,29 +61,15 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
     }
     */
     
-    // TODO override the retrieveOne so we can add a link to output if status == OUTPUT ??       // TODO:  link to /input/{id} ,  link to /output/{id}  (only if completed)
-    
-
-    
     @Override
     @Path("/{id}")
     @DELETE
     public void deleteOne(@BeanParam RpcLocator locator) {
         log.debug("Rpcs deleteOne");
-        // XXX TODO  this check must move to the web service
         boolean isRunning = false;
-        // TODO:  check if it's currently pending processing in the queue
-        //        or if it already started running
         if (isRunning) {
-            // TODO can we stop a running task by sending a signal to its thread?
-            // some tasks may support it , esp. if they are processing a list of
-            // items and using the progress iterator. 
-            // but other tasks may not allow it... so if we cannot interrupt the
-            // task and cancel it,  inform the client:
             throw new WebApplicationException(Response.Status.CONFLICT);
         }
-        // TODO:  remove it from queue
-        
         // now remove from database
         super.deleteOne(locator);
     }
@@ -110,7 +96,7 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
         
         // convert the intermediate output to client's requested output type
         log.debug("Client requested output type: {}" ,request.getHeader(HttpHeaders.ACCEPT));
-//        rpc.setOutputContentType(MediaType.WILDCARD); //   TODO jersey already has code to find the preferred content type.... use it to extract from the accept header 
+//        rpc.setOutputContentType(MediaType.WILDCARD); 
 
         String xml = new String(rpc.getOutput(), Charset.forName("UTF-8"));
         log.debug("output xml: {}", xml);
@@ -163,7 +149,7 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
         }
         // convert the intermediate output to client's requested output type
         log.debug("Client requested output type: {}" ,request.getHeader(HttpHeaders.ACCEPT));
-//        rpc.setOutputContentType(MediaType.WILDCARD); //   TODO jersey already has code to find the preferred content type.... use it to extract from the accept header 
+//        rpc.setOutputContentType(MediaType.WILDCARD); 
 
         String xml = new String(rpc.getOutput(), Charset.forName("UTF-8"));
         log.debug("output xml: {}", xml);

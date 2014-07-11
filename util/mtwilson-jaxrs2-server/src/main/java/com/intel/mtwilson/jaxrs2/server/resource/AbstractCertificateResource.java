@@ -30,7 +30,6 @@ import javax.ws.rs.core.Response;
 public abstract class AbstractCertificateResource<T extends CertificateDocument, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> extends AbstractSimpleResource<T,C,F,P,L> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractCertificateResource.class);
     
-    // XXX TODO find a mediatype/structure for list of DER-encoded certs...   could use APPLICATION_ZIP  but then we'd need to name the files inside! could use cert hashes...
     @GET
     @Produces({ CryptoMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
     public X509Certificate[] searchX509CertificateCollection(@BeanParam F criteria) {
@@ -52,7 +51,7 @@ public abstract class AbstractCertificateResource<T extends CertificateDocument,
         log.debug("retrieveOneX509Certificate");
         T item = getRepository().retrieve(locator);
         if( item == null ) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         X509Certificate certificate = item.getX509Certificate();
         return certificate;

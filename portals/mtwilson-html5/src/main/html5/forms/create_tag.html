@@ -10,15 +10,7 @@
             testingmyfoo = "bar";
             function helloworld() { alert("baz"); }
             </script>
-        <!--
-        XXX TODO current preference is to not include scripts in the forms... 
-        is this script required in order to get the "add value" functionality to work?
-        or is there another way, maybe using xforms?   
-        or maybe the script can be kept but has to be cleaned up not to refer to external
-        application javascript and use only standard libraries like prototype.js which the
-        browser COULD load again but with no ill effects since it's the same as the one
-        loaded by the main application index.html.
-        -->
+        
                         <script>
                             function tag_create_form_addValue() {
                                 mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({values:[]}); // sets the values to empty array if it's not already defined (applies first time this function is called)
@@ -32,7 +24,7 @@
                             }
                             function tag_create_form_removeValue(tagValue) {
                                 mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
-                                mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
+                                mtwilson.rivets.views['tag-create-form'].sync(); 
                             }
                             // called when submitting the form... checks that at least one value was added
                             function tag_create_form_validateValues() {

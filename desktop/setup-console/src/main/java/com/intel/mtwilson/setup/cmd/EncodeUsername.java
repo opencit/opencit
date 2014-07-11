@@ -27,7 +27,7 @@ public class EncodeUsername extends AbstractCommand {
             in.close();
         }
         else {
-            System.out.println(Filename.encode(args[0])); // XXX doesn't work.  "hello world" becomes "hello" instead of "hello%xxworld"
+            System.out.println(Filename.encode(args[0])); 
         }
     }
 
