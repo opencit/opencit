@@ -794,7 +794,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
     @Override
     public String getLocale(String username, ApiClient apiclient) throws DemoPortalException {
         try {
-            return apiclient.getLocale(username);
+            return apiclient.getLocaleForUser(username);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ConnectionUtil.handleDemoPortalException(e);

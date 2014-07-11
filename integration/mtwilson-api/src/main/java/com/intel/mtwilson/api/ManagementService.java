@@ -63,7 +63,7 @@ public interface ManagementService {
     
     HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws IOException, ApiException, SignatureException;
     
-    String getLocale(String username) throws IOException, ApiException, SignatureException;
+    String getLocaleForUser(String username) throws IOException, ApiException, SignatureException;
     
     String setLocaleForUser(PortalUserLocale pul) throws IOException, ApiException, SignatureException;
     

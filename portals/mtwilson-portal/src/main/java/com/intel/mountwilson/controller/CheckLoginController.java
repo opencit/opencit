@@ -159,7 +159,7 @@ public class CheckLoginController extends AbstractController {
                 // get locale
                 try {
                     if (rsaApiClient != null) {
-                        locale = rsaApiClient.getLocale(keyAliasName);
+                        locale = rsaApiClient.getLocaleForUser(keyAliasName);
                         log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
                     } else {
                         locale = null;
@@ -168,7 +168,6 @@ public class CheckLoginController extends AbstractController {
                     log.warn("Cannot retrieve locale for user: {}\r\n{}", keyAliasName, e.toString());
                     locale = null;
                 }
-                
                 
                 HttpSession session = req.getSession();
                 session.setAttribute("logged-in", true);
