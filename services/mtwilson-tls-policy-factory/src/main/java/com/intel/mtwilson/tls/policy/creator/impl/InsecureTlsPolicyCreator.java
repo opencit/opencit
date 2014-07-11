@@ -16,7 +16,7 @@ import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 public class InsecureTlsPolicyCreator implements TlsPolicyCreator {
 
     @Override
-    public TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
+    public InsecureTlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
         if( "INSECURE".equalsIgnoreCase(tlsPolicyDescriptor.getPolicyType()) ) {
             return new InsecureTlsPolicy();
         }

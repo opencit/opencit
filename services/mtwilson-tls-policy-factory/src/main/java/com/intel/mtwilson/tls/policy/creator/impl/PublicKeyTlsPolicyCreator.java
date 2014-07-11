@@ -22,7 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 public class PublicKeyTlsPolicyCreator implements TlsPolicyCreator {
 
     @Override
-    public TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
+    public PublicKeyTlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
         if( "public-key".equalsIgnoreCase(tlsPolicyDescriptor.getPolicyType()) ) {
             try {
                 PublicKeyRepository repository = getPublicKeyRepository(tlsPolicyDescriptor);

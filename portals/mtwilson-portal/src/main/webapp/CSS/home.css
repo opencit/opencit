@@ -939,19 +939,21 @@ form.tlsform fieldset fieldset label {
   margin-left: 123px; /* Width plus 3 (html space) */
 }
 
-form.tlsform ul.tlspolicy-content {
+form.tlsform ol.tlspolicy-content {
   margin: 0;
   padding: 0;
 }
-form.tlsform ul.tlspolicy-content li {
+form.tlsform ol.tlspolicy-content li {
   list-style: none;
   padding: 5px;
   margin: 0;
   border-top: 1px solid black;
   border-right: 1px solid black;
   border-left: 1px solid black;
+  width: 550px;
+  text-overflow: ellipsis;
 }
-form.tlsform ul.tlspolicy-content li:last-child {
+form.tlsform ol.tlspolicy-content li:last-child {
   border-bottom: 1px solid black;
 }
 form.tlsform fieldset[data-policy-type] textarea.publickey-text {
@@ -968,4 +970,8 @@ form.tlsform .tlspolicy-certificate-list {
 .tlspolicy-input-container textarea {
     width: 575px;
     height: 35px;
+}
+textarea#tlspolicy_copy_data_textarea {
+    height: 125px;
+    width: 450px;
 }

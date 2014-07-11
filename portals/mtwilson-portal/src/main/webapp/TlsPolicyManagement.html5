@@ -3,6 +3,7 @@
 <head>
     <title data-i18n="title.tlspolicy_management">TLS Policy Management</title>
     <meta name="description" content="A tool for creating, searching, editing, and removing TLS policies" data-i18n="[content]page.description.tlspolicy_management" />
+	<script type="text/javascript" src="Scripts/ZeroClipboard.min.js"></script>
     <script type="text/javascript" src="tag/base64.js" ></script>
     <script type="text/javascript" src="Scripts/handlebars-v1.3.0.js" ></script>
 	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
@@ -66,6 +67,10 @@
     <menuitem label="Edit" data-i18n="[label]action.edit" icon="images/pencil_small_18.png" onclick="onEditCurrentTlsPolicy()"></menuitem> 
     <menuitem label="Delete" data-i18n="[label]action.delete" icon="images/trash_empty_18.png" onclick="onDeleteCurrentTlsPolicy()"></menuitem> 
 </menu>
+<menu id="tlspolicy_edit_data_item_context_menu" type="context" style="display:none">
+    <menuitem label="Copy" data-i18n="[label]action.copy" icon="images/copy_18.png" onclick="onCopyCurrentTlsPolicyDataItem(this)"></menuitem> 
+    <menuitem label="Delete" data-i18n="[label]action.delete" icon="images/trash_empty_18.png" onclick="onDeleteCurrentTlsPolicyDataItem()"></menuitem> 
+</menu>
 <form id="tlspolicy_edit_form" style="display:none" class="tlsform" title="Edit TLS Policy" data-i18n="[title]form.edit_tls_policy">
     <fieldset>
     <legend data-i18n="form.edit_tls_policy_summary">TLS Policy Summary</legend>
@@ -111,25 +116,8 @@
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
-    <ul id="tlspolicy_edit_certificate_list" class="tlspolicy-content tlspolicy-certificate-list">
-    </ul>
-    <!--
-    TODO:  change the simple list to a table using handlebars to populate it and 
-    where we display the subject name and issuer name in the table, with a context
-    menu for the user to see the base64 cert in a popup, or the full certicicate details
-    in a popup (that one should be a global tool because there are also certificates in
-    other places) 
-    <table id="tlspolicy_edit_certificate_list" class="tlspolicy-content tlspolicy-certificate-list">
-    <thead>
-        <tr>
-            <th data-i18n="table.index">Index</th>
-            <th data-i18n="table.certificate">Certificate</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-    </table>
-    -->
+    <ol id="tlspolicy_edit_certificate_list" class="tlspolicy-content tlspolicy-certificate-list">
+    </ol>
     </fieldset>
     <fieldset data-policy-type="certificate-digest" style="display:none;">
     <legend data-i18n="form.edit_tls_policy_certificate_digests">Certificate Digests</legend>
@@ -148,8 +136,8 @@
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
-    <ul id="tlspolicy_edit_certificate_digest_list"  class="tlspolicy-content tlspolicy-certificate-digest-list">
-    </ul>
+    <ol id="tlspolicy_edit_certificate_digest_list"  class="tlspolicy-content tlspolicy-certificate-digest-list">
+    </ol>
     </fieldset>
     <fieldset data-policy-type="public-key" style="display:none;">
     <legend data-i18n="form.edit_tls_policy_public_keys">Public Keys</legend>
@@ -160,8 +148,8 @@
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
-    <ul id="tlspolicy_edit_public_key_list"  class="tlspolicy-content tlspolicy-public-key-list">
-    </ul>
+    <ol id="tlspolicy_edit_public_key_list"  class="tlspolicy-content tlspolicy-public-key-list">
+    </ol>
     </fieldset>
     <fieldset data-policy-type="public-key-digest" style="display:none;">
     <legend data-i18n="form.edit_tls_policy_public_key_digests">Public Key Digests</legend>
@@ -180,11 +168,26 @@
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
-    <ul id="tlspolicy_edit_public_key_digest_list"  class="tlspolicy-content tlspolicy-public-key-digest-list">
-    </ul>
+    <ol id="tlspolicy_edit_public_key_digest_list"  class="tlspolicy-content tlspolicy-public-key-digest-list">
+    </ol>
     </fieldset>
-
 </form>
+<script id="tlspolicy_edit_data_list_item_template" type="text/x-handlebars-template">
+        {{#each data}}
+            <li class="tlspolicy_data_content">{{content}}</li>
+        {{/each}}
+</script>
+<form id="tlspolicy_copy_data_form" style="display:none" class="tlsform" title="Copy Data" data-i18n="[title]form.copy_tls_policy_data">
+    <fieldset>
+    <legend data-i18n="form.copy_tls_policy_data_summary">Copy Data</legend>
+    <textarea id="tlspolicy_copy_data_textarea"></textarea>
+    <br/>
+<!--
+    <button id="tlspolicy_copy_data_button" data-clipboard-target="tlspolicy_copy_data_textarea" data-i18n="button.copyToClipboard">Copy to Clipboard</button>
+-->
+    </fieldset>
+</form>
+
 <div id="tlspolicy_delete_confirmation" title="Delete the TLS policy?" data-i18n="[title]form.confirm_delete_tls_policy" style="display:none;">
   <p>
     <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
@@ -226,6 +229,7 @@ var saveButtonText = $("div.translations > span[data-i18n='action.save']").first
     <span data-i18n="action.save">Save</span>
     <span data-i18n="action.cancel">Cancel</span>
     <span data-i18n="action.delete">Delete</span>
+    <span data-i18n="action.ok">OK</span>
 </div>
 
 </div>
@@ -299,7 +303,11 @@ $("div[class~=tlspolicy-delete-dialog]").each(function(i,el){el.remove();});
 var source = $("#tlspolicy_browse_table_row_template").html();
 var template = Handlebars.compile(source);
 var currentTlsPolicyTableRow;
-var currentTlsPolicyDataItem;
+var currentTlsPolicyRecord;
+var currentTlsPolicyRecordDataListItem;
+
+var editPolicyDataTemplateSource = $("#tlspolicy_edit_data_list_item_template").html();
+var editPolicyTemplate = Handlebars.compile(editPolicyDataTemplateSource);
 
 // load data handler called when new data has arrived for the search results table
 function onLoadTlsPolicyData(data) {
@@ -322,10 +330,10 @@ function onLoadTlsPolicyData(data) {
             var id = $(this).children("td.tlspolicy_id").html();
             var items = $.grep(data.tls_policies, function(item) { return (item.id == id); });
             if( items && items.length ) {
-                currentTlsPolicyDataItem = items[0];
+                currentTlsPolicyRecord = items[0];
             }
             else {
-                currentTlsPolicyDataItem = null;
+                currentTlsPolicyRecord = null;
             }
         },
         function() { // mouse out
@@ -345,71 +353,122 @@ $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, onLoadTlsPoli
 // event handlers, responsible for initializing data inside dialogs before opening them, or sending commands to the server before closing dialogs
 function onCreateNewTlsPolicy() {
     currentTlsPolicyTableRow = null;
-    currentTlsPolicyDataItem = null;
+    currentTlsPolicyRecord = null;
     // clear the form
     $("#tlspolicy_edit_id").val('');
     $("#tlspolicy_edit_name").val('');
     $("#tlspolicy_edit_private").val('false'); // default to creating a shared policy
     $("#tlspolicy_edit_comment").val('');
     $("#tlspolicy_edit_certificate_list").empty();
+    $("#tlspolicy_edit_certificate_digest_list").empty();
+    $("#tlspolicy_edit_public_key_list").empty();
+    $("#tlspolicy_edit_public_key_digest_list").empty();
     $("#tlspolicy_edit_form").dialog("open"); 
 }
-function onEditCurrentTlsPolicy() {
-    if( currentTlsPolicyTableRow && currentTlsPolicyDataItem ) {
-        $("#tlspolicy_edit_id").val(currentTlsPolicyDataItem.id);
-        $("#tlspolicy_edit_name").val(currentTlsPolicyDataItem.name);
-        $("#tlspolicy_edit_private").val( currentTlsPolicyDataItem.private ? "true" : "false");
-        $("#tlspolicy_edit_comment").val(currentTlsPolicyDataItem.comment);
-        if( currentTlsPolicyDataItem.descriptor ) {
-            $("#tlspolicy_edit_policy_type").val(currentTlsPolicyDataItem.descriptor.policy_type); // required policy type such as "certificate" or "certificate-digest"
+function getCurrentTlsPolicyDataContainer(policyType) {
+    var policyTypeContainerIdMap = {
+        'certificate': 'tlspolicy_edit_certificate_list',
+        'certificate-digest': 'tlspolicy_edit_certificate_digest_list',
+        'public-key': 'tlspolicy_edit_public_key_list',
+        'public-key-digest': 'tlspolicy_edit_public_key_digest_list'
+    };
+    var id = policyTypeContainerIdMap[policyType];
+    if( id ) {
+        return $('#'+id);
+    }
+    return null;
+}
+// item is certificateBase64, certificateDigestHex, publicKeyBase64, or publicKeyDigestHex
+function onEditCurrentTlsPolicyAddData(policyType,item) {
+    // certificate, certificate-digest, public-key, and public-key digest use a data container,  INSECURE and TRUST_FIRST_CERTIFICATE do not.
+    var dataContainer = getCurrentTlsPolicyDataContainer(policyType);
+    if( dataContainer ) {
+        var dataArray = [];
+        if( item ) {
+            dataArray.push({content:item});
+        }
+console.log("onEditCurrentTlsPolicyAddData data array: ", dataArray);
+        var rowhtml = editPolicyTemplate({'data':dataArray});
+console.log("onEditCurrentTlsPolicyAddData rowhtml: ", rowhtml);
+        dataContainer.append(rowhtml);
+        dataContainer.i18n();
+
+        // we need to add the hover/contextmenu actions but we need to add them only to newly added elements, not to all the elements because we don't want multiple calls to the same handler
+        dataContainer.children("li[data-ui-init-actions!='true']").hover(
+            function() { // mouse over
+                $(this).addClass("hover");
+                currentTlsPolicyRecordDataListItem = $(this);
+            },
+            function() { // mouse out
+                $(this).removeClass("hover");
+            }
+        );
+        dataContainer.contextMenu({
+            selector: "li[data-ui-init-actions!='true']",
+            trigger: 'left',
+            autoHide: true,
+            items: $.contextMenu.fromMenu($('#tlspolicy_edit_data_item_context_menu'))
+        }); // end contextMenu definition
+
+        // now that we've added the actions, mark all the list items as having been initialized to avoid adding the same actions to them again later
+        dataContainer.children("li").each(function() { $(this).prop("data-ui-init-actions","true"); });
+    }
+}
+function onCopyCurrentTlsPolicyDataItem() {
+    console.log("copying current item: ", $(currentTlsPolicyRecordDataListItem).text());
+    console.log("to textarea: ", $("#tlspolicy_copy_data_textarea"));
+    // copy the data item content to a textarea then open a dialog box which will allow the user to either manually copy the text or click a button to copy it to clipboard
+    $("#tlspolicy_copy_data_textarea").val($(currentTlsPolicyRecordDataListItem).text());
+    $("#tlspolicy_copy_data_textarea").select();
+    $( "#tlspolicy_copy_data_form" ).dialog("open");
+    var client = new ZeroClipboard( document.getElementById("tlspolicy_copy_data_button") );
+}
+function onCancelCopyCurrentTlsPolicyDataItem() {
+    $( "#tlspolicy_copy_data_form" ).dialog("close");
+}
+function onDeleteCurrentTlsPolicyDataItem() {
+    console.log("deleting current item: ", currentTlsPolicyRecordDataListItem);
+    $(currentTlsPolicyRecordDataListItem).remove();
+}
+function onEditCurrentTlsPolicyInitDialog() {
+    if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
+        $("#tlspolicy_edit_id").val(currentTlsPolicyRecord.id);
+        $("#tlspolicy_edit_name").val(currentTlsPolicyRecord.name);
+        $("#tlspolicy_edit_private").val( currentTlsPolicyRecord.private ? "true" : "false");
+        $("#tlspolicy_edit_comment").val(currentTlsPolicyRecord.comment);
+        $("#tlspolicy_edit_certificate_list").empty();
+        $("#tlspolicy_edit_certificate_digest_list").empty();
+        $("#tlspolicy_edit_public_key_list").empty();
+        $("#tlspolicy_edit_public_key_digest_list").empty();
+        if( currentTlsPolicyRecord.descriptor ) {
+            $("#tlspolicy_edit_policy_type").val(currentTlsPolicyRecord.descriptor.policy_type); // required policy type such as "certificate" or "certificate-digest"
             $("#tlspolicy_edit_policy_type").change(); // trigger the on-change handler we defined, which doesn't get called when we use .val()
-            if( currentTlsPolicyDataItem.descriptor.policy_type == "certificate" ) {
-                $("#tlspolicy_edit_certificate_list").empty();
-                // TODO: need a place to display the encoding, for now assume descriptor.meta.encoding == "base64"
-                // TODO: maybe use a template instead of what we're doing here:
-                if( currentTlsPolicyDataItem.descriptor.data ) {
-                    for(var i=0; i<currentTlsPolicyDataItem.descriptor.data.length; i++) {
-                        $("#tlspolicy_edit_certificate_list").append("<li>"+currentTlsPolicyDataItem.descriptor.data[i]+"</li>");
-                    }
+            // TODO: need a place to display the encoding, for now assume descriptor.meta.encoding == "base64"
+            var dataContainer = getCurrentTlsPolicyDataContainer(currentTlsPolicyRecord.descriptor.policy_type);
+            if( currentTlsPolicyRecord.descriptor.data ) {
+                for(var i=0; i<currentTlsPolicyRecord.descriptor.data.length; i++) {
+                    onEditCurrentTlsPolicyAddData(currentTlsPolicyRecord.descriptor.policy_type,currentTlsPolicyRecord.descriptor.data[i]);
                 }
             }
-            if( currentTlsPolicyDataItem.descriptor.policy_type == "certificate-digest" ) {
-                $("#tlspolicy_edit_certificate_digest_list").empty();
-                $("#tlspolicy_edit_certificate_digests_algorithm").val(currentTlsPolicyDataItem.descriptor.meta.digest_algorithm);
-                // TODO: need a place to display the encoding, for now assume descriptor.meta.digest_encoding == "base64"
-                // TODO: maybe use a template instead of what we're doing here:
-                if( currentTlsPolicyDataItem.descriptor.data ) {
-                    for(var i=0; i<currentTlsPolicyDataItem.descriptor.data.length; i++) {
-                        $("#tlspolicy_edit_certificate_digest_list").append("<li>"+currentTlsPolicyDataItem.descriptor.data[i]+"</li>");
-                    }
-                }
+            if( currentTlsPolicyRecord.descriptor.policy_type == "certificate-digest" ) {
+                $("#tlspolicy_edit_certificate_digests_algorithm").val(currentTlsPolicyRecord.descriptor.meta.digest_algorithm);
             }
-            if( currentTlsPolicyDataItem.descriptor.policy_type == "public-key" ) {
-                $("#tlspolicy_edit_public_key_list").empty();
-                // TODO: need a place to display the encoding, for now assume descriptor.meta.encoding == "base64"
-                // TODO: maybe use a template instead of what we're doing here:
-                if( currentTlsPolicyDataItem.descriptor.data ) {
-                    for(var i=0; i<currentTlsPolicyDataItem.descriptor.data.length; i++) {
-                        $("#tlspolicy_edit_public_key_list").append("<li>"+currentTlsPolicyDataItem.descriptor.data[i]+"</li>");
-                    }
-                }
-            }
-            if( currentTlsPolicyDataItem.descriptor.policy_type == "public-key-digest" ) {
-                $("#tlspolicy_edit_public_key_digest_list").empty();
-                $("#tlspolicy_edit_public_key_digests_algorithm").val(currentTlsPolicyDataItem.descriptor.meta.digest_algorithm);
-                // TODO: need a place to display the encoding, for now assume descriptor.meta.digest_encoding == "base64"
-                // TODO: maybe use a template instead of what we're doing here:
-                if( currentTlsPolicyDataItem.descriptor.data ) {
-                    for(var i=0; i<currentTlsPolicyDataItem.descriptor.data.length; i++) {
-                        $("#tlspolicy_edit_public_key_digest_list").append("<li>"+currentTlsPolicyDataItem.descriptor.data[i]+"</li>");
-                    }
-                }
+            if( currentTlsPolicyRecord.descriptor.policy_type == "public-key-digest" ) {
+                $("#tlspolicy_edit_public_key_digests_algorithm").val(currentTlsPolicyRecord.descriptor.meta.digest_algorithm);
             }
         }
+        else {
+            // hide all the sections?
+        }
+    }
+}
+function onEditCurrentTlsPolicy() {
+    if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
+        onEditCurrentTlsPolicyInitDialog();
         $( "#tlspolicy_edit_form" ).dialog("open");
     }
     else {
-        console.log("onEditCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyDataItem="+currentTlsPolicyDataItem);
+        console.log("onEditCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyRecord="+currentTlsPolicyRecord);
     }
 }
 function onCancelEditCurrentTlsPolicy() {
@@ -442,7 +501,7 @@ function onSaveCurrentTlsPolicy() {
     if( tlsPolicy.descriptor.policy_type == "public-key" ) {
         tlsPolicy.descriptor.meta = { encoding: "base64" };
         tlsPolicy.descriptor.data = [];
-        $("#tlspolicy_edit_public_key_list li").each(function(){
+        $("#tlspolicy_edit_public_key_list tr td[class~='data']").each(function(){
             tlsPolicy.descriptor.data.push( $(this).text() );
         });
     }
@@ -450,7 +509,7 @@ function onSaveCurrentTlsPolicy() {
         tlsPolicy.descriptor.meta = { digest_encoding: "base64" };
         tlsPolicy.descriptor.meta.digest_algorithm = $("#tlspolicy_edit_public_key_digests_algorithm").val();
         tlsPolicy.descriptor.data = [];
-        $("#tlspolicy_edit_public_key_digest_list li").each(function(){
+        $("#tlspolicy_edit_public_key_digest_list tr td[class~='data']").each(function(){
             tlsPolicy.descriptor.data.push( $(this).text() );
         });
     }
@@ -458,7 +517,7 @@ function onSaveCurrentTlsPolicy() {
     var errors = [];
     if( errors.length == 0 ) {
         // send request to server
-        if( currentTlsPolicyTableRow && currentTlsPolicyDataItem ) {
+        if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
             // editing an existing policy so request PUT /tls-policies/{id}
             tlsPolicy.id = $("#tlspolicy_edit_id").val(); // required record id
             console.log("saving existing policy with PUT to id "+tlsPolicy.id);
@@ -515,23 +574,23 @@ function onSaveCurrentTlsPolicy() {
     }
 }
 function onDeleteCurrentTlsPolicy() {
-    if( currentTlsPolicyTableRow && currentTlsPolicyDataItem ) {
-        $("#tlspolicy_delete_confirmation_id").val(currentTlsPolicyDataItem.id);
-        $("#tlspolicy_delete_confirmation_name").val(currentTlsPolicyDataItem.name);
+    if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
+        $("#tlspolicy_delete_confirmation_id").val(currentTlsPolicyRecord.id);
+        $("#tlspolicy_delete_confirmation_name").val(currentTlsPolicyRecord.name);
         $("#tlspolicy_delete_confirmation_hostrefcount").val("unknown number of hosts");
         $("#tlspolicy_delete_confirmation").dialog("open");
     }
     else {
-        console.log("onDeleteCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyDataItem="+currentTlsPolicyDataItem);
+        console.log("onDeleteCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyRecord="+currentTlsPolicyRecord);
     }
 }
 function onCancelDeleteCurrentTlsPolicy() {
     $("#tlspolicy_delete_confirmation").dialog("close");
 }
 function onConfirmDeleteCurrentTlsPolicy() {
-    if( currentTlsPolicyTableRow && currentTlsPolicyDataItem ) {
+    if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
         // send request to server
-        $.ajax("v2proxy/tls-policies/"+currentTlsPolicyDataItem.id,{
+        $.ajax("v2proxy/tls-policies/"+currentTlsPolicyRecord.id,{
             type: "DELETE",
             headers: {
                 //"Content-Type": "application/json",
@@ -551,7 +610,7 @@ function onConfirmDeleteCurrentTlsPolicy() {
         });
     }
     else {
-        console.log("onConfirmDeleteCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyDataItem="+currentTlsPolicyDataItem);
+        console.log("onConfirmDeleteCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyRecord="+currentTlsPolicyRecord);
     }
 }
 
@@ -560,12 +619,15 @@ function onConfirmDeleteCurrentTlsPolicy() {
 var saveButtonText = $("div.translations > span[data-i18n='action.save']").first().html();
 var cancelButtonText = $("div.translations > span[data-i18n='action.cancel']").first().html();
 var deleteButtonText = $("div.translations > span[data-i18n='action.delete']").first().html();
+var okButtonText = $("div.translations > span[data-i18n='action.ok']").first().html();
 var tlsPolicyEditDialogButtons = {};
 tlsPolicyEditDialogButtons[cancelButtonText] = onCancelEditCurrentTlsPolicy;
 tlsPolicyEditDialogButtons[saveButtonText] = onSaveCurrentTlsPolicy;
 var tlsPolicyDeleteDialogButtons = {};
 tlsPolicyDeleteDialogButtons[cancelButtonText] = onCancelDeleteCurrentTlsPolicy;
 tlsPolicyDeleteDialogButtons[deleteButtonText] = onConfirmDeleteCurrentTlsPolicy;
+var tlsPolicyCopyDataDialogButtons = {};
+tlsPolicyCopyDataDialogButtons[okButtonText] = onCancelCopyCurrentTlsPolicyDataItem;
 
 // event handlers for the policy edit form
 $("select#tlspolicy_edit_policy_type").change(function(){
@@ -575,11 +637,13 @@ $("select#tlspolicy_edit_policy_type").change(function(){
     $("#tlspolicy_edit_form fieldset[data-policy-type="+$(this).val()+"]").show();
 });
 $("select#tlspolicy_edit_policy_type").change(); // force it to show fields for initial selection
+
+// enable the "add" buttons for each policy type in the edit dialog
 $("textarea#tlspolicy_edit_certificates_add + button").click(function(event) {
     event.preventDefault(); // prevent browser from reloading the page
     var certificateBase64 = $("#tlspolicy_edit_certificates_add").val();
     if( certificateBase64 && certificateBase64.length ) {
-        $("ul#tlspolicy_edit_certificate_list").append("<li>"+certificateBase64+"</li>");
+        onEditCurrentTlsPolicyAddData('certificate',certificateBase64);
         $("#tlspolicy_edit_certificates_add").val("");
     }
 });
@@ -587,7 +651,7 @@ $("textarea#tlspolicy_edit_certificate_digests_add + button").click(function(eve
     event.preventDefault(); // prevent browser from reloading the page
     var certificateDigestBase64 = $("#tlspolicy_edit_certificate_digests_add").val();
     if( certificateDigestBase64 && certificateDigestBase64.length ) {
-        $("ul#tlspolicy_edit_certificate_digest_list").append("<li>"+certificateDigestBase64+"</li>");
+        onEditCurrentTlsPolicyAddData('certificate-digest',certificateDigestBase64);
         $("#tlspolicy_edit_certificate_digests_add").val("");
     }
 });
@@ -595,15 +659,15 @@ $("textarea#tlspolicy_edit_public_keys_add + button").click(function(event) {
     event.preventDefault(); // prevent browser from reloading the page
     var publicKeyBase64 = $("#tlspolicy_edit_public_keys_add").val();
     if( publicKeyBase64 && publicKeyBase64.length ) {
-        $("ul#tlspolicy_edit_public_key_list").append("<li>"+publicKeyBase64+"</li>");
+        onEditCurrentTlsPolicyAddData('public-key',publicKeyBase64);
         $("#tlspolicy_edit_public_keys_add").val("");
     }
 });
-$("textarea#tlspolicy_edit_certificate_digests_add + button").click(function(event) {
+$("textarea#tlspolicy_edit_public_key_digests_add + button").click(function(event) {
     event.preventDefault(); // prevent browser from reloading the page
     var publicKeyDigestBase64 = $("#tlspolicy_edit_public_key_digests_add").val();
     if( publicKeyDigestBase64 && publicKeyDigestBase64.length ) {
-        $("ul#tlspolicy_edit_public_key_digest_list").append("<li>"+publicKeyDigestBase64+"</li>");
+        onEditCurrentTlsPolicyAddData('public-key-digest',publicKeyDigestBase64);
         $("#tlspolicy_edit_public_key_digests_add").val("");
     }
 });
@@ -630,6 +694,17 @@ if( ! $('#tlspolicy_delete_confirmation').is(':data(dialog)') ) {
         width: 600,
         buttons: tlsPolicyDeleteDialogButtons,
         dialogClass: "tlspolicy-delete-dialog"
+    });
+}
+if( ! $('#tlspolicy_copy_data_form').is(':data(dialog)') ) {
+    $("#tlspolicy_copy_data_form").dialog({
+        autoOpen: false,
+        closeOnEscape: true,
+        modal: true,
+        height: 300,
+        width: 600,
+        buttons: tlsPolicyCopyDataDialogButtons,
+        dialogClass: "tlspolicy-copy-data-dialog"
     });
 }
 

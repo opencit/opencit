@@ -23,7 +23,7 @@ import org.apache.commons.codec.binary.Base64;
 public class CertificateTlsPolicyCreator implements TlsPolicyCreator {
 
     @Override
-    public TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
+    public CertificateTlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
         if( "certificate".equalsIgnoreCase(tlsPolicyDescriptor.getPolicyType()) ) {
             try {
                 CertificateRepository repository = getCertificateRepository(tlsPolicyDescriptor);

@@ -145,6 +145,7 @@ public class VMwareClient implements TlsClient {
          else {
          HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
          }*/
+        log.debug("Connecting to vcenter with URL: {}", url);
         log.debug("Connecting to vcenter with TlsPolicy: {}", tlsPolicy.getClass().getName());
         log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
         log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
@@ -168,7 +169,7 @@ public class VMwareClient implements TlsClient {
 
         try {
             log.debug("VSPHERE: login to vcenter with username: {} {}", userName, password == null || password.isEmpty() ? "without password" : "with password");
-            servInst = new ServiceInstance(new URL(url), userName, password, true);
+            servInst = new ServiceInstance(new URL(url), userName, password, false);
             log.debug("VSPHERE: ServiceInstance created.");
             vimPort = servInst.getServerConnection().getVimService();
             log.debug("VSPHERE: vimPort created.");
