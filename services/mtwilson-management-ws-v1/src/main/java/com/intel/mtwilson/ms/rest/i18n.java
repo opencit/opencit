@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.rest;
 
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.launcher.ws.ext.V1;
@@ -12,8 +13,13 @@ import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
+import com.intel.mtwilson.shiro.jdbi.LoginDAO;
+import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Locale;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -56,21 +62,17 @@ public class i18n {
     //@RolesAllowed({"Security"})
     @RequiresPermissions("users:retrieve")
     public String getLocaleForUser(
-            @QueryParam("username") String username) throws IOException {
-        log.debug("Retrieving information from database for portal user: {}", username);
-        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
-        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
-        log.debug("Retrieving locale for portal user: {}", portalUser.getUsername());
-//            if(portalUser != null) {
-                log.debug("Locale for {}: {}", portalUser.getUsername(), portalUser.getLocale());
-                if(portalUser.getLocale() != null) {
-                    return portalUser.getLocale();
-                } else
-                    return "en-US";
-//            } else {
-//                log.debug("Portal user not found.");
-//                return "Portal user not found.";
-//            }
+            @QueryParam("username") String username) throws IOException, SQLException {
+        log.debug("Retrieving information from database for user: {}", username);
+        LoginDAO loginDAO = MyJdbi.authz();
+        User user = loginDAO.findUserByName(username);
+        log.debug("Retrieving locale for user: {}", user.getUsername());
+        log.debug("Locale for {}: {}", user.getUsername(), user.getLocale());
+        if (user.getLocale() != null) {
+            return user.getLocale().toString();
+        } else {
+            return "en-US";
+        }
     }
     
     /**
@@ -88,16 +90,21 @@ public class i18n {
     @Path("/locale")
     //@RolesAllowed({"Security"})
     @RequiresPermissions("users:store")
-    public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException {
+    public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException, SQLException {
+        log.debug("Retrieving user [{}] from database.", pul.getUser());
+        LoginDAO loginDAO = MyJdbi.authz();
+        User user = loginDAO.findUserByName(pul.getUser());
+        log.debug("Retrieved user [{}] from database.", user.getUsername());
+        log.debug("Setting locale [{}] for user [{}] in database.", pul.getLocale(), user.getUsername());
+        loginDAO.updateUser(user.getId(), pul.getLocale(), user.getComment());
+        
         log.debug("Retrieving portal user [{}] from database.", pul.getUser());
         MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
         MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(pul.getUser());
         log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
-//        if (portalUser != null) {
-            log.debug("Setting locale [{}] for portal user [{}] in database.", pul.getLocale(), portalUser.getUsername());
-            portalUser.setLocale(pul.getLocale());
-            mwPortalUserJpaController.edit(portalUser);
-//        } else { return "Portal user not found."; }
+        log.debug("Setting locale [{}] for portal user [{}] in database.", pul.getLocale(), portalUser.getUsername());
+        portalUser.setLocale(pul.getLocale());
+        mwPortalUserJpaController.edit(portalUser);
         
         return "OK";
     }
