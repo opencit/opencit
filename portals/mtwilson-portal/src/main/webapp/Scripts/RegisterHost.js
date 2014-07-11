@@ -322,7 +322,6 @@ function fnRetriveHostSuccess(responsJSON) {
 }
 
 function fnRegisterMultipleHost() {
-    $('#mainLoadingDiv').prepend(disabledDiv);
     $('#successMessage').html('');
     var listOfHost = [];
     var checked = false;
@@ -353,7 +352,9 @@ function fnRegisterMultipleHost() {
     });
     if (!checked) {
         $('#successMessage').html('<span class="errorMessage">* Please select atleast one host to be registered.</span>');
-    }
+        return;
+    } 
+    $('#mainLoadingDiv').prepend(disabledDiv);
     // Earlier we used to make host registration calls for each of the selected hosts individually. Now that we have the multi host registration API, we are using the same.
     var data = "hostToBeRegister=" + $.toJSON(listOfHost);
     sendJSONAjaxRequest(false, 'getData/registerMultipleHost.html', data, fnRegisterMultipleHostSuccess, null);
