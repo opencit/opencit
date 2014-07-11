@@ -6,6 +6,12 @@ package com.intel.mtwilson.tls.policy.repository;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicy;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicyCollection;
 import com.intel.mtwilson.tls.policy.model.HostTlsPolicyFilterCriteria;
@@ -35,6 +41,7 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
     @RequiresPermissions("host_tls_policies:search")
     public HostTlsPolicyCollection search(HostTlsPolicyFilterCriteria criteria) {
         HostTlsPolicyCollection objCollection = new HostTlsPolicyCollection();
+        log.debug("HostTlsPolicy:Search - Got request to search for HostTlsPolicy.");        
 
         // always populate the meta element in the result set with the current server default or global policies so client knows what it will get if it doesn't specify any policy or that a global policy is in effect so specifying a policy would not have an effect other than to store it for when the global policy is removed
         objCollection.getMeta().put("allow", My.configuration().getTlsPolicyAllow());
@@ -96,9 +103,11 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
                 objCollection.getTlsPolicies().add(policy);
             }
 
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+        } catch (IOException ex) {
+            log.error("HostTlsPolicy:Search - Error during HostTlsPolicy search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
+        log.debug("HostTlsPolicy:Search - Returning back {} of results.", objCollection.getTlsPolicies().size());                
         return objCollection;
     }
     /*
@@ -120,14 +129,16 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
         if (locator.id == null) {
             return null;
         }
+        log.debug("HostTlsPolicy:Retrieve - Got request to retrieve HostTlsPolicy with id {}.", locator.id);                        
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
             TlsPolicyRecord policyRecord = dao.findTlsPolicyById(locator.id);
             if (policyRecord != null) {
                 HostTlsPolicy policy = convert(policyRecord);
                 return policy;
             }
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+        } catch (IOException ex) {
+            log.error("HostTlsPolicy:Retrieve - Error during HostTlsPolicy retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -135,14 +146,18 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
     @Override
     @RequiresPermissions("host_tls_policies:store")
     public void store(HostTlsPolicy item) {
+        log.debug("HostTlsPolicy:Store - Got request to update HostTlsPolicy with id {}.", item.getId().toString());        
         if (item.getId() == null) {
             return;
         }
+        HostTlsPolicyLocator locator = new HostTlsPolicyLocator();
+        locator.id = item.getId();
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
             TlsPolicyRecord record = convert(item);
             dao.updateTlsPolicy(record);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+        } catch (IOException ex) {
+            log.error("HostTlsPolicy:Store - Error during HostTlsPolicy update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }
 
     }
@@ -166,14 +181,20 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
     @Override
     @RequiresPermissions("host_tls_policies:create")
     public void create(HostTlsPolicy item) {
+        log.debug("HostTlsPolicy:Create - Got request to create a new HostTlsPolicy.");
+        
         if (item.getId() == null) {
             return;
         }
+        HostTlsPolicyLocator locator = new HostTlsPolicyLocator();
+        locator.id = item.getId();
+
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
             TlsPolicyRecord record = convert(item);
             dao.insertTlsPolicy(record);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+        } catch (IOException ex) {
+            log.error("HostTlsPolicy:Create - Error during HostTlsPolicy creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -183,21 +204,32 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
         if (locator.id == null) {
             return;
         }
+        log.debug("HostTlsPolicy:Delete - Got request to delete HostTlsPolicy with id {}.", locator.id.toString());        
+        
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
             dao.deleteTlsPolicyById(locator.id);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e);
+        } catch (IOException ex) {
+            log.error("HostTlsPolicy:Delete - Error during HostTlsPolicy deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
 
     @Override
     @RequiresPermissions("host_tls_policies:delete,search")
     public void delete(HostTlsPolicyFilterCriteria criteria) {
-        HostTlsPolicyCollection result = search(criteria);
-        for (HostTlsPolicy hostTlsPolicy : result.getTlsPolicies()) {
-            HostTlsPolicyLocator locator = new HostTlsPolicyLocator();
-            locator.id = hostTlsPolicy.getId();
-            delete(locator);
+        log.debug("HostTlsPolicy:Delete - Got request to delete HostTlsPolicy by search criteria.");        
+        try {
+            HostTlsPolicyCollection result = search(criteria);
+            for (HostTlsPolicy hostTlsPolicy : result.getTlsPolicies()) {
+                HostTlsPolicyLocator locator = new HostTlsPolicyLocator();
+                locator.id = hostTlsPolicy.getId();
+                delete(locator);
+            }
+        } catch (RepositoryException re) {
+            throw re;
+        } catch (Exception ex) {
+            log.error("HostTlsPolicy:Delete - Error during HostTlsPolicy deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
 
