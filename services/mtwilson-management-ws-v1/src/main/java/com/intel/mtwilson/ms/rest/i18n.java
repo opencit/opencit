@@ -67,9 +67,9 @@ public class i18n {
         LoginDAO loginDAO = MyJdbi.authz();
         User user = loginDAO.findUserByName(username);
         log.debug("Retrieving locale for user: {}", user.getUsername());
-        log.debug("Locale for {}: {}", user.getUsername(), user.getLocale());
+        log.debug("Locale for {}: {}", user.getUsername(), user.getLocale().toLanguageTag());
         if (user.getLocale() != null) {
-            return user.getLocale().toString();
+            return user.getLocale().toLanguageTag();
         } else {
             return "en-US";
         }
