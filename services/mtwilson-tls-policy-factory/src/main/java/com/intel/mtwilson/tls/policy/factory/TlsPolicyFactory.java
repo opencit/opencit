@@ -146,7 +146,7 @@ public abstract class TlsPolicyFactory {
                 report.setChoice(tlsPolicyChoice);
                 report.setDescriptor(getTlsPolicyDescriptor(tlsPolicyChoice)); // will load it from database if the choice is a policy id, will be null if it's TRUST_FIRST_CERTIFICATE because that would be specified directly in the choice object from the provider;  maybe null for INSECURE or maybe a descriptor with confidentiality,integrity,and authentication false.
                 // get the policy type
-                String tlsPolicyType = getTlsPolicyType(report); // public-key, certificate, INSECURE, TRUST_FIRST_CERTIFICATE, or null
+                String tlsPolicyType = getTlsPolicyType(report); // certificate, certificate-digest, public-key, public-key-digest, INSECURE, TRUST_FIRST_CERTIFICATE, or null
                 if( tlsPolicyType == null ) {
                     log.debug("Cannot determine policy type; skipping choice");
                     continue;
@@ -173,7 +173,7 @@ public abstract class TlsPolicyFactory {
         if( policyTypeFromDescriptor != null ) {
             return policyTypeFromDescriptor;
         }
-        // check the policy name second in case it's one of the special policies   INSECURE or TRUST_FIRST_CERTIFICATE in the field from previous version
+        // check the policy id second in case it's one of the special policies   INSECURE or TRUST_FIRST_CERTIFICATE in the field from previous version
         if( report.getChoice().getTlsPolicyId() != null ) {
             policyTypeFromName = getTlsPolicyType(report.getChoice().getTlsPolicyId());
         }
@@ -189,6 +189,7 @@ public abstract class TlsPolicyFactory {
             return tlsPolicyChoice.getTlsPolicyDescriptor();
         }
         if( tlsPolicyChoice.getTlsPolicyId() != null ) {
+            // first check for the special policy "id" INSECURE and TRUST_FIRST_CERTIFICATE
             if( tlsPolicyChoice.getTlsPolicyId().equals("INSECURE") ) {
                 TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
                 tlsPolicyDescriptor.setPolicyType("INSECURE");
@@ -203,18 +204,13 @@ public abstract class TlsPolicyFactory {
                 tlsPolicyDescriptor.setPolicyType("TRUST_FIRST_CERTIFICATE");
                 return tlsPolicyDescriptor;
             }
-            log.debug("getTlsPolicyDescriptor: Unsupported tls policy name: {}", tlsPolicyChoice.getTlsPolicyId());
-            return null; // other policy names are not currently supported, for example TRUST_KNOWN_CERTIFICATE and TRUST_CA_VERIFY_HOSTNAME or their newer names "public-key" and "certificate" are now represented by the descriptor
-        }
-
-        if( tlsPolicyChoice.getTlsPolicyId() != null ) {
-            // need to load the actual policy it's pointing to
+            // it it's not a special ID, then it must be an ID of an existing mw_tls_policy record so try to load it
             TlsPolicyDescriptor tlsPolicyDescriptor = getTlsPolicyDescriptorForId(tlsPolicyChoice.getTlsPolicyId());
-            if( tlsPolicyDescriptor == null ) {
-                log.debug("Cannot load TLS Policy with ID {}", tlsPolicyChoice.getTlsPolicyId());
-                return null;
+            if( tlsPolicyDescriptor != null ) {
+                return tlsPolicyDescriptor; // found it
             }
-            return tlsPolicyDescriptor;
+            log.debug("getTlsPolicyDescriptor: Cannot load tls policy id: {}", tlsPolicyChoice.getTlsPolicyId());
+            return null; // other policy names are not currently supported, for example TRUST_KNOWN_CERTIFICATE and TRUST_CA_VERIFY_HOSTNAME or their newer names "public-key" and "certificate" are now represented by the descriptor
         }
         log.debug("getTlsPolicyDescriptor: choice did not have id, name, or descriptor");
         return null;

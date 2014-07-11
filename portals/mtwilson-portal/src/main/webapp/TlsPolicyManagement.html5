@@ -491,7 +491,7 @@ function onSaveCurrentTlsPolicy() {
         });
     }
     if( tlsPolicy.descriptor.policy_type == "certificate-digest" ) {
-        tlsPolicy.descriptor.meta = { digest_encoding: "base64" };
+        tlsPolicy.descriptor.meta = { /*digest_encoding: "base64"*/ };
         tlsPolicy.descriptor.meta.digest_algorithm = $("#tlspolicy_edit_certificate_digests_algorithm").val();
         tlsPolicy.descriptor.data = [];
         $("#tlspolicy_edit_certificate_digest_list li").each(function(){
@@ -501,15 +501,15 @@ function onSaveCurrentTlsPolicy() {
     if( tlsPolicy.descriptor.policy_type == "public-key" ) {
         tlsPolicy.descriptor.meta = { encoding: "base64" };
         tlsPolicy.descriptor.data = [];
-        $("#tlspolicy_edit_public_key_list tr td[class~='data']").each(function(){
+        $("#tlspolicy_edit_public_key_list li").each(function(){
             tlsPolicy.descriptor.data.push( $(this).text() );
         });
     }
     if( tlsPolicy.descriptor.policy_type == "public-key-digest" ) {
-        tlsPolicy.descriptor.meta = { digest_encoding: "base64" };
+        tlsPolicy.descriptor.meta = { /*digest_encoding: "base64"*/ };
         tlsPolicy.descriptor.meta.digest_algorithm = $("#tlspolicy_edit_public_key_digests_algorithm").val();
         tlsPolicy.descriptor.data = [];
-        $("#tlspolicy_edit_public_key_digest_list tr td[class~='data']").each(function(){
+        $("#tlspolicy_edit_public_key_digest_list li").each(function(){
             tlsPolicy.descriptor.data.push( $(this).text() );
         });
     }
