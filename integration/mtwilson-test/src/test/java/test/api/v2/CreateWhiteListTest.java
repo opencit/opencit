@@ -15,6 +15,7 @@ import com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListWithOptionsRunnable;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

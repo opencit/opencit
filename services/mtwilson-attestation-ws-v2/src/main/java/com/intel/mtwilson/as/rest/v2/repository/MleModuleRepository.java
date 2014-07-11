@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -13,7 +12,6 @@ import com.intel.mtwilson.as.rest.v2.model.MleModule;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.repository.RepositoryCreateException;
@@ -24,8 +22,6 @@ import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -69,8 +65,6 @@ public class MleModuleRepository implements DocumentRepository<MleModule, MleMod
                     } 
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
             log.error("MleModule:Search - Error during Module whitelist search.", ex);
             throw new RepositorySearchException(ex, criteria);

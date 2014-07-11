@@ -20,19 +20,34 @@
                         </select>
                     </div>
                 </div>
-                <br>
+                <br/>
                 
                 <div id="openSourcesHostType" style="display: none;">
                     <div class="singleDiv">
                         <div class="labelDiv" data-i18n="input.host_import_file">Host(s) File:</div>
                         <div class="valueDiv">
-                            <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="AuthorizationToken" id="AuthorizationToken" />
-                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50"  data-i18n="[value]button.choose_file" style="height: 24px"/>
+
+					<!-- removed attribute data-i18n="[value]button.choose_file"  from input element below because javascript is not allowed to set the value of a file upload element -->
+                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50"  style="height: 24px"/>
+                        </div>
+                    </div>
+                    <div id="tls_policy_input_div_flatfile" class="singleDiv">
+                        <div class="labelDiv" data-i18n="input.tls_policy">TLS Policy:</div>
+                        <div class="valueDiv">
+                            <select id="tls_policy_select_flatfile" class="textBoxClass">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="singleDiv">
+                        <div class="labelDiv"></div>
+                        <div class="valueDiv">
+                            <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
+				<input type="hidden" name="tlsPolicy"/>
                                 <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()" data-i18n="[value]button.retrieve_hosts"/>
-                            </form>
                             <input type="image" onclick="showDialogUpFlatFileHelp()" src="images/helpicon.png">
                             <span id="messageForFileUpload"></span>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -45,6 +60,22 @@
                             <span class="requiredField">*</span>
                         </div>
                     </div>
+                    <div id="tls_policy_input_div_vmware" class="singleDiv">
+                        <div class="labelDiv" data-i18n="input.tls_policy">TLS Policy:</div>
+                        <div class="valueDiv">
+                            <select id="tls_policy_select_vmware" class="textBoxClass">
+                            </select>
+                        </div>
+                    </div>
+                        <div id="tls_policy_data_container_vmware" class="tlspolicy-input-container singleDiv" style="display: none; padding-bottom: 15px;">
+                            <div class="labelDiv">&nbsp;</div>
+                            <div class="valueDiv">
+                                    <textarea class="tlspolicy-input-certificate" id="tls_policy_data_certificate" placeholder="Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
+                                    <textarea class="tlspolicy-input-certificate-digest" id="tls_policy_data_certificate_digest" placeholder="Base64-encoded digest of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
+                                    <textarea class="tlspolicy-input-public-key" id="tls_policy_data_public_key" placeholder="Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>  
+                                    <textarea class="tlspolicy-input-public-key-digest" id="tls_policy_data_public_key_digest" placeholder="Base64-encoded digest of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>                                    
+                            </div>
+                        </div>
                     <div class="singleDiv">
                         <div class="labelDiv" data-i18n="input.login_id">Login ID:</div>
                         <div class="valueDiv">
@@ -121,6 +152,7 @@
             </div>
             <span id="alert_valid_hostname_ip" data-i18n="alert.valid_hostname_ip" style="display: none;">Please enter a valid hostname or ip address and try again.</span>
         </div>
+	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
         <script type="text/javascript" src="Scripts/RegisterHost.js"></script>
     </body>
 </html>

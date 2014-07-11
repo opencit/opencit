@@ -8,6 +8,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -43,11 +45,19 @@ public class CreateWhiteListWithOptionsRunnable implements Runnable {
     @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create,store","mle_modules:create","mle_sources:create"})
     public void run() {
         log.debug("Starting to process white list creation using host {}.", wlConfig.getTxtHostRecord().HostName);
-        boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
-        result = Boolean.toString(configureWhiteListFromHost);
-        log.debug("Completed processing of the white list using host {} with result {}", wlConfig.getTxtHostRecord().HostName, result);
-        if (wlConfig.isRegisterHost())
-            registerHost();
+        try {
+            boolean configureWhiteListFromHost = new HostBO().configureWhiteListFromCustomData(wlConfig);
+            result = Boolean.toString(configureWhiteListFromHost);
+            log.debug("Completed processing of the white list using host {} with result {}", wlConfig.getTxtHostRecord().HostName, result);
+            if (wlConfig.isRegisterHost()) {
+                registerHost();
+            }
+        } catch (RepositoryException re) {
+            throw re;
+        } catch (Exception ex) {
+            log.error("Error during white list configuration using custom options.", ex);
+            throw new RepositoryCreateException();
+        }
     }
     
     @RequiresPermissions({"hosts:create"})

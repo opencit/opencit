@@ -1317,7 +1317,7 @@ public class MleBO {
 
             if (mleSourceCurrentObj != null) {
                 log.error("White List host is already mapped to the MLE - " + tblMle.getName());
-                throw new ASException(ErrorCode.WS_MLE_HOST_MAP_CREATE_ERROR, this.getClass().getSimpleName());
+                throw new ASException(ErrorCode.WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS, tblMle.getName());
             }
 
             // Else create a new entry in the DB.

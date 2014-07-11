@@ -7,11 +7,9 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestLogJpaController;
-import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -29,7 +27,6 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
@@ -61,14 +58,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.configuration.Configuration;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -167,12 +161,14 @@ public class HostTrustBO {
             hostObjToRegister.HostName = hostObj.HostName;
             hostObjToRegister.AddOn_Connection_String = hostObj.AddOn_Connection_String;
             if (hostObj.Port != null) { hostObjToRegister.Port = hostObj.Port; }
+            hostObjToRegister.tlsPolicyChoice = hostObj.tlsPolicyChoice;
             
+            // BOOKMARK JONATHAN TLS POLICY
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor
+            
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
@@ -670,7 +666,7 @@ public class HostTrustBO {
         long getAgentStart = System.currentTimeMillis(); // XXX jonathan performance
         HostAgent agent = factory.getHostAgent(tblHosts);
         long getAgentStop = System.currentTimeMillis();// XXX jonathan performance
-        log.debug("XXX jonathan performance  get agent: {}", getAgentStop-getAgentStart); // XXX jonathan performance
+        log.trace("performance: getHostAgent: {}ms", getAgentStop-getAgentStart);
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
             throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId);
         }
@@ -678,7 +674,7 @@ public class HostTrustBO {
         long getAgentManifestStart = System.currentTimeMillis(); // XXX jonathan performance
         PcrManifest pcrManifest = agent.getPcrManifest();
         long getAgentManifestStop = System.currentTimeMillis(); // XXX jonathan performance
-        log.debug("XXX jonathan performance  get agent manifest: {}", getAgentManifestStop-getAgentManifestStart); // XXX jonathan performance
+        log.trace("performance: getPcrManifest: {}ms", getAgentManifestStop-getAgentManifestStart);
         
         HostReport hostReport = new HostReport();
         hostReport.tagCertificate = null; // TODO:  need to load the host's tag certificate (if available) and set it here so it can be validated by the rules
@@ -716,16 +712,16 @@ public class HostTrustBO {
         }
         
         
-        long getTrustPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
+        long getTrustPolicyStart = System.currentTimeMillis();
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies
-        long getTrustPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
-        log.debug("XXX jonathan performance  load trust policy: {}", getTrustPolicyStop-getTrustPolicyStart); // XXX jonathan performance
+        long getTrustPolicyStop = System.currentTimeMillis();
+        log.trace("performance: loadTrustPolicyForHost: {}ms", getTrustPolicyStop-getTrustPolicyStart);
 //        trustPolicy.setName(policy for hostId) // do we even need a name? or is that just a management thing for the app?
         PolicyEngine policyEngine = new PolicyEngine();
-        long applyPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
+        long applyPolicyStart = System.currentTimeMillis();
         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
-        long applyPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
-        log.debug("XXX jonathan performance  apply trust policy: {}", applyPolicyStop-applyPolicyStart); // XXX jonathan performance
+        long applyPolicyStop = System.currentTimeMillis();
+        log.trace("performance: policyEngine.apply: {}ms", applyPolicyStop-applyPolicyStart);
         
         if (!trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) || !trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
             trustReport = updateHostIfUntrusted(tblHosts, hostReport, trustReport, agent);
@@ -1818,10 +1814,10 @@ public class HostTrustBO {
             TblMleJpaController mleJpa = My.jpa().mwMle();
             
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            tblHosts.setTlsKeystore(null);
+            // BOOKMARK JONATHAN TLS POLICY
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);

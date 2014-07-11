@@ -10,10 +10,9 @@ import com.intel.mtwilson.as.rest.v2.model.CaCertificate;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.ms.common.MSConfig;
-import com.intel.mtwilson.ms.common.MSException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,15 +47,15 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             } 
             catch (FileNotFoundException e) {
                 log.error("Mt Wilson Root CA certificate file is not found. ", e);
-                throw new MSException(ErrorCode.MS_ROOT_CA_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (IOException e) {
                 log.error("Failed to read Mt Wilson Root CA certificate file. ", e);
-                throw new MSException(ErrorCode.MS_ROOT_CA_CERT_READ_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (Exception e) {
                 log.error("Error during retrieval of root certificate CA chain. ", e);            
-                throw new MSException(ErrorCode.MS_ROOT_CA_CERT_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
         } else if ("saml".equals(id)) {
             try {
@@ -65,15 +64,15 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }
             catch (FileNotFoundException e) {
                 log.error("SAML certificate file is not found.", e);
-                throw new MSException(ErrorCode.MS_SAML_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (IOException e) {
                 log.error("Failed to read SAML certificate file.", e);
-                throw new MSException(ErrorCode.MS_SAML_CERT_READ_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (Exception e) {
                 log.error("Error during retrieval of SAML certificate chain.", e);
-                throw new MSException(ErrorCode.MS_SAML_CERT_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }      
         } else if ("privacy".equals(id)) {
             try {
@@ -82,15 +81,15 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }
             catch (FileNotFoundException e) {
                 log.error("Privacy CA certificate file is not found.", e);
-                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (IOException e) {
                 log.error("Failed to read Privacy CA certificate file.", e);
-                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_READ_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (Exception e) {
                 log.error("Error during retrieval of Privacy CA certificate chain.", e);
-                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
         } else if ("endorsement".equals(id)) {
             try {
@@ -99,15 +98,15 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }
             catch (FileNotFoundException e) {
                 log.error("Privacy CA certificate file is not found.", e);
-                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (IOException e) {
                 log.error("Failed to read Privacy CA certificate file.", e);
-                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_READ_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (Exception e) {
                 log.error("Error during retrieval of Privacy CA certificate chain.", e);
-                throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             
             
@@ -118,15 +117,15 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }
             catch (FileNotFoundException e) {
                 log.error("Server SSL certificate file is not found.", e);
-                throw new MSException(ErrorCode.MS_SSL_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (IOException e) {
                 log.error("Failed to read server SSL certificate file.", e);
-                throw new MSException(ErrorCode.MS_SSL_CERT_READ_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }
             catch (Exception e) {
                 log.error("Error during retrieval of SSL CA chain.", e);
-                throw new MSException(ErrorCode.MS_SSL_CERT_ERROR, e.getClass().getSimpleName());
+                throw new RepositoryRetrieveException(e, locator);
             }   
         }
         return caCert;

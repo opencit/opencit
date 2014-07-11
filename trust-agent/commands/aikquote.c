@@ -50,7 +50,24 @@
 
 #define CKERR	if (result != TSS_SUCCESS) goto error
 
+#define CKERR2(result,message)	if ((result) != TSS_SUCCESS) { printf("Error %s\n", (message)); goto error; }
+
 static void sha1(TSS_HCONTEXT hContext, void *buf, UINT32 bufLen, BYTE *digest);
+
+static int usage(const char *prog)
+{
+  const char text[] =
+	"Usage: %s [-p password] [-c challengefile] [-u uuidfile] [-m PLAIN|SHA1] aikblobfile PCRS... outquotefile\n"
+    "\tpassword\tAIK password in hex (40 chars)\n"
+    "\tchallengefile\tChallenger's data to sign with quote\n"
+    "\tuuidfile\tFile containing 16-byte AIK UUID (only needed if loading by UUID)\n"
+    "\tmode\tcan be 'PLAIN' or 'SHA1'; default is PLAIN, use SHA1 if you took ownership with -z and created AIK with tpm-quote-tools\n"
+    "\taikblobfile\tTPM-encrypted AIK blob\n"
+    "\tPCRS...\tSpace-separated list of PCR numbers to use in the quote\n"
+    "\toutquotefile\tFile in which to store the TPM Quote output\n";
+  fprintf(stderr, text, prog);
+  return 1;
+}
 
 // input is 40 characters, output is 20 characters;
 void convert_niarl_password(char *in_var, BYTE *blob) {
@@ -159,6 +176,7 @@ main (int ac, char **av)
 	FILE		*f_out;
 	char		*chalfile = NULL;
 	char		*pass = NULL;
+	char		*aikuuidfile = NULL;
 	UINT32		tpmProp;
 	UINT32		npcrMax;
 	UINT32		npcrBytes;
@@ -172,6 +190,8 @@ main (int ac, char **av)
 	BYTE		pcrmd[20];
 	int		i;
 	int		result;
+	char	*secret_mode_input;
+	TSS_FLAG secretMode = TSS_SECRET_MODE_PLAIN;
 
 	while (ac > 3) {
 		if (0 == strcmp(av[1], "-p")) {
@@ -184,13 +204,30 @@ main (int ac, char **av)
 			for (i=3; i<ac; i++)
 				av[i-2] = av[i];
 			ac -= 2;
+		} else if (0 == strcmp(av[1], "-u")) {
+			aikuuidfile = av[2];
+			for (i=3; i<ac; i++)
+				av[i-2] = av[i];
+			ac -= 2;
+		} else if (0 == strcmp(av[1], "-m")) {
+			secret_mode_input = av[2];
+			for (i=3; i<ac; i++)
+				av[i-2] = av[i];
+			ac -= 2;
+			if(secret_mode_input) {
+			if( strlen(secret_mode_input)==5 && strncmp(secret_mode_input,"PLAIN",5)==0 )
+				secretMode = TSS_SECRET_MODE_PLAIN;
+			else if( strlen(secret_mode_input)==4 && strncmp(secret_mode_input,"SHA1",4)==0 )
+				secretMode = TSS_SECRET_MODE_SHA1;
+			else
+				printf("Unrecognized secret mode: %s\n", secret_mode_input);
+			}
 		} else
 			break;
 	}
 
 	if (ac < 4) {
-		fprintf (stderr, "Usage: %s [-p password] [-c challengefile] aikblobfile pcrnumber [pcrnumber] outquotefile\n", av[0]);
-		exit (1);
+		exit(usage(av[0]));
 	}
 
 	result = Tspi_Context_Create(&hContext); CKERR;
@@ -198,7 +235,7 @@ main (int ac, char **av)
 	result = Tspi_Context_LoadKeyByUUID(hContext,
 			TSS_PS_TYPE_SYSTEM, SRK_UUID, &hSRK); CKERR;
 	result = Tspi_GetPolicyObject (hSRK, TSS_POLICY_USAGE, &hSrkPolicy); CKERR;
-	result = Tspi_Policy_SetSecret(hSrkPolicy, TSS_SECRET_MODE_PLAIN,
+	result = Tspi_Policy_SetSecret(hSrkPolicy, secretMode,
 			sizeof(srkSecret), srkSecret); CKERR;
 	result = Tspi_Context_GetTpmObject (hContext, &hTPM); CKERR;
 
@@ -224,33 +261,59 @@ main (int ac, char **av)
 	}
 
 	/* Read AIK blob */
-	if ((f_in = fopen(av[1], "rb")) == NULL) {
-		fprintf (stderr, "Unable to open file %s\n", av[1]);
-		exit (1);
-	}
-	fseek (f_in, 0, SEEK_END);
-	bufLen = ftell (f_in);
-	fseek (f_in, 0, SEEK_SET);
-	buf = malloc (bufLen);
-	if (fread(buf, 1, bufLen, f_in) != bufLen) {
-		fprintf (stderr, "Unable to readn file %s\n", av[1]);
-		exit (1);
-	}
-	fclose (f_in);
+	if( aikuuidfile ) {
+	  FILE *f_aik_uuid_in = fopen(aikuuidfile, "rb");
+	  if (!f_aik_uuid_in) {
+		fprintf(stderr, "Cannot open %s\n", aikuuidfile);
+		return 1;
+	  }
 
-	result = Tspi_Context_LoadKeyByBlob (hContext, hSRK, bufLen, buf, &hAIK); CKERR;
-	free (buf);
-	fprintf (stderr, "after Tspi_Context_LoadKeyByBlob \n");
-	if (pass) {
-		BYTE *binary_password = malloc(sizeof(BYTE)* strlen(pass)/ 2);
-		convert_niarl_password(pass, binary_password);
-		result = Tspi_Context_CreateObject(hContext, TSS_OBJECT_TYPE_POLICY,
-				TSS_POLICY_USAGE, &hAIKPolicy); CKERR;
-		result = Tspi_Policy_AssignToObject(hAIKPolicy, hAIK);
-		result = Tspi_Policy_SetSecret (hAIKPolicy, TSS_SECRET_MODE_PLAIN,
-				strlen(pass)/2, binary_password); CKERR;
+	  TSS_UUID uuid;
+	  if (sizeof uuid != fread((void *)&uuid, 1, sizeof uuid, f_aik_uuid_in)) {
+		fprintf(stderr, "Expecting a uuid of %zd bytes in %s\n",
+			sizeof uuid, aikuuidfile);
+		return 1;
+	  }
+	  fclose(f_aik_uuid_in);
+	
+	  result = Tspi_Context_GetKeyByUUID(hContext, TSS_PS_TYPE_SYSTEM,
+					  uuid, &hAIK);
+	  CKERR2(result,"getting AIK");
+	  result = Tspi_Key_LoadKey(hAIK, hSRK);
+	  CKERR2(result,"loading AIK");
 	}
+	else {
+		if ((f_in = fopen(av[1], "rb")) == NULL) {
+			fprintf (stderr, "Unable to open file %s\n", av[1]);
+			exit (1);
+		}
+		fseek (f_in, 0, SEEK_END);
+		bufLen = ftell (f_in);
+		fseek (f_in, 0, SEEK_SET);
+		buf = malloc (bufLen);
+		if (fread(buf, 1, bufLen, f_in) != bufLen) {
+			fprintf (stderr, "Unable to read file %s\n", av[1]);
+			exit (1);
+		}
+		fclose (f_in);
 
+		result = Tspi_Context_LoadKeyByBlob (hContext, hSRK, bufLen, buf, &hAIK); CKERR;
+		free (buf);
+		CKERR2(result,"loading AIK blob");
+		if (pass) {
+			BYTE *binary_password = malloc(sizeof(BYTE)* strlen(pass)/ 2);
+			convert_niarl_password(pass, binary_password);
+			result = Tspi_Context_CreateObject(hContext, TSS_OBJECT_TYPE_POLICY,
+					TSS_POLICY_USAGE, &hAIKPolicy); CKERR;
+			CKERR2(result,"creating AIK policy");
+			result = Tspi_Policy_SetSecret (hAIKPolicy, TSS_SECRET_MODE_PLAIN,
+					strlen(pass)/2, binary_password); CKERR;
+			CKERR2(result,"setting AIK secret on AIK policy");
+			result = Tspi_Policy_AssignToObject(hAIKPolicy, hAIK);
+			CKERR2(result,"assigning AIK policy to AIK handle");
+		}
+	}
+	
 	/* Create PCR list to be quoted */
 	tpmProp = TSS_TPMCAP_PROP_PCR;
 	result = Tspi_TPM_GetCapability(hTPM, TSS_TPMCAP_PROPERTY,
@@ -283,13 +346,11 @@ main (int ac, char **av)
 	valid.ulExternalDataLength = sizeof(chalmd);
 	valid.rgbExternalData = chalmd;
 
-	fprintf (stderr, "before tpm quote\n");
 	/* Perform Quote */
 	result = Tspi_TPM_Quote(hTPM, hAIK, hPCRs, &valid);
 	 CKERR;
 	quoteInfo = (TPM_QUOTE_INFO *)valid.rgbData;
 
-	fprintf (stderr, "after tpm quote\n");
 	/* Fill in rest of PCR buffer */
 	bp = buf + 2 + npcrBytes;
 	*(UINT32 *)bp = htonl (20*npcrs);

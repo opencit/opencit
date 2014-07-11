@@ -127,6 +127,14 @@ function fnUploadWhiteListConfigurationData() {
                 alert($("#alert_valid_hostname_ip").text());
             }
         }
+        
+        mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+            'tls_policy_select': $('#tls_policy_select').val(),
+            'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+            'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+            'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+            'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+        }, hostVo);
 
         if (validation) {
             var data = "registerHostVo=" + $.toJSON(hostVo) + "&biosWLTagrget=" + configurationSaved.biosWLTarget + "&vmmWLTarget=" + configurationSaved.vmmWLTarget;
@@ -390,3 +398,24 @@ function fnDisableOrEnableUploadButton(checkBox) {
         $(this).attr('disabled', status);
     });
 }
+
+// see also addHost.js
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div").hide();
+       } else {
+           var el = $("#tls_policy_select");
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices(el, choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices(el, {
+            dataInputContainer: $('#tls_policy_data_container')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        $("#tls_policy_input_div").i18n();
+       	$("#tls_policy_input_div").show();
+	}
+    });
+});

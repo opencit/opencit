@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.*;
@@ -222,7 +223,7 @@ public class HostBO {
         
     }
     
-    private HostConfigData calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) throws MalformedURLException {
+    private void calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) throws MalformedURLException {
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
         
         if (isBIOSMLE) {
@@ -279,7 +280,6 @@ public class HostBO {
                 }
         }
         hostConfigObj.setTxtHostRecord(hostObj);
-        return hostConfigObj;
     }
     
     /**
@@ -300,8 +300,7 @@ public class HostBO {
      
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            
+            // BOOKMARK JONATHAN TLS POLICY
             // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
             // first and make up the complete connection string.
             ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
@@ -315,6 +314,7 @@ public class HostBO {
             tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
@@ -345,8 +345,8 @@ public class HostBO {
                     + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version + ":" + hostObj.Processor_Info);
 
             // Change the BIOS and VMM MLE names as per the target white list chosen by the user
-            hostConfigObj = calibrateMLENames(hostConfigObj, true);
-            hostConfigObj = calibrateMLENames(hostConfigObj, false);
+            calibrateMLENames(hostConfigObj, true);
+            calibrateMLENames(hostConfigObj, false);
             
             if (registerHost) {
                 new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
@@ -658,6 +658,12 @@ public class HostBO {
      * @return : true on success.
      */
     public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("configureWhiteListFromCustomData: {}", mapper.writeValueAsString(hostConfigObj));
+        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize input" ,e); }
+        // debug only
 
         boolean configStatus = false;
         String attestationReport;
@@ -691,6 +697,13 @@ public class HostBO {
 
                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
                 
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("configureWhiteListFromCustomData TxtHostRecord2: {}", mapper.writeValueAsString(gkvHost));
+        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize TxtHostRecord2" ,e); }
+        // debug only
+                
                 if(gkvHost.AddOn_Connection_String == null) {
                     ConnectionString cs = ConnectionString.from(gkvHost);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
@@ -700,12 +713,11 @@ public class HostBO {
                     ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 }
-                // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
-                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); 
-                tblHosts.setTlsKeystore(null); // XXX previously the default policy name was hardcoded to TRUST_FIRST_CERTIFICATE but is now configurable; but because we are still starting with a null keystore, the only two values that would work as a default are TRUST_FIRST_CERTIFICATE and INSECURE
+                // BOOKMARK JONATHAN TLS POLICY
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
+                tblHosts.setTlsPolicyChoice(gkvHost.tlsPolicyChoice);
                 tblHosts.setIPAddress(gkvHost.HostName);
                 if (gkvHost.Port != null) {
                     tblHosts.setPort(gkvHost.Port);
@@ -770,8 +782,8 @@ public class HostBO {
                     throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                 }
                 
-                hostConfigObj = (WhitelistConfigurationData) calibrateMLENames(hostConfigObj, true);
-                hostConfigObj = (WhitelistConfigurationData) calibrateMLENames(hostConfigObj, false);
+                calibrateMLENames(hostConfigObj, true);
+                calibrateMLENames(hostConfigObj, false);
                 if (hostConfigObj.addBiosWhiteList())
                     reqdManifestList = hostConfigObj.getBiosPCRs();
                 if (hostConfigObj.addVmmWhiteList()) {

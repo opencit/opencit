@@ -4,11 +4,14 @@
  */
 package com.intel.mtwilson.as.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Resource;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.util.ASDataCipher;
 import java.io.Serializable;
 import java.util.Collection;
@@ -50,21 +53,21 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblHosts.findByDescriptionSearchCriteria", query = "SELECT t FROM TblHosts t WHERE t.description like :search"),
     @NamedQuery(name = "TblHosts.findByNameSearchCriteria", query = "SELECT t FROM TblHosts t WHERE t.name like :search")})
 public class TblHosts implements Serializable {
+
     @Transient
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
-    @Basic(optional =     false)
-    @Column(name = "Created_On")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdOn;
-    @Basic(optional =     false)
-    @Column(name = "Updated_On")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn;
-    * 
-    */
+     @Basic(optional =     false)
+     @Column(name = "Created_On")
+     @Temporal(TemporalType.TIMESTAMP)
+     private Date createdOn;
+     @Basic(optional =     false)
+     @Column(name = "Updated_On")
+     @Temporal(TemporalType.TIMESTAMP)
+     private Date updatedOn;
+     * 
+     */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "hostId")
     private Collection<TblSamlAssertion> tblSamlAssertionCollection;
     @Column(name = "Location")
@@ -86,40 +89,31 @@ public class TblHosts implements Serializable {
     private int port;
     @Column(name = "Description")
     private String description;
-    
-    
-    
     @Column(name = "AddOn_Connection_Info")
     private String addOnConnectionInfo_cipherText;   // must be encrypted 
-    
     @Transient
     private transient String addOnConnectionInfo_plainText; // the decrypted version
-    
-    
     @Lob
     @Column(name = "AIK_Certificate")
     private String aikCertificate;
-
     @Column(name = "AIK_SHA1")
     private String aikSha1;
-    
     @Lob
     @Column(name = "AIK_PublicKey")
     private String aikPublicKey;
-    
     @Column(name = "aik_publickey_sha1")
     private String aikPublicKeySha1;
-    
+    @Column(name = "tls_policy_id")
+    private String tlsPolicyId;
+    @Transient
+    private transient TlsPolicyDescriptor tlsPolicyDescriptor;
     @Column(name = "TlsPolicy")
     private String tlsPolicyName;
-    
     @Lob
     @Column(name = "TlsKeystore")
     private byte[] tlsKeystore;
-    
     @Transient
     private ByteArrayResource tlsKeystoreResource;
-    
     @Column(name = "Email")
     private String email;
     @Column(name = "Error_Code")
@@ -138,10 +132,9 @@ public class TblHosts implements Serializable {
     private String bios_mle_uuid_hex;
     @Column(name = "vmm_mle_uuid_hex")
     private String vmm_mle_uuid_hex;
-
     @Column(name = "hardware_uuid")
     private String hardware_uuid;
-    
+
     public TblHosts() {
     }
 
@@ -150,20 +143,19 @@ public class TblHosts implements Serializable {
     }
 
     /*
-    public TblHosts(Integer id, String name, String iPAddress, int port, Date createdOn, Date updatedOn) {
-        this.id = id;
-        this.name = name;
-        this.iPAddress = iPAddress;
-        this.port = port;
-    }
-    */
-        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+     public TblHosts(Integer id, String name, String iPAddress, int port, Date createdOn, Date updatedOn) {
+     this.id = id;
+     this.name = name;
+     this.iPAddress = iPAddress;
+     this.port = port;
+     }
+     */
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
         /*
-        this.createdOn = createdOn;
-        this.updatedOn = updatedOn;
-        * 
-        */
-
+     this.createdOn = createdOn;
+     this.updatedOn = updatedOn;
+     * 
+     */
     public Integer getId() {
         return id;
     }
@@ -190,10 +182,11 @@ public class TblHosts implements Serializable {
 
     /**
      * XXX TODO the port field is only used for Linux hosts running Trust Agent
-     * and needs to be removed;  all agent connection information should be
+     * and needs to be removed; all agent connection information should be
      * stored in the "AddOn_Connection_String" in a URI format. For Linux hosts
      * with Trust Agent that format might be "intel:https://hostname:9999"
-     * @return 
+     *
+     * @return
      */
     public int getPort() {
         return port;
@@ -212,21 +205,19 @@ public class TblHosts implements Serializable {
     }
 
     public String getAddOnConnectionInfo() {
-        if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
+        if (addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null) {
             try {
                 //log.info("XXX TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
                 addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
                 //log.info("XXX TblHosts ASDataCipher plainText = {}", addOnConnectionInfo_plainText);
                 //log.info("XXX TblHosts ASDataCipher cipherText = {}", addOnConnectionInfo_cipherText);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 log.error("Cannot decrypt host connection credentials", e);
                 // this will happen if the data is being decrypted with the wrong key (which will happen if someone reinstalled mt wilson and kept the data but didn't save the data encryption key)
                 // it may also happen if the data wasn't encrypted in the first place
-                if( addOnConnectionInfo_cipherText.startsWith("http") ) {
+                if (addOnConnectionInfo_cipherText.startsWith("http")) {
                     return addOnConnectionInfo_plainText; // data was not encrypted
-                }
-                else {
+                } else {
                     throw new IllegalArgumentException("Cannot decrypt host connection credentials; check the key or delete and re-register the host");
                 }
             }
@@ -237,9 +228,10 @@ public class TblHosts implements Serializable {
     public void setAddOnConnectionInfo(String addOnConnectionInfo) {
         this.addOnConnectionInfo_plainText = addOnConnectionInfo;
         // TODO  encrypt it and set addOnConnectionInfo_cipherText
-        if( addOnConnectionInfo == null ) { addOnConnectionInfo_cipherText = null; }
-        else {
-             addOnConnectionInfo_cipherText = ASDataCipher.cipher.encryptString(addOnConnectionInfo_plainText);
+        if (addOnConnectionInfo == null) {
+            addOnConnectionInfo_cipherText = null;
+        } else {
+            addOnConnectionInfo_cipherText = ASDataCipher.cipher.encryptString(addOnConnectionInfo_plainText);
         }
     }
 
@@ -257,56 +249,130 @@ public class TblHosts implements Serializable {
 
     /**
      * You should set this anytime you set the AIK Certificate
-     * @param aikPublicKey 
+     *
+     * @param aikPublicKey
      */
     public void setAikPublicKey(String aikPublicKey) {
         this.aikPublicKey = aikPublicKey;
     }
-    
+
     /**
      * The AIK SHA1 hash is ALWAYS a hash of the Public Key, NOT the Certificate
-     * @return 
+     *
+     * @return
      */
     public String getAikSha1() {
         return aikSha1;
     }
+
     public String getAikPublicKeySha1() {
         return aikPublicKeySha1;
     }
-    
+
     /**
-     * You should set this anytime you set the AIK Public Key.
-     * The value should be hex-encoded sha1 of the DER-ENCODED (binary) AIK Public Key
-     * Even if someone has signed the AIK and created an AIK CERTIFICATE, this value
-     * should remain as the AIK PUBLIC KEY SHA1 so that it is unambiguous. 
-     * It is trivial to extract the AIK PUBLIC KEY from the AIK CERTIFICATE in order
+     * You should set this anytime you set the AIK Public Key. The value should
+     * be hex-encoded sha1 of the DER-ENCODED (binary) AIK Public Key Even if
+     * someone has signed the AIK and created an AIK CERTIFICATE, this value
+     * should remain as the AIK PUBLIC KEY SHA1 so that it is unambiguous. It is
+     * trivial to extract the AIK PUBLIC KEY from the AIK CERTIFICATE in order
      * to compute the SHA1.
-     * @param aikSha1 
+     *
+     * @param aikSha1
      */
     public void setAikSha1(String aikSha1) {
         this.aikSha1 = aikSha1;
     }
+
     public void setAikPublicKeySha1(String aikPublicKeySha1) {
         this.aikPublicKeySha1 = aikPublicKeySha1;
     }
-    
-    public String getTlsPolicyName() { return tlsPolicyName; }
-    public void setTlsPolicyName(String sslPolicy) { 
-        this.tlsPolicyName = sslPolicy; 
+
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
     }
 
-    
-    public byte[] getTlsKeystore() { 
-        log.debug("getTlsKeystore called on TblHosts for hostname: {}", name);
-        return tlsKeystore; 
+    /**
+     * Setting the tls policy id to a non-null value will automatically clear
+     * the tls policy name and the tls keystore
+     *
+     * @param tlsPolicyId
+     */
+    public void setTlsPolicyId(String tlsPolicyId) {
+        this.tlsPolicyId = tlsPolicyId;
+        if (tlsPolicyId != null) {
+            this.tlsPolicyName = null;
+            this.tlsKeystore = null;
+            this.tlsPolicyDescriptor = null;
+        }
     }
-    public void setTlsKeystore(byte[] tlsKeystoreBytes) {        
+
+    public TlsPolicyDescriptor getTlsPolicyDescriptor() {
+        return tlsPolicyDescriptor;
+    }
+
+    // will not be stored in the host record -- if this is set, the application
+    // should store it in as a record in the mw_tls_policy table and update this
+    // record in the mw_hosts table with that id in tls_policy_id.
+    // this does NOT happen automatically because the host jpa controller does
+    // NOT know about the tls policy tables.
+    public void setTlsPolicyDescriptor(TlsPolicyDescriptor tlsPolicyDescriptor) {
+        this.tlsPolicyDescriptor = tlsPolicyDescriptor;
+        if( tlsPolicyDescriptor != null ) {
+            this.tlsPolicyId = null;
+            this.tlsPolicyName = null;
+            this.tlsKeystore = null;
+        }
+    }
+
+    // there is no member variable for this, it directly updates either tlsPolicyId which 
+    // is saved to the database mw_hosts record or tlsPolicyDescriptor which the
+    // application must separately save into the mw_tls_policy table.
+    public void setTlsPolicyChoice(TlsPolicyChoice tlsPolicyChoice) {
+        if (tlsPolicyChoice == null) {
+            tlsPolicyId = null;
+            tlsPolicyDescriptor = null;
+        } else {
+            if (tlsPolicyChoice.getTlsPolicyId() != null) {
+                tlsPolicyId = tlsPolicyChoice.getTlsPolicyId();
+                tlsPolicyDescriptor = null;
+            } else {
+                tlsPolicyId = null;
+                tlsPolicyDescriptor = tlsPolicyChoice.getTlsPolicyDescriptor();
+            }
+        }
+    }
+
+    public TlsPolicyChoice getTlsPolicyChoice() {
+        TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+        if (tlsPolicyId != null) {
+            tlsPolicyChoice.setTlsPolicyId(tlsPolicyId);
+        } else {
+            tlsPolicyChoice.setTlsPolicyDescriptor(tlsPolicyDescriptor);
+        }
+        return tlsPolicyChoice;
+    }
+
+    public String getTlsPolicyName() {
+        return tlsPolicyName;
+    }
+
+    public void setTlsPolicyName(String sslPolicy) {
+        this.tlsPolicyName = sslPolicy;
+    }
+
+    public byte[] getTlsKeystore() {
+        log.debug("getTlsKeystore called on TblHosts for hostname: {}", name);
+        return tlsKeystore;
+    }
+
+    public void setTlsKeystore(byte[] tlsKeystoreBytes) {
         tlsKeystore = tlsKeystoreBytes;
         tlsKeystoreResource = null;
     }
 
-    public Resource getTlsKeystoreResource() { 
-        if( tlsKeystoreResource == null ) {
+    @JsonIgnore
+    public Resource getTlsKeystoreResource() {
+        if (tlsKeystoreResource == null) {
             tlsKeystoreResource = new ByteArrayResource(tlsKeystore) {
                 @Override
                 protected void onClose() {
@@ -314,10 +380,9 @@ public class TblHosts implements Serializable {
                 }
             };
         }
-        return tlsKeystoreResource; 
+        return tlsKeystoreResource;
     }
-    
-    
+
     public String getEmail() {
         return email;
     }
@@ -328,24 +393,23 @@ public class TblHosts implements Serializable {
 
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
-    public Date getCreatedOn() {
-        return createdOn;
-    }
+     public Date getCreatedOn() {
+     return createdOn;
+     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
-    }
+     public void setCreatedOn(Date createdOn) {
+     this.createdOn = createdOn;
+     }
 
-    public Date getUpdatedOn() {
-        return updatedOn;
-    }
+     public Date getUpdatedOn() {
+     return updatedOn;
+     }
 
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
-    }
-    * 
-    */
-
+     public void setUpdatedOn(Date updatedOn) {
+     this.updatedOn = updatedOn;
+     }
+     * 
+     */
     public Integer getErrorCode() {
         return errorCode;
     }
@@ -402,7 +466,6 @@ public class TblHosts implements Serializable {
         this.vmm_mle_uuid_hex = vmm_mle_uuid_hex;
     }
 
-    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -448,8 +511,8 @@ public class TblHosts implements Serializable {
     public String getHardwareUuid() {
         return hardware_uuid;
     }
-    
-    public void setHardwareUuid(String uuid){
+
+    public void setHardwareUuid(String uuid) {
         this.hardware_uuid = uuid;
     }
 }

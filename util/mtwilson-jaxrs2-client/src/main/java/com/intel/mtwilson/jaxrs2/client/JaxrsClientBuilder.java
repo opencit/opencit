@@ -36,7 +36,7 @@ import java.security.cert.CertificateEncodingException;
 
 /**
  * Examples:
- * 
+ *
  * <pre>
  * JaxrsClient client = JaxrsClientBuilder.factory().url(url).build();
  * JaxrsClient client = JaxrsClientBuilder.factory().configuration(properties).build();
@@ -44,70 +44,77 @@ import java.security.cert.CertificateEncodingException;
  * JaxrsClient client = JaxrsClientBuilder.factory().tlsConnection(tlsConnection).build();
  * JaxrsClient client = JaxrsClientBuilder.factory().url(url).tlsPolicy(tlsPolicy).build();
  * </pre>
- * 
+ *
  * @author jbuhacoff
  */
 public class JaxrsClientBuilder {
+
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JaxrsClientBuilder.class);
-    
+
     public static JaxrsClientBuilder factory() {
         return new JaxrsClientBuilder();
     }
-
     private ClientConfig clientConfig;
     private Configuration configuration;
     private TlsPolicy tlsPolicy;
     private URL url;
     private TlsConnection tlsConnection;
-    
+
     public JaxrsClientBuilder() {
         clientConfig = new ClientConfig();
-        clientConfig.register(JacksonFeature.class);        
-        clientConfig.register(com.intel.mtwilson.jaxrs2.provider.JacksonXmlMapperProvider.class); 
+        clientConfig.register(JacksonFeature.class);
+        clientConfig.register(com.intel.mtwilson.jaxrs2.provider.JacksonXmlMapperProvider.class);
         clientConfig.register(com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider.class);
 //        clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);        
         clientConfig.register(com.intel.mtwilson.jaxrs2.provider.X509CertificateArrayPemProvider.class);
         clientConfig.register(com.intel.mtwilson.jaxrs2.provider.X509CertificateDerProvider.class);
-        clientConfig.register(com.intel.mtwilson.jaxrs2.provider.X509CertificatePemProvider.class);        
+        clientConfig.register(com.intel.mtwilson.jaxrs2.provider.X509CertificatePemProvider.class);
         clientConfig.register(com.intel.mtwilson.jaxrs2.provider.DateParamConverterProvider.class);
     }
 
     /**
      * Configures a client using authentication settings in the properties
-     * argument. The API URL must be set as mtwilson.api.url or mtwilson.api.baseurl
-     * in the properties.
-     * 
-     * To use BASIC password authentication, set mtwilson.api.username and mtwilson.api.password.
-     * 
-     * To use HMAC (MtWilson-specific) authentication, set mtwilson.api.clientId and mtwilson.api.secretKey
-     * 
+     * argument. The API URL must be set as mtwilson.api.url or
+     * mtwilson.api.baseurl in the properties.
+     *
+     * To use BASIC password authentication, set mtwilson.api.username and
+     * mtwilson.api.password.
+     *
+     * To use HMAC (MtWilson-specific) authentication, set mtwilson.api.clientId
+     * and mtwilson.api.secretKey
+     *
      * To use X509 (MtWilson-specific) authentication, set:
      * mtwilson.api.keystore = path to client-keystore.jks
      * mtwilson.api.keystore.password = password protecting client-keystore.jks
-     * mtwilson.api.key.alias = alias of private key in the keystore; usually same as username or name of keystore like "client-keystore"
-     * mtwilson.api.key.password = password protecting the key, usually same as the keystore password
-     * 
+     * mtwilson.api.key.alias = alias of private key in the keystore; usually
+     * same as username or name of keystore like "client-keystore"
+     * mtwilson.api.key.password = password protecting the key, usually same as
+     * the keystore password
+     *
      * @param properties
-     * @return 
+     * @return
      */
     public JaxrsClientBuilder configuration(Properties properties) {
         configuration = new PropertiesConfiguration(properties);
         return this;
     }
+
     public JaxrsClientBuilder configuration(Configuration configuration) {
         this.configuration = configuration;
         return this;
     }
-    
+
     private void authentication() throws KeyManagementException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, CryptographyException {
-        if( configuration == null ) { return; }
+        if (configuration == null) {
+            return;
+        }
         // X509 authorization 
         SimpleKeystore keystore = null;
-        if (configuration.getString("mtwilson.api.keystore") != null && configuration.getString("mtwilson.api.keystore.password") != null ) {
+        if (configuration.getString("mtwilson.api.keystore") != null && configuration.getString("mtwilson.api.keystore.password") != null) {
             FileResource resource = new FileResource(new File(configuration.getString("mtwilson.api.keystore")));
             keystore = new SimpleKeystore(resource, configuration.getString("mtwilson.api.keystore.password"));
         }
-        if (keystore != null && configuration.getString("mtwilson.api.key.alias") != null && configuration.getString("mtwilson.api.key.password") != null ) {
+        if (keystore != null && configuration.getString("mtwilson.api.key.alias") != null && configuration.getString("mtwilson.api.key.password") != null) {
             log.debug("Registering X509 credentials for {}", configuration.getString("mtwilson.api.key.alias"));
             log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.key.password"));
@@ -115,43 +122,42 @@ public class JaxrsClientBuilder {
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
         // HMAC authorization
-        if( configuration.getString("mtwilson.api.clientId") != null && configuration.getString("mtwilson.api.secretKey") != null) {
+        if (configuration.getString("mtwilson.api.clientId") != null && configuration.getString("mtwilson.api.secretKey") != null) {
             log.debug("Registering HMAC credentials for {}", configuration.getString("mtwilson.api.clientId"));
-            clientConfig.register( new HmacAuthorizationFilter(configuration.getString("mtwilson.api.clientId"), configuration.getString("mtwilson.api.secretKey")));
+            clientConfig.register(new HmacAuthorizationFilter(configuration.getString("mtwilson.api.clientId"), configuration.getString("mtwilson.api.secretKey")));
         }
         // BASIC authorization will only be registered if configuration is present but also the feature itself will only add an Authorization header if there isn't already one present
-        if( configuration.getString("mtwilson.api.username") != null && configuration.getString("mtwilson.api.password") != null ) {
+        if (configuration.getString("mtwilson.api.username") != null && configuration.getString("mtwilson.api.password") != null) {
             log.debug("Registering BASIC credentials for {}", configuration.getString("mtwilson.api.username"));
 //            clientConfig.register( new BasicPasswordAuthorizationFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
 //            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"));
 //            clientConfig.register(feature);
-            
-            clientConfig.register( new HttpBasicAuthFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
+
+            clientConfig.register(new HttpBasicAuthFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
         }
     }
 
     private void url() throws MalformedURLException {
-        if( url == null ) {
-            if( configuration != null ) {
+        if (url == null) {
+            if (configuration != null) {
                 url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
             }
         }
     }
-    
+
     private void tls() {
         assert url != null;
-        if( tlsConnection == null ) {
-            if( tlsPolicy != null ) {
+        if (tlsConnection == null) {
+            if (tlsPolicy != null) {
                 log.debug("creating TlsConnection from URL and TlsPolicy");
-                tlsConnection = new TlsConnection(url,tlsPolicy);
-            }
-            else {
+                tlsConnection = new TlsConnection(url, tlsPolicy);
+            } else {
                 log.debug("creating TlsConnection with InsecureTlsPolicy");
-                tlsConnection = new TlsConnection(url,new InsecureTlsPolicy());
+                tlsConnection = new TlsConnection(url, new InsecureTlsPolicy());
             }
         }
     }
-    
+
     // you can set this instead of url and tlsPolicy
     public JaxrsClientBuilder tlsConnection(TlsConnection tlsConnection) {
         log.debug("set TlsConnection");
@@ -161,40 +167,39 @@ public class JaxrsClientBuilder {
         log.debug("TlsPolicy is {}", this.tlsPolicy.getClass().getName());
         return this;
     }
+
     public JaxrsClientBuilder url(URL url) {
         this.url = url;
         return this;
     }
+
     public JaxrsClientBuilder tlsPolicy(TlsPolicy tlsPolicy) {
         this.tlsPolicy = tlsPolicy;
         return this;
     }
-    
+
     public JaxrsClient build() {
         try {
-        url();
-        tls(); // sets tls connection
-        authentication(); // adds to clientConfig
+            url();
+            tls(); // sets tls connection
+            authentication(); // adds to clientConfig
 //        client = ClientBuilder.newClient(clientConfig);
-        // TODO: if URL is http and not https then we should skip the ssl configuration
-        Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).withConfig(clientConfig).build();
-        if( configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true) ) {
-            client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));
-        }
-        else {
-            client.register(new LoggingFilter());
-        }
+            // TODO: if URL is http and not https then we should skip the ssl configuration
+            Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).withConfig(clientConfig).build();
+            if (configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true)) {
+                client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));
+            } else {
+                client.register(new LoggingFilter());
+            }
 //        client.register(com.intel.mtwilson.jaxrs2.provider.JacksonXmlMapperProvider.class); 
 //        client.register(com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider.class);
-        WebTarget target = client.target(url.toExternalForm());
-        
-        return new JaxrsClient(client, target);
-        }
-        catch(MalformedURLException | KeyManagementException | FileNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
+            WebTarget target = client.target(url.toExternalForm());
+
+            return new JaxrsClient(client, target);
+        } catch (MalformedURLException | KeyManagementException | FileNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
             throw new IllegalArgumentException("Cannot construct client", e);
         }
     }
-    
     /*
      register(com.intel.mtwilson.jaxrs2.provider.JacksonXmlMapperProvider.class); 
      register(com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider.class); // added
@@ -215,6 +220,4 @@ public class JaxrsClientBuilder {
      //register(com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMapper.class);
      * 
      */
-    
-    
 }

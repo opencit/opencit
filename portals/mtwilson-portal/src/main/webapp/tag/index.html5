@@ -7,8 +7,8 @@
 
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=9" />
-        <title data-i18n="title.asset_tag">Asset Tag Reference Implementation</title>
-        <meta name="application-name" content="Mt Wilson Asset Tag Reference Implementation"/>
+        <title data-i18n="title.asset_tag">Asset Tag Management</title>
+        <meta name="application-name" content="Mt Wilson Asset Tag Management"/>
         <meta name="description" content="A web-based tool for defining tags and provisioning asset certificates" />
         <meta name="keywords" content="Mt Wilson, attestation, asset, inventory, management, security, cloud, data center" />
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
@@ -1365,9 +1365,7 @@ function isNumber(n) {
 //                ws.retrieveMainConfiguration();
                 i18nInit();
             });
-
             
         </script>
-
     </body>
 </html>

@@ -163,9 +163,9 @@ public class TAHelper {
     //    public void verifyAikWithDaa(String hostIpAddress, int port) {
     public void verifyAikWithDaa(TblHosts tblHosts) throws XMLStreamException {
         try {
-            //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 TODO need to replace with use of HostAgentFactory
-            HostAgentFactory factory = new HostAgentFactory();
-            TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts);
+            com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory tlsPolicyFactory = com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory.createFactory(tblHosts);//getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
+            TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicy();
+            
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {
                 if (tblHosts.getName() != null) {
@@ -174,6 +174,7 @@ public class TAHelper {
             }
 
             URL url = new URL(connectionString);
+            // bug #497 TODO need to replace with use of HostAgentFactory
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
 
             String sessionId = generateSessionId();

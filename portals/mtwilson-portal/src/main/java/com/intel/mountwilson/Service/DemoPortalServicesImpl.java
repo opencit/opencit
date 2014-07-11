@@ -129,7 +129,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		List<HostDetailsEntityVO> hostList;
 		try{
 			//Call into REST Services for getting all HOST information by passing empty String.
-			hostList = ConverterUtil.getHostVOListFromTxtHostRecord(service.queryForHosts("")); 
+			hostList = ConverterUtil.getHostVOListFromTxtHostRecord(service.queryForHosts2("")); 
 		} catch (Exception e) {
 			log.error("Error While getting data from DataBase."+e.getMessage());	
 			 throw ConnectionUtil.handleDemoPortalException(e);
@@ -713,7 +713,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	public HostDetailsEntityVO getSingleHostDetailFromDB(String hostName,AttestationService service) throws DemoPortalException {
 		HostDetailsEntityVO hostDetailsEntityVO;
 		try{
-			hostDetailsEntityVO = ConverterUtil.getHostVOObjectFromTxtHostRecord(service.queryForHosts(hostName).get(0));
+			hostDetailsEntityVO = ConverterUtil.getHostVOObjectFromTxtHostRecord(service.queryForHosts2(hostName).get(0));
 		} catch (Exception e) {
 			log.error("Error While getting data from DataBase."+e.getMessage());
 			 throw ConnectionUtil.handleDemoPortalException(e);

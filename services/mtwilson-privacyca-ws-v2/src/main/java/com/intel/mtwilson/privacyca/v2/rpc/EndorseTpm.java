@@ -32,8 +32,8 @@ public class EndorseTpm implements Callable<X509Certificate> {
         return ekModulus;
     }
     
-    // INSECURE, NEED TODO:    permission allowed  "tpm:endorse:*" 
     @Override
+    @RequiresPermissions("tpms:endorse")    
     public X509Certificate call() throws Exception {
         // load privacy ca ek signing key (cakey) and corresponding certificate (cacert)
         String EndorsementP12Pass = My.configuration().getPrivacyCaEndorsementPassword();

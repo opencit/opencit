@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListWithOptionsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

@@ -315,7 +315,16 @@ function fnGetNewHostData() {
                                              "/;"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
         
     }
-	
+
+    mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+        'tls_policy_select': $('#tls_policy_select').val(),
+        'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+        'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+        'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+        'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+    }, hostVo);
+    
+    
 	//setting unwanted values to null or default
 	hostVo.location = null;
 	hostVo.updatedOn = null;
@@ -363,4 +372,23 @@ function fnSaveNewHostInfoSuccess(response,messageToDisplay) {
 	}
 }
 
-
+// see also WhiteListConfig.js
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div").hide();
+       } else {
+           var el = $("#tls_policy_select");
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices(el, choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices(el, {
+            dataInputContainer: $('#tls_policy_data_container')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        $("#tls_policy_input_div").i18n();
+       	$("#tls_policy_input_div").show();
+	}
+    });
+});

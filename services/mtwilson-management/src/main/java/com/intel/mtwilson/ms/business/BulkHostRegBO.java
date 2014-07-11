@@ -5,11 +5,7 @@
 package com.intel.mtwilson.ms.business;
 
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.datatypes.HostConfigResponse;
-import com.intel.mtwilson.datatypes.HostConfigResponseList;
-import com.intel.mtwilson.datatypes.HostResponse;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.TxtHostRecordList;
+import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.MSComponentFactory;

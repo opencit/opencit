@@ -37,6 +37,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -78,8 +79,8 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
         return endorsementCerts;
     }
     
-    // TODO:   fix the implementation... apparently  HisPrivacyCAWebService2Impl  was using member variables to store info between two requests steps, but we are stateless so need to address that somehow.
     @Override
+    @RequiresPermissions("host_aiks:certify")    
     public byte[] call() throws Exception {
         log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
 	 RSAPrivateKey caPrivKey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
