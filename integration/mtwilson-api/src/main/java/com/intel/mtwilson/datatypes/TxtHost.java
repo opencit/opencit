@@ -6,13 +6,20 @@ import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Hostname;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-//import org.codehaus.jackson.annotate.JsonCreator;
-//import org.codehaus.jackson.annotate.JsonProperty;
-//import org.codehaus.jackson.annotate.JsonIgnore;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 
 /**
+ * Extended TxtHost supported by Mt Wilson 2.0 
+ * This extended record contains additional fields which Mt Wilson 1.x clients
+ * will not send and do not expect to receive (they may throw an error upon
+ * receiving unexpected fields). Therefore it can only be used by Mt Wilson
+ * 2.x clients using v1 APIs when sending requests. Mt Wilson 1.x and 2.x will
+ * always reply with the original TxtHost from any v1 APIs in order to
+ * preserve backward compatibility with Mt Wilson 1.x clients. Therefore
+ * the additional fields will never be returned from v1 APIs. 
+ * 
+ * In order to fully utilize the capability represented by the new fields, 
+ * clients should use v2 APIs. 
  *
  * @author dsmagadx
  */
@@ -31,11 +38,13 @@ public class TxtHost {
     private String aikCertificate;  // may be null
     private String aikPublicKey;  // may be null
     private String aikSha1;  // may be null
+    private TlsPolicyChoice tlsPolicyChoice; // may be null; since mtwilson 2.0
 
     public TxtHost(TxtHostRecord host, HostTrustStatus trustStatus) {
         this(host);
         this.trustStatus = new HostTrustStatus(trustStatus); // make our own copy
     }
+    
     
     /**
      * To create a new TxtHost instance, you call the constructor with
@@ -68,7 +77,9 @@ public class TxtHost {
         aikCertificate = host.AIK_Certificate; // may be null
         aikPublicKey = host.AIK_PublicKey; // may be null
         aikSha1 = host.AIK_SHA1; // may be null
-
+        tlsPolicyChoice = host.tlsPolicyChoice;
+        
+//        tlsPolicyId = (host.tlsPolicyChoice == null ? null : host.tlsPolicyChoice.getTlsPolicyId());
         // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory
 //        if (connectionString == null || connectionString.isEmpty()) {
 //            throw new IllegalArgumentException(String.format("Connection string for host or its vCenter (for ESX hosts) is required: %s", hostname));
@@ -90,6 +101,7 @@ public class TxtHost {
             }
         }*/
     }
+    
 
     // Sample JSON output (not used)
     // {"hostName":"RHEL 62 KVM","port":9999,"description":"RHEL 62 KVM Integration ENV","addOn_Connection_String":"http://example.server.com:234/vcenter/","bios":{"name":"EPSD","version":"60"},"vmm":{"name":"ESX","version":"0.4.1"},"ipaddress":"10.1.71.103","email":null}
@@ -186,4 +198,8 @@ public class TxtHost {
     final public boolean isVmmTrusted() { return trustStatus.vmm; }
     final public boolean isLocationTrusted() { return trustStatus.location; }
     final public boolean isAssetTagTrusted() { return trustStatus.asset_tag; }
+
+    public TlsPolicyChoice getTlsPolicyChoice() {
+        return tlsPolicyChoice;
+    }
 }

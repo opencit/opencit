@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.jaxrs2.provider;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -12,6 +13,7 @@ import javax.ws.rs.ext.Provider;
 //import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -54,6 +56,9 @@ public class JacksonYamlObjectMapperProvider implements ContextResolver<ObjectMa
         yamlFactory.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false);
         ObjectMapper mapper = new ObjectMapper(yamlFactory);
         mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
  

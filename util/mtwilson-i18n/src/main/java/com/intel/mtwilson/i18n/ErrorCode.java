@@ -99,7 +99,8 @@ public enum ErrorCode {
     AS_ASSET_TAG_CERT_CREATE_ERROR(1215, "Error during creation of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_ASSET_TAG_CERT_UPDATE_ERROR(1216, "Error during update of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_ASSET_TAG_CERT_DELETE_ERROR(1217, "Error during deletion of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
-    AS_AIK_CREATE_ERROR(1215, "Error during addition of AIK for the host: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_AIK_CREATE_ERROR(1218, "Error during addition of AIK for the host: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_NO_HOSTS_CONFIGURED(1219, "Currently there are no hosts configured in the system."),
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),

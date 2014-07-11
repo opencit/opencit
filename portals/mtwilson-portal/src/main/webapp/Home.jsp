@@ -2,25 +2,33 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+	<!--[if lt IE 9]><script src="Scripts/html5.js"></script><![endif]-->
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
     <title data-i18n="title.home">Welcome</title>
-	
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
+	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.contextMenu.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
+	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/notifications.css" />
 	
+    
+    <!--
+	<script type="text/javascript" src="Scripts/JQuery/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery-ui-1.10.4.min.js"></script>
+    -->
 	<script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
-	<script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.dialog.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.effects.core.js"></script>
-	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.widget.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.position.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.widget.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menu.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.contextMenu.js"></script>
 	<script type="text/javascript" src="Scripts/token.js"></script>
 	<script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
 	<script type="text/javascript" src="Scripts/i18n_util.js"></script>
@@ -29,6 +37,7 @@
     <script type="text/javascript" src="Scripts/JQuery/prettify.js"></script>
     
     <script type="text/javascript" src="Scripts/commonUtils.js"></script>
+        <script type="text/javascript" src="Scripts/safe.js"></script>
 	<script type="text/javascript" src="Scripts/CommonMessage.js"></script>
 	<script type="text/javascript" src="Scripts/home.js"></script>
 
@@ -153,6 +162,7 @@
                                 <li><a href="javascript:getDeletePendingRegistration();" data-i18n="link.delete_user">Delete User</a></li> <!-- was "Delete Request" -->
                                 <li><a href="javascript:getViewExpiringPage();" data-i18n="link.extend_user">Extend User</a></li> <!-- was "Extend Request" -->
                                 <li><a href="javascript:viewCert();" data-i18n="link.view_certificates">View Certificates</a></li>
+                                <li><a href="javascript:getTlsPolicyManagementPage()" data-i18n="link.tls_policy_management">TLS Policy Management</a></li>
                             </ul>
                         </li>
 
@@ -215,6 +225,18 @@
             </div>
         </div>
         <div class="main" id="mainContainer">
+        </div>
+        <div>
+            <span id="alert_null_server_response" data-i18n="alert.null_server_response" style="display: none;">Response from server is null.</span>
+            <span id="alert_request_error" data-i18n="alert.request_error" style="display: none;">Error while serving request. Please try again later.</span>
+            <span id="alert_valid_ip" data-i18n="alert.valid_ip" style="display: none;">Please enter a valid IP address and try again.</span>
+            <span id="alert_update_os_info" data-i18n="alert.update_os_info" style="display: none;">Are you sure you want to update OS info?</span>
+            <span id="alert_delete_os" data-i18n="alert.delete_os" style="display: none;">Are you sure you want to delete this OS?</span>
+            <span id="alert_add_os" data-i18n="alert.add_os" style="display: none;">Are you sure want to add OS?</span>
+            <span id="alert_add_oem" data-i18n="alert.add_oem" style="display: none;">Are you sure want to add OEM?</span>
+            <span id="alert_update_oem_info" data-i18n="alert.update_oem_info" style="display: none;">Are you sure you want to update OEM info?</span>
+            <span id="alert_delete_oem" data-i18n="alert.delete_oem" style="display: none;">Are you sure you want to delete this OEM?</span>
+            <span id="alert_delete_host" data-i18n="alert.delete_host" style="display: none;">Are you sure you want to delete this host?</span>
         </div>
         <div class="footer">
             <p>&copy; 2012-2014 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>

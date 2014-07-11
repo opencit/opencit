@@ -257,10 +257,15 @@ ajax.json = {
         var info = ajax.resources[resourceName] || {};
         var my = info.clone().merge(opt).merge({name: resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
+
+        params = params || {};
+        var d = new Date();
+        params['time'] = d.getTime();
         _log.debug("get resource: " + my.uri + "  into: " + keyPath);
         console.log("get resource: " + my.uri + "  into: " + keyPath);
         var request = new Ajax.Request(my.uri, {
             method: 'get',
+            cache: false,
 			headers: { "AuthorizationToken": authorizationToken },
             parameters: params || {},
             onSuccess: function(transport) {

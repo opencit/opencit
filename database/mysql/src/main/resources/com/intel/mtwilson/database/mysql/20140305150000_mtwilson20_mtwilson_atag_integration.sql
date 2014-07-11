@@ -2,32 +2,32 @@
 
 -- This script creates the tables required for integrating asset tag with mt wilson
 
-CREATE  TABLE `mw_as`.`mw_host_tpm_password` (
+CREATE  TABLE `mw_host_tpm_password` (
   `id` CHAR(36) NOT NULL ,
   `password` TEXT NOT NULL ,
   `modifiedOn` DATETIME NOT NULL ,
   PRIMARY KEY (`id`) );
   
-CREATE  TABLE `mw_as`.`mw_tag_kvattribute` (
+CREATE  TABLE `mw_tag_kvattribute` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `value` VARCHAR(255) NOT NULL ,
   PRIMARY KEY (`id`), 
   UNIQUE KEY (`name`, `value`));
  
-CREATE  TABLE `mw_as`.`mw_tag_selection` (
+CREATE  TABLE `mw_tag_selection` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NULL,
   PRIMARY KEY (`id`) );
   
-CREATE  TABLE `mw_as`.`mw_tag_selection_kvattribute` (
+CREATE  TABLE `mw_tag_selection_kvattribute` (
   `id` CHAR(36) NOT NULL ,
   `selectionId` CHAR(36) NOT NULL ,
   `kvAttributeId` CHAR(36) NOT NULL ,
   PRIMARY KEY (`id`) );
   
-CREATE  TABLE `mw_as`.`mw_tag_certificate` (
+CREATE  TABLE `mw_tag_certificate` (
   `id` CHAR(36) NOT NULL ,
   `certificate` BLOB NOT NULL ,
   `sha1` CHAR(40) NOT NULL ,
@@ -39,7 +39,7 @@ CREATE  TABLE `mw_as`.`mw_tag_certificate` (
   `revoked` BOOLEAN NOT NULL DEFAULT FALSE ,
   PRIMARY KEY (`id`) );
   
-  CREATE  TABLE `mw_as`.`mw_tag_certificate_request` (
+  CREATE  TABLE `mw_tag_certificate_request` (
   `id` CHAR(36) NOT NULL ,
   `subject` VARCHAR(255) NOT NULL ,
   `status` VARCHAR(255) NULL , 
@@ -49,7 +49,7 @@ CREATE  TABLE `mw_as`.`mw_tag_certificate` (
   
   -- need to drop earlier version of table mw_configuration from 20120920085200
   DROP TABLE mw_configuration;
-  CREATE  TABLE `mw_as`.`mw_configuration` (
+  CREATE  TABLE `mw_configuration` (
   `id` CHAR(36) NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `content` TEXT NULL ,

@@ -65,7 +65,7 @@ function fnGetAllOemInfoSuccess(responseJSON) {
 		oemInfo = responseJSON.oemInfo;
 		var options = "";
 		for ( var str in oemInfo) {
-			options +='<option value="'+str+'">'+str+'</option>';
+			options +='<option value="' + escapeForHTMLAttributes(str) + '">' + getHTMLEscapedMessage(str) + '</option>';
 		}
 		$('#MainContent_ddlOEM').html(options);
 		sendJSONAjaxRequest(false, 'getData/getOSVMMInfo.html', null, fnGetOSVMMInfoSuccess, null);
@@ -83,7 +83,7 @@ function fnGetOSVMMInfoSuccess(responsJSON) {
 	if (responsJSON.result) {
 		var options = "";
 		for ( var str in responsJSON.osInfo) {
-			options +='<option isvmware="'+responsJSON.osInfo[str]+'" value="'+str+'">'+str+'</option>';
+			options +='<option isvmware="'+ escapeForHTMLAttributes(responsJSON.osInfo[str]) + '" value="' + escapeForHTMLAttributes(str) +'">' + getHTMLEscapedMessage(str) + '</option>';
 		}
                 if (options != "") {
                     $('#MainContent_LstVmm').html(options);
@@ -111,7 +111,7 @@ function fnChangeOEMVender() {
 			var options = "";
 			for ( var name in oemInfo[oem]) {
 				for ( var val in oemInfo[oem][name]) {
-					options +='<option biosName="'+val+'" biosVer="'+oemInfo[oem][name][val]+'">'+val+' '+oemInfo[oem][name][val]+'</option>';
+					options +='<option biosName="' + escapeForHTMLAttributes(val) + '" biosVer="' + escapeForHTMLAttributes(oemInfo[oem][name][val]) + '">' + getHTMLEscapedMessage(val) + ' ' + getHTMLEscapedMessage(oemInfo[oem][name][val]) + '</option>';
 				}
 			}
 			$('#MainContent_LstBIOS').html(options);
@@ -315,7 +315,16 @@ function fnGetNewHostData() {
                                              "/;"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
         
     }
-	
+
+    mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+        'tls_policy_select': $('#tls_policy_select').val(),
+        'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+        'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+        'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+        'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+    }, hostVo);
+    
+    
 	//setting unwanted values to null or default
 	hostVo.location = null;
 	hostVo.updatedOn = null;
@@ -339,7 +348,7 @@ function addNewHost() {
 
         if(ipValid == true) {
             if (chechAddHostValidation()) {
-                if (confirm("Are you Sure you want to Add this Host ?")) {
+                if (confirm($("#alert_confirm_add_host").text())) {
                     var dataToSend = fnGetNewHostData();
                     dataToSend.hostId = null;
                     dataToSend = $.toJSON(dataToSend);
@@ -349,7 +358,7 @@ function addNewHost() {
                 }
             }
         }else{
-            alert("Please enter a valid IP address and try again.")
+            alert($("#alert_valid_ip").text())
         }
 }
 
@@ -363,4 +372,23 @@ function fnSaveNewHostInfoSuccess(response,messageToDisplay) {
 	}
 }
 
-
+// see also WhiteListConfig.js
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div").hide();
+       } else {
+           var el = $("#tls_policy_select");
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices(el, choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices(el, {
+            dataInputContainer: $('#tls_policy_data_container')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        $("#tls_policy_input_div").i18n();
+       	$("#tls_policy_input_div").show();
+	}
+    });
+});

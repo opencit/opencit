@@ -37,7 +37,7 @@ function populateHostTrustDetails(responsJSON) {
 }
 
 function updatePeerCert(responsJSON) {
-    alert("updating cert now");
+    alert($("#alert_updating_cert").text());
 }
 
 function updatePeerCertNo(responsJSON){}
@@ -48,22 +48,25 @@ function populateHostTrustDataIntoTable(hostDetails) {
 		VMWareHost = [];
 		VMWareHostLocation = [];
 		for ( var item in hostDetails) {
+			if(item != parseInt(item)) {
+				continue;
+			}
 			var classValue = null;
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
-			str+='<tr class="'+classValue+'" hostID="'+hostDetails[item].hostID+'" id="host_div_id_'+hostDetails[item].hostName.replace(/\./g,'_')+'">'+
+			str+='<tr class="'+classValue+'" hostID="'+ escapeForHTMLAttributes(hostDetails[item].hostID) +'" id="host_div_id_'+ escapeForHTMLAttributes(hostDetails[item].hostName.replace(/\./g,'_'))+'">'+
                                                 //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
 				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
-				'<td class="row2">'+hostDetails[item].hostName+'</td>'+
-				'<td align="center" class="row3"><img border="0" src="'+hostDetails[item].osName+'"></td>';
-				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+hostDetails[item].hypervisorName+'">' : '';
-				str+='<td align="center" class="row4">'+value+'</td>';
+				'<td class="row2">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</td>'+
+				'<td align="center" class="row3"><img border="0" src="'+ hostDetails[item].osName +'"></td>';
+				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ hostDetails[item].hypervisorName+'">' : '';
+				str+='<td align="center" class="row4">'+ value +'</td>';
 			    value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
 				//value="";
 				
-                        str+='<td align="center" class="row5" title="'+hostDetails[item].assetTagDetails+'"><img border="0" src="'+hostDetails[item].assetTagStatus+'"></td>'+
-				'<td align="center" class="row6"><img border="0" src="'+hostDetails[item].biosStatus+'"></td>'+
-				'<td align="center" class="row7"><img border="0" src="'+hostDetails[item].vmmStatus+'"></td>'+
-				'<td align="center" class="row8"><img border="0" src="'+hostDetails[item].overAllStatus+'"></td>';
+                        str+='<td align="center" class="row5" title="'+ escapeForHTMLAttributes(hostDetails[item].assetTagDetails) +'"><img border="0" src="'+ hostDetails[item].assetTagStatus +'"></td>'+
+				'<td align="center" class="row6"><img border="0" src="'+ hostDetails[item].biosStatus +'"></td>'+
+				'<td align="center" class="row7"><img border="0" src="'+ hostDetails[item].vmmStatus +'"></td>'+
+				'<td align="center" class="row8"><img border="0" src="'+ hostDetails[item].overAllStatus +'"></td>';
 				/*if (!(hostDetails[item].overAllStatusBoolean)) {
 					str+='<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/helpicon.png" alt="Failure Report"></td>';
 				}else {
@@ -71,13 +74,13 @@ function populateHostTrustDataIntoTable(hostDetails) {
 					
 				}*/
 				
-				str+='<td class="row9">'+hostDetails[item].updatedOn+'</td>'+
-				'<td nowrap align="center" class="row10"><input class="tableButton" type="button"  value="Refresh" onclick="fnUpdateTrustForHost(this)"></td>'+
+				str+='<td class="row9">'+ getHTMLEscapedMessage(hostDetails[item].updatedOn) +'</td>'+
+				'<td nowrap align="center" class="row10"><input class="tableButton" type="button"  value="Refresh" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh"></td>'+
 				'<td align="center" class="row11"><a><img src="images/trust_assertion.png" onclick="fnGetTrustSamlDetails(\''+hostDetails[item].hostName+'\')"/></a></td>'+
 			    '<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
 				'<td class="row12">';
 				
-				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+hostDetails[item].errorMessage+'</textarea>';}
+				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+ getHTMLEscapedMessage(hostDetails[item].errorMessage) +'</textarea>';}
 				str+='</td>'+
 			'</tr>';
 				
@@ -93,7 +96,7 @@ function populateHostTrustDataIntoTable(hostDetails) {
 		             '</table></div></td>';
 			}else {
 				str+='<td class="'+classValue+'" colspan="13">'+
-					'<div class="subTableDiv" style="text-align: left;">This feature is currently not implemented.</div>'+
+					'<div class="subTableDiv" style="text-align: left;" data-i18n="label.not_implemented">This feature is currently not implemented.</div>'+
 					'</td>';
 			}
 		}
@@ -104,7 +107,7 @@ function fnGetTrustSamlDetails(hostName) {
 //	window.open("getView/trustVerificationDetails.html?hostName="+hostName,"","location=0,menubar=0,status=1,scrollbars=1, width=700,height=600");
 	//Window.open('getData/getHostTrustSatusForPageNo.html',hostName,'width=200,height=100');
         var str = '<div id="samlAssertionReport"></div>';
-        fnOpenDialog(str,"Trust Report", 950, 600,false);
+        fnOpenDialog(str,"trust_assertion", 950, 600,false);
         $('#showFailureReportTable').prepend(disabledDiv);
         sendHTMLAjaxRequest(false, 'getView/trustVerificationDetails.html',"hostName="+hostName , fnDisplayContent, null, 'samlAssertionReport');
 
@@ -242,7 +245,7 @@ function migrateVMToHost(element,hostName,vmName,hostID) {
     var constrains = checkConstrains(element);
     if (constrains){
 	var hostToTransfer = $(element).parent().find('select').val();
-        if(confirm("Are you sure you want to migrate this VM to "+hostToTransfer+" ?")){
+        if(confirm($("#alert_migrate_vm").text() + " " + hostToTransfer + " ?")){
          $('#errorMessage').html('');
 	$('#mainTrustDetailsDiv').prepend(disabledDiv);
         //var vmID = $(element).parent().parent().attr('vmid');
@@ -408,7 +411,7 @@ function showFailureReport(hostName) {
 	var str = '<div id="showFailureReportTable" class="failureReportdiv"></div>';
 	/* Soni_Begin_27/09/2012_Changing thetitle of pop window from "Failure Report for to Trust Report for  */
     //fnOpenDialog(str,"Failure report for "+ hostName, 950, 600,false);
-	fnOpenDialog(str,"Trust Report", 950, 600,false);
+	fnOpenDialog(str,"trust_report", 950, 600,false);
     /* Soni_Begin_27/09/2012_Changing thetitle of pop window from "Failure Report for to Trust Report for  */
     
     $('#showFailureReportTable').prepend(disabledDiv);
@@ -430,9 +433,9 @@ function getFailureReportSuccess(responseJSON) {
         str+='<div class="tableDisplay"><table width="100%" cellpadding="0" cellspacing="0">'+
               '<thead><tr>'+
               '<th class="failureReportRow1"></th>'+
-              '<th class="failureReportRow2">PCR Name</th>'+
-              '<th class="failureReportRow3">PCR Value</th>'+
-              '<th class="failureReportRow4">WhiteList Value</th>'+
+              '<th class="failureReportRow2" data-i18n="table.pcr_name">PCR Name</th>'+
+              '<th class="failureReportRow3" data-i18n="table.pcr_value">PCR Value</th>'+
+              '<th class="failureReportRow4" data-i18n="table.whitelist_value">WhiteList Value</th>'+
               '</tr></thead></table></div>';
           
           str+='<div class="" style="overflow: auto;">'+
@@ -480,7 +483,7 @@ function getFailureReportSuccess(responseJSON) {
     			
             }else {
     			str+='<td class="'+classValue+'" colspan="4">'+
-    				'<div class="subTableDiv" style="text-align: left;">This PCR does not have any Module Logs.</div></td>';
+    				'<div class="subTableDiv" style="text-align: left;" data-i18n="label.no_module_logs">This PCR does not have any Module Logs.</div></td>';
 			}
             str+="</tr>";
         }
@@ -511,14 +514,17 @@ function fnUpdateTrustForHost(element) {
 	$('#errorMessage').html("");
 	var row = $(element).parent().parent();
 	var hostName = $.trim($(row).find('td:eq(1)').text());
-	$(element).attr('value','Updating');
+//        $(element).attr('value','Updating');
+        $(element).attr('data-i18n','[value]button.updating');
+	$(element).i18n();
 	row.find('td:eq(12)').html('<img border="0" src="images/ajax-loader.gif">');
 	sendJSONAjaxRequest(false, 'getData/getHostTrustStatus.html', "hostName="+hostName, updateTrustStatusSuccess, null,element,hostName);
 }
 
 function updateTrustStatusSuccess(response,element,host) {
-        
-	$(element).attr('value','Refresh');
+//        $(element).attr('value','Refresh');
+        $(element).attr('data-i18n','[value]button.refresh');
+	$(element).i18n();
 	var row = $(element).parent().parent();
 	if (response.result) {
             if(response.hostVo.assetTagDetails)
@@ -534,18 +540,18 @@ function updateTrustStatusSuccess(response,element,host) {
 		//row.find('td:eq(7)').html('<img border="0" src="'+'response.hostVo.overAllStatus'+'">');
 		row.find('td:eq(8)').html(response.hostVo.updatedOn);
                 if(response.hostVo.errorCode == 1){
-                    row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'System is unreachable'+'</textarea>');
+                    row.find('td:eq(12)').html('<div class="textAreaBoxClass" cols="20" rows="2" readonly="readonly" style="background-color:white;"><span data-i18n="label.host_status_unreachable">System is unreachable.</span></div>');
                 }
 		else if (response.hostVo.errorCode != 0) {
-			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.hostVo.errorMessage+' ErrorCode = '+response.hostVo.errorCode+'</textarea>');
+			row.find('td:eq(12)').html('<div class="textAreaBoxClass" cols="20" rows="2" readonly="readonly" style="background-color:white;">'+response.hostVo.errorMessage+' <span data-i18n="label.host_status_error_code">ErrorCode</span> = '+response.hostVo.errorCode+'</div>');
                         //row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'ERROR!'+'</textarea>');
                         
 		}
                 else{
-			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">Host Trust status updated successfully.</textarea>');
+			row.find('td:eq(12)').html('<div class="textAreaBoxClass" cols="20" rows="2" readonly="readonly" style="background-color:white;"><span data-i18n="label.host_status_success">Host trust status updated successfully.</span></div>');
 		}
 	}else {
-		row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.message+' False result '+'</textarea>');
+		row.find('td:eq(12)').html('<div class="textAreaBoxClass" cols="20" rows="2" readonly="readonly" style="background-color:white;">'+response.message+' <span data-i18n="label.host_status_false_result">False result</span> '+'</div>');
                 //row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'False Result'+'</textarea>');
 	}
       // alert(response.toSource());

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -45,6 +46,12 @@ public class CacheTest {
                 .build();
         X509AttributeCertificate attributeCertificate = X509AttributeCertificate.valueOf(attributeCertificateBytes);
         return attributeCertificate;
+    }
+    
+    @Test
+    public void testCreateCertificate() throws NoSuchAlgorithmException {
+        X509AttributeCertificate cert = createCertificate();
+        log.debug("cert base64: {}", Base64.encodeBase64String(cert.getEncoded()));
     }
     
     protected SelectionType createSelectionSame() {

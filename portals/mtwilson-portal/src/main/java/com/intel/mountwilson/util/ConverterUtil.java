@@ -12,6 +12,7 @@ import com.intel.mountwilson.datamodel.HostType.hostVMM;
 import com.intel.mountwilson.datamodel.MLEDataVO;
 import com.intel.mountwilson.datamodel.MleDetailsEntityVO;
 import com.intel.mountwilson.datamodel.OEMDataVO;
+import java.util.Iterator;
 import com.intel.mountwilson.datamodel.OSDataVO;
 import com.intel.mountwilson.datamodel.TrustedHostVO;
 import com.intel.mtwilson.TrustAssertion;
@@ -21,11 +22,15 @@ import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 //import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.transform.OutputKeys;
@@ -66,7 +72,23 @@ public class ConverterUtil {
 		hostRecord.HostName=dataVO.getHostName();
 		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
-		
+        if( dataVO.getTlsPolicyId() != null && !dataVO.getTlsPolicyId().isEmpty() ) {
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyId(dataVO.getTlsPolicyId());
+            hostRecord.tlsPolicyChoice = tlsPolicyChoice;
+        }
+        else if (dataVO.getTlsPolicyType() != null && !dataVO.getTlsPolicyType().isEmpty() ) {
+            TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+            tlsPolicyDescriptor.setPolicyType(dataVO.getTlsPolicyType());
+            if( dataVO.getTlsPolicyData() != null && !dataVO.getTlsPolicyData().isEmpty() ) {
+                ArrayList<String> data = new ArrayList<>();
+                data.add(dataVO.getTlsPolicyData());
+                tlsPolicyDescriptor.setData(data);
+            }
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyDescriptor(tlsPolicyDescriptor);
+            hostRecord.tlsPolicyChoice = tlsPolicyChoice;
+        }
 		String[] osVMMInfo = dataVO.getVmmName().split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR));
 		String osNameWithVer = osVMMInfo[0];
 		String osName;
@@ -145,8 +167,10 @@ public class ConverterUtil {
                         }
                 
                         // Bug: 457 - Refresh button is not updating the time stamp
-                        hostVO.setUpdatedOn(trustAssertion.getDate().toString());
-
+//                        hostVO.setUpdatedOn(trustAssertion.getDate().toString());
+                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        hostVO.setUpdatedOn(df.format(trustAssertion.getDate()));
                 } else {
 			hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
 			hostVO.setVmmStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
@@ -155,7 +179,10 @@ public class ConverterUtil {
 			hostVO.setOverAllStatusBoolean(false);
 			hostVO.setErrorMessage(errorMessage);
                         // Bug: 445 - To shown the updated date when the host is in the unknown state
-                        hostVO.setUpdatedOn(new SimpleDateFormat("EEE MMM d HH:MM:ss z yyyy").format(new Date()));
+//                        hostVO.setUpdatedOn(new SimpleDateFormat("EEE MMM d HH:MM:ss z yyyy").format(new Date()));
+                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        hostVO.setUpdatedOn(df.format(new Date()));
                         hostVO.setErrorCode(1);                        
 		}
 		
@@ -246,6 +273,20 @@ public class ConverterUtil {
 		entityVO.setOemName(txtHostDetail.BIOS_Oem);
 		entityVO.setLocation(txtHostDetail.Location);
 		entityVO.setEmailAddress(txtHostDetail.Email);
+        if( txtHostDetail.tlsPolicyChoice != null ) {
+            if( txtHostDetail.tlsPolicyChoice.getTlsPolicyId() != null ) {
+                entityVO.setTlsPolicyId(txtHostDetail.tlsPolicyChoice.getTlsPolicyId());
+            }
+            else if(  txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor() != null ) {
+                entityVO.setTlsPolicyType(txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor().getPolicyType());
+                if( txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor().getData() != null ) {
+                    Iterator<String> it = txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor().getData().iterator();
+                    if(it.hasNext()) {
+                        entityVO.setTlsPolicyData(it.next());
+                    }
+                }
+            }
+        }
     	return entityVO;
     }
 

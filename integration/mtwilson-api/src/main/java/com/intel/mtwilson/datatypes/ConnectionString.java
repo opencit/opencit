@@ -166,7 +166,6 @@ public class ConnectionString {
      */
     public ConnectionString(String connectionString) throws MalformedURLException {
         this();
-        try {
             vendor = vendorFromURL(connectionString);
             // Let us first check if the connection string has the prefix of the vendor or not.
             if( vendor == null ) {
@@ -203,11 +202,6 @@ public class ConnectionString {
                 default:
                     throw new UnsupportedOperationException("Vendor not supported yet: "+vendor.toString());
             }
-        } catch (MalformedURLException ex) {
-            log.error(ex.toString());
-            ex.printStackTrace(System.err);
-            throw ex;
-        }
     }
 
     /**
@@ -241,7 +235,7 @@ public class ConnectionString {
             connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
         } else if (this.vendor == Vendor.VMWARE) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
-                    String.format("https://%s:%d/sdk;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
+                    String.format("https://%s:%d/sdk;%s;%s;h=%s", this.managementServerName, this.port, this.userName, this.password, this.hostname.toString()) : 
                     String.format("%s", this.addOnConnectionString);
         } else if (this.vendor == Vendor.CITRIX) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
@@ -877,23 +871,29 @@ public class ConnectionString {
         if( connectionString == null || connectionString.isEmpty() ) {
             if( host.HostName != null && !host.HostName.isEmpty() && host.Port != null ) {
                 connectionString = String.format("intel:https://%s:%d", host.HostName, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
+                log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() && host.Port != null ) {
                 connectionString = String.format("intel:https://%s:%d", host.IPAddress, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+                log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }
             else if(host.IPAddress != null && !host.IPAddress.isEmpty() ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility;  
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999); // NOTE:  empty port is assumed to be a mtwilson 1.x trust agent for backward compatibility;
+                log.debug("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
                 return new ConnectionString(connectionString);
             }
             throw new IllegalArgumentException("Host does not have a connection string or hostname set");
         }
-        else if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
+        else if (connectionString.startsWith("intel") ) {
             return new ConnectionString(connectionString);
+        }
+        else if ( connectionString.startsWith("vmware")  || connectionString.startsWith("citrix") ) {
+            // ensure the hostname itself is present as a parameter on the connection string, since we have that information in the TxtHostRecord object 
+            ConnectionString cs = new ConnectionString(connectionString);
+            cs.hostname = new InternetAddress(host.HostName);
+            return cs;
         }
         else {
             // use a combination of connection string and other information in the record (port number, vmm name, ...)

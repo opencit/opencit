@@ -22,6 +22,8 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.dcsg.cpg.x500.DN;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.user.management.rest.v2.model.UserComment;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
@@ -87,7 +89,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
             connStr = new ConnectionString(Vendor.valueOf(hostDetailsObj.getHostType().toUpperCase()), hostDetailsObj.getvCenterString());
         }
         hostRecord.AddOn_Connection_String = connStr.getConnectionStringWithPrefix();
-
+//        hostRecord.tlsPolicyChoice = hostDetailsObj.?????
+        
         /* if (hostDetailsObj.isVmWareType()) {
          hostRecord.HostName = hostDetailsObj.getHostName();
          hostRecord.AddOn_Connection_String = hostDetailsObj.getvCenterString();
@@ -96,6 +99,21 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
          hostRecord.IPAddress = hostDetailsObj.getHostName();
          hostRecord.Port = Integer.parseInt(hostDetailsObj.getHostPortNo());
          } */
+        
+        if( hostDetailsObj.getTlsPolicyId() != null ) {
+            log.debug("saveWhiteListConfiguration tls policy id {}",  hostDetailsObj.getTlsPolicyId());
+            hostRecord.tlsPolicyChoice = new TlsPolicyChoice();
+            hostRecord.tlsPolicyChoice.setTlsPolicyId(hostDetailsObj.getTlsPolicyId());
+        }
+        else if( hostDetailsObj.getTlsPolicyType() != null ) {
+            log.debug("saveWhiteListConfiguration tls policy type {}",  hostDetailsObj.getTlsPolicyType());
+            ArrayList<String> data = new ArrayList<>();
+            data.add(hostDetailsObj.getTlsPolicyData());
+            hostRecord.tlsPolicyChoice = new TlsPolicyChoice();
+            hostRecord.tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
+            hostRecord.tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType(hostDetailsObj.getTlsPolicyType());
+            hostRecord.tlsPolicyChoice.getTlsPolicyDescriptor().setData(data);
+        }
 
         hostConfigObj.setTxtHostRecord(hostRecord);
 
@@ -357,15 +375,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 apiListFromDB = msAPIObj.searchApiClients(apiSearchObj);
 
                 apiSearchObj.enabledEqualTo = false;
-                apiSearchObj.statusEqualTo = ApiClientStatus.CANCELLED.toString();
-                apiListFromDB.addAll(msAPIObj.searchApiClients(apiSearchObj));
-
-                apiSearchObj.enabledEqualTo = false;
                 apiSearchObj.statusEqualTo = ApiClientStatus.REJECTED.toString();
-                apiListFromDB.addAll(msAPIObj.searchApiClients(apiSearchObj));
-
-                apiSearchObj.enabledEqualTo = false;
-                apiSearchObj.statusEqualTo = ApiClientStatus.EXPIRED.toString();
                 apiListFromDB.addAll(msAPIObj.searchApiClients(apiSearchObj));
 
             } else if (apiType == ApiClientListType.DELETE) {
@@ -414,7 +424,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                     catch(Exception e) {
                         log.error("Cannot parse user comment: {}", apiClientObj.comment, e);
                         apiClientDetailObj.setRequestedRoles(new ArrayList<String>());
-                        apiClientDetailObj.setComment("");
+                        apiClientDetailObj.setComment(apiClientObj.comment);
                     }
 
                     apiClientList.add(apiClientDetailObj);

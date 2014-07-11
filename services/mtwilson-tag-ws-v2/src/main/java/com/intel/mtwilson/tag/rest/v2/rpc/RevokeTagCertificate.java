@@ -8,10 +8,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -43,25 +46,30 @@ public class RevokeTagCertificate implements Runnable{
     @Override
     @RequiresPermissions("tag_certificates:delete")         
     public void run() {
-        log.debug("Got request to revocation of certificate with ID {}.", certificateId);        
+        log.debug("RPC: RevokeTagCertificate - Got request to revocation of certificate with ID {}.", certificateId);        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-        
+            CertificateLocator locator = new CertificateLocator();
+            locator.id = certificateId;
+            
             Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
-                log.debug("Sha1 of the certificate about to be revoked is {}.", obj.getSha1());
+                log.debug("RPC: RevokeTagCertificate - Sha1 of the certificate about to be revoked is {}.", obj.getSha1());
                 dao.updateRevoked(certificateId, true);                
                 AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
                 request.setSha1OfAssetCert(obj.getSha1().toByteArray());
                 Global.mtwilson().revokeAssetTagCertificate(request);
-                log.info("Certificate with id {} has been revoked successfully.");
+                log.info("RPC: RevokeTagCertificate - Certificate with id {} has been revoked successfully.");
+            } else {
+                log.error("RPC: RevokeTagCertificate - Certificate with id {} does not exist.", certificateId);
+                throw new RepositoryInvalidInputException(locator);
             }
 
-        } catch (WebApplicationException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during certificate revocation.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("RPC: RevokeTagCertificate - Error during certificate revocation.", ex);
+            throw new RepositoryException(ex);
         } 
         
     }

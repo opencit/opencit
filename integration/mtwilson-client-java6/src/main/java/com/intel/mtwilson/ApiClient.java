@@ -916,14 +916,14 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         }
     }*/
     
-    // this is required so that the jackson mapper will create an instance of ListMleData (List<MleData>) instead of creating an instance of List<LinkedHashMap>
+    // this is required so that the jackson mapper will create an instance of ListMleData (List<TxtHostRecordV1>) instead of creating an instance of List<LinkedHashMap> when parsing server responses
     public static class ListHostData extends ArrayList<TxtHostRecord> { };
     
     @Override
     public List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException {
         log.debug("queryForHosts no hardwareUuid");
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
-        query.add("searchCriteria", searchCriteria);        
+        query.add("searchCriteria", searchCriteria);
         ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
         return results;                
     }
@@ -934,9 +934,22 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("searchCriteria", searchCriteria);        
         query.add("includeHardwareUuid",String.valueOf(includeHardware));
+        query.add("includeTlsPolicy",String.valueOf(false));
         ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
         return results;
     }    
+    
+    @Override
+    public List<TxtHostRecord> queryForHosts2(String searchCriteria) throws IOException, ApiException, SignatureException {
+        log.debug("queryForHosts2");
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("searchCriteria", searchCriteria);        
+        query.add("includeHardwareUuid",String.valueOf(true));
+        query.add("includeTlsPolicy",String.valueOf(true));
+        ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
+        return results;
+    }    
+
     
     /**
      * javax.ws.rs.core.MediaType.APPLICATION_XML   application/xml

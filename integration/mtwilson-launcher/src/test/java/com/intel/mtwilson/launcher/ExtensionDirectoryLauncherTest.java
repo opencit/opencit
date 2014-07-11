@@ -33,7 +33,7 @@ public class ExtensionDirectoryLauncherTest {
        }
        launcher.setRegistrars(new Registrar[] { new ImplementationRegistrar(), new AnnotationRegistrar(V2.class) });
        launcher.run(); // loads and scans the jars
-       List<Object> v2s = Extensions.findAll(V2.class.getName());
+       List<Object> v2s = Extensions.findAllAnnotated(V2.class);
        for(Object v2 : v2s) {
            log.debug("V2 extension {} classloader {}", v2.getClass().getName(), v2.getClass().getClassLoader().getClass().getName());
        }

@@ -18,7 +18,17 @@ public enum Role {
     Cache("Cache"),
     Report("Report"),
     Audit("Audit"),
-    AssetTagManagement("AssetTagManagement");
+    // v2 API roles. Adding here for displaying the same in the portal.
+    AssetTagManagement("AssetTagManagement"),
+    UserManager("user_manager"),
+    HostManager("host_manager"),
+    Administrator("administrator"),
+    WhitelistManager("whitelist_manager"),
+    ServerManager("server_manager"),
+    ReportManager("report_manager"),
+    Auditor("auditor"),
+    AssetTagManager("asset_tag_manager"),
+    Challenger("challenger");
     
     private String name;
     

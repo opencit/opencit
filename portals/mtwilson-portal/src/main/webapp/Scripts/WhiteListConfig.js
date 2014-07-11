@@ -83,7 +83,7 @@ function fnUploadWhiteListConfigurationData() {
                             "/;" + $('#whiteListCitrix_userName').val() + ";" + $('#whiteListCitrix_password').val();
                 }
             } else {
-                alert("Please enter a valid hostname or ip address and try again.");
+                alert($("#alert_valid_hostname_ip").text());
             }
         } else if (isVMWare == 1) { // get VMWare values
             if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val()) && fnValidateIpAddress($('#whiteListVMware_Host').val())) {
@@ -102,7 +102,7 @@ function fnUploadWhiteListConfigurationData() {
                     hostVo.hostPortNo = null;
                 }
             } else {
-                alert("Please enter a valid hostname or ip address and try again.");
+                alert($("#alert_valid_hostname_ip").text());
             }
         } else { // TA
 
@@ -124,9 +124,17 @@ function fnUploadWhiteListConfigurationData() {
                     hostVo.registered = false;
                 }
             } else {
-                alert("Please enter a valid hostname or ip address and try again.");
+                alert($("#alert_valid_hostname_ip").text());
             }
         }
+        
+        mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+            'tls_policy_select': $('#tls_policy_select').val(),
+            'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+            'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+            'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+            'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+        }, hostVo);
 
         if (validation) {
             var data = "registerHostVo=" + $.toJSON(hostVo) + "&biosWLTagrget=" + configurationSaved.biosWLTarget + "&vmmWLTarget=" + configurationSaved.vmmWLTarget;
@@ -205,43 +213,48 @@ function fnClearAllFiled() {
 
 
 function showDialogConfigureWhiteHelp() {
-	var str="";
-	for ( var iteam in configureWhiteHelp) {
-		str+='<div class="helpDiv">'+configureWhiteHelp[iteam]+'</div>';
-	}
+//	var str="";
+//	for ( var iteam in configureWhiteHelp) {
+//		str+='<div class="helpDiv">'+configureWhiteHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="helpDiv" data-i18n="[html]help.configure_white_help"></div>';
 	fnOpenDialog(str, "Help", 500, 200,false);
 }
 
 function showDialogWhiteListApplicableHelp() {
-	var str="";
-	for ( var iteam in applicableWhiteListTargetHelp) {
-		str+='<div class="helpDiv">'+applicableWhiteListTargetHelp[iteam]+'</div>';
-	}
+//	var str="";
+//	for ( var iteam in applicableWhiteListTargetHelp) {
+//		str+='<div class="helpDiv">'+applicableWhiteListTargetHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="helpDiv" data-i18n="[html]help.applicable_whitelist_target_help"></div>';
 	fnOpenDialog(str, "Help", 600, 350,false);
 }
 function showDialogRequiredPCRValues() {
-	var str="";
-	for ( var iteam in requiredPCRValuesHelp) {
-		str+='<div class="helpDiv">'+requiredPCRValuesHelp[iteam]+'</div>';
-	}
+//	var str="";
+//	for ( var iteam in requiredPCRValuesHelp) {
+//		str+='<div class="helpDiv">'+requiredPCRValuesHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="helpDiv" data-i18n="[html]help.required_pcr_values_help"></div>';
 	fnOpenDialog(str, "Help", 500, 350,false);
 }
 /* Soni_Begin_25/09/2012_help icon */
 
 function showDialogVcenterHelp() {
-	var str="";
-	for ( var iteam in vCenterStringHelp) {
-		str+='<div class="helpDiv">'+vCenterStringHelp[iteam]+'</div>';
-	}
+//	var str="";
+//	for ( var iteam in vCenterStringHelp) {
+//		str+='<div class="helpDiv">'+vCenterStringHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="helpDiv" data-i18n="[html]help.vcenter_string_help"></div>';
 	fnOpenDialog(str, "Help", 500,275,false);
 }
 /* Soni_Begin_25/09/2012_help icon */
 //function to display help for adding location while while list configuration
 function showHelpForLocation() {
-	var str="";
-	for ( var iteam in addLocationHelp) {
-		str+='<div class="helpDiv">'+addLocationHelp[iteam]+'</div>';
-	}
+//	var str="";
+//	for ( var iteam in addLocationHelp) {
+//		str+='<div class="helpDiv">'+addLocationHelp[iteam]+'</div>';
+//	}
+        var str = '<div class="helpDiv" data-i18n="[html]help.add_location_help"></div>';
 	fnOpenDialog(str, "Help", 500, 200,false);
 }
 
@@ -385,3 +398,24 @@ function fnDisableOrEnableUploadButton(checkBox) {
         $(this).attr('disabled', status);
     });
 }
+
+// see also addHost.js
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div").hide();
+       } else {
+           var el = $("#tls_policy_select");
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices(el, choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices(el, {
+            dataInputContainer: $('#tls_policy_data_container')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        $("#tls_policy_input_div").i18n();
+       	$("#tls_policy_input_div").show();
+	}
+    });
+});

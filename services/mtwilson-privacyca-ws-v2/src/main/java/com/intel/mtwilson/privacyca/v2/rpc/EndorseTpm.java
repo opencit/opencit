@@ -33,6 +33,7 @@ public class EndorseTpm implements Callable<X509Certificate> {
     }
     
     @Override
+    @RequiresPermissions("tpms:endorse")    
     public X509Certificate call() throws Exception {
         // load privacy ca ek signing key (cakey) and corresponding certificate (cacert)
         String EndorsementP12Pass = My.configuration().getPrivacyCaEndorsementPassword();

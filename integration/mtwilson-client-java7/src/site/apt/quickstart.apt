@@ -1,0 +1,189 @@
+                        ------------------------
+                        Mt Wilson API Quickstart
+                        ------------------------
+                        ------------------------
+                        2012-09-21
+                        ------------------------
+
+Background
+
+    Mt. Wilson(MTW) is the code name for the Remote Trust Attestation Solution
+that would provide a secure mechanism in a Data Center to attest to the  Trust
+of different hypervisors and Operating systems on multiple devices including 
+Servers, Clients, Network and Storage components.  The primary purpose of this 
+attestation is for Trust Verification, Remediation, Reporting, and Compliance 
+in a Data Center and Cloud environments.
+
+	Whether it is public cloud, private cloud, hybrid or Enterprise cloud,  
+the Attestation Solution would be used by Cloud/Virtualization  Resource Schedulers,  
+SIEMs, Policy Engines and  GRC tools, to assess and provide an Assurance that the 
+security components on the devices are protecting the assets executing or stored 
+on the devices.  This assurance would then drive policy decisions for
+
+	[[1]]On boarding Virtual Machines.
+	
+	[[2]]Launching Virtual machines on Trusted h/w.
+	
+	[[3]]Secure/trusted migrations.
+	
+	[[4]]Meeting Compliance and Regulatory requirements.
+	
+	[]
+
+	Here are some key aspects of the Attestation solution:
+
+	[[1]]The first generation solution would be targeted to 'Attest to' the trust of the Platform (Firmware and BIOS) and Hypervisor/OS, on Intel Architecture-based Servers that have a 'Measured Launch' of the OS/Hypervisor using Intel TXT.  Future versions would support the attestation of IA-based Network and Storage devices (OpenFiler, OpenNFS running on IA-based Servers), and Clients (TXT-based).
+	
+	[[2]]The Attestation Architecture would be capable of handling Hardware or Software-based based Root-of-Trust for Measurement (RTM) mechanisms, as long as a TPM (Trusted Platform Module) is used for root-of-Trust for Storage and Reporting (RTS and RTR).
+	
+	[[3]]Future generations of the Attestation solution would be capable of attesting to the Trust of Virtual Machines (VMs), Applications, Identity, and geo-location compliance of workloads and data.
+	
+	[[4]]Architecture is flexible to support additional Cloud security use-cases  with Data confidentiality and protection
+	
+	[[5]]Supports certificate based and password based authentication. Future support would include HMAC.
+
+	MTW is delivered as a Virtual Appliance (VM) for ESX, Xen or KVM formats. All MTW APIs are REST-based. There are 2 options for the users to call into the REST APIs of Mt.Wilson:
+
+	[[1]]Directly calling into the REST APIs.
+	
+	[[2]]Using the API CLient Toolkit.
+	
+	[]
+	
+*Directly calling into the REST APIs
+
+	If the user is calling into the REST APIs directly or wants to skip the security (probably all the components would be integrated into a single host/virtual machine), then the user has to ensure that the IP address of the client is added to the trusted IP list on MTW server. This can be accomplished by updating the contents of the shiro.ini file under /etc/intel/cloudsecurity with shiro.localhost file. If in case the user wants to trust any other host other than the local host, then the following configuration needs to be added after the "iniHostRealm=com.intel.mtwilson.shiro.authc.host.IniHostRealm" to the shiro.ini file. 
+	
+	iniHostRealm.allow=192.168.0.1,192.168.0.2
+
+	When MTW sees that the API call is being made from a client that is trusted, then further authentication is skipped. If the trusted IP is not configured then the user has to implement either basic authentication or certificate based authentication. 
+	
+*Using the API CLient Toolkit
+
+	In order to simplify the invocation of the MTW APIs, MTW also provides an APIClient Toolkit which encapsulates multiple API calls, creation and handling of RSA keys and certificates,  authentication and processing of API responses (which are SAML signed assertions). The toolkit provides 2 options:
+
+	[[1]]Zip file containing the client and related dependendent jar files
+	
+	[[2]]Single jar-with-dependencies.
+	
+	[[3]]Single jar-with-dependencies shaded to prevent conflicts with other libraries.
+	
+	[]
+
+Getting started with the SDK 
+
+	Below diagram shows the high level steps that are needed to get the MTW system up and running in your environment.
+	
+[images/mtw_sdk_steps.jpg] Installation-Configuration steps
+
+	After the installation of Mt.Wilson Server and trust agent on the hosts (required only for Xen/KVM hosts), users can call into the APIs for performing various different functions. The sample code below shows how the users can request for access, create whitelists, register hosts and finally retrieve the attestation result of the registered hosts. Refer to the full API Documentation for details on all the available methods. To start with users need to include the MTW Jar files in their project and import the following packages:
+	
++---
+import com.intel.mtwilson.v2.client.*;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.mtwilson.attestation.client.jaxrs.RegisterHosts;
+import com.intel.mtwilson.attestation.client.jaxrs.WhiteList;
+import com.intel.mtwilson.attestation.client.jaxrs.HostAttestations;
+import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
+import com.intel.mtwilson.as.rest.v2.model.RegisterHostsRpcInput;
+import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
+import com.intel.mtwilson.datatypes.HostConfigResponse;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecordList;
++---
+
+    Before you can make any API calls into Mt Wilson, you need to register and obtain access. Below steps will show you how to register with Mt Wilson and how to make API calls after your registration is approved. 
+
+* Registration
+
+    The following code will create a keystore with the username in the specified directory. The keystore contains an RSA keypair that is used to authenticate your API calls to Mt Wilson. It also contains the Mt Wilson SSL certificate and SAML signing certificate, which are downloaded from the server.
+
+** Java
+
++---
+String userName = "testuser";
+String password = "password";
+URL server = new URL("https://mtw.server.com:8181/mtwilson/v2/");
+SimpleKeystore keystore = MwClientUtil.createUserInDirectoryV2(new java.io.File("c:\\mtwilson"), userName, password, server, "comments");
++---
+
+
+*Setting up the properties required for the instantiation of the Client object
+
+    After the request is created, contact the Mt Wilson administrator to approve your access request (offline step). After your registration is approved, you can use the API to access all the features Mt Wilson provides such as maintaining a whitelist, adding hosts,and obtaining a trust assertion on one or more hosts. To use the API, you need to create an Client object configured with your credentials and your Mt Wilson server, then use it to send requests to the Mt Wilson server. Notice that the variables directory, username, password, and servers are the same as what you used during registration.
+
+** Java
+
+    It is up to the user how to pass in the required properties for the creation of the client object. Here we are using a simple helper function. For each of the client objects that would be created, the same set of properties need to be passed in.
+
++---
+private static Properties getClientProperties() {
+	Properties properties = new Properties();
+	properties.setProperty("mtwilson.api.url", "https://mtw.server.com:8181/mtwilson/v2");
+	properties.setProperty("mtwilson.api.keystore", "c:\\mtwilson\\testuser.jks");
+	properties.setProperty("mtwilson.api.keystore.password", "password");
+	properties.setProperty("mtwilson.api.key.alias", "testuser");
+	properties.setProperty("mtwilson.api.key.password", "password");
+	return properties;	
+}
++---
+
+
+*Provisioning white lists / good known measurements
+
+	Now that the environment is setup, we can proceed to the next step, which is provisioning of white list or good known measurements.  The measurements retrieved from the hosts that would be registered would be compared against these white list values for attestation. So, we need to create white lists for each unique BIOS & OS/Hypervisor that is installed on the hosts in the datacenter. We can configure these white lists manually or through automation APIs. In case of automation APIs, we would provide a host, which is known to be in a good state. The measurements retrieved from this good known host would be considered as white lists. Ideally these hosts from which the white lists are retrieved should be in a isolated environment.
+	
+	In the below example we will use a VMware ESXi host. Please refer to the javadocs for the connection string formats for other types of hosts and also other options for configuring the white lists. 
+	
+** Java
+
++---
+// Instantiate the api client object for white list creation with the specified properties 
+WhiteList whiteListClient = new WhiteList(getClientProperties());
+
+// Create the host record object to specify the good known host
+TxtHostRecord gkvHost = new TxtHostRecord();
+gkvHost.HostName = "192.168.0.100";
+gkvHost.AddOn_Connection_String = "vmware:https://vcenter.server.com:443/sdk;admin;password";
+
+CreateWhiteListRpcInput rpcInput = new CreateWhiteListRpcInput();
+rpcInput.setHost(gkvHost);        
+
+boolean rpcOutput = whiteListClient.createWhitelist(rpcInput);
++---
+
+*Host Registration
+
+	Now that the provisioning has been completed, we can register the host(s) for attestation. In the example below we are registering the same host that we used for white listing.
+
+** Java
+
++---
+// Instantiate the api client for host registration with the specified properties
+RegisterHosts registerHostClient = new RegisterHosts(getClientProperties());
+
+TxtHostRecord host = new TxtHostRecord();
+host.HostName = "192.168.0.100";
+host.AddOn_Connection_String = "vmware:https://vcenter.server.com:443/sdk;admin;password";
+TxtHostRecordList hostList = new TxtHostRecordList();
+hostList.getHostRecords().add(host);
+
+RegisterHostsRpcInput registerHostsRpcInput = new RegisterHostsRpcInput();
+registerHostsRpcInput.setHosts(hostList);
+
+List<HostConfigResponse> registerHostsRpcOutput = registerHostClient.registerHosts(registerHostsRpcInput);
++---
+
+*Trust verification
+
+    Once the host is registered, the user can request the attestation status of the host either in SAML or JSON format. The SAML assertion can be verified using the SAML certificate stored in the keystore created during host registration. Note that the input would be the UUID of the host.
+
+** Java
+
++---
+HostAttestations attestationClient = new HostAttestations(getClientProperties());
+HostAttestation hostAttestation = new HostAttestation();
+hostAttestation.setHostUuid("cbb95482-5da7-4549-b018-55371e7aa746");
+String createHostAttestationSaml = attestationClient.createHostAttestationSaml(hostAttestation);
++---

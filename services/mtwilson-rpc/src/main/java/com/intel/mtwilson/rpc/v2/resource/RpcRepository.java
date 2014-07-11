@@ -9,7 +9,7 @@ import com.intel.mtwilson.rpc.v2.model.RpcFilterCriteria;
 import com.intel.mtwilson.rpc.v2.model.RpcCollection;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 //import javax.ejb.Stateless;
@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response;
 @V2
 //@Stateless
 @Path("/rpcs")
-public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFilterCriteria, RpcLocator> {
+public class RpcRepository implements DocumentRepository<Rpc, RpcCollection, RpcFilterCriteria, RpcLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RpcRepository.class);
     private static final HashMap<UUID, Rpc> data = new HashMap<UUID, Rpc>(); 

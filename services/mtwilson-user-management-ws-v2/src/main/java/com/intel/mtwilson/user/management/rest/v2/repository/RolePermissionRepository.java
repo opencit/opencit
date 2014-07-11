@@ -4,18 +4,19 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermission;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.RolePermissionLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
@@ -23,7 +24,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class RolePermissionRepository implements SimpleRepository<RolePermission, RolePermissionCollection, RolePermissionFilterCriteria, RolePermissionLocator> {
+public class RolePermissionRepository implements DocumentRepository<RolePermission, RolePermissionCollection, RolePermissionFilterCriteria, RolePermissionLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RolePermissionRepository.class);
     
@@ -67,7 +68,7 @@ public class RolePermissionRepository implements SimpleRepository<RolePermission
             }
         } catch (Exception ex) {
             log.error("Error during user role permissions search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("RolePermission:Search - Returning back {} of results.", objCollection.getRolePermissions().size());                
         return objCollection;
@@ -89,6 +90,8 @@ public class RolePermissionRepository implements SimpleRepository<RolePermission
     @RequiresPermissions("role_permissions:create")        
     public void create(RolePermission item) {
         log.debug("RolePermission:Create - Got request to create a new role.");
+        RolePermissionLocator locator = new RolePermissionLocator();
+        locator.roleId = item.getRoleId();
          try (LoginDAO loginDAO = MyJdbi.authz()) {
              // Set the default for selection if not specified by the user.
             if (item.getPermitSelection() == null || item.getPermitSelection().isEmpty())
@@ -105,13 +108,13 @@ public class RolePermissionRepository implements SimpleRepository<RolePermission
                 log.debug("RolePermission:Create - Created the role permission successfully.");
             } else {
                 log.error("RolePermission:Create - RolePermission will not be created since a duplicate already exists.");
-                throw new WebApplicationException(Response.Status.CONFLICT);
+                throw new RepositoryCreateConflictException(locator);
             }  
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Error during role permission creation.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -130,9 +133,11 @@ public class RolePermissionRepository implements SimpleRepository<RolePermission
             for (RolePermission obj : objCollection.getRolePermissions()) {
                 loginDAO.deleteRolePermission(obj.getRoleId(), obj.getPermitDomain(), obj.getPermitAction(), obj.getPermitSelection());
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user login password role deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during role permission deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     

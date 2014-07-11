@@ -10,7 +10,7 @@ import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacRoleCollect
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacRoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginHmacRoleLocator;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
@@ -22,7 +22,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class UserLoginHmacRoleRepository implements SimpleRepository<UserLoginHmacRole, UserLoginHmacRoleCollection, UserLoginHmacRoleFilterCriteria, UserLoginHmacRoleLocator> {
+public class UserLoginHmacRoleRepository implements DocumentRepository<UserLoginHmacRole, UserLoginHmacRoleCollection, UserLoginHmacRoleFilterCriteria, UserLoginHmacRoleLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserLoginHmacRoleRepository.class);
     

@@ -149,6 +149,7 @@ public class VMwareConnectionPool {
                                 throw new VMwareConnectionException(e4);
                             }
                         }
+                        /*
                         try {
                             log.debug("Trust policy: {}", tlsConnection.getTlsPolicy().getClass().getName());
                             // now show what is in the trusted keystore... to help understand why it didn't match
@@ -162,6 +163,7 @@ public class VMwareConnectionPool {
                             e5.printStackTrace(System.err);
                             log.error("Cannot enumerate truted certificates: "+e5.toString(), e5);
                         }
+                        */
                         throw new VMwareConnectionException("VMwareConnectionPool not able to read host information: "+ e3.toString());
                     }
                 }

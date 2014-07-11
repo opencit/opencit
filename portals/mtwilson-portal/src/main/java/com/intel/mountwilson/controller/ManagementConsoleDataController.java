@@ -27,6 +27,7 @@ import com.intel.mountwilson.datamodel.MLEDataVO;
 import com.intel.mountwilson.datamodel.OEMDataVO;
 import com.intel.mountwilson.datamodel.OSDataVO;
 import com.intel.mountwilson.datamodel.VmmHostDataVo;
+import com.intel.mountwilson.util.BasicView;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
@@ -118,7 +119,8 @@ public class ManagementConsoleDataController extends MultiActionController {
     public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req, HttpServletResponse res) {
         log.debug("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
         req.getSession().removeAttribute("hostVO");
-        ModelAndView responseView = new ModelAndView(new JSONView());
+        //ModelAndView responseView = new ModelAndView(new JSONView());
+        ModelAndView responseView = new ModelAndView(new BasicView());
         List<HostDetails> listOfRegisterHost = new ArrayList<>();
 
         log.debug("Action is :{}", req.getMethod());
@@ -194,6 +196,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         }
 
         //log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
+        //responseView.addObject("result", true);
         return responseView;
     }
 
@@ -244,11 +247,13 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("ManagementConsoleDataController.uploadWhiteListConfiguration >>");
         ModelAndView responseView = new ModelAndView(new JSONView());
         String hostVOString = req.getParameter("registerHostVo");
+        log.debug("uploadWhiteListConfiguration registerHostVo = {}", hostVOString);
         boolean result = false;
         HostDetails hostDetailsObj;
 
         try {
             String whiteListConfigVOString = req.getParameter("whiteListConfigVO");
+        log.debug("uploadWhiteListConfiguration whiteListConfigVO = {}", whiteListConfigVOString);
             HostConfigData hostConfig;
 
             @SuppressWarnings("serial")
@@ -257,7 +262,10 @@ public class ManagementConsoleDataController extends MultiActionController {
             hostConfig = new Gson().fromJson(whiteListConfigVOString, whiteListType);
             //hostConfig = getObjectFromJSONString(whiteListConfigVOString, HostConfigData.class);
 
-            hostConfig.setBiosWLTarget(getBiosWhiteListTarget(req.getParameter("biosWLTagrget")));
+            // these are handled separately because their values are in enum HostWhiteListTarget
+            // also note that the parameter names are camelCase, because the deserialization happens
+            // above via Gson, so any jackson annotations ilke @JsonProperty are ignored.
+            hostConfig.setBiosWLTarget(getBiosWhiteListTarget(req.getParameter("biosWLTagrget"))); 
             hostConfig.setVmmWLTarget(getVmmWhiteListTarget(req.getParameter("vmmWLTarget")));
             System.err.println("whiteListConfigVO>>" + hostConfig);
 
@@ -671,7 +679,7 @@ public class ManagementConsoleDataController extends MultiActionController {
             ApiClient apiObj = getApiClientService(req, ApiClient.class);
 
             responseView.addObject("expiringApiClients", services.getApiClients(apiObj, ApiClientListType.EXPIRING));
-            responseView.addObject("expirationMonths", MCPConfig.getConfiguration().getString("mtwilson.mc.apiKeyExpirationNoticeInMonths"));
+            responseView.addObject("expirationMonths", MCPConfig.getConfiguration().getInt("mtwilson.mc.apiKeyExpirationNoticeInMonths", 3));
 
         } catch (Exception e) {
 
@@ -923,7 +931,7 @@ public class ManagementConsoleDataController extends MultiActionController {
         for (HostDetails hostDetails : listOfRegisterHost) {
             HostDetails details = hostDetails;
             try {
-                List<TxtHostRecord> list = apiClient.queryForHosts(hostDetails.getHostName());
+                List<TxtHostRecord> list = apiClient.queryForHosts2(hostDetails.getHostName());
                 if (list.size() <= 0) {
                     details.setRegistered(false);
                 } else {

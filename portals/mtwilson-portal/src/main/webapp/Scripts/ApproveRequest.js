@@ -1,5 +1,6 @@
 var apiClientList = [];
 var roleList = [];
+var expire_date;
 
 $(function() {
 	$('#mainLoadingDiv').prepend(disabledDiv);
@@ -11,7 +12,7 @@ function fnRetriveHostSuccess(responseJSON) {
 	if (responseJSON.result) {
 		var request = responseJSON.pendingRequest;
                 if (request.length == 0) {
-                    $('#successMessage').html('<span> No requests are currently pending to be reviewed.</span>');
+                    $('#successMessage').html('<span data-i18n="label.no_pending_api_requests">No requests are currently pending to be reviewed.</span>');
                     return;
                 } 
 
@@ -24,15 +25,20 @@ function fnRetriveHostSuccess(responseJSON) {
                         apiClientList[request[item].fingerprint] = request[item];
 			var classValue = null;
 			if(item % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
+                        var roles = "";
+                        for (var role in request[item].requestedRoles) {
+                            roles += '<span data-i18n="label.role_' + request[item].requestedRoles[role].toLowerCase() + '" data-status="' + request[item].requestedRoles[role] + '">' + request[item].requestedRoles[role] + '</span>, ';
+                        }
+                        roles = roles.replace(/,\s*$/, "");
 			str+='<tr class="'+classValue+'">'+
 					'<td class="viewRequestRow1" name="name" fingerprint="'+request[item].fingerprint+'">'+request[item].name+'</td>'+
-					'<td class="viewRequestRow2" name="requestedRoles">'+request[item].requestedRoles.toString()+'</td>'+
-					'<td class="viewRequestRow3"><input type="button" value="Details" onclick="fnGetRequestDetails(this)"></td>'+
+					'<td class="viewRequestRow2" name="requestedRoles">'+roles+'</td>'+
+					'<td class="viewRequestRow3"><input type="button" value="Details" onclick="fnGetRequestDetails(this)" data-i18n="[value]button.details"></td>'+
 				'</tr>';
 		}
 		$('#approveRegisterHostTableContent').html(str);
 	}else {
-		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
+		$('#successMessage').html('<span class="errorMessage">'+ getHTMLEscapedMessage(responseJSON.message) +'</span>');
 	}
 }
 
@@ -56,13 +62,15 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	$('#mainApiClient_Issuer').val(data.issuer);
         
 	var apiRoles = data.requestedRoles; //.toString().split(',');
-	var str="";
+	var str='<span style="font-weight: bold; color: #555555; font-size: 0.9em" data-i18n="label.mtw_1x_roles">Mt Wilson 1.x roles for backward compatibility:</span><br>';
         for (var globalRole in roleList) {
             var index = findIndex(roleList[globalRole], apiRoles);
+            if (roleList[globalRole] == 'Administrator')
+                str+='<br><br><span style="font-weight: bold; color: #555555; font-size: 0.9em" data-i18n="label.mtw_2x_roles">Mt Wilson 2.x roles:</span><br>';
             if (index != -1) {
-                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';               
+                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly requestedRoleHighlight" id="mainApiClient_'+ roleList[globalRole] +'" data-i18n="label.role_' + roleList[globalRole].toLowerCase() + '">'+ roleList[globalRole] +'</span>';               
             } else {
-                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly" id="mainApiClient_'+ roleList[globalRole] +'">'+ roleList[globalRole] +'</span>';
+                str+='<input type="checkbox" role="'+ roleList[globalRole] +'"><span class="requestedRolesDispaly" id="mainApiClient_'+ roleList[globalRole] +'" data-i18n="label.role_' + roleList[globalRole].toLowerCase() + '">'+ roleList[globalRole] +'</span>';
             }
         }
 	/*for ( var items in apiRoles) {
@@ -70,7 +78,9 @@ function fnApproveRequestDataPolulate(response,elementIDToBePublised,data) {
 	}*/
 	
 	$('#mainApiClient_Roles').html('<div>'+str+'</div>');
-	$('#mainApiClient_Expires').val(data.expires);
+        $('#mainApiClient_Expires').val(new Date(data.expires).toISOString());
+        expire_date = data.expires;
+        $('#mainApiClient_Comments').val(data.comments);
 }
 
 //Add by Soni on 4th oct for bug 462
@@ -101,7 +111,8 @@ function fnGetRequestVOForApprovalOrReject() {
 		roles.push($(this).attr('role'));
 	});
 	vo.requestedRoles = roles;
-	vo.expires= $('#mainApiClient_Expires').val();
+        vo.expires = expire_date;
+	//vo.expires= $('#mainApiClient_Expires').val();
 	vo.comments= $('#mainApiClient_Comments').val();
 	//alert(vo.comments);
 	
@@ -110,7 +121,7 @@ function fnGetRequestVOForApprovalOrReject() {
 }
 
 function approveSelectedRequestSuccess(responseJSON) {
-	alert("Request is Approved Successfully.");
+	alert($("#alert_request_approved").text());
 	getApproveRequestPage();
 }
 
@@ -122,16 +133,23 @@ function fnRejectSelectedRequest() {
 }
 
 function rejectSelectedRequestSuccess() {
-	alert("Request is Rejected Successfully.");
+	alert($("#alert_request_rejected").text());
 	getApproveRequestPage();
 }
 
 function findIndex(item, arr) {
     var index;
     var arrSize = arr.length;
+    if (arrSize == 0) 
+        return -1; // since there are no roles requested by the user
     for (var i = 0; i < arrSize; i++) {
         index = (item == arr[i]) ? i : -1;
         if (-1 != index) break;
     }
     return index;
+}
+
+function showDialogRoleHelp() {
+        var str = '<div class="helpDiv" data-i18n="[html]help.role_description_help"></div>';
+	fnOpenDialog(str, "Help", 500, 350,false);
 }

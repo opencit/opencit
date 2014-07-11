@@ -15,13 +15,11 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.BaseBO;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.io.FileInputStream;
@@ -37,25 +35,22 @@ import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.security.cert.CertificateException;
-//import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.codec.binary.Hex;
 
 /**
  *
  * @author ssbangal
  */
-public class AssetTagCertBO extends BaseBO{
+public class AssetTagCertBO {
     
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AssetTagCertBO.class);
 
     public AssetTagCertBO() {
     }
 
-    public AssetTagCertBO(PersistenceManager pm) {
-        super(pm);
-    }
+//    public AssetTagCertBO(PersistenceManager pm) {
+//        super(pm);
+//    }
     
     /**
      * This functions stores a new asset tag certificate that was provisioned by the Asset tag

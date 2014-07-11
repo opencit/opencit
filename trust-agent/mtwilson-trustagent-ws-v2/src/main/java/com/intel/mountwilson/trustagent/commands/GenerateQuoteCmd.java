@@ -4,11 +4,13 @@
  */
 package com.intel.mountwilson.trustagent.commands;
 
+import com.intel.dcsg.cpg.io.HexUtil;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class GenerateQuoteCmd implements ICommand {
     Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Pattern PCR_LIST_SSV = Pattern.compile("^[0-9][0-9 ]*$");
     
     private TADataContext context;
 
@@ -42,12 +45,24 @@ public class GenerateQuoteCmd implements ICommand {
     
     @Override
     public void execute() throws TAException {
+        String identityAuthKey = context.getIdentityAuthKey();
+        String selectedPcrs = context.getSelectedPCRs();
+        
+        if (!HexUtil.isHex(identityAuthKey)) {
+            log.error("Aik secret password is not in hex format: {}", identityAuthKey);
+            throw new IllegalArgumentException(String.format("Aik secret password is not in hex format."));
+        }
+        if (!PCR_LIST_SSV.matcher(selectedPcrs).matches()) {
+            log.error("Selected PCRs do not match correct format: {}", selectedPcrs);
+            throw new IllegalArgumentException(String.format("Selected PCRs do not match correct format."));
+        }
+        
         String commandLine = String.format("aikquote -p %s -c %s %s %s %s",
-        		context.getIdentityAuthKey(),
-                context.getNonceFileName(),
-                context.getAikBlobFileName(),
-                context.getSelectedPCRs(),
-                context.getQuoteFileName()); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
+                identityAuthKey,
+                CommandUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()),
+                CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
+                selectedPcrs,
+                CommandUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
         
 
         try {

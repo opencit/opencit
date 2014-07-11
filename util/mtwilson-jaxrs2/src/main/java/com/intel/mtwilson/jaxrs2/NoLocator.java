@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.jaxrs2;
 
+import com.intel.mtwilson.repository.Locator;
+
 /**
  *
  * @author jbuhacoff

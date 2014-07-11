@@ -135,6 +135,10 @@
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-rfc822</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -177,6 +181,11 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <scope>test</scope>
         </dependency>
 		
         <!--

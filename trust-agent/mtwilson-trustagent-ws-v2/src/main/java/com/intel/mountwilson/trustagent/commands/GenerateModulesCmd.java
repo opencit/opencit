@@ -50,10 +50,9 @@ public class GenerateModulesCmd implements ICommand {
      * @author skaja
      */
     private void getXmlFromMeasureLog() throws TAException, IOException {
-        
         log.debug("About to run the command: " + context.getMeasureLogLaunchScript());
         long startTime = System.currentTimeMillis();
-        CommandUtil.runCommand( context.getMeasureLogLaunchScript().getAbsolutePath() );
+        CommandUtil.runCommand(CommandUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()));
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
@@ -61,9 +60,7 @@ public class GenerateModulesCmd implements ICommand {
         log.debug("Content of the XML file before getting modules: " + content);
         
         getModulesFromMeasureLogXml(content);
-
-        CommandUtil.runCommand(String.format("rm -fr %s", context.getMeasureLogXmlFile()));
-
+        CommandUtil.runCommand(String.format("rm -fr %s", CommandUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogXmlFile().getAbsolutePath())));
     }
 
     /**

@@ -50,6 +50,10 @@ jQuery.extend({
                 return form;
         },
         ajaxFileUpload: function(s) {
+<<<<<<< HEAD
+=======
+                // TODO introduce global settings, allowing the client to modify them for all requests, not only timeout
+>>>>>>> aea2c917d2bded452f248a22c7be9ec604b68677
                 s = jQuery.extend({}, jQuery.ajaxSettings, s);
                 var id = new Date().getTime()
                 var form = jQuery.createUploadForm(id, s.fileElementId, (typeof(s.data) == 'undefined' ? false : s.data));
@@ -94,7 +98,7 @@ jQuery.extend({
                                         status = isTimeout != "timeout" ? "success" : "error";
                                         // Make sure that the request was successful or notmodified
                                         if (status != "error")
-                                        {
+                                        {                                            
                                                 // process the data (runs the xml through httpData regardless of callback)
                                                 var data = jQuery.uploadHttpData(xml, s.dataType);
                                                 // If a local callback was specified, fire it and pass it the data
@@ -138,12 +142,12 @@ jQuery.extend({
                                                 jQuery.handleError(s, xml, null, e);
                                         }
 
-                                }, 100)
+                                }, 100);
 
-                                xml = null
+                                xml = null;
 
                         }
-                }
+                };
                 // Timeout checker
                 if (s.timeout > 0)
                 {
@@ -155,9 +159,12 @@ jQuery.extend({
                 }
                 try
                 {
-
+                        // also check here that what was created up above is also still here
                         var form = jQuery('#' + formId);
-                        jQuery(form).attr('action', s.url);
+                        var urlWithQS = s.url + "?" + s.headers["AuthorizationToken"];
+                        //var form = jQuery('<form  enctype ="multipart/form-data" method="POST" action="' + urlWithQS + '" name="' + formId + '" id="' + formId + '" target="' + frameId + '"><input type="hidden" name=AuthorizationToken value="' + s.headers["AuthorizationToken"] + '" /></form>');
+                        //jQuery('<input type="hidden" name=AuthorizationToken value="' + s.headers["AuthorizationToken"] + '" />').appendTo(form);
+                        jQuery(form).attr('action', urlWithQS);
                         jQuery(form).attr('method', 'POST');
                         jQuery(form).attr('target', frameId);
                         if (form.encoding)
@@ -189,7 +196,7 @@ jQuery.extend({
                         jQuery.globalEval(data);
                 // Get the JavaScript object, if JSON is used.
                 if (type == "json")
-                        eval("data = " + data);
+                    eval("data = " + data);                        
                 // evaluate scripts within html
                 // INSECURE, NEEDS REVIEW
                 if (type == "html")

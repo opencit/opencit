@@ -33,6 +33,7 @@ response.setHeader("Content-Disposition",
 			<div id="successMessage"></div>
 			
 		</div>
+                <span id="alert_no_root_ca" data-i18n="alert.no_root_ca" style="display: none;">This system is not currently configured with a Root CA</span>
 	</div>
 <script type="text/javascript" src="Scripts/CertDownload.js"></script>
 </body>

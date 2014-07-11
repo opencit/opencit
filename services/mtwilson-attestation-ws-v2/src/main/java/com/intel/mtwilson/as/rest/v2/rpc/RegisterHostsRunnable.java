@@ -8,9 +8,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
+import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.ms.business.HostBO;
 import java.util.List;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
 /**
@@ -45,6 +47,7 @@ public class RegisterHostsRunnable implements Runnable{
     }
     
     @Override
+    @RequiresPermissions({"hosts:create,store"})
     public void run() {
         log.debug("Got request to register # {} of servers.", hosts.getHostRecords().size());
         result = new HostBO().registerHosts(hosts);

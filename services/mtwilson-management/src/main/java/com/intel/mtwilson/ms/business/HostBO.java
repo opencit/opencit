@@ -4,12 +4,12 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.api.*;
-//import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.MwProcessorMappingJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
@@ -34,9 +34,6 @@ import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.ms.BaseBO;
-import com.intel.mtwilson.ms.MSPersistenceManager;
-//import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.util.ResourceFinder;
 import com.intel.mtwilson.wlm.business.MleBO;
 import com.intel.mtwilson.wlm.business.OemBO;
@@ -62,14 +59,12 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class HostBO extends BaseBO {
+public class HostBO {
 
     private static int MAX_BIOS_PCR = 17;
     private static int LOCATION_PCR = 22;
@@ -78,7 +73,7 @@ public class HostBO extends BaseBO {
     private static String OPENSOURCE_PCRs = "18";
     private static String CITRIX_PCRs = "18"; //"17,18";
     
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
 
     /**
      * Private class to support multithreading to retrieve the attestation report from the target host.
@@ -228,7 +223,7 @@ public class HostBO extends BaseBO {
         
     }
     
-    private HostConfigData calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) throws MalformedURLException {
+    private void calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) throws MalformedURLException {
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
         
         if (isBIOSMLE) {
@@ -285,7 +280,6 @@ public class HostBO extends BaseBO {
                 }
         }
         hostConfigObj.setTxtHostRecord(hostObj);
-        return hostConfigObj;
     }
     
     /**
@@ -306,8 +300,7 @@ public class HostBO extends BaseBO {
      
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-            
+            // BOOKMARK JONATHAN TLS POLICY
             // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
             // first and make up the complete connection string.
             ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
@@ -316,6 +309,7 @@ public class HostBO extends BaseBO {
             tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
@@ -346,8 +340,8 @@ public class HostBO extends BaseBO {
                     + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version + ":" + hostObj.Processor_Info);
 
             // Change the BIOS and VMM MLE names as per the target white list chosen by the user
-            hostConfigObj = calibrateMLENames(hostConfigObj, true);
-            hostConfigObj = calibrateMLENames(hostConfigObj, false);
+            calibrateMLENames(hostConfigObj, true);
+            calibrateMLENames(hostConfigObj, false);
             
             if (registerHost) {
                 new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
@@ -654,6 +648,12 @@ public class HostBO extends BaseBO {
      * @return : true on success.
      */
     public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("configureWhiteListFromCustomData: {}", mapper.writeValueAsString(hostConfigObj));
+        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize input" ,e); }
+        // debug only
 
         boolean configStatus = false;
         String attestationReport;
@@ -687,6 +687,13 @@ public class HostBO extends BaseBO {
 
                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
                 
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("configureWhiteListFromCustomData TxtHostRecord2: {}", mapper.writeValueAsString(gkvHost));
+        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize TxtHostRecord2" ,e); }
+        // debug only
+                
                 if(gkvHost.AddOn_Connection_String == null) {
                     ConnectionString cs = ConnectionString.from(gkvHost);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
@@ -696,12 +703,11 @@ public class HostBO extends BaseBO {
                     ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 }
-                // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
-                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); 
-                tblHosts.setTlsKeystore(null); 
+                // BOOKMARK JONATHAN TLS POLICY
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
+                tblHosts.setTlsPolicyChoice(gkvHost.tlsPolicyChoice);
                 tblHosts.setIPAddress(gkvHost.HostName);
                 if (gkvHost.Port != null) {
                     tblHosts.setPort(gkvHost.Port);
@@ -766,8 +772,8 @@ public class HostBO extends BaseBO {
                     throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                 }
                 
-                hostConfigObj = (WhitelistConfigurationData) calibrateMLENames(hostConfigObj, true);
-                hostConfigObj = (WhitelistConfigurationData) calibrateMLENames(hostConfigObj, false);
+                calibrateMLENames(hostConfigObj, true);
+                calibrateMLENames(hostConfigObj, false);
                 if (hostConfigObj.addBiosWhiteList())
                     reqdManifestList = hostConfigObj.getBiosPCRs();
                 if (hostConfigObj.addVmmWhiteList()) {
@@ -862,7 +868,7 @@ public class HostBO extends BaseBO {
                 log.debug("TIMETAKEN: for uploading to DB: {}", (System.currentTimeMillis() - configWLStart));
                 
                 // Register host only if required.
-                if (hostConfigObj.isRegisterHost() == true) {
+                /*if (hostConfigObj.isRegisterHost() == true) {
                     com.intel.mtwilson.as.business.HostBO hostbo = new com.intel.mtwilson.as.business.HostBO();
                     // First let us check if the host is already configured. If yes, we will return back success
                     TblHosts hostSearchObj = hostsJpaController.findByName(gkvHost.HostName);
@@ -886,7 +892,7 @@ public class HostBO extends BaseBO {
                     }
                 }
 
-                log.debug("TIMETAKEN: for registering host: {} ", (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for registering host: {} ", (System.currentTimeMillis() - configWLStart));*/
                 
                 // Now we need to configure the MleSource table with the details of the host that was used for white listing the MLE.
                 if (hostConfigObj.addBiosWhiteList()) {

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.My;
 //import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 //import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
@@ -13,7 +14,7 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
 //import com.intel.dcsg.cpg.tls.policy.TrustCaAndVerifyHostnameTlsPolicy;
 //import com.intel.dcsg.cpg.tls.policy.TrustFirstCertificateTlsPolicy;
 //import com.intel.dcsg.cpg.tls.policy.TrustKnownCertificateTlsPolicy;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 //import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,8 +42,7 @@ import java.util.List;
  */
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private Map<String,VendorHostAgentFactory> vendorFactoryMap = new HashMap<String,VendorHostAgentFactory>();
-    private TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.getInstance();
+    private Map<String,VendorHostAgentFactory> vendorFactoryMap = new HashMap<>();
     
     public HostAgentFactory() {
 //        vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());
@@ -61,30 +62,30 @@ public class HostAgentFactory {
     public void setVendorFactoryMap(Map<String,VendorHostAgentFactory> map) {
         vendorFactoryMap = map;
     }
-    
-    
-    /**
-     * @deprecated in mtwilson 2.0, use implementations of HostAgent instead
-     * @param host
-     * @return 
-     */
-    public PcrManifest getManifest(TblHosts host) {
-        try {
-            InternetAddress hostAddress = new InternetAddress(host.getName());
-            String connectionString = getConnectionString(host);
-            String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  
-//            ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore());
-            String password = My.configuration().getTlsKeystorePassword(); 
-            SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); 
-            TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
-            HostAgent hostAgent = getHostAgent(hostAddress, connectionString, tlsPolicy);
-            PcrManifest pcrManifest = hostAgent.getPcrManifest();
-//            host.setTlsKeystore(resource.toByteArray()); // if the tls policy is TRUST_FIRST_CERTIFICATE then it's possible a new cert has been saved in it and we have to make sure it gets saved to the host record;  for all other tls policies there would be no change so this is a no-op -  the byte array will be the same as the one we started with
-            return pcrManifest;
-        }
-        catch(Exception e) {
-            throw new IllegalArgumentException("Cannot get manifest for "+host.getName()+": "+e.toString(), e);
-        }        
+        
+    private TxtHostRecord convert(TblHosts input) {
+        TxtHostRecord converted = new TxtHostRecord();
+        converted.AIK_Certificate = input.getAIKCertificate();
+        converted.AIK_PublicKey = input.getAikPublicKey();
+        converted.AIK_SHA1 = input.getAikSha1();
+        converted.AddOn_Connection_String = input.getAddOnConnectionInfo();
+        converted.BIOS_Name = (input.getBiosMleId() == null ? null : input.getBiosMleId().getName());
+        converted.BIOS_Version = (input.getBiosMleId() == null ? null : input.getBiosMleId().getVersion());
+        converted.BIOS_Oem = (input.getBiosMleId() == null || input.getBiosMleId().getOemId() == null ? null : input.getBiosMleId().getOemId().getName());
+        converted.Description = input.getDescription();
+        converted.Email = input.getEmail();
+        converted.Hardware_Uuid = input.getHardwareUuid();
+        converted.HostName = input.getName();
+        converted.IPAddress = input.getIPAddress();
+        converted.Location = input.getLocation();
+        converted.Port = input.getPort();
+//        converted.Processor_Info
+        converted.VMM_Name = (input.getVmmMleId() == null ? null : input.getVmmMleId().getName());
+        converted.VMM_Version = (input.getVmmMleId() == null ? null : input.getVmmMleId().getVersion());
+        converted.VMM_OSName = (input.getVmmMleId() == null || input.getVmmMleId().getOsId() == null ? null : input.getVmmMleId().getOsId().getName());
+        converted.VMM_OSVersion = (input.getVmmMleId() == null || input.getVmmMleId().getOsId() == null ? null : input.getVmmMleId().getOsId().getVersion());
+        converted.tlsPolicyChoice = input.getTlsPolicyChoice();
+        return converted;
     }
     
     /**
@@ -96,52 +97,55 @@ public class HostAgentFactory {
      * @return 
      */
     public HostAgent getHostAgent(TblHosts host) {
+        // debug only
         try {
-            InternetAddress hostAddress = new InternetAddress(host.getName()); // switching from Hostname to InternetAddress (better support for both hostname and ip address)
-            // here we figure out if it's vmware or intel  and ensure we have a valid connection string starting with the vendor scheme.  
-            // no special case for citrix, since that support was added recently they should always come with citrix: prepended.
-//            System.out.println("host cs = " + host.getAddOnConnectionInfo());
-            String connectionString = getConnectionString(host);
-            //System.out.println("stdalex getHostAgent cs =" + connectionString);
+        ObjectMapper mapper = new ObjectMapper();
+//        log.debug("getHostAgent TblHosts: {}", mapper.writeValueAsString(host)); // infinite recursion because of the automatic database links, tblHosts -> tblSamlAssertionCollection -> first item -> tblHosts again
+        log.debug("getHostAgent TblHosts tlsPolicyId: {}", host.getTlsPolicyId());
+        log.debug("getHostAgent TblHosts tlsPolicyDescriptor: {}", mapper.writeValueAsString(host.getTlsPolicyDescriptor()));
+        log.debug("getHostAgent TblHosts tlsPolicyName (deprecated): {}", host.getTlsPolicyName());
+        log.debug("getHostAgent TblHosts tlsKeystore (deprecated): {} bytes", (host.getTlsKeystore()==null?"null":host.getTlsKeystore().length));
+        } catch(Exception e) { log.error("getHostAgent cannot serialize TblHosts" ,e); }
+        // debug only
+        
+        return getHostAgent(convert(host));
+    }
+    
+    public HostAgent getHostAgent(TxtHostRecord host) {
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("getHostAgent TxtHostRecord: {}", mapper.writeValueAsString(host));
+        } catch(Exception e) { log.error("getHostAgent cannot serialize TxtHostRecord" ,e); }
+        // debug only
+        
+        String address = host.HostName;
+        if( address == null || address.isEmpty() ) { address = host.IPAddress; }
+        try {
+            
+            InternetAddress hostAddress = new InternetAddress(address); // switching from Hostname to InternetAddress (better support for both hostname and ip address)
+            ConnectionString connectionString = ConnectionString.from(host);
             log.debug("Retrieving TLS policy...");
             TlsPolicy tlsPolicy = getTlsPolicy(host);
-            log.debug("Creating Host Agent for host: " + host.getName());
+            log.debug("Creating Host Agent for host: {}" , address);
             HostAgent ha = getHostAgent(hostAddress, connectionString, tlsPolicy); 
             log.debug("Host Agent created.");
             return ha;
         }
-        catch(Exception e) {
-            throw new IllegalArgumentException("Cannot create Host Agent for "+host.getName()+": "+e.toString(), e);
+        catch(IOException | RuntimeException e) {
+            throw new IllegalArgumentException("Cannot create Host Agent for "+address+": "+e.toString(), e);
         }
-    }
+    }    
     
-    /*
-     * given a host, it returns the complete connection string starting with vendor scheme
-     * 
-     * @deprecated
-     */
-    public String getConnectionString(TblHosts host) {
-        String connectionString = host.getAddOnConnectionInfo();
-        if( connectionString == null || connectionString.isEmpty() ) {
-            if( host.getName() != null  ) {
-                connectionString = String.format("intel:https://%s:%d", host.getName(), host.getPort());
-                log.debug("Assuming Intel connection string for host " + host.getName());// removed connection string to prevent leaking secrets
-            }
-        }
-        else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
-            connectionString = String.format("vmware:%s", connectionString);
-           log.debug("Assuming Vmware connection string for host " + host.getName()); // removed connection string to prevent leaking secrets
-        }        
-        return connectionString;
-    }
-    
-    public TlsPolicy getTlsPolicy(TblHosts host) throws KeyManagementException, IOException {
-        if( host.getTlsPolicyName() == null ) {
-            host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-        }
+    public TlsPolicy getTlsPolicy(TxtHostRecord host)  {
+//        if( host.getTlsPolicyName() == null ) {
+//            host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+//        }
 //        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); 
 //        KeyStore tlsKeystore = txtHost.getTlsKeystore(); 
-        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
+//        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
+        TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.createFactory(host);//getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
+        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicy();
         return tlsPolicy;
     }
 
@@ -150,11 +154,10 @@ public class HostAgentFactory {
      * @param connectionString what is also known as the "AddOn_Connection_String", in the form vendor:url, for example vmware:https://vcenter.com/sdk;Administrator;password
      * @return 
      */
-    private HostAgent getHostAgent(InternetAddress hostAddress, String connectionString, TlsPolicy tlsPolicy) throws IOException {
-        if( connectionString == null ) {
+    private HostAgent getHostAgent(InternetAddress hostAddress, ConnectionString cs, TlsPolicy tlsPolicy) throws IOException {
+        if( cs == null ) {
             throw new IllegalArgumentException("Connection info missing"); 
         }
-        ConnectionString cs = new ConnectionString(connectionString);
         String vendorProtocol = cs.getVendor().name().toLowerCase(); // INTEL, CITRIX, VMWARE becomes intel, citrix, vmware
         if( vendorFactoryMap.containsKey(vendorProtocol) ) {
             VendorHostAgentFactory factory = vendorFactoryMap.get(vendorProtocol);

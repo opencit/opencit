@@ -18,7 +18,7 @@ import org.junit.Test;
  */
 public class HostAttestationTest {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAttestationTest.class);
 
     private static HostAttestations client = null;
     

@@ -8,12 +8,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.tag.model.Certificate;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.intel.mtwilson.tag.model.CertificateLocator;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -41,24 +42,30 @@ public class MtWilsonImportTagCertificate implements Runnable{
     @Override
     @RequiresPermissions("tag_certificates:import")         
     public void run() {
-        log.debug("Got request to deploy certificate with ID {}.", certificateId);        
+        log.debug("RPC:MtWilsonImportTagCertificate - Got request to deploy certificate with ID {}.", certificateId);  
+        CertificateLocator locator = new CertificateLocator();
+        locator.id = certificateId;
+        
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
         
             Certificate obj = dao.findById(certificateId);
             if (obj != null) 
             {
-                log.debug("Sha1 of the certificate about to be deployed is {}.", obj.getSha1());
+                log.debug("RPC:MtWilsonImportTagCertificate - Sha1 of the certificate about to be deployed is {}.", obj.getSha1());
                 AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
                 request.setCertificate(obj.getCertificate());
                 Global.mtwilson().importAssetTagCertificate(request);
-                log.info("Certificate with id {} has been deployed successfully.");
+                log.info("RPC:MtWilsonImportTagCertificate - Certificate with id {} has been deployed successfully.");
+            } else {
+                log.error("RPC:MtWilsonImportTagCertificate - Specified Certificate with id {} is not valid.", certificateId);
+                throw new RepositoryInvalidInputException(locator);
             }
 
-        } catch (WebApplicationException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during certificate deployment.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("RPC:MtWilsonImportTagCertificate - Error during certificate deployment.", ex);
+            throw new RepositoryException(ex);
         } 
         
     }

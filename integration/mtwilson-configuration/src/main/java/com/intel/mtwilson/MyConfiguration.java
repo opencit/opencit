@@ -22,11 +22,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 import java.util.prefs.Preferences;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
@@ -686,10 +689,20 @@ public class MyConfiguration {
     }
 
     ///////////////////////// tls policy  //////////////////////////////////
-    public String getDefaultTlsPolicyName() {
-        return conf.getString("mtwilson.default.tls.policy.name", "TRUST_CA_VERIFY_HOSTNAME"); // issue #871 default should be secure;  customer can explicitly set to TRUST_FIRST_CERTIFICATE if that's what they want
+    public String getGlobalTlsPolicyId() {
+        return conf.getString("mtwilson.global.tls.policy.id"); // no default - when a value is present it means all per-host and default tls policy settings will be ignored
     }
-
+    public String getDefaultTlsPolicyId() {
+        return conf.getString("mtwilson.default.tls.policy.id"); // no default - when a value is present it is used whenever a tls connection needs to be made but no per-request or per-host tls policy was specified
+    }
+    public Set<String> getTlsPolicyAllow() {
+        String[] allowed = conf.getStringArray("mtwilson.tls.policy.allow");
+        if( allowed.length == 0 ) {
+            allowed = new String[] { "certificate", "certificate-digest" }; // the other possible values which are intentionally not included in the default list are public-key, public-key-digest, INSECURE and TRUST_FIRST_CERTIFICATE
+        }
+        return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(allowed)));
+    }
+    
     public File getTlsKeystoreFile() {
         return new File(conf.getString("mtwilson.tls.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-tls.jks"));
     }

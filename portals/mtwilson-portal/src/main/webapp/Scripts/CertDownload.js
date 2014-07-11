@@ -217,6 +217,6 @@ function fnRootCADownloadSuccess(responseJSON){
 	
 	
     } else {
-        alert("This system is not currently configured with a Root CA");
+        alert($("#alert_no_root_ca").text());
 	}
 }

@@ -160,7 +160,8 @@ setup_interactive_install() {
     #webservice_install "${webservice_application_name}" "${package_dir}"/ManagementService.war
     #webservice_running_report "${webservice_application_name}"
   fi
-  bootstrap_ms_internal_user
+  # no need to create the management automation user as it is not being used.
+  #bootstrap_ms_internal_user
 }
 
 

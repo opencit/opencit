@@ -140,6 +140,35 @@ public class Mles extends MtWilsonClient {
     }
     
     /**
+     * Deletes the Mle(s) matching the specified search criteria. 
+     * @param criteria MleFilterCriteria object specifying the search criteria. Search options supported
+     * include id, nameEqualTo, nameContains, osUuid and oemUuid.
+     * @return N/A
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions mles:delete,search
+     * @mtwContentTypeReturned N/A
+     * @mtwMethodType DELETE
+     * @mtwSampleRestCall
+     * <pre>
+     * https://server.com:8181/mtwilson/v2/mles?nameContains=mle
+     * </pre>
+     * @mtwSampleApiCall
+     * <pre>
+     *  Mles client = new Mles(My.configuration().getClientProperties());
+     *  MleFilterCriteria criteria = new MleFilterCriteria();
+     *  criteria.nameContains = "mle";
+     *  client.deleteMle(criteria);
+     * </pre>
+     */
+    public void deleteMle(MleFilterCriteria criteria) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        Response obj = getTargetPathWithQueryParams("mles", criteria).request(MediaType.APPLICATION_JSON).delete();
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Delete mle failed");
+        }
+    }
+    
+    /**
      * Updates the MLE in the system. Only the description can be updated. For updating the whitelist values the caller
      * has to use either use the MlePcrs/MleModules resources.
      * Instead of updating the OS/OEM & MLEs manually, users can opt to use the RPC automation APIs.
@@ -176,7 +205,7 @@ public class Mles extends MtWilsonClient {
     /**
      * Retrieves the Mle with the specified UUID from the system.
      * @param uuid - UUID of the MLE to be retrieved
-     * @return <code> Mle </code> matching the specified UUID.
+     * @return Mle matching the specified UUID.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mles:retrieve
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -203,10 +232,11 @@ public class Mles extends MtWilsonClient {
     }
     
     /**
-     * Search for Mles matching the specified filter criteria.
-     * @param criteria <code> MleFilterCriteria </code> used to specify the parameters of search. 
-     *          Search criteria currently supported includes nameEqualTo, nameContains, osUuid and oemUuid
-     * @return <code> MleCollection</code>, having the list of the Mles that match the specified criteria.
+     * Searches for Mles matching the specified filter criteria.
+     * @param criteria MleFilterCriteria object specifying the filter criteria. Search options supported
+     * include id, nameEqualTo, nameContains, osUuid and oemUuid.
+     * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /v2/mles?filter=false]
+     * @return MleCollection having the list of the Mles that match the specified criteria.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mles:search
      * @mtwContentTypeReturned JSON/XML/YAML

@@ -36,7 +36,8 @@ public class Host extends Document {
     private String aikCertificate;  // may be null
     private String aikPublicKey;  // may be null
     private String aikSha1;  // may be null
-    private HostTlsPolicy tlsPolicy;
+    private String tlsPolicyId;
+    private String hardwareUuid;
 
     @Regex(RegexPatterns.IPADDR_FQDN)    
     public String getName() {
@@ -111,13 +112,22 @@ public class Host extends Document {
     public void setAikSha1(String aikSha1) {
         this.aikSha1 = aikSha1;
     }
-    
-    public HostTlsPolicy getTlsPolicy() {
-        return tlsPolicy;
+
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
     }
 
-    public void setTlsPolicy(HostTlsPolicy tlsPolicy) {
-        this.tlsPolicy = tlsPolicy;
+    public void setTlsPolicyId(String tlsPolicyId) {
+        this.tlsPolicyId = tlsPolicyId;
     }
+
+    public String getHardwareUuid() {
+        return hardwareUuid;
+    }
+
+    public void setHardwareUuid(String hardwareUuid) {
+        this.hardwareUuid = hardwareUuid;
+    }
+    
         
 }

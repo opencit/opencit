@@ -28,7 +28,16 @@ public class HostDetailsEntityVO implements Serializable {
 	private String location;
 	private String oemName;
 	private String vCenterDetails;
-	
+    /**
+     *  tlsPolicyId indicates a shared policy
+     */
+	private String tlsPolicyId;
+    /**
+     * tlsPolicyType and tlsPolicyData indicate a private policy
+     */
+    private String tlsPolicyType;
+    private String tlsPolicyData;
+    
 	/**
 	 * @return the vCenterDetails
 	 */
@@ -135,6 +144,32 @@ public class HostDetailsEntityVO implements Serializable {
 		return oemName;
 	}
 
+    /**
+     * 
+     * @return the UUID of the record in the mw_tls_policy table
+     */
+    public String getTlsPolicyId() {
+        return tlsPolicyId;
+    }
+
+    /**
+     * null if tls policy id is set,  or a policy type like "certificate" or "INSECURE"
+     * @return 
+     */
+    public String getTlsPolicyType() {
+        return tlsPolicyType;
+    }
+
+    /**
+     * only set if tlsPolicyType is set to a type that requires additional data (certificate, public key, or digest)
+     * @return 
+     */
+    public String getTlsPolicyData() {
+        return tlsPolicyData;
+    }
+    
+    
+
 	/**
 	 * @param string the hostId to set
 	 */
@@ -227,6 +262,20 @@ public class HostDetailsEntityVO implements Serializable {
 		this.oemName = oemName;
 	}
 
+    public void setTlsPolicyId(String tlsPolicyId) {
+        this.tlsPolicyId = tlsPolicyId;
+    }
+
+    public void setTlsPolicyType(String tlsPolicyType) {
+        this.tlsPolicyType = tlsPolicyType;
+    }
+
+    public void setTlsPolicyData(String tlsPolicyData) {
+        this.tlsPolicyData = tlsPolicyData;
+    }
+
+    
+    
 	@Override
 	public String toString() {
 		return "HostDetailsEntityVO [hostId=" + hostId + ", hostName="
@@ -235,7 +284,7 @@ public class HostDetailsEntityVO implements Serializable {
 				+ ", biosName=" + biosName + ", biosBuildNo=" + biosBuildNo
 				+ ", vmmName=" + vmmName + ", vmmBuildNo=" + vmmBuildNo
 				+ ", updatedOn=" + updatedOn + ", emailAddress=" + emailAddress
-				+ ", location=" + location + ", oemName=" + oemName + "]";
+				+ ", location=" + location + ", oemName=" + oemName + ", tlsPolicyId="+tlsPolicyId+"]";
 				// remove bad logs + ", vCenterDetails=" + vCenterDetails + 
 	}
 

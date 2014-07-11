@@ -225,7 +225,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 				callbackSuccessFunction.apply(null,args);
 			}else{
-				alert("Response from Server is null.");
+				alert($("#alert_null_server_response").text());
 				fnSessionExpireLoginAgain();
 			}
                         i18nInit();
@@ -241,7 +241,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
-				alert("Error While Serving request. Please try again later.");
+				alert($("#alert_request_error").text());
 				fnSessionExpireLoginAgain();
 			}
                         i18nInit();
@@ -327,11 +327,16 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
                  }
 			}
 		});
+                $('#ui-dialog-title-dialog').attr('data-i18n', 'title.' + title.toLowerCase());
+                $(':button').attr('data-i18n', '[text]button.ok');
+                $('#dialog').i18n();
+                $('#ui-dialog-title-dialog').i18n();
+                $(':button').i18n();
 }
 
 //Function to show dialog box to show message to user if session is expired or request return Login Page.
 function fnSessionExpireLoginAgain() {
-	var str = 'Your Login Session is Expired. <a href="login.htm">Click here</a> to Login again.';
+	var str = '<span data-i18n="error.login_expired">Your Login Session is Expired. Please Login again.</span>';
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 
@@ -491,15 +496,16 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
 //function to change give date into a format "MM/DD/YYYY hh:mm:sec".  
 function fnGetFormatedDate(dateObject) {
 	var date = new Date(dateObject);
-	var str = "";
-	var month = date.getMonth()+1;
-	month = month.toString().length == 1 ? "0"+month : month;
-	var day = date.getDate().toString().length == 1 ? "0"+date.getDate() : date.getDate();
-	var hr = date.getHours().toString().length == 1 ? "0"+date.getHours() : date.getHours();
-	var min = date.getMinutes().toString().length == 1 ? "0"+date.getMinutes() : date.getMinutes();
-	var sec = date.getSeconds().toString().length == 1 ? "0"+date.getSeconds() : date.getSeconds();
-	str+=month+"/"+day+"/"+date.getFullYear()+" "+hr+":"+min+":"+sec;
-	return str;
+        return date.toISOString();
+//	var str = "";
+//	var month = date.getMonth()+1;
+//	month = month.toString().length == 1 ? "0"+month : month;
+//	var day = date.getDate().toString().length == 1 ? "0"+date.getDate() : date.getDate();
+//	var hr = date.getHours().toString().length == 1 ? "0"+date.getHours() : date.getHours();
+//	var min = date.getMinutes().toString().length == 1 ? "0"+date.getMinutes() : date.getMinutes();
+//	var sec = date.getSeconds().toString().length == 1 ? "0"+date.getSeconds() : date.getSeconds();
+//	str+=month+"/"+day+"/"+date.getFullYear()+" "+hr+":"+min+":"+sec;
+//	return str;
 }
 
 //function to create vCenterString using IPAdress and port no provided. 
@@ -861,11 +867,16 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
 	             }
 			}
 		});
+                $('#ui-dialog-title-dialog').attr('data-i18n', 'title.' + title.toLowerCase());
+                $(':button').attr('data-i18n', '[text]button.ok');
+                $('#dialog').i18n();
+                $('#ui-dialog-title-dialog').i18n();
+                $(':button').i18n();
 }
 
 //Function to show dialog box to show message to user if session is expired or request return Login Page.
 function fnSessionExpireLoginAgain() {
-	var str = 'Your Login Session is Expired. <a href="login.htm">Click here</a> to Login again.';
+	var str = '<span data-i18n="error.login_expired">Your Login Session is Expired. Please Login again.</span>';
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 
@@ -906,12 +917,12 @@ function applyPagination(elementID,noOfPages,fuToCallOnButtonClick,startPageNo){
 }
 
 /*Function to change error message into html escaped String.*/
-function getHTMLEscapedMessage(message) {
+/*function getHTMLEscapedMessage(message) {
 	 var str = message;
      str =str.replace(/\</g, "&lt;");
      str =str.replace(/\>/g, "&gt;");
      return str;
-}
+}*/
 
 
 //function to check empty input:text value. If input is empty then add validationDiv into third div of a row for which we are checking the value.
@@ -996,16 +1007,21 @@ function fnOpenDialog(content,title,width,height,removeOkButton) {
 	         }
 		}
 	});
+        $('#ui-dialog-title-dialog').attr('data-i18n', 'title.' + title.toLowerCase());
+        $(':button').attr('data-i18n', '[text]button.ok');
+        $('#dialog').i18n();
+        $('#ui-dialog-title-dialog').i18n();
+        $(':button').i18n();
 }
 
 
 /*Function to change error message into html escaped string.*/
-function getHTMLEscapedMessage(message) {
+/*function getHTMLEscapedMessage(message) {
 	 var str = message;
      str =str.replace(/\</g, "&lt;");
      str =str.replace(/\>/g, "&gt;");
      return str;
-}
+}*/
 
 //function to get vCenterServer Address 
 function getVCenterServerAddress(inputID) {

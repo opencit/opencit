@@ -6,7 +6,6 @@ package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.rest.v2.resource.*;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwMleSourceJpaController;
 import com.intel.mtwilson.as.data.MwMleSource;
@@ -14,18 +13,22 @@ import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.MleBO;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class MleSourceRepository implements SimpleRepository<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLocator>{
+public class MleSourceRepository implements DocumentRepository<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLocator>{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources.class);
     
     @Override
@@ -42,11 +45,9 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
                     mleSourceCollection.getMleSources().add(convert(obj));
                 }
             } 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE Source search.", ex);
-            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("MleSource:Search - Error during MLE Source search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("MleSource:Search - Returning back {} of results.", mleSourceCollection.getMleSources().size());                
         return mleSourceCollection;
@@ -65,11 +66,9 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
                 MleSource mleSource = convert(obj);
                 return mleSource;            
             } 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE Source search.", ex);
-            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("MleSource:Retrieve - Error during MleSource retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -77,18 +76,20 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     @Override
     @RequiresPermissions("mle_sources:store")    
     public void store(MleSource item) {
-        if (item == null || item.getMleUuid() == null) { throw new WebApplicationException(Response.Status.BAD_REQUEST);}
+        if (item == null || item.getMleUuid() == null) { throw new RepositoryInvalidInputException();}
         log.debug("MleSource:Store - Got request to update the mle source mapping for MLE with id {}.", item.getMleUuid().toString());        
+        MleSourceLocator locator = new MleSourceLocator();
+        locator.mleUuid = UUID.valueOf(item.getMleUuid());
+        locator.id = item.getId();
+        
         com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
         try {
             obj.setHostName(item.getName());
             new MleBO().updateMleSource(obj, item.getMleUuid());
             log.debug("MleSource:Store - Successfully updated the mle source mapping for MLE with id {}.", item.getMleUuid().toString());        
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE source host mapping update.", ex);
-            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_UPDATE_ERROR, ex.getClass().getSimpleName());
+            log.error("MleSource:Store - Error during MLE source host mapping update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }
     }
 
@@ -96,17 +97,19 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     @RequiresPermissions("mle_sources:create")    
     public void create(MleSource item) {
         log.debug("MleSource:Create - Got request to create a new mle source mapping.");
+        MleSourceLocator locator = new MleSourceLocator();
+        locator.mleUuid = UUID.valueOf(item.getMleUuid());
+        locator.id = item.getId();
+
         com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
         try {
             obj.setHostName(item.getName());
             obj.setMleData(null);
             new MleBO().addMleSource(obj, item.getId().toString(), item.getMleUuid());
             log.debug("MleSource:Create - Successfully created the mle source mapping.");
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE source host mapping creation.", ex);
-            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("MleSource:Create - Error during MLE source host mapping creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -118,11 +121,9 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
         try {
             new MleBO().deleteMleSource(null, null, null, null, null, locator.mleUuid.toString());
             log.debug("MleSource:Delete - Deleted Mle Source mapping for MLE with id {}.", locator.mleUuid.toString());        
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE source host mapping deletion.", ex);
-            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_DELETE_ERROR, ex.getClass().getSimpleName());
+            log.error("MleSource:Delete - Error during MLE source host mapping deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
 
@@ -145,9 +146,11 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
                 locator.mleUuid = UUID.valueOf(obj.getMleUuid());
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during MleSource deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("MleSource:Delete - Error during MleSource deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     

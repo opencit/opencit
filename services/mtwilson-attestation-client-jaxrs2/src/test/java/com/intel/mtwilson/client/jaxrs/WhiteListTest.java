@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListWithOptionsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ import org.junit.Test;
  */
 public class WhiteListTest {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileTest.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WhiteListTest.class);
 
     private static WhiteList client = null;
     
@@ -28,6 +29,15 @@ public class WhiteListTest {
         client = new WhiteList(My.configuration().getClientProperties());
     }
     
+    /**
+     * Note the path you need at the end of mtwilson.api.url is /mtwilson/v2 to
+     * run this test:
+     * <pre>
+mtwilson.api.url=https\://10.1.71.56\:8443/mtwilson/v2
+     * </pre>
+     * 
+     * @throws Exception 
+     */
     @Test
     public void testCreateWhitelist() throws Exception {
         TxtHostRecord gkvHost = new TxtHostRecord();
