@@ -23,7 +23,6 @@ public class HostAttestation extends Document {
     private String challenge;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
-    // TODO: Add the capability to send back the complete TrustReport even in the case of GET operation (for the 2.x release)
 
     public String getHostUuid() {
         return hostUuid;

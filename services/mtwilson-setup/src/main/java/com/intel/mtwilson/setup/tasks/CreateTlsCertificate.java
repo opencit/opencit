@@ -61,7 +61,6 @@ public class CreateTlsCertificate extends LocalSetupTask {
         this.dnsAlternativeName = dnsAlternativeName;
     }
 
-    // XXX TODO INSECURE  need to protect this with apache shiro so it will require administrator permission to view
     public String getTlsKeystorePassword() {
         return tlsKeystorePassword;
     }
@@ -83,7 +82,7 @@ public class CreateTlsCertificate extends LocalSetupTask {
         tlsKeystorePassword = My.configuration().getTlsKeystorePassword();
         if( tlsKeystorePassword == null || tlsKeystorePassword.isEmpty() ) {
             tlsKeystorePassword = RandomUtil.randomBase64String(16);
-            My.configuration().update("mtwilson.tls.keystore.password", tlsKeystorePassword);// XXX should this be updated here or after execute?  advantage here is that if there's an error writing to the file, we won't proceed;  which is better than trying and failing after execute when the keystore has been created and then we're left not able to record the password...   at least here if we create a password but then cannot create the keystore, the password will still be used next time we try to create the keystore
+            My.configuration().update("mtwilson.tls.keystore.password", tlsKeystorePassword);
             My.reset();
         }
         
@@ -126,7 +125,6 @@ public class CreateTlsCertificate extends LocalSetupTask {
             validation("TLS keystore is missing");
         }
         // keystore exists, look for the private key and cert
-        // XXX TODO make sure it has a TLS private key and certificate inside
         if( tlsKeystorePassword == null ) {
             configuration("TLS keystore password is not configured");
             return;
@@ -177,7 +175,7 @@ public class CreateTlsCertificate extends LocalSetupTask {
             List<Fault> faults = builder.getFaults();
             for(Fault fault : faults) {
                 log.error(String.format("%s%s", fault.toString(), fault.getCause() == null ? "" : ": "+fault.getCause().getMessage()));
-                validation(fault); // XXX TODO  should we have an execution() category of faults? 
+                validation(fault);  
             }
             throw new SetupException("Cannot generate TLS certificate");
             

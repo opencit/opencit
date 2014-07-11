@@ -7,7 +7,7 @@ package test.shiro;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.rest.v2.model.File;
+import com.intel.mtwilson.v2.file.model.File;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;

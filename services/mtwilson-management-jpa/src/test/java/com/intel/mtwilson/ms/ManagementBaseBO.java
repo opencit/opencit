@@ -11,11 +11,6 @@ import org.slf4j.LoggerFactory;
  * Copy of BaseBO with "ManagementDataPU" as the persistence unit name, for
  * use with the new management data objects.
  * 
- * TODO refactor BaseBO in attestation service, attestation handler, and
- * ManagementBaseBO into one class that will specify or load the configuration
- * (database connection and persistence unit name) and a separate class that 
- * will instantiate the entityManagerFactory. 
- * 
  * @since 0.5.2
  * @author dsmagadx
  */

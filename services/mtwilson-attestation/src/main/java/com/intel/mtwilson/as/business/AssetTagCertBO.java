@@ -461,7 +461,6 @@ public class AssetTagCertBO {
         log.error("attempting to connect to asset tag host");
         String requestURL = My.configuration().getAssetTagServerURL() + "/tags?oidEqualTo="+oid;
         
-        // XXX TODO  1) during setup need to save asset tag service ssl cert so we can use the secure tls policy;  2) add the asset tag apis to the java client 
         //1.3.6.1.4.1.99999.3"; 
         ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
 

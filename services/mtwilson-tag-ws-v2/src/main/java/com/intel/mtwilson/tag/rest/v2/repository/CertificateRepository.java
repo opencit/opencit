@@ -9,39 +9,40 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import static com.intel.mtwilson.tag.dao.jooq.generated.Tables.MW_TAG_CERTIFICATE;
 import com.intel.mtwilson.tag.dao.jdbi.CertificateDAO;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.jooq.util.JooqContainer;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreConflictException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.tag.model.CertificateCollection;
 import com.intel.mtwilson.tag.model.CertificateFilterCriteria;
 import com.intel.mtwilson.tag.model.CertificateLocator;
 import java.sql.Timestamp;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-//import org.restlet.data.Status;
-//import org.restlet.resource.ResourceException;
-//import org.restlet.resource.ServerResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
-public class CertificateRepository implements SimpleRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
+public class CertificateRepository implements DocumentRepository<Certificate, CertificateCollection, CertificateFilterCriteria, CertificateLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateRepository.class);
     
     @Override
     @RequiresPermissions("tag_certificates:search") 
     public CertificateCollection search(CertificateFilterCriteria criteria) {
+        log.debug("Certificate:Search - Got request to search for the Certificates.");        
         CertificateCollection objCollection = new CertificateCollection();
-        // TODO: Evaluate the use of byte search in MySQL and PostgreSQL against using this option.
         
         try(JooqContainer jc = TagJdbi.jooq()) {
             DSLContext jooq = jc.getDslContext();
@@ -98,23 +99,19 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
                     certObj.setSha1(Sha1Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA1)));
                     certObj.setSha256(Sha256Digest.valueOf(r.getValue(MW_TAG_CERTIFICATE.SHA256)));
                     certObj.setRevoked(r.getValue(MW_TAG_CERTIFICATE.REVOKED));
-                    log.debug("Created certificate record in search result {}", certObj.getId().toString());
+                    log.debug("Certificate:Search - Created certificate record in search result {}", certObj.getId().toString());
                     objCollection.getCertificates().add(certObj);
                 }
                 catch(Exception e) {
-                    log.error("Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
+                    log.error("Certificate:Search - Cannot load certificate #{}", r.getValue(MW_TAG_CERTIFICATE.ID), e);
                 }
             }
-            log.debug("Closing sql");
-            sql.close();
-            log.debug("Returning {} certificates", objCollection.getCertificates().size());
-            
-        } catch (WebApplicationException aex) {
-            throw aex;            
+            sql.close();            
         } catch (Exception ex) {
-            log.error("Error during certificate search.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Certificate:Search - Error during certificate search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         } 
+        log.debug("Certificate:Search - Returning back {} of results.", objCollection.getCertificates().size());                                
         return objCollection;
     }
 
@@ -122,17 +119,14 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     @RequiresPermissions("tag_certificates:retrieve") 
     public Certificate retrieve(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return null;}
+        log.debug("Certificate:Retrieve - Got request to retrieve user with id {}.", locator.id);                
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
-        
             Certificate obj = dao.findById(locator.id);
             if (obj != null) 
                 return obj;
-
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during certificate search.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Certificate:Retrieve - Error during certificate retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         } 
         return null;
     }
@@ -140,43 +134,50 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     @Override
     @RequiresPermissions("tag_certificates:store") 
     public void store(Certificate item) {
-
+        log.debug("Certificate:Store - Got request to update Certificate with id {}.", item.getId().toString());        
+        CertificateLocator locator = new CertificateLocator(); // will be used if we need to throw an exception
+        locator.id = item.getId();
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             
             Certificate obj = dao.findById(item.getId());
             // Allowing the user to only edit the revoked field.
-            if (obj != null)
+            if (obj != null) {
                 dao.updateRevoked(item.getId(), item.isRevoked());
-            else {
-                throw new WebApplicationException("Object not found.", Response.Status.NOT_FOUND);
-            }
-                                    
-        } catch (WebApplicationException aex) {
-            throw aex;            
+                log.debug("Certificate:Store - Updated the Certificate {} successfully.", item.getId().toString());                
+            } else {
+                log.error("Certificate:Store - Certificate will not be updated since it does not exist.");
+                throw new RepositoryStoreConflictException(locator);
+            }                                    
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during attribute update.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Certificate:Store - Error during Certificate update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }        
     }
 
     @Override
     @RequiresPermissions("tag_certificates:create") 
     public void create(Certificate item) {
-
+        log.debug("Certificate:Create - Got request to create a new Certificate {}.", item.getId().toString());
+        CertificateLocator locator = new CertificateLocator();
+        locator.id = item.getId();
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             Certificate newCert = dao.findById(item.getId());
             if (newCert == null) {
                 newCert = Certificate.valueOf(item.getCertificate());
                 dao.insert(item.getId(), newCert.getCertificate(), newCert.getSha1().toHexString(), 
                         newCert.getSha256().toHexString(), newCert.getSubject(), newCert.getIssuer(), newCert.getNotBefore(), newCert.getNotAfter());                
+                log.debug("Certificate:Create - Created the Certificate {} successfully.", item.getId().toString());
             } else {
-                throw new WebApplicationException(Response.Status.CONFLICT);
+                log.error("Certificate:Create - Certificate {} will not be created since a duplicate Certificate already exists.", item.getId().toString());                
+                throw new RepositoryCreateConflictException(locator);
             }
-        } catch (WebApplicationException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during certificate creation.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Certificate:Create - Error during certificate creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }        
     }
 
@@ -184,18 +185,18 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
     @RequiresPermissions("tag_certificates:delete") 
     public void delete(CertificateLocator locator) {
         if (locator == null || locator.id == null) { return;}
+        log.debug("Certificate:Delete - Got request to delete Certificate with id {}.", locator.id.toString());                
         try (CertificateDAO dao = TagJdbi.certificateDao()) {
             Certificate obj = dao.findById(locator.id);
             if (obj != null) {
                 dao.delete(locator.id);
+                log.debug("Certificate:Delete - Deleted the Certificate {} successfully.", locator.id.toString());                
             }else {
-                throw new WebApplicationException("Certificate not found.", Response.Status.NOT_FOUND);
+                log.info("Certificate:Delete - Certificate does not exist in the system.");                
             }
-        } catch (WebApplicationException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during certificate deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Certificate:Delete - Error during certificate deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }        
     }
     
@@ -210,9 +211,11 @@ public class CertificateRepository implements SimpleRepository<Certificate, Cert
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during Certificate deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Certificate:Delete - Error during Certificate deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
         

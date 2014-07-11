@@ -13,8 +13,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
- * XXX TODO similar code used in cpg-module ReflectionUtil and cpg-validation/mtwilson-webservice-util validation methods
- * 
  * @author jbuhacoff
  */
 public class ReflectionUtil {

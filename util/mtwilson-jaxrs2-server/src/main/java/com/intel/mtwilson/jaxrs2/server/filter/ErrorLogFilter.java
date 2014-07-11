@@ -13,10 +13,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 /**
- * TODO make a configurable option that for some status codes (that could
- * be a configurable list) we could store the entire request headers & content 
- * in the database w/ the same id # so engineering team can look at it later
- * 
  * @author jbuhacoff
  */
 public class ErrorLogFilter implements ContainerResponseFilter {

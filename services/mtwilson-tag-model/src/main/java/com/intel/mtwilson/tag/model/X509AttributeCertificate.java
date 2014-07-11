@@ -38,12 +38,6 @@ import org.slf4j.LoggerFactory;
  * Convenience class that wraps the Bouncy Castle API to walk the ASN1 tree and extract the information that we are
  * interested in.
  * 
- * XXX when we are interested in only one or two types of attributes this make sense but
- * when generalizing it becomes a duplicate effort of Bouncy Castle's X509AttributeCertificateHolder.
- * Maybe what we need instead is a set of convenience classes for extracting certain types of
- * attributes, for example the "key-value attribute" class for getting all UTF8NameValueMicroformat or
- * UTF8NameValueSequence attributes out of the certificate.
- *
  * @author jbuhacoff
  */
 public class X509AttributeCertificate {

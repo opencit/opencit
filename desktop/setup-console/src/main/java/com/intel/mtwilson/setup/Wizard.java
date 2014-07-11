@@ -7,7 +7,7 @@ package com.intel.mtwilson.setup;
 import java.util.Stack;
 
 /**
- * XXX just a draft
+ * just a draft
  * 
  * This is a driver for the setup requirements. It may be used by any user
  * interface in order to ensure that adequate input is gathered from the 
@@ -36,10 +36,6 @@ public class Wizard {
         stack.push(root);
     }
     
-    // TODO: not so simple. we are driving this, we're not just a wrapper around a stack.  
-    // so we need to keep track of what is curerntly on the top ... maybe retur npeek() instaed of pop()
-    // and if it has to add more items then we do that.
-    // but definitely return null when done.
     // intent:  whatever panel we return from here is what needs to be shown to the user to complete.
     public Panel next() {
         if( stack.isEmpty() ) { return null; }

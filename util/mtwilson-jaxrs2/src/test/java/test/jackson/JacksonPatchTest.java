@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import com.intel.mtwilson.repository.FilterCriteria;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
 import java.io.IOException;

@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.jaxrs2;
 
+import com.intel.mtwilson.repository.Locator;
+
 /**
  *
  * @author jbuhacoff
@@ -12,7 +14,7 @@ public class NoLocator<T> implements Locator<T> {
 
     @Override
     public void copyTo(T item) {
-        // TODO  delete this class after all resources have locators
+       
     }
     
 }

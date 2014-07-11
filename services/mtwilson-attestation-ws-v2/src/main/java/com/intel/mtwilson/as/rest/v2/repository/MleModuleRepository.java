@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -13,20 +12,23 @@ import com.intel.mtwilson.as.rest.v2.model.MleModule;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class MleModuleRepository implements SimpleRepository<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLocator> {
+public class MleModuleRepository implements DocumentRepository<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleModuleRepository.class);
     
@@ -63,11 +65,9 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
                     } 
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during Module whitelist search.", ex);
-            throw new ASException(ErrorCode.WS_MODULE_WHITELIST_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("MleModule:Search - Error during Module whitelist search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("MleModule:Search - Returning back {} of results.", objCollection.getMleModules().size());
         return objCollection;
@@ -85,11 +85,9 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
                 MleModule convObj = convert(obj);
                 return convObj;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during Module whitelist retrieval.", ex);
-            throw new ASException(ErrorCode.WS_MODULE_WHITELIST_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("MleModule:Retrieve - Error during Module whitelist retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -98,17 +96,20 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     @RequiresPermissions("mle_modules:store")    
     public void store(MleModule item) {
         log.debug("MleModule:Store - Got request to update Mle module with id {}.", item.getId().toString());        
+        MleModuleLocator locator = new MleModuleLocator();
+        locator.mleUuid = UUID.valueOf(item.getMleUuid());
+        locator.id = item.getId();
         
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
             obj.setDigestValue(item.getModuleValue());
             obj.setDescription(item.getDescription());
             new MleBO().updateModuleWhiteList(obj, null, item.getId().toString());
-        } catch (ASException aex) {
-            throw aex;            
+            log.debug("MleModule:Store - Updated the MleModule with id {} successfully.", item.getId().toString()); 
+            
         } catch (Exception ex) {
-            log.error("Error during module whitelist update.", ex);
-            throw new ASException(ErrorCode.WS_MODULE_WHITELIST_UPDATE_ERROR, ex.getClass().getSimpleName());
+            log.error("MleModule:Store - Error during module whitelist update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }        
     }
 
@@ -116,6 +117,9 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     @RequiresPermissions("mle_modules:create")    
     public void create(MleModule item) {
         log.debug("MleModule:Create - Got request to create a new Mle module.");
+        MleModuleLocator locator = new MleModuleLocator();
+        locator.mleUuid = UUID.valueOf(item.getMleUuid());
+        locator.id = item.getId();
         
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
@@ -129,12 +133,11 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
             obj.setPackageVersion(item.getPackageVersion());
             obj.setUseHostSpecificDigest(item.getUseHostSpecificDigest());
             new MleBO().addModuleWhiteList(obj, null, item.getId().toString(), item.getMleUuid());
-        } catch (ASException aex) {
-            throw aex;            
+            log.debug("MleModule:Create - Created the MleModule {} successfully.", item.getModuleName()); 
         } catch (Exception ex) {
-            log.error("Error during module whitelist creation.", ex);
-            throw new ASException(ErrorCode.WS_MODULE_WHITELIST_CREATE_ERROR, ex.getClass().getSimpleName());
-        }        
+            log.error("MleModule:Create - Error during MleModule creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
+        }
     }
 
     @Override
@@ -144,11 +147,10 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
         log.debug("MleModule:Delete - Got request to delete Mle Module with id {}.", locator.id.toString());        
         try {
             new MleBO().deleteModuleWhiteList(null, null, null, null, null, null, null, locator.id.toString());
-        } catch (ASException aex) {
-            throw aex;            
+            log.debug("MleModule:Delete - Deleted the MleModule with id {} successfully.", locator.id.toString());            
         } catch (Exception ex) {
-            log.error("Error during module whitelist deletion.", ex);
-            throw new ASException(ErrorCode.WS_MODULE_WHITELIST_DELETE_ERROR, ex.getClass().getSimpleName());
+            log.error("MleModule:Delete - Error during module whitelist deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }        
     }
     
@@ -178,10 +180,12 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during MleModule deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
-        }
+            log.error("MleModule:Delete - Error during module whitelist deletion.", ex);
+            throw new RepositoryDeleteException(ex);
+        }        
     }
     
 }

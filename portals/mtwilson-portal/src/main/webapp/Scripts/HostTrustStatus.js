@@ -60,11 +60,6 @@ function populateHostTrustDataIntoTable(hostDetails) {
 				'<td align="center" class="row3"><img border="0" src="'+ hostDetails[item].osName +'"></td>';
 				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ hostDetails[item].hypervisorName+'">' : '';
 				str+='<td align="center" class="row4">'+ value +'</td>';
-				//TODO : 
-				 // Loaction Policy 
-				 //according to email on Fri 9/14/2012 10:21 AM
-				  //Item: 5
-				//To remove the location from main page commnet thr below line and un uncommnet the next line 
 			    value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
 				//value="";
 				

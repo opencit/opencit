@@ -22,7 +22,6 @@
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
-            <version>1.4.5</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>

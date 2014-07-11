@@ -32,13 +32,6 @@ import com.intel.mtwilson.util.ResourceFinder;
  *
  */
 
-//TODO: 
-//TODO: 
-//TODO: Add Javadoc for the public functions
-//TODO: This is probably the most usable class of everything in this package, so this is more important than normal
-//TODO: Make sure to describe the use of the properties file
-//TODO: 
-//TODO: 
 public class TpmModule {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TpmModule.class);
 
@@ -638,7 +631,6 @@ public class TpmModule {
 		 * NIARL_TPM_Module -mode 13 -owner_auth <40 char hex blob> -cred_type <"EC" | "CC" | "PC" | "PCC"> [-trousers]
 		 * return: <cred blob>
 		 */
-        // TODO INSECURE the owner secret is sent on the command line here... need to use sh -c  with Runtime.getRuntime().exec  and environment variables in order to protect it
  		if (!(credType.equals("EC") || credType.equals("CC") || credType.equals("PC")|| credType.equals("PCC"))) throw new TpmModuleException("TpmModule.getCredential: credential type parameter must be \"EC\", \"CC\", \"PC\", or \"PCC\".");
 		String argument = "-owner_auth " + TpmUtils.byteArrayToHexString(ownerAuth) + " -cred_type " + credType;
 		// TROUSERS MODE OPTIONAL

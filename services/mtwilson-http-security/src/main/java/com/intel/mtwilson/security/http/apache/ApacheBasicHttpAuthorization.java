@@ -12,8 +12,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.auth.UsernamePasswordCredentials;
 
 /**
- * TODO move this to an apache http-client specific utility project
- * 
  * @author jbuhacoff
  */
 public class ApacheBasicHttpAuthorization implements ApacheHttpAuthorization {

@@ -142,7 +142,6 @@ public class Bootstrap {
     
     /**
      * Uses the server's address as the certificate alias
-     * XXX TODO this should now be governed by the tls policy - if it's a "trust first" policy
      * then the policy implementation will add it to the keystore IF it's not already there,
      * otherwise and also if it's "trust known" it will check if it's there and if so it will
      * use it, but it will never replace it with a new one or accept anything else - 
@@ -277,7 +276,7 @@ public class Bootstrap {
                 Properties p = new Properties();
                 p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");
                 p.setProperty("mtwilson.api.ssl.verifyHostname", "false");
-                p.setProperty("mtwilson.api.truststore", tmp.getAbsolutePath()); // XXX TODO need to implement this configuration in API Client
+                p.setProperty("mtwilson.api.truststore", tmp.getAbsolutePath()); 
                 ApiClient c = new ApiClient(url, new HmacCredential("cloudportal@intel","nU8jTeJaFJZ7TJdMb4g4wAOljEHqwyFoRGvrsPjxrST8icOU"), p);
                 List<OsData> list = c.listAllOS();
                 System.out.println(String.format("Got list size %i", list.size()));            

@@ -61,7 +61,7 @@ public class CreateUser extends AbstractCommand {
                 System.err.println("The password must be at least six characters");
                 System.exit(1);
             }
-            //CN=jonathan, OU=IASI, O=Intel, L=Folsom, ST=CA, C=US
+            //CN=username, OU=IASI, O=Intel, L=Folsom, ST=CA, C=US
             /*
             System.out.print("Common Name (optional): "); 
             String cn = in.readLine();

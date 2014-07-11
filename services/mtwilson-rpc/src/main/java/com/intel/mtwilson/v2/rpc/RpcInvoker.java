@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author jbuhacoff
  */
-@Background // TODO:  add an increasing delay behavior to the backgroudn task runner so if a task has errors the next one will be delayed etc.  and maybe then just shut it off after a while and make a facility for adding new background tasks at runtime
+@Background
 public class RpcInvoker implements Runnable {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RpcInvoker.class);
 
@@ -32,7 +32,7 @@ public class RpcInvoker implements Runnable {
     
     private RpcRepository repository = new RpcRepository();
     private ConcurrentLinkedQueue<UUID> queue = new ConcurrentLinkedQueue<>(); // of rpc request uuid's to run
-    private ObjectMapper mapper = new ObjectMapper(); // XXX for debugging only
+    private ObjectMapper mapper = new ObjectMapper(); 
     
 //    public void setRepository(RpcRepository repository) { this.repository = repository; }
     
@@ -100,12 +100,11 @@ public class RpcInvoker implements Runnable {
         }
         // run
         try {
-        // assume that the rpc adapter is RunnableRpcAdapter    XXX TODO  need to detect it
+        // assume that the rpc adapter is RunnableRpcAdapter   
 //            Runnable runnable = (Runnable)taskObject;
 //            runnable.run();
             adapter.setInput(taskObject);
-            adapter.invoke();
-            // TODO   connect the task obejct to a progress monitor that has a reference to its task id to update current/max   in the database
+            adapter.invoke();            
 //            log.debug("After run: {}", mapper.writeValueAsString(taskObject));
             log.debug("After run: {}", mapper.writeValueAsString(adapter.getOutput()));
         }

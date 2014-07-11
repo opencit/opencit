@@ -26,7 +26,7 @@
     <module>database</module>
     <module>integration</module>
     <module>trust-agent</module>
-    <module>plugins</module> <!-- XXX TODO     leads to a circular dependency when we don't have everything properly refactored;  need to work more on plugin api's s othey don't depend on actual attestation service classes -->
+    <module>plugins</module> 
     <module>services</module>
     <module>portals</module>
     <module>desktop</module>
@@ -558,7 +558,7 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
     <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.8</version>
+        <version>1.9</version>
     </dependency>
 	<dependency>
 		<groupId>commons-collections</groupId>
@@ -610,6 +610,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
         <artifactId>commons-pool</artifactId>
         <version>1.6</version>
     </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.49</version>
+        </dependency>        
 
         		
     <dependency>
@@ -912,6 +917,11 @@ reference : https://java.net/jira/browse/JERSEY-2325
                 <artifactId>jackson-jaxrs-xml-provider</artifactId>
                 <version>2.3.2</version>
             </dependency>
+            <dependency>
+              <groupId>com.fasterxml.jackson.dataformat</groupId>
+              <artifactId>jackson-dataformat-csv</artifactId>
+              <version>2.3.2</version>
+            </dependency>
     
             <!-- other -->
             <dependency>
@@ -925,6 +935,7 @@ reference : https://java.net/jira/browse/JERSEY-2325
             <version>1.4.7</version>
         </dependency>
 
+    
     
         </dependencies>
     </dependencyManagement>  

@@ -34,7 +34,7 @@ public class HmacAuthorization {
     
     /*
     public RequestAuthorization(Credentials credentials) {
-        this(new String(credentials.identity()), "", "SHA256"); // TODO
+        this(new String(credentials.identity()), "", "SHA256"); 
     }*/
     
     public HmacAuthorization(HmacCredential credentials) {

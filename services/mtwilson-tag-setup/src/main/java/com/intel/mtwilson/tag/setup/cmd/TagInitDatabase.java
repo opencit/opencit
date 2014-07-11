@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This command creates a default "main" configuration and TODO: create the default asset tag authority
+ * This command creates a default "main" configuration
  *
  * @author jbuhacoff
  */

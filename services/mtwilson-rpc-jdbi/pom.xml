@@ -34,7 +34,6 @@
             <version>${project.version}</version>
         </dependency>
 
-<!-- XXX TODO  dependency will need to be the other way... eventually this should be included in mtwilson-my and obtained by mtwilson-rpc using My.jdbi().rpc() -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>

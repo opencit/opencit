@@ -4,8 +4,10 @@
  */
 package com.intel.mtwilson.trustagent.niarl;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.IOException;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * Test TPM ownership status by attempting to change the SRK secret and then
@@ -22,7 +24,9 @@ public class Util {
     
     public static boolean isOwner(byte[] secret) {
         try {
-            TpmModule.getCredential(secret, "EC");
+            //TpmModule.getCredential(secret, "EC");
+            byte[] ekModulus = TpmModule.getEndorsementKeyModulus(secret, RandomUtil.randomByteArray(20));
+            if( ekModulus != null ) { log.debug("EK modulus: {}", Hex.encodeHexString(ekModulus)); }
             return true;
         }
         catch(IOException e) {

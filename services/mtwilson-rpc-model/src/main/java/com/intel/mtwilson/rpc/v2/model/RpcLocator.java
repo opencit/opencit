@@ -5,7 +5,7 @@
 package com.intel.mtwilson.rpc.v2.model;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.Locator;
+import com.intel.mtwilson.repository.Locator;
 import javax.ws.rs.PathParam;
 
 /**

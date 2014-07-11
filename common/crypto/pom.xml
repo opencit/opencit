@@ -1,12 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!--
-    XXX TODO (in progress)  mtwilson-crypto should be refactored into 2 parts:  1) use the cpg-crypto package instead which
-    has most of these classes, 2) mtwilson-specific code.  mtwilson-api should be refactored to move some of those
-    classes into other more suitable packages.  
-    -->
-
     <artifactId>mtwilson-crypto</artifactId>
     <packaging>jar</packaging>
     <name>Common Crypto</name>

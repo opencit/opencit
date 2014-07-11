@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -13,22 +12,23 @@ import com.intel.mtwilson.as.rest.v2.model.HostAik;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAikFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostAikLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class HostAikRepository implements SimpleRepository<HostAik, HostAikCollection, HostAikFilterCriteria, HostAikLocator> {
+public class HostAikRepository implements DocumentRepository<HostAik, HostAikCollection, HostAikFilterCriteria, HostAikLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAikRepository.class);
 
     @Override
     @RequiresPermissions("host_aiks:search")    
     public HostAikCollection search(HostAikFilterCriteria criteria) {
-        log.debug("HostAik:Search - Got request to search for the roles.");        
+        log.debug("HostAik:Search - Got request to search for host aik.");        
         HostAikCollection objCollection = new HostAikCollection();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
@@ -37,12 +37,10 @@ public class HostAikRepository implements SimpleRepository<HostAik, HostAikColle
                 if (obj != null) {
                     objCollection.getAiks().add(convert(obj));
                 }
-            } // TODO: Need to add the AIKSha1 search criteria later when we have the capability of multiple AIKs
-        } catch (ASException aex) {
-            throw aex;            
+            } 
         } catch (Exception ex) {
-            log.error("Error during search for hosts.", ex);
-            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("HostAik:Search - Error during search for host aik.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("HostAik:Search - Returning back {} of results.", objCollection.getAiks().size());                
         return objCollection;
@@ -62,11 +60,9 @@ public class HostAikRepository implements SimpleRepository<HostAik, HostAikColle
                 HostAik hostAik = convert(obj);
                 return hostAik;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during search for hosts.", ex);
-            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("HostAik:Retrieve - Error during retrieval of host aik.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }        
         return null;
     }

@@ -32,7 +32,7 @@ public class PasswordUtil {
             }
             return digest.toByteArray();
         }
-        throw new UnsupportedOperationException("Algorithm not supported: "+hashProtection.getAlgorithm()); // TODO:  i18n
+        throw new UnsupportedOperationException("Algorithm not supported: "+hashProtection.getAlgorithm()); 
     }
 
 }

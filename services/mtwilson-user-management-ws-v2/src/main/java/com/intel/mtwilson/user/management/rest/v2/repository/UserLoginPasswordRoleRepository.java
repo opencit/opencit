@@ -4,17 +4,18 @@
  */
 package com.intel.mtwilson.user.management.rest.v2.repository;
 
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRole;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleCollection;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleFilterCriteria;
 import com.intel.mtwilson.user.management.rest.v2.model.UserLoginPasswordRoleLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
@@ -22,14 +23,14 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  *
  * @author ssbangal
  */
-public class UserLoginPasswordRoleRepository implements SimpleRepository<UserLoginPasswordRole, UserLoginPasswordRoleCollection, UserLoginPasswordRoleFilterCriteria, UserLoginPasswordRoleLocator> {
+public class UserLoginPasswordRoleRepository implements DocumentRepository<UserLoginPasswordRole, UserLoginPasswordRoleCollection, UserLoginPasswordRoleFilterCriteria, UserLoginPasswordRoleLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserLoginPasswordRoleRepository.class);
     
     @Override
     @RequiresPermissions("user_login_password_roles:search")        
     public UserLoginPasswordRoleCollection search(UserLoginPasswordRoleFilterCriteria criteria) {
-        log.debug("UserLoginPasswordRole:Search - Got request to search for the users login password roles.");        
+        log.debug("UserLoginPasswordRole:Search - Got request to search for the user login password roles.");        
         UserLoginPasswordRoleCollection objCollection = new UserLoginPasswordRoleCollection();
         try (LoginDAO loginDAO = MyJdbi.authz()) {
             if (criteria.loginPasswordIdEqualTo != null) {
@@ -49,7 +50,7 @@ public class UserLoginPasswordRoleRepository implements SimpleRepository<UserLog
             }  
         } catch (Exception ex) {
             log.error("Error during user login password role search.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("UserLoginPasswordRole:Search - Returning back {} of results.", objCollection.getUserLoginPasswordRoles().size());                
         return objCollection;
@@ -83,7 +84,7 @@ public class UserLoginPasswordRoleRepository implements SimpleRepository<UserLog
     @Override
     @RequiresPermissions("user_login_password_roles:create")        
     public void create(UserLoginPasswordRole item) {
-        log.debug("UserLoginPasswordRole:Create - Got request to create a new login password role.");
+        log.debug("UserLoginPasswordRole:Create - Got request to create a new user login password role.");
          try (LoginDAO loginDAO = MyJdbi.authz()) {
             UserLoginPasswordRole obj = loginDAO.findUserLoginPasswordRolesByUserLoginPasswordIdAndRoleId(item.getLoginPasswordId(), item.getRoleId());
             if (obj == null) {
@@ -94,13 +95,12 @@ public class UserLoginPasswordRoleRepository implements SimpleRepository<UserLog
                 log.debug("UserLoginPasswordRole:Create - Created the user login password role successfully.");
             } else {
                 log.info("UserLoginPasswordRole:Create - User login password role specified already exists.");
-                //throw new WebApplicationException(Response.Status.CONFLICT);
             }            
-        } catch (WebApplicationException wex) {
-            throw wex;
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during user creation.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            log.error("Error during user login password role creation.", ex);
+            throw new RepositoryCreateException(ex);
         }
     }
 
@@ -125,9 +125,11 @@ public class UserLoginPasswordRoleRepository implements SimpleRepository<UserLog
             for (UserLoginPasswordRole obj : objList.getUserLoginPasswordRoles()) {
                 loginDAO.deleteUserLoginPasswordRole(obj.getLoginPasswordId(), obj.getRoleId());
             }
+        } catch(RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Error during user login password role deletion.", ex);
-            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryDeleteException(ex);
         }
     }
     

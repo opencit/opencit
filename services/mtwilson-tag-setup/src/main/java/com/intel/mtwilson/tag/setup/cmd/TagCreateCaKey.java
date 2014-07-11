@@ -49,7 +49,7 @@ public class TagCreateCaKey extends TagCommand {
             dn = args[0];
         } 
         else {
-            dn = "CN=asset-tag-service,OU=mtwilson"; // TODO:   use  TagConfiguration getTagIssuer()
+            dn = "CN=asset-tag-service,OU=mtwilson"; 
         }
         
         // create a new key pair
@@ -82,7 +82,6 @@ public class TagCreateCaKey extends TagCommand {
         }
         else {
             // replace existing private key... 
-            // XXX IMPORTANT TODO   before we replace it we need to revoke it so that nobody else with a copy can use it to sign any more certs
             TagJdbi.fileDao().update(cakeyFile.getId(), PRIVATEKEY_FILE, "text/plain", combinedPrivateKeyAndCertPemBytes);
         }
         

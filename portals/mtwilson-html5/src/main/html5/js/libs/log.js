@@ -48,13 +48,12 @@ var Log = (function(undefined) {
         my.element_id = $(element_id);
         my.element_id.observe('log:entry', function(event) {
             my.element_id.innerHTML += "[" + event.memo.level + "] " + event.memo.message + "<br/>";
-            my.element_id.scrollTop = my.element_id.scrollHeight;  // XXX TODO:  should provide a checkbox so user can select if they want to automatically scroll to the bottom whenever a message arrives, or if they want us to leave it alone since sometimes auto-scroll can be annoying if they are in the middle of reading an earlier message
+            my.element_id.scrollTop = my.element_id.scrollHeight; 
         });
     };
 
     my._logdata = [];  // where each entry is {timestamp, level, message}
 
-    // XXX TODO:  add an optional marker parameter to the log methods so messages can be logged with specific subsystems, error codes, password information or other secrets (so can be configured not to display) etc. 
     my._log = function (level, message) {
         var newentry = {
             'timestamp': Date.today().toISOString(),
@@ -68,7 +67,6 @@ var Log = (function(undefined) {
     };
     //alert("test...4");
 
-    // XXX TODO  the enabled flags must be BY PACKAGE (like log4j, slf4j, etc) so that means a user must first obtain a log instance FOR THEIR PACKAGE then we can calculate whether these are enabled based on their configuration (todo also)
     my.error = function(text) {
         if (my.isErrorEnabled) {
             my._log('ERROR', text);

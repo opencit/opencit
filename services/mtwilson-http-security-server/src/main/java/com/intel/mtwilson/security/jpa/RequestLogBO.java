@@ -10,7 +10,6 @@ import java.util.List;
 import javax.persistence.EntityManagerFactory;
 
 /**
- * XXX see note in ApiClientBO about rewriting the data access layer to decouple the database from the business logic
  * @since 1.2
  * @author jbuhacoff
  */

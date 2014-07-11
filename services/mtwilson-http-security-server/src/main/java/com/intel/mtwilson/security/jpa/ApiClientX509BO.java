@@ -25,16 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX This class has a compile-time dependency on ManagementService because
- * that application defines the JPA configuration for accessing the security
- * database. In maven this is annotated as "provided" because when this
- * project is deployed it will be as a JAR component of a web service that
- * also depends on the ManagementService data layer.
- * 
  * It was labeled business logic but it's very closely tied to the JPA layer.
- * 
- * TODO: Separate JPA from Business Objects by formalizing the required
- * data interfaces and creating JPA objects that implement those interfaces.
  * 
  * Secret key lookup provider for the authentication filter that secures
  * the REST API.
@@ -105,7 +96,7 @@ public class ApiClientX509BO implements X509UserFinder, PublicKeyUserFinder {
         // Since we need to ignore the comma character before the OU, the to index is being subtracted by 2
         userInfo.loginName = tempUserName.substring(tempUserName.indexOf("CN=") + 3, tempUserName.indexOf("OU=")-1);
 //        userInfo.publicKey = userInfo.certificate.getPublicKey(); // apiClient.getCertificate().getPublicKey();
-        userInfo.fingerprint = fingerprint; // XXX: cheating by using the input fingerprint instead of what was found... they SHOULD be the same.
+        userInfo.fingerprint = fingerprint; 
         Collection<ApiRoleX509> roles = apiClient.getApiRoleX509Collection();
         ArrayList<Role> allowedRoles = new ArrayList<Role>();
         for( ApiRoleX509 role : roles ) {

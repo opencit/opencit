@@ -188,7 +188,7 @@ public class TrustAssertion {
      */
     public String getSubjectFormat() {
 //        return assertion.getSubject().getNameID().getFormat();
-        return "hostname"; // TODO
+        return "hostname"; 
     }
 
     /**
@@ -335,7 +335,6 @@ public class TrustAssertion {
                         ((AttributeStatement) statement).getAttributes ())
                 {
                     String attributeValue = null;
-                    // XXX TODO currently this only grabs the last value if there was more than one value in the attribute... full implementation should handle all possibilities but we do provide a getAssertion() function so the client can navigate the assertion tree directly in case they need something not covered here
                     for (XMLObject value : attribute.getAttributeValues ()) {
                         if (value instanceof XSAny) {
                             attributeValue = (((XSAny) value).getTextContent()); // boolean attributes are the text "true" or "false"

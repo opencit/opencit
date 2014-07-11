@@ -86,7 +86,6 @@ public class CreateTlsKeypair extends AbstractSetupTask {
             log.debug("Certificate DN not the same as configured DN; should recreate certificate");
             validation("Configured DN does not match certificate DN; should recreate certificate");
         }
-        // TODO: check alternative names ip and dns of cert against configured
     }
 
     @Override
@@ -97,7 +96,7 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(2048);
         X509Builder builder = X509Builder.factory()
                 .selfSigned(dn, keypair)
-                .expires(3650, TimeUnit.DAYS) // 10 years default ; TODO: make it configurable 
+                .expires(3650, TimeUnit.DAYS) 
                 .keyUsageKeyEncipherment();
         // NOTE:  right now we are creating a self-signed cert but if we have
         //        the mtwilson api url, username, and password, we could submit

@@ -66,7 +66,7 @@
         original javascript:      this.model = this.key ? this.view.models[this.key] : this.view.models;
         replaced with below;  so it was already the first & last branches and i'm adding the middle branch else if (this.key) { ... }
         */
-       if( this.key && this.key in this.view.models ) { // jonathan TODO maybe should also add a guard for typeof this.view.models[this.key]==='object' ... otherwise it could also be an issue
+       if( this.key && this.key in this.view.models ) { 
            this.model = this.view.models[this.key];
        }
        else if( this.key ) {
@@ -74,9 +74,9 @@
            var typeDefault='';
            switch(this.type) {
                case 'value': typeDefault=''; break;
-               case 'each-item': typeDefault=[]; break; // XXX TODO the '-item' part is specific to the tag... should be using regex for 'each-*' like in other parts of rivets
+               case 'each-item': typeDefault=[]; break; 
            }
-           this.view.models[this.key] = defaultValue ? defaultValue : typeDefault; // jonathan if the form already comes with a default, then we initialize the model with it;  TODO:  if it's a select need to get the current option etc.
+           this.view.models[this.key] = defaultValue ? defaultValue : typeDefault;
            this.model = this.view.models; //this.view.models[this.key];
            this.keypath = this.key;
        }

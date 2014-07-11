@@ -56,7 +56,7 @@ public class CA {
     }
 
 //    @POST @Path("/enable")
-//    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
+//    @RolesAllowed({"Security"}) 
 //    @Consumes("application/json")
 //    @Produces({MediaType.TEXT_PLAIN})
 //    public String enableCa(String newSaltedPasswordString) {
@@ -75,7 +75,7 @@ public class CA {
 //    }
 //
 //    @POST @Path("/disable")
-//    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
+//    @RolesAllowed({"Security"}) 
 //    @Produces({MediaType.TEXT_PLAIN})
 //    public String disableCa() {
 //        try {
@@ -127,7 +127,7 @@ public class CA {
         try {
 //            String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
 //            if( certFile != null && !certFile.startsWith(File.separator) ) {
-//                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+//                certFile = "/etc/intel/cloudsecurity/" + certFile; 
 //            }
 //            if(certFile != null) {
 //                File rootCaPemFile = new File(certFile);
@@ -171,7 +171,7 @@ public class CA {
         try {
 //            String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); // PEM format file with possible CA certificate chain; not the same as mtwilson.saml.certificate which is the DER format file mtwilson.saml.certificate that we configured in mtwilson 1.0-RC2 
 //            if( certFile != null && !certFile.startsWith(File.separator) ) {
-//                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+//                certFile = "/etc/intel/cloudsecurity/" + certFile; 
 //            }
 //            if(certFile != null) {
 //                File samlPemFile = new File(certFile);
@@ -217,7 +217,7 @@ public class CA {
         try {
 //            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
 //             if( certFile != null && !certFile.startsWith(File.separator) ) {
-//                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+//                certFile = "/etc/intel/cloudsecurity/" + certFile; 
 //            }
 //            if(certFile != null) {
 //                File privacyCaPemFile = new File(certFile);
@@ -252,7 +252,7 @@ public class CA {
         try {
             String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
             if( certFile != null && !certFile.startsWith(File.separator) ) {
-                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+                certFile = "/etc/intel/cloudsecurity/" + certFile; 
             }
             if(certFile != null) {
                 if( certFile.endsWith(".pem") ) {
@@ -308,10 +308,9 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getTlsCertificateChain() {
         try {
-            // XXX TODO this code block is repeated in HostAgentFactory
             String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
             if( certFile != null && !certFile.startsWith(File.separator) ) {
-                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+                certFile = "/etc/intel/cloudsecurity/" + certFile; 
             }
             if(certFile != null) {
                 if( certFile.endsWith(".pem") ) {

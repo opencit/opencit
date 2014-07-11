@@ -100,7 +100,6 @@ public class HostInfoCmd implements ICommand {
      */
     private void getBiosAndVersion() throws TAException, IOException {
 
-        // TODO: multline output is ignored, we just use the "first" string. whic his the only line anyway.
         CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
         context.setBiosOem(trim(result.getStdout()));
         log.debug("Bios OEM: " + context.getBiosOem());

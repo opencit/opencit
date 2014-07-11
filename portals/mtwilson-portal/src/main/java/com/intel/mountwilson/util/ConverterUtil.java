@@ -12,6 +12,7 @@ import com.intel.mountwilson.datamodel.HostType.hostVMM;
 import com.intel.mountwilson.datamodel.MLEDataVO;
 import com.intel.mountwilson.datamodel.MleDetailsEntityVO;
 import com.intel.mountwilson.datamodel.OEMDataVO;
+import java.util.Iterator;
 import com.intel.mountwilson.datamodel.OSDataVO;
 import com.intel.mountwilson.datamodel.TrustedHostVO;
 import com.intel.mtwilson.TrustAssertion;
@@ -21,7 +22,10 @@ import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 //import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import java.io.StringReader;
@@ -68,7 +72,23 @@ public class ConverterUtil {
 		hostRecord.HostName=dataVO.getHostName();
 		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
-		
+        if( dataVO.getTlsPolicyId() != null && !dataVO.getTlsPolicyId().isEmpty() ) {
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyId(dataVO.getTlsPolicyId());
+            hostRecord.tlsPolicyChoice = tlsPolicyChoice;
+        }
+        else if (dataVO.getTlsPolicyType() != null && !dataVO.getTlsPolicyType().isEmpty() ) {
+            TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+            tlsPolicyDescriptor.setPolicyType(dataVO.getTlsPolicyType());
+            if( dataVO.getTlsPolicyData() != null && !dataVO.getTlsPolicyData().isEmpty() ) {
+                ArrayList<String> data = new ArrayList<>();
+                data.add(dataVO.getTlsPolicyData());
+                tlsPolicyDescriptor.setData(data);
+            }
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyDescriptor(tlsPolicyDescriptor);
+            hostRecord.tlsPolicyChoice = tlsPolicyChoice;
+        }
 		String[] osVMMInfo = dataVO.getVmmName().split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR));
 		String osNameWithVer = osVMMInfo[0];
 		String osName;
@@ -98,7 +118,7 @@ public class ConverterUtil {
 		TrustedHostVO hostVO = new TrustedHostVO();
 		hostVO.setHostName(hostDetailsEntityVO.getHostName());
 		if (trustAssertion != null) {
-        		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName()); // TODO:  is this always valid? 
+        		HostTrustAssertion hostTrustAssertion = trustAssertion.getTrustAssertion(hostDetailsEntityVO.getHostName());  
 			if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.Trusted_BIOS))) {
 				hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
 			}else {
@@ -117,8 +137,6 @@ public class ConverterUtil {
 				hostVO.setOverAllStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
 				hostVO.setOverAllStatusBoolean(false);
 			}
-
-// XXX MERGE WARNING 20131119 TODO make sure this was merged correctly
 
                         if (hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
                             if (Boolean.parseBoolean(hostTrustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {
@@ -210,7 +228,6 @@ public class ConverterUtil {
 				}
 			}
 			
-			// TODO : add date once available from saml assertion for time been its empty.
 			//hostVO.setUpdatedOn(formatter.format(hostDetailsEntityVO.getUpdatedOn()));//
 //                        if (trustAssertion != null)
 //                            hostVO.setUpdatedOn(trustAssertion.getDate().toString());
@@ -256,6 +273,20 @@ public class ConverterUtil {
 		entityVO.setOemName(txtHostDetail.BIOS_Oem);
 		entityVO.setLocation(txtHostDetail.Location);
 		entityVO.setEmailAddress(txtHostDetail.Email);
+        if( txtHostDetail.tlsPolicyChoice != null ) {
+            if( txtHostDetail.tlsPolicyChoice.getTlsPolicyId() != null ) {
+                entityVO.setTlsPolicyId(txtHostDetail.tlsPolicyChoice.getTlsPolicyId());
+            }
+            else if(  txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor() != null ) {
+                entityVO.setTlsPolicyType(txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor().getPolicyType());
+                if( txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor().getData() != null ) {
+                    Iterator<String> it = txtHostDetail.tlsPolicyChoice.getTlsPolicyDescriptor().getData().iterator();
+                    if(it.hasNext()) {
+                        entityVO.setTlsPolicyData(it.next());
+                    }
+                }
+            }
+        }
     	return entityVO;
     }
 

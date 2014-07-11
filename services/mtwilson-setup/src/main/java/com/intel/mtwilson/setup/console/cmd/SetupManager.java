@@ -181,13 +181,6 @@ public class SetupManager implements Command {
     }
 
     protected List<SetupTask> getAllSetupTasks() throws IOException {
-        // TODO: this way is not good because the tasks would be executed in random order
-        // and that is not likely to work.  our options are to either do nothing here
-        // and let a subclass define the tasks (in order) to run, or to define a 
-        // dependency mechanism so we can take the set of all tasks and create a
-        // directed dependency graph, and start executing at the leaves (level 0)
-        // and move up executing one level at a time until all tasks have been
-        // executed.
         /*
          List<SetupTask> tasks = Extensions.findAll(SetupTask.class);
          for (SetupTask task : tasks) {
@@ -303,7 +296,6 @@ public class SetupManager implements Command {
     }
     
     protected PropertiesConfiguration loadConfiguration() throws IOException {
-        // TODO:  need to handle the encrypted configuration file too like My.configuration() does, but using the filesystem location instaed of the looking-everywhere My.configuration() method because we need to have the mtwilson.properties file to write back to from the setup tasks
         File file = getConfigurationFile();
         if (file.exists()) {
             log.debug("Loading configuration file {}", file.getAbsolutePath());

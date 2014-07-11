@@ -124,7 +124,7 @@ public class TpmIntegrityReport {
 		//System.out.println(countbits(pcrBitMask));
 		int bitcount = countbits(pcrBitMask);
 		byte[] PCRlongList = new byte[20 * bitcount];
-		//byte[] PCRlongList = new byte[20 * PCRlist.size()]; //TODO: should we check to see that the number of PCRs requested (per the mask) matches those provided via the PCRlist?
+		//byte[] PCRlongList = new byte[20 * PCRlist.size()]; 
 		// add PCRs to the long list
 		int count = 0;
 		/*while (!PCRlist.isEmpty()) {

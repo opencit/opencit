@@ -9,9 +9,7 @@ import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyFactory;
-import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import com.intel.dcsg.cpg.tls.policy.impl.AnyProtocolSelector;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
 import com.intel.mtwilson.attestation.client.jaxrs.CaCertificates;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -22,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -94,14 +91,13 @@ public class DownloadMtWilsonPrivacyCACertificate extends AbstractSetupTask {
     @Override
     protected void execute() throws Exception {
         /*
-        // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", trustagentConfiguration.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", trustagentConfiguration.getTrustagentKeystorePassword());
         */
         log.debug("Creating TLS policy");
-        TlsPolicy tlsPolicy = TlsPolicyFactory.strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile().getAbsolutePath(), trustagentConfiguration.getTrustagentKeystorePassword());
+        TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), trustagentConfiguration.getTrustagentKeystorePassword()).build();
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
         Properties clientConfiguration = new Properties();

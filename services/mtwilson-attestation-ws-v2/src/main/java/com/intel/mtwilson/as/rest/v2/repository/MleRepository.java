@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
@@ -19,21 +18,25 @@ import com.intel.mtwilson.as.rest.v2.model.MleCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleLocator;
 import com.intel.mtwilson.as.rest.v2.model.MleSource;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.MleData;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.Collection;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFilterCriteria, MleLocator> {
+public class MleRepository implements DocumentRepository<Mle, MleCollection, MleFilterCriteria, MleLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleRepository.class);
 
@@ -85,11 +88,9 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                     }
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE search.", ex);
-            throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Mle:Search - Error during MLE search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("Mle:Search - Returning back {} of results.", mleCollection.getMles().size());                
         return mleCollection;
@@ -108,11 +109,9 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                 Mle mle = convert(tblMle);
                 return mle;
             } 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE search.", ex);
-            throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Mle:Retrieve - Error during MLE search.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -121,6 +120,9 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @RequiresPermissions("mles:store")    
     public void store(Mle item) {
         log.debug("Mle:Store - Got request to update Mle with id {}.", item.getId().toString());        
+        MleLocator locator = new MleLocator();
+        locator.id = item.getId();
+
         try {
             // Only the description and the PCR white lists are editable.
             MleData obj = new MleData();
@@ -130,11 +132,9 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                 
             new MleBO().updateMle(obj, item.getId().toString());
             log.debug("Mle:Store - Successfully updated Mle with id {}.", item.getId().toString());            
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE search.", ex);
-            throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Mle:Store - Error during Mle update.", ex);
+            throw new RepositoryStoreException(ex, locator);
         }
     }
 
@@ -142,6 +142,9 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
     @RequiresPermissions("mles:create")    
     public void create(Mle item) {
         log.debug("Mle:Create - Got request to create a new Mle.");
+        MleLocator locator = new MleLocator();
+        locator.id = item.getId();
+
         try {
             // Since the new APIs accept the UUID of the OEM and OS associated with the MLE, we need to verify the UUIDs
             // then form the MleData object before calling into the business layer.
@@ -160,8 +163,8 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                 if (tblOem != null) {
                     obj.setOemName(tblOem.getName());
                 } else {
-                    log.error("The OEM specified with UUID {} does not exist.", item.getOemUuid());
-                    throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST, item.getOemUuid());
+                    log.error("Mle:Create - The OEM specified with UUID {} does not exist.", item.getOemUuid());
+                    throw new RepositoryInvalidInputException(locator);
                 }                
             } else {
                 TblOsJpaController osJpaController = My.jpa().mwOs();            
@@ -170,8 +173,8 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                     obj.setOsName(tblOs.getName());
                     obj.setOsVersion(tblOs.getVersion());
                 } else {
-                    log.error("The OS specified with UUID {} does not exist.", item.getOsUuid());
-                    throw new ASException(ErrorCode.WS_OS_DOES_NOT_EXIST, item.getOsUuid());
+                    log.error("Mle:Create - The OS specified with UUID {} does not exist.", item.getOsUuid());
+                    throw new RepositoryInvalidInputException(locator);
                 }                                
             }
             
@@ -191,11 +194,11 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
             }
             log.debug("Mle:Create - Successfully created the new Mle with name {}.", item.getName());
             
-        } catch (ASException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during MLE creation.", ex);
-            throw new ASException(ErrorCode.WS_MLE_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("Mle:Create - Error during MLE creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -207,11 +210,9 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
         String id = locator.id.toString();
         try {
             new MleBO().deleteMle(null, null, null, null, null, id);
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during MLE delete.", ex);
-            throw new ASException(ErrorCode.WS_MLE_DELETE_ERROR, ex.getClass().getSimpleName());
+            log.error("Mle:Delete - Error during MLE delete.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
     
@@ -226,9 +227,11 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during Mle deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Mle:Delete - Error during MLE delete.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     

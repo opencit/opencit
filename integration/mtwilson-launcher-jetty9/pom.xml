@@ -105,7 +105,7 @@ This error message indicates you need a jersey implementation like org.glassfish
             <version>2.5.10</version>
         </dependency>        
         
-        <!-- temporarily putting jpa dependencies here so we can find persistence.xml , but TODO  need to allow passing in a classloader to cpg-jpa persistencemanager  and some way for the app to know what is the application class loader used by mtwilson-launcher-xyz ... maybe MyClassLoader ?? -->
+        <!-- temporarily putting jpa dependencies here so we can find persistence.xml -->
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -133,7 +133,7 @@ This error message indicates you need a jersey implementation like org.glassfish
     </dependency>
         -->
         
-        <!-- include all the app dependencies ... XXX TODO  load from java filesystem path like /opt/mtwilson/java -->
+        <!-- include all the app dependencies -->
         <dependency>
             <groupId>com.intel.mtwilson.features</groupId>
             <artifactId>mtwilson-server</artifactId>
@@ -142,22 +142,6 @@ This error message indicates you need a jersey implementation like org.glassfish
         </dependency>
     </dependencies>
     
-    <!-- todo:  enable command line usage like  "mvn jetty:start" for 
-    production-like setup and "mvn -Dtest jetty:start" for including test
-    dependencies as well; can be done either by including them in this
-    profile or by using the useTestDependencies option in jetty in this
-    profile.  
-    currently this has no effect because the extensions cache launcher reads
-    the extensions.cache file which mentions some of the test classes
-    locally and loads them as long as they are in the java folder, and the
-    directory launcher would load whatever is in the java folder which 
-    is not maintained by maven... so need to use the maven launcher with
-    the extensions.cache file to only load mentioned extensions that have
-    dependencies in the maven-generated classpath (dependencies in ~/.m2/repository)
-    
-    NOTE: it's important to keep these test dependencies out of the production
-    build.
-    -->
     <!--
     <profiles>
     <profile>

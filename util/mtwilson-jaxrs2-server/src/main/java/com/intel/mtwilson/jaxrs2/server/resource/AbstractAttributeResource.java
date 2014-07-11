@@ -17,8 +17,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
-import com.intel.mtwilson.jaxrs2.Locator;
+import com.intel.mtwilson.repository.FilterCriteria;
+import com.intel.mtwilson.repository.Locator;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
@@ -67,7 +67,7 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
     
     protected SimpleRepository<T,C,F,L> getRepository() { return repository; }
     */
-    protected abstract SimpleRepository<T,C,F,L> getRepository();
+    protected abstract DocumentRepository<T,C,F,L> getRepository();
     
 
     /**
@@ -88,18 +88,18 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
         /*
         T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }*/
         /*
 //        C collection = getRepository().search(selector);
 //        if( collection.getDocuments().isEmpty() ) {            
-//            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+//            throw new WebApplicationException(Response.Status.NOT_FOUND); 
 //        }
 //        T item = collection.getDocuments().get(0);
 * */
         T existing = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (existing == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         return existing;
     }
@@ -135,7 +135,7 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
         return item;
     }
 
-    // the patch method only accepts the patch content type (TODO - DEFINE IT  - actually yaml might be a good choice because it's compact, uses multiple lines for display, and has language features that can help deserialize into java easier than json or xml)  
+    // the patch method only accepts the patch content type 
     /**
      * Update an extended attribute. Input Content-Type is a special patch
      * document format. Output Content-Type is any of application/json,
@@ -154,25 +154,21 @@ public abstract class AbstractAttributeResource<T extends Document, C extends Do
         try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("patchOne: cannot serialize locator: {}", e.getMessage()); }
         T item = getRepository().retrieve(locator); // subclass is responsible for validating id
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         locator.copyTo(item);
         ValidationUtil.validate(patchArray);
         for (int i = 0; i < patchArray.length; i++) {
             log.debug("Processing patch #{} of {}", i + 1, patchArray.length);
-            // XXX TODO check if patchArray[i].getSelect() == null  (expected) , and if it's not null then use abstract method to check that id == id   (like have a method that takes a string id and a filtercriteria and decides if they refer to the same record)
-            // XXX TODO need an abstract method for applying patches for subclasses
             if (false /* error during processing */) {
                 // 400 bad request or 500 internal server error
                 return null;
             }
 
         }
-        // XXX TODO wire up to getRepository()...
-        // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
         //return new Host();
 //        return patch(null);
-        return null; // XXX TODO return final item with changes
+        return null; 
     }
 
 }

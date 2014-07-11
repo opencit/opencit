@@ -65,7 +65,7 @@ public class MyPersistenceManager extends PersistenceManager {
     public static Properties getJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", config.getDatabaseDriver());
-        prop.put("javax.persistence.jdbc.scheme", config.getDatabaseProtocol()); // XXX if everything is working without this now, remove it
+        prop.put("javax.persistence.jdbc.scheme", config.getDatabaseProtocol()); 
         String url = String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                 config.getDatabaseProtocol(), config.getDatabaseHost(), 
                 config.getDatabasePort(), config.getDatabaseSchema());

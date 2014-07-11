@@ -15,9 +15,6 @@
     </filter-mapping>
 -->
 
-<!--  
-    TODO:  mtwilson-launcher-xyz  should have a listener that uses Extensions.findAll(Shutdown.class) and calls all components that need to be informed of web server shutdown
--->
     <listener>
         <description>Cleans up Persistence factory.</description>
         <listener-class>com.intel.mtwilson.as.ASPersistenceManager</listener-class>
@@ -118,7 +115,6 @@ cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJso
         </init-param>
         -->
         <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
-        <!-- XXX TODO plugin architecture needs a facility for configuring this... or just initialize it with all known codes and don't make it available to plugins -->
         <init-param>
             <param-name>jersey.config.server.languageMappings</param-name>
             <param-value>en:en, fr:fr</param-value>
@@ -171,12 +167,10 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         </init-param>
         -->
         <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
-        <!-- XXX TODO plugin architecture needs a facility for plugins to declare mappings relevant to their special resources; all mappings must be combined and then declared to jersey?  -->
         <init-param>
             <param-name>jersey.config.server.mediaTypeMappings</param-name>
             <param-value>txt:text/plain, xml:application/xml, json:application/json, jsonapi: application/vnd.api+json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml, pem:application/x-pem-file, cer:application/pkix-cert, crt:application/octet-stream, enc:message/rfc822</param-value>
         </init-param>
-        <!-- XXX TODO plugin architecture needs a facility for configuring this... or just initialize it with all known codes and don't make it available to plugins -->
         <init-param>
             <param-name>jersey.config.server.languageMappings</param-name>
             <param-value>en:en, fr:fr</param-value>

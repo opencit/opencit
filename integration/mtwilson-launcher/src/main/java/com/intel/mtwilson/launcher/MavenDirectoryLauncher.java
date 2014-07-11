@@ -26,14 +26,11 @@ import org.apache.commons.io.IOUtils;
  * MavenDirectoryLauncher launcher = new MavenDirectoryLauncher();
  * launcher.launch();
  * // run tests
- * launcher.shutdown(); // the shutdown just tells container to deactivate all modules ; XXX TODO can we make this happen automatically with a jvm hook so we know to shutdown?
+ * launcher.shutdown(); // the shutdown just tells container to deactivate all modules ; 
  * container automatically stops after tests if you don't start the event loop.
  * 
- * XXX TODO maybe rename the property to mtwilson.launcher.directory
- * 
  * If some of the modules are missing dependencies in the directory, the launcher tries to copy the missing
- * dependencies from a local maven repository. TODO this feature should be configurable on/off; the location of
- * the repository is already configurable with the "localRepository" property.
+ * dependencies from a local maven repository. 
  * 
  * System properties:
  * mtwilson.jmod.dir=/path/to/jar/directory   (needed to load modules from a directory)

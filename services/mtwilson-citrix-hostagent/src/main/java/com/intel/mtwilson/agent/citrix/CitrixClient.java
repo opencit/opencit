@@ -181,7 +181,7 @@ public class CitrixClient {
 //        SSLContext sc = SSLContext.getInstance(tlsConnection.getTlsPolicy().getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable;   was hardcoded to "SSL" before
 
 //        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); // TODO: not clear if it will be possible to create a socket factory that is tlspolicy-aware ; for now using the default Java socket factory
+//        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); 
 //        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
         // it would be better to use TlsConnection's openConnection directly but the URL is used from Citrix code so we try to affect it by setting the default policies
         TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);

@@ -10,9 +10,6 @@
         manage the list of hosts being monitored, obtain attestation on the
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
-        
-        TODO this project should be renamed mtwilson-client-v2 because in mtwilson 2.0 it uses java7 features
-        and it applies only to v2 apis, not to v1 apis.
     </description>
   
     <parent> 

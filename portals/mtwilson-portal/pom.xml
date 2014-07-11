@@ -21,7 +21,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
-            <!-- XXX TODO LEGAL   must mark as test only  before release ... it is not authorized for distribution  <scope>test</scope>  -->
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -186,20 +185,26 @@
         </dependency>
         
 
-        <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
+        <!-- for MwPowrtalUser only-->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>	
-            
-        <!-- TODO for plugin architecture and html5 portal rewrite, the vmware-specific GUI features need to be moved to a plugin -->
+
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>         
+        </dependency>
+
+                                    
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-vmware-hostagent</artifactId>
             <version>${project.version}</version>         
         </dependency>        
-        <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
+        <!-- for MwPowrtalUser only -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>

@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX TODO this factory should probably be replaced with Spring
  * @author jbuhacoff
  */
 public class ASComponentFactory {

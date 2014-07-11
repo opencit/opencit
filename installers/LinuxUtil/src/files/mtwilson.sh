@@ -38,7 +38,6 @@ if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env
 #export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 #export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
-# XXX TODO can remove this later; converting  all package_required_version variable names to be upper case, which can be defined in mtwilson.env or for which we have a default
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
@@ -134,9 +133,6 @@ Detected the following options on this server:"
   # Attestation service auto-configuration
   export PRIVACYCA_SERVER=${MTWILSON_SERVER}
 
-  # TODO should be completely removed because functions to create certificates are moving to the java tool
-  # ## TODO: prompt for server settings (move from mtwilson-server installer setup.sh to here)
-  # create glassfish ssl cert (TODO: move to a "glassfish" control script that should be created to make glassfish management easier... so instead of "mtwilson glassfish-stop" it would be just "glassfish stop"  etc)
   if using_glassfish; then
     if [ -n "${MTWILSON_SERVER}" ]; then
       glassfish_create_ssl_cert "${MTWILSON_SERVER}"
@@ -229,7 +225,7 @@ print_help() {
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
           "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
           "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat-sslcert|tomcat-status|\n" \
-          "\t\trestart|setup|start|status|stop|uninstall|version}"
+          "\t\trestart|setup|start|status|stop|uninstall|version|zeroize}"
 }
 
 RETVAL=0
@@ -447,6 +443,18 @@ case "$1" in
         #export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
+  zeroize)
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
+        if using_glassfish; then
+          glassfish_require
+          glassfish_async_stop
+        elif using_tomcat; then
+          tomcat_require
+          tomcat_async_stop
+        fi
+        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
+        rm -rf /etc/intel/cloudsecurity        
+        ;;
   change-db-pass)
         if [ $# -ne 1 ]; then
           echo_failure "Usage: $0 $1"; exit -1;
@@ -497,7 +505,7 @@ case "$1" in
             echo "Removing mtwilson logrotate files"
             rm -fr /etc/logrotate.d/mtwilson
         # java:  rm -rf /usr/share/jdk1.7.0_51
-        # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
+        # Finally, clear variables so that detection will work properly if mt wilson is re-installed  
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
         tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""
         glassfish_clear; export GLASSFISH_HOME=""; export glassfish_bin=""; export glassfish=""

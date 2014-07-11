@@ -484,6 +484,18 @@ public interface MtWilson {
     List<TxtHostRecord> queryForHosts(String searchCriteria,boolean includeHardwareUuid) throws IOException, ApiException, SignatureException;
 
     /**
+     * Returns the host record with new features such as hardware uuid and tls policy.
+     * 
+     * @param searchCriteria
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     * @since MTW 2.0
+     */
+    List<TxtHostRecord> queryForHosts2(String searchCriteria) throws IOException, ApiException, SignatureException;
+    
+    /**
      * Retrives the trust status of the list of hosts specified. This API is added for the OpenStack integration.
      * <p>
      * <i><u>Roles needed:</u></i>Attestation/Report
@@ -2428,7 +2440,6 @@ public interface MtWilson {
      */    
     boolean configureWhiteList(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException;
 
-    // TODO: deprecate in next release in favor of getSamlCertificates()
     /**
      * Retrieves server's SAML certificate and any root certificates if available. This would be used to verify the signed
      * SAML assertion sent by the system. 

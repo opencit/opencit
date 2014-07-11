@@ -36,31 +36,6 @@ import org.apache.commons.io.IOUtils;
 /**
  * Depends on CreateCertificateAuthorityKey to create the cakey first
  *
- * XXX TODO:   instead of defining all the setters and getters here,  maybe
- * use mtwilson-configuration objects like SamlConfiguration which would define
- * the configuration key constants like SAML_KEYSTORE_FILE = "saml.keystore.file"
- * and the getters and setters with some defaults for things that can have a 
- * default. That would allow other setup tasks as well as the business layer
- * to use those bean properties like we were doing with My.configuration()
- * without having an all-in-one MyConfiguration object (because it will not
- * be practical to maintain an all-in-one object with a plugin system) and also
- * this setup tasks requires the cakey which means it either has to look in
- * My.configuration() for it or it could accept a CaConfiguration
- * object from which it can get the required settings. Or instead of 
- * accepting SamlConfiguration CaConfiguration, any object can just instantiate
- * its own copies of them using the same MutableConfiguration  instance as a
- * data source -- the *Configuration instances themselves would be discardable
- * and the application only has to save the MutableConfiguration at the end.
- * BUT, using *Configuration objects means that the setup task itself does not
- * have bean setters and getters which means an application  would either 
- * need to "look deep" into the getters and setters in order to do something
- * useful or it would need another way of knowing what the task needs. 
- * 
- * XXX TODO  maybe the code to instantiate the saml keystore and the ca
- * private key needs to go into a repository object so that it doesn't have
- * to be repeated here and in other tasks that use the ca and in the business
- * layer where it uses the saml key. 
- * 
  * @author jbuhacoff
  */
 public class CreateSamlCertificate extends LocalSetupTask {
@@ -174,7 +149,6 @@ public class CreateSamlCertificate extends LocalSetupTask {
             validation("SAML keystore file is missing");
         }
         // keystore exists, look for the private key and cert
-        // XXX TODO make sure it has a SAML private key and certificate inside
         SimpleKeystore keystore = new SimpleKeystore(samlKeystoreFile, getSamlKeystorePassword());
         for (String alias : keystore.aliases()) {
             log.debug("Keystore alias: {}", alias);
@@ -216,7 +190,7 @@ public class CreateSamlCertificate extends LocalSetupTask {
             List<Fault> faults = builder.getFaults();
             for (Fault fault : faults) {
                 log.error(String.format("%s%s", fault.toString(), fault.getCause() == null ? "" : ": " + fault.getCause().getMessage()));
-                validation(fault); // XXX TODO  should we have an execution() category of faults? 
+                validation(fault); 
             }
             throw new SetupException("Cannot generate SAML certificate");
 
@@ -228,7 +202,6 @@ public class CreateSamlCertificate extends LocalSetupTask {
         keystore.addKeyPairX509(samlkey.getPrivate(), samlcert, getSamlCertificateDistinguishedName(), getSamlKeystorePassword(), cacert); // we have to provide the issuer chain since it's not self-signed,  otherwise we'll get an exception from the KeyStore provider
         keystore.save();
 
-        // TODO: create saml.crt.pem with  saml crt followed by cacert
         Pem samlCert = new Pem("CERTIFICATE", samlcert.getEncoded());
         Pem samlCaCert = new Pem("CERTIFICATE", cacert.getEncoded());
         String certificateChainPem = String.format("%s\n%s", samlCert.toString(), samlCaCert.toString());

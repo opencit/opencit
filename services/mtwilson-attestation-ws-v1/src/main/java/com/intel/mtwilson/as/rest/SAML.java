@@ -115,7 +115,7 @@ public class SAML {
                     throw new ValidationException("Hostname or IP address is missing or invalid");
                 }
             }
-            return hostTrustBO.getTrustWithSamlForHostnames(Arrays.asList(hostArray)/* , forceVerify*/); // TODO:  forceVerify not implemented yet in HostTrustBO for this method
+            return hostTrustBO.getTrustWithSamlForHostnames(Arrays.asList(hostArray)/* , forceVerify*/); 
         }
     }
 }

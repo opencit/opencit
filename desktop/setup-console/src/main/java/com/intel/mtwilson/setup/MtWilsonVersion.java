@@ -5,7 +5,7 @@
 package com.intel.mtwilson.setup;
 
 /**
- * XXX just a draft.. .maybe make it a class with public static final instances instead of enum?  or interface with implementations?
+ * just a draft.. .maybe make it a class with public static final instances instead of enum?  or interface with implementations?
  * @author jbuhacoff
  */
 public enum MtWilsonVersion {

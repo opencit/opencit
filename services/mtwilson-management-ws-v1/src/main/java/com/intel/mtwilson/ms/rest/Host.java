@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.MSComponentFactory;
@@ -56,7 +57,6 @@ public class Host {
 //    @GET
 //    @Produces("application/json")
 //    public String getJson() {
-//        //TODO return proper representation object
 //        throw new UnsupportedOperationException();
 //    }
 
@@ -79,10 +79,10 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(TxtHostRecord hostObj) throws ApiException {
         ValidationUtil.validate(hostObj);
-        long regHostStart = System.currentTimeMillis(); // XXX savy performance
+        long regHostStart = System.currentTimeMillis(); 
         boolean result = MSComponentFactory.getHostBO().registerHost(hostObj);
-        long regHostStop = System.currentTimeMillis();// XXX savy performance
-        log.debug("XXX savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
+        long regHostStop = System.currentTimeMillis();
+        log.debug("savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); 
         return Boolean.toString(result);
     }
 
@@ -94,15 +94,15 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
-        long regHostStart = System.currentTimeMillis(); // XXX savy performance
+        long regHostStart = System.currentTimeMillis(); 
         boolean result = MSComponentFactory.getHostBO().registerHostFromCustomData(hostConfigObj);
-        long regHostStop = System.currentTimeMillis();// XXX savy performance
-        log.debug("XXX savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
+        long regHostStop = System.currentTimeMillis();
+        log.debug("savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); 
         return Boolean.toString(result);
     }
 
     //@RolesAllowed({"Whitelist"})
-    @RequiresPermissions({"hosts:create","oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
     @POST
     @Path("/whitelist")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -114,15 +114,29 @@ public class Host {
     }
 
     //@RolesAllowed({"Whitelist"})
-    @RequiresPermissions({"hosts:create","oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
+    @RequiresPermissions({"oems:create","oss:create","mles:create","mle_pcrs:create","mle_modules:create","mle_sources:create"})
     @POST
     @Path("/whitelist/custom")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
+        
+        // debug only
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("configureWhiteList: {}", mapper.writeValueAsString(hostConfigObj));
+        } catch(Exception e) { log.error("configureWhiteList cannot serialize input" ,e); }
+        // debug only
+        
         WhitelistConfigurationData wlConfigData = new WhitelistConfigurationData(hostConfigObj);
         boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(wlConfigData);
+        log.info("Status of white list configuration is {}.", Boolean.toString(result));
+        if (hostConfigObj.isRegisterHost()) {
+            String registerHost = registerHost(hostConfigObj);
+            log.info("Status of host registration is {}.", registerHost);
+            return registerHost;
+        }
         return Boolean.toString(result);
     }
 
@@ -146,7 +160,7 @@ public class Host {
         ValidationUtil.validate(hostRecords);
         TxtHostRecordList newHostRecords = new TxtHostRecordList();
         
-        for (HostConfigData host : hostRecords.getHostRecords().toArray(new HostConfigData[0])) {
+        for (HostConfigData host : hostRecords.getHostRecords()) {
             if (host.getTxtHostRecord().HostName.isEmpty() || host.getTxtHostRecord().HostName == null) {
                 throw new MSException(com.intel.mtwilson.i18n.ErrorCode.AS_MISSING_INPUT, "host");
             } else {

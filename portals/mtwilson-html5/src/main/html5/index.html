@@ -311,10 +311,6 @@
             });
             
             // wait for the webservice library to initialize, then populate the UI with some data from the server. 
-            // XXX TODO create special 'views' resources on the  server that can provide all the info
-            // we need in one response. so for example the default search for tags, triples, and selections, as well
-            // as main configuration and cacerts... all would be defined in one 'view' that would be merged into
-            // mtwilson.data. 
             document.observe('jsonapi:ready', function() {
                 Log.debug("after init (jsonapiclient:ready), data: "+Object.toJSON(ws.data));
 				/*

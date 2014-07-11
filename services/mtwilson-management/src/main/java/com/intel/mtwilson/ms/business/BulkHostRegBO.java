@@ -5,11 +5,7 @@
 package com.intel.mtwilson.ms.business;
 
 import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.datatypes.HostConfigResponse;
-import com.intel.mtwilson.datatypes.HostConfigResponseList;
-import com.intel.mtwilson.datatypes.HostResponse;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.TxtHostRecordList;
+import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.MSComponentFactory;
@@ -31,7 +27,7 @@ public class BulkHostRegBO {
     private Logger log = LoggerFactory.getLogger(getClass());
     private HostBO hostBO = MSComponentFactory.getHostBO();
     private int timeout;
-    private static ExecutorService scheduler = Executors.newFixedThreadPool(MSConfig.getConfiguration().getInt("mtwilson.ms.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
+    private static ExecutorService scheduler = Executors.newFixedThreadPool(MSConfig.getConfiguration().getInt("mtwilson.ms.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; 
     
     public BulkHostRegBO() {
         timeout = MSConfig.getConfiguration().getInt("mtwilson.ms.registration.hostTimeout", 600);

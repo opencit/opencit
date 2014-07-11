@@ -59,7 +59,7 @@ register(com.intel.mtwilson.jaxrs2.provider.X509CertificateArrayPemProvider.clas
 register(com.intel.mtwilson.jaxrs2.provider.DateParamConverterProvider.class);
         
         // now get the list of classes that implement @V2 and @Path
-        List<Object> resources = Extensions.findAll(V2.class.getName()); // we could search for @Path but then we'd find v1 and v2 classes as well as utility classes for both such as the application.wadl generator ; we use .class.getName() and not just .class because we want the object instances, not the annotation itself as <T>
+        List<Object> resources = Extensions.findAllAnnotated(V2.class); // we could search for @Path but then we'd find v1 and v2 classes as well as utility classes for both such as the application.wadl generator
         for(Object resource : resources) {
             log.debug("Looking at resource class {}", resource.getClass().getName());
             if( resource.getClass().isAnnotationPresent(Path.class) ) {
@@ -74,7 +74,7 @@ register(com.intel.mtwilson.jaxrs2.provider.DateParamConverterProvider.class);
     protected Registrar[] getRegistrars() {
         AnnotationRegistrar v2 = new AnnotationRegistrar(V2.class); // Mt Wilson 2.0 Resource APIs 
         AnnotationRegistrar rpc = new AnnotationRegistrar(RPC.class); // Mt Wilson 2.0 Remote Procedure Call APIs 
-        ImplementationRegistrar runnables = new ImplementationRegistrar(); //  backgroudn tasks TODO  move the scanning of these into a ServletContextListener so it will happen at application startup regarldess of v1/v2  ??
+        ImplementationRegistrar runnables = new ImplementationRegistrar(); //  backgroudn tasks 
         return new Registrar[] { v2, rpc, runnables };
     }
 

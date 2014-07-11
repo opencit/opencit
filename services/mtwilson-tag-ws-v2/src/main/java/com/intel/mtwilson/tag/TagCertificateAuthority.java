@@ -44,11 +44,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
  * The only required parameter in the certificate request is the identity of the
  * subject (hardware uuid) being certified.
  *
- * TODO INSECURE: add shiro annotations to require the logged in user to have
- * asset tag certificate permission; for pull provisioning this permission must
- * be granted to the user whose credentials are used from the host that requests
- * the certificate
- *
  * @author jbuhacoff
  */
 public class TagCertificateAuthority {
@@ -71,7 +66,7 @@ public class TagCertificateAuthority {
         List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip, true);
         if (hostList == null || hostList.isEmpty()) {
             log.debug("host uuid lookup didn't return back any results");
-            //throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.")); // TODO: i18n  similar to  ErrorCode.AS_HOST_NOT_FOUND but with this custom message
+            //throw new ASException(new Exception("No host records found, please verify your host is in mtwilson or provide a hardware uuid in the subject field.")); // 
             log.warn("No host records found for {}, please verify your host is in mtwilson or provide a hardware uuid in the subject field", ip);
             return null;
         }
@@ -176,12 +171,11 @@ public class TagCertificateAuthority {
             }
         }
         // second search by host ip or host name
-        // TODO: look up the subject's ip addresses and hostnames by subject uuid just once here, then compare what is in the xml against this list to find a matching selection
         for (SelectionType selection : currentSelections.getSelection()) {
             for (SubjectType subject : selection.getSubject()) {
                 if (subject.getIp() != null) {
                     log.debug("looking up uuid for host with ip {}", subject.getIp().getValue());
-                    String uuid = findSubjectHardwareUuid(subject.getIp().getValue()); // TODO: (see note immediately before this block) instead of looking up the hardware uuid for each ip to compare to the subject uuid,  we should be looking up the subject uuid's ip address or hostname list just once and then seeing if this matches any of the ip values we already looked up for the subject 
+                    String uuid = findSubjectHardwareUuid(subject.getIp().getValue()); 
                     if (uuid != null) {
                         log.debug("comparing to found selection subject uuid {}", uuid);
                         if (targetSubject.toString().equalsIgnoreCase(uuid.toLowerCase())) {

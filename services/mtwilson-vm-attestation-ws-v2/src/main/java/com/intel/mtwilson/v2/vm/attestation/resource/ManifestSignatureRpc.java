@@ -59,18 +59,14 @@ public class ManifestSignatureRpc {
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
     public ManifestSignature signImageManifest(ManifestSignatureInput input) throws KeyManagementException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, CryptographyException, InvalidKeyException, SignatureException {
         
-        // TODO: validate the input
-        // TODO: create the vmblob xml
         String vmblobXml = "<vm_manifest><customer_id>1234</customer_id><image_id>1235289</image_id><manifest_hash>aaaaaa</manifest_hash></vm_manifest>";
         
-        // TODO:  load the private key for signing  -  please check with jonathan later for better convenience function in SImpleKeystore to get private key out
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
         RsaCredentialX509 credential = keystore.getRsaCredentialX509("saml", My.configuration().getSamlKeystorePassword());
         byte[] signature = credential.signature(vmblobXml.getBytes(Charset.forName("UTF-8")));
         
         log.debug("retrieve version");
         ManifestSignature output = new ManifestSignature();
-        // TODO sign the input ,  put signature in output.setSignature(...)
         output.setCustomerId("1234");
         output.setVmImageId("1235289");
         output.setManifestHash("aaaaaa");

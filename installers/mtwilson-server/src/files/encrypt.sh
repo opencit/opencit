@@ -68,8 +68,6 @@ write_signature() {
   local docfile="$infile.sig.doc"
   local infilename=$(basename $infile)
 
-  # TODO input validation: echo $infilename | grep -E -q "^[a-zA-Z\.]$"
-
   # The signature document (docfile) consists of:
   # 1. the signature headers, followed by blank line
   # 2. the original input file

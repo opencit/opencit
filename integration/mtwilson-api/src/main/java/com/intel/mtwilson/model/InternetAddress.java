@@ -55,8 +55,7 @@ public class InternetAddress extends ObjectModel {
             return; 
         }
         
-        // XXX TODO: any other format accepted as Hostname? what about DNS / FQDN? There are definitely invalid possibilities for these.
-        Hostname hostname = new Hostname(input); // XXX the Hostname validation itself is very weak right now, it accepts anything without commas
+        Hostname hostname = new Hostname(input); 
         if( hostname.isValid() ) { 
             format = Format.Hostname;
             formatObject = hostname;
@@ -71,9 +70,9 @@ public class InternetAddress extends ObjectModel {
     
     public boolean isIPv6() { return isValid() && format.equals(Format.IPv6); }
     public boolean isIPv4() { return isValid() && format.equals(Format.IPv4); }
-    public boolean isHostname() { return isValid() && format.equals(Format.Hostname); }
-    
-    public Model value() { return isValid() ? formatObject : null; } // returns the underlying model object for the current format (ipv6, ipv4, or hostname) so you can use it without re-validating
-    
-    public static enum Format { IPv6, IPv4, Hostname; } // TODO: DNS,  FQDN
+        public boolean isHostname() { return isValid() && format.equals(Format.Hostname); }
+
+        public Model value() { return isValid() ? formatObject : null; } // returns the underlying model object for the current format (ipv6, ipv4, or hostname) so you can use it without re-validating
+
+        public static enum Format { IPv6, IPv4, Hostname; } 
 }

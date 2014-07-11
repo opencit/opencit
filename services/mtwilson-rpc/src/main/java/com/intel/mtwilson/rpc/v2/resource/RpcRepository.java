@@ -9,7 +9,7 @@ import com.intel.mtwilson.rpc.v2.model.RpcFilterCriteria;
 import com.intel.mtwilson.rpc.v2.model.RpcCollection;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 //import javax.ejb.Stateless;
@@ -33,15 +33,14 @@ import javax.ws.rs.core.Response;
 @V2
 //@Stateless
 @Path("/rpcs")
-public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFilterCriteria, RpcLocator> {
+public class RpcRepository implements DocumentRepository<Rpc, RpcCollection, RpcFilterCriteria, RpcLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RpcRepository.class);
-    private static final HashMap<UUID, Rpc> data = new HashMap<UUID, Rpc>(); // XXX simulated database for debugging only  TODO for production need a jpa controller   TODO maybe we should have a standard helper class for this kind of thing, which would include a basic search based on beanutils ?
+    private static final HashMap<UUID, Rpc> data = new HashMap<UUID, Rpc>(); 
 
     @Override
     public RpcCollection search(RpcFilterCriteria criteria) {
         log.debug("Search id {} name {}", criteria.id, criteria.nameEqualTo);
-        // TODO  replace with jpa code ?
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
@@ -63,7 +62,6 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
                 rpcs.getDocuments().add(item);
             }
         }
-        // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
         return rpcs;
         }
         catch(Exception e) {
@@ -90,12 +88,10 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
         if (locator.id == null) {
             return null;
         }
-        // TODO  replace with jpa code
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
             Rpc item = dao.findStatusById(locator.id);
-        // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
         return item;
         }
         catch(Exception e) {
@@ -107,16 +103,13 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
     }
 
     public RpcPriv retrieveInput(RpcLocator locator) {
-        // TODO replace with jpa code
         if (locator.id == null) {
             return null;
         }
-        // TODO  replace with jpa code
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
             RpcPriv item = dao.findById(locator.id);
-        // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
         return item;
         }
         catch(Exception e) {
@@ -128,16 +121,13 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
     }
 
     public RpcPriv retrieveOutput(RpcLocator locator) {
-        // TODO replace with jpa code
         if (locator.id == null) {
             return null;
         }
-        // TODO  replace with jpa code
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
             RpcPriv item = dao.findById(locator.id);
-        // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
         return item;
         }
         catch(Exception e) {
@@ -163,7 +153,6 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
     }
     public void create(RpcPriv item) {
         log.debug("Create id {}", item.getId());
-        // TODO  replace with jpa code
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
@@ -207,7 +196,6 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
     public void delete(RpcLocator locator) {
         if( locator.id == null ) { return; }
         UUID uuid = locator.id;
-        // TODO:  replace with jpa code
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();

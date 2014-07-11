@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.data.TblOs;
@@ -13,21 +12,25 @@ import com.intel.mtwilson.as.rest.v2.model.Os;
 import com.intel.mtwilson.as.rest.v2.model.OsCollection;
 import com.intel.mtwilson.as.rest.v2.model.OsFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OsLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.OsData;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
+import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.wlm.business.OsBO;
 
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilterCriteria, OsLocator>{
+public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilterCriteria, OsLocator>{
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OsRepository.class);
     
@@ -65,11 +68,9 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
                     }
                 }                
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OS search.", ex);
-            throw new ASException(ErrorCode.WS_OS_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Os:Search - Error during Os search.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("Os:Search - Returning back {} of results.", osCollection.getOss().size());                
         return osCollection;
@@ -88,11 +89,9 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
                 Os os = convert(tblOs);
                 return os;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OS retrieval.", ex);
-            throw new ASException(ErrorCode.WS_OS_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
+            log.error("Os:Retrieve - Error during Os retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -100,26 +99,30 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
     @Override
     @RequiresPermissions("oss:store")    
     public void store(Os item) {
-        if (item == null || item.getId() == null) { throw new WebApplicationException(Response.Status.BAD_REQUEST);}
+        if (item == null || item.getId() == null) { throw new RepositoryInvalidInputException();}
         log.debug("Os:Store - Got request to update Os with id {}.", item.getId().toString());        
+        OsLocator locator = new OsLocator();
+        locator.id = item.getId();
+        
         OsData obj = new OsData();
         try {
             obj.setName(item.getName());
             obj.setDescription(item.getDescription());
             new OsBO().updateOs(obj, item.getId().toString());
             log.debug("Os:Store - Updated the Os with id {} successfully.", item.getId().toString());                    
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OS update.", ex);
-            throw new ASException(ErrorCode.WS_OS_UPDATE_ERROR, ex.getClass().getSimpleName());
-        }        
+            log.error("Os:Store - Error during Os update.", ex);
+            throw new RepositoryStoreException(ex, locator);
+        }
     }
 
     @Override
     @RequiresPermissions("oss:create")    
     public void create(Os item) {
         log.debug("Os:Create - Got request to create a new role.");
+        OsLocator locator = new OsLocator();
+        locator.id = item.getId();
+
         OsData obj = new OsData();
         try {
             obj.setName(item.getName());
@@ -127,11 +130,9 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
             obj.setDescription(item.getDescription());
             new OsBO().createOs(obj, item.getId().toString());
             log.debug("Os:Store - Created the Os {} successfully.", item.getName());                                
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OS creation.", ex);
-            throw new ASException(ErrorCode.WS_OS_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("Os:Create - Error during Os creation.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -144,11 +145,9 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
         try {
             new OsBO().deleteOs(null, null, id);
             log.debug("Os:Delete - Deleted the Os with id {} successfully.", locator.id.toString()); 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during OS delete.", ex);
-            throw new ASException(ErrorCode.WS_OS_DELETE_ERROR, ex.getClass().getSimpleName());
+            log.error("Os:Delete - Error during Os deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
         }
     }
     
@@ -172,9 +171,11 @@ public class OsRepository implements SimpleRepository<Os, OsCollection, OsFilter
                 locator.id = obj.getId();
                 delete(locator);
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
-            log.error("Error during Os deletion.", ex);
-            throw new WebApplicationException("Please see the server log for more details.", Response.Status.INTERNAL_SERVER_ERROR);
+            log.error("Os:Delete - Error during Os deletion.", ex);
+            throw new RepositoryDeleteException(ex);
         }
     }
     

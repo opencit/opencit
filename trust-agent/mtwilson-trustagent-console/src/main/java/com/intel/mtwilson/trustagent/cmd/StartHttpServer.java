@@ -74,7 +74,6 @@ public class StartHttpServer implements Command {
         sslContextFactory.setTrustStorePath(configuration.getTrustagentKeystoreFile().getAbsolutePath());
         sslContextFactory.setTrustStorePassword(configuration.getTrustagentKeystorePassword());
         // fixes this error in mtwilson java.lang.NoClassDefFoundError: org/bouncycastle/jce/spec/ECPublicKeySpec by limiting our supported tls ciphers to RSA ciphers
-        // TODO: this list should be expanded somewhat and the mtwilson NoClassDefFoundError should be fixed on the mtwilson side, possibly by limiting its list of acceptable ciphers
         sslContextFactory.setIncludeCipherSuites("TLS_DHE_RSA_WITH_AES_128_CBC_SHA","SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA","TLS_RSA_WITH_AES_128_CBC_SHA","SSL_RSA_WITH_3DES_EDE_CBC_SHA");
         ServerConnector https = new ServerConnector(server,
             new SslConnectionFactory(sslContextFactory,"http/1.1"),

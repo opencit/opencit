@@ -46,12 +46,8 @@ import java.util.Random;
  * to mtwilson 2.0 tables;  it's safe to run multiple times because it will only
  * migrate data that wasn't already migrated, but if there's a programmer error
  * here the old data may be lost;  so backup the mtwilson 1.2 database before
- * running setup.  XXX TODO it might be a good idea to have a setup task to 
- * backup the database... even if restoring it would be a manual process, at
- * least the administrator would have a backup and save the time of having to 
- * create it. however, that process might be database specific unless we use
- * our own format for export/import of the data.
- *
+ * running setup. 
+ * 
  * @author jbuhacoff
  */
 public class MigrateUsers extends DatabaseSetupTask {
@@ -90,7 +86,6 @@ public class MigrateUsers extends DatabaseSetupTask {
         if (algorithmName == null) {
             algorithmName = "SHA-256";
         }
-        // TODO:  check that the configured algorithm is available on this system
         try {
             MessageDigest md = MessageDigest.getInstance(algorithmName);
             log.debug("Hash algorithm {} is available", md.getAlgorithm());
@@ -136,10 +131,6 @@ public class MigrateUsers extends DatabaseSetupTask {
     protected void execute() throws Exception {
         roleCache.clear();
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        // TODO:
-        // 1. select all user passwords that are currently in plaintext  (mtwilson 1.2 does not have any, because mw_portal_user uses a java keystore as the login test)
-        // 2. for each user, create a mw_user record and an mw_user_keystore record
-        // 3. for each user password, hash it and create the mw_user_login_password record
         List<MwPortalUser> portalUsers = My.jpa().mwPortalUser().findMwPortalUserEntities(); // getting "the type of mwPortalUser() is erroneous"
         for (MwPortalUser portalUser : portalUsers) {
             try {
@@ -161,9 +152,6 @@ public class MigrateUsers extends DatabaseSetupTask {
     }
 
     /**
-     * TODO there is similar code in cpg-crypto PasswordCipher , should
-     * consolidate somewhere
-     *
      * @param cipherInfo the password-based cipher to test (algorithm name, salt
      * size)
      * @param elapsedTimeTarget the minimum average delay, in milliseconds; the

@@ -125,7 +125,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
             }
         } catch (Exception e) {
             log.debug("doGetAuthorizationInfo error", e);
-            throw new AuthenticationException("Internal server error", e); // TODO: i18n
+            throw new AuthenticationException("Internal server error", e); 
         }
 
         return authzInfo;
@@ -203,7 +203,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
     //            userLoginCertificate = dao.findUserLoginCertificateByUsername(username);
             } catch (Exception e) {
                 log.debug("doGetAuthenticationInfo error", e);
-                throw new AuthenticationException("Internal server error", e); // TODO: i18n
+                throw new AuthenticationException("Internal server error", e); 
             }
         }
         if (userLoginCertificate == null || user == null) {
@@ -225,7 +225,7 @@ public class JdbcCertificateRealm extends AuthorizingRealm {
             info.setCredentials(X509Util.decodeDerCertificate(userLoginCertificate.getCertificate()));
         }
         catch(CertificateException e) {
-            throw new AuthenticationException("Invalid certificate", e); // TODO: i18n
+            throw new AuthenticationException("Invalid certificate", e); 
         }
 
         return info;

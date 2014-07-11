@@ -77,7 +77,7 @@ public class JpaPolicyReader {
     
     public List<PcrIndex> loadBiosPcrIndexList(TblHosts tblHosts) {
         ArrayList<PcrIndex> pcrs = new ArrayList<PcrIndex>();
-        TblMle biosMle = mleJpaController.findMleById(tblHosts.getBiosMleId().getId()); // XXX don't know why we are doing another database lookup, the tblHosts.getBiosMleId() is not an Id it's the full record and it has the same information we are looking up here
+        TblMle biosMle = mleJpaController.findMleById(tblHosts.getBiosMleId().getId()); 
         String biosPcrList = biosMle.getRequiredManifestList();
         if (biosPcrList.isEmpty()) {
             throw new ASException(
@@ -94,7 +94,7 @@ public class JpaPolicyReader {
     public List<PcrIndex> loadVmmPcrIndexList(TblHosts tblHosts) {
         ArrayList<PcrIndex> pcrs = new ArrayList<PcrIndex>();
         // Get the Vmm MLE without accessing cache
-        TblMle vmmMle = mleJpaController.findMleById(tblHosts.getVmmMleId().getId()); // XXX don't know why we are doing another database lookup, the tblHosts.getVmmMleId() is not an Id it's the full record and it has the same information we are looking up here
+        TblMle vmmMle = mleJpaController.findMleById(tblHosts.getVmmMleId().getId()); 
         String vmmPcrList = vmmMle.getRequiredManifestList();
         if (vmmPcrList == null || vmmPcrList.isEmpty()) {
             throw new ASException(
@@ -156,7 +156,7 @@ public class JpaPolicyReader {
     
     public Set<Rule> loadPcrMatchesConstantRulesForLocation(String location, TblHosts tblHosts) {
 //        HashSet<Rule> rules = new HashSet<Rule>();
-//        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcrByLocationName(location) // XXX need to create this method
+//        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcrByLocationName(location) 
 //        log.debug("WhitelistUtil found Location PCR: {}", locationPcr.getName());
 //        Sha1Digest pcrValue = new Sha1Digest(locationPcr.getValue());
 //        log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", pcrValue.toString());
@@ -164,12 +164,12 @@ public class JpaPolicyReader {
 //        rule.setMarkers(markers);
 //        rules.add(rule);
 //        return rules;
-        throw new UnsupportedOperationException("TODO: add support for checking pcr 22");
+        throw new UnsupportedOperationException("add support for checking pcr 22");
     }
 
     public Set<Rule> loadPcrMatchesConstantRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts tblHosts) {
         HashSet<Rule> rules = new HashSet<Rule>();
-        // load the tag cacerts and create the tag trust rule   TODO  load the cacerts once and keep it in memory instead of reloading for every attestation, but need a way for admin to refresh the configuration at runtime without restartnig the server
+        // load the tag cacerts and create the tag trust rule  
         try(FileInputStream in = new FileInputStream(My.configuration().getAssetTagCaCertificateFile())) {
             String text = IOUtils.toString(in);
             List<X509Certificate> tagAuthorities = X509Util.decodePemCertificates(text);
@@ -178,7 +178,7 @@ public class JpaPolicyReader {
             rules.add(tagTrustedRule);
         }
         catch(Exception e) {
-            throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage()); // TODO: i18n
+            throw new RuntimeException("Cannot load tag certificate authorities file: "+ e.getMessage());
         }
 
         log.debug("Adding the asset tag rule for host {} with asset tag ID {}", tblHosts.getName(), atagCert.getId());
@@ -195,7 +195,7 @@ public class JpaPolicyReader {
 
     public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo, TblHosts host) {
         HashMap<String,String> info = new HashMap<String,String>();
-        // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
+        // info.put("EventType", manifest.getEventType()); 
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
         info.put("HostSpecificModule", moduleInfo.getUseHostSpecificDigestValue().toString());
@@ -203,7 +203,7 @@ public class JpaPolicyReader {
         // Since we can call this function even without registering the host, the hostID will not be present. So, we need to skip adding this host specific module
         if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue()) {
             if (host.getId() != null && host.getId() != 0) {
-                TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
+                TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  
                 if( hostSpecificModule == null ) {
                     log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
                     Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
@@ -217,8 +217,6 @@ public class JpaPolicyReader {
                 return null;
         }
         else {
-            // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
-            // XXX the only way to fix this is to change the schema so it can accomodate all the custom info we need w/o needing to know WHAT it is from here.
             info.put("PackageName", moduleInfo.getPackageName());
             info.put("PackageVersion", moduleInfo.getPackageVersion());
             info.put("PackageVendor", moduleInfo.getPackageVendor());
@@ -244,8 +242,6 @@ public class JpaPolicyReader {
     // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
     public Set<Rule> createPcrEventLogIncludesRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, TblHosts host, String... markers) {
         HashSet<Rule> list = new HashSet<Rule>();
-    // XXX unfortunately because of our database design, we don't know in advance which  pcr's these modules belong to.
-        // so we need to collect the set of measurements for each pcr, and then for every pcr that has modules/events, we need to add the rules (second section below)
         HashMap<PcrIndex,Set<Measurement>> measurements = new HashMap<PcrIndex,Set<Measurement>>();
         for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
             PcrIndex pcrIndex = PcrIndex.valueOf(Integer.valueOf(moduleInfo.getExtendedToPCR()));
@@ -260,7 +256,6 @@ public class JpaPolicyReader {
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
-            // XXX TODO for first phase of this implementation in mt wilson 1.2,  we only support pcr 19 ...  in next phase, need to rewrite the way data is stored and also the UI so we can remove this "pcr 19" check and just do it generally for any pcr with modules
             if( pcrIndex.toInteger() == 19 ) {
                 // event log rule
                 log.debug("Adding PcrEventLogIncludes rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
@@ -280,27 +275,25 @@ public class JpaPolicyReader {
     
     public Set<Rule> loadPcrEventLogIncludesRuleForBios(Bios bios, TblHosts tblHosts) {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
-        Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection();  // XXX event logs shouldn't be associated directly to a bios, they should be associated to a specific pcr digest ...
+        Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection();  
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.BIOS.name());
     }
     
     public Set<Rule> loadPcrEventLogIncludesRuleForVmm(Vmm vmm, TblHosts tblHosts) {
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
-        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();       // XXX event logs shouldn't be associated directly to a vmm, they should be associated to a specific pcr digest ...  
+        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();      
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.VMM.name());
     }
     
     public Set<Rule> loadPcrEventLogEqualExcludingVmm(Vmm vmm, TblHosts tblHosts, boolean verifyMLE) {
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
-        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();       // XXX event logs shouldn't be associated directly to a vmm, they should be associated to a specific pcr digest ...  
+        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();  
         return createPcrEventLogEqualExcludingRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, verifyMLE, TrustMarker.VMM.name());
     }
 
     // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
     public Set<Rule> createPcrEventLogEqualExcludingRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, TblHosts host, boolean verifyMLE, String... markers) {
         HashSet<Rule> list = new HashSet<Rule>();
-        // XXX unfortunately because of our database design, we don't know in advance which  pcr's these modules belong to.
-        // so we need to collect the set of measurements for each pcr, and then for every pcr that has modules/events, we need to add the rules (second section below)
         HashMap<PcrIndex,ArrayList<Measurement>> measurements = new HashMap<PcrIndex,ArrayList<Measurement>>();
         for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
             PcrIndex pcrIndex = PcrIndex.valueOf(Integer.valueOf(moduleInfo.getExtendedToPCR()));
@@ -315,7 +308,6 @@ public class JpaPolicyReader {
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
-            // XXX TODO for first phase of this implementation in mt wilson 1.2,  we only support pcr 19 ...  in next phase, need to rewrite the way data is stored and also the UI so we can remove this "pcr 19" check and just do it generally for any pcr with modules
             if( pcrIndex.toInteger() == 19 ) {
                 // event log rule
                 log.debug("Adding PcrEventLogEqualsExcluding rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());

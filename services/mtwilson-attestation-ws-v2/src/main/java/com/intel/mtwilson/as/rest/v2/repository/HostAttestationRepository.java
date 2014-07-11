@@ -6,7 +6,6 @@ package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -14,14 +13,18 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.policy.TrustReport;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 
 import java.util.Date;
 import java.util.List;
@@ -33,7 +36,7 @@ import org.joda.time.DateTime;
  *
  * @author ssbangal
  */
-public class HostAttestationRepository implements SimpleRepository<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLocator> {
+public class HostAttestationRepository implements DocumentRepository<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLocator> {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAttestationRepository.class);
     
@@ -43,7 +46,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @Override
     @RequiresPermissions("host_attestations:search")    
     public HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
-        log.debug("HostAttestation:Search - Got request to search for the roles.");        
+        log.debug("HostAttestation:Search - Got request to search for host attestations.");        
         HostAttestationCollection objCollection = new HostAttestationCollection();
         try {
             TblTaLogJpaController jpaController = My.jpa().mwTaLog();
@@ -74,11 +77,9 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
                     }
                 }
             } 
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during retrieval of host attestation status from cache.", ex);
-            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
+            log.error("HostAttestation:Search - Error during retrieval of host attestation status from cache.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("HostAttestation:Search - Returning back {} of results.", objCollection.getHostAttestations().size());                
         return objCollection;
@@ -96,11 +97,9 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
                 HostAttestation haObj = convert(obj, obj.getHost_uuid_hex());
                 return haObj;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during retrieval of host attestation status from cache.", ex);
-            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
+            log.error("HostAttestation:Store - Error during retrieval of host attestation status from cache.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
     }
@@ -114,7 +113,9 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @Override
     @RequiresPermissions("host_attestations:create")    
     public void create(HostAttestation item) {
-        log.debug("HostAttestation:Store - Got request to create host attestation.");        
+        log.debug("HostAttestation:Create - Got request to create host attestation.");  
+        HostAttestationLocator locator = new HostAttestationLocator();
+        locator.id = item.getId();
         try {
             HostTrustBO asBO = new HostTrustBO();
             TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
@@ -125,14 +126,14 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
                 // Need to cache the attestation report
                 asBO.logTrustReport(hostObj, htr);
             } else {
-                log.error("Specified host with UUID {} does not exist in the system.", item.getHostUuid());
-                throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, item.getHostUuid());
+                log.error("HostAttestation:Create - Specified host with UUID {} does not exist in the system.", item.getHostUuid());
+                throw new RepositoryInvalidInputException(locator);
             }
-        } catch (ASException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
-            log.error("Error during creating a new attestation report.", ex);
-            throw new ASException(ErrorCode.AS_HOST_REPORT_ERROR, ex.getClass().getSimpleName());
+            log.error("HostAttestation:Create - Error during creating a new attestation report.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }
     }
 
@@ -140,7 +141,6 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @RequiresPermissions("host_attestations:delete")    
     public void delete(HostAttestationLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        //TODO : We should be able to delete the report in the future. If possible by GA release
     }
 
     @Override

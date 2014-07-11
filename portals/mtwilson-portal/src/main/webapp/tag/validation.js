@@ -301,10 +301,10 @@ Validation.addAllThese([
 			}]
 ]);
 
-// jonathan added a new validator type... use class="validate-data" and data-validator="name_of_function_to_validate_this_field"
+// There is now new validator type... use class="validate-data" and data-validator="name_of_function_to_validate_this_field"
 Validation.add('validate-data', 'error...', function(v,el) {
     var dataValidator = el.getAttribute('data-validator');
-    if( dataValidator && window[dataValidator] /* TODO: add  && typeof window[dataValidator] === 'function' */ ) { // XXX TODO there is probably a better way to check if the function exists...
+    if( dataValidator && window[dataValidator] ) { 
         return window[dataValidator](el);
     }
     return false;

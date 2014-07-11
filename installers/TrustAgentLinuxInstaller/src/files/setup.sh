@@ -85,8 +85,6 @@ fi
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
-# TODO: check if trustagent exists before trying to add it; allow user name to be
-#       specified by environment variable
 groupadd trustagent >> $logfile  2>&1
 useradd -d /opt/trustagent -r -s /bin/false -g trustagent trustagent >> $logfile  2>&1
 
@@ -234,7 +232,6 @@ auto_install "TrustAgent requirements" "APPLICATION"
 # 3. create a symlink from libcrypto.so to libcrypto.so.1.0.0 
 # 4. run ldconfig to capture it
 # 5. run ldconfig -p to ensure it is found
-# XXX TODO for now we are not doing the general steps, just solving for a specific system.
 fix_libcrypto() {
   #yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
   local has_libcrypto=`find / -name libcrypto.so.1.0.0 | head -1`
@@ -431,7 +428,6 @@ DEFAULT_TRUSTAGENT_TLS_CERT_IP=`hostaddress_list_csv`
 if [ -n "$TRUSTAGENT_TLS_CERT_IP" ]; then
   export TRUSTAGENT_TLS_CERT_IP=$DEFAULT_TRUSTAGENT_TLS_CERT_IP
 fi
-# TODO: look up each ip address in /etc/hosts and generate the list of 
 # corresponding hostnames to be a default for TRUSTAGENT_TLS_CERT_DNS
 #DEFAULT_TRUSTAGENT_TLS_CERT_DNS=`hostaddress_list_csv`
 #if [ -n "$TRUSTAGENT_TLS_CERT_DNS" ]; then

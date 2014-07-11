@@ -7,8 +7,8 @@ package com.intel.mtwilson.jaxrs2.server.resource;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.jaxrs2.CertificateDocument;
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
-import com.intel.mtwilson.jaxrs2.Locator;
+import com.intel.mtwilson.repository.FilterCriteria;
+import com.intel.mtwilson.repository.Locator;
 import com.intel.mtwilson.jaxrs2.PatchLink;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import java.security.cert.X509Certificate;
@@ -33,7 +33,6 @@ public abstract class AbstractCertificateJsonapiResource<T extends CertificateDo
         super();
     }
     */
-        // XXX TODO find a mediatype/structure for list of DER-encoded certs...   could use APPLICATION_ZIP  but then we'd need to name the files inside! could use cert hashes...
     @GET
     @Produces({ CryptoMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
     public X509Certificate[] searchX509CertificateCollection(@BeanParam F criteria) {
@@ -55,7 +54,7 @@ public abstract class AbstractCertificateJsonapiResource<T extends CertificateDo
         log.debug("retrieveOneX509Certificate");
         T item = getRepository().retrieve(locator);
         if (item == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }        
         X509Certificate certificate = item.getX509Certificate();
         return certificate;

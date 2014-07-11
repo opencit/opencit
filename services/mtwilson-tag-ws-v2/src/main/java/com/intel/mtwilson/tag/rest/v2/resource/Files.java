@@ -17,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: move to separate file feature
- *
  * @author ssbangal
  */
 @V2

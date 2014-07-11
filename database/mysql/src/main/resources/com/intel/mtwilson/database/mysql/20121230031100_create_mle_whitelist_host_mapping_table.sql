@@ -8,7 +8,7 @@ CREATE  TABLE `mw_mle_source` (
   INDEX `MLE_ID` (`MLE_ID` ASC) ,
   CONSTRAINT `MLE_ID`
     FOREIGN KEY (`MLE_ID` )
-    REFERENCES `mw_as`.`mw_mle` (`ID` )
+    REFERENCES `mw_mle` (`ID` )
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;

@@ -48,7 +48,6 @@
       <artifactId>mtwilson-version</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<!-- TODO database support needs to be separated into distinct features -->
     <dependency>
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -71,7 +70,6 @@
       <version>${project.version}</version>
     </dependency>
     
-	<!-- todo: a separate feature with asset tag components -->
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-attestation</artifactId>
@@ -104,6 +102,16 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-file-ws-v2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-tls-policy-ws-v2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-privacyca-ws-v2</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -122,7 +130,7 @@
       <artifactId>mtwilson-audit-data</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<!-- TODO:  the host agents already have feature projects, so when we're able to load features separately from main app remove them from here -->
+
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-citrix-hostagent</artifactId>
@@ -139,13 +147,11 @@
       <version>${project.version}</version>
     </dependency>
 			<!-- end host agents -->
-    <!--
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-configuration-ws-v2</artifactId>
       <version>${project.version}</version>
     </dependency>
-    -->
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-hostagent-ext</artifactId>
@@ -240,8 +246,7 @@
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-shiro-ws-v2</artifactId>
       <version>${project.version}</version>
-    </dependency>
-	<!-- todo:   remove test web services before production release -->
+    </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-test-ws-v1</artifactId>
@@ -253,10 +258,24 @@
       <version>${project.version}</version>
     </dependency>
 				<!-- end test web services -->
-				<!-- TODO:   replace  mtwsilon-tls-policy with cpg-tls-policy -->
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-tls-policy</artifactId>
+      <artifactId>mtwilson-tls-policy-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-tls-policy-factory</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-tls-policy-ws-v2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-tls-policy-jdbi</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

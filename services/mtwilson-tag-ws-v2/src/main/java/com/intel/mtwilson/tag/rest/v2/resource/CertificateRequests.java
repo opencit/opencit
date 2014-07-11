@@ -36,10 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: add a path /certificate_requests/{id}/content  to get the content as-is,
- * and remove the content from the regular response of /certificate_requests/{id}
- * from simple and jsonapi methods. 
- * 
  * @author ssbangal
  */
 @V2
@@ -76,7 +72,6 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @RequiresPermissions("tag_certificate_requests:create")         
     public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest certificateRequest) {
         certificateRequest = super.createOne(locator, certificateRequest);
-        // TODO:  this doesn't conform to JSON API,  the non-jsonapi links should go in the meta.links section;   also TODO revise NoLinks in the class declaration
         certificateRequest.getLinks().put("status", String.format("/tag-certificate-requests/%s", certificateRequest.getId().toString()));
         certificateRequest.getLinks().put("certificate", String.format("/tag-certificates?certificateRequestIdEqualTo=%s", certificateRequest.getId().toString()));
         certificateRequest.getLinks().put("content", String.format("/tag-certificate-requests/%s/content", certificateRequest.getId().toString()));

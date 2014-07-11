@@ -125,7 +125,6 @@ public abstract class AuthenticationFilter extends PathMatchingFilter {
                 // in permissive mode we let the request continue (default true) - a "user" filter later on or an authorization check will stop the request if it cannot continue without being authenticated
                 return true;
             }
-            // TODO: should add the challenge header to the response   by calling TODO new method challenge(request,response) with default no-op implementation and subclasses would add the WWW-Authenticate header with their authentication method
             return false;
         }
         catch(Exception e) {

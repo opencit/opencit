@@ -4,12 +4,9 @@
  */
 package com.intel.mtwilson.tag.rest.v2.resource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
-import com.intel.mtwilson.tag.model.x509.UTF8NameValueSequence;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -33,18 +30,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.JAXBException;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 //import org.restlet.data.Status;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -113,7 +106,6 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
 //        for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
 //            builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
 //        } 
-//        // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
 //        SelectionsType selectionsType = builder.build();
         SelectionsType selectionsType = getSelectionData(obj);
         String xml = Util.toXml(selectionsType);
@@ -137,7 +129,6 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
             for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
                 builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
             } 
-            // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
             SelectionsType selectionsType = builder.build();
 
             return selectionsType;

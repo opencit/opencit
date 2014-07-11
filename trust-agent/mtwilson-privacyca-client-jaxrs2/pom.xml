@@ -141,7 +141,6 @@
         </dependency>
 
         
-        <!-- XXX TODO need to separate data model from web services -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-privacyca-model</artifactId>

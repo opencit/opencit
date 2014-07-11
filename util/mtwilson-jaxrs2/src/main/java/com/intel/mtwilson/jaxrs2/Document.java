@@ -33,11 +33,9 @@ public abstract class Document {
     private URL href;
     private final HashMap<String,Object> meta = new HashMap<>();
     private final HashMap<String,Object> links = new HashMap<>();
-    // TODO:  these fields should be returned inside the metadata structure since they are not part of the record itself.
-    //        maybe the metadata structure should be a declared class instead of a map, then it can have etag, createdon, modifiedon, href.
     private String etag;
-    private Date createdOn; // TODO define a jackson formatter for Date objects to use com.intel.dcsg.cpg.iso8601.Iso8601Date 
-    private Date modifiedOn;// TODO  define a jackson formatter for Date objects to use com.intel.dcsg.cpg.iso8601.Iso8601Date 
+    private Date createdOn; 
+    private Date modifiedOn;
     
     public UUID getId() {
         return id;

@@ -329,10 +329,32 @@ function fnRetriveHostSuccess(responsJSON) {
 }
 
 function fnRegisterMultipleHost() {
-    $('#mainLoadingDiv').prepend(disabledDiv);
     $('#successMessage').html('');
     var listOfHost = [];
     var checked = false;
+    
+    var tlsPolicyChoice = {}; // will be populated with tlsPolicyId or tlsPolicyType and tlsPolicyData which we will copy to each host record we send to the server
+    if( $('#MainContent_ddlHOSTProvider').val() == "Flat File" ) {
+            // the bulk registration screen allows selection of one shared tls policy to apply to all hosts when using a flatfile (tls_policy_select_flatfile)
+            // but allows a custom policy when using the vcenter retrieval (tls_policy_select_vmware)
+            mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+                'tls_policy_select': $('#tls_policy_select_flatfile').val(),
+                'tls_policy_data_certificate': '',
+                'tls_policy_data_certificate_digest': '',
+                'tls_policy_data_public_key': '',
+                'tls_policy_data_public_key_digest': ''
+            }, tlsPolicyChoice);
+    }
+    else if( $('#MainContent_ddlHOSTProvider').val() == "VMware Cluster" ) {
+            mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
+                'tls_policy_select': $('#tls_policy_select_vmware').val(),
+                'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
+                'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
+                'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
+                'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
+            }, tlsPolicyChoice);
+    }
+    
     $('#registerHostTableContent tr').each(function() {
         var row = $(this);
         var checkBoxValue = $(row).find('td:eq(3)').find('input:checkbox').attr('checked');
@@ -355,12 +377,19 @@ function fnRegisterMultipleHost() {
             host.vmmWLtarget = $(row).find('td:eq(5)').find('select').val();
 //            host.selectionTarget = $(row).find('td:eq(6)').find('select').val();
             host.registered = $(row).attr("registered") == "true" ? true : false;
+            
+            host.tlsPolicyId = tlsPolicyChoice.tlsPolicyId;
+            host.tlsPolicyType = tlsPolicyChoice.tlsPolicyType;
+            host.tlsPolicyData = tlsPolicyChoice.tlsPolicyData;
+            
             listOfHost.push(host);
         }
     });
     if (!checked) {
         $('#successMessage').html('<span class="errorMessage">* Please select atleast one host to be registered.</span>');
-    }
+        return;
+    } 
+    $('#mainLoadingDiv').prepend(disabledDiv);
     // Earlier we used to make host registration calls for each of the selected hosts individually. Now that we have the multi host registration API, we are using the same.
     var data = "hostToBeRegister=" + $.toJSON(listOfHost);
     sendJSONAjaxRequest(false, 'getData/registerMultipleHost.html', data, fnRegisterMultipleHostSuccess, null);
@@ -369,7 +398,7 @@ function fnRegisterMultipleHost() {
 
 function fnRegisterMultipleHostSuccess(responseJSON) {
     // alert( $.toJSON(responseJSON.hostVOs.hostRecords));
-    if (responseJSON.hostVOs.hostRecords) {
+    if (responseJSON.result == true) {
         var values = responseJSON.hostVOs.hostRecords;
         for (var val in values) {
             // alert(values[val].hostName);
@@ -391,6 +420,7 @@ function fnRegisterMultipleHostSuccess(responseJSON) {
         }
     } else {
         $('#successMessage').html('<span class="errorMessage">' + responseJSON.message + '</span>');
+        $('#disabledDiv').remove();
     }
 }
 
@@ -410,3 +440,25 @@ function fnSelectAllCheckBox(status) {
         $(this).find(':checkbox').attr('checked', status);
     });
 }
+
+$(document).ready(function() {
+    $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
+        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
+        var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
+       if( choicesArray.length === 0 ) {
+       	$("#tls_policy_input_div_vmware").hide();
+       	$("#tls_policy_input_div_flatfile").hide();
+       } else {
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_vmware"), choicesArray);
+  		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_flatfile"), choicesArray);
+        mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices($("#tls_policy_select_vmware"), {
+            dataInputContainer: $('#tls_policy_data_container_vmware')
+        });
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice($("#tls_policy_select_vmware"));
+        mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice($("#tls_policy_select_flatfile"));
+       	$("#tls_policy_input_div_vmware").show();
+       	$("#tls_policy_input_div_flatfile").show();
+	}
+    });
+});

@@ -4,12 +4,14 @@
  */
 package com.intel.mtwilson.jaxrs2.provider;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 //import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.SerializationConfig.Feature;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
@@ -49,12 +51,15 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         return defaultObjectMapper;
     }
  
-    private ObjectMapper createDefaultMapper() {
+    public ObjectMapper createDefaultMapper() {
         log.debug("JacksonObjectMapperProvider createDefaultMapper");
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
         ObjectMapper mapper = new ObjectMapper(jsonFactory);
         mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
  

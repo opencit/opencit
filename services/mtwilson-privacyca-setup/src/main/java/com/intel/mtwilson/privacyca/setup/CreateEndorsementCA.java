@@ -26,7 +26,6 @@ public class CreateEndorsementCA extends LocalSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        // TODO:  create a mtwilson-privacyca-configuration project or at least a PrivacyCAConfiguration  object in mtwilson-privacyca-ws-v2
         endorsementPemFile = My.configuration().getPrivacyCaEndorsementCacertsFile();
         endorsementIssuer = My.configuration().getPrivacyCaEndorsementIssuer();
         endorsementP12 = My.configuration().getPrivacyCaEndorsementP12();
@@ -34,14 +33,13 @@ public class CreateEndorsementCA extends LocalSetupTask {
         endorsementCertificateValidityDays = My.configuration().getPrivacyCaEndorsementValidityDays();
         
         if( endorsementPassword == null || endorsementPassword.isEmpty() ) {
-            endorsementPassword = RandomUtil.randomBase64String(16); // TODO:  use a larger alphabet
+            endorsementPassword = RandomUtil.randomBase64String(16); 
             getConfiguration().setString("mtwilson.privacyca.ek.p12.password", endorsementPassword);
         }
     }
 
     @Override
     protected void validate() throws Exception {
-       // TODO: open contents and verify certificate is correct
         if( !endorsementPemFile.exists() ) {
             validation("Privacy CA certs file does not exist");
         }
@@ -49,10 +47,9 @@ public class CreateEndorsementCA extends LocalSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        // TODO: touch the endorsementP12 file first and chmod 700 before writing to it ; that should be a method in the LocalSetupTask super class
         TpmUtils.createCaP12(2048, endorsementIssuer, endorsementPassword, endorsementP12.getAbsolutePath(), endorsementCertificateValidityDays);
         X509Certificate pcaCert = TpmUtils.certFromP12(endorsementP12.getAbsolutePath(), endorsementPassword);
-        FileUtils.writeStringToFile(endorsementPemFile, X509Util.encodePemCertificate(pcaCert)); // XXX should we check if it already exists and APPEND to it instead of overwriting?
+        FileUtils.writeStringToFile(endorsementPemFile, X509Util.encodePemCertificate(pcaCert)); 
     }
     
 }

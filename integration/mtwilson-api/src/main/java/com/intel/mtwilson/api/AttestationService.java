@@ -75,6 +75,18 @@ public interface AttestationService {
      */
     List<TxtHostRecord> queryForHosts(String searchCriteria,boolean includeHardwareUuid) throws IOException, ApiException, SignatureException;
 
+    /**
+     * Returns the host record with new features such as hardware uuid and tls policy.
+     * 
+     * @param searchCriteria
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     * @since MTW 2.0
+     */
+    List<TxtHostRecord> queryForHosts2(String searchCriteria) throws IOException, ApiException, SignatureException;
+    
     OpenStackHostTrustLevelReport pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException;
 
 

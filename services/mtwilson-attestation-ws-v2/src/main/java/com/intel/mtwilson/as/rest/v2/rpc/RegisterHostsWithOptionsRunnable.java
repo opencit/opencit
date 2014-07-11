@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.datatypes.HostConfigDataList;
+import com.intel.mtwilson.datatypes.HostConfigDataList;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.launcher.ws.ext.RPC;

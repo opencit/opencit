@@ -51,14 +51,12 @@
     <xs:complexType name="requiresType">
         <xs:sequence>
             <xs:element name="feature-ref" type="featureRefType" minOccurs="0" maxOccurs="1"/>
-            <!-- TODO: platform/architecture/os/hardware for example Intel, 64-bit, Linux, TPM 1.2,  java6 or java7, etc -->
         </xs:sequence>        
     </xs:complexType>
 
     <xs:complexType name="conflictsType">
         <xs:sequence>
             <xs:element name="feature-ref" type="featureRefType" minOccurs="0" maxOccurs="1"/>
-            <!-- TODO: platform/architecture/os/hardware for example Intel, 64-bit, Linux, TPM 1.2,  java6 or java7, etc -->
         </xs:sequence>        
     </xs:complexType>
 

@@ -31,7 +31,7 @@ public class BulkHostTrustBO {
     private HostTrustBO hostTrustBO = ASComponentFactory.getHostTrustBO(); 
 //    private int maxThreads;
     private int timeout;
-    private static ExecutorService scheduler = Executors.newFixedThreadPool(ASConfig.getConfiguration().getInt("mtwilson.bulktrust.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
+    private static ExecutorService scheduler = Executors.newFixedThreadPool(ASConfig.getConfiguration().getInt("mtwilson.bulktrust.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; 
     
     public BulkHostTrustBO(/*int maxThreads,*/ int timeout) {
 //        this.maxThreads = maxThreads;
@@ -55,7 +55,6 @@ public class BulkHostTrustBO {
             
             // Bug:547 - Since the comment mentioned that the return value will not be used and the java.util.concurrent.TimeoutException was being thrown
             // by the get statement, we are ignoring the exception and continuing.
-            // TODO: Review the change with Jonathan
             for (Future<?> status : taskStatus) {
                 try {
                     status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks

@@ -174,7 +174,6 @@ public class HostTrustPolicyManager {
         VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);
 //        Set<Rule> rules = factory.createWhitelistRules(host);
 //        Set<Rule> rules = factory.createHostSpecificRules(host);
-        // XXX TODO do we need to replace anything that is host-specific?  or remove anything that is host-specific ? from these rules?
         Policy policy = new Policy("Automatically generated policy from "+host.getName(), rules);
         return policy;
     }
@@ -258,31 +257,24 @@ public class HostTrustPolicyManager {
     
     /**
      * Creates a list of PcrMatchesConstant policies for the given bios.
-     * XXX the hard-coded rule right now is that we don't check for modules in bios pcr's,
-     * and there are no host-specific bios pcrs in the database... but we add the host parameter
-     * anyway to prepare for a future where anything is possible, and to make a consistent
-     * interface so that callers need only make ONE call and get the right set of policies, 
-     * and not need to be concerned whether those policies are host-specific or not. we
-     * take care of all of that here.
      * @param bios
      * @return 
      */
     /*
     public List<Rule> loadTrustRulesForBios(Bios bios, TblHosts tblHosts) {
-        throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
+        throw new UnsupportedOperationException("need to call vendor-specific code....");
     }
 
     public List<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts tblHosts) {
-        throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
+        throw new UnsupportedOperationException("need to call vendor-specific code....");
         
 //        ArrayList<Rule> list = new ArrayList<Rule>();
 //        list.add(loadPcrMatchesConstantRulesForVmm(vmmMle, tblHosts)); // in whitelistutil
     }
     */
     /*
-    // XXX FOR SUDHIR  ... IF YOU CONVERT HOST.LOCATION TO ID YOU CAN USE AS-IS... OTHERWISE NEED TO LOOK UP LOCATION BY STRING VALUE ... THAT METHOD ISN'T IN THE LOCATION CONTROLLER RIGHT NOW
     public List<Rule> loadTrustRulesForLocation(TblHosts tblHosts) {
-        throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
+        throw new UnsupportedOperationException("need to call vendor-specific code....");
 //        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcr(tblHosts.getLocationId());
 //        ArrayList<Rule> list = new ArrayList<Rule>();
 //        PcrIndex pcrIndex = HostBO.LOCATION_PCR;

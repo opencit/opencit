@@ -20,9 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX not sure if we should use this one, or just use a list of PcrEventLogContainsMeasurement
- * for each measurement that should positively be there ??? 
- * 
  * A TrustPolicy implementation that checks whether the HostReport contains
  * a ModuleManifest for a given PCR that equals the expected ModuleManifest.
  * The expected ModuleManifest in this case is a complete manifest and any

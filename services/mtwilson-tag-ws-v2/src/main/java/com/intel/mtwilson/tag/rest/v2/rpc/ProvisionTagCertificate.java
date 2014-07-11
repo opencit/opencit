@@ -299,7 +299,7 @@ public class ProvisionTagCertificate  {
             throws IOException, ApiException, SignatureException, SQLException {        
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
-             throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
+             throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);
          }
         SelectionsType selections = null;
         if( json != null ) {
@@ -347,7 +347,7 @@ public class ProvisionTagCertificate  {
             throws IOException, ApiException, SignatureException, SQLException  {
          TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
          if( configuration.isTagProvisionXmlEncryptionRequired() ) {
-             throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);// TODO: i18n
+             throw new WebApplicationException("Encryption is required", Response.Status.BAD_REQUEST);
          }
         SelectionsType selections = null;
         if( xml != null ) {
@@ -387,7 +387,6 @@ public class ProvisionTagCertificate  {
         byte[] content = passwordEncryptedFile.decrypt();
         */
         UUID uuid = new UUID();
-        // TODO:  setup should create this path
         String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
         File encryptedFile = new File(encryptedFilePath);
         try(FileOutputStream out = new FileOutputStream(encryptedFile)) {
@@ -409,7 +408,7 @@ public class ProvisionTagCertificate  {
         File encryptedFileContentFolder = new File(encryptedFilePath+".d");
         File[] selectionFiles = encryptedFileContentFolder.listFiles(new PlaintextFilenameFilter());
         if( selectionFiles != null && selectionFiles.length > 0 ) {
-            // process only the first file we find.  TODO:  what if there are multiple selection files in the zip ?
+            // process only the first file we find.  
             try(FileInputStream in = new FileInputStream(selectionFiles[0])) {
                 String xml = IOUtils.toString(in);
                 //return createOneFromXmlToBytes(locator, xml, request, response); // don't call this because it checks if encryption is required and doesn't "know" that we just decrypted the file
@@ -422,9 +421,7 @@ public class ProvisionTagCertificate  {
                     throw new CertificateException("Error creating the certificate.");
                 }
             }
-            finally {
-                // TODO: delete all the temporary files - won't be necessary when the decryption moves to java and it's all in memory
-            }
+            finally {}
         }
         throw new IOException("Failed to read tag selection xml");
     }    
@@ -438,7 +435,7 @@ public class ProvisionTagCertificate  {
             return locator.subject; // from query paramter  ?subject={subject}            
         }
         else {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST); // TODO:  ErrorCode enum with internationalized message saying subject is required in header or query param
+            throw new WebApplicationException(Response.Status.BAD_REQUEST); 
         }
     }
         

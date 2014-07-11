@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
  * The attestation-service.properties file can be placed in your home directory 
  * in order to customize the application settings for your machine.
  * 
- * XXX CHANGE:  no longer using the attestation-service-config.xml file or the attestation-service-defaults.properties file in the classpath
- * 
  * @author jabuhacx
  */
 public class ASConfig  {

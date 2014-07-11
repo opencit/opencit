@@ -40,10 +40,7 @@ import org.slf4j.LoggerFactory;
  * multiple redundant requests to the host. For example if it already obtained
  * the OS Name, that is not going to change between one call and the next so it
  * may be cached. TPM Quotes are never cached. If you want to be sure to get
- * fresh data, create a new instance. XXX Or maybe provide a clear() or reset()
- * method that will clear all saved data (but it would have to become part of
- * the HostAgent interface to be useful)
- *
+ * fresh data, create a new instance. 
  * @author jbuhacoff
  */
 public class VmwareHostAgent implements HostAgent {
@@ -102,7 +99,7 @@ public class VmwareHostAgent implements HostAgent {
 
     @Override
     public boolean isTpmEnabled() {
-        return true; // XXX TODO we need this acpability !!! throw new UnsupportedOperationException("Not supported yet.");
+        return true; 
     }
 
     @Override
@@ -134,7 +131,7 @@ public class VmwareHostAgent implements HostAgent {
     @Override
     public X509Certificate getAikCertificate() {
         throw new UnsupportedOperationException("Vmware does not provide an AIK Certificate");
-//        return null;  // XXX TODO throw exception or return null? call should first check isAikAvailable // vmware does not make the AIK available through its API
+//        return null;  
     }
 
     /**
@@ -147,7 +144,7 @@ public class VmwareHostAgent implements HostAgent {
     @Override
     public X509Certificate getAikCaCertificate() {
         throw new UnsupportedOperationException("Vmware does not provide a Privacy CA Certificate");
-//        return null; // XXX TODO throw exception or return null? call should first check isAikCaAvailable  // vmware does not make the Privacy CA Certificate available through its API, if it even uses a Privacy CA
+//        return null; 
     }
 
     @Override
@@ -184,69 +181,9 @@ public class VmwareHostAgent implements HostAgent {
 
     @Override
     public TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<PcrIndex> pcr) {
-        throw new UnsupportedOperationException("Vmware does not provide TPM Quotes"); // XXX TODO throw exception or return null?
+        throw new UnsupportedOperationException("Vmware does not provide TPM Quotes"); 
     }
 
-    /**
-     * XXX TODO auditing of the host report should happen in attestation
-     * service. you can obtain the original "raw" report by calling
-     * getVendorHostReport() Here is the code that was used for audit logging in
-     * VCenterHost (previous draft) that belongs in attestation service:
-     * AuditLog auditLog = new AuditLog(); auditLog.setAction("ATTESTATION");
-     * auditLog.setEntityId(hostId); auditLog.
-     * auditLog.setEntityType("ATTESTATION_REPORT");
-     * auditLog.setData(getReportInXML(report)); new
-     * AuditLogger().addLog(auditLog);
-     *
-     * Here is the exception that we were getting when the addLog() call
-     * executed:
-     *     * 
-[#|2012-11-20T09:56:10.575-0800|WARNING|glassfish4.0|javax.enterprise.system.container.ejb.com.sun.ejb.containers|_ThreadID=33;_ThreadName=Thread-2;|A
-     * system exception occurred during an invocation on EJB SAML method public
-     * java.lang.String
-     * com.intel.mountwilson.as.rest.SAML.getHostAssertions(java.lang.String)
-     * javax.ejb.EJBException ... Caused by:
-     * com.intel.mountwilson.as.common.ASException:
-     * com.intel.mtwilson.audit.helper.AuditHandlerException:
-     * java.lang.ClassCastException:
-     * com.sun.enterprise.naming.impl.SerialContext cannot be cast to
-     * com.intel.mtwilson.audit.api.AuditWorker at
-     * com.intel.mountwilson.util.vmware.VCenterHost.process(VCenterHost.java:121)
-     * at
-     * com.intel.mountwilson.util.vmware.VCenterHost.<init>(VCenterHost.java:54)
-     * at
-     * com.intel.mountwilson.manifest.strategy.VMWareManifestStrategy$1.<init>(VMWareManifestStrategy.java:86)
-     * at
-     * com.intel.mountwilson.manifest.strategy.VMWareManifestStrategy.getQuoteInformationForHost(VMWareManifestStrategy.java:86)
-     * at
-     * com.intel.mountwilson.manifest.strategy.VMWareManifestStrategy.getManifest(VMWareManifestStrategy.java:48)
-     * at
-     * com.intel.mountwilson.as.business.trust.HostTrustBO.getTrustStatus(HostTrustBO.java:92)
-     * at
-     * com.intel.mountwilson.as.business.trust.HostTrustBO.getHostWithTrust(HostTrustBO.java:131)
-     * at
-     * com.intel.mountwilson.as.business.trust.HostTrustBO.getTrustWithSaml(HostTrustBO.java:437)
-     * at com.intel.mountwilson.as.rest.SAML.getHostAssertions(SAML.java:63) ...
-     * Caused by: com.intel.mtwilson.audit.helper.AuditHandlerException:
-     * java.lang.ClassCastException:
-     * com.sun.enterprise.naming.impl.SerialContext cannot be cast to
-     * com.intel.mtwilson.audit.api.AuditWorker at
-     * com.intel.mtwilson.audit.api.AuditLogger.addLog(AuditLogger.java:54) at
-     * com.intel.mountwilson.util.vmware.VCenterHost.auditAttestionReport(VCenterHost.java:165)
-     * at
-     * com.intel.mountwilson.util.vmware.VCenterHost.process(VCenterHost.java:104)
-     * ... 78 more Caused by: java.lang.ClassCastException:
-     * com.sun.enterprise.naming.impl.SerialContext cannot be cast to
-     * com.intel.mtwilson.audit.api.AuditWorker at
-     * com.intel.mtwilson.audit.api.AuditLogger.getAuditWorker(AuditLogger.java:91)
-     * at com.intel.mtwilson.audit.api.AuditLogger.addLog(AuditLogger.java:51)
-     * ... 80 more
-     *
-     * @throws RuntimeFaultFaultMsg
-     * @throws InvalidPropertyFaultMsg
-     * @throws JAXBException
-     */
-    // XXX-stdalex 2/14 commenting out unused function for later removal
     //private void getAllPcrAndModuleInformationFromHost() throws RuntimeFaultFaultMsg, InvalidPropertyFaultMsg, JAXBException {
     //}
     // Commenting the below function since it is not being used and klocwork is throwing a warning
@@ -273,7 +210,7 @@ public class VmwareHostAgent implements HostAgent {
             if (vmware.isModuleAttestationSupportedByVcenter(vCenterVersion)) {
                 HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
-//                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
+//                                            auditAttestionReport(hostId,report); 
                 log.debug("Retrieved HostTpmAttestationReport.");
 //                                        vendorHostReport = toXml(HostTpmAttestationReport.class, report);
                 log.debug("Parsed HostTpmAttestationReport.");
@@ -285,7 +222,7 @@ public class VmwareHostAgent implements HostAgent {
                     //                    return new VMWare50Esxi50().getPcrManiFest(report, 
                     //        getRequestedPcrs(host));
                 }
-            } else if (vCenterVersion.contains("5.0")) { // XXX TODO should check if it's 5.0 ... because what if it's 5.2 ??? then we need to run code ABOVE
+            } else if (vCenterVersion.contains("5.0")) { 
 
                 HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMEProperty(hostMOR.type, hostname, "runtime");
                 if (runtimeInfo == null) {
@@ -329,12 +266,12 @@ public class VmwareHostAgent implements HostAgent {
             TxtHostRecord host = new TxtHostRecord();
             host.HostName = vmware.getStringMEProperty(hostMOR.type, hostname, "name");
             // hostObj.Description = serviceContent.getAbout().getVersion();
-            host.VMM_Name = vmware.getStringMEProperty(hostMOR.type, hostname, "config.product.name"); // XXX TODO vmware doesn't return a separate hypervisor name... so for now using same as os name which is "Vmware ESXi"
+            host.VMM_Name = vmware.getStringMEProperty(hostMOR.type, hostname, "config.product.name"); 
             host.VMM_OSName = vmware.getStringMEProperty(hostMOR.type, hostname, "config.product.name");
             host.VMM_OSVersion = vmware.getStringMEProperty(hostMOR.type, hostname, "config.product.version");
             host.VMM_Version = vmware.getStringMEProperty(hostMOR.type, hostname, "config.product.build");
             host.BIOS_Oem = vmware.getStringMEProperty(hostMOR.type, hostname, "hardware.systemInfo.vendor");
-            host.BIOS_Name = vmware.getStringMEProperty(hostMOR.type, hostname, "hardware.systemInfo.vendor"); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
+            host.BIOS_Name = vmware.getStringMEProperty(hostMOR.type, hostname, "hardware.systemInfo.vendor"); 
             host.BIOS_Version = vmware.getStringMEProperty(hostMOR.type, hostname, "hardware.biosInfo.biosVersion");
 
             /*
@@ -382,12 +319,12 @@ public class VmwareHostAgent implements HostAgent {
 
     @Override
     public boolean isIntelTxtSupported() {
-        return true; // XXX TODO need to implement detection
+        return true; 
     }
 
     @Override
     public boolean isIntelTxtEnabled() {
-        return true; // XXX TODO need to implement detection
+        return true; 
     }
 
     @Override

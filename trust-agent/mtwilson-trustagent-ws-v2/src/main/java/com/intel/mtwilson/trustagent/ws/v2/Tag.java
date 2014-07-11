@@ -30,7 +30,6 @@ public class Tag {
     @POST
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
     public void writeTag(TagWriteRequest tagInfo, @Context HttpServletResponse response) throws TAException {
-        // TODO:  confirm that the uuid in the tag request matches our own host hardware uuid, reject the request if they don't match 
         log.debug("writeTag uuid {} sha1 {}", tagInfo.getHardwareUuid(), Hex.encodeHexString(tagInfo.getTag()));
         TADataContext context = new TADataContext();
         context.setAssetTagHash(Hex.encodeHexString(tagInfo.getTag()));

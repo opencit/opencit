@@ -12,10 +12,6 @@ import java.util.Properties;
 
 /**
  * Depends on ConfigureFilesystem. 
- * TODO this really shouldn't be its own task, the setup application should
- * create a PropertiesConfiguration object, pass it to all the setup tasks,
- * and then store it at the end to mtwilson.properties
- *
  * @author jbuhacoff
  */
 public class CreateMtWilsonPropertiesFile extends LocalSetupTask {

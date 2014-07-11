@@ -10,12 +10,6 @@
         manage the list of hosts being monitored, obtain attestation on the
         status of those hosts in SAML format, and more. Please see the documentation
         for complete details.
-        
-        TODO  the shade plugin and zip plugin should be moved to a pom under installers to generate
-        the distribution artifacts so that we don't have to wait for that when building the project
-        independently for testing or as part of another build that is not to create an installer.
-        
-        TODO this project should be renamed mtwilson-client-v1 because in mtwilson 2.0 it uses java7 features
     </description>
   
     <parent> 
@@ -309,10 +303,6 @@
         </dependency>
 
         
-        <!-- begin jersey 
-        TODO upgrade to jersey2: org.glassfish.jersey.core:jersey-client
-        -->
-    
         <!-- jersey-core provides MultivaluedMap and MediaType -->
         
         <dependency>

@@ -29,6 +29,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
@@ -49,6 +50,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
 
     
     @Override
+    @RequiresPermissions("host_aiks:certify")    
     public byte[] call() throws Exception {
 	 RSAPrivateKey caPrivKey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
 	 X509Certificate caPubCert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
@@ -63,7 +65,7 @@ public class IdentityRequestSubmitResponse implements Callable<byte[]> {
             // find the existing challenge and idproof
             // save the challenge and idproof for use in identity request submit response if the client successfully answers the challenge
             // the filename is the challenge (in hex) and the content is the idproof
-            File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); // TODO:  put this in a privacyca configuration class
+            File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); 
             if( !datadir.exists() ) { datadir.mkdirs(); }
             String filename = TpmUtils.byteArrayToHexString(decryptedIdentityRequestChallenge); //Hex.encodeHexString(identityRequestChallenge)
             log.debug("Filename: {}", filename);

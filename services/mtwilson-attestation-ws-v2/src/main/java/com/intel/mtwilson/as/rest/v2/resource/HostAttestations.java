@@ -7,7 +7,6 @@ package com.intel.mtwilson.as.rest.v2.resource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -20,11 +19,15 @@ import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.as.rest.v2.repository.HostAttestationRepository;
-import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -72,17 +75,20 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
             if (criteria.hostUuid != null) {
                 obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
                 if (obj == null) {
-                    throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, criteria.hostUuid.toString());
+                    log.error("Host specified with id {} is not valid.", criteria.hostUuid.toString());
+                    throw new RepositoryInvalidInputException();
                 }
             } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
                 obj = jpaController.findByAikSha1(criteria.aikSha1);
                 if (obj == null) {
-                    throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, criteria.aikSha1);
+                    log.error("Host specified with aik sha1 {} is not valid.", criteria.aikSha1);
+                    throw new RepositoryInvalidInputException();
                 }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                 obj = jpaController.findByName(criteria.nameEqualTo);
                 if (obj == null) {
-                    throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, criteria.nameEqualTo);
+                    log.error("Host specified with name {} is not valid.", criteria.nameEqualTo);
+                    throw new RepositoryInvalidInputException();
                 }
             } else return null;
             
@@ -93,18 +99,18 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
                     return tblSamlAssertion.getSaml();
                 }else{
-                    log.debug("Found assertion in cache with error set, returning that.");
-                   throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
+                    log.debug("Found assertion in cache with error set.");
+                   throw new RepositoryRetrieveException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
                 }
             } else {
                 return null;
             }
             
-        } catch (ASException aex) {
-            throw aex;            
+        } catch (RepositoryException re) {
+            throw re;            
         } catch (Exception ex) {
             log.error("Error during retrieval of host attestation status from cache.", ex);
-            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
+            throw new RepositorySearchException(ex, criteria);
         }        
     }
 
@@ -113,7 +119,10 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     @Produces(CryptoMediaType.APPLICATION_SAML)    
     @SuppressWarnings("empty-statement")
     public String createSamlAssertion(HostAttestation item) {
-        log.debug("Entering the creation of SAML assertion function.");
+        log.debug("Creating new SAML assertion for host {}.", item.getHostUuid());
+        HostAttestationLocator locator = new HostAttestationLocator();
+        locator.id = item.getId();
+        
         try { log.debug("createSamlAssertion: {}", mapper.writeValueAsString(item)); } catch(JsonProcessingException e) { log.debug("createSamlAssertion: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
         String samlAssertion;
@@ -121,16 +130,15 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
         try {
             TblHosts obj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
             if (obj == null) {
-                throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, item.getHostUuid());
+                log.error("Host specified with id {} is not valid.", item.getHostUuid());
+                throw new RepositoryInvalidInputException();
             }
             
             samlAssertion = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), true);
             
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
             log.error("Error during generation of host saml assertion.", ex);
-            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
+            throw new RepositoryCreateException(ex, locator);
         }        
         
         return samlAssertion;

@@ -202,9 +202,9 @@ mkdir -p /etc/intel/cloudsecurity
 chmod 600 /etc/intel/cloudsecurity/*.properties
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
   default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ -z "$default_mtwilson_tls_policy_name" ]; then
+  if [ "$default_mtwilson_tls_policy_name" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_name" == "TRUST_FIRST_CERTIFICATE" ]; then
     #update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
-    echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
+    echo_warning "Default TLS policy is insecure; the product guide contains information on enabling secure TLS policies"
   fi
   mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
   #if [ -z "$mtwilson_tls_keystore_password" ]; then
@@ -216,9 +216,6 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
 else
     touch /etc/intel/cloudsecurity/mtwilson.properties
     chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
-    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
-    echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
-    # for a new install we generate a random password to protect all the tls keystores. (each host record has a tls policy and tls keystore field)
     mtwilson_tls_keystore_password=`generate_password 32`
     update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
@@ -722,7 +719,6 @@ update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properti
 
 # remaining properties
 prompt_with_default TAG_PROVISION_EXTERNAL "Use external CA instead of the built-in CA? " ${TAG_PROVISION_EXTERNAL:-false}
-# TODO: remove the nocache option; client will specify with each request whether cached certificate is acceptable
 prompt_with_default TAG_PROVISION_XML_ENCRYPTION_REQUIRED "XML encryption required? " ${TAG_PROVISION_XML_ENCRYPTION_REQUIRED:-false}
 prompt_with_default_password TAG_PROVISION_XML_PASSWORD "XML encryption password: " ${TAG_PROVISION_XML_PASSWORD:-$(generate_password 16)}
 #prompt_with_default TAG_PROVISION_SELECTION_DEFAULT "Default tag provisioning selection: " ${TAG_PROVISION_SELECTION_DEFAULT:-default}
@@ -805,7 +801,6 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
-#TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
   ./$monit_installer  >> $INSTALL_LOG_FILE 

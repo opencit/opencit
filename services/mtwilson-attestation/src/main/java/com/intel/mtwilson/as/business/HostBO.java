@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.business;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
@@ -35,6 +36,13 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.factory.impl.TblHostsTlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
+import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyReader;
+import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyWriter;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -103,6 +111,15 @@ public class HostBO {
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("addHost input: {}", mapper.writeValueAsString(host));
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to addHost", e);
+                }
+            }
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -121,33 +138,11 @@ public class HostBO {
 
                         log.debug("Getting Server Identity.");
 
-                        // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
+                        // BUG #497  setting default tls policy name and empty keystore for all new hosts. 
                         TblHosts tblHosts = new TblHosts();
-                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
-			/*String tlsPolicyName = tlsObjects.length > 0 ? (String)tlsObjects[0] : My.configuration().getDefaultTlsPolicyName();
-	    		String[] tlsCertificates = tlsObjects.length > 1 ? (String[])tlsObjects[1] : new String[1];
-                        tblHosts.setTlsPolicyName(tlsPolicyName);
-
-			Resource resource = tblHosts.getTlsKeystoreResource();
-                        SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
-			if (tlsCertificates != null) {
-				try {
-		                        for (String certificate : tlsCertificates) {
-        		                    //CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                		            X509Certificate x509Cert = X509Util.decodePemCertificate(new String(Base64.decodeBase64(certificate)));
-                        		    clientKeystore.addTrustedSslCertificate(x509Cert, host.getHostName().toString());
-	                        	}
-				} catch(CertificateException | KeyManagementException e) {
-					// If the certificates are not properly encoded or there is any other error, ever the TLS Policy to INSECURE
-					// Check with JB if this is behaviorally right.
-					//tlsPolicyName = TLSPolicy.INSECURE.toString();
-				}
-			
-			}
-                        clientKeystore.save();*/
-                        tblHosts.setTlsKeystore(null);
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
-                        tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());                        
+                        setTlsPolicyFields(tblHosts, host);
                         
                         // Using the connection string we will find out the type of the host. This information would be used later
                         ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
@@ -182,7 +177,7 @@ public class HostBO {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
                                     X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                     hostAikCert.checkValidity(); // AIK certificate must be valid today
-                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); 
                                     if( !validCaSignature ) {
                                         throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
                                     }
@@ -198,12 +193,12 @@ public class HostBO {
                         // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
                         // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
 //                        HostReport hostReport = new HostReport();
-//                        hostReport.aik = null; // TODO should be what we get above if it's available
+//                        hostReport.aik = null; 
 //                        hostReport.pcrManifest = pcrManifest;
 //                        hostReport.tpmQuote = null;
 //                        hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 
-//                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
+//                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
                         
                         // Bug: 749: We need to handle the host specific modules only if the PCR 19 is selected for attestation
                         List<TblHostSpecificManifest>   tblHostSpecificManifests = null;
@@ -262,16 +257,14 @@ public class HostBO {
 
 
     /**
-     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
      * CHANGE IT IN THE OTHER LOCATION AS WELL.
      * 
      * @param hostAikCert
      * @return 
      */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
-        // XXX code in this first section is duplciated in the IntelHostTrustPolicyFactory ... maybe refactor to put it into a configuration method? it's just loading list of trusted privacy ca's from the configuration.
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
-        // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
@@ -290,7 +283,6 @@ public class HostBO {
         } catch(Exception ex) {
             log.warn("Cannot load PrivacyCA.pem",ex);            
         }
-        // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
             try {
@@ -298,8 +290,6 @@ public class HostBO {
                     log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
-                    // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
-                    // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
                     validCaSignature = true;
                 }
             }
@@ -328,8 +318,89 @@ public class HostBO {
         }
     }
 
+    private void deletePrivateTlsPolicy(TblHosts target) throws IOException {
+        try(TlsPolicyDAO tlsPolicyDao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+            tlsPolicyDao.deletePrivateTlsPolicyByHostId(target.getUuid_hex());
+        }        
+    }
+
+        private void setTlsPolicyFields(TblHosts target, TxtHost from) throws IOException {
+            setTlsPolicyFields(target, from.getTlsPolicyChoice());
+        }
+    private void setTlsPolicyFields(TblHosts target, TlsPolicyChoice from) throws IOException {
+                        // if there is a tls policy id, we save it directly in the host record
+                        // but if there is a tls policy descriptor, we need to create or update a per-from.(private) tls policy and 
+                        // then set its id on the host record
+                        if( from != null && from.getTlsPolicyDescriptor() != null ) {
+                            target.setTlsPolicyId(null);
+                            target.setTlsPolicyDescriptor(from.getTlsPolicyDescriptor());
+                            target.setTlsKeystore(null);
+                            target.setTlsPolicyName(null);
+                        }
+                        else if( from != null && from.getTlsPolicyId() != null && !from.getTlsPolicyId().isEmpty() ) {
+                            // a private tls policy may or may not exist but the host refers to one anyway
+                            target.setTlsPolicyId(from.getTlsPolicyId()); // automatically clears the old tls policy name and tls keystore fields as well as the new tls policy descriptor field
+                            target.setTlsPolicyDescriptor(null);
+                            target.setTlsKeystore(null);
+                            target.setTlsPolicyName(null);
+                        }
+                        else {
+                            target.setTlsPolicyId(null);
+                            target.setTlsPolicyDescriptor(null);
+                            target.setTlsKeystore(null);
+                            target.setTlsPolicyName(null);
+                        }        
+    }
+    private void storePrivateTlsPolicy(TblHosts target) throws IOException {
+        // look for an existing private tls policy record - we ignore the (possibly) existing tls policy id in target because it might be a shared policy and we dont' want to update that one; if it's a private policy the dao will find it
+        try(TlsPolicyDAO tlsPolicyDao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+            if( target.getTlsPolicyDescriptor() != null ) {
+                // a descriptor is set so we assume a private policy and look to either update an existing one or create a new one
+                TlsPolicyRecord existingTlsPolicy = tlsPolicyDao.findPrivateTlsPolicyByHostId(target.getUuid_hex()); // will only return a private policy if one is associated with this host
+                if( existingTlsPolicy == null ) {
+                    log.debug("storePrivateTlsPolicy creating new private policy");
+                    // no private tls policy exists yet for this host; so we create a new one and we'll save it
+                    TlsPolicyRecord newTlsPolicy = new TlsPolicyRecord();
+                    newTlsPolicy.setId(new UUID());
+                    newTlsPolicy.setName(target.getUuid_hex());
+                    newTlsPolicy.setPrivate(true);
+                    newTlsPolicy.setContentType("application/json");
+                    JsonTlsPolicyWriter tlsPolicyWriter = new JsonTlsPolicyWriter();
+                    newTlsPolicy.setContent(tlsPolicyWriter.write(target.getTlsPolicyDescriptor()));
+                    tlsPolicyDao.insertTlsPolicy(newTlsPolicy);
+                    target.setTlsPolicyId(newTlsPolicy.getId().toString()); // automatically clears the old tls policy name and tls keystore fields as well as the new tls policy descriptor field
+                }
+                else {
+                    log.debug("storePrivateTlsPolicy updating existing private policy");
+                    // a private tls policy already exists for this host, so update it with the new descriptor
+                    existingTlsPolicy.setContentType("application/json");
+                    JsonTlsPolicyWriter tlsPolicyWriter = new JsonTlsPolicyWriter();
+                    existingTlsPolicy.setContent(tlsPolicyWriter.write(target.getTlsPolicyDescriptor()));
+                    tlsPolicyDao.updateTlsPolicy(existingTlsPolicy);
+                    target.setTlsPolicyId(existingTlsPolicy.getId().toString()); // automatically clears the old tls policy name and tls keystore fields as well as the new tls policy descriptor field
+                }
+            }
+            else if( target.getTlsPolicyId() != null ) {
+                TlsPolicyRecord existingTlsPolicy = tlsPolicyDao.findPrivateTlsPolicyByHostId(target.getUuid_hex()); // will only return a private policy if one is associated with this host
+                if( existingTlsPolicy != null && !target.getTlsPolicyId().equalsIgnoreCase(existingTlsPolicy.getId().toString()) ) {
+                    log.debug("storePrivateTlsPolicy deleting existing private policy because host is now linked to a shared policy");
+                    // an id is set so we assume a shared policy, and therefore try to delete any existing private policy for the host
+                    deletePrivateTlsPolicy(target);
+                }
+            }
+        }
+    }
 
         public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("updateHost input: {}", mapper.writeValueAsString(host));
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to updateHost", e);
+                }
+            }
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -346,13 +417,24 @@ public class HostBO {
                         TblMle  biosMleId = findBiosMleForHost(host); 
                         TblMle  vmmMleId = findVmmMleForHost(host); 
             
-
-                        // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
-                        if (tblHosts.getTlsPolicyName() == null && tblHosts.getTlsPolicyName().isEmpty()) { // XXX new code to test
-                                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
-                        }
-//                        tblHosts.setTlsKeystore(null);  // XXX new code to test: it's either null or it's already set so don't change it // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
+                        // BOOKMARK JONATHAN TLS POLICY
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        setTlsPolicyFields(tblHosts, host);
+
+            if( log.isDebugEnabled() ) {
+		log.debug("updateHost after setTlsPolicyFields TlsPolicyName {}", tblHosts.getTlsPolicyName());
+		log.debug("updateHost after setTlsPolicyFields TlsKeystoreLength {}", (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
+		log.debug("updateHost after setTlsPolicyFields tlsPolicyId {}", tblHosts.getTlsPolicyId());
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+		log.debug("updateHost after setTlsPolicyFields tlsPolicyDescriptor {}", mapper.writeValueAsString(tblHosts.getTlsPolicyDescriptor()));
+        }
+        catch(IOException e) {
+            log.debug("cannot log tls policy descriptor in updateHost after setTlsPolicyFields", e);
+        }
+            }
+                        
+                        
                         
                         // Using the connection string we will find out the type of the host. This information would be used later
                         ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
@@ -390,11 +472,11 @@ public class HostBO {
                                 // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
                                 // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
 //                                HostReport hostReport = new HostReport();
-//                                hostReport.aik = null; // TODO should be what we get above if it's available
+//                                hostReport.aik = null; 
 //                                hostReport.pcrManifest = pcrManifest;
 //                                hostReport.tpmQuote = null;
 //                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
-//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
+//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
                                 
                                 // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
                                 // already be updated and the query would not find any values to delete.
@@ -425,6 +507,8 @@ public class HostBO {
                         tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
                         tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
 
+                storePrivateTlsPolicy(tblHosts); // will create a new private policy, or update an existing one, or delete an existing private policy (if host now has a shared policy)
+                        
 			My.jpa().mwHosts().edit(tblHosts);
 			log.info("Updated host: {}", tblHosts.getName());
                         
@@ -472,6 +556,8 @@ public class HostBO {
                         deleteTALogs(tblHosts.getId());
 
                         deleteSAMLAssertions(tblHosts);
+                        
+                        deletePrivateTlsPolicy(tblHosts);
 
                         My.jpa().mwHosts().destroy(tblHosts.getId());
                         log.info("Deleted host: {}", hostName.toString());
@@ -675,8 +761,18 @@ public class HostBO {
 	private synchronized void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId, String uuid) throws CryptographyException, MalformedURLException, IOException {
 		checkForDuplicate(host);
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
-		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
-		
+        if(log.isDebugEnabled() ) {
+		log.debug("saveHostInDatabase TlsPolicyName {}", tblHosts.getTlsPolicyName());
+		log.debug("saveHostInDatabase TlsKeystoreLength {}", (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
+		log.debug("saveHostInDatabase tlsPolicyId {}", tblHosts.getTlsPolicyId());
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+		log.debug("saveHostInDatabase tlsPolicyDescriptor {}", mapper.writeValueAsString(tblHosts.getTlsPolicyDescriptor()));
+        }
+        catch(IOException e) {
+            log.debug("cannot log tls policy descriptor in saveHostInDatabase", e);
+        }
+        }		
 		String cs = host.getAddOn_Connection_String();
                 //log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
@@ -705,6 +801,9 @@ public class HostBO {
                     tblHosts.setUuid_hex(new UUID().toString());
                 tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
                 tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
+
+                
+                storePrivateTlsPolicy(tblHosts); // will create a new private policy, or update an existing one, or delete an existing private policy (if host now has a shared policy)
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
@@ -739,7 +838,7 @@ public class HostBO {
      * what host-specific module values should be recorded in the database... apparently hard-coded to pcr 19
      * and vmware information... so this is a candidate for moving into VmwareHostTrustPolicyFactory,
      * and instaed of returning a "host-specific manifest" it should return a list of policies with module-included
-     * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
+     * or module-equals type rules.    
     */
     private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) throws IOException {
         List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<>();
@@ -989,6 +1088,37 @@ public class HostBO {
                     log.debug("not adding in hardware uuid");
                     hostObj.Hardware_Uuid = null;
                 }
+                
+                // if the host already has a mtwilson 1.x tls keystore, automatically convert it to the new tls policy descriptor
+                if( tblHost.getTlsPolicyName() != null || tblHost.getTlsKeystore() != null ) {
+                    TblHostsTlsPolicyFactory.TblHostsObjectTlsPolicy tlsPolicyFactory = new TblHostsTlsPolicyFactory.TblHostsObjectTlsPolicy(tblHost);
+                    hostObj.tlsPolicyChoice = tlsPolicyFactory.getTlsPolicyChoice();
+                }
+                else if( tblHost.getTlsPolicyId() != null ) {
+                    // there is a policy id, but for the UI edit host page we need to provide the id for a shared policy, or the descriptor for a private policy
+                    try(TlsPolicyDAO tlsPolicyDao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+                        TlsPolicyRecord tlsPolicyRecord = tlsPolicyDao.findPrivateTlsPolicyByHostId(tblHost.getUuid_hex());
+                        if( tlsPolicyRecord != null && tblHost.getTlsPolicyId().equalsIgnoreCase(tlsPolicyRecord.getId().toString()) ) {
+                            // found the private policy for this host, so set the descriptor on the host record
+                            JsonTlsPolicyReader reader = new JsonTlsPolicyReader();
+                            hostObj.tlsPolicyChoice = new TlsPolicyChoice();
+                            hostObj.tlsPolicyChoice.setTlsPolicyDescriptor(reader.read(tlsPolicyRecord.getContent()));
+                        }
+                        else {
+                            // either didn't find a private policy OR we found one but the host actually links to a shared policy - so keep the tls policy id
+                            hostObj.tlsPolicyChoice = new TlsPolicyChoice();
+                            hostObj.tlsPolicyChoice.setTlsPolicyId(tblHost.getTlsPolicyId());
+                        }
+                    }
+                    catch(IOException e) {
+                        log.debug("Cannot lookup tlsPolicyId {}", tblHost.getTlsPolicyId(), e);
+                    }
+                }
+                else if( tblHost.getTlsPolicyDescriptor() != null ) {
+                    hostObj.tlsPolicyChoice = new TlsPolicyChoice();
+                    hostObj.tlsPolicyChoice.setTlsPolicyDescriptor(tblHost.getTlsPolicyDescriptor());
+                }
+                
                 return hostObj;
         }
 

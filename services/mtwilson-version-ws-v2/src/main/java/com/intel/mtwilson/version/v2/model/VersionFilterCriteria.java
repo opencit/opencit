@@ -5,7 +5,7 @@
 package com.intel.mtwilson.version.v2.model;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mtwilson.jaxrs2.FilterCriteria;
+import com.intel.mtwilson.repository.FilterCriteria;
 import javax.ws.rs.QueryParam;
 
 /**
@@ -13,7 +13,7 @@ import javax.ws.rs.QueryParam;
  * @author jbuhacoff
  */
 public class VersionFilterCriteria implements FilterCriteria<Version> {
-    // TODO also allow administrators to filter by plugin, dependency, etc,
+    
 /*    
     @QueryParam("id")
     public UUID id;

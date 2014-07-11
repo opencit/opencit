@@ -29,7 +29,7 @@ public class CreateTpmSrkSecret extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        String tpmSrkSecretHex = "0000000000000000000000000000000000000000"; // to match existing ProvisionTPM hard-coded value;  TODO: change to RandomUtil.randomHexString(20) after verifying rest of stack can handle well-known SRK ... well-known SRK may be a bad assumption, but at least now we have an option to use a configured value instead;  see issue #1012
+        String tpmSrkSecretHex = "0000000000000000000000000000000000000000"; // to match existing ProvisionTPM hard-coded value;  
         log.info("Generated well-known SRK secret"); 
         getConfiguration().setString(TrustagentConfiguration.TPM_SRK_SECRET, tpmSrkSecretHex);
     }

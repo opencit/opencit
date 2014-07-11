@@ -2,25 +2,33 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+	<!--[if lt IE 9]><script src="Scripts/html5.js"></script><![endif]-->
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
     <title data-i18n="title.home">Welcome</title>
-	
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
+	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.contextMenu.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
+	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/notifications.css" />
 	
+    
+    <!--
+	<script type="text/javascript" src="Scripts/JQuery/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery-ui-1.10.4.min.js"></script>
+    -->
 	<script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
-	<script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.dialog.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.effects.core.js"></script>
-	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.widget.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.position.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.widget.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menu.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.contextMenu.js"></script>
 	<script type="text/javascript" src="Scripts/token.js"></script>
 	<script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
 	<script type="text/javascript" src="Scripts/i18n_util.js"></script>
@@ -154,6 +162,7 @@
                                 <li><a href="javascript:getDeletePendingRegistration();" data-i18n="link.delete_user">Delete User</a></li> <!-- was "Delete Request" -->
                                 <li><a href="javascript:getViewExpiringPage();" data-i18n="link.extend_user">Extend User</a></li> <!-- was "Extend Request" -->
                                 <li><a href="javascript:viewCert();" data-i18n="link.view_certificates">View Certificates</a></li>
+                                <li><a href="javascript:getTlsPolicyManagementPage()" data-i18n="link.tls_policy_management">TLS Policy Management</a></li>
                             </ul>
                         </li>
 
@@ -197,8 +206,7 @@
                                 </ul>
                         </li> -->
                         <!--End Added by Soni on 18/10/12 for New Screen for CA-->
-                        <!-- stdalex 1/18 this functionality is now duplicated in Certificates tab
-                             TODO-stdalex this will be offically removed in 1.2
+                        <!-- 
                         <li >
                         
                                 <a>SAML</a>

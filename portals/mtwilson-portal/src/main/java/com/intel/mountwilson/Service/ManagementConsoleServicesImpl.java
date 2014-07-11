@@ -22,6 +22,8 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.dcsg.cpg.x500.DN;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.user.management.rest.v2.model.UserComment;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
@@ -87,7 +89,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
             connStr = new ConnectionString(Vendor.valueOf(hostDetailsObj.getHostType().toUpperCase()), hostDetailsObj.getvCenterString());
         }
         hostRecord.AddOn_Connection_String = connStr.getConnectionStringWithPrefix();
-
+//        hostRecord.tlsPolicyChoice = hostDetailsObj.?????
+        
         /* if (hostDetailsObj.isVmWareType()) {
          hostRecord.HostName = hostDetailsObj.getHostName();
          hostRecord.AddOn_Connection_String = hostDetailsObj.getvCenterString();
@@ -96,6 +99,21 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
          hostRecord.IPAddress = hostDetailsObj.getHostName();
          hostRecord.Port = Integer.parseInt(hostDetailsObj.getHostPortNo());
          } */
+        
+        if( hostDetailsObj.getTlsPolicyId() != null ) {
+            log.debug("saveWhiteListConfiguration tls policy id {}",  hostDetailsObj.getTlsPolicyId());
+            hostRecord.tlsPolicyChoice = new TlsPolicyChoice();
+            hostRecord.tlsPolicyChoice.setTlsPolicyId(hostDetailsObj.getTlsPolicyId());
+        }
+        else if( hostDetailsObj.getTlsPolicyType() != null ) {
+            log.debug("saveWhiteListConfiguration tls policy type {}",  hostDetailsObj.getTlsPolicyType());
+            ArrayList<String> data = new ArrayList<>();
+            data.add(hostDetailsObj.getTlsPolicyData());
+            hostRecord.tlsPolicyChoice = new TlsPolicyChoice();
+            hostRecord.tlsPolicyChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
+            hostRecord.tlsPolicyChoice.getTlsPolicyDescriptor().setPolicyType(hostDetailsObj.getTlsPolicyType());
+            hostRecord.tlsPolicyChoice.getTlsPolicyDescriptor().setData(data);
+        }
 
         hostConfigObj.setTxtHostRecord(hostRecord);
 
@@ -108,7 +126,6 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         }
     }
 
-    // XXX MERGE WARNING 
     /**
      *
      * @param vCenterConnection
@@ -304,9 +321,6 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
 //                            List<MwPortalUser> portalUsers = keystoreJpa.findMwPortalUserByUsernameEnabled(username);
                 // in case there was more than one (shouldn't happen!!) with the same username who is ENABLED, identify the right one via fingerprint
-                // XXX TODO it would be more efficient to add a fingerprint field to the keystore table, then we can look it up by fingerprint and have the right record immediately
-//                            for(MwPortalUser portalUser : portalUsers) {
-                // XXX TODO if we don't add teh fingerprintfield, then we need to looka t the cert in the keystore and compare the fingerprints
                 keystoreJpa.destroy(portalUser.getId());
 //                            }
 //                            keystoreJpa.destroy(clientRecord.getId()); // actually deletes the user keystore w/ private key    bug #677 trying to delete a MwPortalUser keystore using the ID of an ApiClientX509 record
@@ -404,7 +418,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                             if( comment.roles != null ) {
                                 apiClientDetailObj.setRequestedRoles(new ArrayList<String>(comment.roles));
                             }
-                            apiClientDetailObj.setComment(""); // TODO:  if comment.comment != null ... 
+                            apiClientDetailObj.setComment(""); 
                         }
                     }
                     catch(Exception e) {
@@ -424,7 +438,6 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
     }
     
     // SEE ALSO: ApiClientBO.creatYamlMapper() in mtwilson-management
-    // TODO: consolidate in a common library
     private ObjectMapper createYamlMapper() {
         YAMLFactory yamlFactory = new YAMLFactory();
         yamlFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -442,7 +455,6 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
      */
     @Override
     public List<ApiClientDetails> getCADetails(ApiClient apiObj) throws ManagementConsolePortalException {
-        // TODO Auto-generated method stub
         return null;
     }
 

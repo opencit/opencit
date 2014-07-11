@@ -111,14 +111,6 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
             log.error("Cannot load jars", e);
             return;
         }
-        // TODO:  list all the jar files in feature folders...
-//        String featurePath = My.filesystem().getApplicationPath() + File.separator + "features";
-//        File featureFolder = new File(featurePath);
-        // TODO:  list all the directories in featureFolder,  each directory is a featureId
-        // TODO:  for each featureId:
-//        My.filesystem().getFeatureFilesystem(featureId).getJavaPath(); 
-        // TODO: create a classloader for that feature, using the multijar cl above as the parent
-        
         
         // scan mtwilson jars for plugins,  in the main classloader and also in all feature classloaders / java ext dirs
         scan(getApplicationExtensionJars(), getRegistrars());
@@ -157,22 +149,9 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         if( applicationClassLoader == null ) {
             applicationClassLoader = new FileURLClassLoader(jars, parentClassLoader);
         }
-        else {
-            // TODO:  we can't predict what classloader it would be so does it even
-            // make sense to have a load(File[]) ?? 
-        }
+        else {}
     }
     
-    // TODO :   Extensions find* functions need to record the *results* that
-    //  they provide to callers in an in-memory log;  then at application shtudown
-    //  we can record the classes that were used during that run (maybe combine
-    // them with previous results if those were cached) 
-    //  so at startup we can read that log/cache and we can immediately register
-    //  all those classes and then schedule a background task to scan the jars
-    //  complete with this function.  that will makea pplication startup much
-    //  faster (with the assumption that any new plugins wont' be requested 
-    //  within the first 5-10 seconds of the app starting up) 
-    // jars need to be already filtered to the jars you want to scan 
     public void scan(File[] jars, Registrar[] registrars) {
         long time0 = System.currentTimeMillis();
         CountingIterator<File> it = new CountingIterator<>(new ArrayIterator<>(jars)); // only scans directory for jar files; does NOT scan subdirectories

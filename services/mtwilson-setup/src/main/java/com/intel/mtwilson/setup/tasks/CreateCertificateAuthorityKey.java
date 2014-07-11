@@ -24,8 +24,6 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 
 /**
- * TODO instead of ObjectModel we might want to extend a similar base class
- * written specifically for setup tasks... 
  * @author jbuhacoff
  */
 public class CreateCertificateAuthorityKey extends AbstractSetupTask {
@@ -78,7 +76,6 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
         byte[] combinedPrivateKeyAndCertPemBytes = combinedPrivateKeyAndCertPem.getBytes("UTF-8"); // throws UnsupportedEncodingException
         byte[] cacertPemContent = cacertPem.getBytes("UTF-8");
         
-        // XXX TODO INSECURE need to encrypt this, not just store it plain
         try (FileOutputStream cakeyOut = new FileOutputStream(My.configuration().getCaKeystoreFile())) { // throws FileNotFoundException, IOException
             IOUtils.write(combinedPrivateKeyAndCertPemBytes, cakeyOut); // throws IOException
         } catch (Exception ex) {

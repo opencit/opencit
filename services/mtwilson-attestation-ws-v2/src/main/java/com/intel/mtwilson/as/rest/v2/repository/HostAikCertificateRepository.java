@@ -5,7 +5,6 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -13,15 +12,17 @@ import com.intel.mtwilson.as.rest.v2.model.HostAikCertificate;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostAikCertificateLocator;
-import com.intel.mtwilson.i18n.ErrorCode;
-import com.intel.mtwilson.jaxrs2.server.resource.SimpleRepository;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
  *
  * @author ssbangal
  */
-public class HostAikCertificateRepository implements SimpleRepository<HostAikCertificate, HostAikCertificateCollection, HostAikCertificateFilterCriteria, HostAikCertificateLocator> {
+public class HostAikCertificateRepository implements DocumentRepository<HostAikCertificate, HostAikCertificateCollection, HostAikCertificateFilterCriteria, HostAikCertificateLocator> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAikCertificateRepository.class);
 
@@ -37,12 +38,10 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
                 if (obj != null) {
                     objCollection.getAikCertificates().add(convert(obj));
                 }
-            } // TODO: Need to add the AIKSha1 search criteria later when we have the capability of multiple AIKs
-        } catch (ASException aex) {
-            throw aex;            
+            } 
         } catch (Exception ex) {
-            log.error("Error during search for hosts.", ex);
-            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("AikCertificate:Search - Error during search for hosts.", ex);
+            throw new RepositorySearchException(ex, criteria);
         }
         log.debug("AikCertificate:Search - Returning back {} of results.", objCollection.getAikCertificates().size());                
         return objCollection;
@@ -62,11 +61,9 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
                 HostAikCertificate hostAik = convert(obj);
                 return hostAik;
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during search for hosts.", ex);
-            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+            log.error("AikCertificate:Retrieve - Error during search for hosts.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
         }        
         return null;
     }
@@ -81,6 +78,8 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
     @RequiresPermissions("host_aik_certificates:create")    
     public void create(HostAikCertificate item) {
         log.debug("AikCertificate:Create - Got request to create a new Aik certificate.");
+        HostAikCertificateLocator locator = new HostAikCertificateLocator();
+        locator.hostUuid = UUID.valueOf(item.getHostUuid());
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             TblHosts obj = jpaController.findHostByUuid(item.getHostUuid());
@@ -90,11 +89,9 @@ public class HostAikCertificateRepository implements SimpleRepository<HostAikCer
                 
                 jpaController.edit(obj);
             }
-        } catch (ASException aex) {
-            throw aex;            
         } catch (Exception ex) {
-            log.error("Error during aik update for the host.", ex);
-            throw new ASException(ErrorCode.AS_AIK_CREATE_ERROR, ex.getClass().getSimpleName());
+            log.error("AikCertificate:Create - Error during aik update for the host.", ex);
+            throw new RepositoryCreateException(ex, locator);
         }        
     }
 
