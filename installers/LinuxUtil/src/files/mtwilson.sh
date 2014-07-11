@@ -229,7 +229,7 @@ print_help() {
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
           "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
           "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat-sslcert|tomcat-status|\n" \
-          "\t\trestart|setup|start|status|stop|uninstall|version}"
+          "\t\trestart|setup|start|status|stop|uninstall|version|zeroize}"
 }
 
 RETVAL=0
@@ -446,6 +446,18 @@ case "$1" in
         #fi
         #export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
+        ;;
+  zeroize)
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
+        if using_glassfish; then
+          glassfish_require
+          glassfish_async_stop
+        elif using_tomcat; then
+          tomcat_require
+          tomcat_async_stop
+        fi
+        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
+        rm -rf /etc/intel/cloudsecurity        
         ;;
   change-db-pass)
         if [ $# -ne 1 ]; then

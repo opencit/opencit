@@ -708,7 +708,9 @@ mtwilson.atag = mtwilson.atag || {};
 		$('selection-search-form').hide();
                 break;
           case 'certificates_json':
-		if(data.certificates != null && data.hosts != null) {
+              wait4Hosts2PopulateCerts();
+
+		/*if(data.certificates != null && data.hosts != null) {
                         for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
                                 for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
                                         if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
@@ -717,7 +719,7 @@ mtwilson.atag = mtwilson.atag || {};
                                         }
                                 }
                         }
-                }
+                }*/
 
 
                 for(var loop = 0; loop < data.certificates.length; loop++) {
@@ -785,7 +787,12 @@ mtwilson.atag = mtwilson.atag || {};
                 data.selection_details = [];
                 break;
             case 'hosts':
-                if(data.certificates != null && data.hosts != null) {
+                wait4Hosts2PopulateCerts();
+                if(document.URL.indexOf('tab=certificates') > -1) {
+                        break;
+                }
+
+                /*if(data.certificates != null && data.hosts != null) {
                         for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
                                 for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
                                         if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
@@ -795,7 +802,7 @@ mtwilson.atag = mtwilson.atag || {};
                                 }
                         }
                         view.sync();
-                }
+                }*/
 
 
                 for(var i = data.hosts.length-1; i >= 0; i--) {
@@ -1713,3 +1720,29 @@ function getSelectedSelectionDetails(selection_id) {
 
 }
 
+function wait4Hosts2PopulateCerts() {
+        var atag = mtwilson.atag;
+        var data = atag.data;
+        if(data.hosts == null || data.certificates == null || data.hosts.length == 0  || data.certificates.length == 0) {
+                for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                        data.certificates[cert_loop].subjectName = 'fetching..';
+                }
+                atag.view.sync();
+                // Wait for a few millinseconds for the next check
+                setTimeout(populateCertsWithHostName, 100)
+        }
+}
+
+function populateCertsWithHostName() {
+        var atag = mtwilson.atag;
+        var data = atag.data;
+        for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
+                        if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
+                                data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                continue;
+                        }
+                }
+        }
+        ajax.view.sync();
+}

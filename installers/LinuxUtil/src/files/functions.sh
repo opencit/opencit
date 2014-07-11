@@ -2300,6 +2300,16 @@ glassfish_stop() {
     echo_success " Done"
   fi
 }
+glassfish_async_stop() {
+  glassfish_require 2>&1 > /dev/null
+  if ! glassfish_running; then
+    echo_warning "Glassfish already stopped"
+  elif [ -n "$glassfish" ]; then
+    echo -n "Shutting down Glassfish services in the background..."
+    ($glassfish stop-domain &) 2>&1 > /dev/null
+    echo_success " Done"
+  fi
+}
 glassfish_restart() {
   #if [ -n "$glassfish" ]; then
   #    $glassfish restart-domain
@@ -2768,6 +2778,16 @@ tomcat_stop() {
       tomcat_shutdown 2>&1 > /dev/null
       sleep 3
     done
+    echo_success " Done"
+  fi
+}
+tomcat_async_stop() {
+  tomcat_require 2>&1 > /dev/null
+  if ! tomcat_running; then
+    echo_warning "Tomcat already stopped"
+  elif [ -n "$tomcat" ]; then
+    echo -n "Shutting down Tomcat services in the background..."
+    ($tomcat start &) 2>&1 > /dev/null
     echo_success " Done"
   fi
 }
