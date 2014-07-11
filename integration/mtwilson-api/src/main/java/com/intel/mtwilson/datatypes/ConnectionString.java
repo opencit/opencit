@@ -396,7 +396,7 @@ public class ConnectionString {
             return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
-            log.debug("CitrixConnectionString forURL {}", url);
+//            log.debug("CitrixConnectionString forURL {}", url); //REMOVED debug log statement as it has the password in the connection string
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
