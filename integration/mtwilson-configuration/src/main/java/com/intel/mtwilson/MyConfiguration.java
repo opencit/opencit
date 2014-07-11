@@ -700,7 +700,7 @@ public class MyConfiguration {
     public Set<String> getTlsPolicyAllow() {
         String[] allowed = conf.getStringArray("mtwilson.tls.policy.allow");
         if( allowed.length == 0 ) {
-            allowed = new String[] { "public-key", "certificate" }; // the other possible values which are intentionally not included in the default list are INSECURE and TRUST_FIRST_CERTIFICATE
+            allowed = new String[] { "certificate", "certificate-digest" }; // the other possible values which are intentionally not included in the default list are public-key, public-key-digest, INSECURE and TRUST_FIRST_CERTIFICATE
         }
         return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(allowed)));
     }
