@@ -950,8 +950,10 @@ form.tlsform ol.tlspolicy-content li {
   border-top: 1px solid black;
   border-right: 1px solid black;
   border-left: 1px solid black;
-  width: 550px;
+  width: 525px;
   text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
 }
 form.tlsform ol.tlspolicy-content li:last-child {
   border-bottom: 1px solid black;
@@ -963,10 +965,12 @@ form.tlsform fieldset[data-policy-type] textarea.publickey-text {
 form.tlsform fieldset[data-policy-type] label+textarea+button {
     float: right;
 }
+/*
 form.tlsform .tlspolicy-certificate-list {
     width: 100%;
     overflow: auto;
 }
+*/
 .tlspolicy-input-container textarea {
     width: 575px;
     height: 35px;
