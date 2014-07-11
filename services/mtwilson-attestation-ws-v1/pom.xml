@@ -288,13 +288,7 @@
 <version>2.4.1</version>
 </dependency>
         --> 
-                
-        <dependency>
-            <groupId>com.intel.mtwilson.plugins</groupId>
-            <artifactId>mtwilson-auto-refresh-trust</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
+
         <!-- end plugins -->
         
 
