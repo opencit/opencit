@@ -293,8 +293,6 @@ public abstract class TlsPolicyFactory {
         providesAuthentication = descriptor.isAuthenticationRequired();
         providesIntegrity = descriptor.isIntegrityRequired();  
         hostnameVerification = descriptor.getCertificates() != null && !descriptor.getCertificates().isEmpty();
-        // TODO: ciphers, protocols
-        // TODO: build the certificate repository from the certificatse list...
         if( descriptor.getCertificates() != null && !descriptor.getCertificates().isEmpty() ) {
             HashSetMutableCertificateRepository repository = new HashSetMutableCertificateRepository();
             for(String certificateBase64 : descriptor.getCertificates()) {

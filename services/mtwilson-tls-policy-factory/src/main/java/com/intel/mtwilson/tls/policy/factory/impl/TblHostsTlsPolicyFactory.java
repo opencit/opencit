@@ -133,7 +133,6 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
                     tlsPolicyNameChoice.setTlsPolicyDescriptor(new TlsPolicyDescriptor());
                     tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType(host.getTlsPolicyName());
-                    // TODO:  need to provide something here for savnig the cert back???? no... must be provided via some other interface... because the choice/descriptor objects are data contains only, not pure oo...
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_KNOWN_CERTIFICATE")) {
                     // BOOKMARK JONATHAN TLS POLICY
@@ -163,8 +162,8 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
         private TlsPolicyDescriptor getTlsPolicyDescriptorFromResource(String tlsPolicyName, Resource resource)  {
             try {
                 String password = My.configuration().getTlsKeystorePassword();
-                SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); // XXX TODO only because txthost doesn't have the field yet... we should get the keystore from the txthost object
-                TlsPolicyDescriptor tlsPolicyDescriptor = getTlsPolicyDescriptorFromKeystore(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
+                SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); 
+                TlsPolicyDescriptor tlsPolicyDescriptor = getTlsPolicyDescriptorFromKeystore(tlsPolicyName, tlsKeystore); 
                 return tlsPolicyDescriptor;
             }
             catch(KeyManagementException e) {
@@ -280,7 +279,7 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
             String tlsCaFilename = My.configuration().getConfiguration().getString("mtwilson.tls.certificate.file", "mtwilson-tls.pem");
             if (tlsCaFilename != null) {
                 if (!tlsCaFilename.startsWith("/")) {
-                    tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);// XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+                    tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);
                 }
                 if (tlsCaFilename.endsWith(".pem")) {
                     File tlsPemFile = new File(tlsCaFilename);

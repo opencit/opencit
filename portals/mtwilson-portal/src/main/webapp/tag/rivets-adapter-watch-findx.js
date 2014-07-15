@@ -49,14 +49,14 @@ var rivets_watch_findx_adapter =  {
     subscribe: function(obj, keypath, callback) {
 //        if( typeof keypath === 'function' ) { return; }
         if( this.isLoggingEnabled && typeof log === 'object' ) {
-            log.debug("rivets subscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")"); // xxx jonathan
+            log.debug("rivets subscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
         }
         watch(obj, keypath, callback);
     },
     unsubscribe: function(obj, keypath, callback) {
 //        if( typeof keypath === 'function' ) { return; }
         if( this.isLoggingEnabled  && typeof log === 'object' ) {
-            log.debug("rivets unsubscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")"); // xxx jonathan
+            log.debug("rivets unsubscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
         } 
         if( typeof obj !== 'string' ) {
             unwatch(obj, keypath, callback);
@@ -66,7 +66,7 @@ var rivets_watch_findx_adapter =  {
     read: function(obj, keypath) {
         if( this.isLoggingEnabled  && typeof log === 'object' ) {
             log.debug("rivets read keypath: "+keypath+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
-        } // xxx jonathan
+        } 
         if( typeof obj === 'undefined') {
 //            log.debug("reading keypath "+keypath+" on undefined object");
             return null;
@@ -89,7 +89,7 @@ var rivets_watch_findx_adapter =  {
     publish: function(obj, keypath, value) {
         if( this.isLoggingEnabled  && typeof log === 'object' ) {
             //log.debug("rivets publish keypath: "+keypath+" value: "+value+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
-        } // xxx jonathan
+        }
         if( typeof obj === 'string'  ) {
 
         }

@@ -199,10 +199,10 @@ public class TblHosts implements Serializable {
     public String getAddOnConnectionInfo() {
         if (addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null) {
             try {
-                //log.info("XXX TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
+                //log.info("TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
                 addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
-                //log.info("XXX TblHosts ASDataCipher plainText = {}", addOnConnectionInfo_plainText);
-                //log.info("XXX TblHosts ASDataCipher cipherText = {}", addOnConnectionInfo_cipherText);
+                //log.info("TblHosts ASDataCipher plainText = {}", addOnConnectionInfo_plainText);
+                //log.info("TblHosts ASDataCipher cipherText = {}", addOnConnectionInfo_cipherText);
             } catch (Exception e) {
                 log.error("Cannot decrypt host connection credentials", e);
                 // this will happen if the data is being decrypted with the wrong key (which will happen if someone reinstalled mt wilson and kept the data but didn't save the data encryption key)

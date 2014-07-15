@@ -81,9 +81,6 @@ public class DeployTagCertificate implements Runnable{
                 }
                 
                 // Before deploying, we need to verify if the host is same as the one for which the certificate was created.
-                // TODO: need to call business object / data layer directly or use a V2 API so we get the v2 TxtHostRecord with TLS Policy,
-                // because we're going to need it when we call deployAssetTagToHost.  so right now the policy info isn't making it to 
-                // deployAssetTagToHost so the TlsPolicyFactory has to load it from the database.
                 List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(host.toString(), true);
                 if(hostList == null || hostList.isEmpty() ) {
                     log.error("RPC: DeployTagCertificate - No hosts were returned back matching name " + host.toString());

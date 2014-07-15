@@ -43,8 +43,7 @@ public class TpmPasswordRepository implements DocumentRepository<TpmPassword, Tp
             if (criteria.id != null) {                
                 TpmPassword obj = dao.findById(criteria.id);
                 if (obj != null) {
-                    // TODO INSECURE: decrypt the password,  only provide the password if the user ALSO has tpm_passwords:retrieve permission
-                    obj.setPassword(null); // prevent giving out the password in search results... see TODO comment above
+                    obj.setPassword(null); 
                     objCollection.getTpmPasswords().add(obj);
                 }
             }

@@ -140,13 +140,7 @@ configure_privacyca_user() {
   #PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
   #update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
   #update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD_HASH}"
-<<<<<<< HEAD
-  mtwilson login-password $PRIVACYCA_DOWNLOAD_USERNAME env:PRIVACYCA_DOWNLOAD_PASSWORD tpms:endorse tpm_passwords:store tpm_passwords:search
-=======
-  # TODO:  instead of ClientFilesDownload* we should  make a user with permission specifically
-  #        to authorize hosts while installing trust agent, instead of using the admin user for that
   mtwilson login-password $PRIVACYCA_DOWNLOAD_USERNAME env:PRIVACYCA_DOWNLOAD_PASSWORD tpms:endorse host_aiks:certify tpm_passwords:store tpm_passwords:search
->>>>>>> aea2c917d2bded452f248a22c7be9ec604b68677
 }
 
 
