@@ -648,12 +648,12 @@ public class HostBO {
      * @return : true on success.
      */
     public boolean configureWhiteListFromCustomData(WhitelistConfigurationData hostConfigObj) {
-        // debug only
-        try {
-        ObjectMapper mapper = new ObjectMapper();
-        log.debug("configureWhiteListFromCustomData: {}", mapper.writeValueAsString(hostConfigObj));
-        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize input" ,e); }
-        // debug only
+//        // debug only
+//        try {
+//        ObjectMapper mapper = new ObjectMapper();
+//        log.debug("configureWhiteListFromCustomData: {}", mapper.writeValueAsString(hostConfigObj)); //This statement may contain clear text passwords
+//        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize input" ,e); }
+//        // debug only
 
         boolean configStatus = false;
         String attestationReport;
@@ -687,12 +687,13 @@ public class HostBO {
 
                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
                 
-        // debug only
-        try {
-        ObjectMapper mapper = new ObjectMapper();
-        log.debug("configureWhiteListFromCustomData TxtHostRecord2: {}", mapper.writeValueAsString(gkvHost));
-        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize TxtHostRecord2" ,e); }
-        // debug only
+//        // debug only
+//        try {
+//        ObjectMapper mapper = new ObjectMapper();
+//        String writeValueAsString = mapper.writeValueAsString(gkvHost);
+//        log.debug("configureWhiteListFromCustomData TxtHostRecord2: {}", mapper.writeValueAsString(gkvHost)); //This statement may contain clear text passwords
+//        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize TxtHostRecord2" ,e); }
+//        // debug only
                 
                 if(gkvHost.AddOn_Connection_String == null) {
                     ConnectionString cs = ConnectionString.from(gkvHost);

@@ -122,12 +122,12 @@ public class Host {
     public String configureWhiteList(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
         
-        // debug only
-        try {
-        ObjectMapper mapper = new ObjectMapper();
-        log.debug("configureWhiteList: {}", mapper.writeValueAsString(hostConfigObj));
-        } catch(Exception e) { log.error("configureWhiteList cannot serialize input" ,e); }
-        // debug only
+//        // debug only
+//        try {
+//        ObjectMapper mapper = new ObjectMapper();
+//        log.debug("configureWhiteList: {}", mapper.writeValueAsString(hostConfigObj)); //This statement may contain clear text passwords
+//        } catch(Exception e) { log.error("configureWhiteList cannot serialize input" ,e); }
+//        // debug only
         
         WhitelistConfigurationData wlConfigData = new WhitelistConfigurationData(hostConfigObj);
         boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(wlConfigData);

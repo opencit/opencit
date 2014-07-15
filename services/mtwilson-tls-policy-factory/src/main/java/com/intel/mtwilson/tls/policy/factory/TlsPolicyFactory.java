@@ -346,12 +346,12 @@ public abstract class TlsPolicyFactory {
      * @return a new TlsPolicyFactory that can create a TlsPolicyDescriptor and a TlsPolicy for the given tlsPolicySubject
      */
     public static TlsPolicyFactory createFactory(Object tlsPolicySubject) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            log.debug("TlsPolicyFactory createFactory: {}", mapper.writeValueAsString(tlsPolicySubject));
-        } catch (Exception e) {
-            log.warn("Cannot write debug log", e);
-        }
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            log.debug("TlsPolicyFactory createFactory: {}", mapper.writeValueAsString(tlsPolicySubject)); //This statement may contain clear text passwords
+//        } catch (Exception e) {
+//            log.warn("Cannot write debug log", e);
+//        }
         TlsPolicyFactory factoryExtension = Extensions.require(TlsPolicyFactory.class, tlsPolicySubject);
         return factoryExtension;
         /*

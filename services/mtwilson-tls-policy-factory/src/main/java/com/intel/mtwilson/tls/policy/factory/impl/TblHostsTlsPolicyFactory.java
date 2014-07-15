@@ -60,12 +60,12 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
      */
     public TblHostsTlsPolicyFactory(TblHosts tblHosts) {
         super();
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            log.debug("TblHostsTlsPolicyFactory constructor: {}", mapper.writeValueAsString(tblHosts));
-        } catch (Exception e) {
-            log.warn("Cannot write debug log", e);
-        }
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            log.debug("TblHostsTlsPolicyFactory constructor: {}", mapper.writeValueAsString(tblHosts)); //This statement may contain clear text passwords
+//        } catch (Exception e) {
+//            log.warn("Cannot write debug log", e);
+//        }
 //        this.txtHostRecord = txtHostRecord;
         this.objectTlsPolicyProvider = new TblHostsObjectTlsPolicy(tblHosts);
         this.hostDescriptor = new TblHostsHostDescriptor(tblHosts);
