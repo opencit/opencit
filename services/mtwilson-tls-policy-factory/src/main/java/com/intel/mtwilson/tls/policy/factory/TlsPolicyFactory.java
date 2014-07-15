@@ -324,7 +324,7 @@ public abstract class TlsPolicyFactory {
                 }
             }
             certificateRepository = repository;
-            throw new UnsupportedOperationException("public key policy"); // TODO: also need a corresponding public key policy implementation that will compare just the public keys and not do anything with certificates (also no hostname verification)
+            throw new UnsupportedOperationException("public key policy");
         }
         trustDelegate = null;
         return this;
