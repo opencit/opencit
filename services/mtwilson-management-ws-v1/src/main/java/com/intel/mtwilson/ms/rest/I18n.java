@@ -41,11 +41,11 @@ import org.slf4j.LoggerFactory;
 @V1
 //@Stateless
 @Path("/ManagementService/resources/i18n")
-public class i18n {
+public class I18n {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public i18n() {
+    public I18n() {
     }
 
     /**
