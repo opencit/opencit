@@ -4,14 +4,11 @@
  */
 package com.intel.mtwilson.ms.rest;
 
-import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.launcher.ws.ext.V1;
-import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
-import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
 import com.intel.mtwilson.shiro.jdbi.MyJdbi;
@@ -19,7 +16,6 @@ import com.intel.mtwilson.user.management.rest.v2.model.User;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Locale;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -60,7 +56,7 @@ public class i18n {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
     public String getLocaleForUser(
-            @QueryParam("username") String username) throws IOException {
+            @QueryParam("username") String username) throws IOException, SQLException {
         
         if( username == null || ShiroUtil.subjectUsernameEquals(username)) {
             // allow any user to access own data 
@@ -73,7 +69,7 @@ public class i18n {
     }
     
     // does not require any permission - anyone is allowed to get their own locale
-    protected String getLocaleForCurrentUser() throws IOException {
+    protected String getLocaleForCurrentUser() throws IOException, SQLException {
         String username = ShiroUtil.subjectUsername();
 //        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
 //        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
@@ -91,7 +87,7 @@ public class i18n {
     }
     
     @RequiresPermissions("users:retrieve")
-    protected String getLocaleForAnyUser(String username) throws IOException {
+    protected String getLocaleForAnyUser(String username) throws IOException, SQLException {
         log.debug("Retrieving information from database for portal user: {}", username);
 //        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
 //        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
@@ -121,7 +117,7 @@ public class i18n {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/locale")
-    public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException {
+    public String setLocaleForUser(PortalUserLocale pul) throws IOException, NonexistentEntityException, MSDataException, SQLException {
         if( pul.getUser() == null || ShiroUtil.subjectUsernameEquals(pul.getUser())) {
             setLocaleForCurrentUser(pul.getLocale());
         }
@@ -132,7 +128,7 @@ public class i18n {
         return "OK";
     }
     
-    protected void setLocaleForCurrentUser(String locale) throws IOException, NonexistentEntityException, MSDataException {
+    protected void setLocaleForCurrentUser(String locale) throws IOException, NonexistentEntityException, MSDataException, SQLException {
         String username = ShiroUtil.subjectUsername();
         log.debug("Retrieving current portal user [{}] from database.", username);
         //MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
@@ -152,7 +148,7 @@ public class i18n {
     } 
     
     @RequiresPermissions("users:store")
-    protected void setLocaleForAnyUser(String username, String locale) throws IOException, NonexistentEntityException, MSDataException {
+    protected void setLocaleForAnyUser(String username, String locale) throws IOException, NonexistentEntityException, MSDataException, SQLException {
         log.debug("Retrieving portal user [{}] from database.", username);
         //MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
         //MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
