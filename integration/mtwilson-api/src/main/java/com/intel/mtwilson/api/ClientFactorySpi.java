@@ -19,7 +19,7 @@ com.intel.my.app.MyClientFactory
  * @author jbuhacoff
  */
 public interface ClientFactorySpi {
-//    MtWilson createClientFor(URL webserviceUrl); // XXX TODO  add TlsPolicy as a second parameter... after we transition to using cpg-tls-policy with the new factory classes and repositories
+//    MtWilson createClientFor(URL webserviceUrl); 
 
     SimpleKeystore createUserInResource(Resource keystoreDir, String keystoreUsername, String keystorePassword, URL wsUrl, TlsPolicy tlsPolicy, String[] roles);
     MtWilson clientForUserInResource(Resource keystoreDir, String keystoreUsername, String keystorePassword, URL wsUrl, TlsPolicy tlsPolicy);

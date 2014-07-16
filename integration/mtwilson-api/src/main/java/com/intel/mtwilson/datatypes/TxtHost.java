@@ -126,7 +126,6 @@ public class TxtHost {
     }
 
     /**
-     * XXX TODO  the guessing of connection string has now moved to ConnectionString.from()
      * @return
      * @throws MalformedURLException 
      */
@@ -136,7 +135,7 @@ public class TxtHost {
             if (ipAddress != null && port != null) {
                 // for backwards compatibility with cilents that don't submit a connection string for intel hosts
                 connStr = ConnectionString.forIntel(ipAddress, port);
-                // return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
+                // return "intel:https://"+ipAddress.toString()+":"+port.toString(); 
             }
         } else {
             // Let us first check if the user already has specified the connection string in the correct format. If yes, then return back the connection

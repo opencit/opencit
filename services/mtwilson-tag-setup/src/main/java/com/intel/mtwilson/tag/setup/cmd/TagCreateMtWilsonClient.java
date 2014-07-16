@@ -74,7 +74,7 @@ public class TagCreateMtWilsonClient extends TagCommand {
             mtwilsonClientKeystorePassword = My.configuration().getTagKeystorePassword(); //Global.configuration().getMtWilsonClientKeystorePassword();
         }
         
-        // defaults:  username=asset-tag-prov-svc and password=random-16-chars ... XXX TODO maybe prompt for the username & url?  password can still be generated.
+        // defaults:  username=asset-tag-prov-svc and password=random-16-chars 
         if( mtwilsonUrl == null || mtwilsonUrl.isEmpty() ) {
             mtwilsonUrl = "https://127.0.0.1:8181";
         }
@@ -92,7 +92,6 @@ public class TagCreateMtWilsonClient extends TagCommand {
 //        SimpleKeystore keystore = new SimpleKeystore(keystoreResource, mtwilsonClientKeystorePassword);
 //        TrustFirstCertificateTlsPolicy policy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
         ApiClientFactory factory = new ApiClientFactory();
-        // XXX TODO use the tls keystore and policy configured for the mt wilson server ... 
         SimpleKeystore keystore = factory.createUserInResource(keystoreResource, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword, url, new InsecureTlsPolicy(), roles);
         keystore.save();
         
@@ -108,9 +107,6 @@ public class TagCreateMtWilsonClient extends TagCommand {
         fileDao.close();
         
         // display configuration so user can copy it to mtwilson.properties 
-        // TODO:  when converting to a setup task this would just be set in the in-memory configuration 
-        // and the application setup manager would write all the properties out to mtwilson.properties
-        // file at the end of setup
         Properties p = new Properties();
         p.setProperty("mtwilson.tag.api.url", mtwilsonUrl);
         p.setProperty("mtwilson.tag.api.username", mtwilsonClientKeystoreUsername);

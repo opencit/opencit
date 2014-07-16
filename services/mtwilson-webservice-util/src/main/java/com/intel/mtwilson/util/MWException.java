@@ -58,7 +58,7 @@ public class MWException extends WebApplicationException implements Localizable 
 //        super(e,Response.status(400).entity(new AuthResponse(ErrorCode.SYSTEM_ERROR, e.getMessage())).type(MediaType.APPLICATION_JSON_TYPE).build());
 //        authResponse = new AuthResponse(ErrorCode.SYSTEM_ERROR, e.getMessage());
         super(400);
-        errorMessage = new ErrorMessage(ErrorCode.SYSTEM_ERROR, e.getMessage()); // TODO i18n : need to have a way to look up non-coded standard english error messages in a translation table - maybe take a hash of the message and use that as the key 
+        errorMessage = new ErrorMessage(ErrorCode.SYSTEM_ERROR, e.getMessage()); 
         parameters = null;
     }
     

@@ -127,7 +127,6 @@ public class ProxyApiClient extends ApiClient {
         String querySeparator = "?";
         if( queryString.isEmpty()) { querySeparator = ""; }
             
-        // TODO:  remove the requestUrl parameter from the query string before passing it on 
         log.debug("Request URI: {}", request.getRequestURI()); // looks like this:  /mtwilson-portal/v2proxy/configurations
         log.debug("Request URL: {}", request.getRequestURL()); // looks like this:  https://10.1.71.49:8443/mtwilson-portal/v2proxy/configurations
         int pathIndex = request.getRequestURL().toString().indexOf(request.getRequestURI());
@@ -136,7 +135,7 @@ public class ProxyApiClient extends ApiClient {
         String urltext = String.format("%s/mtwilson/v2/%s%s%s", server, proxyUrl, querySeparator, queryString);
         log.debug("Proxy URL: {}", urltext);
         log.debug("Proxy Content-Type: {}", request.getContentType()); // example:    application/json; charset=UTF-8
-        //  MediaType.valueof(...)  can't handle the  parameters like "; charset=UTF-8"  so we have to strip them out ... TODO parse the content type and then use the MediaType constructor that accepts a map of already-parsed parameters,
+        //  MediaType.valueof(...)  can't handle the  parameters like "; charset=UTF-8"  so we have to strip them out 
         String contentType = request.getContentType();
         if( contentType != null ) {
             String[] contentTypeParts = contentType.split(";");

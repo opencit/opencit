@@ -145,7 +145,7 @@ push @critical, "most recent received $report->{delay} seconds ago" if( defined(
 push @warning, "no emails found" if( !defined($report->{delay}) );
 
 # print report and exit with known status
-my $perf_data = "delay=".$report->{delay}."s;$delay_warn;$delay_crit;0 elapsed=".$report->{seconds}."s"; # TODO: need a component for safely generating valid perf data format. for notes on the format, see http://www.perfparse.de/tiki-view_faq.php?faqId=6
+my $perf_data = "delay=".$report->{delay}."s;$delay_warn;$delay_crit;0 elapsed=".$report->{seconds}."s"; 
 my $short_report = $report->text(qw/seconds delay/) . " | $perf_data";
 my $long_report = join("", map { "$_: $report->{$_}\n" } @report_plugins );
 if( scalar @critical ) {

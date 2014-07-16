@@ -18,9 +18,6 @@ public class PasswordLoginRequest {
     @FormParam("password")
     private String password;
 
-    // XXX "rememberme" - can be implemented directly by apache shiro .... or we need to integrate... but defeinitely don't re-invent this one.
-    
-    
     public String getUsername() {
         return username;
     }

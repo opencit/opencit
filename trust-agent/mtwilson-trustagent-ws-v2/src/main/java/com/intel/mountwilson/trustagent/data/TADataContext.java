@@ -87,7 +87,7 @@ public class TADataContext {
     }
 
     public String getNonceFileName() {
-        return getDataFolder() + File.separator + "nonce"; // like /opt/trustagent/var/nonce   TODO:  randomize filename to allow multiple simultaneous requests
+        return getDataFolder() + File.separator + "nonce"; // like /opt/trustagent/var/nonce   
     }
 
     public String getResponseXML() {
@@ -149,7 +149,7 @@ public class TADataContext {
         return getCertificateFolder() + File.separator + Config.getInstance().getProperty("aikcert.filename");
     }
 
-    // used only by the CreateIdentityDaaCmd - TODO  when creating the ekcert save it to an file so it can be used for the daa commands
+    // used only by the CreateIdentityDaaCmd 
     public String getEKCertFileName() {
         return getCertificateFolder() + File.separator + Config.getInstance().getProperty("ekcert.filename");
     }

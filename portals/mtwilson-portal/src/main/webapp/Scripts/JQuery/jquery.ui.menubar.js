@@ -17,7 +17,6 @@
     
     //alert("starting menubar script!!");
 
-// TODO when mixing clicking menus and keyboard navigation, focus handling is broken
 // there has to be just one item that has tabindex
 $.widget( "ui.menubar", {
 	version: "@VERSION",
@@ -57,7 +56,6 @@ $.widget( "ui.menubar", {
 				select: function( event, ui ) {
 					ui.item.parents( "ul.ui-menu:last" ).hide();
 					that._close();
-					// TODO what is this targetting? there's probably a better way to access it
 					$(event.target).prev().focus();
 					that._trigger( "select", event, ui );
 				},
@@ -85,7 +83,6 @@ $.widget( "ui.menubar", {
 			});
 		this.items.each(function() {
 			var input = $(this),
-				// TODO menu var is only used on two places, doesn't quite justify the .each
 				menu = input.next( that.options.menuElement );
 
 			input.bind( "click.menubar focus.menubar mouseenter.menubar", function( event ) {
@@ -94,8 +91,6 @@ $.widget( "ui.menubar", {
 					return;
 				}
 				event.preventDefault();
-				// TODO can we simplify or extractthis check? especially the last two expressions
-				// there's a similar active[0] == menu[0] check in _open
 				if ( event.type == "click" && menu.is( ":visible" ) && that.active && that.active[0] == menu[0] ) {
 					that._close();
 					return;
@@ -131,14 +126,12 @@ $.widget( "ui.menubar", {
 			.attr( "aria-haspopup", "true" )
 			.wrapInner( "<span class='ui-button-text'></span>" );
 
-			// TODO review if these options are a good choice, maybe they can be merged
 			if ( that.options.menuIcon ) {
 				input.addClass( "ui-state-default" ).append( "<span class='ui-button-icon-secondary ui-icon ui-icon-triangle-1-s'></span>" );
 				input.removeClass( "ui-button-text-only" ).addClass( "ui-button-text-icon-secondary" );
 			}
 
 			if ( !that.options.buttons ) {
-				// TODO ui-menubar-link is added above, not needed here?
 				input.addClass( "ui-menubar-link" ).removeClass( "ui-state-default" );
 			};
 
@@ -188,7 +181,6 @@ $.widget( "ui.menubar", {
 			.removeClass( "ui-button ui-widget ui-button-text-only ui-menubar-link ui-state-default" )
 			.removeAttr( "role" )
 			.removeAttr( "aria-haspopup" )
-			// TODO unwrap?
 			.children( "span.ui-button-text" ).each(function( i, e ) {
 				var item = $( this );
 				item.parent().html( item.html() );
@@ -228,7 +220,6 @@ $.widget( "ui.menubar", {
 		if ( this.active && this.active[0] == menu[0] ) {
 			return;
 		}
-		// TODO refactor, almost the same as _close above, but don't remove tabIndex
 		if ( this.active ) {
 			this.active
 				.menu( "collapseAll" )
@@ -251,7 +242,6 @@ $.widget( "ui.menubar", {
 			.removeAttr( "aria-hidden" )
 			.attr( "aria-expanded", "true" )
 			.menu("focus", event, menu.children( ".ui-menu-item" ).first() )
-			// TODO need a comment here why both events are triggered
 			.focus()
 			.focusin();
 		this.open = true;

@@ -16,7 +16,6 @@ public class Util {
 
         } catch (Exception e) {
             return null;
-            //:TODO log the error 
         }
     }
 

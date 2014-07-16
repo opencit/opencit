@@ -18,7 +18,6 @@
   // SideTable is a weak map where possible. If WeakMap is not available the
   // association is stored as an expando property.
   var SideTable;
-  // TODO(arv): WeakMap does not allow for Node etc to be keys in Firefox
   if (typeof WeakMap !== 'undefined' && navigator.userAgent.indexOf('Firefox/') < 0) {
     SideTable = WeakMap;
   } else {
@@ -108,7 +107,6 @@
 
   function getExpressionBinding(model, expressionText) {
     try {
-      // TODO(rafaelw): Cache expressions.
       var delegate = new ASTDelegate();
       esprima.parse(expressionText, delegate);
 
@@ -118,10 +116,6 @@
       if (!delegate.labeledStatements.length && delegate.statements.length > 1)
         throw Error('Multiple unlabelled statements are not allowed.');
 
-      // TODO(rafaelw): This is a bit of hack. We'd like to support syntax for
-      // binding to class like class="{{ foo: bar; baz: bat }}", so we're
-      // abusing ECMAScript labelled statements for this use. The main downside
-      // is that ECMAScript indentifiers are more limited than CSS classnames.
       var resolveFn = delegate.labeledStatements.length ?
           newLabeledResolve(delegate.labeledStatements) :
           resolveFn = delegate.statements[0];

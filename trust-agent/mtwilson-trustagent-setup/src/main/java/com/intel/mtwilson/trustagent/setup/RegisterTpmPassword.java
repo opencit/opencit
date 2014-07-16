@@ -81,14 +81,12 @@ public class RegisterTpmPassword extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        // TODO:  check if tpm password has been updated in mtwilson - 
         //        by saving the ETag we get from Mt Wilson and then
         //        looking for the same ETag from here.
         //        until that is done, user should always run this setup task
         //        with --force
         
         /*
-        // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
@@ -129,14 +127,12 @@ public class RegisterTpmPassword extends AbstractSetupTask {
     @Override
     protected void execute() throws Exception {
         /*
-        // TODO:  this should be consolidated in the v2 client abstract class  with use of TlsPolicyManager ; see also RequestEndorsementCertificat e and RequestAikCertificate
         System.setProperty("javax.net.ssl.trustStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", config.getTrustagentKeystorePassword());
         System.setProperty("javax.net.ssl.keyStore", config.getTrustagentKeystoreFile().getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
         */
         
-        // TODO: duplicate code here= (log.debug("Cf and download privacy ca certs
         log.debug("RegisterTpmPassword.execute creating strict TLS policy using keystore");
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(config.getTrustagentKeystoreFile(), config.getTrustagentKeystorePassword()).build();
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);

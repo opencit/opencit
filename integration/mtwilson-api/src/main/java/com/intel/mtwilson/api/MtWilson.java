@@ -2440,7 +2440,6 @@ public interface MtWilson {
      */    
     boolean configureWhiteList(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException;
 
-    // TODO: deprecate in next release in favor of getSamlCertificates()
     /**
      * Retrieves server's SAML certificate and any root certificates if available. This would be used to verify the signed
      * SAML assertion sent by the system. 

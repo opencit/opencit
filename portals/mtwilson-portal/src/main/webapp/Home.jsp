@@ -206,8 +206,7 @@
                                 </ul>
                         </li> -->
                         <!--End Added by Soni on 18/10/12 for New Screen for CA-->
-                        <!-- stdalex 1/18 this functionality is now duplicated in Certificates tab
-                             TODO-stdalex this will be offically removed in 1.2
+                        <!-- 
                         <li >
                         
                                 <a>SAML</a>

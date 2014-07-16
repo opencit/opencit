@@ -43,7 +43,6 @@ public class RevokeTagCertificate implements Runnable{
         this.certificateId = certificateId;
     }
     
-    // TODO: should this be tag_certificates:revoke?
     @Override
     @RequiresPermissions("tag_certificates:delete")         
     public void run() {

@@ -68,9 +68,8 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
             log.debug("RPC instance is now: {}", mapper.writeValueAsString(rpcInstance));
         }
         catch(Exception e) {
-            // TODO log the fault
             log.error("Error while setting task input: {}", e.getMessage());
-            faults.add(new Fault(e, "Error while preparing task")); // TODO i18n
+            faults.add(new Fault(e, "Error while preparing task")); 
         }
     }
     // this method is called to invoke the rpc
@@ -80,9 +79,8 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
             rpcInstance.run();
         }
         catch(Exception e) {
-            // TODO log the fault
             log.error("Error while executing task: {}", e.getMessage());
-            faults.add(new Fault(e, "Error while executing task")); // TODO i18n
+            faults.add(new Fault(e, "Error while executing task")); 
         }
     }
     // this method is called to get the output from the rpc,

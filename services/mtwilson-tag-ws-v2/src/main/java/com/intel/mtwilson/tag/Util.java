@@ -85,12 +85,10 @@ java.io.IOException: javax.xml.bind.JAXBException: Provider com.sun.xml.bind.v2.
      * @throws UnsupportedOperationException if the attribute OID is not supported or a text format was given for which a parser is not available
      */
     public static X509AttrBuilder.Attribute toAttributeOidValue(AttributeType attribute) throws IOException {
-        // TODO:  oid support extensions
         if (attribute.getDer() != null) {
             ASN1Object asn1 = ASN1Object.fromByteArray(attribute.getDer().getValue()); // throws IOException
             return new X509AttrBuilder.Attribute(new ASN1ObjectIdentifier(attribute.getOid()), asn1);
         } else if (attribute.getOid().equals("2.5.4.789.1") && attribute.getText() != null) {
-            // TODO: move to a text parser for this oid
             String[] parts = attribute.getText().getValue().split("=");  // name=value
             return new X509AttrBuilder.Attribute(new ASN1ObjectIdentifier(UTF8NameValueMicroformat.OID), new UTF8NameValueMicroformat(parts[0], parts[1]));
         } else if (attribute.getOid().equals("2.5.4.789.2") && attribute.getText() != null) {

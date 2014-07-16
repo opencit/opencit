@@ -18,10 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX see also apache commons pool KeyedPoolableObjectFactory - 
- * this ipmlementation was quick but it maybe completely replaceable with
- * apache commons pool.
- * 
  * @author jbuhacoff
  */
 public class VMwareConnectionPool {
@@ -121,7 +117,6 @@ public class VMwareConnectionPool {
             if( factory.validateObject(tlsConnection, client) ) {
 //                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
                 pool.put(tlsConnection, client);
-                // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
 //                log.debug("Opening new vCenter connection for "+client.getEndpoint());
                 return client;
             }

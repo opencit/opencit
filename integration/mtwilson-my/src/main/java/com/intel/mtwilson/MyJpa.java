@@ -41,7 +41,6 @@ public class MyJpa {
     ApiRoleX509JpaController mwApiRoleX509;
     AuditLogEntryJpaController mwAuditLogEntry;
     MwCertificateX509JpaController mwCertificateX509;
-    // XXX TODO we don't have a controller for the schema changelog   mw_changelog !!!
     MwConfigurationJpaController mwConfiguration;
     TblEventTypeJpaController mwEventType;
     TblHostSpecificManifestJpaController mwHostSpecificManifest;
@@ -102,7 +101,6 @@ public class MyJpa {
 //		if( mwCertificateX509 == null ) { mwCertificateX509 = new MwCertificateX509JpaController(pm.getASData()); }
 //		return mwCertificateX509;
 	}
-    // XXX TODO we don't have a controller for the schema changelog   mw_changelog !!!
     public MwConfigurationJpaController mwConfiguration() throws IOException {
         return new MwConfigurationJpaController(pm.getMSData());
 //		if( mwConfiguration == null ) { mwConfiguration = new MwConfigurationJpaController(pm.getMSData()); }

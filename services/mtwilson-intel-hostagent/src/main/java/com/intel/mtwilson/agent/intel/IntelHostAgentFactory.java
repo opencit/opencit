@@ -42,7 +42,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
                 // login credentials
                 properties.setProperty("mtwilson.api.username", "mtwilson");
                 properties.setProperty("mtwilson.api.password", "");
-//                properties.setProperty("mtwilson.api.ssl.policy", "INSECURE"); // TODO need to initialize the client with TlsPolicy
+//                properties.setProperty("mtwilson.api.ssl.policy", "INSECURE");
                 
                 // now add the /v2 path if it's not already there,  to maintain compatibility with the existing UI that only prompts for
                 // the hostname and port and doesn't give the user the ability to specify the complete connection url

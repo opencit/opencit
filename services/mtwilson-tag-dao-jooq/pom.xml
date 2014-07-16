@@ -97,8 +97,6 @@ Jooq code generation happens in asset-tag-dao.
                                         <!-- run the program to create a local derby database ; 
                                      fork=true is important so that Derby shuts down before it starts up again from the jooq plugin 
                                      (or else you'll get an error that Derby is already started and has the db locked) 
-                                     TODO: find out why Derby.stopDatabase() doesn't complete release the db and fix it so that
-                                     Derby will release its locks on the db so that we don't need to fork here.
                                         -->                             
                                         <java classname="com.intel.mtwilson.tag.dao.jooq.CreateDatabase" classpath="${compile_classpath}" fork="true">
                                             <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log" />

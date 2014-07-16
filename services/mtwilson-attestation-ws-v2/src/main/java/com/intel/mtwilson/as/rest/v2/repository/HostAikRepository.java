@@ -37,7 +37,7 @@ public class HostAikRepository implements DocumentRepository<HostAik, HostAikCol
                 if (obj != null) {
                     objCollection.getAiks().add(convert(obj));
                 }
-            } // TODO: Need to add the AIKSha1 search criteria later when we have the capability of multiple AIKs
+            } 
         } catch (Exception ex) {
             log.error("HostAik:Search - Error during search for host aik.", ex);
             throw new RepositorySearchException(ex, criteria);

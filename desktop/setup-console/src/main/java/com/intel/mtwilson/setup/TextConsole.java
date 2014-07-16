@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO:  should deprecate this in favor of com.intel.mtwilson.setup.ui.console.Main
  * @author jbuhacof
  */
 public class TextConsole {

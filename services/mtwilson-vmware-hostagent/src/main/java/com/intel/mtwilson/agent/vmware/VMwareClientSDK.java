@@ -399,9 +399,6 @@ public class VMwareClientSDK implements TlsClient {
 //    // retrieved</param>
 //    // / <returns>Value of the property</returns>
 //
-//    /**
-//     * XXX temporary public access until the code is refactored
-//     */
 //    public Object getMORProperty(ManagedObjectReference moRef,
 //            String propertyName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
 //        return getMORProperties(moRef, new String[]{propertyName})[0];
@@ -523,9 +520,6 @@ public class VMwareClientSDK implements TlsClient {
 //     disconnect();
 //     }
 //     }*/
-//    /**
-//     * XXX temporary public access until the code is refactored
-//     */
 //    public HostTpmAttestationReport getAttestationReport(
 //            ManagedObjectReference hostObj) throws RuntimeFaultFaultMsg {
 //        return vimPort.queryTpmAttestationReport(hostObj);
@@ -537,14 +531,6 @@ public class VMwareClientSDK implements TlsClient {
 //     * per iteration of the comparison loop. see getHostReference for obtaining
 //     * a managed object reference for a specific host (instead of for all hosts
 //     * and then querying each one for the name)
-//     *
-//     *
-//     * TODO: this method should return a VCenterHost object, and VCenterHost
-//     * should provide convenient access to information such as "is tpm enabled"
-//     * and "get attestation report" for that host, wrapping all of the calls
-//     * with managed object references to the vmware api.
-//     *
-//     * XXX temporary public access until this code is refactored
 //     */
 //    public ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
 //        // Get the host objects in the vcenter
@@ -749,7 +735,7 @@ public class VMwareClientSDK implements TlsClient {
 //        try {
 //            vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
 //        } catch (Exception e) {
-//            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); // XXX could result in a leaked secret
+//            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); 
 //        }
 //        try {
 //            // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet
@@ -803,7 +789,7 @@ public class VMwareClientSDK implements TlsClient {
 //        try {
 //            vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
 //        } catch (Exception e) {
-//            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); // XXX could result in a leaked secret
+//            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); 
 //        }
 //        try {
 //            // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet
@@ -895,7 +881,7 @@ public class VMwareClientSDK implements TlsClient {
 //        try {
 //            vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
 //        } catch (Exception e) {
-//            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); // XXX could result in a leaked secret
+//            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); 
 //        }
 //        try {
 //            // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet

@@ -45,12 +45,12 @@ public class Global {
                 currentConfiguration = configurationDao.findByName("main");
                 if( currentConfiguration == null ) {
                     log.debug("Cannot find 'main' configuration, using default");
-                    currentConfiguration = new Configuration(); // XXX using default config because cannot find main config
+                    currentConfiguration = new Configuration(); 
                 }
             }
             catch(Exception e) {
                 log.error("Cannot load configuration, using default", e);
-                currentConfiguration = new Configuration(); // XXX using default config because of database error 
+                currentConfiguration = new Configuration(); 
             }
             finally {
                 if( configurationDao != null ) { configurationDao.close(); }
@@ -151,7 +151,6 @@ public class Global {
 //            KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
             URL url = My.configuration().getMtWilsonURL();  //configuration().getMtWilsonURL();
             ApiClientFactory factory = new ApiClientFactory();
-            // XXX TODO need to use the configured trust policy like the host agent factory does; default configured should be STRICT, user can change to STRICT_AFTER_FIRST to restore old behavior
             TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(keystore);
             mtwilson = factory.clientForUserInResource(keystoreResource, keystoreUsername, keystorePassword, url, tlsPolicy);
             }

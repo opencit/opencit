@@ -43,7 +43,7 @@ Requires: html5, no dependencies
        });       
     };
     
-    // Source of this function is unknown, TODO search for the source and give credit here
+    // Source of this function is unknown, 
     var _indexOf = function (searchElement /*, fromIndex */ ) {
     'use strict';
     if (this == null) {

@@ -38,7 +38,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
                 if (obj != null) {
                     objCollection.getAikCertificates().add(convert(obj));
                 }
-            } // TODO: Need to add the AIKSha1 search criteria later when we have the capability of multiple AIKs
+            } 
         } catch (Exception ex) {
             log.error("AikCertificate:Search - Error during search for hosts.", ex);
             throw new RepositorySearchException(ex, criteria);

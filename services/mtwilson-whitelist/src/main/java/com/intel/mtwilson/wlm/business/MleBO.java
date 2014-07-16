@@ -106,8 +106,7 @@ public class MleBO {
                 throw new ASException(ErrorCode.WS_MLE_ALREADY_EXISTS, mleData.getName());
             }
 
-            // XXX TODO this needs to be refactored into vendor-specific checks
-            // This check has been moved to the VMware Host agent.
+                                        // This check has been moved to the VMware Host agent.
                                         /*if(mleData.getName().toUpperCase().contains("ESX")){
              String version = getUpperCase(mleData.getVersion()).substring(0, 2);
              if(!version.equals("51") && !version.equals("50")){
@@ -507,7 +506,6 @@ public class MleBO {
                 } catch (Exception e) {
                     // log.error("Cannot add PCR "+manifestData.getName()+" to MLE: "+e.toString());
                     log.error("Cannot add PCR {} to MLE: {}.", manifestData.getName(), e.toString());
-                    // XXX should we continue the loop to the next PCR, trying to add as many as we can?  or should we be checking all the PCR values early, and if any one of them is bad don't add ANY pcr's??
                 }
             }
         }

@@ -138,7 +138,7 @@ public class HostBO {
 
                         log.debug("Getting Server Identity.");
 
-                        // BOOKMARK JONATHAN TLS POLICY
+                        // BUG #497  setting default tls policy name and empty keystore for all new hosts. 
                         TblHosts tblHosts = new TblHosts();
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());                        
@@ -177,7 +177,7 @@ public class HostBO {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
                                     X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                     hostAikCert.checkValidity(); // AIK certificate must be valid today
-                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); 
                                     if( !validCaSignature ) {
                                         throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
                                     }
@@ -193,12 +193,12 @@ public class HostBO {
                         // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
                         // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
 //                        HostReport hostReport = new HostReport();
-//                        hostReport.aik = null; // TODO should be what we get above if it's available
+//                        hostReport.aik = null; 
 //                        hostReport.pcrManifest = pcrManifest;
 //                        hostReport.tpmQuote = null;
 //                        hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 
-//                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
+//                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
                         
                         // Bug: 749: We need to handle the host specific modules only if the PCR 19 is selected for attestation
                         List<TblHostSpecificManifest>   tblHostSpecificManifests = null;
@@ -257,16 +257,14 @@ public class HostBO {
 
 
     /**
-     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
      * CHANGE IT IN THE OTHER LOCATION AS WELL.
      * 
      * @param hostAikCert
      * @return 
      */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
-        // XXX code in this first section is duplciated in the IntelHostTrustPolicyFactory ... maybe refactor to put it into a configuration method? it's just loading list of trusted privacy ca's from the configuration.
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
-        // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<>();
         try (InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.list.pem"))) {
@@ -285,7 +283,6 @@ public class HostBO {
         } catch(Exception ex) {
             log.warn("Cannot load PrivacyCA.pem",ex);            
         }
-        // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
             try {
@@ -293,8 +290,6 @@ public class HostBO {
                     log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
                     pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
                     hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
-                    // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
-                    // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
                     validCaSignature = true;
                 }
             }
@@ -477,11 +472,11 @@ public class HostBO {
                                 // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
                                 // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
 //                                HostReport hostReport = new HostReport();
-//                                hostReport.aik = null; // TODO should be what we get above if it's available
+//                                hostReport.aik = null; 
 //                                hostReport.pcrManifest = pcrManifest;
 //                                hostReport.tpmQuote = null;
 //                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
-//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
+//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
                                 
                                 // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
                                 // already be updated and the query would not find any values to delete.
@@ -843,7 +838,7 @@ public class HostBO {
      * what host-specific module values should be recorded in the database... apparently hard-coded to pcr 19
      * and vmware information... so this is a candidate for moving into VmwareHostTrustPolicyFactory,
      * and instaed of returning a "host-specific manifest" it should return a list of policies with module-included
-     * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
+     * or module-equals type rules.    
     */
     private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) throws IOException {
         List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<>();

@@ -88,7 +88,6 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
             long time0 = System.currentTimeMillis();
             long count = 0;
             Scanner scanner = new Scanner(registrars);
-            // TODO INSECURE:  cache file should be encrypted to prevent unauthorized swapping of components
             try(FileInputStream in = new FileInputStream(cacheFile)) {
                 String content = IOUtils.toString(in);
                 String[] lines = content.split("[\n\r]");

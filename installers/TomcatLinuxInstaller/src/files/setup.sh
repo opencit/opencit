@@ -42,7 +42,6 @@ fi
 # Add the manager role give access to the tomcat user in the tomcat-users.xml
 
 cd $TOMCAT_CONF
-# XXX TODO: cleanup tomcat users, admin user should not be assigned both manager-gui and manager-script roles
 userExists=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml`
 mv tomcat-users.xml tomcat-users.xml.old
 if [ -z "$userExists" ]; then

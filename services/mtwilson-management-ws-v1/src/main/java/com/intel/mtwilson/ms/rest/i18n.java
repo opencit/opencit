@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.rest;
 
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.PortalUserLocale;
 import com.intel.mtwilson.launcher.ws.ext.V1;
@@ -12,8 +13,13 @@ import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.shiro.ShiroUtil;
+import com.intel.mtwilson.shiro.jdbi.LoginDAO;
+import com.intel.mtwilson.shiro.jdbi.MyJdbi;
+import com.intel.mtwilson.user.management.rest.v2.model.User;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Locale;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -34,7 +40,6 @@ import org.slf4j.LoggerFactory;
  * @author rksavinx
  */
 @V1
-//@Stateless
 @Path("/ManagementService/resources/i18n")
 public class i18n {
 
@@ -70,30 +75,36 @@ public class i18n {
     // does not require any permission - anyone is allowed to get their own locale
     protected String getLocaleForCurrentUser() throws IOException {
         String username = ShiroUtil.subjectUsername();
-        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
-        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
-        if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
-        log.debug("Retrieved locale for current portal user: {}", portalUser.getUsername());
-        log.debug("Locale for {}: {}", portalUser.getUsername(), portalUser.getLocale());
-        if(portalUser.getLocale() != null) {
-            return portalUser.getLocale();
+//        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
+//        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+//        if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
+        User user = loginDAO.findUserByName(username);
+        if( user == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        log.debug("Retrieved locale for current user {}: {}", user.getUsername(), user.getLocale());
+        if(user.getLocale() != null) {
+            return user.getLocale().toLanguageTag();
         } else {
             return My.configuration().getAvailableLocales()[0];// "en-US"; // getAvailableLocales() guarantees to return at least one element.
+        }
         }
     }
     
     @RequiresPermissions("users:retrieve")
     protected String getLocaleForAnyUser(String username) throws IOException {
         log.debug("Retrieving information from database for portal user: {}", username);
-        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
-        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
-        if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
-        log.debug("Retrieved locale for portal user: {}", portalUser.getUsername());
-        log.debug("Locale for {}: {}", portalUser.getUsername(), portalUser.getLocale());
-        if(portalUser.getLocale() != null) {
-            return portalUser.getLocale();
+//        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
+//        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+//        if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
+        User user = loginDAO.findUserByName(username);
+        if( user == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        log.debug("Retrieved locale for current user {}: {}", user.getUsername(), user.getLocale());
+        if(user.getLocale() != null) {
+            return user.getLocale().toLanguageTag();
         } else {
             return My.configuration().getAvailableLocales()[0];// "en-US"; // getAvailableLocales() guarantees to return at least one element.
+        }
         }
     }
     
@@ -124,25 +135,38 @@ public class i18n {
     protected void setLocaleForCurrentUser(String locale) throws IOException, NonexistentEntityException, MSDataException {
         String username = ShiroUtil.subjectUsername();
         log.debug("Retrieving current portal user [{}] from database.", username);
-        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
-        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
-        if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
-        log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
-        log.debug("Setting locale [{}] for portal user [{}] in database.", locale, portalUser.getUsername());
-        portalUser.setLocale(locale);
-        mwPortalUserJpaController.edit(portalUser);
+        //MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
+        //MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+        //if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
+        User user = loginDAO.findUserByName(username);
+        if( user == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        log.debug("Retrieved current user {}", user.getUsername());
+        loginDAO.updateUser(user.getId(), locale, user.getComment());
+        }
+
+        //log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
+        //log.debug("Setting locale [{}] for portal user [{}] in database.", locale, portalUser.getUsername());
+        //portalUser.setLocale(locale);
+        //mwPortalUserJpaController.edit(portalUser);
     } 
     
     @RequiresPermissions("users:store")
     protected void setLocaleForAnyUser(String username, String locale) throws IOException, NonexistentEntityException, MSDataException {
         log.debug("Retrieving portal user [{}] from database.", username);
-        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
-        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
-        if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
-        log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
-        log.debug("Setting locale [{}] for portal user [{}] in database.", locale, portalUser.getUsername());
-        portalUser.setLocale(locale);
-        mwPortalUserJpaController.edit(portalUser);
+        //MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
+        //MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+        //if( portalUser == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        //log.debug("Retrieved portal user [{}] from database.", portalUser.getUsername());
+        //log.debug("Setting locale [{}] for portal user [{}] in database.", locale, portalUser.getUsername());
+        //portalUser.setLocale(locale);
+        //mwPortalUserJpaController.edit(portalUser);
+        try(LoginDAO loginDAO = MyJdbi.authz()) {
+        User user = loginDAO.findUserByName(username);
+        if( user == null ) { throw new WebApplicationException(Response.Status.NOT_FOUND); }
+        log.debug("Retrieved current user {}", user.getUsername());
+        loginDAO.updateUser(user.getId(), locale, user.getComment());
+        }
     }
     
     /**

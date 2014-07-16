@@ -58,7 +58,6 @@ public class Tpm {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public byte[] tpmQuoteBytes(TpmQuoteRequest tpmQuoteRequest, @Context HttpServletRequest request) throws IOException, TAException {
-        // TODO:   return just the tpm quote structure from the tpm which should be verifiable with aikqverify
         return null;
     }
     */

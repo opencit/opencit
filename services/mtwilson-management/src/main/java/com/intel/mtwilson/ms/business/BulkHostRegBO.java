@@ -27,7 +27,7 @@ public class BulkHostRegBO {
     private Logger log = LoggerFactory.getLogger(getClass());
     private HostBO hostBO = MSComponentFactory.getHostBO();
     private int timeout;
-    private static ExecutorService scheduler = Executors.newFixedThreadPool(MSConfig.getConfiguration().getInt("mtwilson.ms.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
+    private static ExecutorService scheduler = Executors.newFixedThreadPool(MSConfig.getConfiguration().getInt("mtwilson.ms.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; 
     
     public BulkHostRegBO() {
         timeout = MSConfig.getConfiguration().getInt("mtwilson.ms.registration.hostTimeout", 600);

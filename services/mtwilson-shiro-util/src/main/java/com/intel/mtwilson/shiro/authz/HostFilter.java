@@ -41,7 +41,6 @@ public class HostFilter extends AuthorizationFilter {
             } else if (address.isIPv4()) {
                 allowIp4.add(address.toString());
             } else {
-                // TODO:  support for CIDR address blocks for ips like 192.168.1.0/24 and wildcards for hostnames like *.intel.com
                 log.error("Invalid address '{}'", item);
                 throw new IllegalArgumentException("Address must be hostname or IPv4");
             }

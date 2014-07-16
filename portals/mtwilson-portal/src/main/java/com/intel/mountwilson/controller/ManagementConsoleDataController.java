@@ -71,6 +71,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
@@ -82,6 +83,7 @@ import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Locale;
 import org.apache.http.auth.UsernamePasswordCredentials;
 //import org.codehaus.jackson.JsonParseException;
 //import org.codehaus.jackson.map.JsonMappingException;
@@ -985,14 +987,11 @@ public class ManagementConsoleDataController extends MultiActionController {
      
         //List<String> selectionList = new ArrayList<String>();
         //String requestURL = My.configuration().getAssetTagServerURL() + "/selections";
-        // XXX TODO  1) during setup need to save asset tag service ssl cert so we can use the secure tls policy;  2) add the asset tag apis to the java client 
         //1.3.6.1.4.1.99999.3"; 
         //ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
         //ApiRequest request = new ApiRequest(MediaType., "");
         //ApiResponse response = client.get(requestURL);    
 
-        // TODO-stdale 
-        // Need to talk to ryan about the best way to get the list of selections here 
         //List<String> selectionList = new ArrayList<String>();
         //selectionList.add("N/A");
         //SelectionRepository repo = new SelectionRepository();  
@@ -2303,8 +2302,6 @@ public class ManagementConsoleDataController extends MultiActionController {
         }
 
         try {
-            // TODO: Had to temporarily store the detailed MLE object so that it can be reused to retrieve the mleSource details.
-            // The MleData object expects the MLE_Type detail to be present to get the OS/OEM details. Need to fix this
             detailMLEVO = mleClientService.getSingleMleData(dataVO, getWhitelistService(req));
             responseView.addObject("dataVo", detailMLEVO);
             responseView.addObject("result", true);
@@ -2874,7 +2871,12 @@ public class ManagementConsoleDataController extends MultiActionController {
         log.debug("Calling api to set locale [{}] for user [{}]", locale, username);
         
         try {
-            responseView.addObject("locale", demoPortalServices.setLocale(username, locale, getApiClientService(req, ApiClient.class)));
+            ApiClient apiClient = getApiClientService(req, ApiClient.class);
+            apiClient.setLocale(LocaleUtil.forLanguageTag(locale));
+            HttpSession session = req.getSession();
+            session.setAttribute("api-object", apiClient);
+            session.setAttribute("apiClientObject",apiClient);
+            responseView.addObject("locale", demoPortalServices.setLocale(username, locale, apiClient));
         } catch (DemoPortalException e) {
             e.printStackTrace();
             log.error(e.toString());

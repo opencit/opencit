@@ -31,8 +31,6 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 
 /**
- * TODO: move into mtwilson-shiro-jdbi
- * 
  * @author jbuhacoff
  */
 public class JdbcPasswordRealm extends AuthorizingRealm {
@@ -84,7 +82,7 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
             }
         } catch (Exception e) {
             log.debug("doGetAuthorizationInfo error", e);
-            throw new AuthenticationException("Internal server error", e); // TODO: i18n
+            throw new AuthenticationException("Internal server error", e); 
         }
 
         return authzInfo;
@@ -110,7 +108,7 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
             }
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);
-            throw new AuthenticationException("Internal server error", e); // TODO: i18n
+            throw new AuthenticationException("Internal server error", e);
         }
         if (userLoginPassword == null || user == null ) {
             return null;

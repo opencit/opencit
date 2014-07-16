@@ -59,25 +59,25 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
         }
         
         if( !isRequestMatchingReferer(httpRequest)) {
-            throw new AuthenticationException("Referer"); // TODO better message or more vague message
+            throw new AuthenticationException("Referer");
         }
         
         String encryptedToken = getExistingToken(httpRequest);
         if( encryptedToken == null ) {
-            throw new AuthenticationException("Missing token"); // TODO better message or more vague message
+            throw new AuthenticationException("Missing token"); 
         }
         
         
         int duration = My.configuration().getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800); // use same duration as the session timeout in Mt Wilson 1.2
         if( tokenFactory == null || tokenValidator == null ) {
-            tokenFactory = new TokenFactory(); // XXX needs to be sync w/ the TokenFactory in com.intel.mtwilson.shiro.jaxrs.PasswordLogin  ? or just the configuration needs to be the same ?
+            tokenFactory = new TokenFactory(); 
             tokenValidator = new TokenValidator(tokenFactory);
             tokenValidator.setExpiresAfter(duration);  // in seconds
         }
         
         Token validatedToken = isTokenValid(encryptedToken, "test foo username");
         if( validatedToken == null ) {
-            throw new AuthenticationException("Invalid token"); // TODO increase security with generic message
+            throw new AuthenticationException("Invalid token");
         }
 
         // check if we should generate a new token for the user to use in next request, like if this one is about to expire.  but we still use the current token for authentication, not the new one.

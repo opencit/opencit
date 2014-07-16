@@ -44,7 +44,7 @@ public class IPv4Address extends ObjectModel {
     public byte[] toByteArray() { 
         if( !isValid() ) { return null; }
         try {
-            return Inet4Address.getByName(input).getAddress(); // XXX is this ok or is there another way?
+            return Inet4Address.getByName(input).getAddress();
         }
         catch(UnknownHostException e) {
             return null;

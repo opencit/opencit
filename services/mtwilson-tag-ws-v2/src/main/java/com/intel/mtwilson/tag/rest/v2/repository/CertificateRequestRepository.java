@@ -153,8 +153,6 @@ public class CertificateRequestRepository implements DocumentRepository<Certific
             certificateRequest.setContent(resource.toByteArray()); // encrypted xml file wrapped in rfc822-style message format which indicates the encryption settings
             certificateRequest.setContentType("message/rfc822"); 
         
-            // TODO:  PasswordEncryptedFile currently doesn't support passing the plaintext content type, but when it does we need ot pass it so it will be mentioned in the encrypted file's headers, so that we can check it when we decrypt later (to ensure it's application/xml before we try to parse it)
-            
     }
     
     protected void decrypt(CertificateRequest certificateRequest) throws IOException {
@@ -164,9 +162,6 @@ public class CertificateRequestRepository implements DocumentRepository<Certific
             
             certificateRequest.setContent(plaintext); 
             certificateRequest.setContentType("application/xml"); 
-        
-            // TODO:  PasswordEncryptedFile currently doesn't provide us the plaintext content type, but when it does we need to check it after we decrypt  and set it on the request object
-        
     }
     
     @Override

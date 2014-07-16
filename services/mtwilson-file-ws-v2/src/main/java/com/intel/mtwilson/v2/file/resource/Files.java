@@ -52,14 +52,14 @@ public class Files extends AbstractJsonapiResource<File,FileCollection,FileFilte
     @Produces(MediaType.WILDCARD)
     public Response retrieveFileContent(@BeanParam FileLocator locator) {
         log.debug("retrieve file content");
-        File file = repository.retrieveWithContent(locator); // XXX  don't call retrieve(id) because it won't return the content... use a separate SQL  select contentType,content from file where id=?    to get the contenttype and content for this function.
+        File file = repository.retrieveWithContent(locator); 
         if (file == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
+            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         if( file.getContent() == null ) {
             return Response.noContent().build();
         }
-        return Response.ok(file.getContent().getBytes() /* TODO  probably File model should have byte[] content  not String content! */, file.getContentType()).build();
+        return Response.ok(file.getContent().getBytes() , file.getContentType()).build();
     }
     
 }

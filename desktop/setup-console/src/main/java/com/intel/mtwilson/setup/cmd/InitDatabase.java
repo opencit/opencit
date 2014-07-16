@@ -68,10 +68,6 @@ import org.slf4j.LoggerFactory;
  * 2. delete some entries from the mw_changelog table, run the tool. Should report that there are database upgrades to apply.
  * 3. create new bogus entries in the mw_changelog table, run the tool. Should report that it's not compatible with the database
  * 
- * 
- * TODO:  consolidate the persistence units into ASDataPU... the MSDataPU can't really be separate from
- * the ASDataPU because audit logs need to refer to users and to whitelist data...
- * 
  * References:
  * http://stackoverflow.com/questions/1429172/how-do-i-list-the-files-inside-a-jar-file
  * http://stackoverflow.com/questions/1044194/running-a-sql-script-using-mysql-with-jdbc
@@ -145,7 +141,7 @@ public class InitDatabase implements Command {
     
     private void initDatabase() throws SetupException, IOException, SQLException {
         log.debug("Loading SQL for {}", databaseVendor);
-        Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
+        Map<Long,Resource> sql = getSql(databaseVendor); 
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
         DataSource ds = getDataSource();
@@ -162,10 +158,7 @@ public class InitDatabase implements Command {
 //            throw e;
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
-        
-        // TODO: check for error condition "MW database does not exist" and if it happens then do System.exit(3);
-        
-        
+                
 //        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
@@ -225,7 +218,6 @@ public class InitDatabase implements Command {
         
         ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
         // removing unneeded output as user can't choice what updates to apply
-        // XXX-TODO stdalex this should all be log.info
         //System.out.println("Available database updates:");
         for(Long id : changesToApplyInOrder) {
             //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));

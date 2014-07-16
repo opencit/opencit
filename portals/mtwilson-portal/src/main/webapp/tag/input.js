@@ -159,7 +159,6 @@ net_buhacoff_inputjs.activateWithHtml5ElementAndLabel = function(input) {
 }
 
 
-// for html4.    XXX TODO instead of swapping the value,  create the label and show it on top of the input, like this: http://kyleschaeffer.com/user-experience/input-prompt-text/
 net_buhacoff_inputjs.activateWithElementAndLabel = function(input, display_text) {	
 	if( input.getValue() == null || input.getValue().length == 0 ) {
         //input.store("net_buhacoff_inputjs_src_color", input.getStyle('color'));
@@ -169,7 +168,7 @@ net_buhacoff_inputjs.activateWithElementAndLabel = function(input, display_text)
     }
 	if( input.type == "password" ) { 
         input.store("net_buhacoff_inputjs_src_type", "password"); 
-        input.type = "text"; // XXX cannot do this in HTML Appliance (HTA) in Windows
+        input.type = "text"; 
     }
 	input.observe('focus', function() {
 		var value = input.getValue();

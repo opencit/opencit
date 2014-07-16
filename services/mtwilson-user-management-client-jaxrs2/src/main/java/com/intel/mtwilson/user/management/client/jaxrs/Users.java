@@ -86,7 +86,6 @@ public class Users extends MtWilsonClient {
         map.put("id", uuid);
         Response user = getTarget().path("users/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         if( !user.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
-            // TODO: maybe throw a more appropriate exception depending on family of the error code - that should be in a helper function in the base class;  see http://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html
             throw new WebApplicationException("Delete OS failed");
         }
     }

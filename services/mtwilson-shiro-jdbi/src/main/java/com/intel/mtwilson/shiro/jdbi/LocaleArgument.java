@@ -15,9 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX TODO:  this class should be moved to cpg-io under a jdbi package (where jdbi has a provided/optional scope) or to 
- * a new cpg-jdbi module if it looks like jdbi is going to be a mainstay of the quick prototypes.
- * 
  * This class allows UUID instances to be passed directly to DAO queries as parameters.
  * It automatically converts the UUID to either a 16-byte binary field or a 36 byte text field (32 bytes hex and 4 hyphens)
  * 

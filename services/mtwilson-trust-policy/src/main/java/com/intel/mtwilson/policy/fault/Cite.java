@@ -22,7 +22,7 @@ import com.intel.mtwilson.policy.RuleResult;
 public class Cite extends Fault {
     private RuleResult report;
     public Cite(RuleResult report) {
-//        super(report.getPolicyName()); // XXX TODO maybe use a format like "%s: %s with %d faults", report.getPolicyName(), report.isTrusted() ? "trusted" : "not trusted", report.getFaults().size()
+//        super(report.getPolicyName()); 
         super("%s: %s with %d faults", report.getRuleName(), report.isTrusted() ? "trusted" : "not trusted", report.getFaults().size());
         this.report = report;
     }

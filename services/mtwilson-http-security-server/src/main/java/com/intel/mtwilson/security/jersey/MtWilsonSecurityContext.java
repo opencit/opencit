@@ -44,8 +44,6 @@ import javax.ws.rs.core.SecurityContext;
     }
 
     /**
-     * XXX: currently returns DIGEST_AUTH because the SecurityContext interface
-     * only allows BASIC_AUTH, DIGEST_AUTH, FORM_AUTH, and CLIENT_CERT_AUTH.
      * @return 
      */
     @Override

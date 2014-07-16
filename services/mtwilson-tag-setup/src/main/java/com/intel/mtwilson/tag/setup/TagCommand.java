@@ -10,8 +10,6 @@ import java.io.IOException;
 import org.apache.commons.configuration.Configuration;
 
 /**
- * XXX Copied from Mystery Hill where there is one of these in both the client and the server package... probably
- * merits a standard convenience base class in cpg.console
  * @author jbuhacoff
  */
 public abstract class TagCommand implements Command {
@@ -29,7 +27,7 @@ public abstract class TagCommand implements Command {
     /*
     public MHServerConfig getConfig() {
         if( config == null ) {
-            config = new MHServerConfig(options);    // XXX maybe don't want to do this... use Java Preferences API where possible, and set global paths etc. via JVM properties on the command line, which can also be wrapped in a COnfiguration object
+            config = new MHServerConfig(options);   
         }
         return config;
     }*/

@@ -127,7 +127,6 @@ public class Certificate extends CertificateDocument{
         X509AttributeCertificate attrcert = X509AttributeCertificate.valueOf(data);
         certificate.setIssuer(attrcert.getIssuer());
         certificate.setSubject(attrcert.getSubject());
-        // XXX TODO need to verify the certificate against known ca's before we really believe these validity dates... assuming that will happen where they matter.
         certificate.setNotBefore(attrcert.getNotBefore());
         certificate.setNotAfter(attrcert.getNotAfter());
         // assuming revoked = false (default value)
@@ -144,8 +143,8 @@ public class Certificate extends CertificateDocument{
             return X509Util.decodeDerCertificate(certificate);
         }
         catch(CertificateException e) {
-            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
-//            throw new ASException(ce, ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName()); // XXX TODO:   i18n should have keys for specific exception types instead of error codes;  so MS_CERTIFICATE_ENCODING_ERROR  becomes com.intel.dscg.cpg.x509.X509CertificateFormatException
+            //throw new IllegalArgumentException("Cannot decode certificate", e); 
+//            throw new ASException(ce, ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName()); 
             throw new X509CertificateFormatException(e, certificate);
         }
     }
@@ -162,7 +161,7 @@ public class Certificate extends CertificateDocument{
         }
         catch(CertificateEncodingException e) {
             log.error("Error decoding certificate.", e);
-            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+            //throw new IllegalArgumentException("Cannot decode certificate", e); 
 //            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
             throw new X509CertificateEncodingException(e, certificate);
         }

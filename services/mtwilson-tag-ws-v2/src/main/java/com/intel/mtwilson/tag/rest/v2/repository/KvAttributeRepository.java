@@ -87,7 +87,7 @@ public class KvAttributeRepository implements DocumentRepository<KvAttribute, Kv
 //                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID, uuidConverter));
 //                obj.setId(r.getValue(MW_TAG_KVATTRIBUTE.ID));
                 obj.setName(r.getValue(MW_TAG_KVATTRIBUTE.NAME));
-                obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); //TODO: Change these after creating new JOOQ tables.
+                obj.setValue(r.getValue(MW_TAG_KVATTRIBUTE.VALUE)); 
                 objCollection.getKvAttributes().add(obj);
             }
             sql.close();

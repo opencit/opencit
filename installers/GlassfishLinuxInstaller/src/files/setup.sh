@@ -33,7 +33,7 @@ cp jackson-databind.jar ${GLASSFISH_HOME}/modules/
 # # cp mysql-connector-java-5.1.x.jar /opt/intel/cloudsecurity/setup-console
 # so now we check to see if it's there, and copy it to glassfish so the apps
 # can use it:
-mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
+mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* 2>/dev/null | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${GLASSFISH_HOME}/modules/
 fi

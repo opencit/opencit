@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 //import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
- * TODO: Once we use the same API DataTypes package in the backend service, we can 
- * use the OS and OEM data objects here instead of declaring them separately again.
  * @author ssbangal
  */
 public class ModuleWhiteList {

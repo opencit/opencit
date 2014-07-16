@@ -58,7 +58,6 @@ load_defaults 2>&1 >/dev/null
 
 create_saml_key() {
   if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
-  # TODO:  keystore password can be set in environment variable and passed like env:varname (see docs.. only in java 1.7 did they copy this from openssl)... same for key password
   # windows path: C:\Intel\CloudSecurity\SAML.jks
   # the saml.keystore.file property is just a file name and not an absolute path
   # prepend the configuration directory to the keystore filename
@@ -77,7 +76,6 @@ create_saml_key() {
   samlkey_exists=`$keytool -list -keystore ${SAML_KEYSTORE_FILE} -storepass ${SAML_KEYSTORE_PASSWORD} | grep PrivateKeyEntry | grep "^${SAML_KEY_ALIAS}"`
   if [ -n "${samlkey_exists}" ]; then
     echo "SAML key with alias ${SAML_KEY_ALIAS} already exists in ${SAML_KEYSTORE_FILE}"
-    # TODO: check if the key is at least 2048 bits. if not, prompt to create a new key.
   else
     $keytool -genkey -alias ${SAML_KEY_ALIAS} -keyalg RSA  -keysize 2048 -keystore ${SAML_KEYSTORE_FILE} -storepass ${SAML_KEYSTORE_PASSWORD} -dname "CN=mtwilson, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${SAML_KEY_PASSWORD}
   fi
@@ -97,8 +95,6 @@ create_saml_key() {
   fi
   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
 
-  # TODO:
-  # mtwilson setup V2 create-saml-certificate
 }
 
 create_data_encryption_key() {
@@ -144,17 +140,11 @@ configure_privacyca_user() {
   #PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
   #update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
   #update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD_HASH}"
-  # TODO:  instead of ClientFilesDownload* we should  make a user with permission specifically
-  #        to authorize hosts while installing trust agent, instead of using the admin user for that
   mtwilson login-password $PRIVACYCA_DOWNLOAD_USERNAME env:PRIVACYCA_DOWNLOAD_PASSWORD tpms:endorse host_aiks:certify tpm_passwords:store tpm_passwords:search
 }
 
 
 create_privacyca_keys() {
-   # TODO:  a lot of Error: Cannot load class xyz  show up on the output because
-   #        the setup console does not have the same classpath as the mtwilson app;
-   #        when the plugin work is complete they will have the same classpath
-   #        so these errors would not be thrown
    mtwilson setup-manager create-endorsement-ca >> /dev/null 2>&1
    mtwilson setup-manager create-privacy-ca >> /dev/null 2>&1
 }
@@ -232,7 +222,7 @@ setup_interactive_install() {
     #  tomcat_restart
     #fi
       #echo -n "Waiting for ${webservice_application_name} to become accessible... "
-      #sleep 50s        #XXX TODO: remove when we have solution for webserver up
+      #sleep 50s        
       #echo "Done"
       webservice_running_report_wait "${webservice_application_name}"
       mtwilson_running_report_wait

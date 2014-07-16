@@ -61,7 +61,7 @@ public class InitDatabase extends LocalSetupTask {
             configuration("Database URL not configured");
         }
         else {
-            log.debug("Database URL: {}", databaseUrl); // XXX TODO INSECURE do not print this in the log after things are worknig
+            log.debug("Database URL: {}", databaseUrl); 
         }
         databaseVendor = My.configuration().getDatabaseProtocol();
         if( databaseVendor == null ) {
@@ -87,7 +87,7 @@ public class InitDatabase extends LocalSetupTask {
     private boolean testConnection() {
         try {
             try (Connection c = My.jdbc().connection(); Statement s = c.createStatement()) {
-                s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
+                s.executeQuery("SELECT 1"); 
             }
             return true;
         }
@@ -142,7 +142,7 @@ public class InitDatabase extends LocalSetupTask {
     
     private void checkAvailableUpdates() throws SetupException, IOException, SQLException {
         log.debug("Loading SQL for {}", databaseVendor);
-        sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
+        sql = getSql(databaseVendor); 
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
         DataSource ds = getDataSource();
@@ -160,9 +160,6 @@ public class InitDatabase extends LocalSetupTask {
 //            throw e;
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
-        
-        // TODO: check for error condition "MW database does not exist" and if it happens then do System.exit(3);
-        
         
 //        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
@@ -245,7 +242,6 @@ public class InitDatabase extends LocalSetupTask {
             
             ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
             // removing unneeded output as user can't choice what updates to apply
-            // XXX-TODO stdalex this should all be log.info
             //System.out.println("Available database updates:");
             for(Long id : changesToApplyInOrder) {
                 //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));

@@ -108,8 +108,7 @@
 
 
   <dependencies>
-      <!-- TODO  update this to use com.intel.mtwilson.dist:mtwilson-client-java6   jar-with-dependencies  and move this project to the dist folder too since it's only to create a distribution artifact  -->
-	<dependency>
+      	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-client-java6</artifactId>
 	    <version>${project.version}</version>

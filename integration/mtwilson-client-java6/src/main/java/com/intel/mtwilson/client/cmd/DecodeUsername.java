@@ -27,7 +27,7 @@ public class DecodeUsername extends AbstractCommand {
             in.close();
         }
         else {
-            System.out.println(Filename.decode(args[0])); // XXX doesn't work.  "hello world" becomes "hello" instead of "hello%xxworld"
+            System.out.println(Filename.decode(args[0])); 
         }
     }
 

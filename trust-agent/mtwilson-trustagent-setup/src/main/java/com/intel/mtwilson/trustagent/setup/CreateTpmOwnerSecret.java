@@ -53,7 +53,6 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
     }
     
     private boolean isTpmOwned() throws IOException {
-        // TODO: should be moved to platform-specific code
         File tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
         String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
         Integer number = Integer.valueOf(text.trim());

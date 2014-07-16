@@ -21,7 +21,7 @@ public class CreateXmlEncryptionPassword extends AbstractSetupTask {
         TagConfiguration tagConfiguration = new TagConfiguration(getConfiguration());
         String password = tagConfiguration.getTagProvisionXmlEncryptionPassword();
         if( password == null || password.isEmpty() ) {
-            password = RandomUtil.randomBase64String(16).replace("/", "!").replace("=", "-"); // TODO:  use more special characters ; use a string generation function instead of a base64 function
+            password = RandomUtil.randomBase64String(16).replace("/", "!").replace("=", "-"); 
             log.info("Generated random password for xml encryption"); 
             getConfiguration().setString(TagConfiguration.TAG_PROVISION_XML_ENCRYPTION_PASSWORD, password);
         }

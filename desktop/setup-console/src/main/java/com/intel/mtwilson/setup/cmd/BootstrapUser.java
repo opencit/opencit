@@ -146,10 +146,9 @@ public class BootstrapUser implements Command {
     private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
         //SetupWizard wizard = new SetupWizard(conf);
         try {
-            // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
             /*
             Connection c = wizard.getMSDatabaseConnection();        
-            PreparedStatement s = c.prepareStatement("UPDATE mw_api_client_x509 SET enabled=b'1',status='Approved' WHERE hex(fingerprint)=?"); // XXX TODO should use repository code for this, not hardcoded query, because table names may change between releases or deployments
+            PreparedStatement s = c.prepareStatement("UPDATE mw_api_client_x509 SET enabled=b'1',status='Approved' WHERE hex(fingerprint)=?"); 
             //s.setBytes(1, fingerprint);
             s.setString(1, Hex.encodeHexString(fingerprint));
             s.executeUpdate();
@@ -196,7 +195,6 @@ public class BootstrapUser implements Command {
     }
 
     
-    // XXX see also RemoteCommand in com.intel.mtwilson.setup (not used) and com.intel.mtwilson (in api-client)
     private static String getLocalHostAddress() {
         try {
             InetAddress addr = InetAddress.getLocalHost();

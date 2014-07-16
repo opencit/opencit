@@ -11,8 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Currently supports only Glassfish. 
- * TODO: refactor for modular support and add support for Apache Httpd, Tomcat, Nginx
+ * Currently supports only Glassfish.
  * 
  * @author jbuhacoff
  */

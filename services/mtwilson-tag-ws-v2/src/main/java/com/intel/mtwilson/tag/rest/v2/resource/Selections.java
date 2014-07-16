@@ -106,7 +106,6 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
 //        for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
 //            builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
 //        } 
-//        // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
 //        SelectionsType selectionsType = builder.build();
         SelectionsType selectionsType = getSelectionData(obj);
         String xml = Util.toXml(selectionsType);
@@ -130,7 +129,6 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
             for (SelectionKvAttribute kvAttribute : selectionKvAttributes) {
                 builder.textAttributeKV(kvAttribute.getKvAttributeName(), kvAttribute.getKvAttributeValue());
             } 
-            // TODO:  if there are any other attributes such as 2.5.4.789.2 or custom ones they should be added here too
             SelectionsType selectionsType = builder.build();
 
             return selectionsType;

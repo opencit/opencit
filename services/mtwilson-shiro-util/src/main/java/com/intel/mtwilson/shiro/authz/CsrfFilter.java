@@ -49,7 +49,7 @@ public class CsrfFilter extends AuthorizationFilter {
 
     public CsrfFilter() throws IOException {
         int duration = My.configuration().getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800); // use same duration as the session timeout in Mt Wilson 1.2
-        tokenFactory = new TokenFactory(); // XXX needs to be sync w/ the TokenFactory in com.intel.mtwilson.shiro.jaxrs.PasswordLogin  ? or just the configuration needs to be the same ?
+        tokenFactory = new TokenFactory(); 
         tokenValidator = new TokenValidator(tokenFactory);
         tokenValidator.setExpiresAfter(duration);  // in seconds
     }
@@ -141,8 +141,6 @@ public class CsrfFilter extends AuthorizationFilter {
         }
         // now we have an http request with a method like POST, PUT, DELETE, or PATCH and an authorization using HTTP BASIC or HTTP DIGEST
         // so we need to check the anti-CSRF token and make sure it matches the authenticated user name.
-        // XXX TODO  token check here ...     move code from EncryptedTokenAuthenticationFilter to this class.
-        //  TODO  then remove the EncryptdTokenAuthenticatioFilter 
         
         // if a token is present, it must be valid - we don't fix invalid tokens here, user has to login again to get a new token
         String tokenText = getExistingToken(httpRequest);
@@ -151,14 +149,13 @@ public class CsrfFilter extends AuthorizationFilter {
         Subject subject = getSubject(request,response);
         log.debug("got subject");
         for(Object p : subject.getPrincipals().asList()) { log.debug("principal: {}", p.getClass().getName()); }
-        // TODO:  remove direct use of Username because the subject might be authenticated in a way that doesn't provide a Username principal... maybe make this more general by being able to encode all principals in the token 
         Username username = subject.getPrincipals().oneByType(Username.class);
         log.debug("got username: {}", username.getUsername());
 
         Token validatedToken = isTokenValid(tokenText, username.getUsername());
         if( validatedToken == null ) {
             log.debug("invalid token");
-            return false; // throw new AuthenticationException("Invalid token"); // TODO increase security with generic message
+            return false; // throw new AuthenticationException("Invalid token"); 
         }
         
         // token is valid. we replace it with a new token, extending the expiration
@@ -175,7 +172,7 @@ public class CsrfFilter extends AuthorizationFilter {
             return false;
         }
         String authorizationHeader = httpRequest.getHeader("Authorization");
-        log.debug("csrf filter authorizatino header {}", authorizationHeader); // XXX TODO INSECURE  remove this logging line because http basic crednetials will be leaked here
+        log.debug("csrf filter authorizatino header {}", authorizationHeader); 
         if( authorizationHeader != null ) {
             Matcher matcher = authorizationNamePattern.matcher(authorizationHeader);
             if( matcher.matches() ) {

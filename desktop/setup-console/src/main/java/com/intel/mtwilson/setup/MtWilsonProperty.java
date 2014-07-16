@@ -5,13 +5,13 @@
 package com.intel.mtwilson.setup;
 
 /**
- * XXX just a draft
+ * just a draft
  * @author jbuhacoff
  */
 public enum MtWilsonProperty {
     AS_DB_USERNAME("mountwilson.as.db.user", "username", "", "Database credential specific to Attestation Service"),
     AS_DB_PASSWORD("mountwilson.as.db.password", "password", "", "Database credential specific to Attestation Service"),
-    AS_AIKQVERIFY_CMD("com.intel.mountwilson.as.aikqverify.cmd", "file", "aikqverify", "Filename; aikqverify on linux, aikqverify.exe on windows"), // XXX we really should not be configuring this unless we're configuring the entire command line... this is pointless.
+    AS_AIKQVERIFY_CMD("com.intel.mountwilson.as.aikqverify.cmd", "file", "aikqverify", "Filename; aikqverify on linux, aikqverify.exe on windows"), 
     AS_SAML_KEY_ALIAS("saml.key.alias", "keystore-alias", "samlkey1", "Alias of the SAML private key"),
     AS_SAML_KEYSTORE_FILE("saml.keystore.file", "file", "SAML.jks", "Filename of SAML keystore");
     

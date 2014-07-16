@@ -50,8 +50,6 @@ import org.slf4j.LoggerFactory;
  *
  * This class requires Bouncy Castle
  * 
- * XXX TODO this class may be moved to cpg-crypto 
- *
  * @since 0.1
  * @author jbuhacoff
  */

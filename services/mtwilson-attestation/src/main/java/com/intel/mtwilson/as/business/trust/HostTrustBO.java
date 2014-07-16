@@ -79,7 +79,7 @@ public class HostTrustBO {
     private static final int CACHE_VALIDITY_SECS;
     private Resource samlKeystoreResource = null;
     
-    private HostBO hostBO = new HostBO(); // TODO: use IoC
+    private HostBO hostBO = new HostBO(); 
     
     static{
         CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
@@ -99,14 +99,13 @@ public class HostTrustBO {
     public void setHostBO(HostBO hostBO) { this.hostBO = hostBO; }
     
     private void loadSamlSigningKey() {
-        // XXX was going to store saml keys in the database but a better way is for each server to have its own and to make a CA sign all of them
         /*
         MwKeystore mwKeystore = keystoreJpa.findMwKeystoreByName(SAML_KEYSTORE_NAME);
         if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
             samlKeystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
         }
         */
-        //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); // TODO:  use SamlConfiguration
+        //samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks"))); 
         samlKeystoreResource = new FileResource(My.configuration().getSamlKeystoreFile());
     }
         
@@ -187,8 +186,8 @@ public class HostTrustBO {
 
             HostReport hostReport = new HostReport();
             hostReport.pcrManifest = pcrManifest;
-            hostReport.tpmQuote = null; // TODO
-            hostReport.variables = new HashMap<String,String>(); // TODO
+            hostReport.tpmQuote = null; 
+            hostReport.variables = new HashMap<String,String>(); 
             
             // Bug-1037: aik cert is empty for hostReport
             if (agent.isAikCaAvailable()) {
@@ -601,7 +600,6 @@ public class HostTrustBO {
                 }
             }
         }
-        // XXX TODO whenw e move to complete policy model implementation this check will need to be deleted since we will be able to handle missing information better
         if( trustReport.getHostReport() == null || trustReport.getHostReport().pcrManifest == null ) {
             throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
         }
@@ -612,9 +610,6 @@ public class HostTrustBO {
         trust.vmm = trustReport.isTrustedForMarker(TrustMarker.VMM.name());
 
         // previous check for trusted location was if the host's location field is not null, then it's trusted... but i think this is better as it checks the pcr.  
-        // XXX TODO need a better feedback mechanism from trust policies... when they succeed, they should be able to set attributes.
-        // or else,  just go with the "marks" thing but then we have to post process and look for certain marks and then  set other fields elsewhere based on them ... or maybe that's not necessary??)
-//        trust.location = tblHosts.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
         
         // Going ahead we will not be using location. It would be replaced by asset_tag. Location can be one of the asset tags.
         //trust.location = trustReport.isTrustedForMarker(TrustMarker.LOCATION.name());
@@ -663,28 +658,27 @@ public class HostTrustBO {
     public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId) throws IOException {
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
-        long getAgentStart = System.currentTimeMillis(); // XXX jonathan performance
+        long getAgentStart = System.currentTimeMillis(); 
         HostAgent agent = factory.getHostAgent(tblHosts);
-        long getAgentStop = System.currentTimeMillis();// XXX jonathan performance
+        long getAgentStop = System.currentTimeMillis();
         log.trace("performance: getHostAgent: {}ms", getAgentStop-getAgentStart);
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
             throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId);
         }
         
-        long getAgentManifestStart = System.currentTimeMillis(); // XXX jonathan performance
+        long getAgentManifestStart = System.currentTimeMillis(); 
         PcrManifest pcrManifest = agent.getPcrManifest();
-        long getAgentManifestStop = System.currentTimeMillis(); // XXX jonathan performance
+        long getAgentManifestStop = System.currentTimeMillis();
         log.trace("performance: getPcrManifest: {}ms", getAgentManifestStop-getAgentManifestStart);
         
         HostReport hostReport = new HostReport();
-        hostReport.tagCertificate = null; // TODO:  need to load the host's tag certificate (if available) and set it here so it can be validated by the rules
+        hostReport.tagCertificate = null; 
         hostReport.pcrManifest = pcrManifest;
-        hostReport.tpmQuote = null; // TODO
-        hostReport.variables = new HashMap<String,String>(); // TODO
+        hostReport.tpmQuote = null; 
+        hostReport.variables = new HashMap<String,String>(); 
         if( agent.isAikAvailable() ) {
             if( agent.isAikCaAvailable() ) {
-                hostReport.aik = new Aik(agent.getAikCertificate());
-                // TODO: if the host sends an aik cert, tthen it should ALSO send the privacy ca cert that signed it, and then we can add it to the report hre... instaead of having to contact the database, for exapmle, to try and finding a matching ca first and then add it here.
+                hostReport.aik = new Aik(agent.getAikCertificate());                
             }
             else {
                 hostReport.aik = new Aik(agent.getAik()); 
@@ -847,7 +841,7 @@ public class HostTrustBO {
             TblTaLog taLog = new TblTaLog();
             taLog.setHostID(host.getId());
             taLog.setMleId(0);
-            taLog.setTrustStatus(status.bios && status.vmm); // XXX TODO should we add && status.location?  this true/false thing doesn't handle a case where location is not expected, so it is neither trusted nor untrusted
+            taLog.setTrustStatus(status.bios && status.vmm); 
             taLog.setError(toString(status));
             taLog.setManifestName(" ");
             taLog.setManifestValue(" ");
@@ -863,20 +857,20 @@ public class HostTrustBO {
             TblTaLog taLogBios = new TblTaLog();
             taLogBios.setHostID(host.getId());
             taLogBios.setMleId(host.getBiosMleId().getId());
-            taLogBios.setTrustStatus(status.bios); // XXX TODO should we add && status.location?  this true/false thing doesn't handle a case where location is not expected, so it is neither trusted nor untrusted
+            taLogBios.setTrustStatus(status.bios); 
             taLogBios.setError(toString(status));
-            taLogBios.setManifestName(" "); // XXX TODO there should actually be one record per PCR !!!
-            taLogBios.setManifestValue(" ");// XXX TODO there should actually be one record per PCR !!!
+            taLogBios.setManifestName(" "); 
+            taLogBios.setManifestValue(" ");
             taLogBios.setUpdatedOn(today);
             talog.create(taLogBios);
             
             TblTaLog taLogVmm = new TblTaLog();
             taLogVmm.setHostID(host.getId());
             taLogVmm.setMleId(host.getVmmMleId().getId());
-            taLogVmm.setTrustStatus(status.vmm); // XXX TODO should we add && status.location?  this true/false thing doesn't handle a case where location is not expected, so it is neither trusted nor untrusted
+            taLogVmm.setTrustStatus(status.vmm); 
             taLogVmm.setError(toString(status));
-            taLogVmm.setManifestName(" ");// XXX TODO there should actually be one record per PCR !!!
-            taLogVmm.setManifestValue(" ");// XXX TODO there should actually be one record per PCR !!!
+            taLogVmm.setManifestName(" ");
+            taLogVmm.setManifestValue(" ");
             taLogVmm.setUpdatedOn(today);
             talog.create(taLogVmm);
             */
@@ -911,7 +905,7 @@ public class HostTrustBO {
                 pcr.setHost_uuid_hex(host.getUuid_hex());
                 pcr.setUuid_hex(new UUID().toString());
                 pcr.setUpdatedOn(today);
-                pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
+                pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults 
                 pcr.setManifestName(biosPcrIndex);
                 if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)) == null ) {
                     throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
@@ -926,7 +920,7 @@ public class HostTrustBO {
                 pcr.setHost_uuid_hex(host.getUuid_hex());
                 pcr.setUuid_hex(new UUID().toString());
                 pcr.setUpdatedOn(today);
-                pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
+                pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults 
                 pcr.setManifestName(vmmPcrIndex);
                 if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)) == null ) {
                     throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
@@ -942,7 +936,6 @@ public class HostTrustBO {
                 if( rule instanceof PcrMatchesConstant ) {
                     PcrMatchesConstant pcrPolicy = (PcrMatchesConstant)rule;
                     log.debug("Expected PCR {} = {}", pcrPolicy.getExpectedPcr().getIndex().toString(), pcrPolicy.getExpectedPcr().getValue().toString());
-                    // XXX we can do this because we know the policy passed and it's a constant pcr value... but ideally we need to be logging the host's actual value from its HostReport!!!
                     // find out which MLE this policy corresponds to and then log it
                     TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
                     // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. XXX TODO  we should not keep two lists... the "Required Manifest List" field should be deleted and it must be up to the whitelist manager to define only the pcrs that should be checked! in a future release (maybe 1.3) we will store a global whitelist with pcr values for known mles, and for specific hosts the trust poilcy will be stored as a set of rules instead of just pcr values for specific hosts and it will be more evident what the trust policy is supposed to be. 
@@ -1084,7 +1077,7 @@ public class HostTrustBO {
                     TblTaLog pcr;
                     List<Fault> faults = result.getFaults();
                     for(Fault fault : faults) {
-                        if( fault instanceof PcrEventLogMissingExpectedEntries ) { // there would only be one of these faults per PcrEventLogIncludes rule. XXX this might change in the future to have a bunch of individual faults, one per missing entry.
+                        if( fault instanceof PcrEventLogMissingExpectedEntries ) { // there would only be one of these faults per PcrEventLogIncludes rule.
                             log.debug("Host is missing modules compared to the white list.");
                             PcrEventLogMissingExpectedEntries missingEntriesFault = (PcrEventLogMissingExpectedEntries)fault;
 
@@ -1135,7 +1128,7 @@ public class HostTrustBO {
                                             }
                                         }
                                     }
-                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it. 
+                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.
                                     TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getInfo().get("ComponentName"));
                                     if (findByTaLogIdAndName == null) {
                                         TblModuleManifestLog event = new TblModuleManifestLog();
@@ -1210,7 +1203,7 @@ public class HostTrustBO {
                                             }
                                         }
                                     }
-                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it.
+                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.
                                     TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getInfo().get("ComponentName"));
                                     if (findByTaLogIdAndName == null) {
                                         TblModuleManifestLog event = new TblModuleManifestLog();
@@ -1435,7 +1428,7 @@ public class HostTrustBO {
             
             for(TblHosts tblHosts : tblHostsCollection) {
                 // these 3 lines equivalent of getHostWithTrust without a host-specific saml assertion table record to update 
-                HostTrustStatus trust = getTrustStatus(tblHosts, tblHosts.getUuid_hex()); // TODO:  for anonymous assertions the host uuid needs to be replaced with AIK SHA1
+                HostTrustStatus trust = getTrustStatus(tblHosts, tblHosts.getUuid_hex()); 
                 TxtHostRecord data = createTxtHostRecord(tblHosts);
                 TxtHost host = new TxtHost(data, trust);
 
@@ -1570,7 +1563,7 @@ public class HostTrustBO {
     private SamlGenerator getSamlGenerator() throws UnknownHostException, ConfigurationException, IOException {
         Configuration conf = My.configuration().getConfiguration();
         InetAddress localhost = InetAddress.getLocalHost();
-        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
+        String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; 
         String issuer = conf.getString("saml.issuer", defaultIssuer);
         SamlGenerator saml = new SamlGenerator(samlKeystoreResource, conf);
         saml.setIssuer(issuer);
@@ -1604,7 +1597,6 @@ public class HostTrustBO {
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
         
-	// XXX MERGE WARNING
 //        My.initDataEncryptionKey();
 //        TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
@@ -1667,7 +1659,6 @@ public class HostTrustBO {
                 tblSamlAssertion.setErrorMessage(e.getClass().getSimpleName());
                 My.jpa().mwSamlAssertion().create(tblSamlAssertion);
             }catch(Exception ex){
-				// XXX TODO i18n we need to use a specific error code for cannot-generate-saml and throw new ASException(ErrorCode.THE-NEW-ERROR-CODE, parameters)
                 //log.debug("getTrustwithSaml caugh exception while generating error saml assertion");
                 log.error("getTrustwithSaml caugh exception while generating error saml assertion", ex);
                 // String msg = ex.getMessage();
@@ -1677,7 +1668,6 @@ public class HostTrustBO {
                 throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, msg);
                 //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
             } 
-			// XXX TODO i18n need to use a specific error code
             //Daniel, change the messages into meaningful thiings here
             //log.debug("e.getMessage = "+e.getMessage());
             //throw new ASException(new Exception(e.getMessage()));
@@ -1787,7 +1777,6 @@ public class HostTrustBO {
         return hostTrust;
     }
     
-// XXX MERGE WARNING make sure this function got merged correctly
     private HostTrustStatus getHostTrustStatusObj(TblTaLog tblTaLog) {
         HostTrustStatus hostTrustStatus = new HostTrustStatus();
         
@@ -1836,8 +1825,8 @@ public class HostTrustBO {
 
             HostReport hostReport = new HostReport();
             hostReport.pcrManifest = null;
-            hostReport.tpmQuote = null; // TODO
-            hostReport.variables = new HashMap<String,String>(); // TODO
+            hostReport.tpmQuote = null; 
+            hostReport.variables = new HashMap<String,String>(); 
 
             log.debug("checkMatchingMLEExists: Successfully retrieved the TPM meausrements from host '{}' for checking against the matching MLE.", hostObj.HostName);
             HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());

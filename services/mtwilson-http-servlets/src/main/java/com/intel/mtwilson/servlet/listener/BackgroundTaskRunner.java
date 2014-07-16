@@ -26,11 +26,6 @@ import com.intel.mtwilson.launcher.ext.annotations.Background;
  * 1min to run each time, it's going to be delaying the 100ms task by 
  * a lot.
  * 
- * TODO  if we're going to run the tasks in sequence we might also use
- * the TaskManager from cpg-performance and test a progress bar available
- * somewhere for progress of current task sequence? could be queried via api
- * for admin screen.
- * 
  * @author jbuhacoff
  */
 public class BackgroundTaskRunner implements ServletContextListener, Runnable {
@@ -82,7 +77,7 @@ public class BackgroundTaskRunner implements ServletContextListener, Runnable {
     
     /*
     protected Registrar[] getRegistrars() {
-        ImplementationRegistrar runnables = new ImplementationRegistrar(); //  backgroudn tasks TODO  move the scanning of these into a ServletContextListener so it will happen at application startup regarldess of v1/v2  ??
+        ImplementationRegistrar runnables = new ImplementationRegistrar(); //  backgroudn tasks
         return new Registrar[] { runnables };
     }
     */

@@ -14,8 +14,6 @@ var isVMWare = 0;
 
 
 // Validation functions
-// TODO  this function is being used everywhere but we really need ip address OR hostname validation.
-//       adding hostname validation here sinc
 // stdalex_ validate ip address function
 
 function fnMWValidateIpAddressOrHostName(elementID, isMandatory) {
@@ -464,7 +462,7 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
         },
 		success: function (responseJSON) {
 			if(responseJSON == null){
-				fnSessionExpireLoginAgain(); // XXX TODO no response from server is an ERROR not an indicator of expired session.  we should display an appropriate message, NOT kick out the user.    this needs to be fixed also in other uses of fnSessionExpireLoginAgain that do not involve the session actually expiring.
+				fnSessionExpireLoginAgain(); 
 			}else{
 				var args = []; 
 				args.push(responseJSON);
@@ -586,8 +584,6 @@ return true;
 	
 }
 
-// TODO  this function is being used everywhere but we really need ip address OR hostname validation.
-//       adding hostname validation here sinc
 // stdalex_ validate ip address function
 function fnValidateIpAddress(ipAddress) {
     var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;

@@ -57,7 +57,6 @@ public class Host {
 //    @GET
 //    @Produces("application/json")
 //    public String getJson() {
-//        //TODO return proper representation object
 //        throw new UnsupportedOperationException();
 //    }
 
@@ -80,10 +79,10 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(TxtHostRecord hostObj) throws ApiException {
         ValidationUtil.validate(hostObj);
-        long regHostStart = System.currentTimeMillis(); // XXX savy performance
+        long regHostStart = System.currentTimeMillis(); 
         boolean result = MSComponentFactory.getHostBO().registerHost(hostObj);
-        long regHostStop = System.currentTimeMillis();// XXX savy performance
-        log.debug("XXX savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
+        long regHostStop = System.currentTimeMillis();
+        log.debug("savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); 
         return Boolean.toString(result);
     }
 
@@ -95,10 +94,10 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
-        long regHostStart = System.currentTimeMillis(); // XXX savy performance
+        long regHostStart = System.currentTimeMillis(); 
         boolean result = MSComponentFactory.getHostBO().registerHostFromCustomData(hostConfigObj);
-        long regHostStop = System.currentTimeMillis();// XXX savy performance
-        log.debug("XXX savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
+        long regHostStop = System.currentTimeMillis();
+        log.debug("savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); 
         return Boolean.toString(result);
     }
 

@@ -5,7 +5,6 @@
 package com.intel.mtwilson.agent.intel;
 
 /**
- * XXX TODO this needs to move into the com.intel.mtwilson.agent.intel package in trust-utils-jar 
  * @author dsmagadX
  */
 
@@ -57,7 +56,6 @@ public class TrustAgentSecureClient {
     private static int TIME_OUT = ASConfig.getTrustAgentTimeOutinMilliSecs();
 
     // Bug #497 commenting out  these two constructors because now Tls Policy is a required argument.
-    // XXX this constructor is only used from the unit test class, that's why it allows setting data -  so unit test can mock response from trust agent
     /*
     public TrustAgentSecureClient(String serverHostname, int serverPort, byte[] data) {
         this(serverHostname, serverPort);
@@ -78,7 +76,6 @@ public class TrustAgentSecureClient {
         log.debug("TrustAgentSecureClient  hostname({}) port({})", new Object[] {  serverHostname, serverPort }); // removed tlsConnection.getConnectionString(), to prevent leaking secrets
     }
 
-    // XXX the ipaddress:port format is also parsed somewhere else in the codebase... need to consolidate here.
     private void parseConnectionString(String connectionString) {
         if( connectionString.startsWith("https") ) {  // new format used starting with version 1.1 is URL:   https://ipAddressOrHostname:port
             try {
@@ -109,7 +106,6 @@ public class TrustAgentSecureClient {
     }
     
     /*
-    // XXX this constructor is not used anywhere
     public TrustAgentSecureClient(IPAddress serverIPAddress, int serverPort, byte[] data) { // datatype.IPAddress
         this(serverIPAddress, serverPort);
         if( data != null ) {
@@ -117,7 +113,6 @@ public class TrustAgentSecureClient {
         }
     }
 
-    // XXX this constructor is not used anywhere
     public TrustAgentSecureClient(IPAddress serverIPAddress, int serverPort) { // datatype.IPAddress
         this(serverIPAddress.toString(), serverPort);
     }
@@ -194,7 +189,6 @@ public class TrustAgentSecureClient {
 
     }
 
-    // XXX TODO  bug #497  currently this is not using the hostname verifier in the tls policy... it should be.
         /*
     private SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
         javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {
@@ -239,7 +233,6 @@ public class TrustAgentSecureClient {
     }
         */
 
-    // XXX TODO  we need to return an X509Certificate here;   if the caller wants it in PEM format they can encode it.  returning a String is ambiguous and leaves open possibiility of parsing errors later. we should catch them here.
     /**
      * Example request:
      * <identity_request></identity_request>
@@ -270,8 +263,6 @@ public class TrustAgentSecureClient {
             ClientRequestType response = sendQuoteRequest();
 
             String certificate = response.getAikcert();
-            
-            // TODO:  ensure certificate is propertly formatted.  If missing a line after the header, insert it.  Or decode it, and re-encode as base-64 blob with no line endings.
             
             return certificate;
         }catch(ASException ase){

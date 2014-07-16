@@ -29,7 +29,7 @@ Requires: prototype.js 1.6.1 or later,  datejs
 var log = log || {};
 (function(log) { // start log module definition
 
-// XXX TODO: there are emerging standards on defining classes... define a Log class and then instantiate it. then put the data in there.
+
 var _logdata = [];  // where each entry is {timestamp, level, message}
 
 var _logelementid; // will be initialized when user calls initlog(id) ... this is where events are fired, and also is expected to be the log window itself
@@ -38,7 +38,7 @@ log.attach = function(element_id) {
 	_logelementid = $(element_id);
 	_logelementid.observe('log:entry', function(event) {
 		_logelementid.innerHTML += "["+event.memo.level +"] "+event.memo.message+"<br/>";
-		_logelementid.scrollTop = _logelementid.scrollHeight;  // XXX TODO:  should provide a checkbox so user can select if they want to automatically scroll to the bottom whenever a message arrives, or if they want us to leave it alone since sometimes auto-scroll can be annoying if they are in the middle of reading an earlier message
+		_logelementid.scrollTop = _logelementid.scrollHeight;  
 	});
 };
 
@@ -57,7 +57,6 @@ _console = {
     'ERROR': function(message) { console.error(message); }
 };
 
-// XXX TODO:  add an optional marker parameter to the log methods so messages can be logged with specific subsystems, error codes, password information or other secrets (so can be configured not to display) etc. 
 function _log(level, message) {
 	var newentry = {
 		'timestamp': Date.today().toISOString(),
@@ -72,15 +71,12 @@ function _log(level, message) {
     (_console[level])(message);
 }
 
-// XXX TODO  allow configuring these levels BY PACKAGE  like log4j, slf4j, etc.
-// For now, enable/disable all logging here.
 var _logerror = true;
 var _logwarning = true;
 var _loginfo = true;
 var _logdebug = true;
 var _logtrace = false;
 
-	// XXX TODO  the enabled flags must be BY PACKAGE (like log4j, slf4j, etc) so that means a user must first obtain a log instance FOR THEIR PACKAGE then we can calculate whether these are enabled based on their configuration (todo also)
 log.isErrorEnabled = function() { return _logerror; };
 log.isWarningEnabled = function() { return _logwarning; };
 log.isInfoEnabled = function() { return _loginfo; };

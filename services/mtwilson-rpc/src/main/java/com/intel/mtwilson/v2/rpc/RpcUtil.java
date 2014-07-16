@@ -116,7 +116,6 @@ public class RpcUtil {
         }
     }
     
-    // TODO:  move to mtwilson-jersey-util  (might be renamed mtwilson-jaxrs-util) 
     public static com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String> convertHeadersToMultivaluedMap(HttpServletRequest request) {
         com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String> map = new com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String>();
         Enumeration<String> names = request.getHeaderNames();
