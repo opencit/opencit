@@ -98,7 +98,7 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
                 log.debug("tokenContent xml: {}", tokenContentXml);
                 
                 String refreshToken = tokenFactory.create(tokenContentXml);
-                log.debug("processRequestToken: XXX INSECURE DEBUGGING ONLY    NEW TOKEN: {}", existingToken);
+                log.debug("processRequestToken: DEBUGGING ONLY    NEW TOKEN: {}", existingToken);
                 
                 httpResponse.addHeader("Authorization-Token", refreshToken);
         }
