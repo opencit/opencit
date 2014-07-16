@@ -4104,7 +4104,7 @@ function erase_data() {
 
 key_backup() {
   shift
-  if ! options=$(getopt -a -n key-backup -l passwd: -o p: -- "$@"); then echo_failure "1Usage: $0 key-backup [-p PASSWORD | --passwd PASSWORD]"; exit 1; fi
+  if ! options=$(getopt -a -n key-backup -l passwd: -o p: -- "$@"); then echo_failure "Usage: $0 key-backup [-p PASSWORD | --passwd PASSWORD]"; return 1; fi
   eval set -- "$options"
   while [ $# -gt 0 ]
   do
@@ -4116,10 +4116,10 @@ key_backup() {
   done
 
   args=`echo $args | sed -e 's/^ *//' -e 's/ *$//'`
-  if [ -n "$args" ]; then echo_failure "2Usage: $0 key-backup [-p PASSWORD | --passwd PASSWORD]"; exit 2; fi
+  if [ -n "$args" ]; then echo_failure "Usage: $0 key-backup [-p PASSWORD | --passwd PASSWORD]"; return 2; fi
 
   export MTWILSON_PASSWORD
-  if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; exit 1; fi
+  if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
 
   configDir="/opt/mtwilson/configuration"
   keyBackupDir="/var/mtwilson/key-backup"
@@ -4133,7 +4133,7 @@ key_backup() {
 
 key_restore() {
   shift
-  if ! options=$(getopt -a -n key-restore -l passwd: -o p: -- "$@"); then echo_failure "Usage: $0 key-restore [-p PASSWORD | --passwd PASSWORD] file_name"; exit 1; fi
+  if ! options=$(getopt -a -n key-restore -l passwd: -o p: -- "$@"); then echo_failure "Usage: $0 key-restore [-p PASSWORD | --passwd PASSWORD] file_name"; return 1; fi
   eval set -- "$options"
   while [ $# -gt 0 ]
   do
@@ -4145,10 +4145,10 @@ key_restore() {
   done
 
   args=`echo $args | sed -e 's/^ *//' -e 's/ *$//'`
-  if [[ "$args" == *" "* ]]; then echo_failure "Usage: $0 key-restore [-p PASSWORD | --passwd PASSWORD] file_name"; exit 2; fi
+  if [[ "$args" == *" "* ]]; then echo_failure "Usage: $0 key-restore [-p PASSWORD | --passwd PASSWORD] file_name"; return 2; fi
 
   export MTWILSON_PASSWORD
-  if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; exit 1; fi
+  if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
 
   keyBackupFile="$args"
   keyBackupDir="$keyBackupFile.d"
