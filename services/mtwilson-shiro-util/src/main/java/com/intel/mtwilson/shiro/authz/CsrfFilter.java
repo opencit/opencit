@@ -273,7 +273,7 @@ public class CsrfFilter extends AuthorizationFilter {
 
                 
                 String refreshToken = tokenFactory.create(username.getUsername());
-                log.debug("processRequestToken: XXX INSECURE DEBUGGING ONLY    NEW TOKEN: {}", refreshToken);
+                log.debug("processRequestToken: DEBUGGING ONLY    NEW TOKEN: {}", refreshToken);
                 
                 httpResponse.addHeader("Authorization-Token", refreshToken);
 

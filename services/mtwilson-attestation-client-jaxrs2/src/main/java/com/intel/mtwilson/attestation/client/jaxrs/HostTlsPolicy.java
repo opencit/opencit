@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * BOOKMARK TODO: move to tls policy ws and client project
  * <code>HostTlsPolicy</code> is the class that allows searching, accessing and updating TLS Policies of hosts
  * @author ssbangal 
  */
@@ -33,7 +32,6 @@ public class HostTlsPolicy extends MtWilsonClient {
     }
     
      /**
-      * BOOKMARK TODO: UPDATE DOCUMENTATION
      * Updates the host's TLS policy for the specified host in the system. 
      * @param HostTlsPolicy that needs to be updated.
      * @return Updated HostTlsPolicy object.

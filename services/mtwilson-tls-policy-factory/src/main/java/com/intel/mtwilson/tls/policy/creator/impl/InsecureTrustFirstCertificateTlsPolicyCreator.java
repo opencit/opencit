@@ -24,7 +24,6 @@ public class InsecureTrustFirstCertificateTlsPolicyCreator implements TlsPolicyC
             HashSetMutablePublicKeyRepository repository = new HashSetMutablePublicKeyRepository();
             TrustDelegate delegate = new FirstPublicKeyTrustDelegate(repository);
             return TlsPolicyBuilder.factory().strict(repository).trustDelegate(delegate).skipHostnameVerification().build();
-            // XXX TODO... need to tie the mutable public key repository back to the host record so it will be saved when it's written to....
 //            return new InsecureTlsPolicy();
         }
         return null;

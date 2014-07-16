@@ -175,7 +175,6 @@ public class TAHelper {
             }
 
             URL url = new URL(connectionString);
-            // bug #497 TODO need to replace with use of HostAgentFactory
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, tlsPolicy));
 
             String sessionId = generateSessionId();

@@ -214,7 +214,7 @@ function isNumber(n) {
                                 }
                                 function tag_create_form_removeValue(tagValue) {
                                     mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
-                                    mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
+                                    mtwilson.rivets.views['tag-create-form'].sync(); 
                                 }
                                 // called when submitting the form... checks that at least one value was added
                                 function tag_create_form_validateValues() {
@@ -351,7 +351,7 @@ function isNumber(n) {
     //                                if( mtwilson.rivets.forms['selection-create-form'] ) {
                                         log.debug("selection_create_form_init: got selection-create-form");
                                         log.debug("selection_create_form_init: current tag data is: "+Object.toJSON(mtwilson.atag.data.tags));
-                                        mtwilson.rivets.forms['selection-create-form'].input.name = ''; // TODO should use automatic binding to form element... don't know why that isn't working.
+                                        mtwilson.rivets.forms['selection-create-form'].input.name = ''; 
                                         mtwilson.rivets.forms['selection-create-form'].tagValues = [];
     //                                    mtwilson.rivets.forms['selection-create-form'].tags = mtwilson.atag.data.tags; // already part of global binding
                                         mtwilson.rivets.forms['selection-create-form'].input.selection = [];
@@ -371,7 +371,7 @@ function isNumber(n) {
                                 function selection_create_form_addValue() {
                                     var tag = ws.findTagByOid(getSelectOptionValue('selection-create-tags-select'));
                                     var tagValue = $F('selection-create-tags-values');
-                                    mtwilson.rivets.forms['selection-create-form'].input.selection.push({ tag:tag, value: tagValue});  // XXX tag should be uuid? oid? name? just need an id, not the whole object. maybe put the whole object here to make it easy and just pick out what we need to send to the server when it's time to submit the selection.
+                                    mtwilson.rivets.forms['selection-create-form'].input.selection.push({ tag:tag, value: tagValue});  
                                     log.debug("added tag ("+tag.oid+","+tagValue+") to selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
                                 }
                                 function selection_create_form_removeValue(tagOid,tagValue) {
@@ -383,7 +383,7 @@ function isNumber(n) {
                                         }
                                     }
                                     log.debug("removed tag ("+tagOid+","+tagValue+") from selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
-                                    mtwilson.rivets.views['selection-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
+                                    mtwilson.rivets.views['selection-create-form'].sync(); 
                                 }
                                 // called when submitting the form... checks that at least one value was added
                                 function selection_create_form_validateValues() {
@@ -1009,7 +1009,7 @@ function isNumber(n) {
             navTabs.setActiveTab(anchorvalue);
             
             //navTabs.setActiveTab('tags');
-            //navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
+            //navTabs.setActiveTab('certificates');  // for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
             $('certificate-provision-form').hide();
         </script>
@@ -1039,7 +1039,7 @@ function isNumber(n) {
     //                data: sampledata, // optional: if not provided will start empty and then we can load it from server
     /*
                     view: { 'update': function(data) {
-                            var i = mtwilson.rivets.views.length; // until they respond we don't know what these tags are;  TODO if user changes here make sure yo uupdate config in database
+                            var i = mtwilson.rivets.views.length; // until they respond we don't know what these tags are;  
                             while(i--) {
                                 mtwilson.rivets.views[i].update(data);
                             }
@@ -1052,7 +1052,7 @@ function isNumber(n) {
     //                        configurationView.update(data);
                         },
                         'sync': function() {
-                            var i = mtwilson.rivets.views.length; // until they respond we don't know what these tags are;  TODO if user changes here make sure yo uupdate config in database
+                            var i = mtwilson.rivets.views.length; // until they respond we don't know what these tags are; 
                             while(i--) {
                                 mtwilson.rivets.views[i].sync();
                             }
@@ -1080,10 +1080,6 @@ function isNumber(n) {
 //            configurationView = rivets.bind(document.getElementById('config-form'), ws.data.currentConfiguration); 
 
             // wait for the webservice library to initialize, then populate the UI with some data from the server. 
-            // XXX TODO create special 'views' resources on the  server that can provide all the info
-            // we need in one response. so for example the default search for tags, triples, and selections, as well
-            // as main configuration and cacerts... all would be defined in one 'view' that would be merged into
-            // mtwilson.data. 
             document.observe('mtwilson:ready', function() {
                 log.debug("after init (mtwilson:ready), data: "+Object.toJSON(ws.data));
                 ws.searchTags('tag-search-form');
