@@ -123,21 +123,17 @@ public class SecurityFilter implements Filter {
 
     // only call this for required tokens, will return the token if it's valid, null if it's not valid
     private Token isTokenValid(String token, String username) {
-        log.debug("isTokenValid: Validating token for username '{}'", username);
-        log.debug("XXX INSECURE TOKEN DEBUGGING ONLY : {}", token);
+        log.debug("isTokenValid: Validating token for username '{}'", username); 
         try {
             Token tokenObject = validator.validate(token); // throws UnsupportedTokenVersionException, CryptographyException, ExpiredTokenException, KeyNotFoundException
             // validator already checks the timestamp,  so we just check that the token belongs to this user 
             String confirmUsername = new String(tokenObject.getContent(), Charset.forName("UTF-8"));
-            log.debug("XXX TOKEN DEBUGGING ONLY :   token username is '{}'", confirmUsername);
+            log.debug("Token username: {}", confirmUsername.toCharArray()); 
             if( username.equals(confirmUsername) ) { 
-                log.debug("XXX TOKEN DEBUGGING ONLY:  usernames are equal"); 
                 return tokenObject;
             } 
             else { 
-                log.debug("XXX TOKEN DEBUGGING ONLY:   usernames are NOT equal"); 
-                log.debug("username: {}", username.toCharArray()); 
-                log.debug("confirmusername: {}", confirmUsername.toCharArray()); 
+                log.debug("Input username does not match: {}", username.toCharArray()); 
                 return null;
             }
         } catch (UnsupportedTokenVersionException e) {

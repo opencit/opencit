@@ -19,7 +19,6 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -151,9 +150,10 @@ public class JaxrsClientBuilder {
             if (tlsPolicy != null) {
                 log.debug("creating TlsConnection from URL and TlsPolicy");
                 tlsConnection = new TlsConnection(url, tlsPolicy);
-            } else {
-                log.debug("creating TlsConnection with InsecureTlsPolicy");
-                tlsConnection = new TlsConnection(url, new InsecureTlsPolicy());
+            }
+            else if( configuration != null ) {
+                tlsPolicy = PropertiesTlsPolicyFactory.createTlsPolicy(configuration);
+                tlsConnection = new TlsConnection(url, tlsPolicy);                    
             }
         }
     }

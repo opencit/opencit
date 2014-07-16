@@ -375,12 +375,9 @@ function fnSaveNewHostInfoSuccess(response,messageToDisplay) {
 // see also WhiteListConfig.js
 $(document).ready(function() {
     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
-        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+        //console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
 	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
         var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
-       if( choicesArray.length === 0 ) {
-       	$("#tls_policy_input_div").hide();
-       } else {
            var el = $("#tls_policy_select");
   		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices(el, choicesArray);
         mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices(el, {
@@ -389,6 +386,5 @@ $(document).ready(function() {
         mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
         $("#tls_policy_input_div").i18n();
        	$("#tls_policy_input_div").show();
-	}
     });
 });
