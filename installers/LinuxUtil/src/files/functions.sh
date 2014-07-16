@@ -179,7 +179,7 @@ function validate_path_data() {
   file_path=`readlink -f "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/var/'* && "$file_path" != '/opt/'* ]]; then
-    echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
+    echo_failure "Data path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
@@ -197,7 +197,7 @@ function validate_path_executable() {
   file_path=`readlink -f "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/usr/'* && "$file_path" != '/opt/'* ]]; then
-    echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
+    echo_failure "Executable path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
@@ -3680,34 +3680,38 @@ file_encrypted() {
 decrypt_file() {
   local filename="${1}"
   export PASSWORD="${2}"
-  if ! validate_path_configuration "$filename"; then exit -1; fi
+  if ! validate_path_configuration "$filename" 2>&1>/dev/null && ! validate_path_data "$filename" 2>&1>/dev/null; then
+    echo_failure "Path validation failed. Verify path meets acceptable directory constraints: $filename"
+    return 1
+  fi
   if [ -f "$filename" ]; then
-    #echo -n "Decrypting file [$filename]....."
     call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
-    if file_encrypted $filename; then
+    if file_encrypted "$filename"; then
       echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      return 1
+      return 2
     fi
-    return 0
-    #echo_success " Done"
   else
     echo_warning "File not found: $filename"
-    return 2
+    return 3
   fi
 }
 
 encrypt_file() {
   local filename="${1}"
   export PASSWORD="${2}"
-  if ! validate_path_configuration "$filename"; then exit -1; fi
+  if ! validate_path_configuration "$filename" 2>&1>/dev/null && ! validate_path_data "$filename" 2>&1>/dev/null; then
+    echo_failure "Path validation failed. Verify path meets acceptable directory constraints: $filename"
+    return 1
+  fi
   if [ -f "$filename" ]; then
-    #echo -n "Encrypting file [$filename]....."
     call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"
-    if ! file_encrypted $filename; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; exit -1; fi
-    #echo_success " Done"
+    if ! file_encrypted "$filename"; then
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+      return 2
+    fi
   else
     echo_warning "File NOT found: $filename"
+    return 3
   fi
 }
 
@@ -3968,7 +3972,7 @@ change_db_pass() {
   local decryption_error=false
   for i in ${encrypted_files[@]}; do
     decrypt_file "$i" "$cryptopass"
-    if [ $? != 0 ]; then
+    if [ $? -ne 0 ]; then
       decryption_error=true
     fi
   done
@@ -4096,4 +4100,75 @@ function erase_data() {
      temp=$(sudo "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")
     done
   fi 
+}
+
+key_backup() {
+  shift
+  if ! options=$(getopt -a -n key-backup -l passwd: -o p: -- "$@"); then echo_failure "Usage: $0 key-backup [-p PASSWORD | --passwd PASSWORD]"; return 1; fi
+  eval set -- "$options"
+  while [ $# -gt 0 ]
+  do
+    case $1 in
+      -p|--passwd) eval MTWILSON_PASSWORD="\$$2"; shift;;
+      --) shift; args="$@"; shift;;
+    esac
+    shift
+  done
+
+  args=`echo $args | sed -e 's/^ *//' -e 's/ *$//'`
+  if [ -n "$args" ]; then echo_failure "Usage: $0 key-backup [-p PASSWORD | --passwd PASSWORD]"; return 2; fi
+
+  export MTWILSON_PASSWORD
+  if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
+
+  configDir="/opt/mtwilson/configuration"
+  keyBackupDir="/var/mtwilson/key-backup"
+  datestr=`date +%Y-%m-%d.%H%M%S`
+  keyBackupFile="$keyBackupDir/mtwilson-keys_$datestr.enc"
+  mkdir -p "$keyBackupDir" 2>/dev/null
+  /opt/mtwilson/bin/encrypt.sh -p MTWILSON_PASSWORD --nopbkdf2 "$keyBackupFile" "$configDir/*.* $configDir/private/*.*" > /dev/null
+  find "$configDir/" -name "*.sig" -type f -delete
+  shred -uzn 3 "$keyBackupFile.zip"
+  echo_success "Keys backed up to: $keyBackupFile"
+}
+
+key_restore() {
+  shift
+  if ! options=$(getopt -a -n key-restore -l passwd: -o p: -- "$@"); then echo_failure "Usage: $0 key-restore [-p PASSWORD | --passwd PASSWORD] file_name"; return 1; fi
+  eval set -- "$options"
+  while [ $# -gt 0 ]
+  do
+    case $1 in
+      -p|--passwd) eval MTWILSON_PASSWORD="\$$2"; shift;;
+      --) shift; args="$@"; shift;;
+    esac
+    shift
+  done
+
+  args=`echo $args | sed -e 's/^ *//' -e 's/ *$//'`
+  if [[ "$args" == *" "* ]]; then echo_failure "Usage: $0 key-restore [-p PASSWORD | --passwd PASSWORD] file_name"; return 2; fi
+
+  export MTWILSON_PASSWORD
+  if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
+
+  keyBackupFile="$args"
+  keyBackupDir="$keyBackupFile.d"
+  configDir="/opt/mtwilson/configuration"
+  if [ ! -f "$keyBackupFile" ]; then
+    echo_failure "File does not exist"
+    return 4
+  fi
+  /opt/mtwilson/bin/decrypt.sh -p MTWILSON_PASSWORD "$keyBackupFile" > /dev/null
+  find "$keyBackupDir/" -name "*.sig" -type f -delete
+  cp -R "$keyBackupDir"/* "$configDir"/
+  find "$keyBackupDir" -type f -exec shred -uzn 3 {} \;
+  rm -rf "$keyBackupDir"
+  shred -uzn 3 "$keyBackupFile.zip"
+
+  # password.txt file in private directory  
+  mkdir -p "$configDir/private" 2>/dev/null
+  cp -R "$configDir/password.txt" "$configDir/private/password.txt"
+  shred -uzn 3 "$configDir/password.txt"
+
+  echo_success "Keys restored from: $keyBackupFile"
 }

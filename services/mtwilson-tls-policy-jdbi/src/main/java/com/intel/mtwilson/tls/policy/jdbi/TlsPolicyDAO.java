@@ -11,6 +11,7 @@ import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterArgumentFactory;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 import org.skife.jdbi.v2.unstable.BindIn;
 
 /*
@@ -22,6 +23,7 @@ import org.skife.jdbi.v2.unstable.BindIn;
  *
  * @author jbuhacoff
  */
+@UseStringTemplate3StatementLocator
 @RegisterArgumentFactory({UUIDArgument.class})
 @RegisterMapper({TlsPolicyResultMapper.class,})
 public interface TlsPolicyDAO extends Closeable {

@@ -500,6 +500,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
              hostTxtObj.IPAddress = hostRecord.getHostName();
              hostTxtObj.Port = Integer.parseInt(hostRecord.getHostPortNo());
              }*/
+            hostTxtObj.tlsPolicyChoice = getTlsPolicyChoice(hostRecord);
+            
             HostConfigData configData = new HostConfigData();
             configData.setBiosWLTarget(HostWhiteListTarget.getBIOSWhiteListTarget(hostRecord.getBiosWLTarget()));
             configData.setVmmWLTarget(HostWhiteListTarget.getVMMWhiteListTarget(hostRecord.getVmmWLtarget()));
@@ -516,5 +518,22 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
             log.error("Failed to register hosts: {}", e.getMessage());
             throw ConnectionUtil.handleManagementConsoleException(e);
         }
+    }
+    
+    private TlsPolicyChoice getTlsPolicyChoice(HostDetails hostRecord) {
+        TlsPolicyChoice tlsPolicyChoice =  new TlsPolicyChoice();
+        TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+        if( hostRecord.getTlsPolicyId() != null && !hostRecord.getTlsPolicyId().isEmpty() ) {
+            tlsPolicyChoice.setTlsPolicyId(hostRecord.getTlsPolicyId());
+        }
+        if( hostRecord.getTlsPolicyType() != null && !hostRecord.getTlsPolicyType().isEmpty() ) {
+            tlsPolicyDescriptor.setPolicyType(hostRecord.getTlsPolicyType());
+        }
+        if( hostRecord.getTlsPolicyData() != null && !hostRecord.getTlsPolicyData().isEmpty() ) {
+            tlsPolicyDescriptor.setData(new ArrayList<String>());
+            tlsPolicyDescriptor.getData().add(hostRecord.getTlsPolicyData());
+        }
+        tlsPolicyChoice.setTlsPolicyDescriptor(tlsPolicyDescriptor);
+        return tlsPolicyChoice;
     }
 }

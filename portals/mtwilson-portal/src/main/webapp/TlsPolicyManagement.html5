@@ -75,12 +75,20 @@
     <fieldset>
     <legend data-i18n="form.edit_tls_policy_summary">TLS Policy Summary</legend>
     <ol>
-        <li style="display:none;">
+        <li class="tlspolicy-edit-only">
             <label for="tlspolicy_edit_id" data-i18n="table.id">ID</label>
-            <input id="tlspolicy_edit_id" type="hidden" name="id"/>
+            <input id="tlspolicy_edit_id" type="text" name="id" disabled/>
         </li>
         <li>
-            <label for="tlspolicy_edit_name" data-i18n="table.policy_name">Name</label>
+            <label for="tlspolicy_edit_private" data-i18n="table.policy_scope">Scope</label>
+            <select id="tlspolicy_edit_private" name="private" disabled>
+                <option value="false" data-i18n="tlspolicy.scope.shared">Shared</option>
+                <option value="true" data-i18n="tlspolicy.scope.private">Per-host</option>
+            </select>
+        </li>
+        <li>
+            <label for="tlspolicy_edit_name" data-i18n="table.policy_name" class="tlspolicy-scope-shared">Name</label>
+            <label for="tlspolicy_edit_name" data-i18n="table.host_name" class="tlspolicy-scope-private" style="display: none;">Host Name</label>
             <input id="tlspolicy_edit_name" type="text" name="name"/>
         </li>
         <li>
@@ -95,13 +103,6 @@
             </select>
         </li>
         <li>
-            <label for="tlspolicy_edit_private" data-i18n="table.policy_scope">Scope</label>
-            <select id="tlspolicy_edit_private" name="private">
-                <option value="false" data-i18n="tlspolicy.scope.shared">Shared</option>
-                <option value="true" data-i18n="tlspolicy.scope.private">Per-host</option>
-            </select>
-        </li>
-        <li>
             <label for="tlspolicy_edit_comment" data-i18n="table.comment">Comment</label>
             <textarea id="tlspolicy_edit_comment" name="comment"></textarea>
         </li>
@@ -112,7 +113,7 @@
     <ol>
         <li>
             <label for="tlspolicy_edit_certificates_add" data-i18n="action.add_certificate">Add certificate</label>
-            <textarea id="tlspolicy_edit_certificates_add" class="publickey-text" placeholder="Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
+            <textarea id="tlspolicy_edit_certificates_add" class="publickey-text" placeholder="Hex or Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -132,7 +133,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_certificate_digests_add" data-i18n="action.add_certificate_digest">Add certificate fingerprint</label>
-            <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text" placeholder="Base64-encoded digest using selected algorithm of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
+            <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text" placeholder="Hex or Base64-encoded digest using selected algorithm of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -144,7 +145,7 @@
     <ol>
         <li>
             <label for="tlspolicy_edit_public_keys_add" data-i18n="action.add_public_key">Add public key</label>
-            <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text" placeholder="Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>
+            <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text" placeholder="Hex or Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -164,7 +165,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_public_key_digests_add" data-i18n="action.add_public_key_digest">Add public key fingerprint</label>
-            <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text" placeholder="Base64-encoded digest using selected algorithm of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>
+            <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text" placeholder="Hex or Base64-encoded digest using selected algorithm of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -358,11 +359,13 @@ function onCreateNewTlsPolicy() {
     $("#tlspolicy_edit_id").val('');
     $("#tlspolicy_edit_name").val('');
     $("#tlspolicy_edit_private").val('false'); // default to creating a shared policy
+    $("#tlspolicy_edit_private").change();
     $("#tlspolicy_edit_comment").val('');
     $("#tlspolicy_edit_certificate_list").empty();
     $("#tlspolicy_edit_certificate_digest_list").empty();
     $("#tlspolicy_edit_public_key_list").empty();
     $("#tlspolicy_edit_public_key_digest_list").empty();
+    $("#tlspolicy_edit_form").find(".tlspolicy-edit-only").hide();
     $("#tlspolicy_edit_form").dialog("open"); 
 }
 function getCurrentTlsPolicyDataContainer(policyType) {
@@ -435,6 +438,7 @@ function onEditCurrentTlsPolicyInitDialog() {
         $("#tlspolicy_edit_id").val(currentTlsPolicyRecord.id);
         $("#tlspolicy_edit_name").val(currentTlsPolicyRecord.name);
         $("#tlspolicy_edit_private").val( currentTlsPolicyRecord.private ? "true" : "false");
+        $("#tlspolicy_edit_private").change();
         $("#tlspolicy_edit_comment").val(currentTlsPolicyRecord.comment);
         $("#tlspolicy_edit_certificate_list").empty();
         $("#tlspolicy_edit_certificate_digest_list").empty();
@@ -465,6 +469,7 @@ function onEditCurrentTlsPolicyInitDialog() {
 function onEditCurrentTlsPolicy() {
     if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
         onEditCurrentTlsPolicyInitDialog();
+        $("#tlspolicy_edit_form").find(".tlspolicy-edit-only").show();
         $( "#tlspolicy_edit_form" ).dialog("open");
     }
     else {
@@ -563,8 +568,8 @@ function onSaveCurrentTlsPolicy() {
                     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, onLoadTlsPolicyData); // TODO:  should be re-submitting the same search criteria already being used because we just edited a record from that result table
                 },
                 error: function(jqXHR,textStatus,errorThrown) {
-                    console.log("server returned error: "+textStatus);
-                    alert("cannot save tls policy: "+textStatus); // TODO:  convert to the auto-fade/clickable status message like on tag pages
+                    console.log("server returned error: "+errorThrown);
+                    alert("cannot save tls policy: "+errorThrown); // TODO:  convert to the auto-fade/clickable status message like on tag pages
                 }
             });
         }
@@ -630,6 +635,17 @@ var tlsPolicyCopyDataDialogButtons = {};
 tlsPolicyCopyDataDialogButtons[okButtonText] = onCancelCopyCurrentTlsPolicyDataItem;
 
 // event handlers for the policy edit form
+$("select#tlspolicy_edit_private").change(function(){
+    var isPrivate = ($(this).val() === "true");
+    if( isPrivate ) {
+        $("#tlspolicy_edit_form .tlspolicy-scope-shared").hide();
+        $("#tlspolicy_edit_form .tlspolicy-scope-private").show();
+    }
+    else {
+        $("#tlspolicy_edit_form .tlspolicy-scope-shared").show();
+        $("#tlspolicy_edit_form .tlspolicy-scope-private").hide();
+    }
+});
 $("select#tlspolicy_edit_policy_type").change(function(){
     // hide all policy-specific field sets
     $("#tlspolicy_edit_form fieldset[data-policy-type]").hide();

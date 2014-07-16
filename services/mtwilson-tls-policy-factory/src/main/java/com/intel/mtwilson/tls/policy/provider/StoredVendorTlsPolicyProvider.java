@@ -24,15 +24,15 @@ import java.util.List;
  * 
  * @author jbuhacoff
  */
-public class StoredVendorTlsPolicy implements TlsPolicyProvider {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StoredVendorTlsPolicy.class);
+public class StoredVendorTlsPolicyProvider implements TlsPolicyProvider {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StoredVendorTlsPolicyProvider.class);
     private String vendor;
 
-    public StoredVendorTlsPolicy(String vendor) {
+    public StoredVendorTlsPolicyProvider(String vendor) {
         this.vendor = vendor;
     }
 
-    public StoredVendorTlsPolicy(VendorDescriptor vendorDescriptor) {
+    public StoredVendorTlsPolicyProvider(VendorDescriptor vendorDescriptor) {
         this.vendor = vendorDescriptor.getVendorProtocol();
     }
     

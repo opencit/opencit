@@ -57,7 +57,7 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                     objCollection.getHosts().add(convert(obj));
                 }
             } else if (criteria.nameEqualTo != null) {
-                TblHosts obj = jpaController.findHostByUuid(criteria.nameEqualTo);
+                TblHosts obj = jpaController.findByName(criteria.nameEqualTo);
                 if (obj != null) {
                     objCollection.getHosts().add(convert(obj));
                 }
@@ -284,6 +284,7 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
         convObj.setAikCertificate(obj.getAIKCertificate());
         convObj.setAikSha1(obj.getAikSha1());
         convObj.setHardwareUuid(obj.getHardwareUuid());
+        convObj.setTlsPolicyId(obj.getTlsPolicyId());
         log.debug("------------------------------------" + obj.getHardwareUuid());
         return convObj;
     }

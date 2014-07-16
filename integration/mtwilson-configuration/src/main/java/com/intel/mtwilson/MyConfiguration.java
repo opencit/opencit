@@ -495,6 +495,12 @@ public class MyConfiguration {
         return properties;
     }
 
+    /**
+     * Returns the list of locales configured in "mtwilson.locales" , or
+     * the platform default locale if there is nothing configured.
+     * 
+     * @return an array with at least one locale
+     */
     public String[] getAvailableLocales() {
         // example property in file:  mtwilson.locales=en,en-US,es,es-MX
         // the getString(key) function will return the text only up to the first comma, e.g. "en"

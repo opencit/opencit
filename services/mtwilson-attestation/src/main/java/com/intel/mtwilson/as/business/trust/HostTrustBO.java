@@ -938,7 +938,7 @@ public class HostTrustBO {
                     log.debug("Expected PCR {} = {}", pcrPolicy.getExpectedPcr().getIndex().toString(), pcrPolicy.getExpectedPcr().getValue().toString());
                     // find out which MLE this policy corresponds to and then log it
                     TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
-                    // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. XXX TODO  we should not keep two lists... the "Required Manifest List" field should be deleted and it must be up to the whitelist manager to define only the pcrs that should be checked! in a future release (maybe 1.3) we will store a global whitelist with pcr values for known mles, and for specific hosts the trust poilcy will be stored as a set of rules instead of just pcr values for specific hosts and it will be more evident what the trust policy is supposed to be. 
+                    // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. 
                     if( pcr == null ) {
                         //log.warn("Trust policy includes PCR {} but MLE does not define it", pcrPolicy.getExpectedPcr().getIndex().toInteger());
                         // create the missing pcr record in the report so the user will see it in the UI 
@@ -967,7 +967,7 @@ public class HostTrustBO {
                         pcr.setHost_uuid_hex(host.getUuid_hex());
                         pcr.setUuid_hex(new UUID().toString());
                         pcr.setUpdatedOn(today);
-                        pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
+                        pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults 
                         pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
                         if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()) == null ) {
                             throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
@@ -1025,7 +1025,7 @@ public class HostTrustBO {
                     */
                     List<Fault> faults = result.getFaults();
                     for(Fault fault : faults) {
-                        if( fault instanceof PcrEventLogMissingExpectedEntries ) { // there would only be one of these faults per PcrEventLogIncludes rule. XXX this might change in the future to have a bunch of individual faults, one per missing entry.
+                        if( fault instanceof PcrEventLogMissingExpectedEntries ) { // there would only be one of these faults per PcrEventLogIncludes rule.
                             PcrEventLogMissingExpectedEntries missingEntriesFault = (PcrEventLogMissingExpectedEntries)fault;
 
                             TblTaLog pcr = taLogMap.get(missingEntriesFault.getPcrIndex());
@@ -1034,7 +1034,7 @@ public class HostTrustBO {
                                 pcr.setTrustStatus(false); // PCR not trusted since one or more required modules are missing, which we will detail below
                                 pcr.setError("Missing modules");
         //                        pcr.setUpdatedOn(today);
-        //                        pcr.setManifestName(missingEntriesFault.getPcrIndex().toString());
+        //                        pcr.setManifestName(missingEntriesFault.getPcrIndex().toString());    
         //                        pcr.setManifestValue(""); // doesn't match up with how we store data. we would need to look for another related fault about the dynamic value not matching... 
         //                        if( biosPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
         //                            pcr.setMleId(host.getBiosMleId().getId());
@@ -1053,14 +1053,12 @@ public class HostTrustBO {
                                     Measurement found = null;
                                     List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
                                     for(Measurement a : actualEntries) {
-                                        // TODO SUDHIR: This below test is failing for open source since the label in the measurement is set to initrd, where as the pcrManifest is having OpenSource.initrd
-                                        // Need to probably change the attestation generator itself.
                                         //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
                                         if( a.getLabel().equals(m.getLabel()) ) {
                                             found = a;
                                         }
                                     }
-                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it. 
+                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.
                                     TblModuleManifestLog event = new TblModuleManifestLog();
                                     event.setName(m.getLabel());
                                     event.setTaLogId(pcr);

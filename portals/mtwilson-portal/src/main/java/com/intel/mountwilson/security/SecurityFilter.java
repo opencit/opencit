@@ -123,21 +123,17 @@ public class SecurityFilter implements Filter {
 
     // only call this for required tokens, will return the token if it's valid, null if it's not valid
     private Token isTokenValid(String token, String username) {
-        log.debug("isTokenValid: Validating token for username '{}'", username);
-        log.debug("XXX INSECURE TOKEN DEBUGGING ONLY : {}", token);
+        log.debug("isTokenValid: Validating token for username '{}'", username); 
         try {
             Token tokenObject = validator.validate(token); // throws UnsupportedTokenVersionException, CryptographyException, ExpiredTokenException, KeyNotFoundException
             // validator already checks the timestamp,  so we just check that the token belongs to this user 
             String confirmUsername = new String(tokenObject.getContent(), Charset.forName("UTF-8"));
-            log.debug("XXX TOKEN DEBUGGING ONLY :   token username is '{}'", confirmUsername);
+            log.debug("Token username: {}", confirmUsername.toCharArray()); 
             if( username.equals(confirmUsername) ) { 
-                log.debug("XXX TOKEN DEBUGGING ONLY:  usernames are equal"); 
                 return tokenObject;
             } 
             else { 
-                log.debug("XXX TOKEN DEBUGGING ONLY:   usernames are NOT equal"); 
-                log.debug("username: {}", username.toCharArray()); 
-                log.debug("confirmusername: {}", confirmUsername.toCharArray()); 
+                log.debug("Input username does not match: {}", username.toCharArray()); 
                 return null;
             }
         } catch (UnsupportedTokenVersionException e) {
@@ -172,7 +168,7 @@ public class SecurityFilter implements Filter {
                 // token was not required for this request , for example a GET, so add a new token and let it continue
                 // when the request does not require a token,  we simply create one and return it.  at this point the user session has already been authetnicated using the cookie ;  this still prevents CSRF attacks because in CSRF the attacker cannot see our response.
                 String token = factory.create(username);
-                 log.debug("processRequestToken: XXX INSECURE DEBUGGING ONLY    NEW TOKEN: {}", token);
+                 log.debug("processRequestToken: DEBUGGING ONLY    NEW TOKEN: {}", token);
                response.addHeader("AuthorizationToken", token);
                response.addHeader("Cache-Control", "no-cache");
                 // if the response is html,  the jsp tag can copy the token into a <meta> tag so that javascript can get it without making an additional ajax request;  it's also very useful for resolving an issue with the initial login page where javascript would not be able to request a token before the user logs in, but the login form requires a token
@@ -209,7 +205,7 @@ public class SecurityFilter implements Filter {
             // replace it and allow request to continue
             try {
                 existingToken = factory.create(username);
-                log.debug("processRequestToken: XXX INSECURE DEBUGGING ONLY    NEW TOKEN: {}", existingToken);
+                log.debug("processRequestToken: DEBUGGING ONLY    NEW TOKEN: {}", existingToken);
             } catch (GeneralSecurityException e) {
                 log.error("Cannot create replacement token", e);
                 // we let the request continue because this is not a client error; however if the server issue is not fixed when the token expires the client will be locked out due to no new tokens
