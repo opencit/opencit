@@ -225,7 +225,7 @@ print_help() {
         echo -e "Usage: mtwilson {change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
           "\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
           "\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat-sslcert|tomcat-status|\n" \
-          "\t\trestart|setup|start|status|stop|uninstall|version|zeroize}"
+          "\t\tkey-backup|key-restore|restart|setup|start|status|stop|uninstall|version|zeroize}"
 }
 
 RETVAL=0
