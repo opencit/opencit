@@ -375,7 +375,7 @@ function fnSaveNewHostInfoSuccess(response,messageToDisplay) {
 // see also WhiteListConfig.js
 $(document).ready(function() {
     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
-        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+        //console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
 	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
         var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
            var el = $("#tls_policy_select");

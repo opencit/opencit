@@ -3,6 +3,65 @@ var selectedBothBiosVMM = false;
 var registerHost = false;
 var configurationSaved = [];
 
+function autoPopulateTlsPolicy(hostname) {
+    // first clear the existing selection
+    $("#tls_policy_select").val('');
+    $("#tls_policy_data_certificate").val('');
+    $("#tls_policy_data_certificate_digest").val('');
+    $("#tls_policy_data_public_key").val('');
+    $("#tls_policy_data_public_key_digest").val('');
+    // second try to retrieve host information and re-populate the tls policy selection
+    // if we receive it from the server
+    $.getJSON("v2proxy/hosts.json", {"nameEqualTo":hostname}, function(data) {
+        console.log("got host search results", data);
+        if( data.hosts && data.hosts.length ) {
+            var tlsPolicyId = data.hosts[0].tls_policy_id;
+            if( tlsPolicyId ) {
+                $.getJSON("v2proxy/tls-policies.json", {"id":tlsPolicyId}, function(tlspolicydata) {
+                    console.log("got tlspolicy search results", tlspolicydata);
+                    // example: {"meta":{"default":null,"allow":["certificate","certificate-digest","public-key","INSECURE","public-key-digest","TRUST_FIRST_CERTIFICATE"],"global":null},"tls_policies":[{"id":"7658cb90-d1f0-428e-9e03-03b02521183a","name":"fab721c5-0dbf-4ca9-b533-67d73e0cc75c","descriptor":{"policy_type":"certificate-digest","data":["18 9a e6 e0 26 6f ae 63 8f 8c 9c b0 92 e1 ad 04 c3 a7 58 aa"]},"private":true}]}
+                    if( tlspolicydata.tls_policies && tlspolicydata.tls_policies.length ) {
+                        console.log("looking through tlspolicy results for the right policy");
+                        // find the tls policy we need
+                        for(var i=0; i<tlspolicydata.tls_policies.length; i++) {
+                            console.log("looking at policy index "+i);
+                            if( tlspolicydata.tls_policies[i].id == tlsPolicyId ) {
+                                console.log("found the tls policy", tlspolicydata.tls_policies[i].descriptor);
+                                if( tlspolicydata.tls_policies[i].private ) {
+                                    console.log("it's private");
+                                    var selectValue = "private-"+tlspolicydata.tls_policies[i].descriptor.policy_type; // for example  private-certificate, private-certificate-digest
+                                    $("#tls_policy_select").val(selectValue);
+                                    $("#tls_policy_select").change();
+                                    console.log("tls policy data", tlspolicydata.tls_policies[i].descriptor.data);
+                                    if( tlspolicydata.tls_policies[i].descriptor.policy_type == "certificate" ) {
+                                        $("#tls_policy_data_certificate").val(tlspolicydata.tls_policies[i].descriptor.data[0]);
+                                    }
+                                    else if(tlspolicydata.tls_policies[i].descriptor.policy_type == "certificate-digest") {
+                                        $("#tls_policy_data_certificate_digest").val(tlspolicydata.tls_policies[i].descriptor.data[0]);
+                                    }
+                                    else if(tlspolicydata.tls_policies[i].descriptor.policy_type == "public-key") {
+                                        $("#tls_policy_data_public_key").val(tlspolicydata.tls_policies[i].descriptor.data[0]);
+                                    }
+                                    else if(tlspolicydata.tls_policies[i].descriptor.policy_type == "public-key-digest") {
+                                        $("#tls_policy_data_public_key_digest").val(tlspolicydata.tls_policies[i].descriptor.data[0]);
+                                    }
+                                }
+                                else {
+                                    console.log("it's shared");
+                                    var selectValue = tlsPolicyId;
+                                    $("#tls_policy_select").val(selectValue);
+                                    $("#tls_policy_select").change();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });            
+    
+}
+
 $(function() {
 	
 	$('#openSourcesHostType').find('input:text').each(function() {
@@ -41,6 +100,44 @@ $(function() {
     
                 $('#RegisterWhiteListHost').attr('disabled', 'disabled');
                 $('#RegisterWhiteListHost').attr('checked', false);    
+
+
+    $('#whiteListOpenSource_Host').change(function() { 
+        var hostname = $(this).val();
+        if( hostname && fnValidateIpAddress(hostname) ) {
+            autoPopulateTlsPolicy(hostname);
+        }
+        else {
+            // erase tls policy information
+            var el = $("#tls_policy_select");
+            mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        }
+    });
+
+    $('#whiteListCitrix_Host').change(function() { 
+        var hostname = $(this).val();
+        if( hostname && fnValidateIpAddress(hostname) ) {
+            autoPopulateTlsPolicy(hostname);
+        }
+        else {
+            // erase tls policy information
+            var el = $("#tls_policy_select");
+            mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        }
+    });
+
+    $('#whiteListVMware_Host').change(function() { 
+        var hostname = $(this).val();
+        if( hostname && fnValidateIpAddress(hostname) ) {
+            autoPopulateTlsPolicy(hostname);
+        }
+        else {
+            // erase tls policy information
+            var el = $("#tls_policy_select");
+            mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice(el);
+        }
+    });
+
 });
 
 
@@ -402,7 +499,7 @@ function fnDisableOrEnableUploadButton(checkBox) {
 // see also addHost.js
 $(document).ready(function() {
     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
-        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+        //console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
 	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
         var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
            var el = $("#tls_policy_select");

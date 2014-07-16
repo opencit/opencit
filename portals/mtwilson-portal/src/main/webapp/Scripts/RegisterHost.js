@@ -11,7 +11,15 @@ $(function() {
 //	});
 
     $('#mainRegisterHost_vCenterServer').blur(function() {
-        fnMWValidateIpAddressOrHostName('mainRegisterHost_vCenterServer', true);
+        var isValid = fnMWValidateIpAddressOrHostName('mainRegisterHost_vCenterServer', true);
+        var vcenter = $('#mainRegisterHost_vCenterServer').val();
+        if( vcenter && isValid ) {
+            // check if we have a tls policy already associated with this vcenter server
+            // in the database - if we do, automatically populate it so the user doesn't have
+            // to enter it again
+            //$.getJSON("v2proxy/tls-policies.json", {"nameEqualTo":vcenter}, function(data) {
+            //});
+        }
     });
 
     $('#mainRegisterHost_loginID').blur(function() {
@@ -443,7 +451,7 @@ function fnSelectAllCheckBox(status) {
 
 $(document).ready(function() {
     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, function(data) {
-        console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
+        //console.log(data); // {"meta":{"default":null,"allow":["certificate","public-key"],"global":null},"tls_policies":[]}
 	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
         var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
        if( choicesArray.length === 0 ) {
