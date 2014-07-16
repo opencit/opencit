@@ -12,8 +12,8 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
-import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicy;
-import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicy;
+import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
+import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
 import java.net.MalformedURLException;
 
 /**
@@ -25,8 +25,8 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
 
 //    private TxtHostRecord txtHostRecord;
     private TlsPolicyProvider objectTlsPolicyProvider;
-    private StoredTlsPolicy.HostDescriptor hostDescriptor;
-    private StoredVendorTlsPolicy.VendorDescriptor vendorDescriptor;
+    private StoredTlsPolicyProvider.HostDescriptor hostDescriptor;
+    private StoredVendorTlsPolicyProvider.VendorDescriptor vendorDescriptor;
 
     public TxtHostRecordTlsPolicyFactory(TxtHostRecord txtHostRecord) {
         super();
@@ -56,12 +56,12 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
     }
 
     @Override
-    protected StoredTlsPolicy.HostDescriptor getHostDescriptor() {
+    protected StoredTlsPolicyProvider.HostDescriptor getHostDescriptor() {
         return hostDescriptor;
     }
 
     @Override
-    protected StoredVendorTlsPolicy.VendorDescriptor getVendorDescriptor() {
+    protected StoredVendorTlsPolicyProvider.VendorDescriptor getVendorDescriptor() {
         return vendorDescriptor;
     }
 
@@ -84,7 +84,7 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
         }
     }
 
-    public static class TxtHostRecordHostDescriptor implements StoredTlsPolicy.HostDescriptor {
+    public static class TxtHostRecordHostDescriptor implements StoredTlsPolicyProvider.HostDescriptor {
         private String hostId;
         private InternetAddress hostname;
 
@@ -108,7 +108,7 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
         }
     }
 
-    public static class TxtHostRecordVendorDescriptor implements StoredVendorTlsPolicy.VendorDescriptor {
+    public static class TxtHostRecordVendorDescriptor implements StoredVendorTlsPolicyProvider.VendorDescriptor {
         private String vendor;
 
         public TxtHostRecordVendorDescriptor(TxtHostRecord txtHostRecord) {
