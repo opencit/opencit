@@ -144,7 +144,7 @@ public class RpcUtil {
         CharArrayBuffer buffer = new CharArrayBuffer(accept.length());
         buffer.append(accept);
         BasicHeaderValueParser parser = new BasicHeaderValueParser();
-        HeaderElement[] headerElements = parser.parseElements(buffer, new ParserCursor(0,accept.length())); // xxx do we need accept.length - 1 ? 
+        HeaderElement[] headerElements = parser.parseElements(buffer, new ParserCursor(0,accept.length()));
         // sample headerElements structure:
         //     [{"name":"application/json","value":null,"parameters":[{"name":"0.9","value":null}],"parameterCount":1},{"name":"application/xml","value":null,"parameters":[{"name":"0.8","value":null}],"parameterCount":1},{"name":"text/plain","value":null,"parameters":[],"parameterCount":0},{"name":" * / * ","value":null,"parameters":[],"parameterCount":0}]
         // sort according to ascending priority  ... so most preferred wil be at the end of the array
