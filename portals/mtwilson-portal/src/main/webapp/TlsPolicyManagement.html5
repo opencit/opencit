@@ -563,8 +563,8 @@ function onSaveCurrentTlsPolicy() {
                     $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, onLoadTlsPolicyData); // TODO:  should be re-submitting the same search criteria already being used because we just edited a record from that result table
                 },
                 error: function(jqXHR,textStatus,errorThrown) {
-                    console.log("server returned error: "+textStatus);
-                    alert("cannot save tls policy: "+textStatus); // TODO:  convert to the auto-fade/clickable status message like on tag pages
+                    console.log("server returned error: "+errorThrown);
+                    alert("cannot save tls policy: "+errorThrown); // TODO:  convert to the auto-fade/clickable status message like on tag pages
                 }
             });
         }

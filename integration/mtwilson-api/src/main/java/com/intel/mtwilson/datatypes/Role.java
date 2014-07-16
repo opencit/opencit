@@ -28,7 +28,8 @@ public enum Role {
     ReportManager("report_manager"),
     Auditor("auditor"),
     AssetTagManager("asset_tag_manager"),
-    Challenger("challenger");
+    Challenger("challenger"),
+    TlsPolicyManager("tls_policy_manager");
     
     private String name;
     
