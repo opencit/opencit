@@ -362,7 +362,7 @@ function fnRegisterMultipleHost() {
                 'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
             }, tlsPolicyChoice);
     }
-    
+    console.log("Created tls policy choice", tlsPolicyChoice);
     $('#registerHostTableContent tr').each(function() {
         var row = $(this);
         var checkBoxValue = $(row).find('td:eq(3)').find('input:checkbox').attr('checked');

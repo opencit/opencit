@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.crypto.digest.DigestUtil;
 import com.intel.dcsg.cpg.crypto.digest.UnsupportedAlgorithmException;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyDigestTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.DigestRepository;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutableDigestRepository;
@@ -20,7 +19,6 @@ import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPol
 import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getFirst;
 import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.guessAlgorithmForDigest;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  *

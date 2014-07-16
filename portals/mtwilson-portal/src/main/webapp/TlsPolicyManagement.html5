@@ -113,7 +113,7 @@
     <ol>
         <li>
             <label for="tlspolicy_edit_certificates_add" data-i18n="action.add_certificate">Add certificate</label>
-            <textarea id="tlspolicy_edit_certificates_add" class="publickey-text" placeholder="Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
+            <textarea id="tlspolicy_edit_certificates_add" class="publickey-text" placeholder="Hex or Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -133,7 +133,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_certificate_digests_add" data-i18n="action.add_certificate_digest">Add certificate fingerprint</label>
-            <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text" placeholder="Base64-encoded digest using selected algorithm of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
+            <textarea id="tlspolicy_edit_certificate_digests_add" class="publickey-text" placeholder="Hex or Base64-encoded digest using selected algorithm of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -145,7 +145,7 @@
     <ol>
         <li>
             <label for="tlspolicy_edit_public_keys_add" data-i18n="action.add_public_key">Add public key</label>
-            <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text" placeholder="Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>
+            <textarea id="tlspolicy_edit_public_keys_add" class="publickey-text" placeholder="Hex or Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
@@ -165,7 +165,7 @@
         </li>
         <li>
             <label for="tlspolicy_edit_public_key_digests_add" data-i18n="action.add_public_key_digest">Add public key fingerprint</label>
-            <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text" placeholder="Base64-encoded digest using selected algorithm of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>
+            <textarea id="tlspolicy_edit_public_key_digests_add" class="publickey-text" placeholder="Hex or Base64-encoded digest using selected algorithm of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>
             <button data-i18n="button.add">Add</button>
         </li>
     </ol>
