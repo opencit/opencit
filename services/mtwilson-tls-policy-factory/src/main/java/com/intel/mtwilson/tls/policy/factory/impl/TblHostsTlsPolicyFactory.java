@@ -18,8 +18,8 @@ import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.TlsProtection;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
-import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicy;
-import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicy;
+import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
+import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,8 +46,8 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TblHostsTlsPolicyFactory.class);
     private TlsPolicyProvider objectTlsPolicyProvider;
-    private StoredTlsPolicy.HostDescriptor hostDescriptor;
-    private StoredVendorTlsPolicy.VendorDescriptor vendorDescriptor;
+    private StoredTlsPolicyProvider.HostDescriptor hostDescriptor;
+    private StoredVendorTlsPolicyProvider.VendorDescriptor vendorDescriptor;
 
     /**
      * Example input:
@@ -84,12 +84,12 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
     }
 
     @Override
-    protected StoredTlsPolicy.HostDescriptor getHostDescriptor() {
+    protected StoredTlsPolicyProvider.HostDescriptor getHostDescriptor() {
         return hostDescriptor;
     }
 
     @Override
-    protected StoredVendorTlsPolicy.VendorDescriptor getVendorDescriptor() {
+    protected StoredVendorTlsPolicyProvider.VendorDescriptor getVendorDescriptor() {
         return vendorDescriptor;
     }
 
@@ -314,7 +314,7 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
         }
     }
 
-    public static class TblHostsHostDescriptor implements StoredTlsPolicy.HostDescriptor {
+    public static class TblHostsHostDescriptor implements StoredTlsPolicyProvider.HostDescriptor {
 
         private String hostId;
         private InternetAddress hostname;
@@ -343,7 +343,7 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
         }
     }
 
-    public static class TblHostsVendorDescriptor implements StoredVendorTlsPolicy.VendorDescriptor {
+    public static class TblHostsVendorDescriptor implements StoredVendorTlsPolicyProvider.VendorDescriptor {
 
         private String vendor;
 
