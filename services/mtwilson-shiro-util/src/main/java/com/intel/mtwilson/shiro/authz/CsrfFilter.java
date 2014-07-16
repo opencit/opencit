@@ -238,20 +238,16 @@ public class CsrfFilter extends AuthorizationFilter {
     // only call this for required tokens, will return the token if it's valid, null if it's not valid
     private Token isTokenValid(String token, String username) {
         log.debug("isTokenValid: Validating token for username '{}'", username);
-        log.debug("TOKEN DEBUGGING ONLY : {}", token);
         try {
             Token tokenObject = tokenValidator.validate(token); // throws UnsupportedTokenVersionException, CryptographyException, ExpiredTokenException, KeyNotFoundException
             // validator already checks the timestamp,  so we just check that the token belongs to this user 
             String confirmUsername = new String(tokenObject.getContent(), Charset.forName("UTF-8"));
-            log.debug("TOKEN DEBUGGING ONLY :   token username is '{}'", confirmUsername);
+            log.debug("Token username: {}", confirmUsername);
             if( username.equals(confirmUsername) ) { 
-                log.debug("TOKEN DEBUGGING ONLY:  usernames are equal"); 
                 return tokenObject;
             } 
             else { 
-                log.debug("TOKEN DEBUGGING ONLYI:   usernames are NOT equal"); 
-                log.debug("username: {}", username.toCharArray()); 
-                log.debug("confirmusername: {}", confirmUsername.toCharArray()); 
+                log.debug("Input username does not match: {}", username.toCharArray()); 
                 return null;
             }
         } catch (UnsupportedTokenVersionException e) {

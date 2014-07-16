@@ -199,7 +199,7 @@ auto_install "Installer requirements" "APICLIENT"
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
-chmod 600 /etc/intel/cloudsecurity/*.properties
+chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
   default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ "$default_mtwilson_tls_policy_name" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_name" == "TRUST_FIRST_CERTIFICATE" ]; then
@@ -985,6 +985,8 @@ fi
 #  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 #fi
 
+# last chance to set permissions
+chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
 
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver

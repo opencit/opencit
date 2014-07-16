@@ -8,6 +8,7 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mountwilson.util.ProxyApiClient;
@@ -21,6 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import java.util.Properties;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -159,7 +161,7 @@ public class CheckLoginController extends AbstractController {
                 // get locale
                 try {
                     if (rsaApiClient != null) {
-                        locale = rsaApiClient.getLocale(keyAliasName);
+                        locale = rsaApiClient.getLocaleForUser(keyAliasName);
                         log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
                     } else {
                         locale = null;
@@ -169,6 +171,15 @@ public class CheckLoginController extends AbstractController {
                     locale = null;
                 }
                 
+                // set locale in apiclient
+                try {
+                    if (rsaApiClient != null) {
+                        rsaApiClient.setLocale(LocaleUtil.forLanguageTag(locale));
+                        log.debug("Set locale {} on apiclient", locale);
+                    }
+                } catch (Exception e) {
+                    log.warn("Cannot set locale on API client object.\r\n{}", e.toString());
+                }
                 
                 HttpSession session = req.getSession();
                 session.setAttribute("logged-in", true);

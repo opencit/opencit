@@ -112,12 +112,12 @@ public class HostAgentFactory {
     }
     
     public HostAgent getHostAgent(TxtHostRecord host) {
-        // debug only
-        try {
-        ObjectMapper mapper = new ObjectMapper();
-        log.debug("getHostAgent TxtHostRecord: {}", mapper.writeValueAsString(host));
-        } catch(Exception e) { log.error("getHostAgent cannot serialize TxtHostRecord" ,e); }
-        // debug only
+//        // debug only
+//        try {
+//        ObjectMapper mapper = new ObjectMapper();
+//        log.debug("getHostAgent TxtHostRecord: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
+//        } catch(Exception e) { log.error("getHostAgent cannot serialize TxtHostRecord" ,e); }
+//        // debug only
         
         String address = host.HostName;
         if( address == null || address.isEmpty() ) { address = host.IPAddress; }

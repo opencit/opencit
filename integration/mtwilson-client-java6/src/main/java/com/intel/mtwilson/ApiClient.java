@@ -1618,7 +1618,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @throws SignatureException 
      */
     @Override
-    public String getLocale(String username) throws IOException, ApiException, SignatureException {
+    public String getLocaleForUser(String username) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("username", username);
         String userLocale = text(httpGet(msurl("/i18n/locale", query)));

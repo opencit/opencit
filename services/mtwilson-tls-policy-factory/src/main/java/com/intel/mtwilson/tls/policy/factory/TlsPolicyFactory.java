@@ -4,68 +4,26 @@
  */
 package com.intel.mtwilson.tls.policy.factory;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.crypto.digest.Digest;
-import com.intel.dcsg.cpg.crypto.digest.DigestUtil;
-import com.intel.dcsg.cpg.crypto.digest.UnsupportedAlgorithmException;
 import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.net.Hostname;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
-import com.intel.dcsg.cpg.tls.policy.TrustDelegate;
-import com.intel.dcsg.cpg.tls.policy.impl.CertificateDigestTlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
-import com.intel.dcsg.cpg.tls.policy.impl.FirstPublicKeyTrustDelegate;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyDigestTlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
-import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.dcsg.cpg.x509.repository.CertificateRepository;
-import com.intel.dcsg.cpg.x509.repository.DigestRepository;
-import com.intel.dcsg.cpg.x509.repository.HashSetMutableCertificateRepository;
-import com.intel.dcsg.cpg.x509.repository.HashSetMutableDigestRepository;
-import com.intel.dcsg.cpg.x509.repository.HashSetMutablePublicKeyRepository;
-import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
-import com.intel.dcsg.cpg.x509.repository.PublicKeyRepository;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsProtection;
-import com.intel.mtwilson.tls.policy.factory.impl.TblHostsTlsPolicyFactory;
-import com.intel.mtwilson.tls.policy.factory.impl.TxtHostRecordTlsPolicyFactory;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
-import com.intel.mtwilson.tls.policy.provider.DefaultTlsPolicy;
-import com.intel.mtwilson.tls.policy.provider.GlobalTlsPolicy;
-import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicy;
-import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicy;
+import com.intel.mtwilson.tls.policy.provider.DefaultTlsPolicyProvider;
+import com.intel.mtwilson.tls.policy.provider.GlobalTlsPolicyProvider;
+import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
+import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.KeyManagementException;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.ws.rs.core.MediaType;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 
 /**
  * You can instantiate subclasses directly:
@@ -103,21 +61,22 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 public abstract class TlsPolicyFactory {
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TlsPolicyFactory.class);
-
+    private static final String INSECURE = "INSECURE";
+    private static final String TRUST_FIRST_CERTIFICATE = "TRUST_FIRST_CERTIFICATE";
+    
 //    protected abstract boolean accept(Object tlsPolicySubject);
     protected abstract TlsPolicyProvider getObjectTlsPolicyProvider();
-    protected abstract StoredTlsPolicy.HostDescriptor getHostDescriptor();
-    protected abstract StoredVendorTlsPolicy.VendorDescriptor getVendorDescriptor();
+    protected abstract StoredTlsPolicyProvider.HostDescriptor getHostDescriptor();
+    protected abstract StoredVendorTlsPolicyProvider.VendorDescriptor getVendorDescriptor();
     
     protected List<TlsPolicyProvider> getProviders() {
         ArrayList<TlsPolicyProvider> providers = new ArrayList<>();
-        providers.add(new GlobalTlsPolicy());
+        providers.add(new GlobalTlsPolicyProvider());
         providers.add(getObjectTlsPolicyProvider()); //providers.add(new ObjectTlsPolicy(txtHostRecord));
-        providers.add(new StoredTlsPolicy(getHostDescriptor()));
-        providers.add(new StoredVendorTlsPolicy(getVendorDescriptor()));
-        providers.add(new DefaultTlsPolicy());
+        providers.add(new StoredTlsPolicyProvider(getHostDescriptor()));
+        providers.add(new StoredVendorTlsPolicyProvider(getVendorDescriptor()));
+        providers.add(new DefaultTlsPolicyProvider());
         return providers;
     }
     
@@ -190,18 +149,18 @@ public abstract class TlsPolicyFactory {
         }
         if( tlsPolicyChoice.getTlsPolicyId() != null ) {
             // first check for the special policy "id" INSECURE and TRUST_FIRST_CERTIFICATE
-            if( tlsPolicyChoice.getTlsPolicyId().equals("INSECURE") ) {
+            if( tlsPolicyChoice.getTlsPolicyId().equals(INSECURE) ) {
                 TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-                tlsPolicyDescriptor.setPolicyType("INSECURE");
+                tlsPolicyDescriptor.setPolicyType(INSECURE);
                 tlsPolicyDescriptor.setProtection(new TlsProtection());
                 tlsPolicyDescriptor.getProtection().encryption = false;
                 tlsPolicyDescriptor.getProtection().integrity = false;
                 tlsPolicyDescriptor.getProtection().authentication = false;
                 return tlsPolicyDescriptor;
             }
-            if( tlsPolicyChoice.getTlsPolicyId().equals("TRUST_FIRST_CERTIFICATE")) {
+            if( tlsPolicyChoice.getTlsPolicyId().equals(TRUST_FIRST_CERTIFICATE)) {
                 TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-                tlsPolicyDescriptor.setPolicyType("TRUST_FIRST_CERTIFICATE");
+                tlsPolicyDescriptor.setPolicyType(TRUST_FIRST_CERTIFICATE);
                 return tlsPolicyDescriptor;
             }
             // it it's not a special ID, then it must be an ID of an existing mw_tls_policy record so try to load it
@@ -224,14 +183,14 @@ public abstract class TlsPolicyFactory {
         if( !tlsPolicyDescriptor.getProtection().authentication ||
                 !tlsPolicyDescriptor.getProtection().encryption  ||
                 !tlsPolicyDescriptor.getProtection().integrity) {
-            return "INSECURE"; // theoretically there might be some other type for integrity+authentication without encryption, but for now if it's not integrity+authentication+confidentiality we call it insecure
+            return INSECURE; // theoretically there might be some other type for integrity+authentication without encryption, but for now if it's not integrity+authentication+confidentiality we call it insecure
         }
         }
         return null;
     }
     
     private String getTlsPolicyType(String tlsPolicyName) {
-        if( tlsPolicyName.equals("INSECURE") || tlsPolicyName.equals("TRUST_FIRST_CERTIFICATE") ) { return tlsPolicyName; }
+        if( tlsPolicyName.equals(INSECURE) || tlsPolicyName.equals(TRUST_FIRST_CERTIFICATE) ) { return tlsPolicyName; }
         return null;
     }
     
@@ -261,30 +220,49 @@ public abstract class TlsPolicyFactory {
     }
 
     private TlsPolicy createTlsPolicy(TlsPolicyChoiceReport report) {
-        String policyName = report.getDescriptor().getPolicyType();
+        return createTlsPolicy(report.getDescriptor());
+    }
+    
+    /**
+     * 
+     * @param tlsPolicyDescriptor comprised of policy type and policy-specific data
+     * @return 
+     */
+    public static TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
+        String policyName = tlsPolicyDescriptor.getPolicyType();
         log.debug("Trying to read TlsPolicy name {}", policyName);
-        List<TlsPolicyCreator> readers = Extensions.findAll(TlsPolicyCreator.class);
-        for(TlsPolicyCreator reader : readers ) {
+        List<TlsPolicyCreator> creators = Extensions.findAll(TlsPolicyCreator.class);
+        for(TlsPolicyCreator creator : creators ) {
             try {
-                log.debug("Trying to read TlsPolicy with {}", reader.getClass().getName());
-                TlsPolicy tlsPolicy = reader.createTlsPolicy(report.getDescriptor()); // throws IllegalArgumentException
+                log.debug("Trying to read TlsPolicy with {}", creator.getClass().getName());
+                TlsPolicy tlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor); // throws IllegalArgumentException
                 if( tlsPolicy == null ) {
-                    continue; // reader does not support the given descriptor
+                    continue; // creator does not support the given descriptor
                 }
-                log.debug("Successfully created TlsPolicy with {}", reader.getClass().getName());
+                log.debug("Successfully created TlsPolicy with {}", creator.getClass().getName());
                 return tlsPolicy;
             }
             catch(TlsPolicyDescriptorInvalidException e) { throw e; }
             catch(IllegalArgumentException e) {
-                throw new TlsPolicyDescriptorInvalidException(e, report.getDescriptor());
+                throw new TlsPolicyDescriptorInvalidException(e, tlsPolicyDescriptor);
             }
         }
         
         throw new IllegalArgumentException("Unsupported TLS policy choice");
     }
-    
 
  
+    /**
+     * Shortcut for TlsPolicyFactory.createFactory(subject).getTlsPolicy()
+     * 
+     * @param tlsPolicySubject could be an instance of TxtHostRecord, TblHosts, or any other class for which there exists a TlsPolicyFactory implementation
+     * @return 
+     */
+    public static TlsPolicy createTlsPolicy(Object tlsPolicySubject) {
+        TlsPolicyFactory factory = createFactory(tlsPolicySubject);
+        TlsPolicy tlsPolicy = factory.getTlsPolicy();
+        return tlsPolicy;
+    }
 
         
     /*
@@ -344,12 +322,12 @@ public abstract class TlsPolicyFactory {
      * @return a new TlsPolicyFactory that can create a TlsPolicyDescriptor and a TlsPolicy for the given tlsPolicySubject
      */
     public static TlsPolicyFactory createFactory(Object tlsPolicySubject) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            log.debug("TlsPolicyFactory createFactory: {}", mapper.writeValueAsString(tlsPolicySubject));
-        } catch (Exception e) {
-            log.warn("Cannot write debug log", e);
-        }
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            log.debug("TlsPolicyFactory createFactory: {}", mapper.writeValueAsString(tlsPolicySubject)); //This statement may contain clear text passwords
+//        } catch (Exception e) {
+//            log.warn("Cannot write debug log", e);
+//        }
         TlsPolicyFactory factoryExtension = Extensions.require(TlsPolicyFactory.class, tlsPolicySubject);
         return factoryExtension;
         /*

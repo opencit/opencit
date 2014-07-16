@@ -111,15 +111,15 @@ public class HostBO {
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-            if( log.isDebugEnabled() ) {
-                try {
-                ObjectMapper mapper = new ObjectMapper();
-                log.debug("addHost input: {}", mapper.writeValueAsString(host));
-                }
-                catch(IOException e) {
-                    log.debug("cannot serialize host input to addHost", e);
-                }
-            }
+//            if( log.isDebugEnabled() ) {
+//                try {
+//                ObjectMapper mapper = new ObjectMapper();
+//                log.debug("addHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
+//                }
+//                catch(IOException e) {
+//                    log.debug("cannot serialize host input to addHost", e);
+//                }
+//            }
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -392,15 +392,15 @@ public class HostBO {
     }
 
         public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-            if( log.isDebugEnabled() ) {
-                try {
-                ObjectMapper mapper = new ObjectMapper();
-                log.debug("updateHost input: {}", mapper.writeValueAsString(host));
-                }
-                catch(IOException e) {
-                    log.debug("cannot serialize host input to updateHost", e);
-                }
-            }
+//            if( log.isDebugEnabled() ) {
+//                try {
+//                ObjectMapper mapper = new ObjectMapper();
+//                log.debug("updateHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
+//                }
+//                catch(IOException e) {
+//                    log.debug("cannot serialize host input to updateHost", e);
+//                }
+//            }
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {

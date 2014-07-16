@@ -47,12 +47,12 @@ import org.apache.commons.codec.binary.Base64;
  *
  * @author jbuhacoff
  */
-public class StoredTlsPolicy implements TlsPolicyProvider {
+public class StoredTlsPolicyProvider implements TlsPolicyProvider {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StoredTlsPolicy.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StoredTlsPolicyProvider.class);
     private String hostId;
 
-    public StoredTlsPolicy(HostDescriptor hostDescriptor) {
+    public StoredTlsPolicyProvider(HostDescriptor hostDescriptor) {
         this.hostId = hostDescriptor.getHostId();
     }
 

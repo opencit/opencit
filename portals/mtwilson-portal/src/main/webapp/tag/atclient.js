@@ -902,15 +902,7 @@ mtwilson.atag = mtwilson.atag || {};
         subject_id = $F("uuid-populate-host");
         selection_id = getSelectOptionValue($('certificate-request-create-tag-selection'));
         if (report.isValid) {
-<<<<<<< HEAD
-            if( true ) { 
-=======
-            // currently we always request the encrypted selection xml and then we use it for our certificate request
-            // that always works but if we want to save some processing, we can first check if encrypted xmls are 
-            // required by checking the server configuration for tag.encrypted.xml.required and only use encrypted
-            // selection xmls when required
             if( true ) {
->>>>>>> aea2c917d2bded452f248a22c7be9ec604b68677
                 var requestObject = "";
                 console.log("Certificate request: " + Object.toJSON(requestObject));
 

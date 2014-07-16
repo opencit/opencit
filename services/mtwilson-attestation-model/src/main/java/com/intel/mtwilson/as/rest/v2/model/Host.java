@@ -36,7 +36,7 @@ public class Host extends Document {
     private String aikCertificate;  // may be null
     private String aikPublicKey;  // may be null
     private String aikSha1;  // may be null
-    private String tlsPolicyId;
+    private String tlsPolicyId; // may be null, a uuid reference to mw_tls_policy table, or special keyword INSECURE or TRUST_FIRST_CERTIFICATE
     private String hardwareUuid;
 
     @Regex(RegexPatterns.IPADDR_FQDN)    

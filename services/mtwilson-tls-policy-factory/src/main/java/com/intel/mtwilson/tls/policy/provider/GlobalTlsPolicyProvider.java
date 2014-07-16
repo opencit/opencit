@@ -17,8 +17,8 @@ import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
  * 
  * @author jbuhacoff
  */
-public class GlobalTlsPolicy implements TlsPolicyProvider {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GlobalTlsPolicy.class);
+public class GlobalTlsPolicyProvider implements TlsPolicyProvider {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GlobalTlsPolicyProvider.class);
     
     @Override
     public TlsPolicyChoice getTlsPolicyChoice() {
