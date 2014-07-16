@@ -28,7 +28,8 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateDigestTlsPolicyCreator.class);
-    private static final Pattern ignore = Pattern.compile("[\\s:]", Pattern.MULTILINE);
+//    private static final Pattern ignore = Pattern.compile("[\\s:]", Pattern.MULTILINE);
+    private static final Pattern ignore = Pattern.compile("[^0-9a-zA-Z/+=]", Pattern.MULTILINE);  // ignore any characters not in hex and base64 character sets
     
     @Override
     public CertificateDigestTlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {

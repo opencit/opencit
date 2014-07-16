@@ -71,7 +71,7 @@
     <menuitem label="Copy" data-i18n="[label]action.copy" icon="images/copy_18.png" onclick="onCopyCurrentTlsPolicyDataItem(this)"></menuitem> 
     <menuitem label="Delete" data-i18n="[label]action.delete" icon="images/trash_empty_18.png" onclick="onDeleteCurrentTlsPolicyDataItem()"></menuitem> 
 </menu>
-<form id="tlspolicy_edit_form" style="display:none" class="tlsform" title="Edit TLS Policy" data-i18n="[title]form.edit_tls_policy">
+<form id="tlspolicy_edit_form" style="display:none" class="tlsform">
     <fieldset>
     <legend data-i18n="form.edit_tls_policy_summary">TLS Policy Summary</legend>
     <ol>
@@ -231,6 +231,8 @@ var saveButtonText = $("div.translations > span[data-i18n='action.save']").first
     <span data-i18n="action.cancel">Cancel</span>
     <span data-i18n="action.delete">Delete</span>
     <span data-i18n="action.ok">OK</span>
+    <span data-i18n="form.edit_tls_policy">Edit TLS Policy</span>
+    <span data-i18n="form.create_tls_policy">Create TLS Policy</span>
 </div>
 
 </div>
@@ -367,6 +369,7 @@ function onCreateNewTlsPolicy() {
     $("#tlspolicy_edit_public_key_digest_list").empty();
     $("#tlspolicy_edit_form").find(".tlspolicy-edit-only").hide();
     $("#tlspolicy_edit_form").dialog("open"); 
+    $("#tlspolicy_edit_form").dialog("option", "title", createTlsPolicyDialogTitle); 
 }
 function getCurrentTlsPolicyDataContainer(policyType) {
     var policyTypeContainerIdMap = {
@@ -470,7 +473,8 @@ function onEditCurrentTlsPolicy() {
     if( currentTlsPolicyTableRow && currentTlsPolicyRecord ) {
         onEditCurrentTlsPolicyInitDialog();
         $("#tlspolicy_edit_form").find(".tlspolicy-edit-only").show();
-        $( "#tlspolicy_edit_form" ).dialog("open");
+        $("#tlspolicy_edit_form").dialog("open");
+        $("#tlspolicy_edit_form").dialog("option", "title", editTlsPolicyDialogTitle); 
     }
     else {
         console.log("onEditCurrentTlsPolicy called but currentTlsPolicyTableRow="+currentTlsPolicyTableRow+" and currentTlsPolicyRecord="+currentTlsPolicyRecord);
@@ -625,6 +629,8 @@ var saveButtonText = $("div.translations > span[data-i18n='action.save']").first
 var cancelButtonText = $("div.translations > span[data-i18n='action.cancel']").first().html();
 var deleteButtonText = $("div.translations > span[data-i18n='action.delete']").first().html();
 var okButtonText = $("div.translations > span[data-i18n='action.ok']").first().html();
+var editTlsPolicyDialogTitle = $("div.translations > span[data-i18n='form.edit_tls_policy']").first().html();
+var createTlsPolicyDialogTitle = $("div.translations > span[data-i18n='form.create_tls_policy']").first().html();
 var tlsPolicyEditDialogButtons = {};
 tlsPolicyEditDialogButtons[cancelButtonText] = onCancelEditCurrentTlsPolicy;
 tlsPolicyEditDialogButtons[saveButtonText] = onSaveCurrentTlsPolicy;
