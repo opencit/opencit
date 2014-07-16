@@ -444,6 +444,7 @@ case "$1" in
         call_setupcommand EraseUserAccounts $@
         ;;
   zeroize)
+        configDir="/opt/mtwilson/configuration"
         if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
           glassfish_require
@@ -452,8 +453,14 @@ case "$1" in
           tomcat_require
           tomcat_async_stop
         fi
-        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
-        rm -rf /etc/intel/cloudsecurity        
+        echo "Removing Mt Wilson configuration in $configDir..."
+        find "$configDir/" -type f -exec shred -uzn 3 {} \;
+        ;;
+  key-backup)
+        key_backup $@
+        ;;
+  key-restore)
+        key_restore $@
         ;;
   change-db-pass)
         if [ $# -ne 1 ]; then
