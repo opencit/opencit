@@ -9,6 +9,8 @@ import com.intel.dcsg.cpg.tls.policy.impl.CertificateDigestTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import java.util.ArrayList;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -40,6 +42,18 @@ public class PolicyCreatorTest {
         PublicKeyTlsPolicy tlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
         assertNotNull(tlsPolicy);
     }
+    
+    @Test
+    public void testCreatePublicKeyTlsPolicyFrom1024BitRsaPublicKeyHex() {
+        TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+        tlsPolicyDescriptor.setPolicyType("public-key");
+        tlsPolicyDescriptor.setData(new ArrayList<String>());
+        tlsPolicyDescriptor.getData().add("30 81 9f 30 0d 06 09 2a 86 48 86 f7 0d 01 01 01 05 00 03 81 8d 00 30 81 89 02 81 81 00 80 cd 7d 5e 8f d0 c7 b6 b8 63 f3 98 c6 37 93 7f df a0 c1 f4 c2 d7 9b 3e 04 3b 24 4d 3b 9c a2 22 70 db 1e 10 8a 12 18 af 46 e7 d9 d1 10 77 a7 8c 2f 64 68 e8 c0 82 92 8f d9 a4 07 48 06 ca f6 82 75 e4 ee 0d 94 06 5c 7f f0 46 37 c4 e8 18 d1 ad 80 7f 97 9e ed ca 6f 21 c8 2c 95 95 a0 f6 bb b5 8c e7 9d 33 21 76 84 98 11 20 f2 16 0f 6f 4d b0 5e 4b 17 e0 ae a8 e3 b0 c2 b4 bf 5d 9b 81 43 b5 02 03 01 00 01");
+        PublicKeyTlsPolicyCreator creator = new PublicKeyTlsPolicyCreator();
+        PublicKeyTlsPolicy tlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+        assertNotNull(tlsPolicy);
+    }
+    
     @Test
     public void testCreatePublicKeyTlsPolicyFrom2048BitRsaPublicKey() {
         TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();

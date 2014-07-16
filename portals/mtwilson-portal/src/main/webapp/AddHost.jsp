@@ -134,10 +134,10 @@
                                                 <div class="valueDiv">&nbsp; </div>
                             <div class="labelDiv">&nbsp;</div>
                             <div class="valueDivConfig">
-                                    <textarea class="tlspolicy-input-certificate" id="tls_policy_data_certificate" placeholder="Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
-                                    <textarea class="tlspolicy-input-certificate-digest" id="tls_policy_data_certificate_digest" placeholder="Base64-encoded digest of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
-                                    <textarea class="tlspolicy-input-public-key" id="tls_policy_data_public_key" placeholder="Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>  
-                                    <textarea class="tlspolicy-input-public-key-digest" id="tls_policy_data_public_key_digest" placeholder="Base64-encoded digest of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>                                    
+                                    <textarea class="tlspolicy-input-certificate" id="tls_policy_data_certificate" placeholder="Hex or Base64-encoded DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_input_format"></textarea>
+                                    <textarea class="tlspolicy-input-certificate-digest" id="tls_policy_data_certificate_digest" placeholder="Hex or Base64-encoded digest of DER-format X.509 public key certificate" data-i18n="[placeholder]tlspolicy.certificate_digest_input_format"></textarea>
+                                    <textarea class="tlspolicy-input-public-key" id="tls_policy_data_public_key" placeholder="Hex or Base64-encoded DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_input_format"></textarea>  
+                                    <textarea class="tlspolicy-input-public-key-digest" id="tls_policy_data_public_key_digest" placeholder="Hex or Base64-encoded digest of DER-format X.509 public key" data-i18n="[placeholder]tlspolicy.public_key_digest_input_format"></textarea>                                    
                             </div>
                         </div>
 			
