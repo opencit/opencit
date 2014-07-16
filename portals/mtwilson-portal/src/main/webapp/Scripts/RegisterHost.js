@@ -447,9 +447,12 @@ $(document).ready(function() {
 	mtwilsonTlsPolicyModule.onGetTlsPolicies(data);
         var choicesArray = mtwilsonTlsPolicyModule.getTlsPolicyChoices();
        if( choicesArray.length === 0 ) {
-       	$("#tls_policy_input_div_vmware").hide();
+    //   	$("#tls_policy_input_div_vmware").hide();
        	$("#tls_policy_input_div_flatfile").hide();
        } else {
+//       	$("#tls_policy_input_div_vmware").show();
+       	$("#tls_policy_input_div_flatfile").show();
+	}
   		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_vmware"), choicesArray);
   		mtwilsonTlsPolicyModule.populateSelectOptionsWithTlsPolicyChoices($("#tls_policy_select_flatfile"), choicesArray);
         mtwilsonTlsPolicyModule.insertSelectOptionsWithPerHostTlsPolicyChoices($("#tls_policy_select_vmware"), {
@@ -457,8 +460,5 @@ $(document).ready(function() {
         });
         mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice($("#tls_policy_select_vmware"));
         mtwilsonTlsPolicyModule.selectDefaultTlsPolicyChoice($("#tls_policy_select_flatfile"));
-       	$("#tls_policy_input_div_vmware").show();
-       	$("#tls_policy_input_div_flatfile").show();
-	}
     });
 });

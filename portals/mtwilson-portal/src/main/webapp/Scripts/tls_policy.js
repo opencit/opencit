@@ -53,7 +53,7 @@ var mtwilsonTlsPolicyModule = {};
     defineFunction(m, "populateSelectOptionsWithTlsPolicyChoices", function(element,choicesArray) {
         $(element).empty();
         if(choicesArray.length===0) {
-            $(element).append("<option value='' data-i18n='tls.no_choices' disabled>None available</option>");
+            return;
         }
         var globalChoice, defaultChoice;
         var shared = "";
@@ -151,6 +151,7 @@ var mtwilsonTlsPolicyModule = {};
                 $(element).val( selectedValue );
             }
         }
+        $(element).change();
         /*
         if( defaultValue ) {           
             $(element).val(defaultValue);

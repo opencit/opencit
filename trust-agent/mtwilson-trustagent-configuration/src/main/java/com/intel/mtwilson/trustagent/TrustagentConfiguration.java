@@ -158,7 +158,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     
     public int getTrustagentHttpTlsPort() {
-        return getConfiguration().getInteger(TRUSTAGENT_HTTP_TLS_PORT, 1443); // TODO:  choose another default port; 9999 is the old v1 port
+        return getConfiguration().getInteger(TRUSTAGENT_HTTP_TLS_PORT, 1443);
     }
     public String getTrustagentTlsCertDn() {
         return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
