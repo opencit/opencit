@@ -4126,7 +4126,9 @@ key_backup() {
   datestr=`date +%Y-%m-%d.%H%M%S`
   keyBackupFile="$keyBackupDir/mtwilson-keys_$datestr.enc"
   mkdir -p "$keyBackupDir" 2>/dev/null
-  /opt/mtwilson/bin/encrypt.sh -p MTWILSON_PASSWORD --nopbkdf2 "$keyBackupFile" "$configDir/*.* $configDir/private/*.*" > /dev/null
+  filesToEncrypt="$configDir/*.*"
+  if [ -f "$configDir/private/password.txt" ]; then filesToEncrypt="$filesToEncrypt $configDir/private/*.*"; fi
+  /opt/mtwilson/bin/encrypt.sh -p MTWILSON_PASSWORD --nopbkdf2 "$keyBackupFile" "$filesToEncrypt" > /dev/null
   find "$configDir/" -name "*.sig" -type f -delete
   shred -uzn 3 "$keyBackupFile.zip"
   echo_success "Keys backed up to: $keyBackupFile"
@@ -4165,10 +4167,12 @@ key_restore() {
   rm -rf "$keyBackupDir"
   shred -uzn 3 "$keyBackupFile.zip"
 
-  # password.txt file in private directory  
-  mkdir -p "$configDir/private" 2>/dev/null
-  cp -R "$configDir/password.txt" "$configDir/private/password.txt"
-  shred -uzn 3 "$configDir/password.txt"
+  # password.txt file in private directory
+  if [ -f "$configDir/password.txt" ]; then
+    mkdir -p "$configDir/private" 2>/dev/null
+    cp -R "$configDir/password.txt" "$configDir/private/password.txt"
+    shred -uzn 3 "$configDir/password.txt"
+  fi
 
   echo_success "Keys restored from: $keyBackupFile"
 }
