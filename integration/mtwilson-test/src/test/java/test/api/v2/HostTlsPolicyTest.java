@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.client.jaxrs;
+package test.api.v2;
 
 import com.intel.mtwilson.attestation.client.jaxrs.HostTlsPolicy;
 import com.intel.dcsg.cpg.io.UUID;
@@ -13,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * BOOKMARK TODO: move to tls policy ws and client project
  *
  * @author ssbangal
  */

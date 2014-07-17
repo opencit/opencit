@@ -417,7 +417,6 @@ public class HostBO {
                         TblMle  biosMleId = findBiosMleForHost(host); 
                         TblMle  vmmMleId = findVmmMleForHost(host); 
             
-                        // BOOKMARK JONATHAN TLS POLICY
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         setTlsPolicyFields(tblHosts, host);
 
