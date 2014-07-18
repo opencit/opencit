@@ -15,12 +15,14 @@ import org.glassfish.jersey.client.HttpUrlConnector.ConnectionFactory;
  * @author jbuhacoff
  */
 public class TlsPolicyAwareConnectionFactory implements ConnectionFactory {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TlsPolicyAwareConnectionFactory.class);
     private TlsConnection tlsConnection;
     public TlsPolicyAwareConnectionFactory(TlsConnection tlsConnection) {
         this.tlsConnection = tlsConnection;
     }
     @Override
     public HttpURLConnection getConnection(URL url) throws IOException {
+        log.debug("getConnection: {}", url.toExternalForm());
         return tlsConnection.openConnection();
     }
     

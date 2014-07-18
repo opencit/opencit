@@ -161,9 +161,10 @@ public class JaxrsClientBuilder {
             }
         }
         if (tlsConnection != null) {
+            log.debug("setting HttpUrlConnector with TlsPolicyAwareConnectionFactory");
+            clientConfig.connector(new HttpUrlConnector(clientConfig, new TlsPolicyAwareConnectionFactory(tlsConnection)));
+            log.debug("setting HttpsURLConnection defaults");
             TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
-            
-            clientConfig.connector(new HttpUrlConnector(clientConfig, connectionFactory));
         }
     }
 
