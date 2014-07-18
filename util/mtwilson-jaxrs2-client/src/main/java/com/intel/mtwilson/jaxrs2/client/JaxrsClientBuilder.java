@@ -9,7 +9,8 @@ import java.net.URL;
 import org.glassfish.jersey.client.ClientConfig;
 import com.intel.mtwilson.security.http.jaxrs.HmacAuthorizationFilter;
 import com.intel.mtwilson.security.http.jaxrs.X509AuthorizationFilter;
-import org.glassfish.jersey.client.filter.HttpBasicAuthFilter;
+//import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature; //jersey 2.10.1
+import org.glassfish.jersey.client.filter.HttpBasicAuthFilter; //jersey 2.4.1
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
@@ -34,7 +35,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
-import org.glassfish.jersey.client.HttpUrlConnector;
+//import org.glassfish.jersey.client.HttpUrlConnectorProvider; // jersey 2.10.1
+import org.glassfish.jersey.client.HttpUrlConnector; // jersey 2.4.1
 
 /**
  * Examples:
@@ -135,7 +137,8 @@ public class JaxrsClientBuilder {
 //            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"));
 //            clientConfig.register(feature);
 
-            clientConfig.register(new HttpBasicAuthFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
+            clientConfig.register(new HttpBasicAuthFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"))); // jersey 2.4.1
+//            clientConfig.register(HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"))); // jersey 2.10.1
         }
     }
 
@@ -161,9 +164,11 @@ public class JaxrsClientBuilder {
             }
         }
         if (tlsConnection != null) {
-            TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
-            
-            clientConfig.connector(new HttpUrlConnector(clientConfig, connectionFactory));
+//            log.debug("setting HttpUrlConnector with TlsPolicyAwareConnectionFactory");
+//            clientConfig.connector(new HttpUrlConnector(clientConfig, new TlsPolicyAwareConnectionFactory(tlsConnection)));  // jersey 2.4.1
+//            clientConfig.connectorProvider(new HttpUrlConnectorProvider().connectionFactory(new TlsPolicyAwareConnectionFactory(tlsConnection)));
+//            log.debug("setting HttpsURLConnection defaults");
+//            TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
         }
     }
 
@@ -196,8 +201,8 @@ public class JaxrsClientBuilder {
 //            Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).hostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier()).withConfig(clientConfig).build();
             Client client = ClientBuilder.newBuilder()
                     .withConfig(clientConfig)
-//                    .sslContext(tlsConnection.getSSLContext())
-                    .hostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier())
+                    .sslContext(tlsConnection.getSSLContext()) // when commented out,  get pkix path building failure from java's built-in ssl context... when enabled, our custom ssl context doesn't get called at all.
+//                    .hostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier())
                     .build();
             if (configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true)) {
                 client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));

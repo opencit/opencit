@@ -43,7 +43,7 @@ import com.intel.dcsg.cpg.io.Platform;
 import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
-import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import java.io.StringReader;
@@ -232,7 +232,7 @@ public class TAHelper {
             // 3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
 //            HostAgentFactory factory = new HostAgentFactory();
 
-            TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
+            TlsPolicy tlsPolicy = V1TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
 
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {
