@@ -139,14 +139,15 @@ public class ProvisionTagCertificate  {
         TagCertificateAuthority ca = new TagCertificateAuthority(configuration);
         // if the subject is an ip address or hostname, resolve it to a hardware uuid with mtwilson - if the host isn't registered in mtwilson we can't get the hardware uuid so we have to reject the request
         if( !UUID.isValid(subject)) {
-            subject = ca.findSubjectHardwareUuid(subject);
-            if (subject == null) {
-                log.error("Subject specified is not valid.");
+            String subjectUuid = ca.findSubjectHardwareUuid(subject);
+            if (subjectUuid == null) {
+                log.error("Cannot find hardware uuid for subject: {}", subject);
                 throw new IllegalArgumentException("Invalid subject specified in the call");
             }
+            subject = subjectUuid;
         }
         if( selections == null ) {
-            log.error("Selections specified is not valid.");
+            log.error("Selection input is null");
             throw new IllegalArgumentException("Invalid selections specified.");
         }
         // if external ca is configured then we only save the request to the database and indicate async processing in our response
