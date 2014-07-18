@@ -10,7 +10,7 @@ import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.datatypes.TLSPolicy;
+//import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.Database;
@@ -715,6 +715,8 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         ctx.automationKeyPassword = msprops.getProperty("mtwilson.api.key.password");
         ctx.automationKeystoreFile = msprops.getProperty("mtwilson.api.keystore");
         
+        /*
+         * 
         // here we are mapping the old ssl policy implementation to the new one. the mapping is not perfect but we try to capture the best intent.  specifically, "requireTrustedCertificate" can either mean a CA or a specific self-signed host certificate. we assume a CA.
         boolean automationVerifyHostname = Boolean.valueOf(msprops.getProperty("mtwilson.api.ssl.verifyHostname", mwprops.getProperty("mtwilson.api.ssl.verifyHostname", "true")));
         boolean automationRequireTrustedCertificate = Boolean.valueOf(msprops.getProperty("mtwilson.api.ssl.requireTrustedCertificate", mwprops.getProperty("mtwilson.api.ssl.requireTrustedCertificate", "true")));
@@ -727,6 +729,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         else {
             ctx.automationTlsPolicy = TLSPolicy.INSECURE;
         }
+        */
             
         // these security parameters actually apply to all services
         ctx.securityPolicy = new WebServiceSecurityPolicy();

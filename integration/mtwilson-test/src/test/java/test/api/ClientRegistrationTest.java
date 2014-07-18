@@ -24,6 +24,9 @@ import org.junit.Test;
 public class ClientRegistrationTest extends RemoteIntegrationTest {
     
     /**
+     * NOTE: the configuration example below may be outdated with respect
+     * to TLS Policy configuration; please refer to current product documentation
+     * 
      * Register using V1 APIs. Before running this junit test, create the 
      * file C:\mtwilson\configuration\mtwilson.properties with content like
      * this:

@@ -211,7 +211,7 @@ public class HostBO {
                         }
                         
                         // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
-//                            pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
+//                            pcrMap = getHostPcrManifest(tblHosts, host); 
                         
 
                         // for all hosts (used to be just vmware, but no reason right now to make it vmware-specific...), if pcr 22 happens to match our location database, populate the location field in the host record
@@ -417,7 +417,6 @@ public class HostBO {
                         TblMle  biosMleId = findBiosMleForHost(host); 
                         TblMle  vmmMleId = findVmmMleForHost(host); 
             
-                        // BOOKMARK JONATHAN TLS POLICY
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         setTlsPolicyFields(tblHosts, host);
 

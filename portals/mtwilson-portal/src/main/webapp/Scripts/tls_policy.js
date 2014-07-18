@@ -45,6 +45,13 @@ var mtwilsonTlsPolicyModule = {};
             }
             choices.push(choice);
         }
+        // automatically add "INSECURE" and "TRUST_FIRST_CERTIFICATE" to the policy list IF they are allowed
+        if( m.configuration.allow.indexOf("INSECURE") > -1 ) {
+            choices.push({value:"INSECURE",label:"INSECURE",policy_scope:"shared",policy_type:"INSECURE", disabled:disabled});
+        }
+        if( m.configuration.allow.indexOf("TRUST_FIRST_CERTIFICATE") > -1 ) {
+            choices.push({value:"TRUST_FIRST_CERTIFICATE",label:"TRUST_FIRST_CERTIFICATE",policy_scope:"shared",policy_type:"TRUST_FIRST_CERTIFICATE", disabled:disabled});
+        }
         return choices;
     });
     

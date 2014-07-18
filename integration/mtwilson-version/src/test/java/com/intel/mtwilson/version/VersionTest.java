@@ -16,6 +16,8 @@ public class VersionTest {
 
     @Test
     public void testVersion() {
-        log.debug("Version: {}", Version.getInstance());
+        log.debug("Version: {}", Version.getInstance().getVersion());
+        log.debug("Build: {}", Version.getInstance().getTimestamp());
+        log.debug("Branch: {}", Version.getInstance().getBranch());
     }
 }

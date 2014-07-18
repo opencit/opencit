@@ -135,14 +135,13 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
                     tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType(host.getTlsPolicyName());
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_KNOWN_CERTIFICATE")) {
-                    // BOOKMARK JONATHAN TLS POLICY
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
-                    tlsPolicyNameChoice.setTlsPolicyDescriptor(getTlsPolicyDescriptorFromResource(host.getTlsPolicyName(), host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.setTlsPolicyDescriptor(getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType("public-key"); // will cause the certs in the data section to be read only for their public keys. without hostname verification
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_CA_VERIFY_HOSTNAME")) {
-                    // BOOKMARK JONATHAN TLS POLICY
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
-                    tlsPolicyNameChoice.setTlsPolicyDescriptor(getTlsPolicyDescriptorFromResource(host.getTlsPolicyName(), host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.setTlsPolicyDescriptor(getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
                     return tlsPolicyNameChoice;
                 } else {
                     log.debug("TblHostsObjectTlsPolicy: unsupported policy name {}", host.getTlsPolicyName());
@@ -157,19 +156,6 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
         @Override
         public TlsPolicyChoice getTlsPolicyChoice() {
             return tlsPolicyChoice;
-        }
-
-        private TlsPolicyDescriptor getTlsPolicyDescriptorFromResource(String tlsPolicyName, Resource resource)  {
-            try {
-                String password = My.configuration().getTlsKeystorePassword();
-                SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); 
-                TlsPolicyDescriptor tlsPolicyDescriptor = getTlsPolicyDescriptorFromKeystore(tlsPolicyName, tlsKeystore); 
-                return tlsPolicyDescriptor;
-            }
-            catch(KeyManagementException e) {
-                log.warn("Cannot load tls policy descriptor", e);
-                return null;
-            }
         }
 
         private List<X509Certificate> getMtWilson1xTrustedTlsCertificates() {
@@ -198,78 +184,50 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
             return list;
         }
 
-        @Deprecated
-        private TlsPolicyDescriptor getTlsPolicyDescriptorFromKeystore(String tlsPolicyName, SimpleKeystore tlsKeystore) {
-            if (tlsPolicyName == null) {
-                tlsPolicyName = My.configuration().getDefaultTlsPolicyId();
+        private TlsPolicyDescriptor getTlsPolicyDescriptorFromResource(Resource resource)  {
+            try {
+                String password = My.configuration().getTlsKeystorePassword();
+                SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); 
+                TlsPolicyDescriptor tlsPolicyDescriptor = createTlsPolicyDescriptorFromKeystore(tlsKeystore); 
+                return tlsPolicyDescriptor;
             }
-            String ucName = tlsPolicyName.toUpperCase();
-            if (ucName.equals("TRUST_CA_VERIFY_HOSTNAME")) {
-                TlsProtection tlsProtection = new TlsProtection();
-                tlsProtection.integrity = true;
-                tlsProtection.encryption = true;
-                tlsProtection.authentication = true;
-                tlsProtection.forwardSecrecy = true;
-                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-                tlsPolicyDescriptor.setPolicyType("certificate");
-                tlsPolicyDescriptor.setProtection(tlsProtection);
-                ArrayList<String> encodedCertificates = new ArrayList<>();
-                tlsPolicyDescriptor.setData(encodedCertificates);
+            catch(KeyManagementException e) {
+                log.warn("Cannot load tls policy descriptor", e);
+                return null;
+            }
+        }
+        
+        private TlsProtection getAllTlsProtection() {
+            TlsProtection tlsProtection = new TlsProtection();
+            tlsProtection.integrity = true;
+            tlsProtection.encryption = true;
+            tlsProtection.authentication = true;
+            tlsProtection.forwardSecrecy = true;
+            return tlsProtection;
+        }
 
-                // combine mtwilson 1.x ca certs configuration and per-host cacerts and certs configuration into one certificate policy
-                ArrayList<X509Certificate> certificates = new ArrayList<>();
-                certificates.addAll(getMtWilson1xTrustedTlsCertificates());
-                certificates.addAll(getTrustedTlsCertificatesFromSimpleKeystore(tlsKeystore));
+        private TlsPolicyDescriptor createTlsPolicyDescriptorFromKeystore(SimpleKeystore tlsKeystore) {
+            TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+            tlsPolicyDescriptor.setPolicyType("certificate");
+            tlsPolicyDescriptor.setProtection(getAllTlsProtection());
+            ArrayList<String> encodedCertificates = new ArrayList<>();
+            tlsPolicyDescriptor.setData(encodedCertificates);
 
-                // encode each certificate into the descriptor
-                for (X509Certificate cert : certificates) {
-                    log.debug("Adding trusted TLS certs and cacerts: {}", cert.getSubjectX500Principal().getName());
-                    try {
-                        encodedCertificates.add(Base64.encodeBase64String(cert.getEncoded()));
-                    } catch (CertificateEncodingException e) {
-                        throw new IllegalArgumentException("Invalid certificate", e);
-                    }
+            // combine mtwilson 1.x ca certs configuration and per-host cacerts and certs configuration into one certificate policy
+            ArrayList<X509Certificate> certificates = new ArrayList<>();
+            certificates.addAll(getMtWilson1xTrustedTlsCertificates());
+            certificates.addAll(getTrustedTlsCertificatesFromSimpleKeystore(tlsKeystore));
+
+            // encode each certificate into the descriptor
+            for (X509Certificate cert : certificates) {
+                log.debug("Adding trusted TLS certs and cacerts: {}", cert.getSubjectX500Principal().getName());
+                try {
+                    encodedCertificates.add(Base64.encodeBase64String(cert.getEncoded()));
+                } catch (CertificateEncodingException e) {
+                    throw new IllegalArgumentException("Invalid certificate", e);
                 }
-                return tlsPolicyDescriptor;
             }
-            if (ucName.equals("TRUST_FIRST_CERTIFICATE")) {
-                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-                tlsPolicyDescriptor.setPolicyType("TRUST_FIRST_CERTIFICATE");
-                ArrayList<String> certificates = new ArrayList<>();
-                tlsPolicyDescriptor.setData(certificates);
-                return tlsPolicyDescriptor;
-            }
-            if (ucName.equals("TRUST_KNOWN_CERTIFICATE")) {
-                TlsProtection tlsProtection = new TlsProtection();
-                tlsProtection.integrity = true;
-                tlsProtection.encryption = true;
-                tlsProtection.authentication = true;
-                tlsProtection.forwardSecrecy = true;
-                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-                tlsPolicyDescriptor.setPolicyType("public-key");
-                tlsPolicyDescriptor.setProtection(tlsProtection);
-                ArrayList<String> encodedPublicKeys = new ArrayList<>();
-                tlsPolicyDescriptor.setData(encodedPublicKeys);
-
-                // combine mtwilson 1.x ca certs configuration and per-host cacerts and certs configuration into one certificate policy
-                ArrayList<X509Certificate> certificates = new ArrayList<>();
-                certificates.addAll(getMtWilson1xTrustedTlsCertificates());
-                certificates.addAll(getTrustedTlsCertificatesFromSimpleKeystore(tlsKeystore));
-
-                // encode each certificate into the descriptor
-                for (X509Certificate cert : certificates) {
-                    log.debug("Adding trusted TLS certificate public keys: {}", cert.getSubjectX500Principal().getName());
-                    encodedPublicKeys.add(Base64.encodeBase64String(cert.getPublicKey().getEncoded()));
-                }
-                return tlsPolicyDescriptor;
-            }
-            if (ucName.equals("INSECURE")) {
-                TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-                tlsPolicyDescriptor.setPolicyType("INSECURE");
-                return tlsPolicyDescriptor;
-            }
-            throw new IllegalArgumentException("Unknown TLS Policy: " + tlsPolicyName);
-
+            return tlsPolicyDescriptor;
         }
 
         // for backward compatibility, can load the mtwilson 1.x trusted tls cacerts file

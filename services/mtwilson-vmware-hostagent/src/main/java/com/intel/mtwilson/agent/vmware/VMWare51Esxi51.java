@@ -35,7 +35,9 @@ public class VMWare51Esxi51   {
         PcrManifest pcrManifest = new PcrManifest();
         
         // for each PCR get index and value
-        for (HostTpmDigestInfo hostTpmDigestInfo : report.getTpmPcrValues()) {
+        HostTpmDigestInfo[] tpmPcrValues = report.getTpmPcrValues();
+        if( tpmPcrValues != null ) {
+        for (HostTpmDigestInfo hostTpmDigestInfo :tpmPcrValues ) {
             log.debug("HostTpmDigestInfo PCR {}", hostTpmDigestInfo.getPcrNumber());
             // this block just out of curiosity ... we should instantiate the right digest class using this info. expected to be SHA1... always...
             String algorithm = hostTpmDigestInfo.getDigestMethod();
@@ -46,9 +48,12 @@ public class VMWare51Esxi51   {
             Pcr pcr = new Pcr(hostTpmDigestInfo.getPcrNumber(), digest);
             pcrManifest.setPcr(pcr);
         }
+        }
         
         // for each event assign it to a PCR event log
-        for(HostTpmEventLogEntry logEntry : report.getTpmEvents()) {
+        HostTpmEventLogEntry[] tpmEvents = report.getTpmEvents();
+        if( tpmEvents != null ) {
+        for(HostTpmEventLogEntry logEntry : tpmEvents) {
             int pcrIndex = logEntry.getPcrIndex();
             log.debug("PCR {}", pcrIndex);
             Measurement m = convertHostTpmEventLogEntryToMeasurement(logEntry);
@@ -60,6 +65,7 @@ public class VMWare51Esxi51   {
                 list.add(m);
                 pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(pcrIndex),list));
             }
+        }
         }
         
         return pcrManifest;

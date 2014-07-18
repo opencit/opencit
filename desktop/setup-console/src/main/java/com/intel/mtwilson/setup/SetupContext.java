@@ -6,7 +6,7 @@ package com.intel.mtwilson.setup;
 
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.datatypes.TLSPolicy;
+//import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.*;
 import java.net.URL;
@@ -73,7 +73,7 @@ public class SetupContext {
     public String automationKeyAlias;
     public String automationKeyPassword;
     public String automationKeystoreFile;
-    public TLSPolicy automationTlsPolicy;
+//    public TLSPolicy automationTlsPolicy;
     
     public WebServiceSecurityPolicy securityPolicy;
     

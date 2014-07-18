@@ -69,7 +69,6 @@ public class TestCitrixHostAgent {
     public static HostAgent getAgent() throws KeyManagementException, MalformedURLException, IOException {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
-//        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
         HostAgent hostAgent = hostAgentFactory.getHostAgent(new ConnectionString(connection), new InsecureTlsPolicy());
         return hostAgent;
     }

@@ -211,9 +211,9 @@ public class VmwareHostAgent implements HostAgent {
                 HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); 
-                log.debug("Retrieved HostTpmAttestationReport.");
+                log.debug("Retrieved HostTpmAttestationReport: {}", report);
 //                                        vendorHostReport = toXml(HostTpmAttestationReport.class, report);
-                log.debug("Parsed HostTpmAttestationReport.");
+//                log.debug("Parsed HostTpmAttestationReport.");
 //					manifestMap = postProcessing.processReport(esxVersion,report);
                 //if(esxVersion.contains("5.1")) {
                 if (vmware.isModuleAttestationSupportedByESX(esxVersion)) {
@@ -247,7 +247,7 @@ public class VmwareHostAgent implements HostAgent {
                     isTpmPresent = true;
                 }
             } catch (Exception e2) {
-                throw new IOException("Cannot retrieve PCR Manifest from " + hostname + ": cannot determine if TPM is present");
+                throw new IOException("Cannot retrieve PCR Manifest from " + hostname + ": cannot determine if TPM is present", e2);
             }
             throw new IOException("Cannot retrieve PCR Manifest from " + hostname + ": " + (isTpmPresent ? "TPM is present" : "TPM is not present") + ": " + e.toString(), e);
         }

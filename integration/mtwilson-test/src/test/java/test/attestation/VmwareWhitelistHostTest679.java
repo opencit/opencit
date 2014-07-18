@@ -14,6 +14,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -54,7 +55,7 @@ public class VmwareWhitelistHostTest679 {
      */
     @Test
     public void testHostReports() throws KeyManagementException, IOException {
-        // XXX TODO need to get these host ip's dynamically from the environment file... but
+        // TODO need to get these host ip's dynamically from the environment file... but
         // we need a way to specify "i need two different vmware hosts that are expected to
         // have the same mle"  so we can do meaningful tests w/o knowing in advance WHICH two
         // vmware hosts they are.   possibilities are for someone to maintain a tagged list
@@ -65,14 +66,12 @@ public class VmwareWhitelistHostTest679 {
         String host2 = "vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.175";
         
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
-        ByteArrayResource tlsKeystore = new ByteArrayResource();
-        TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore("TRUST_FIRST_CERTIFICATE", tlsKeystore);
-        HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), tlsPolicy);
+        HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), new InsecureTlsPolicy());
         PcrManifest manifest1 = agent1.getPcrManifest();
         Pcr pcr1 = manifest1.getPcr(19);
         PcrEventLog eventLog1 = manifest1.getPcrEventLog(19);
         List<Measurement> list1 = eventLog1.getEventLog();
-        HostAgent agent2 = hostAgentFactory.getHostAgent(new ConnectionString(host2), tlsPolicy);
+        HostAgent agent2 = hostAgentFactory.getHostAgent(new ConnectionString(host2), new InsecureTlsPolicy());
         PcrManifest manifest2 = agent2.getPcrManifest();
         Pcr pcr2 = manifest2.getPcr(19);        
         PcrEventLog eventLog2 = manifest2.getPcrEventLog(19);

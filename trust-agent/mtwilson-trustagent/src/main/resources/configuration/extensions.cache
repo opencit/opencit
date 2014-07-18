@@ -1,5 +1,6 @@
 com.intel.mtwilson.trustagent.cmd.Setup
 com.intel.mtwilson.trustagent.cmd.StartHttpServer
+com.intel.mtwilson.trustagent.cmd.Version
 com.intel.mtwilson.trustagent.ws.v2.Aik
 com.intel.mtwilson.trustagent.ws.v2.Daa
 com.intel.mtwilson.trustagent.ws.v2.Host
@@ -18,3 +19,4 @@ com.intel.mtwilson.trustagent.setup.RegisterTpmPassword
 com.intel.mtwilson.trustagent.setup.RequestAikCertificate
 com.intel.mtwilson.trustagent.setup.RequestEndorsementCertificate
 com.intel.mtwilson.trustagent.setup.TakeOwnership
+com.intel.mtwilson.version.v2.resource.VersionHttpResource

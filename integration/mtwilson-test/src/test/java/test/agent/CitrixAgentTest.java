@@ -13,6 +13,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -33,9 +34,7 @@ public class CitrixAgentTest {
         String host1 = "citrix:https://10.1.70.126:443;root;P@ssw0rd";
         
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
-        ByteArrayResource tlsKeystore = new ByteArrayResource();
-        TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore("TRUST_FIRST_CERTIFICATE", tlsKeystore);
-        HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), tlsPolicy);
+        HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), new InsecureTlsPolicy());
         PcrManifest manifest1 = agent1.getPcrManifest();
         Pcr pcr1 = manifest1.getPcr(19);
         PcrEventLog eventLog1 = manifest1.getPcrEventLog(19);
@@ -50,9 +49,7 @@ public class CitrixAgentTest {
         String host1 = "citrix:https://10.1.70.126:443;u=root;p=P@ssw0rd";
         
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
-        ByteArrayResource tlsKeystore = new ByteArrayResource();
-        TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore("TRUST_FIRST_CERTIFICATE", tlsKeystore);
-        HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), tlsPolicy);
+        HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), new InsecureTlsPolicy());
         PcrManifest manifest1 = agent1.getPcrManifest();
         Pcr pcr1 = manifest1.getPcr(19);
         PcrEventLog eventLog1 = manifest1.getPcrEventLog(19);

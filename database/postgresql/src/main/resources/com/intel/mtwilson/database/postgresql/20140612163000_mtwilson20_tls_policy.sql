@@ -1,6 +1,7 @@
 
-ALTER TABLE mw_hosts ALTER COLUMN TlsPolicy VARCHAR(255) NULL;
-ALTER TABLE mw_hosts ADD COLUMN tls_policy_id char(36) NULL;
+ALTER TABLE mw_hosts ALTER COLUMN TlsPolicy DROP NOT NULL;
+ALTER TABLE mw_hosts ALTER COLUMN TlsPolicy SET DEFAULT NULL;
+ALTER TABLE mw_hosts ADD COLUMN tls_policy_id TYPE char(36);
 
 CREATE TABLE mw_tls_policy (
   id char(36) NOT NULL,
