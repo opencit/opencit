@@ -4,11 +4,16 @@
  */
 package test.tls;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.TrustKnownCertificateTlsPolicy;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.agent.VendorHostAgentFactory;
+import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
@@ -17,6 +22,7 @@ import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.tls.policy.factory.impl.TxtHostRecordTlsPolicyFactory;
 import com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator;
 import com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstCertificateTlsPolicyCreator;
+import java.io.IOException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -65,6 +71,30 @@ public class TlsPolicyFactoryTest {
         TlsPolicyFactory factory = TlsPolicyFactory.createFactory(host);
         TlsPolicy tlsPolicy = factory.getTlsPolicy();
         assertEquals(TrustKnownCertificateTlsPolicy.class, tlsPolicy.getClass()); // the "trust first certificate" is implemented by TrustKnownCertificateTlsPolicy with a FirstCertificateTrustDelegate
+    }
+    
+    @Test
+    public void testTlsPolicyFactoryWithTxtHostRecordTrustFirstCertificateSaveToRecord() throws IOException {
+        Extensions.register(TlsPolicyFactory.class, TxtHostRecordTlsPolicyFactory.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTrustFirstCertificateTlsPolicyCreator.class);
+        Extensions.register(VendorHostAgentFactory.class, VmwareHostAgentFactory.class);
+        ObjectMapper mapper = new ObjectMapper();
+        TxtHostRecord host = new TxtHostRecord();
+        host.HostName = "10.1.71.173";
+        host.AddOn_Connection_String = "vmware:https://10.1.71.162/sdk;Administrator;intel123!";
+        TlsPolicyChoice insecureChoice = new TlsPolicyChoice();
+        insecureChoice.setTlsPolicyId("TRUST_FIRST_CERTIFICATE");
+        host.tlsPolicyChoice = insecureChoice;
+        TlsPolicyFactory factory = TlsPolicyFactory.createFactory(host);
+        TlsPolicy tlsPolicy = factory.getTlsPolicy();
+        assertEquals(TrustKnownCertificateTlsPolicy.class, tlsPolicy.getClass()); // the "trust first certificate" is implemented by TrustKnownCertificateTlsPolicy with a FirstCertificateTrustDelegate
+        log.debug("Original host record: {}", mapper.writeValueAsString(host));
+        HostAgentFactory hostAgentFactory = new HostAgentFactory();
+        HostAgent agent = hostAgentFactory.getHostAgent(host);
+        TxtHostRecord hostDetails = agent.getHostDetails();
+        assertNotNull(hostDetails);
+        assertNotNull(hostDetails.BIOS_Name); // just one of the attributes that gets set
+        log.debug("Edited host record: {}", mapper.writeValueAsString(host));
     }
 
     /**

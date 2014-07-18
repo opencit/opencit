@@ -301,8 +301,6 @@ public class KeystoreUtil {
      * 
      * The path to the new keystore will be "directory/username.jks"
      * 
-     * Implies Tls Policy TRUST_FIRST_CERTIFICATE
-     * 
      * @param directory where the keystore should be saved
      * @param username arbitrary, needs to be unique only within the directory, should not contain any path-forming characters such as .. or slashes
      * @param password arbitrary
@@ -310,6 +308,7 @@ public class KeystoreUtil {
      * @param roles like new String[] { Role.Attestation.toString(), Role.Whitelist.toString() }
      * @return the new keystore
      * @throws Exception 
+     * @deprecated this method uses an INSECURE policy for TLS and should not be used; replace with a newer method which requires caller to provide either Properties to give to a TlsPolicyFactory or a TlsPolicy object to be used directly
      */
     public static SimpleKeystore createUserInDirectory(File directory, String username, String password, URL server, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
@@ -364,6 +363,7 @@ public class KeystoreUtil {
      * @return the new keystore, which is also saved in the resource
      * @throws Exception 
      * @since 0.5.4
+     * @deprecated this method uses an INSECURE policy for TLS and should not be used; replace with a newer method which requires caller to provide either Properties to give to a TlsPolicyFactory or a TlsPolicy object to be used directly
      */
     public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
         return createUserInResource(resource, username, password, server, new InsecureTlsPolicy(), roles);
@@ -392,10 +392,6 @@ public class KeystoreUtil {
         }
         ApiClient c;
         try {
-            // download server's ssl certificates and add them to the keystore
-//            Properties p = new Properties();
-//            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); 
-//            Configuration config = new MapConfiguration(p);
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
 //            c = new ApiClient(server, rsaCredential, keystore, config); //ClientException

@@ -42,7 +42,7 @@ public class HostTlsPolicyTest {
     public void testEdit() {
         com.intel.mtwilson.tls.policy.model.HostTlsPolicy obj = new com.intel.mtwilson.tls.policy.model.HostTlsPolicy();
         obj.setId(UUID.valueOf("de07c08a-7fc6-4c07-be08-0ecb2f803681"));
-        obj.setName("TRUST_FIRST_CERTIFICATE");
+        obj.setName("INSECURE");
         com.intel.mtwilson.tls.policy.model.HostTlsPolicy editHostTlsPolicy = client.editHostTlsPolicy(obj);
         log.debug("Tls policy for host with uuid {} is {}.", editHostTlsPolicy.getId(),editHostTlsPolicy.getName());        
     }

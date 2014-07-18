@@ -150,7 +150,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     private TblHosts initNewHost() {
         TblHosts host = new TblHosts();
         host.setName(hostname);
-        host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+        host.setTlsPolicyName("INSECURE");
         host.setTlsKeystore(null);
         host.setAddOnConnectionInfo(connection); // XXX notice we do not set the IPAddress or Port in the database... don't need to because now we are setting ConnectionString which includes them both and is passed to the host agent and the host agent extracts ip address and port from this string.
         return host;
