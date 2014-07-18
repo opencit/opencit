@@ -73,6 +73,17 @@ public class TlsPolicyFactoryTest {
         assertEquals(TrustKnownCertificateTlsPolicy.class, tlsPolicy.getClass()); // the "trust first certificate" is implemented by TrustKnownCertificateTlsPolicy with a FirstCertificateTrustDelegate
     }
     
+    /**
+     * Test the TRUST_FIRST_CERTIFICATE policy implementation to save the 
+     * remote server certificate back to the TxtHostRecord object.
+     * 
+     * Sample output:
+     * <pre>
+     * Original host record: {"HostName":"10.1.71.173","IPAddress":null,"Port":null,"BIOS_Name":null,"BIOS_Version":null,"BIOS_Oem":null,"VMM_Name":null,"VMM_Version":null,"VMM_OSName":null,"VMM_OSVersion":null,"AddOn_Connection_String":"vmware:https://10.1.71.162/sdk;Administrator;intel123!","Description":null,"Email":null,"Location":null,"AIK_Certificate":null,"AIK_PublicKey":null,"AIK_SHA1":null,"Processor_Info":null,"tlsPolicyChoice":{"tlsPolicyId":"TRUST_FIRST_CERTIFICATE","tlsPolicyDescriptor":null}}
+     * Edited host record: {"HostName":"10.1.71.173","IPAddress":null,"Port":null,"BIOS_Name":null,"BIOS_Version":null,"BIOS_Oem":null,"VMM_Name":null,"VMM_Version":null,"VMM_OSName":null,"VMM_OSVersion":null,"AddOn_Connection_String":"vmware:https://10.1.71.162/sdk;Administrator;intel123!","Description":null,"Email":null,"Location":null,"AIK_Certificate":null,"AIK_PublicKey":null,"AIK_SHA1":null,"Processor_Info":null,"tlsPolicyChoice":{"tlsPolicyId":"TRUST_FIRST_CERTIFICATE","tlsPolicyDescriptor":null}}
+     * </pre>
+     * @throws IOException 
+     */
     @Test
     public void testTlsPolicyFactoryWithTxtHostRecordTrustFirstCertificateSaveToRecord() throws IOException {
         Extensions.register(TlsPolicyFactory.class, TxtHostRecordTlsPolicyFactory.class);

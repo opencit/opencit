@@ -10,7 +10,7 @@ import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.datatypes.TLSPolicy;
+//import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.Database;

@@ -133,7 +133,7 @@ public class HostAgentFactory {
             return ha;
         }
         catch(IOException | RuntimeException e) {
-            throw new IllegalArgumentException("Cannot create Host Agent for "+address+": "+e.toString(), e);
+            throw new IllegalArgumentException(String.format("Cannot create Host Agent for %s",address), e);
         }
     }    
     
@@ -165,8 +165,8 @@ public class HostAgentFactory {
                 return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
             }
         }
-        log.error("HostAgentFactory: Unsupported host type: "+vendorProtocol);
-        throw new UnsupportedOperationException("Unsupported host type: "+vendorProtocol);
+        log.error("HostAgentFactory: Unsupported host type: {}",vendorProtocol);
+        throw new UnsupportedOperationException(String.format("Unsupported host type: %s",vendorProtocol));
     }
     
     

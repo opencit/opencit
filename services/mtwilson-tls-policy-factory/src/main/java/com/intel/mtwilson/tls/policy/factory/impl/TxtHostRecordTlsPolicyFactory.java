@@ -4,14 +4,12 @@
  */
 package com.intel.mtwilson.tls.policy.factory.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstPublicKeyTrustDelegate;
 import com.intel.dcsg.cpg.x509.repository.MutableCertificateRepository;
 import com.intel.dcsg.cpg.x509.repository.MutablePublicKeyRepository;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
@@ -24,7 +22,6 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
