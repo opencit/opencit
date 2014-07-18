@@ -8,8 +8,9 @@ import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+//import org.glassfish.jersey.client.HttpUrlConnectorProvider.ConnectionFactory; // jersey 2.10.1
+// jersey 2.4.1:
 import org.glassfish.jersey.client.HttpUrlConnector.ConnectionFactory;
-
 /**
  *
  * @author jbuhacoff
