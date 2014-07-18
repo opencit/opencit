@@ -31,19 +31,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName="tlsPolicyChoice")
 public class TlsPolicyChoice {
     private String tlsPolicyId; // key into the mw_tls_policy table
-//    private String tlsPolicyName; // INSECURE or TRUST_FIRST_CERTIFICATE
     private TlsPolicyDescriptor tlsPolicyDescriptor;
 
     public String getTlsPolicyId() {
         return tlsPolicyId;
     }
-
-    /*
-    public String getTlsPolicyName() {
-        return tlsPolicyName;
-    }
-    */
-
     public TlsPolicyDescriptor getTlsPolicyDescriptor() {
         return tlsPolicyDescriptor;
     }
@@ -51,26 +43,14 @@ public class TlsPolicyChoice {
     public void setTlsPolicyId(String tlsPolicyId) {
         this.tlsPolicyId = tlsPolicyId;
         if( tlsPolicyId != null ) {
-//        this.tlsPolicyName = null;
         this.tlsPolicyDescriptor = null;
         }
     }
-
-    /*
-    public void setTlsPolicyName(String tlsPolicyName) {
-        this.tlsPolicyName = tlsPolicyName;
-        if( tlsPolicyName != null ) {
-        this.tlsPolicyId = null;
-        this.tlsPolicyDescriptor = null;
-        }
-    }
-    */
 
     public void setTlsPolicyDescriptor(TlsPolicyDescriptor tlsPolicyDescriptor) {
         this.tlsPolicyDescriptor = tlsPolicyDescriptor;
         if( tlsPolicyDescriptor != null ) {
         this.tlsPolicyId = null;
-//        this.tlsPolicyName = null;
         }
     }
     

@@ -300,7 +300,6 @@ public class HostBO {
      
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
-            // BOOKMARK JONATHAN TLS POLICY
             // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
             // first and make up the complete connection string.
             ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
@@ -705,7 +704,6 @@ public class HostBO {
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 }
                 TblHosts tblHosts = new TblHosts();
-                // BOOKMARK JONATHAN TLS POLICY
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
                 tblHosts.setTlsPolicyChoice(gkvHost.tlsPolicyChoice);

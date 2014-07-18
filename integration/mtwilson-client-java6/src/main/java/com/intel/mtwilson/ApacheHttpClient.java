@@ -15,8 +15,6 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.ConfigurableProtocolSelector;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.impl.StrictTlsPolicy;
-import com.intel.dcsg.cpg.tls.policy.impl.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -53,6 +51,9 @@ import org.apache.http.params.HttpParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.rfc822.Headers;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
+import com.intel.dcsg.cpg.x509.repository.PublicKeyCertificateRepository;
 import java.util.Calendar;
 import java.util.Date;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -199,35 +200,35 @@ public class ApacheHttpClient implements java.io.Closeable {
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
             if (requireTrustedCertificate && verifyHostname) {
                 log.debug("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
-                return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
+                return new CertificateTlsPolicy(sslKeystore.getRepository(), pSelector);
             } else if (requireTrustedCertificate && !verifyHostname) {
                 // two choices: trust first certificate or trust known certificate;  we choose trust first certificate as a usability default
                 // furthermore we assume that the api client keystore is a server-specific keystore (it's a client configured for a specific mt wilson server)
                 // that either has a server instance ssl cert or a cluster ssl cert.  either should work.
                 log.debug("Using TLS Policy TRUST_FIRST_CERTIFICATE");
                 KeystoreCertificateRepository repository = sslKeystore.getRepository();
-                return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
+                return new PublicKeyTlsPolicy(new PublicKeyCertificateRepository(repository), new FirstCertificateTrustDelegate(repository), pSelector);
             } else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
                 log.warn("Using TLS Policy INSECURE");
                 return new InsecureTlsPolicy();
             }
         } else if (tlsPolicyName.equals("TRUST_CA_VERIFY_HOSTNAME")) {
             log.debug("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
-            return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
+            return new CertificateTlsPolicy(sslKeystore.getRepository(), pSelector);
         } else if (tlsPolicyName.equals("TRUST_FIRST_CERTIFICATE")) {
             log.debug("TLS Policy: TRUST_FIRST_CERTIFICATE");
             KeystoreCertificateRepository repository = sslKeystore.getRepository();
-            return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
+            return new PublicKeyTlsPolicy(new PublicKeyCertificateRepository(repository), new FirstCertificateTrustDelegate(repository), pSelector);
         } else if (tlsPolicyName.equals("TRUST_KNOWN_CERTIFICATE")) {
             log.debug("TLS Policy: TRUST_KNOWN_CERTIFICATE");
-            return new TrustKnownCertificateTlsPolicy(sslKeystore.getRepository(), pSelector);
+            return new PublicKeyTlsPolicy(new PublicKeyCertificateRepository(sslKeystore.getRepository()), pSelector);
         } else if (tlsPolicyName.equals("INSECURE")) {
             log.warn("TLS Policy: INSECURE");
             return new InsecureTlsPolicy();
         } else {
             // unrecognized 1.1 policy defined, so use a secure default
             log.warn("Unknown TLS Policy Name: {}", tlsPolicyName);
-            return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector); // issue #871 default should be secure
+            return new CertificateTlsPolicy(sslKeystore.getRepository(), pSelector); // issue #871 default should be secure
         }
     }
     /*

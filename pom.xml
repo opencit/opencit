@@ -553,7 +553,7 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
-		<version>1.8.3</version>
+		<version>1.9.2</version>
     </dependency>
     <dependency>
         <groupId>commons-codec</groupId>

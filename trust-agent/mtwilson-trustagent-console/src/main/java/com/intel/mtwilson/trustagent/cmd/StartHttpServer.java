@@ -4,15 +4,10 @@
  */
 package com.intel.mtwilson.trustagent.cmd;
 
-import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.Security;
-import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.jetty.server.Connector;

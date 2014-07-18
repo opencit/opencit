@@ -172,7 +172,7 @@ monit_uninstall() {
 }
 
 print_help() {
-    echo "Usage: $0 start|stop|authorize|start-http-server"
+    echo "Usage: $0 start|stop|authorize|start-http-server|version"
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo configure-from-environment

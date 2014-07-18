@@ -162,7 +162,6 @@ public class HostTrustBO {
             if (hostObj.Port != null) { hostObjToRegister.Port = hostObj.Port; }
             hostObjToRegister.tlsPolicyChoice = hostObj.tlsPolicyChoice;
             
-            // BOOKMARK JONATHAN TLS POLICY
             TblHosts tblHosts = new TblHosts();
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
@@ -1801,7 +1800,6 @@ public class HostTrustBO {
             TblMleJpaController mleJpa = My.jpa().mwMle();
             
             TblHosts tblHosts = new TblHosts();
-            // BOOKMARK JONATHAN TLS POLICY
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setTlsPolicyChoice(hostObj.tlsPolicyChoice);  // either a tls policy id or a tls policy descriptor

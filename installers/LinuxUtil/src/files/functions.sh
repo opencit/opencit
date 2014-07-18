@@ -2754,7 +2754,7 @@ tomcat_async_stop() {
     echo_warning "Tomcat already stopped"
   elif [ -n "$tomcat" ]; then
     echo -n "Shutting down Tomcat services in the background..."
-    ($tomcat start &) 2>&1 > /dev/null
+    ($tomcat stop &) 2>&1 > /dev/null
     echo_success " Done"
   fi
 }

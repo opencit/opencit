@@ -71,7 +71,7 @@ public class TestVmwareHostAgent {
 //        TblHosts.dataCipher = new DummyCipher();
         TblHosts host = new TblHosts();
         host.setName(hostname);
-        host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+        host.setTlsPolicyName("INSECURE");
         host.setTlsKeystore(null);
         host.setAddOnConnectionInfo(connection);
         HostAgentFactory factory = new HostAgentFactory();
