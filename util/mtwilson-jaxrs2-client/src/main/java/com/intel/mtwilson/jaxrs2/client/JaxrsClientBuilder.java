@@ -19,6 +19,8 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -32,6 +34,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
+import org.glassfish.jersey.client.HttpUrlConnector;
 
 /**
  * Examples:
@@ -150,11 +153,17 @@ public class JaxrsClientBuilder {
             if (tlsPolicy != null) {
                 log.debug("creating TlsConnection from URL and TlsPolicy");
                 tlsConnection = new TlsConnection(url, tlsPolicy);
-            }
-            else if( configuration != null ) {
+            } else if (configuration != null) {
                 tlsPolicy = PropertiesTlsPolicyFactory.createTlsPolicy(configuration);
-                tlsConnection = new TlsConnection(url, tlsPolicy);                    
+                log.debug("TlsPolicy is {}", this.tlsPolicy.getClass().getName());
+                tlsConnection = new TlsConnection(url, tlsPolicy);
+                log.debug("set TlsConnection from configuration");
             }
+        }
+        if (tlsConnection != null) {
+            TlsUtil.setHttpsURLConnectionDefaults(tlsConnection);
+            
+            clientConfig.connector(new HttpUrlConnector(clientConfig, connectionFactory));
         }
     }
 
@@ -184,7 +193,12 @@ public class JaxrsClientBuilder {
             tls(); // sets tls connection
             authentication(); // adds to clientConfig
 //        client = ClientBuilder.newClient(clientConfig);
-            Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).withConfig(clientConfig).build();
+//            Client client = ClientBuilder.newBuilder().sslContext(tlsConnection.getSSLContext()).hostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier()).withConfig(clientConfig).build();
+            Client client = ClientBuilder.newBuilder()
+                    .withConfig(clientConfig)
+//                    .sslContext(tlsConnection.getSSLContext())
+                    .hostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier())
+                    .build();
             if (configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true)) {
                 client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));
             } else {

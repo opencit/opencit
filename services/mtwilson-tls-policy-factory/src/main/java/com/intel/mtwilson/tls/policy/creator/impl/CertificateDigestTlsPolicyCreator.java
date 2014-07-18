@@ -137,7 +137,7 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
             metadata.digestEncoding = tlsPolicyDescriptor.getMeta().get("digestEncoding");
         }
         if( tlsPolicyDescriptor.getMeta().get("digestAlgorithm") != null && !tlsPolicyDescriptor.getMeta().get("digestAlgorithm").isEmpty() ) {
-            metadata.digestEncoding = tlsPolicyDescriptor.getMeta().get("digestAlgorithm");
+            metadata.digestAlgorithm = tlsPolicyDescriptor.getMeta().get("digestAlgorithm");
         }
         return metadata;
     }

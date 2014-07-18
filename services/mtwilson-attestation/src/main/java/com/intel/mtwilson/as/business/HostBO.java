@@ -111,17 +111,18 @@ public class HostBO {
         
 //	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid, Object... tlsObjects) {
 	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-//            if( log.isDebugEnabled() ) {
-//                try {
-//                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("addHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
-//                }
-//                catch(IOException e) {
-//                    log.debug("cannot serialize host input to addHost", e);
-//                }
-//            }
+            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("addHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to addHost", e);
+                }
+            }
             
-           System.err.println("HOST BO ADD HOST STARTING");
+           log.trace("HOST BO ADD HOST STARTING");
             
 
                 try {
@@ -345,6 +346,7 @@ public class HostBO {
                             target.setTlsPolicyName(null);
                         }
                         else {
+                            // all these null will cause server default tls policy to be used, if available
                             target.setTlsPolicyId(null);
                             target.setTlsPolicyDescriptor(null);
                             target.setTlsKeystore(null);
@@ -392,15 +394,16 @@ public class HostBO {
     }
 
         public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
-//            if( log.isDebugEnabled() ) {
-//                try {
-//                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("updateHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
-//                }
-//                catch(IOException e) {
-//                    log.debug("cannot serialize host input to updateHost", e);
-//                }
-//            }
+            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("updateHost input: {}", mapper.writeValueAsString(host)); //This statement may contain clear text passwords
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to updateHost", e);
+                }
+            }
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -425,7 +428,7 @@ public class HostBO {
 		log.debug("updateHost after setTlsPolicyFields TlsKeystoreLength {}", (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		log.debug("updateHost after setTlsPolicyFields tlsPolicyId {}", tblHosts.getTlsPolicyId());
         try {
-        ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
 		log.debug("updateHost after setTlsPolicyFields tlsPolicyDescriptor {}", mapper.writeValueAsString(tblHosts.getTlsPolicyDescriptor()));
         }
         catch(IOException e) {
@@ -764,6 +767,7 @@ public class HostBO {
 		log.debug("saveHostInDatabase TlsPolicyName {}", tblHosts.getTlsPolicyName());
 		log.debug("saveHostInDatabase TlsKeystoreLength {}", (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		log.debug("saveHostInDatabase tlsPolicyId {}", tblHosts.getTlsPolicyId());
+        // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK DUE TO CLEARTEXT PASSWORDS
         try {
         ObjectMapper mapper = new ObjectMapper();
 		log.debug("saveHostInDatabase tlsPolicyDescriptor {}", mapper.writeValueAsString(tblHosts.getTlsPolicyDescriptor()));

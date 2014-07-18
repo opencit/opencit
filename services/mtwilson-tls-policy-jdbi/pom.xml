@@ -36,11 +36,13 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-tls-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jdbi-util</artifactId>
