@@ -264,51 +264,7 @@ public abstract class TlsPolicyFactory {
         return tlsPolicy;
     }
 
-        
-    /*
-    public TlsPolicyBuilder descriptor(TlsPolicyDescriptor descriptor) {
-        providesConfidentiality = descriptor.isConfidentialityRequired();
-        providesAuthentication = descriptor.isAuthenticationRequired();
-        providesIntegrity = descriptor.isIntegrityRequired();  
-        hostnameVerification = descriptor.getCertificates() != null && !descriptor.getCertificates().isEmpty();
-        if( descriptor.getCertificates() != null && !descriptor.getCertificates().isEmpty() ) {
-            HashSetMutableCertificateRepository repository = new HashSetMutableCertificateRepository();
-            for(String certificateBase64 : descriptor.getCertificates()) {
-                try {
-                    X509Certificate certificate = X509Util.decodeDerCertificate(Base64.decodeBase64(certificateBase64));
-                    repository.addCertificate(certificate);
-                }
-                catch(CertificateException e) {
-                    log.error("Cannot read certificate: {}", certificateBase64, e);
-                }
-                catch(KeyManagementException e) {
-                    log.debug("Cannot add certificate to repository: {}", certificateBase64, e);
-                }
-            }
-            certificateRepository = repository;
-        }
-        else if( descriptor.getPublicKeys() != null && !descriptor.getPublicKeys().isEmpty() ) {
-            HashSetMutablePublicKeyRepository repository = new HashSetMutablePublicKeyRepository();
-            for(String publicKeyBase64 : descriptor.getCertificates()) {
-                try {
-                    PublicKey publicKey = RsaUtil.decodeDerPublicKey(Base64.decodeBase64(publicKeyBase64));
-                    repository.addPublicKey(publicKey);
-                }
-                catch(CryptographyException e) {
-                    log.error("Cannot read public key: {}", publicKeyBase64, e);
-                }
-                catch(KeyManagementException e) {
-                    log.debug("Cannot add public key to repository: {}", publicKeyBase64, e);
-                }
-            }
-            certificateRepository = repository;
-            throw new UnsupportedOperationException("public key policy");
-        }
-        trustDelegate = null;
-        return this;
-    }
-*/
-    
+
     /**
      * This method creates a TlsPolicyFactory instance appropriate for the 
      * given input. If one cannot be created, it throws UnsupportedOperationException.

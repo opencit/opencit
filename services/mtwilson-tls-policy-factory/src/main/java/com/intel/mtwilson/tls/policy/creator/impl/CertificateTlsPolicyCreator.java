@@ -5,7 +5,6 @@
 package com.intel.mtwilson.tls.policy.creator.impl;
 
 import com.intel.dcsg.cpg.codec.ByteArrayCodec;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.x509.repository.CertificateRepository;
@@ -14,13 +13,10 @@ import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecByName;
 import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecForData;
 import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getFirst;
-import static com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator.getPublicKeyMetadata;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.security.KeyManagementException;
-import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  *

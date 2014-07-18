@@ -323,7 +323,7 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-tls-policy</artifactId>
+            <artifactId>mtwilson-tls-policy-factory</artifactId>
             <version>${project.version}</version>
         </dependency>
 
