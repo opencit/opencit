@@ -21,6 +21,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 import java.security.cert.*;
+import org.apache.commons.lang.StringUtils;
 
 //import com.intel.mountwilson.as.common.ResourceFinder;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -177,11 +178,45 @@ public class TpmModule {
 		boolean DebugMode = false;
 		if (debugMode.toLowerCase().equals("true"))
 			DebugMode = true;
-		String commandLine = newTpmModuleExePath + File.separator + newExeName + " -mode " + mode + " " + args;
+
+		// Parse the args parameter to populate the environment variables array
+		String[] params = args.split(" ");
+		HashMap<String,String> environmentVars = new HashMap<String, String>();
+		List<String> cmd = new ArrayList<String>();
+		cmd.add(newTpmModuleExePath + File.separator + newExeName);
+
+		for(int loop = 0; loop < params.length; loop++) {
+			String param = params[loop];
+			cmd.add(param);
+			if(param.equals("-owner_auth") || param.equals("-nonce") || param.equals("-key_auth") ||
+					param.equals("-pcak") ||  param.equals("-blob_auth")) {
+				String envVarName = param.substring(1).toUpperCase();
+				// Populate the environment variable hash map
+				environmentVars.put(envVarName, params[++loop]);
+				// update the params array with the env variable name
+				//params[loop] = envVarName;
+				cmd.add(envVarName);
+			}
+		}
+
+		cmd.add("-t");
+		cmd.add("-mode");
+		cmd.add(Integer.toString(mode));
+		
+		if (TrousersMode && useTrousersMode) {
+			cmd.add("-trousers");
+		}
+
+
+		/*String commandLine = newTpmModuleExePath + File.separator + newExeName + " " + args;
 		if (TrousersMode && useTrousersMode)
-			commandLine += " -trousers";
-		if (DebugMode) log.debug("\"" + commandLine + "\"");
-		Process p = Runtime.getRuntime().exec(commandLine);
+			commandLine += " -trousers";*/
+		//if (DebugMode) log.debug("\"" + commandLine + "\"");
+
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		pb.environment().putAll(environmentVars);
+		Process p = pb.start();
+		//Process p = Runtime.getRuntime().exec(commandLine);
 		String line = "";
 		if (returnCount != 0){
 			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));

@@ -79,7 +79,8 @@ public:
 				b_log,
 				b_help,
 				b_infile,
-				b_outfile;
+				b_outfile,
+				b_getenvSecrets;
 
 	int			i_mode,
 				i_argc,
