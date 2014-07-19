@@ -68,8 +68,6 @@ public class PublicKeyTlsPolicyCreator implements TlsPolicyCreator {
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates public keys but does not declare public key encoding");
             }
-            codec = new CertificateDigestTlsPolicyCreator.NormalizingCodec(codec);
-            
             for(String publicKeyEncoded : tlsPolicyDescriptor.getData()) {
                 PublicKey publicKey = decodePublicKey(codec.decode(publicKeyEncoded));
                 repository.addPublicKey(publicKey);

@@ -65,8 +65,6 @@ public class CertificateTlsPolicyCreator implements TlsPolicyCreator {
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates certificates but does not declare certificate encoding");
             }
-            codec = new CertificateDigestTlsPolicyCreator.NormalizingCodec(codec);
-            
             for(String certificateBase64 : tlsPolicyDescriptor.getData()) {
                 X509Certificate certificate = X509Util.decodeDerCertificate(codec.decode(certificateBase64));
                 repository.addCertificate(certificate);

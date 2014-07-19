@@ -71,7 +71,6 @@ public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates public key digests but does not declare digest encoding");
             }
-            codec = new CertificateDigestTlsPolicyCreator.NormalizingCodec(codec);
             String alg;
             if( meta.digestAlgorithm == null ) {
                 // attempt auto-detection based on first digest

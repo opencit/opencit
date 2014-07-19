@@ -5,13 +5,14 @@
 package com.intel.mtwilson.tls.policy.creator.impl;
 
 import com.intel.dcsg.cpg.codec.Base64Codec;
+import com.intel.dcsg.cpg.codec.Base64Util;
 import com.intel.dcsg.cpg.codec.ByteArrayCodec;
 import com.intel.dcsg.cpg.codec.HexCodec;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.crypto.digest.DigestUtil;
 import com.intel.dcsg.cpg.crypto.digest.UnsupportedAlgorithmException;
-import com.intel.dcsg.cpg.io.HexUtil;
+import com.intel.dcsg.cpg.codec.HexUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.CertificateDigestTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.DigestRepository;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutableDigestRepository;
@@ -19,7 +20,6 @@ import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -28,8 +28,6 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertificateDigestTlsPolicyCreator.class);
-//    private static final Pattern ignore = Pattern.compile("[\\s:]", Pattern.MULTILINE);
-    private static final Pattern ignore = Pattern.compile("[^0-9a-zA-Z/+=]", Pattern.MULTILINE);  // ignore any characters not in hex and base64 character sets
     
     @Override
     public CertificateDigestTlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
@@ -68,7 +66,6 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates certificate digests but does not declare digest encoding");
             }
-            codec = new NormalizingCodec(codec);
             String alg;
             if( meta.digestAlgorithm == null ) {
                 // attempt auto-detection based on first digest
@@ -160,23 +157,6 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
     }
     
     /**
-     * Removes all whitespace and colons from the the data.
-     * 
-     * Examples of hex:
-     * <pre>
-     * aa bb cc dd
-     * aa:bb:cc:dd
-     * aabbccdd
-     * </pre>
-     * 
-     * @param data in hex or base64 format with optional whitespace (for hex and base64) and colons (for hex)
-     * @return 
-     */
-    public static String normalize(String data) {
-        return ignore.matcher(data).replaceAll("");
-    }
-    
-    /**
      * Utility function to detect if the sample is base64-encoded or
      * hex-encoded and return a new instance of the appropriate codec. 
      * If the sample
@@ -185,40 +165,22 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
      * @return a new codec instance or null if the encoding is not recognized
      */
     public static ByteArrayCodec getCodecForData(String sample) {
-        String normalized = normalize(sample);
-        log.debug("getCodecForData normalized: {}", normalized);
-        log.debug("getCodecForData normalized length: {}", normalized.length());
-        if( HexUtil.isHex(normalized)) {
-            return new HexCodec(); // encoding = "hex";
+        log.debug("getCodecForData: {}", sample);
+        String printable = sample.replaceAll("[^\\p{Print}]", ""); // remove all non-printable characters; for example if someone copies a hex-encoded certificate "thumbprint" from a certificate information box it might be preceded by a non-printable character
+        String hex = HexUtil.trim(printable); // important to remove only whitespace here and not ALL non-hex characters (because then isHex will almost always return true)
+        if( HexUtil.isHex(hex)) {
+            log.debug("getCodecForData hex: {}", hex);
+            HexCodec codec = new HexCodec(); // encoding = "hex";
+            codec.setNormalizeInput(true); // automatically remove non-hex characters before decoding
+            return codec;
         }
-        else if( Base64.isBase64(normalized) ) {
-            return new Base64Codec(); // encoding = "base64";
+        String base64 = Base64Util.trim(printable); // important to remove only whitespace here and not ALL non-hex characters (because then isBase64 will almost always return true)
+        if( Base64Util.isBase64(base64) ) {
+            log.debug("getCodecForData base64: {}", base64);
+            Base64Codec codec = new Base64Codec(); // encoding = "base64";
+            codec.setNormalizeInput(true); // automatically remove non-base64 characters before decoding
+            return codec;
         }
-        else {
-            return null;
-        }
-    }
-    
-    /**
-     * Executes a transformation on the data before decoding it to remove
-     * whitespace and colons
-     */
-    public static class NormalizingCodec implements ByteArrayCodec {
-        private ByteArrayCodec codec;
-
-        public NormalizingCodec(ByteArrayCodec codec) {
-            this.codec = codec;
-        }
-        
-        @Override
-        public String encode(byte[] input) {
-            return codec.encode(input);
-        }
-
-        @Override
-        public byte[] decode(String encoded) {
-            return codec.decode(normalize(encoded));
-        }
-        
+        return null;
     }
 }
