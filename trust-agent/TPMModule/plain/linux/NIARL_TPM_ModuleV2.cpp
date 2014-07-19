@@ -23,6 +23,7 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 	b_outfile = false;
 	i_mode = 0;
 	i_return = 0;
+	b_getenvSecrets = false;
 
 	//setup local copy of argument array
 	i_argc = argc;
@@ -30,6 +31,11 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 
 	for(short i = 0; i < i_argc; i++)
 	{
+		if(strcmp(argv[i], "-t") == 0) {
+			b_getenvSecrets = true;
+			continue;
+		}
+
 		if(strcmp(argv[i], "-debug") == 0)
 		{
 			b_debug = true;
@@ -155,6 +161,28 @@ NIARL_TPM_ModuleV2::NIARL_TPM_ModuleV2(int argc, char* argv[])
 		cout << " -" << ERROR_ARG_VALIDATION << " --- Argument validation error" << endl;
 		cout << " -" << ERROR_ARG_HELP << " --- Help toggle detected" << endl;
 		cout << " -" << ERROR_MODE_DISABLED << " --- Mode selection disabled" << endl;
+	}
+
+	if (b_getenvSecrets) {
+		// Replace all the scret values with the corresponding environment values
+
+		// Loop through the arguments again to replace them with the environment variable values
+		for(short i = 0; i < i_argc; i++) {
+			if(s_argv[i].find_first_of("-", 0) == 0) {
+				// this is a parameter and not a value. Check and replace if this is part of the secrets
+				if(s_argv[i] == "-owner_auth" || s_argv[i] == "-nonce" || s_argv[i] == "-key_auth" || 
+						s_argv[i] == "-pcak" ||  s_argv[i] == "-blob_auth") {
+					// Parameter is a known secret element. Replace it with the env value
+					if(++i >= i_argc || s_argv[i].find_first_of("-", 0) == 0) continue;
+					if (const char* value = getenv(s_argv[i].c_str())) {
+						s_argv[i] = value;
+					} else {
+						cout << "Parameter \"" << s_argv[i] << "\" provided in the command does not exist in the environment variables. Please check and retry." << endl;
+						exit(1);
+					}
+				}
+			}
+		}
 	}
 }
 
