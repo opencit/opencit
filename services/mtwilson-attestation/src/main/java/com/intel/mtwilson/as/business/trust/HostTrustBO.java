@@ -195,7 +195,7 @@ public class HostTrustBO {
                 hostReport.aik = new Aik(agent.getAik());
             }
 
-            log.debug("getTrustStatusOfHostNotInDB: Successfully retrieved the TPM meausrements from host '{}' for identifying the MLE to be mapped to.", hostObj.HostName);
+            log.debug("getTrustStatusOfHostNotInDB: Successfully retrieved the TPM measurements from host '{}' for identifying the MLE to be mapped to.", hostObj.HostName);
             HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());
             
             // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
@@ -1824,7 +1824,7 @@ public class HostTrustBO {
             hostReport.tpmQuote = null; 
             hostReport.variables = new HashMap<String,String>(); 
 
-            log.debug("checkMatchingMLEExists: Successfully retrieved the TPM meausrements from host '{}' for checking against the matching MLE.", hostObj.HostName);
+            log.debug("checkMatchingMLEExists: Successfully retrieved the TPM measurements from host '{}' for checking against the matching MLE.", hostObj.HostName);
             HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());
             
             // We need to check for the BIOS MLE matching only if the user wants. This is applicable in cases where the user wants to just
