@@ -7,7 +7,6 @@ package com.intel.mtwilson.tls.policy.creator.impl;
 import com.intel.dcsg.cpg.codec.ByteArrayCodec;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutablePublicKeyRepository;
@@ -15,15 +14,9 @@ import com.intel.dcsg.cpg.x509.repository.PublicKeyRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.security.PublicKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCertificateDigestMetadata;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecByName;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecForData;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getFirst;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.guessAlgorithmForDigest;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 
 /**
  *
@@ -56,13 +49,13 @@ public class PublicKeyTlsPolicyCreator implements TlsPolicyCreator {
             PublicKeyMetadata meta = getPublicKeyMetadata(tlsPolicyDescriptor);
             if( meta.encoding == null ) {
                 // attempt auto-detection based on first digest
-                String sample = getFirst(tlsPolicyDescriptor.getData());
-                codec = getCodecForData(sample);
+                String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
+                codec = TlsPolicyFactoryUtil.getCodecForData(sample);
                 log.debug("Codec {} for sample data {}", (codec==null?"null":codec.getClass().getName()), sample);
             }
             else {
                 String encoding = meta.encoding;
-                codec = getCodecByName(encoding);
+                codec = TlsPolicyFactoryUtil.getCodecByName(encoding);
                 log.debug("Codec {} for public key encoding {}", (codec==null?"null":codec.getClass().getName()), encoding);
             }
             if( codec == null ) {

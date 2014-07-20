@@ -10,10 +10,8 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.x509.repository.CertificateRepository;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutableCertificateRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecByName;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecForData;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getFirst;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 import java.security.KeyManagementException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -53,13 +51,13 @@ public class CertificateTlsPolicyCreator implements TlsPolicyCreator {
             CertificateMetadata meta = getCertificateMetadata(tlsPolicyDescriptor);
             if( meta.encoding == null ) {
                 // attempt auto-detection based on first digest
-                String sample = getFirst(tlsPolicyDescriptor.getData());
-                codec = getCodecForData(sample);
+                String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
+                codec = TlsPolicyFactoryUtil.getCodecForData(sample);
                 log.debug("Codec {} for sample data {}", (codec==null?"null":codec.getClass().getName()), sample);
             }
             else {
                 String encoding = meta.encoding;
-                codec = getCodecByName(encoding);
+                codec = TlsPolicyFactoryUtil.getCodecByName(encoding);
                 log.debug("Codec {} for certificate encoding {}", (codec==null?"null":codec.getClass().getName()), encoding);
             }
             if( codec == null ) {
