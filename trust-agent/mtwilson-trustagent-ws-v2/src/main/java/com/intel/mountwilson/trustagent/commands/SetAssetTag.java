@@ -15,7 +15,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
-import com.intel.dcsg.cpg.io.HexUtil;
+import com.intel.dcsg.cpg.codec.HexUtil;
 import com.intel.mountwilson.common.CommandResult;
 import com.intel.mountwilson.common.TAConfig;
 

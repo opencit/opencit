@@ -6,6 +6,7 @@ package com.intel.mtwilson.tls.policy.creator.impl;
 
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.CertificateDigestTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import java.util.ArrayList;
@@ -82,6 +83,26 @@ public class PolicyCreatorTest {
         tlsPolicyDescriptor.getData().add("MIICJTCCAY6gAwIBAgIIebi9bYW6Z4gwDQYJKoZIhvcNAQELBQAwVTELMAkGA1UEBhMCVVMxHDAaBgNVBAoTE1RydXN0ZWQgRGF0YSBDZW50ZXIxEjAQBgNVBAsTCU10IFdpbHNvbjEUMBIGA1UEAwwLQ049c2FtcGxlXzAwHhcNMTQwNzExMTQxNDU5WhcNMTQwNzEyMTQxNDU5WjBVMQswCQYDVQQGEwJVUzEcMBoGA1UEChMTVHJ1c3RlZCBEYXRhIENlbnRlcjESMBAGA1UECxMJTXQgV2lsc29uMRQwEgYDVQQDDAtDTj1zYW1wbGVfMDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA0SLMa7UTLqJVYsPr6wuMn2HaRvpc0N18tqIS23FUnGLCI0wZpV74hUlSjbv5+D/OQOKhHjQzFlUK6dHaa8XFxa8WC633DY+iZNajRsl3XN1W51uQzI1wrxtOQAX7h34XmqM2diGsl4uk/ysiqwS19A2uWRRQ3WeDPzrdnDthpyUCAwEAATANBgkqhkiG9w0BAQsFAAOBgQBLsXUyoCmDXRafdabCE0r2djgCpIT7jxMYkDz67qwUMztwZRbaNF/um05kHDBhZCvoUH/NjWZ/hXnAB7mg+djJOQ2DEa0oi8eRewJE1CLXusp5tJvzkFrgYTQ0eoYnS97QJbNn//LaACKj+7aIdSx1hxKQhWXpir8vvHoLLhdCDQ==");
         PublicKeyTlsPolicyCreator creator = new PublicKeyTlsPolicyCreator();
         PublicKeyTlsPolicy tlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
+        assertNotNull(tlsPolicy);
+    }
+    
+    @Test
+    public void testCreateCertificatePolicyFromCertificate() {
+        TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+        tlsPolicyDescriptor.setPolicyType("certificate");
+        tlsPolicyDescriptor.setData(new ArrayList<String>());
+        tlsPolicyDescriptor.getData().add(
+"MIIBoTCCAQoCCQCUbSaqp+HiojANBgkqhkiG9w0BAQUFADAVMRMwEQYDVQQDEwox\n" +
+"MC4xLjcxLjkxMB4XDTE0MDQxNDIyMjYwMFoXDTI0MDQxMTIyMjYwMFowFTETMBEG\n" +
+"A1UEAxMKMTAuMS43MS45MTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAw0WR\n" +
+"uXZRsdcmtNb6IFHenIuq/WPEM+R7zCpVlaC4iujCGSBRjeGKyvy8ZS09c4NXv7/T\n" +
+"CYYitdn8O6560gY9VTlTm6sMeGYuFb0i8BkBXIiVgBhJqoTVpJXc3+DhU/tXHPNg\n" +
+"yYvd+ykkRZsDtNEeunJ7yY3A+pti8jeNOHSSXHkCAwEAATANBgkqhkiG9w0BAQUF\n" +
+"AAOBgQCGFGDSPUCI6UXnjQ43vg3U9Ges4O737VLlf8FIh0tGP0GTBHK10HWOJG3Q\n" +
+"DaK4tHuDbQQ5fzUKiwOUscryZgZ2elNDTBwoWcREypFMAY1n8laC6ao4rEGXpyik\n" +
+"5OrFa3NLtY8duK2HgD5DsD96ysYToqaK+Ks14htCqgY2m9XJKA==");
+        CertificateTlsPolicyCreator creator = new CertificateTlsPolicyCreator();
+        CertificateTlsPolicy tlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor);
         assertNotNull(tlsPolicy);
     }
     
