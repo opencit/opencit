@@ -57,7 +57,7 @@ public class V1TlsPolicyFactory {
         } // XXX for backwards compatibility with records that don't have a policy set, but maybe this isn't the place to put it - maybe it should be in the DAO that provides us the txthost object.
         
         if (tlsPolicyName == null) {
-            throw new IllegalArgumentException("A TLS policy must be specified in order to proceed.");
+            throw new IllegalArgumentException("A TLS policy must be specified.");
         }
         
         String ucName = tlsPolicyName.toUpperCase();
