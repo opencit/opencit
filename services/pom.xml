@@ -87,6 +87,7 @@
 	<module>mtwilson-user-management-ws-v2</module>
     <module>mtwilson-attestation-client-jaxrs2</module>
     <module>mtwilson-user-management-client-jaxrs2</module>
+    <module>mtwilson-tls-policy-client-jaxrs2</module>
   </modules>
 
 </project>

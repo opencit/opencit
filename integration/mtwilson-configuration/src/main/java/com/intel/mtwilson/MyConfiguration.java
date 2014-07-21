@@ -492,6 +492,12 @@ public class MyConfiguration {
             properties.setProperty("mtwilson.api.password", conf.getString("mtwilson.api.password"));
 
         }
+        
+        if (conf.containsKey("mtwilson.api.tls.policy.certificate.sha1")) {
+            properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", conf.getString("mtwilson.api.tls.policy.certificate.sha1"));
+        } else if (conf.containsKey("mtwilson.api.tls.policy.insecure")) {
+            properties.setProperty("mtwilson.api.tls.policy.insecure", conf.getString("mtwilson.api.tls.policy.insecure"));
+        }
         return properties;
     }
 
