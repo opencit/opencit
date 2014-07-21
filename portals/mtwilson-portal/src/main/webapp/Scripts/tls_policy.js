@@ -25,17 +25,18 @@ var mtwilsonTlsPolicyModule = {};
             disabled = true;
             choices.push({value:"",label:m.configuration["global"],policy_scope:"global",policy_type:"", isGlobal:true, disabled:false});
         }
-        // second, server default if it's defined
+        // second, server default if it's defined (notice we don't put real policy data here - everything is blank so when the request is submitted to server it will use the default)
         if( m.configuration["default"] ) {
             choices.push({value:"",label:m.configuration["default"],policy_scope:"default",policy_type:"", isDefault:true, disabled:disabled});
         }
+        console.log("allowed policies: ", m.configuration.allow);
         // next, any shared policies
         for(var i=0; i<m.tls_policies.length; i++) {
             var choice = {};
             choice.value = m.tls_policies[i].id || "";
             choice.label = m.tls_policies[i].name;
             choice.policy_scope = (m.tls_policies[i].private ? "private" : "shared");
-            choice.policy_type = m.tls_policies[i].policy_type;
+            choice.policy_type = m.tls_policies[i].descriptor.policy_type;
             choice.disabled = disabled;
             if( m.configuration["default"] == choice.value ) {
                 choice.isDefault = true; //the UI may indicate to the user that this policy is the current server default; user can select this one specifically to retain it even when the default changes
@@ -43,7 +44,10 @@ var mtwilsonTlsPolicyModule = {};
             if( m.configuration["global"] == choice.value ) {
                 choice.isGlobal = true;
             }
-            choices.push(choice);
+            // we only add it to the list if the policy type is in the allowed list
+            if( m.configuration.allow.indexOf(choice.policy_type) > -1 ) { 
+                choices.push(choice);
+            }
         }
         // automatically add "INSECURE" and "TRUST_FIRST_CERTIFICATE" to the policy list IF they are allowed
         if( m.configuration.allow.indexOf("INSECURE") > -1 ) {
