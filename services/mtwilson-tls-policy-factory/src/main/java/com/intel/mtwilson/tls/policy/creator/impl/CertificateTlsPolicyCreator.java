@@ -47,19 +47,7 @@ public class CertificateTlsPolicyCreator implements TlsPolicyCreator {
             if( tlsPolicyDescriptor.getData() == null || tlsPolicyDescriptor.getData().isEmpty()  ) {
                 throw new IllegalArgumentException("TLS policy descriptor does not contain any certificates");
             }
-            ByteArrayCodec codec;
-            CertificateMetadata meta = getCertificateMetadata(tlsPolicyDescriptor);
-            if( meta.encoding == null ) {
-                // attempt auto-detection based on first digest
-                String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
-                codec = TlsPolicyFactoryUtil.getCodecForData(sample);
-                log.debug("Codec {} for sample data {}", (codec==null?"null":codec.getClass().getName()), sample);
-            }
-            else {
-                String encoding = meta.encoding;
-                codec = TlsPolicyFactoryUtil.getCodecByName(encoding);
-                log.debug("Codec {} for certificate encoding {}", (codec==null?"null":codec.getClass().getName()), encoding);
-            }
+            ByteArrayCodec codec = getCodecForTlsPolicyDescriptor(tlsPolicyDescriptor);
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates certificates but does not declare certificate encoding");
             }
@@ -71,6 +59,21 @@ public class CertificateTlsPolicyCreator implements TlsPolicyCreator {
         }
         return null;
     }    
+    
+    protected ByteArrayCodec getCodecForTlsPolicyDescriptor(TlsPolicyDescriptor tlsPolicyDescriptor) {
+        ByteArrayCodec codec;
+        CertificateMetadata meta = getCertificateMetadata(tlsPolicyDescriptor);
+        if( meta.encoding == null ) {
+            // attempt auto-detection based on first certificate
+            String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
+            meta.encoding = TlsPolicyFactoryUtil.guessEncodingForData(sample);
+            log.debug("Guessing codec {} for sample data {}", meta.encoding, sample);
+        }
+        codec = TlsPolicyFactoryUtil.getCodecByName(meta.encoding); // safe because if input is null return value will be null
+        log.debug("Codec {} for cerrtificate encoding {}", (codec==null?"null":codec.getClass().getName()), meta.encoding);
+        return codec;
+    }
+    
     
     /**
      * 

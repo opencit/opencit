@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.tls.policy.factory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.UUID;
@@ -19,7 +18,7 @@ import com.intel.mtwilson.tls.policy.provider.DefaultTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.GlobalTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
-import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyReader;
+import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -249,6 +248,22 @@ public abstract class TlsPolicyFactory {
         }
         
         throw new IllegalArgumentException("Unsupported TLS policy choice");
+    }
+    
+    /**
+     * Can be used to instantiate a TlsPolicy from an abbreviated descriptor
+     * using two String variables which can be stored by classes without any
+     * dependency on mtwilson-tls-policy projects. 
+     * @param policyType for example "certificate", "certificate-digest", "public-key", "public-key-digest", or "INSECURE"
+     * @param policyData can be a base64 or hex encoded certificate, certificate digest, public key, or public key digest as appropriate for the selected policy
+     * @return 
+     */
+    public static TlsPolicy createTlsPolicy(String policyType, String policyData) {
+        TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+        tlsPolicyDescriptor.setPolicyType(policyType);
+        tlsPolicyDescriptor.setData(new ArrayList<String>());
+        tlsPolicyDescriptor.getData().add(policyData);
+        return createTlsPolicy(tlsPolicyDescriptor);
     }
 
  

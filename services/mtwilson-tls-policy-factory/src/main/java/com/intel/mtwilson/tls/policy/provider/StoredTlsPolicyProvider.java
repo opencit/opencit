@@ -25,7 +25,8 @@ import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
-import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyWriter;
+import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyWriter;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.KeyStoreException;
@@ -132,11 +133,7 @@ public class StoredTlsPolicyProvider implements TlsPolicyProvider {
         public TlsPolicyDescriptor convert(CertificateRepository repository) {
             TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
             tlsPolicyDescriptor.setPolicyType("public-key");
-            tlsPolicyDescriptor.setProtection(new TlsProtection());
-            tlsPolicyDescriptor.getProtection().encryption = true; 
-            tlsPolicyDescriptor.getProtection().integrity = true;
-            tlsPolicyDescriptor.getProtection().authentication = true;
-            tlsPolicyDescriptor.getProtection().forwardSecrecy = true;
+            tlsPolicyDescriptor.setProtection(TlsPolicyFactoryUtil.getAllTlsProtection());
             tlsPolicyDescriptor.setMeta(new HashMap<String,String>());
             tlsPolicyDescriptor.getMeta().put("encoding", "base64");
             tlsPolicyDescriptor.setData(new HashSet<String>());
@@ -154,11 +151,7 @@ public class StoredTlsPolicyProvider implements TlsPolicyProvider {
         public TlsPolicyDescriptor convert(CertificateRepository repository) {
             TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
             tlsPolicyDescriptor.setPolicyType("certificate");
-            tlsPolicyDescriptor.setProtection(new TlsProtection());
-            tlsPolicyDescriptor.getProtection().encryption = true;
-            tlsPolicyDescriptor.getProtection().integrity = true;
-            tlsPolicyDescriptor.getProtection().authentication = true;
-            tlsPolicyDescriptor.getProtection().forwardSecrecy = true;
+            tlsPolicyDescriptor.setProtection(TlsPolicyFactoryUtil.getAllTlsProtection());
             tlsPolicyDescriptor.setMeta(new HashMap<String,String>());
             tlsPolicyDescriptor.getMeta().put("encoding", "base64");
             tlsPolicyDescriptor.setData(new HashSet<String>());

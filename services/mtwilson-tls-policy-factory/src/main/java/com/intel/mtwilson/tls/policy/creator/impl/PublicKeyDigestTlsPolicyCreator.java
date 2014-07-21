@@ -47,26 +47,17 @@ public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
             }
             ByteArrayCodec codec;
             PublicKeyDigestMetadata meta = getPublicKeyDigestMetadata(tlsPolicyDescriptor);
-            // DEBU GONLY 
-            try {
-            ObjectMapper mapper = new ObjectMapper();
-            log.debug("metadata is: {}", mapper.writeValueAsString(meta));
-            } catch(Exception e) { }
-            // DEBUG ONLY
             if( meta.digestEncoding == null ) {
                 // attempt auto-detection based on first digest
                 String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
-                codec = TlsPolicyFactoryUtil.getCodecForData(sample);
-                log.debug("getCodecForData: {}", codec);
+                meta.digestEncoding = TlsPolicyFactoryUtil.guessEncodingForData(sample);
+                log.debug("Guessing codec {} for sample data {}", meta.digestEncoding, sample);
             }
-            else {
-                String encoding = meta.digestEncoding;
-                codec = TlsPolicyFactoryUtil.getCodecByName(encoding);
-                log.debug("getCodecByName: {}", codec);
-            }
+            codec = TlsPolicyFactoryUtil.getCodecByName(meta.digestEncoding); // safe because if input is null return value will be null
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates public key digests but does not declare digest encoding");
             }
+            log.debug("Codec {} for digest encoding {}", codec.getClass().getName(), meta.digestEncoding);
             String alg;
             if( meta.digestAlgorithm == null ) {
                 // attempt auto-detection based on first digest

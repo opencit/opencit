@@ -23,7 +23,7 @@ public class DefaultTlsPolicyProvider implements TlsPolicyProvider {
     @Override
     public TlsPolicyChoice getTlsPolicyChoice() {
         String defaultTlsPolicyId = My.configuration().getDefaultTlsPolicyId();
-        log.debug("DefaultTlsPolicy: {}", defaultTlsPolicyId);
+        log.debug("DefaultTlsPolicyProvider: {}", defaultTlsPolicyId);
         if (defaultTlsPolicyId == null || defaultTlsPolicyId.isEmpty()) {
             return null;
         }
@@ -38,7 +38,7 @@ public class DefaultTlsPolicyProvider implements TlsPolicyProvider {
             tlsPolicyChoice.setTlsPolicyId(defaultTlsPolicyId);
             return tlsPolicyChoice;
         }
-        log.debug("DefaultTlsPolicy not found");
+        log.debug("DefaultTlsPolicyProvider policy not found");
         return null;
     }
 }

@@ -4,39 +4,18 @@
  */
 package com.intel.mtwilson.tls.policy.factory.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.net.InternetAddress;
-import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import com.intel.mtwilson.tls.policy.TlsProtection;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -97,10 +76,6 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
 
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TblHostsObjectTlsPolicy.class);
         private TlsPolicyChoice tlsPolicyChoice;
-        // used only for initTlsTrustedCertificateAuthorities
-        private long tlsPemLastModified = 0;
-        private long tlsCrtLastModified = 0;
-        private ArrayList<X509Certificate> tlsAuthorities = new ArrayList<>();
 
         public TblHostsObjectTlsPolicy(TblHosts tblHosts) {
             this.tlsPolicyChoice = determineTlsPolicyChoice(tblHosts);
@@ -136,12 +111,12 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_KNOWN_CERTIFICATE")) {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
-                    tlsPolicyNameChoice.setTlsPolicyDescriptor(getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.setTlsPolicyDescriptor(TlsPolicyFactoryUtil.getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
                     tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType("public-key"); // will cause the certs in the data section to be read only for their public keys. without hostname verification
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_CA_VERIFY_HOSTNAME")) {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
-                    tlsPolicyNameChoice.setTlsPolicyDescriptor(getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.setTlsPolicyDescriptor(TlsPolicyFactoryUtil.getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
                     return tlsPolicyNameChoice;
                 } else {
                     log.debug("TblHostsObjectTlsPolicy: unsupported policy name {}", host.getTlsPolicyName());
@@ -156,118 +131,6 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
         @Override
         public TlsPolicyChoice getTlsPolicyChoice() {
             return tlsPolicyChoice;
-        }
-
-        private List<X509Certificate> getMtWilson1xTrustedTlsCertificates() {
-            try {
-                initTlsTrustedCertificateAuthorities();
-                return tlsAuthorities;
-            } catch (IOException e) {
-                log.warn("Cannot load trusted TLS certificates from Mt Wilson 1.x configuration", e);
-                return Collections.EMPTY_LIST;
-            }
-        }
-
-        private List<X509Certificate> getTrustedTlsCertificatesFromSimpleKeystore(SimpleKeystore tlsKeystore) {
-            ArrayList<X509Certificate> list = new ArrayList<>();
-            if (tlsKeystore != null) {
-                try {
-                    X509Certificate[] cacerts = tlsKeystore.getTrustedCertificates(SimpleKeystore.CA);
-                    list.addAll(Arrays.asList(cacerts));
-                    X509Certificate[] sslcerts = tlsKeystore.getTrustedCertificates(SimpleKeystore.SSL);
-                    list.addAll(Arrays.asList(sslcerts));
-                } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
-                    log.warn("Cannot load trusted TLS certificates from Mt Wilson 1.x keystore", e);
-
-                }
-            }
-            return list;
-        }
-
-        private TlsPolicyDescriptor getTlsPolicyDescriptorFromResource(Resource resource)  {
-            try {
-                String password = My.configuration().getTlsKeystorePassword();
-                SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); 
-                TlsPolicyDescriptor tlsPolicyDescriptor = createTlsPolicyDescriptorFromKeystore(tlsKeystore); 
-                return tlsPolicyDescriptor;
-            }
-            catch(KeyManagementException e) {
-                log.warn("Cannot load tls policy descriptor", e);
-                return null;
-            }
-        }
-        
-        private TlsProtection getAllTlsProtection() {
-            TlsProtection tlsProtection = new TlsProtection();
-            tlsProtection.integrity = true;
-            tlsProtection.encryption = true;
-            tlsProtection.authentication = true;
-            tlsProtection.forwardSecrecy = true;
-            return tlsProtection;
-        }
-
-        private TlsPolicyDescriptor createTlsPolicyDescriptorFromKeystore(SimpleKeystore tlsKeystore) {
-            TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
-            tlsPolicyDescriptor.setPolicyType("certificate");
-            tlsPolicyDescriptor.setProtection(getAllTlsProtection());
-            ArrayList<String> encodedCertificates = new ArrayList<>();
-            tlsPolicyDescriptor.setData(encodedCertificates);
-
-            // combine mtwilson 1.x ca certs configuration and per-host cacerts and certs configuration into one certificate policy
-            ArrayList<X509Certificate> certificates = new ArrayList<>();
-            certificates.addAll(getMtWilson1xTrustedTlsCertificates());
-            certificates.addAll(getTrustedTlsCertificatesFromSimpleKeystore(tlsKeystore));
-
-            // encode each certificate into the descriptor
-            for (X509Certificate cert : certificates) {
-                log.debug("Adding trusted TLS certs and cacerts: {}", cert.getSubjectX500Principal().getName());
-                try {
-                    encodedCertificates.add(Base64.encodeBase64String(cert.getEncoded()));
-                } catch (CertificateEncodingException e) {
-                    throw new IllegalArgumentException("Invalid certificate", e);
-                }
-            }
-            return tlsPolicyDescriptor;
-        }
-
-        // for backward compatibility, can load the mtwilson 1.x trusted tls cacerts file
-        @Deprecated
-        private void initTlsTrustedCertificateAuthorities() throws IOException {
-            // read the trusted CA's
-            String tlsCaFilename = My.configuration().getConfiguration().getString("mtwilson.tls.certificate.file", "mtwilson-tls.pem");
-            if (tlsCaFilename != null) {
-                if (!tlsCaFilename.startsWith("/")) {
-                    tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);
-                }
-                if (tlsCaFilename.endsWith(".pem")) {
-                    File tlsPemFile = new File(tlsCaFilename);
-                    if (tlsPemFile.lastModified() > tlsPemLastModified) {
-                        tlsPemLastModified = tlsPemFile.lastModified();
-                        tlsAuthorities.clear();
-                        try (FileInputStream in = new FileInputStream(tlsPemFile)) {
-                            String content = IOUtils.toString(in);
-                            List<X509Certificate> cacerts = X509Util.decodePemCertificates(content);
-                            tlsAuthorities.addAll(cacerts);
-                        } catch (CertificateException e) {
-                            log.error("Cannot read trusted TLS CA certificates", e);
-                        }
-                    }
-                }
-                if (tlsCaFilename.endsWith(".crt")) {
-                    File tlsCrtFile = new File(tlsCaFilename);
-                    if (tlsCrtFile.lastModified() > tlsCrtLastModified) {
-                        tlsCrtLastModified = tlsCrtFile.lastModified();
-                        tlsAuthorities.clear();
-                        try (FileInputStream in = new FileInputStream(tlsCrtFile)) {
-                            byte[] content = IOUtils.toByteArray(in);
-                            X509Certificate cert = X509Util.decodeDerCertificate(content);
-                            tlsAuthorities.add(cert);
-                        } catch (CertificateException e) {
-                            log.error("Cannot read trusted TLS CA certificates", e);
-                        }
-                    }
-                }
-            }
         }
     }
 

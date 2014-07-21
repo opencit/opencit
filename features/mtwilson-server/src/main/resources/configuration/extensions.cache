@@ -269,7 +269,7 @@ com.intel.mtwilson.tag.rest.v2.resource.Configurations
 com.intel.mtwilson.MultivaluedMapImpl
 com.intel.mtwilson.user.management.rest.v2.resource.UserLoginPasswords
 com.intel.mtwilson.setup.RemoteSetup
-com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstCertificateTlsPolicyCreator
+com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstPublicKeyTlsPolicyCreator
 com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria
 com.intel.mtwilson.tag.model.HostUuidLocator
 com.intel.mtwilson.as.rest.v2.repository.HostRepository

@@ -20,6 +20,7 @@ import java.security.KeyManagementException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 
@@ -36,9 +37,6 @@ public class V1TlsPolicyFactory {
     public static V1TlsPolicyFactory getInstance() {
         return instance;
     }
-    private long tlsPemLastModified = 0;
-    private long tlsCrtLastModified = 0;
-    private ArrayList<X509Certificate> tlsAuthorities = new ArrayList<>();
 
     public TlsPolicy getTlsPolicyWithKeystore(String tlsPolicyName, Resource resource) throws KeyManagementException, IOException {
         String password = My.configuration().getTlsKeystorePassword();
@@ -62,8 +60,7 @@ public class V1TlsPolicyFactory {
         
         String ucName = tlsPolicyName.toUpperCase();
         if (ucName.equals("TRUST_CA_VERIFY_HOSTNAME")) { // XXX TODO   use TlsPolicyName  
-            initTlsTrustedCertificateAuthorities();
-            for (X509Certificate cacert : tlsAuthorities) {
+            for (X509Certificate cacert : getMtWilsonTrustedTlsCertificates()) {
                 log.debug("Adding trusted TLS CA certificate {}", cacert.getSubjectX500Principal().getName());
                 try {
                     tlsKeystore.addTrustedSslCertificate(cacert, cacert.getSubjectX500Principal().getName());
@@ -90,20 +87,40 @@ public class V1TlsPolicyFactory {
         throw new IllegalArgumentException("Unknown TLS Policy: " + tlsPolicyName);
 
     }
+    
+    private static TrustedTlsCertificateFileLoader cacertsLoader = new TrustedTlsCertificateFileLoader();
+    public static List<X509Certificate> getMtWilsonTrustedTlsCertificates() {
+        return cacertsLoader.getTlsTrustedCertificateAuthorities();
+    }
 
+    public static class TrustedTlsCertificateFileLoader {
+    private static long tlsPemLastModified = 0;
+    private static long tlsCrtLastModified = 0;
+    private static final ArrayList<X509Certificate> tlsAuthorities = new ArrayList<>();
+    
+    public List<X509Certificate> getTlsTrustedCertificateAuthorities() {
+        try {
+            initTlsTrustedCertificateAuthorities();
+            return tlsAuthorities;
+        }
+        catch(IOException e) {
+            log.warn("Cannot initialize trusted certificate authorities: {}", e.getMessage());
+            return Collections.EMPTY_LIST;
+        }
+    }
+    // for backward compatibility, can load the mtwilson 1.x trusted tls cacerts file
     private void initTlsTrustedCertificateAuthorities() throws IOException {
-        // read the trusted CA's
         String tlsCaFilename = My.configuration().getConfiguration().getString("mtwilson.tls.certificate.file", "mtwilson-tls.pem");
         if (tlsCaFilename != null) {
             if (!tlsCaFilename.startsWith("/")) {
-                tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);// XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+                tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);
             }
             if (tlsCaFilename.endsWith(".pem")) {
                 File tlsPemFile = new File(tlsCaFilename);
                 if (tlsPemFile.lastModified() > tlsPemLastModified) {
                     tlsPemLastModified = tlsPemFile.lastModified();
                     tlsAuthorities.clear();
-                    try (FileInputStream in = new FileInputStream(tlsPemFile)) {
+                    try (final FileInputStream in = new FileInputStream(tlsPemFile)) {
                         String content = IOUtils.toString(in);
                         List<X509Certificate> cacerts = X509Util.decodePemCertificates(content);
                         tlsAuthorities.addAll(cacerts);
@@ -117,7 +134,7 @@ public class V1TlsPolicyFactory {
                 if (tlsCrtFile.lastModified() > tlsCrtLastModified) {
                     tlsCrtLastModified = tlsCrtFile.lastModified();
                     tlsAuthorities.clear();
-                    try (FileInputStream in = new FileInputStream(tlsCrtFile)) {
+                    try (final FileInputStream in = new FileInputStream(tlsCrtFile)) {
                         byte[] content = IOUtils.toByteArray(in);
                         X509Certificate cert = X509Util.decodeDerCertificate(content);
                         tlsAuthorities.add(cert);
@@ -127,5 +144,7 @@ public class V1TlsPolicyFactory {
                 }
             }
         }
+    }
+        
     }
 }
