@@ -4,13 +4,17 @@
  */
 package com.intel.mtwilson.tls.policy.factory.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.net.InternetAddress;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyChoiceReport;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
+import static com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory.createTlsPolicy;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
@@ -24,7 +28,7 @@ import java.net.MalformedURLException;
 public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TblHostsTlsPolicyFactory.class);
-    private TlsPolicyProvider objectTlsPolicyProvider;
+    private TblHostsObjectTlsPolicy objectTlsPolicyProvider;
     private StoredTlsPolicyProvider.HostDescriptor hostDescriptor;
     private StoredVendorTlsPolicyProvider.VendorDescriptor vendorDescriptor;
 
@@ -51,6 +55,14 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
         this.vendorDescriptor = new TblHostsVendorDescriptor(tblHosts);
     }
 
+    @Override
+    protected TlsPolicy createTlsPolicy(TlsPolicyChoiceReport report) {
+        try {ObjectMapper mapper = new ObjectMapper();        
+        log.debug("TblHostsTlsPolicyFactory createTlsPolicy with report: {}", mapper.writeValueAsString(report));}catch(Exception e){ log.error("TblHostsTlsPolicyFactory createTlsPolicy with report"); }
+        objectTlsPolicyProvider.setTlsPolicyChoice(report.getChoice());
+        return super.createTlsPolicy(report);
+    }
+    
     /*
      @Override
      protected boolean accept(Object tlsPolicySubject) {
@@ -75,10 +87,17 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
     public static class TblHostsObjectTlsPolicy implements TlsPolicyProvider {
 
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TblHostsObjectTlsPolicy.class);
-        private TlsPolicyChoice tlsPolicyChoice;
+        private TblHosts tblHosts;
+//        private TlsPolicyChoice tlsPolicyChoice;
 
         public TblHostsObjectTlsPolicy(TblHosts tblHosts) {
-            this.tlsPolicyChoice = determineTlsPolicyChoice(tblHosts);
+            this.tblHosts = tblHosts;
+//            this.tlsPolicyChoice = determineTlsPolicyChoice(tblHosts);
+        }
+        
+        public void setTlsPolicyChoice(TlsPolicyChoice tlsPolicyChoice) {
+            log.debug("TblHostsObjectTlsPolicy setTlsPolicyChoice");
+            tblHosts.setTlsPolicyChoice(tlsPolicyChoice);
         }
 
         private TlsPolicyChoice determineTlsPolicyChoice(TblHosts host) {
@@ -130,7 +149,7 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
 
         @Override
         public TlsPolicyChoice getTlsPolicyChoice() {
-            return tlsPolicyChoice;
+            return determineTlsPolicyChoice(tblHosts); // tlsPolicyChoice;
         }
     }
 

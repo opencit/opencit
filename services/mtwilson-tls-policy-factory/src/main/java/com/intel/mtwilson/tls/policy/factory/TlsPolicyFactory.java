@@ -101,8 +101,8 @@ public abstract class TlsPolicyFactory {
                 // got a candidate choice from the provider, now we have to validate it
                 TlsPolicyChoiceReport report = new TlsPolicyChoiceReport();
                 report.setProviderClassName(tlsPolicyProvider.getClass().getName());
-                report.setChoice(tlsPolicyChoice);
-                report.setDescriptor(getTlsPolicyDescriptor(tlsPolicyChoice)); // will load it from database if the choice is a policy id, will be null if it's TRUST_FIRST_CERTIFICATE because that would be specified directly in the choice object from the provider;  maybe null for INSECURE or maybe a descriptor with confidentiality,integrity,and authentication false.
+                report.setChoice(tlsPolicyChoice); // choice is what needs to be saved back to the record, if applicable: a shared /tls policy id, or inline descriptor
+                report.setDescriptor(getTlsPolicyDescriptor(tlsPolicyChoice)); // this descriptor is the effective policy, so if the choice is a shared policy id this is the descriptor that was loaded from that shared policy. will load it from database if the choice is a policy id, will be null if it's TRUST_FIRST_CERTIFICATE because that would be specified directly in the choice object from the provider;  maybe null for INSECURE or maybe a descriptor with confidentiality,integrity,and authentication false.
                 // get the policy type
                 String tlsPolicyType = getTlsPolicyType(report); // certificate, certificate-digest, public-key, public-key-digest, INSECURE, TRUST_FIRST_CERTIFICATE, or null
                 if( tlsPolicyType == null ) {
@@ -218,7 +218,14 @@ public abstract class TlsPolicyFactory {
                     }
     }
 
-    private TlsPolicy createTlsPolicy(TlsPolicyChoiceReport report) {
+    /**
+     * Subclasses can override this method to process the final tls policy
+     * as necessary.  Overriding methods should call this super method
+     * to continue.
+     * @param report
+     * @return 
+     */
+    protected TlsPolicy createTlsPolicy(TlsPolicyChoiceReport report) {
         return createTlsPolicy(report.getDescriptor());
     }
     

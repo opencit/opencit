@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.tls.policy.factory.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.net.InternetAddress;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstPublicKeyTrustDelegate;
 import com.intel.dcsg.cpg.x509.repository.MutableCertificateRepository;
@@ -12,6 +14,7 @@ import com.intel.dcsg.cpg.x509.repository.MutablePublicKeyRepository;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyChoiceReport;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
@@ -34,7 +37,7 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TxtHostRecordTlsPolicyFactory.class);
 //    private TxtHostRecord txtHostRecord;
-    private TlsPolicyProvider objectTlsPolicyProvider;
+    private TxtHostRecordObjectTlsPolicy objectTlsPolicyProvider;
     private StoredTlsPolicyProvider.HostDescriptor hostDescriptor;
     private StoredVendorTlsPolicyProvider.VendorDescriptor vendorDescriptor;
     private FirstCertificateTrustDelegate firstCertificateTrustDelegate;
@@ -57,6 +60,15 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
         this.firstPublicKeyTrustDelegate = new FirstPublicKeyTrustDelegate(new TxtHostRecordMutablePublicKeyRepository(txtHostRecord));
     }
 
+    @Override
+    protected TlsPolicy createTlsPolicy(TlsPolicyChoiceReport report) {
+        try {ObjectMapper mapper = new ObjectMapper();        
+        log.debug("TxtHostRecordTlsPolicyFactory createTlsPolicy with report: {}", mapper.writeValueAsString(report));}catch(Exception e){ log.error("TxtHostRecordTlsPolicyFactory createTlsPolicy with report"); }
+        objectTlsPolicyProvider.setTlsPolicyChoice(report.getChoice());
+        return super.createTlsPolicy(report);
+    }
+    
+    
     /*
      @Override
      protected boolean accept(Object tlsPolicySubject) {
@@ -79,17 +91,25 @@ public class TxtHostRecordTlsPolicyFactory extends TlsPolicyFactory {
     }
 
     public static class TxtHostRecordObjectTlsPolicy implements TlsPolicyProvider {
-
-        private TlsPolicyChoice tlsPolicyChoice;
+        private TxtHostRecord txtHostRecord;
+//        private TlsPolicyChoice tlsPolicyChoice;
 
         public TxtHostRecordObjectTlsPolicy(TxtHostRecord txtHostRecord) {
-            this.tlsPolicyChoice = txtHostRecord.tlsPolicyChoice;
+//            this.tlsPolicyChoice = txtHostRecord.tlsPolicyChoice;
+            this.txtHostRecord = txtHostRecord;
         }
 
         @Override
         public TlsPolicyChoice getTlsPolicyChoice() {
-            return tlsPolicyChoice;
+//            return tlsPolicyChoice;
+            return txtHostRecord.tlsPolicyChoice;
         }
+        
+        public void setTlsPolicyChoice(TlsPolicyChoice tlsPolicyChoice) {
+            log.debug("TblHostsObjectTlsPolicy setTlsPolicyChoice");
+            txtHostRecord.tlsPolicyChoice = tlsPolicyChoice;
+        }
+        
     }
 
     public static class TxtHostRecordHostDescriptor implements StoredTlsPolicyProvider.HostDescriptor {
