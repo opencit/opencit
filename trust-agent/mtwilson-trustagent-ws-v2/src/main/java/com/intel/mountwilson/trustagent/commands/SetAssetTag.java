@@ -11,7 +11,6 @@ import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.IOException;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;

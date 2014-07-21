@@ -316,13 +316,17 @@ function fnGetNewHostData() {
         
     }
 
+    var tlsPolicyChoice = {}
     mtwilsonTlsPolicyModule.copyTlsPolicyChoiceToHostDetailsVO({
         'tls_policy_select': $('#tls_policy_select').val(),
         'tls_policy_data_certificate': $("#tls_policy_data_certificate").val(),
         'tls_policy_data_certificate_digest': $("#tls_policy_data_certificate_digest").val(),
         'tls_policy_data_public_key': $("#tls_policy_data_public_key").val(),
         'tls_policy_data_public_key_digest': $("#tls_policy_data_public_key_digest").val()
-    }, hostVo);
+    }, tlsPolicyChoice);
+    hostVo.tlsPolicyId = tlsPolicyChoice.tlsPolicyId;
+    hostVo.tlsPolicyType = tlsPolicyChoice.tlsPolicyType;
+    hostVo.tlsPolicyData = encodeURIComponent(tlsPolicyChoice.tlsPolicyData); // may contain base64 data include + sign which , if not encoded, would be received by the server as a space and cause the data to be unusable
     
     
 	//setting unwanted values to null or default

@@ -180,26 +180,32 @@ var mtwilsonTlsPolicyModule = {};
     defineFunction(m, "copyTlsPolicyChoiceToHostDetailsVO", function(input, hostDetails) {
         var tlsPolicySelect = input.tls_policy_select || "";
         if( tlsPolicySelect == "INSECURE" ) {
+            hostDetails.tlsPolicyId = null;
             hostDetails.tlsPolicyType = "INSECURE";
             hostDetails.tlsPolicyData = null;
         }
         else if( tlsPolicySelect == "TRUST_FIRST_CERTIFICATE" ) {
+            hostDetails.tlsPolicyId = null;
             hostDetails.tlsPolicyType = "TRUST_FIRST_CERTIFICATE";
             hostDetails.tlsPolicyData = null;
         }
         else if( tlsPolicySelect == "private-certificate" ) {
+            hostDetails.tlsPolicyId = null;
             hostDetails.tlsPolicyType = "certificate";
             hostDetails.tlsPolicyData = input.tls_policy_data_certificate;
         }
         else if( tlsPolicySelect == "private-certificate-digest" ) {
+            hostDetails.tlsPolicyId = null;
             hostDetails.tlsPolicyType = "certificate-digest";
             hostDetails.tlsPolicyData = input.tls_policy_data_certificate_digest;
         }
         else if( tlsPolicySelect == "private-public-key" ) {
+            hostDetails.tlsPolicyId = null;
             hostDetails.tlsPolicyType = "public-key";
             hostDetails.tlsPolicyData = input.tls_policy_data_public_key;
         }
         else if( tlsPolicySelect == "private-public-key-digest" ) {
+            hostDetails.tlsPolicyId = null;
             hostDetails.tlsPolicyType = "public-key-digest";
             hostDetails.tlsPolicyData = input.tls_policy_data_public_key_digest;
         }

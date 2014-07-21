@@ -14,12 +14,8 @@ import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyDigestTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.DigestRepository;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutableDigestRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCertificateDigestMetadata;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecByName;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getCodecForData;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.getFirst;
-import static com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.guessAlgorithmForDigest;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 
 /**
  *
@@ -59,13 +55,13 @@ public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
             // DEBUG ONLY
             if( meta.digestEncoding == null ) {
                 // attempt auto-detection based on first digest
-                String sample = getFirst(tlsPolicyDescriptor.getData());
-                codec = getCodecForData(sample);
+                String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
+                codec = TlsPolicyFactoryUtil.getCodecForData(sample);
                 log.debug("getCodecForData: {}", codec);
             }
             else {
                 String encoding = meta.digestEncoding;
-                codec = getCodecByName(encoding);
+                codec = TlsPolicyFactoryUtil.getCodecByName(encoding);
                 log.debug("getCodecByName: {}", codec);
             }
             if( codec == null ) {
@@ -74,9 +70,9 @@ public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
             String alg;
             if( meta.digestAlgorithm == null ) {
                 // attempt auto-detection based on first digest
-                String sample = getFirst(tlsPolicyDescriptor.getData());
+                String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
                 byte[] hash = codec.decode(sample);
-                alg = guessAlgorithmForDigest(hash);
+                alg = TlsPolicyFactoryUtil.guessAlgorithmForDigest(hash);
             }
             else {
                 alg = meta.digestAlgorithm;

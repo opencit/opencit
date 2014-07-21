@@ -3,7 +3,7 @@
  *
  * Rules and details @ https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet
  *
- * Copyright (C) 2014-2015 
+ * Copyright (C) 2014-2015 Intel Corporation
  *
  * Author: Naresh K Gadepalli 
  * */
@@ -169,6 +169,6 @@ function escapeForHTMLAttributes(input) {
  * 
  * Method that does a standard percent encoding of the given input string. 
  * */
-function encodeURL(input) {
+function escapeForURL(input) {
 	return encodeURIComponent(input);
 }

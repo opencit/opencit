@@ -136,7 +136,7 @@ public class MyPersistenceManager extends PersistenceManager {
         Properties prop = new Properties();
         Configuration myConfig = config.getConfiguration();
         prop.put("javax.persistence.jdbc.driver", 
-                myConfig.getString("mountwilson.ms.db.driver", 
+                myConfig.getString("mountwilson.as.db.driver", 
                config.getDatabaseDriver()));
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
@@ -148,19 +148,19 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }        
         prop.put("javax.persistence.jdbc.url" , 
-                myConfig.getString("mountwilson.ms.db.url",
+                myConfig.getString("mountwilson.as.db.url",
                 myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    myConfig.getString("mountwilson.ms.db.host", config.getDatabaseHost()),
-                    myConfig.getString("mountwilson.ms.db.port", config.getDatabasePort()),
-                    myConfig.getString("mountwilson.ms.db.schema", config.getDatabaseSchema())))));
+                    myConfig.getString("mountwilson.as.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.as.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.as.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
-                myConfig.getString("mountwilson.ms.db.user",
+                myConfig.getString("mountwilson.as.db.user",
                 myConfig.getString("mtwilson.db.user",
                 "root")));
         prop.put("javax.persistence.jdbc.password", 
-                myConfig.getString("mountwilson.ms.db.password", 
+                myConfig.getString("mountwilson.as.db.password", 
                 myConfig.getString("mtwilson.db.password", 
                 "password")));
         log.debug("MSData javax.persistence.jdbc.url={}", prop.getProperty("javax.persistence.jdbc.url"));

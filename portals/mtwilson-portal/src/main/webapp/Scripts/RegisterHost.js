@@ -388,7 +388,7 @@ function fnRegisterMultipleHost() {
             
             host.tlsPolicyId = tlsPolicyChoice.tlsPolicyId;
             host.tlsPolicyType = tlsPolicyChoice.tlsPolicyType;
-            host.tlsPolicyData = tlsPolicyChoice.tlsPolicyData;
+            host.tlsPolicyData = encodeURIComponent(tlsPolicyChoice.tlsPolicyData); // may contain base64 data include + sign which , if not encoded, would be received by the server as a space and cause the data to be unusable
             
             listOfHost.push(host);
         }
