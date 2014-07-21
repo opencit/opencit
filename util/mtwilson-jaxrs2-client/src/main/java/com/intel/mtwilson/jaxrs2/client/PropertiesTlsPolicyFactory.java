@@ -90,7 +90,7 @@ public class PropertiesTlsPolicyFactory {
             tlsPolicyDescriptor.setPolicyType("public-key-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-1");
             tlsPolicyDescriptor.getData().add(publicKeyDigestSha1);
-        } else if (insecure != null) {
+        } else if (insecure != null && insecure.equalsIgnoreCase("true")) {
             tlsPolicyDescriptor.setPolicyType("INSECURE");
         }
         TlsPolicy tlsPolicy = TlsPolicyFactory.createTlsPolicy(tlsPolicyDescriptor);

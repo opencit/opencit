@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.as.controller;
 
@@ -62,7 +62,7 @@ public class TblHostsJpaController implements Serializable {
                 biosMleId = em.getReference(biosMleId.getClass(), biosMleId.getId());
                 tblHosts.setBiosMleId(biosMleId);
             }
-            Collection<TblSamlAssertion> attachedTblSamlAssertionCollection = new ArrayList<TblSamlAssertion>();
+            Collection<TblSamlAssertion> attachedTblSamlAssertionCollection = new ArrayList<>();
             for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertionToAttach : tblHosts.getTblSamlAssertionCollection()) {
                 tblSamlAssertionCollectionTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionTblSamlAssertionToAttach.getId());
                 attachedTblSamlAssertionCollection.add(tblSamlAssertionCollectionTblSamlAssertionToAttach);
@@ -111,7 +111,7 @@ public class TblHostsJpaController implements Serializable {
             for (TblSamlAssertion tblSamlAssertionCollectionOldTblSamlAssertion : tblSamlAssertionCollectionOld) {
                 if (!tblSamlAssertionCollectionNew.contains(tblSamlAssertionCollectionOldTblSamlAssertion)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain TblSamlAssertion " + tblSamlAssertionCollectionOldTblSamlAssertion + " since its hostId field is not nullable.");
                 }
@@ -127,7 +127,7 @@ public class TblHostsJpaController implements Serializable {
                 biosMleIdNew = em.getReference(biosMleIdNew.getClass(), biosMleIdNew.getId());
                 tblHosts.setBiosMleId(biosMleIdNew);
             }
-            Collection<TblSamlAssertion> attachedTblSamlAssertionCollectionNew = new ArrayList<TblSamlAssertion>();
+            Collection<TblSamlAssertion> attachedTblSamlAssertionCollectionNew = new ArrayList<>();
             for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertionToAttach : tblSamlAssertionCollectionNew) {
                 tblSamlAssertionCollectionNewTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getId());
                 attachedTblSamlAssertionCollectionNew.add(tblSamlAssertionCollectionNewTblSamlAssertionToAttach);
