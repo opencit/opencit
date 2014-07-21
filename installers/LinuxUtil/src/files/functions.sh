@@ -1661,6 +1661,17 @@ postgres_configure_connection() {
 # call postgres_configure_connection before calling this function
 postgres_create_database() {
 if postgres_server_detect ; then
+  #we first need to find if the user has specified a different port than the once currently configured for postgres
+  current_port=`grep "port =" $postgres_conf | awk '{print $3}'`
+  has_correct_port=`grep $POSTGRES_PORTNUM $postgres_conf`
+  if [ -z "$has_correct_port" ]; then
+    echo "Port needs to be reconfigured from $current_port to $POSTGRES_PORTNUM"
+    sed -i s/$current_port/$POSTGRES_PORTNUM/g $postgres_conf 
+    echo "Restarting PostgreSQL for port change update to take effect."
+    postgres_restart >> $INSTALL_LOG_FILE
+    sleep 10
+  fi
+
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
     #echo_success "Database [${POSTGRES_DATABASE}] already exists"

@@ -107,7 +107,7 @@ public class APIClient {
     public Role[] listAvailableRoles() {
         return new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement,
         Role.Administrator, Role.AssetTagManager, Role.Auditor, Role.Challenger, Role.HostManager, Role.ReportManager, 
-        Role.ServerManager, Role.UserManager, Role.WhitelistManager}; 
+        Role.ServerManager, Role.UserManager, Role.WhitelistManager, Role.TlsPolicyManager}; 
     }
     
     
