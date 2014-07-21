@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.as.controller;
 
@@ -15,17 +15,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
-import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
-import org.eclipse.persistence.queries.DatabaseQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +62,7 @@ public class TblHostsJpaController implements Serializable {
                 biosMleId = em.getReference(biosMleId.getClass(), biosMleId.getId());
                 tblHosts.setBiosMleId(biosMleId);
             }
-            Collection<TblSamlAssertion> attachedTblSamlAssertionCollection = new ArrayList<TblSamlAssertion>();
+            Collection<TblSamlAssertion> attachedTblSamlAssertionCollection = new ArrayList<>();
             for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertionToAttach : tblHosts.getTblSamlAssertionCollection()) {
                 tblSamlAssertionCollectionTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionTblSamlAssertionToAttach.getId());
                 attachedTblSamlAssertionCollection.add(tblSamlAssertionCollectionTblSamlAssertionToAttach);
@@ -115,7 +111,7 @@ public class TblHostsJpaController implements Serializable {
             for (TblSamlAssertion tblSamlAssertionCollectionOldTblSamlAssertion : tblSamlAssertionCollectionOld) {
                 if (!tblSamlAssertionCollectionNew.contains(tblSamlAssertionCollectionOldTblSamlAssertion)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain TblSamlAssertion " + tblSamlAssertionCollectionOldTblSamlAssertion + " since its hostId field is not nullable.");
                 }
@@ -131,7 +127,7 @@ public class TblHostsJpaController implements Serializable {
                 biosMleIdNew = em.getReference(biosMleIdNew.getClass(), biosMleIdNew.getId());
                 tblHosts.setBiosMleId(biosMleIdNew);
             }
-            Collection<TblSamlAssertion> attachedTblSamlAssertionCollectionNew = new ArrayList<TblSamlAssertion>();
+            Collection<TblSamlAssertion> attachedTblSamlAssertionCollectionNew = new ArrayList<>();
             for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertionToAttach : tblSamlAssertionCollectionNew) {
                 tblSamlAssertionCollectionNewTblSamlAssertionToAttach = em.getReference(tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getClass(), tblSamlAssertionCollectionNewTblSamlAssertionToAttach.getId());
                 attachedTblSamlAssertionCollectionNew.add(tblSamlAssertionCollectionNewTblSamlAssertionToAttach);

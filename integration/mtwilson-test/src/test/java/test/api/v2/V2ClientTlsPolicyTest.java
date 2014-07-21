@@ -37,20 +37,16 @@ public class V2ClientTlsPolicyTest extends RemoteIntegrationTest {
         }
     }
 
-    @Test
+    @Test(expected=javax.net.ssl.SSLHandshakeException.class)
     public void testSearchOemsWithPublicKeyDigestTlsPolicyWithIncorrectDigest() throws Exception {
         Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator.class);
 //        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator.class);
-        testProperties.setProperty("mtwilson.api.tls.policy.publickey.sha1", "8e c3 ea 36 0d d8 27 ab 9c 71 cf 11 a6 b7 30 35 a3 dc 23 f0");
+        testProperties.setProperty("mtwilson.api.tls.policy.publickey.sha1", "8e c3 ea 36 0d d8 27 ab 9c 71 cf 11 a6 b7 30 35 a3 dc 23 f0"); // intentionally incorrect digest to cause an error
         Oems client = new Oems(testProperties);
-        try {
-            OemCollection results = client.searchOems(new OemFilterCriteria());
-            List<Oem> list = results.getOems();
-            for (Oem oem : list) {
-                log.debug("got oem {}", oem.getId().toString());
-            }
-        } catch (Exception e) {
-            log.debug("Expected tls policy exception due to incorrect digest", e);
+        OemCollection results = client.searchOems(new OemFilterCriteria());
+        List<Oem> list = results.getOems();
+        for (Oem oem : list) {
+            log.debug("got oem {}", oem.getId().toString());
         }
     }
 }

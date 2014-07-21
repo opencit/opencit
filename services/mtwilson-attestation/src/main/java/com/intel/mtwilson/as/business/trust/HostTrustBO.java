@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.business.trust;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
@@ -147,6 +148,18 @@ public class HostTrustBO {
     public HostResponse getTrustStatusOfHostNotInDBAndRegister(TxtHostRecord hostObj) {
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         boolean biosMLEFound = false, VMMMLEFound = false;
+        
+            // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
+            if( log.isDebugEnabled() ) {
+                try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostObj)); //This statement may contain clear text passwords
+                }
+                catch(IOException e) {
+                    log.debug("cannot serialize host input to addHost", e);
+                }
+            }
+            
         
         try {
             

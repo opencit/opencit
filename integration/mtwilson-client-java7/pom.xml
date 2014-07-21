@@ -290,6 +290,11 @@
             <artifactId>mtwilson-attestation-model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -409,6 +414,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-client-jaxrs2</artifactId>
             <version>${project.version}</version>
@@ -463,6 +473,7 @@
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-client-jaxrs2</dependencySourceInclude>
                                     </dependencySourceIncludes>
                                 </configuration>
                             </execution>

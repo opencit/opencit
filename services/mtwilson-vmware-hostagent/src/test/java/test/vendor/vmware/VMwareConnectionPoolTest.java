@@ -20,9 +20,7 @@ import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
-import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import com.intel.dcsg.cpg.tls.policy.impl.*;
-import com.vmware.vim25.mo.ManagedEntity;
 import java.io.IOException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -54,7 +52,7 @@ public class VMwareConnectionPoolTest {
     }
 
     public HostAgent getAgentWithDenyAllTlsPolicy() throws KeyManagementException, IOException {
-        TlsPolicy tlsPolicy = new TrustKnownCertificateTlsPolicy(new ArrayCertificateRepository(new X509Certificate[0]));
+        TlsPolicy tlsPolicy = new CertificateTlsPolicy(new ArrayCertificateRepository(new X509Certificate[0]));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent hostAgent = factory.getHostAgent(new ConnectionString(host1), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;
@@ -81,7 +79,7 @@ public class VMwareConnectionPoolTest {
         String vmwareConnString = "https://10.1.71.162:443/sdk;Administrator;intel123!";
         URL url = new URL(vmwareConnString);
         log.debug("Acquiring vmware client...");
-        VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance()));
+        VMwareClient client = pool.getClientForConnection(new TlsConnection(url, new InsecureTlsPolicy()));
         
 //        List<String> datacenters = client.getDatacenterNames();
         List<String> clusters = client.getClusterNamesWithDC();

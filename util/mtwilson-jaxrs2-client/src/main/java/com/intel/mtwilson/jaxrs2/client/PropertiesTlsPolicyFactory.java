@@ -6,15 +6,11 @@ package com.intel.mtwilson.jaxrs2.client;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -90,7 +86,7 @@ public class PropertiesTlsPolicyFactory {
             tlsPolicyDescriptor.setPolicyType("public-key-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-1");
             tlsPolicyDescriptor.getData().add(publicKeyDigestSha1);
-        } else if (insecure != null) {
+        } else if (insecure != null && insecure.equalsIgnoreCase("true")) {
             tlsPolicyDescriptor.setPolicyType("INSECURE");
         }
         TlsPolicy tlsPolicy = TlsPolicyFactory.createTlsPolicy(tlsPolicyDescriptor);

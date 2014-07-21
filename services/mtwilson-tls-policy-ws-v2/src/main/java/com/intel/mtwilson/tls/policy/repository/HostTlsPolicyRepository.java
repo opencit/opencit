@@ -6,6 +6,7 @@ package com.intel.mtwilson.tls.policy.repository;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.repository.RepositoryCreateConflictException;
 import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.repository.RepositoryDeleteException;
 import com.intel.mtwilson.repository.RepositoryException;
@@ -20,8 +21,8 @@ import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyRecord;
-import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyReader;
-import com.intel.mtwilson.tls.policy.reader.impl.JsonTlsPolicyWriter;
+import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyReader;
+import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -190,6 +191,11 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
         locator.id = item.getId();
 
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+            if ((dao.findTlsPolicyById(item.getId()) != null) || (dao.findTlsPolicyByNameEqualTo(item.getName()) != null)) {
+                log.error("HostTlsPolicy:Create - HostTlsPolicy {} will not be created since a duplicate HostTlsPolicy already exists.", item.getId().toString());                
+                throw new RepositoryCreateConflictException(locator);
+            }
+            
             TlsPolicyRecord record = convert(item);
             dao.insertTlsPolicy(record);
         } catch (IOException ex) {

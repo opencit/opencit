@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.IOException;
 import org.apache.commons.codec.binary.Hex;
+import java.util.NoSuchElementException;
 
 /**
  * Test TPM ownership status by attempting to change the SRK secret and then
@@ -29,7 +30,7 @@ public class Util {
             if( ekModulus != null ) { log.debug("EK modulus: {}", Hex.encodeHexString(ekModulus)); }
             return true;
         }
-        catch(IOException e) {
+        catch(IOException | NoSuchElementException e) {
             log.debug("Failed ownership test (get endorsement credential)", e);
             return false;
         }

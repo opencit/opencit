@@ -56,19 +56,17 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
             if( meta.digestEncoding == null ) {
                 // attempt auto-detection based on first digest
                 String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
-                codec = TlsPolicyFactoryUtil.getCodecForData(sample);
-                log.debug("Codec {} for sample data {}", (codec==null?"null":codec.getClass().getName()), sample);
+                meta.digestEncoding = TlsPolicyFactoryUtil.guessEncodingForData(sample);
+                log.debug("Guessing codec {} for sample data {}", meta.digestEncoding, sample);
             }
-            else {
-                String encoding = meta.digestEncoding;
-                codec = TlsPolicyFactoryUtil.getCodecByName(encoding);
-                log.debug("Codec {} for digest encoding {}", (codec==null?"null":codec.getClass().getName()), encoding);
-            }
+            codec = TlsPolicyFactoryUtil.getCodecByName(meta.digestEncoding); // safe because if input is null return value will be null
             if( codec == null ) {
                 throw new IllegalArgumentException("TlsPolicyDescriptor indicates certificate digests but does not declare digest encoding");
             }
+            log.debug("Codec {} for digest encoding {}", codec.getClass().getName(), meta.digestEncoding);
             String alg;
-            if( meta.digestAlgorithm == null ) {
+            if( meta.digestAlgorithm == null || meta.digestAlgorithm.isEmpty() ) {
+                log.debug("Guessing algorithm for sample data");
                 // attempt auto-detection based on first digest
                 String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
                 byte[] hash = codec.decode(sample);
@@ -76,6 +74,7 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
                 log.debug("Algorithm {} for sample data {} decoded length {}", alg, sample, hash.length);
             }
             else {
+                log.debug("Using specified algorithm for sample data {}", meta.digestAlgorithm);
                 alg = meta.digestAlgorithm;
             }
             if( alg == null ) {

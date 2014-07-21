@@ -2,12 +2,9 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.tls.policy.reader.impl;
+package com.intel.mtwilson.tls.policy.codec.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyReader;
@@ -41,5 +38,6 @@ public class JsonTlsPolicyReader implements TlsPolicyReader {
             throw new IllegalArgumentException(e); // it's not TlsPolicyDescriptorInvalidException because we weren't able to read the content... there is no descriptor yet
         }
     }
-    
+
+
 }
