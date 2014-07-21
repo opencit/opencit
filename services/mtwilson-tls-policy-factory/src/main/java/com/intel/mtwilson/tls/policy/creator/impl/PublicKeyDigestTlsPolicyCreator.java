@@ -59,7 +59,7 @@ public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
             }
             log.debug("Codec {} for digest encoding {}", codec.getClass().getName(), meta.digestEncoding);
             String alg;
-            if( meta.digestAlgorithm == null ) {
+            if( meta.digestAlgorithm == null || meta.digestAlgorithm.isEmpty() ) {
                 // attempt auto-detection based on first digest
                 String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
                 byte[] hash = codec.decode(sample);

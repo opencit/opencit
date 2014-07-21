@@ -46,7 +46,9 @@ public class TlsPolicyFactoryUtil {
     public static String guessEncodingForData(String sample) {
         log.debug("guessEncodingForData: {}", sample);
         if( sample == null ) { return null; }
-        String printable = sample.replaceAll("[^\\p{Print}]", "");
+//        String printable = sample.replaceAll("[^\\p{Print}]", "");
+        String printable = sample.replaceAll("["+HexUtil.NON_HEX+"&&"+Base64Util.NON_BASE64+"]", "");
+        log.debug("guessEncodingForData printable: {}", printable);
         String hex = HexUtil.trim(printable);
         if (HexUtil.isHex(hex)) {
             log.debug("guessEncodingForData hex: {}", hex);

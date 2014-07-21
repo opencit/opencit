@@ -65,7 +65,8 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
             }
             log.debug("Codec {} for digest encoding {}", codec.getClass().getName(), meta.digestEncoding);
             String alg;
-            if( meta.digestAlgorithm == null ) {
+            if( meta.digestAlgorithm == null || meta.digestAlgorithm.isEmpty() ) {
+                log.debug("Guessing algorithm for sample data");
                 // attempt auto-detection based on first digest
                 String sample = TlsPolicyFactoryUtil.getFirst(tlsPolicyDescriptor.getData());
                 byte[] hash = codec.decode(sample);
@@ -73,6 +74,7 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
                 log.debug("Algorithm {} for sample data {} decoded length {}", alg, sample, hash.length);
             }
             else {
+                log.debug("Using specified algorithm for sample data {}", meta.digestAlgorithm);
                 alg = meta.digestAlgorithm;
             }
             if( alg == null ) {
