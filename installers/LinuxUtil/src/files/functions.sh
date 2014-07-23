@@ -2218,20 +2218,21 @@ glassfish_admin_user() {
   GF_CONFIG_PATH="$GLASSFISH_HOME/config"
   export AS_ADMIN_USER=$WEBSERVICE_USERNAME
   export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
+  export AS_ADMIN_PASSWORD_OLD=`cat $GF_CONFIG_PATH/admin.passwd 2>/dev/null | head -n 1 | cut -d'=' -f2`
   export AS_ADMIN_PASSWORDFILE=$GF_CONFIG_PATH/admin.passwd
   
-  if [ ! -f $GF_CONFIG_PATH/admin.user ]; then
+#  if [ ! -f $GF_CONFIG_PATH/admin.user ]; then
     echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > $GF_CONFIG_PATH/admin.user
-  fi
+#  fi
   
-  if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
-    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd
+#  if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
+    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD_OLD}" > $GF_CONFIG_PATH/admin.passwd
     echo "AS_ADMIN_NEWPASSWORD=${AS_ADMIN_PASSWORD}" >> $GF_CONFIG_PATH/admin.passwd
-  fi
+#  fi
 
-  if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
-    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd.old
-  fi
+#  if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
+    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD_OLD}" > $GF_CONFIG_PATH/admin.passwd.old
+#  fi
 
   chmod 600 $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
   #echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
