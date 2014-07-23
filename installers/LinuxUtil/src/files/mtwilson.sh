@@ -491,8 +491,9 @@ case "$1" in
         webservice_uninstall ManagementService 2>&1 > /dev/null
         webservice_uninstall WLMService 2>&1 > /dev/null
 
-        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity and /opt/mtwilson..."
         rm -rf /opt/intel/cloudsecurity
+        rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
         # configuration files
