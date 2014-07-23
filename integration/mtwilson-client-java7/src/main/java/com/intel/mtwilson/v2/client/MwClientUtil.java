@@ -33,6 +33,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Locale;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,14 +60,14 @@ public class MwClientUtil {
         }
     }
     
-    public static SimpleKeystore createUserInDirectoryV2(File directory, String username, String password, URL server, String comments) throws IOException, ApiException, CryptographyException, ClientException {
+    public static SimpleKeystore createUserInDirectoryV2(File directory, String username, String password, URL server, String comments, Properties properties) throws IOException, ApiException, CryptographyException, ClientException {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
-        return createUserInResourceV2(resource, username, password, server, comments);
+        return createUserInResourceV2(resource, username, password, server, properties, comments, null, "TLS");
     }
 
-    public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
+    /*public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, String comments) throws IOException, ApiException, CryptographyException, ClientException {
         return createUserInResourceV2(resource, username, password, server, new InsecureTlsPolicy(), comments, null);
     }
@@ -74,10 +75,10 @@ public class MwClientUtil {
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, TlsPolicy tlsPolicy, String comments, Locale locale) throws IOException, ApiException, CryptographyException, ClientException {
         return createUserInResourceV2(resource, username, password, server, tlsPolicy, comments, locale, "TLS");
-    }
+    }*/
 
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
-            URL server, TlsPolicy tlsPolicy, String comments, Locale locale, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
+            URL server, Properties properties, String comments, Locale locale, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
         
         URL baseUrl = new URL(server.getProtocol() + "://" + server.getAuthority());
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
@@ -99,7 +100,7 @@ public class MwClientUtil {
         
         try {
             
-            RegisterUsers client = new RegisterUsers(My.configuration().getClientProperties());
+            RegisterUsers client = new RegisterUsers(properties);//My.configuration().getClientProperties());
             
             RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate();            
             User newUser = new User();
