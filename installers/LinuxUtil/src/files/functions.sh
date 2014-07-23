@@ -2191,7 +2191,7 @@ glassfish_install() {
   
   # set JAVA_HOME for glassfish
   asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
-  if ! grep -q "AS_JAVA=" "$File"; then
+  if [ -f "$asenvFile" ] && ! grep -q "AS_JAVA=" "$asenvFile"; then
     echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
   fi
   
