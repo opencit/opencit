@@ -1962,15 +1962,19 @@ glassfish_detect() {
       if [[ -n "$java" ]]; then    
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
           gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          if [ -n "$gfuser" ]; then
+            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          fi
         fi
       else
         glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
           gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          if [ -n "$gfuser" ]; then
+            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          fi
         fi
       fi
     fi
@@ -1993,9 +1997,11 @@ glassfish_detect() {
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
           gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          if [ -n "$gfuser" ]; then
+            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          fi
         fi
         echo "Found Glassfish: $GLASSFISH_HOME"
 #        echo "Found Glassfish: $glassfish"
