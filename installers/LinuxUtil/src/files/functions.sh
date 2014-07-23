@@ -2259,7 +2259,7 @@ glassfish_admin_user() {
   if [[ "$glassfish" != *"--passwordfile="* ]]; then
     changeAdminPassOptions+=" --passwordfile=$GF_CONFIG_PATH/admin.passwd"
   fi
-  $glassfish "$changeAdminPassOptions" change-admin-password
+  $glassfish $changeAdminPassOptions change-admin-password     # no quotes; command doesn't handle well
 
   # set the password file appropriately for further reads
   echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
