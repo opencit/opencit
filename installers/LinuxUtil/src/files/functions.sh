@@ -2191,7 +2191,9 @@ glassfish_install() {
   
   # set JAVA_HOME for glassfish
   asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
-  echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  if ! grep -q "AS_JAVA=" "$File"; then
+    echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  fi
   
   echo "Increasing glassfish max thread pool size to 200..."
   $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
