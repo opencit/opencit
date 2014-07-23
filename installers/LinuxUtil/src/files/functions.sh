@@ -2253,10 +2253,10 @@ glassfish_admin_user() {
 
   # needed in case glassfish_detect has already added --user and --passwordfile options
   changeAdminPassOptions=
-  if [[ "$glassfish" == *"--user="* ]]; then
+  if [[ "$glassfish" != *"--user="* ]]; then
     changeAdminPassOptions+=" --user=$AS_ADMIN_USER"
   fi
-  if [[ "$glassfish" == *"--passwordfile="* ]]; then
+  if [[ "$glassfish" != *"--passwordfile="* ]]; then
     changeAdminPassOptions+=" --passwordfile=$GF_CONFIG_PATH/admin.passwd"
   fi
   $glassfish "$changeAdminPassOptions" change-admin-password
