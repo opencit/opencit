@@ -2250,7 +2250,16 @@ glassfish_admin_user() {
 #expect eof
 #EOD
 #) > /dev/null 2>&1
-  $glassfish --user=$AS_ADMIN_USER --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
+
+  # needed in case glassfish_detect has already added --user and --passwordfile options
+  changeAdminPassOptions=
+  if [[ "$glassfish" == *"--user="* ]]; then
+    changeAdminPassOptions+=" --user=$AS_ADMIN_USER"
+  fi
+  if [[ "$glassfish" == *"--passwordfile="* ]]; then
+    changeAdminPassOptions+=" --passwordfile=$GF_CONFIG_PATH/admin.passwd"
+  fi
+  $glassfish "$changeAdminPassOptions" change-admin-password
 
   # set the password file appropriately for further reads
   echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
