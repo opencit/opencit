@@ -11,5 +11,5 @@ import com.intel.dcsg.cpg.configuration.Configuration;
  * @author jbuhacoff
  */
 public interface Configurable {
-    void setConfiguration(Configuration configuration);
+    void configure(Configuration configuration);
 }

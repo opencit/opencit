@@ -11,7 +11,7 @@ import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;
 
 /**
- *
+ * 
  * @author jbuhacoff
  */
 public class TakeOwnership extends AbstractSetupTask {

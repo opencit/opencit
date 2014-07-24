@@ -380,11 +380,13 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <!-- deps to support ssl -->
+        <!--
         <dependency>
             <groupId>simple-framework</groupId>
             <artifactId>simple-framework</artifactId>
             <version>5.1</version>
         </dependency>
+        -->
         <!--
                 <dependency>
                     <groupId>org.apache.httpcomponents</groupId>

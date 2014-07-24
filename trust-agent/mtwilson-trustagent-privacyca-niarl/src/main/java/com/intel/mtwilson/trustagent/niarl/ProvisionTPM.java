@@ -40,7 +40,7 @@ public class ProvisionTPM implements Configurable, Runnable {
     private Configuration configuration = null;
     
     @Override
-    public void setConfiguration(Configuration configuration) {
+    public void configure(Configuration configuration) {
         this.configuration = configuration;
     }
     

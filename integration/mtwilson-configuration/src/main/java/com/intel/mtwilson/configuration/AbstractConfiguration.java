@@ -20,7 +20,7 @@ public class AbstractConfiguration implements Configurable {
     private Configuration configuration;
     
     @Override
-    public void setConfiguration(Configuration configuration) {
+    public void configure(Configuration configuration) {
         this.configuration = configuration;
     }
     

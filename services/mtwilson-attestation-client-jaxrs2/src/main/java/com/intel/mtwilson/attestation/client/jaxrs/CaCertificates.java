@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
 
 /**
  *
@@ -83,4 +84,10 @@ public class CaCertificates extends MtWilsonClient {
         return certificate;
     }
        
+    public String searchCaCertificatesPem(CaCertificateFilterCriteria criteria) {
+        criteria.domain = "ek";
+        String certificatesPem = getTargetPathWithQueryParams("ca-certificates", criteria).request(CryptoMediaType.APPLICATION_X_PEM_FILE).get(String.class);
+        return certificatesPem;
+    }
+    
 }

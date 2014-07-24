@@ -13,12 +13,14 @@ import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -31,7 +33,21 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
         
     @Override
     public CaCertificateCollection search(CaCertificateFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if( criteria.domain != null ) { 
+            if(  criteria.domain.equals("ek") ||  criteria.domain.equals("endorsement") ) {
+            // corresponds to URL /ca-certificates?domain=ek
+                String certFile = My.configuration().getPrivacyCaEndorsementCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
+                try {
+                    CaCertificateCollection cacerts = readCaCertCollection(certFile);
+                    return cacerts;
+                }
+                catch(IOException | CertificateException e) {
+                    log.debug("Failed to read certificates for domain: {}", criteria.domain);
+                    throw new RepositorySearchException(e, criteria);
+                }
+            }
+        }
+        return new CaCertificateCollection();
     }
 
     @Override
@@ -74,7 +90,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
                 log.error("Error during retrieval of SAML certificate chain.", e);
                 throw new RepositoryRetrieveException(e, locator);
             }      
-        } else if ("privacy".equals(id)) {
+        } else if ("privacy".equals(id) || "aik".equals(id)) {
             try {
                 String certFile = My.configuration().getPrivacyCaIdentityCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
                 caCert = readCaCert(certFile);
@@ -91,7 +107,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
                 log.error("Error during retrieval of Privacy CA certificate chain.", e);
                 throw new RepositoryRetrieveException(e, locator);
             }
-        } else if ("endorsement".equals(id)) {
+        } else if ("endorsement".equals(id) || "ek".equals(id)) {
             try {
                 String certFile = My.configuration().getPrivacyCaEndorsementCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
                 caCert = readCaCert(certFile);
@@ -132,15 +148,16 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
     }
     
     private CaCertificate readCaCert(String path) throws FileNotFoundException, IOException, CertificateException {
+        File file = new File(path);
         String certFile = path;
         CaCertificate caCert = new CaCertificate();
-        if( certFile != null && !certFile.startsWith(File.separator)) {
-            certFile = "/opt/mtwilson/configuration/" + certFile;
+        if( certFile != null && !file.isAbsolute()) {
+            certFile = My.filesystem().getConfigurationPath() + File.separator + certFile;
         }
         if (certFile != null) {
             if (certFile.endsWith(".pem")) {
-                File PemFile = new File(certFile);
-                try (FileInputStream in = new FileInputStream(PemFile)) {
+                File pemFile = new File(certFile);
+                try (FileInputStream in = new FileInputStream(pemFile)) {
                     String pem = IOUtils.toString(in);
                     X509Certificate cert = X509Util.decodePemCertificate(pem);
                     caCert.setCertificate(cert.getEncoded());
@@ -159,6 +176,43 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
         return caCert;
     }
 
+    private CaCertificateCollection readCaCertCollection(String path) throws FileNotFoundException, IOException, CertificateException {
+        File file = new File(path);
+        CaCertificateCollection collection = new CaCertificateCollection();
+        String certFile = path;
+        if( certFile != null && !file.isAbsolute()) {
+            certFile = My.filesystem().getConfigurationPath() + File.separator + certFile;
+        }
+        log.debug("CA file: {}", certFile);
+        if (certFile != null) {
+            if (certFile.endsWith(".pem")) {
+                File PemFile = new File(certFile);
+                try (FileInputStream in = new FileInputStream(PemFile)) {
+                    String pem = IOUtils.toString(in);
+                    log.debug("PEM: {}", pem);
+                    List<X509Certificate> certs = X509Util.decodePemCertificates(pem);
+                    for(X509Certificate cert : certs) {
+                        CaCertificate caCert = new CaCertificate();
+                        caCert.setCertificate(cert.getEncoded());
+                        collection.getCaCertificates().add(caCert);
+                    }
+                }
+            } else if (certFile.endsWith(".crt")) {
+                File crtFile = new File(certFile);
+                try (FileInputStream in = new FileInputStream(crtFile)) {
+                    CaCertificate caCert = new CaCertificate();
+                    caCert.setCertificate(IOUtils.toByteArray(in));
+                    collection.getCaCertificates().add(caCert);
+                }
+            } else {
+                throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
+            }
+        } else {
+            throw new FileNotFoundException("Could not obtain cert chain location from config");
+        }
+        return collection;
+    }
+    
     @Override
     public void store(CaCertificate item) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

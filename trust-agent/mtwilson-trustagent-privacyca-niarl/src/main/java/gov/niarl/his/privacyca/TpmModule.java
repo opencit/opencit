@@ -211,7 +211,7 @@ public class TpmModule {
 		/*String commandLine = newTpmModuleExePath + File.separator + newExeName + " " + args;
 		if (TrousersMode && useTrousersMode)
 			commandLine += " -trousers";*/
-		//if (DebugMode) log.debug("\"" + commandLine + "\"");
+		if (DebugMode) log.debug("Command line: {}", StringUtils.join(cmd, " "));
 
 		ProcessBuilder pb = new ProcessBuilder(cmd);
 		pb.environment().putAll(environmentVars);
@@ -235,7 +235,7 @@ public class TpmModule {
 			}
 			
 		}
-		if (DebugMode) log.debug("\"" + line + "\"");
+		if (DebugMode) log.debug("Output: '{}'", line);
 		
 		//do a loop to wait for an exit value
 		try {

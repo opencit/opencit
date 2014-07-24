@@ -46,7 +46,7 @@ public class TagConfiguration extends AbstractConfiguration {
     
     public TagConfiguration(Configuration configuration) {
         super();
-        setConfiguration(configuration);
+        configure(configuration);
     }
     public TagConfiguration(org.apache.commons.configuration.Configuration configuration) {
         super();

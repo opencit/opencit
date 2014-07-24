@@ -71,13 +71,13 @@ public class MwClientHolder implements Configurable {
             return null;
         }
         if( instance instanceof Configurable ) {
-            ((Configurable)instance).setConfiguration(configuration);
+            ((Configurable)instance).configure(configuration);
         }
         return (T)instance;
     }
 
     @Override
-    public void setConfiguration(Configuration configuration) {
+    public void configure(Configuration configuration) {
         this.configuration = configuration;
     }
     

@@ -668,11 +668,11 @@ public class MyConfiguration {
     }
 
     public File getPrivacyCaEndorsementCacertsFile() {
-        return findConfigurationFile(conf.getString("mtwilson.privacyca.ek.cacerts.file", "EndorsementCA.pem")); // list of all approved ek signing certificates from this server and other servers
+        return findConfigurationFile(conf.getString("mtwilson.privacyca.ek.cacerts.file", "EndorsementCA.pem")); // list of all approved ek signing certificates from this server and other servers and tpm manufacturers
     }
 
     public File getPrivacyCaEndorsementP12() {
-        return findConfigurationFile(conf.getString("mtwilson.privacyca.ek.p12.file", "EndorsementCA.p12")); // ek signing certificate
+        return findConfigurationFile(conf.getString("mtwilson.privacyca.ek.p12.file", "EndorsementCA.p12")); // our own ek signing certificate and private key
     }
 
     public String getPrivacyCaEndorsementPassword() {

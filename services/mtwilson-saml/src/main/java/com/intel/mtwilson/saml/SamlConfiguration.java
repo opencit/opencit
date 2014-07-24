@@ -31,7 +31,7 @@ public class SamlConfiguration extends AbstractConfiguration {
     
     public SamlConfiguration(Configuration configuration) {
         super();
-        setConfiguration(configuration);
+        configure(configuration);
     }
 
     public String getJsr105Provider() { 

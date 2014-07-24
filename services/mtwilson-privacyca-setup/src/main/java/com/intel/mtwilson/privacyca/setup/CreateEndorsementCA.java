@@ -49,7 +49,12 @@ public class CreateEndorsementCA extends LocalSetupTask {
     protected void execute() throws Exception {
         TpmUtils.createCaP12(2048, endorsementIssuer, endorsementPassword, endorsementP12.getAbsolutePath(), endorsementCertificateValidityDays);
         X509Certificate pcaCert = TpmUtils.certFromP12(endorsementP12.getAbsolutePath(), endorsementPassword);
-        FileUtils.writeStringToFile(endorsementPemFile, X509Util.encodePemCertificate(pcaCert)); 
+        String self = X509Util.encodePemCertificate(pcaCert);
+        String existingEndorsementAuthorities = "";
+        if( endorsementPemFile.exists() ) {
+            existingEndorsementAuthorities = FileUtils.readFileToString(endorsementPemFile);
+        }
+        FileUtils.writeStringToFile(endorsementPemFile, String.format("%s\n%s", existingEndorsementAuthorities,self)); 
     }
     
 }

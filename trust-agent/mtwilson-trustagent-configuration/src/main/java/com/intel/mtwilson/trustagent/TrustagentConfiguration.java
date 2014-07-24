@@ -5,26 +5,17 @@
 package com.intel.mtwilson.trustagent;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
-import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
-import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.net.NetUtils;
-import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.configuration.AbstractConfiguration;
 import java.io.File;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.codec.DecoderException;
@@ -65,7 +56,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     public TrustagentConfiguration(Configuration configuration) {
         super();
-        setConfiguration(configuration);
+        configure(configuration);
 //        initEnvironmentConfiguration(configuration);
     }
     /*
@@ -208,6 +199,10 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     public String getTrustagentKeystorePassword() {
         return getConfiguration().getString(TRUSTAGENT_KEYSTORE_PASSWORD); // intentionally no default - this must be generated during setup
+    }
+    
+    public File getEndorsementAuthoritiesFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "endorsement.pem");
     }
 
     public File getTrustagentUserFile() {

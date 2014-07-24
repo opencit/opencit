@@ -123,7 +123,7 @@ public class RequestAikCertificate extends AbstractSetupTask {
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
         */
         CreateIdentity provisioner = new CreateIdentity();
-        provisioner.setConfiguration(config.getConfiguration());
+        provisioner.configure(config.getConfiguration());
         provisioner.run();
     }
     

@@ -4,14 +4,9 @@
  */
 package com.intel.mtwilson.trustagent.setup;
 
-import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
-import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -20,6 +15,8 @@ import com.intel.mtwilson.trustagent.niarl.Util;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +26,9 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -44,6 +44,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
     private String url;
     private String username;
     private String password;
+    private File endorsementAuthoritiesFile;
 
     @Override
     protected void configure() throws Exception {
@@ -81,6 +82,25 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         } else {
             configuration("Keystore file is missing");
         }
+        
+        endorsementAuthoritiesFile = config.getEndorsementAuthoritiesFile();
+        if( endorsementAuthoritiesFile == null ) {
+            configuration("Endorsement authorities file location is not set");
+        }
+        else if( !endorsementAuthoritiesFile.exists() ) {
+            configuration("Endorsement authorities file does not exist");
+        }
+        else {
+            try(InputStream in = new FileInputStream(endorsementAuthoritiesFile)) {
+                String pem = IOUtils.toString(in);
+                List<X509Certificate> endorsementAuthorities = X509Util.decodePemCertificates(pem);
+                log.debug("Found {} endorsement authorities in {}", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
+            }
+            catch(Exception e) {
+                configuration(e, "Cannot read endorsement authorities file");
+            }
+        }
+        
     }
 
     @Override
@@ -101,9 +121,21 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
                         validation("Error code %d while validating EC", e.getErrorCode());
                 }
             }
+            log.debug("Failed to get EC from TPM using NIARL_TPM_Module");
+            // try with tpm tools 
+            //   /root/tpm-tools-1.3.8-patched/src/tpm_mgmt/tpm_getpubek
+            //    that gets the EK modulus  but we still need the EC:
+            // tpm_nvinfo -i 0x1000f000
+            // tpm_nvread -i 0x1000f000 -x -t -pOWNER_AUTH -s 834 -f mfr.crt.tpm
+            // openssl x509 -in mfr.crt.tpm -inform der -text   (works for Nuvoton, will not work for some others if they wrapped EC in a TCG structure... then have to use dd to remove initial bytes, and sometimes do other corrections for invalid length fields)
+            
+            
             return;
         }
+        log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
         X509Certificate ekCert = X509Util.decodeDerCertificate(ekCertBytes);
+        
+        /*
         X509Certificate endorsementCA = keystore.getX509Certificate("endorsement", SimpleKeystore.CA);
         try {
             ekCert.verify(endorsementCA.getPublicKey());
@@ -112,6 +144,30 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException e) {
             validation("Unable to verify TPM EC", e);
         }
+        */
+        
+        try(InputStream in = new FileInputStream(endorsementAuthoritiesFile)) {
+            String pem = IOUtils.toString(in);
+            List<X509Certificate> endorsementAuthorities = X509Util.decodePemCertificates(pem);
+            log.debug("Found {} endorsement authorities in {}", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
+            // if we find one certificate authority that can verify our current EC, then we don't need to request a new EC
+            boolean found = false;
+            for(X509Certificate ca : endorsementAuthorities) {
+                try {
+                    log.debug("Trying to verify EC with {}", ca.getSubjectX500Principal().getName());
+                    ekCert.verify(ca.getPublicKey());
+                    found = true;
+                } catch (SignatureException e) {
+                    log.debug("Endorsement CA '{}' did not sign TPM EC: {}", ca.getSubjectX500Principal().getName(), e.getMessage());
+                } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException e) {
+                    log.debug("Unable to verify TPM EC '{}': {}", ca.getSubjectX500Principal().getName(), e.getMessage());
+                }
+            }
+            if(!found) {
+                validation("Unable to verify TPM EC with %d authorities", endorsementAuthorities.size());
+            }
+        }
+        
     }
 
     @Override
@@ -124,7 +180,8 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         */
         
         ProvisionTPM provisioner = new ProvisionTPM();
-        provisioner.setConfiguration(config.getConfiguration());
+        provisioner.configure(config.getConfiguration());
+        log.debug("skipping provision tpm action");
         provisioner.run();
     }
 }

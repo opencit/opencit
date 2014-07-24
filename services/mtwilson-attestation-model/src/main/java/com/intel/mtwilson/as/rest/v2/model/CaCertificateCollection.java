@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JacksonXmlRootElement(localName="ca_certificate_collection")
 public class CaCertificateCollection extends DocumentCollection<CaCertificate> {
 
-    private final ArrayList<CaCertificate> caCerts = new ArrayList<CaCertificate>();
+    private final ArrayList<CaCertificate> caCerts = new ArrayList<>();
     
     @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
