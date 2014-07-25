@@ -197,7 +197,8 @@ public class TlsPolicies extends MtWilsonClient {
     }
     
     /**
-     * Searches for the TLS policies with the specified set of criteria.
+     * Searches for the TLS policies with the specified set of criteria. The meta data in the output indicates the allowed TLS policies that
+     * can be configured. This can be updated in the mtwilson.properties file.
      * @param criteria HostTlsPolicyFilterCriteria object specifying the filter criteria. The search options include
      * id, hostId, nameEqualTo, nameContains, privateEqualTo, commentEqualTo and commentContains. 
      * Also, if the caller wants to retrieve the list of all the registered
@@ -211,8 +212,9 @@ public class TlsPolicies extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/tls-policies?filter=false
-     * Output: {"roles":[{"id":"0199a936-9a49-482a-8c63-cfe7a9412d7e","role_name":"server_manager"},
-     * {"id":"177b1d3c-b0aa-4543-8509-92fde907a4a9","role_name":"admin","description":"user created role"}]}
+     * Output: {"meta":{"default":null,"allow":["certificate","certificate-digest"],"global":null},"tls_policies":[{"id":"3e75091f-4657-496c-a721-8a77931ee9da",
+     * "name":"vcenter1_shared_policy","descriptor":{"policy_type":"certificate-digest","data":["d0 8f 07 b0 5c 6d 78 62 b9 27 48 ff 35 da 27 bf f2 03 b3 c1"],
+     * "meta":{"digest_algorithm":"SHA-1"}},"private":false}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>

@@ -32,4 +32,4 @@ if [ -z "$makeself" ]; then
     exit 1
 fi
 
-$makeself --follow --nocomp --notemp "$workspace" "$targetDir/${projectNameVersion}.bin" "$projectNameVersion" ./setup.sh
+$makeself --follow --nocomp --current "$workspace" "$targetDir/${projectNameVersion}.bin" "$projectNameVersion" ./setup.sh

@@ -8,11 +8,13 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.ClientException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Properties;
 import org.junit.Test;
 
 /**
@@ -35,7 +37,8 @@ public class RegisterUserV2Test {
   
         // TODO: use MyConfiguration to select an appropriate path for local platform
         FileResource resource = new FileResource(new java.io.File("c:\\intel\\mtwilson\\"+userName+".jks"));
-        SimpleKeystore keystore = MwClientUtil.createUserInResourceV2(resource, userName, password, server, "Admin role needed");
+        Properties properties = My.configuration().getClientProperties();
+        SimpleKeystore keystore = MwClientUtil.createUserInResourceV2(resource, userName, password, server, properties, "Admin role needed", null, "TLS");
 //        SimpleKeystore keystore = KeystoreUtil.createUserInDirectoryV2(new java.io.File("c:\\intel\\mtwilson"), userName, password, server, "Admin role needed");
         
     }
