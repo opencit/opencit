@@ -7,6 +7,9 @@ package com.intel.mtwilson.privacyca.v2.rpc;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.tpm.endorsement.jdbi.TpmEndorsementDAO;
+import com.intel.mtwilson.tpm.endorsement.jdbi.TpmEndorsementJdbiFactory;
+import com.intel.mtwilson.tpm.endorsement.model.TpmEndorsement;
 import gov.niarl.his.privacyca.TpmIdentityProof;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
 import gov.niarl.his.privacyca.TpmKeyParams;
@@ -28,6 +31,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -66,14 +70,15 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
         return endorsementCertificate;
     }
 
-    private Map<Principal, RSAPublicKey> getEndorsementCertificates() throws IOException, CertificateException {
-	 Map<Principal, RSAPublicKey> endorsementCerts = new HashMap<Principal, RSAPublicKey>();
+    private Map<String, X509Certificate> getEndorsementCertificates() throws IOException, CertificateException {
+	 Map<String, X509Certificate> endorsementCerts = new HashMap<>();
      File ekCacertsPemFile = My.configuration().getPrivacyCaEndorsementCacertsFile();
      try(FileInputStream in = new FileInputStream(ekCacertsPemFile)) {
          String ekCacertsPem = IOUtils.toString(in); // throws IOException
          List<X509Certificate> ekCacerts = X509Util.decodePemCertificates(ekCacertsPem); // throws CertificateException
          for(X509Certificate ekCacert : ekCacerts) {
-             endorsementCerts.put((Principal)ekCacert.getSubjectDN(), (RSAPublicKey)ekCacert.getPublicKey());
+             log.debug("Adding issuer {}", ekCacert.getSubjectX500Principal().getName());
+             endorsementCerts.put(ekCacert.getSubjectDN().getName(), ekCacert);
          }
      }
         return endorsementCerts;
@@ -87,7 +92,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
 	 X509Certificate caPubCert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
 	 
      // load the trusted ek cacerts
-        Map<Principal, RSAPublicKey> endorsementCerts = getEndorsementCertificates();
+        Map<String, X509Certificate> endorsementCerts = getEndorsementCertificates();
         
 			//decrypt identityRequest and endorsementCertificate
 			TpmIdentityRequest idReq = new TpmIdentityRequest(identityRequest);
@@ -95,14 +100,20 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
 			TpmIdentityRequest tempEC = new TpmIdentityRequest(endorsementCertificate);
 			X509Certificate ekCert = TpmUtils.certFromBytes(tempEC.decryptRaw(caPrivKey));
             log.debug("Validating endorsement certificate");
-            ekCert.verify(endorsementCerts.get(ekCert.getIssuerDN())); // throws SignatureException
+            if( !isEkCertificateVerifiedByAuthority(ekCert, endorsementCerts.get(ekCert.getIssuerDN().getName()))
+                    && !isEkCertificateVerifiedByAnyAuthority(ekCert, endorsementCerts.values()) 
+                    && !isEkCertificateRegistered(ekCert)) {
+                // cannot trust the EC because it's not signed by any of our trusted EC CAs and is not in the mw_tpm_ec table
+                log.debug("EC is not trusted");
+                throw new RuntimeException("Invalid identity request");
+            }
 			//check out the endorsement certificate
 			//if the cert is good, issue challenge
             byte[] identityRequestChallenge = TpmUtils.createRandomBytes(32);
 
             //check the rest of the identity proof
 			if(!idProof.checkValidity((RSAPublicKey)caPubCert.getPublicKey())){
-                log.error("TPM IDPROOF failed validit check");
+                log.error("TPM IDPROOF failed validity check");
                 throw new RuntimeException("Invalid identity request");
 			}
             
@@ -161,5 +172,47 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
 		byte [] symBlob = TpmUtils.concat(TpmUtils.concat(credSize, keyParms.toByteArray()), encryptedBlob);
 		return TpmUtils.concat(asymBlob, symBlob);
 	}
+    
+    private boolean isEkCertificateVerifiedByAuthority(X509Certificate ekCert, X509Certificate authority) {
+                if( authority != null ) {
+            try {
+                    ekCert.verify(authority.getPublicKey()); // throws SignatureException
+                    return true;
+            }
+            catch(Exception e) {
+                log.debug("Failed to verify EC using CA {}: {}", ekCert.getIssuerDN().getName(), e.getMessage());
+            }
+                }
+            return false;
+    }
+    
+    private boolean isEkCertificateVerifiedByAnyAuthority(X509Certificate ekCert, Collection<X509Certificate> authorities) {
+        for(X509Certificate authority : authorities) {
+            try {
+                ekCert.verify(authority.getPublicKey()); // throws SignatureException
+                log.debug("Verified EC with authority: {}", authority.getSubjectX500Principal().getName());
+                return true;
+            }
+            catch(Exception e) {
+                log.debug("Failed to verify EC with authority: {}", authority.getSubjectX500Principal().getName());
+            }
+        }
+        return false;
+    }
+
+    private boolean isEkCertificateRegistered(X509Certificate ekCert) {
+        try(TpmEndorsementDAO dao = TpmEndorsementJdbiFactory.tpmEndorsementDAO()) {
+            TpmEndorsement tpmEndorsement = dao.findTpmEndorsementByIssuerEqualTo(ekCert.getSubjectX500Principal().getName()); // SHOULD REALLY BE BY CERT SHA256
+            if(tpmEndorsement == null ) {
+                return false;
+            }
+            log.debug("EC is registered: {}", tpmEndorsement.getId().toString());
+            return true;
+        }
+        catch(IOException e) {
+            log.debug("Cannot check if EC is registered", e);
+            return false;
+        }
+    }
     
 }

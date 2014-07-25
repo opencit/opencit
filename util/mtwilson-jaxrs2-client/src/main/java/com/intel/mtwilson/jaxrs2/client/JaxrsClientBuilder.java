@@ -203,6 +203,7 @@ public class JaxrsClientBuilder {
                     .withConfig(clientConfig)
                     .sslContext(tlsConnection.getSSLContext()) // when commented out,  get pkix path building failure from java's built-in ssl context... when enabled, our custom ssl context doesn't get called at all.
 //                    .hostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier())
+                    .hostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier())
                     .build();
             if (configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true)) {
                 client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));

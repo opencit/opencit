@@ -103,7 +103,6 @@
   -->
     <repositories>
 	<!-- for sharing cpg repo internally and for net.sourceforge:vijava:5.5 -->
-    <!--
 	<repository>
 		<id>cloudsecurityportal.intel.com</id>
 		<name>Cloud Security - Intel Architecture Systems Integration</name>
@@ -113,7 +112,6 @@
                   <enabled>true</enabled>
                 </snapshots>
         </repository>
-        -->
 	<repository>
 		<id>cpg-x</id>
 		<name>Cloud Platform Group</name>

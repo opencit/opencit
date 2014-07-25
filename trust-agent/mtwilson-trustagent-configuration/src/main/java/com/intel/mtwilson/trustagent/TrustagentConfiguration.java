@@ -230,6 +230,16 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh");
     } 
     
+    public Properties getMtWilsonClientProperties() {
+        Properties properties = new Properties();
+        properties.setProperty("mtwilson.api.url", getMtWilsonApiUrl());
+        properties.setProperty("mtwilson.api.username", getMtWilsonApiUsername());
+        properties.setProperty("mtwilson.api.password", getMtWilsonApiPassword());
+        properties.setProperty("mtwilson.api.tls.policy.certificate.keystore.file", getTrustagentKeystoreFile().getAbsolutePath());
+        properties.setProperty("mtwilson.api.tls.policy.certificate.keystore.password", getTrustagentKeystorePassword());
+        return properties;
+    }
+    
     
     public static TrustagentConfiguration loadConfiguration() throws IOException {
         File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");

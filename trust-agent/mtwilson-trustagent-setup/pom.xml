@@ -61,6 +61,16 @@
             <artifactId>mtwilson-attestation-client-jaxrs2</artifactId>
             <version>${project.version}</version>        
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tpm-endorsement-model</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tpm-endorsement-client-jaxrs2</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
 
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>

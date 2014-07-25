@@ -20,6 +20,9 @@ public class TpmEndorsementFilterCriteria extends DefaultFilterCriteria implemen
     @QueryParam("hardwareUuidEqualTo")
     public String hardwareUuidEqualTo;
     
+//    @QueryParam("publicKeySha256EqualTo")
+//    public String publicKeySha256EqualTo;
+    
     @QueryParam("issuerEqualTo")
     public String issuerEqualTo;
 
