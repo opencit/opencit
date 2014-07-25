@@ -70,7 +70,6 @@ public class Oems extends MtWilsonClient {
     /**
      * Deletes the Oem with the specified UUID from the system. An OEM can be deleted only if it is not associated with any BIOS MLE.
      * @param uuid - UUID of the Oem that has to be deleted.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oems:delete
      * @mtwContentTypeReturned N/A
@@ -100,7 +99,6 @@ public class Oems extends MtWilsonClient {
      * Deletes the Oem(s) matching the specified search criteria. 
      * @param criteria OemFilterCriteria object specifying the search criteria. The search options include
      * id, nameEqualTo and nameContains.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oems:delete,search
      * @mtwContentTypeReturned N/A

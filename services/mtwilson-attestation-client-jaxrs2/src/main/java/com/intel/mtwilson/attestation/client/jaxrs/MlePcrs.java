@@ -103,7 +103,6 @@ public class MlePcrs extends MtWilsonClient {
      * Deletes the PCR white lists of the specified MLE using the filter criteria.
      * @param criteria MlePcrFilterCriteria object specifying the search criteria. Search options supported
      * include id, indexEqualTo and valueEqualTo.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mle_pcrs:delete,search
      * @mtwContentTypeReturned N/A

@@ -41,7 +41,7 @@ public class HostTagCertificates extends MtWilsonClient {
     /**
      * Imports the tag certificate into the system and associates the same to the host for which the tag certificate was created if the has already
      * been registered in the system. If the host is not already registered, certificate would be imported and will not be associated with any hosts.
-     * @param TagCertificate object with the details of the certificate to be imported. The subject of the certificate would have the hardware UUID of
+     * @param obj TagCertificate object with the details of the certificate to be imported. The subject of the certificate would have the hardware UUID of
      * the host for which the certificate was generated. 
      * @return TagCertificate created in the system.
      * @since Mt.Wilson 2.0
@@ -88,7 +88,7 @@ public class HostTagCertificates extends MtWilsonClient {
      */    
     public void deleteHostTagCertificate(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Response obj = getTarget().path("host-tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).delete();
         log.debug(obj.toString());
@@ -115,7 +115,7 @@ public class HostTagCertificates extends MtWilsonClient {
     */    
     public TagCertificate retrieveHostTagCertificate(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         TagCertificate obj = getTarget().path("host-tag-certificates/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(TagCertificate.class);
         return obj;
@@ -123,7 +123,7 @@ public class HostTagCertificates extends MtWilsonClient {
 
     /**
      * Searches for the tag certificates in the system based on the specified criteria.
-     * @param TagCertificateFilterCriteria object that specifies the search criteria.
+     * @param criteria TagCertificateFilterCriteria object that specifies the search criteria.
      * The possible search options include id, & hostUuid.
      * @return TagCertificateCollection object with a list of tag certificates that match the search criteria.
      * @since Mt.Wilson 2.0

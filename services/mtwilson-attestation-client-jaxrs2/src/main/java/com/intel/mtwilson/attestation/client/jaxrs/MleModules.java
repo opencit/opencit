@@ -115,7 +115,6 @@ public class MleModules extends MtWilsonClient {
      * Deletes the Module white lists of the specified MLE using the filter criteria.
      * @param criteria MleModuleFilterCriteria object specifying the search criteria. Search options supported
      * include id, nameContains, and valueEqualTo.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mle_modules:delete,search
      * @mtwContentTypeReturned N/A

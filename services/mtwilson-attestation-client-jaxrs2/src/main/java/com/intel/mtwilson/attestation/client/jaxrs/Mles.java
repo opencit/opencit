@@ -54,19 +54,19 @@ public class Mles extends MtWilsonClient {
      * and Citrix XenServer there are no separation between the OS & Hypervisor components. They are the same. But Open Source hypervisors
      * like Xen & KVM can be installed on Ubuntu/RHEL & SUSE. <br>
      * Currently on Xen & KVM installed on Ubuntu, RHEL and SUSE are supported in the system.
-     * @param mle  - MLE that needs to be created. For creating BIOS MLEs, user has to specify the Name, Version, Attestation_Type as 
+     * @param obj MLE object that needs to be created. For creating BIOS MLEs, user has to specify the Name, Version, Attestation_Type as 
      * PCR [Defines how the verification of the measurements are done. Possible options are PCR & MODULE], MLE_Type as BIOS
-     * [Possible options are BIOS and VMM], optional description, list of {@link ManifestData} for each of the BIOS PCRs to be 
+     * [Possible options are BIOS and VMM], optional description, list of ManifestData for each of the BIOS PCRs to be 
      * verified[Valid BIOS PCR names are 0, 1, 2, 3, 4 & 5] and UUID of the OEM that needs to be associated with the MLE. If the user 
      * wants to set the white list values for the PCRs at a later point of time, then can do so and
      * during the creation of MLEs set them to empty strings. <br>
      * For creating VMM MLEs, user has to specify the Name, Version, Attestation_Type as either PCR or Module [For VMware ESXi,
      * Open Source Xen & KVM it is Module. For Citrix XenServer it is PCR], MLE_Type as VMM, optional description, list of 
-     * {@link ManifestData} for each of the VMM PCRs to be verified [Valid VMM PCRs names are 17, 18, 19 & 20. PCR 20 is valid only
+     * ManifestData for each of the VMM PCRs to be verified [Valid VMM PCRs names are 17, 18, 19 & 20. PCR 20 is valid only
      * for VMware ESXi. Currently only PCR 19 provides module level information. So, user has to call createMleModules
      * method to configure the modules that gets extended to PCR 19 [During the creation of MLE, PCR 19 should be set to empty string 
      * for MODULE Attestation_Type], and UUID of the OS that needs to be associated with the MLE. 
-     * @return <code> Mle </code> object created.
+     * @return Mle object created.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mles:create
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -143,7 +143,6 @@ public class Mles extends MtWilsonClient {
      * Deletes the Mle(s) matching the specified search criteria. 
      * @param criteria MleFilterCriteria object specifying the search criteria. Search options supported
      * include id, nameEqualTo, nameContains, osUuid and oemUuid.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mles:delete,search
      * @mtwContentTypeReturned N/A
@@ -172,7 +171,7 @@ public class Mles extends MtWilsonClient {
      * Updates the MLE in the system. Only the description can be updated. For updating the whitelist values the caller
      * has to use either use the MlePcrs/MleModules resources.
      * Instead of updating the OS/OEM & MLEs manually, users can opt to use the RPC automation APIs.
-     * @param mle  - MLE object having the details that needs to be updated.
+     * @param obj MLE object having the details that needs to be updated.
      * @return Updated <code> Mle </code> object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mles:store
@@ -196,7 +195,7 @@ public class Mles extends MtWilsonClient {
      */
     public Mle editMle(Mle obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", obj.getId().toString());
         Mle newObj = getTarget().path("mles/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), Mle.class);
         return newObj;
@@ -225,7 +224,7 @@ public class Mles extends MtWilsonClient {
      */
     public Mle retrieveMle(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Mle obj = getTarget().path("mles/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Mle.class);
         return obj;
