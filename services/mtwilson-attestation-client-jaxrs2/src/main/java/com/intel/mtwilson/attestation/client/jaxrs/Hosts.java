@@ -36,12 +36,14 @@ public class Hosts extends MtWilsonClient {
     
     /**
      * Registers the specified host with the system. As part of registration, a host has to be associated with both BIOS and 
-     * VMM/Hypervisor MLEs. So, these MLEs have to be configured before host registration.
-     * @param Host object with the details of the host to be registered. The required parameters that specify
+     * VMM/Hypervisor MLEs. So, these MLEs have to be configured before host registration. Also the TLS policy that should be used
+     * to communicate with the host has to be specified.
+     * @param obj Host object with the details of the host to be registered. The required parameters that specify
      * the host details are the host_name and add_on_connection_string [Open Source Hosts: intel:https://192.168.1.201:1443, Citrix XenServer: 
      * citrix:https://192.168.1.202:443/;root;pwd, VMware ESXi:vmware:https://192.168.1.222:443/sdk;Admin;password]. To associate 
-     * the host with the MLEs, both the OEM and OS UUIDs have to be specified. All other parameters are optional.
-     * @return <code>Host</code> created in the system.
+     * the host with the MLEs, both the OEM and OS UUIDs have to be specified. Also a valid TLS policy has to be specified for
+     * communicating with the host. All other parameters are optional.
+     * @return Host created in the system.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:create
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -49,11 +51,13 @@ public class Hosts extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/hosts/
-     * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"6500f971-b712-4baa-83aa-2c72cc4dbb1e",
-     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"} 
-     * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2",
-     * "connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"6500f971-b712-4baa-83aa-2c72cc4dbb1e",
-     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
+     *          "bios_mle_uuid":"7e90c088-c9c7-486f-9480-9cd0a7a3b977","vmm_mle_uuid":"fb2cb173-5e19-446b-9161-aa7368c5c882",
+     *          "tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}'
+     * 
+     * Output: {"id":"2fbe5090-7eb7-4af5-aefd-afa5cd70bf4d","name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd",
+     *          "bios_mle_uuid":"7e90c088-c9c7-486f-9480-9cd0a7a3b977","vmm_mle_uuid":"fb2cb173-5e19-446b-9161-aa7368c5c882",
+     *          "tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -62,8 +66,9 @@ public class Hosts extends MtWilsonClient {
      *   Host obj = new Host();
      *   obj.setName("192.168.0.2");
      *   obj.setConnectionUrl("https://192.168.0.1:443/sdk;admin;pwd");
-     *   obj.setBiosMleUuid("6500f971-b712-4baa-83aa-2c72cc4dbb1e");
-     *   obj.setVmmMleUuid("98101211-b617-4f59-8132-a5d05360acd6");
+     *   obj.setBiosMleUuid("7e90c088-c9c7-486f-9480-9cd0a7a3b977");
+     *   obj.setVmmMleUuid("fb2cb173-5e19-446b-9161-aa7368c5c882");
+     *   obj.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
      *   Host createHost = client.createHost(obj);
      * </pre>
      */
@@ -103,7 +108,6 @@ public class Hosts extends MtWilsonClient {
      * Deletes the hosts matching the specified filter criteria.
      * @param criteria HostFilterCriteria object specifying the search criteria. Search options supported
      * include id, nameEqualTo, nameContains and descriptionContains.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:delete,search
      * @mtwContentTypeReturned N/A
@@ -130,7 +134,7 @@ public class Hosts extends MtWilsonClient {
     
     /**
      * Updates the host with the specified attributes. Except for the host name, all other attributes can be updated.
-     * @param Host object with the values to be updated. 
+     * @param obj Host object with the values to be updated. 
      * @return Updated <code>Host</code> object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:store
@@ -140,10 +144,10 @@ public class Hosts extends MtWilsonClient {
      * <pre>
      * https://server.com:8181/mtwilson/v2/hosts/e43424ca-9e00-4cb9-b038-9259d0307888
      * Input: {"name":"192.168.0.2","connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
-     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     *          "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6","tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}
      * Output: {"id":"e43424ca-9e00-4cb9-b038-9259d0307888","name":"192.168.0.2",
-     * "connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
-     * "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6"}
+     *          "connection_url":"https://192.168.0.1:443/sdk;admin;pwd","bios_mle_uuid":"823a4ae6-b8cd-4c14-b89b-2a3be2d13985",
+     *          "vmm_mle_uuid":"98101211-b617-4f59-8132-a5d05360acd6","tls_policy_id":"e1a527b5-2020-49c1-83be-6bd8bf641258"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -155,12 +159,13 @@ public class Hosts extends MtWilsonClient {
      *   obj.setConnectionUrl("https://192.168.0.1:443/sdk;admin;pwd");
      *   obj.setBiosMleUuid("823a4ae6-b8cd-4c14-b89b-2a3be2d13985"); // updating the BIOS
      *   obj.setVmmMleUuid("98101211-b617-4f59-8132-a5d05360acd6");
+     *   obj.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
      *   Host editHost = client.editHost(obj);
      * </pre>
      */
     public Host editHost(Host obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", obj.getId().toString());
         Host newObj = getTarget().path("hosts/{id}").resolveTemplates(map).request().accept(MediaType.APPLICATION_JSON).put(Entity.json(obj), Host.class);
         return newObj;
@@ -169,7 +174,7 @@ public class Hosts extends MtWilsonClient {
     /**
      * Retrieves the details of the host with the specified UUID.
      * @param uuid - UUID of the Host to be retrieved. 
-     * @return <code>Host</code> retrieved from the system with the specified UUID.
+     * @return Host retrieved from the system with the specified UUID.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions hosts:retrieve
      * @mtwContentTypeReturned JSON/XML/YAML
@@ -197,7 +202,7 @@ public class Hosts extends MtWilsonClient {
 
     /**
      * Searches for the hosts with the specified criteria.
-     * @param HostFilterCriteria object that specifies the search criteria.
+     * @param criteria HostFilterCriteria object that specifies the search criteria.
      * The possible search options include id, nameEqualTo, nameContains and descriptionContains.
      * If in case the caller needs the list of all records, filter option can to be set to false. [Ex: /hosts?filter=false]
      * @return HostCollection object with a list of Hosts that match the filter criteria.

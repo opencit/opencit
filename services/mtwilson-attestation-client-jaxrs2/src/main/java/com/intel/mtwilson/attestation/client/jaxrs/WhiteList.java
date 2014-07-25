@@ -36,7 +36,7 @@ public class WhiteList extends MtWilsonClient {
      * If the user wants to change any of the default selections, then custom white list API should be used.   
      * Here we are assuming that the user already created the TlsPolicy to be used to connect to the host. Alternatively, the user
      * can also specify the TlsPolicy details using the TlsPolicyDescriptor without having to pre-configure the TlsPolicy. 
-     * @param CreateWhiteListRpcInput object having the IP address and the connection string of the host from which the white list has
+     * @param obj CreateWhiteListRpcInput object having the IP address and the connection string of the host from which the white list has
      * to be created.
      * @return boolean value indicating whether the whitelist was successfully created or not.
      * @since Mt.Wilson 2.0
@@ -100,7 +100,7 @@ public class WhiteList extends MtWilsonClient {
      * would be created by the system using the OEM/OS names and version.
      * Here we are assuming that the user already created the TlsPolicy to be used to connect to the host. Alternatively, the user
      * can also specify the TlsPolicy details using the TlsPolicyDescriptor without having to pre-configure the TlsPolicy. 
-     * @param CreateWhiteListWithOptionsRpcInput object with the host details that would be used to create the white list and the
+     * @param obj CreateWhiteListWithOptionsRpcInput object with the host details that would be used to create the white list and the
      * customization options.
      * @return boolean value indicating whether the whitelist was successfully created or not.
      * @since Mt.Wilson 2.0

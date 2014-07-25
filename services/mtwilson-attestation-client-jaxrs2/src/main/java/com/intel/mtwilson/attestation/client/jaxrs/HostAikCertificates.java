@@ -34,7 +34,7 @@ public class HostAikCertificates extends MtWilsonClient {
     
     public HostAikCertificateCollection searchHostAikCertificates(HostAikCertificateFilterCriteria criteria) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", criteria.hostUuid);
         HostAikCertificateCollection objCollection = getTargetPathWithQueryParams("hosts/{host_id}/aik-certificates", criteria)
                 .resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(HostAikCertificateCollection.class);
@@ -43,7 +43,7 @@ public class HostAikCertificates extends MtWilsonClient {
     
     public HostAikCertificate retrieveHostAikCertificate(String hostUuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", hostUuid);
         // We are passing the host UUID to "id" also even though it will not be used (without this framework treats this call as a 
         // search call instead of a retrieve call. Currently we support only one aik certificate for a host, we can retrieve
@@ -56,7 +56,7 @@ public class HostAikCertificates extends MtWilsonClient {
 
     public HostAikCertificate createHostAikCertificate(HostAikCertificate obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("host_id", obj.getHostUuid());
         HostAikCertificate newObj = getTarget().path("hosts/{host_id}/aik-certificates").resolveTemplates(map)
                 .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), HostAikCertificate.class);

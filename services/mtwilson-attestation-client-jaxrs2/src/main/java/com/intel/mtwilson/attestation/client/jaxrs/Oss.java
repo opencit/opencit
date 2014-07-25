@@ -37,7 +37,7 @@ public class Oss extends MtWilsonClient {
      /**
      * Creates an Os object with the specified parameters in the system. This would be used to associate with VMM/Hypervisor 
      * MLE[Measured Launch Environment] during its creation. Both OS name and version are required parameters. Description field is optional.
-     * @param OS - Os object that needs to be created. Name and Version have to be specified by the caller. If the caller specifies the ID,
+     * @param os - Os object that needs to be created. Name and Version have to be specified by the caller. If the caller specifies the ID,
      * it has to be a valid UUID. If not provided, it would be automatically generated.
      * @return <code> Os </code> that is created.
      * @since Mt.Wilson 2.0
@@ -76,7 +76,7 @@ public class Oss extends MtWilsonClient {
      * @mtwMethodType DELETE
      * @mtwSampleRestCall
      * <pre>
-     * https://10.1.71.234:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
+     * https://server.com:8181/mtwilson/v2/oss/e946ccec-4a55-4913-bdb6-5878c88a9e81
      * </pre>
      * @mtwSampleApiCall
      * <pre>
@@ -98,7 +98,6 @@ public class Oss extends MtWilsonClient {
      * Deletes the Os(s) matching the specified search criteria. 
      * @param criteria OsFilterCriteria object specifying the search criteria. The search options include
      * id, nameEqualTo and nameContains.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oss:delete,search
      * @mtwContentTypeReturned N/A
@@ -125,7 +124,7 @@ public class Oss extends MtWilsonClient {
     
     /**
      * Updates the details of the Os in the system. Only the description of the OS can be updated. 
-     * @param OS - Os object that needs to be updated. The caller needs to provide the ID of the object along with the description.
+     * @param obj - Os object that needs to be updated. The caller needs to provide the ID of the object along with the description.
      * @return <code> Os </code> that is updated.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions oss:store
@@ -176,7 +175,7 @@ public class Oss extends MtWilsonClient {
      */
     public Os retrieveOs(String uuid) {
         log.debug("target: {}", getTarget().getUri().toString());
-        HashMap<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<>();
         map.put("id", uuid);
         Os obj = getTarget().path("oss/{id}").resolveTemplates(map).request(MediaType.APPLICATION_JSON).get(Os.class);
         return obj;
