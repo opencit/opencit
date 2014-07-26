@@ -2470,10 +2470,11 @@ glassfish_create_ssl_cert() {
   cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
   cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
-  local keystorePassword=changeit
+  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
+  local configDir="/opt/mtwilson/configuration"
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   # does the keystore already have a cert with this alias? the alias has to be s1as (too much work to change it) so we check to see if a separate certificate file has been saved, indicating that s1as has already been replaced.
@@ -2516,9 +2517,10 @@ glassfish_create_ssl_cert() {
     $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
 
     #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${tmpHost}.crt" -out /tmp/mycert.der -outform DER
-    #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
-    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
+    #openssl x509 -in /tmp/mycert.der -inform DER -out "$configDir/ssl.crt.pem" -outform PEM
+    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" "$configDir/ssl.crt"
+    cp "$keystore" "$configDir/mtwilson-tls.jks"
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
@@ -2865,8 +2867,9 @@ tomcat_create_ssl_cert() {
   cert_cns=`echo $cert_cns | sed -e 's/,$//'`
   cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
-  local keystorePassword=changeit
+  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local keystore=${TOMCAT_HOME}/ssl/.keystore
+  local configDir="/opt/mtwilson/configuration"
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
@@ -2899,11 +2902,12 @@ tomcat_create_ssl_cert() {
     #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
     $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
     #$keytool -import -trustcacerts -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass ${keystorePassword}
-    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
-    cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
+    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
+    cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" "$configDir/ssl.crt"
+    cp "$keystore" "$configDir/mtwilson-tls.jks"
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     #cp ${keystore} /root/
-    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
+    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem "$configDir/ssl.crt.pem"
   fi
 }
 tomcat_env_report(){
