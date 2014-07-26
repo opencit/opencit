@@ -813,164 +813,86 @@ fi
 mkdir -p /etc/monit/conf.d
 
 # create the monit rc files
+
+#glassfish.mtwilson
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
- echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-check file gf_installed with path \"/usr/share/glassfish4/bin/asadmin\"
-	group gf_server
-	if does not exist then unmonitor
-# Monitoring the glassfish java service
-	group gf_server
-	check process glassfish matching \"glassfish.jar\"
-	start program = \"/usr/local/bin/mtwilson glassfish-start\"
-	stop program = \"/usr/local/bin/mtwilson glassfish-stop\"
-	depends on gf_installed
-# Glassfish portal
-	check host mtwilson-portal-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/mtwilson-portal start\"
-	stop program = \"/usr/local/bin/mtwilson-portal stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/mtwilson-portal/home.html\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish
-# Attestation Service
-	check host mtwilson-AS-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/asctl start\"
-	stop program = \"/usr/local/bin/asctl stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/asstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish
-## Management Service
-#	check host mtwilson-MS-glassfish with address 127.0.0.1
-#	group gf_server
-#	start program = \"/usr/local/bin/msctl start\"
-#	stop program = \"/usr/local/bin/msctl stop\"
-#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on gf_installed
-#	depends on glassfish
-## Whitelist Service
-#	check host mtwilson-WLM-glassfish with address 127.0.0.1
-#	group gf_server
-#	start program = \"/usr/local/bin/wlmctl start\"
-#	stop program = \"/usr/local/bin/wlmctl stop\"
-#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on gf_installed
-#	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
-fi
+  if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
+    echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
+      check file gf_installed with path "/usr/share/glassfish4/bin/asadmin"
+      group gf_server
+      if does not exist then unmonitor
+
+      # MtWilson Glassfish services
+      check host mtwilson-version-glassfish with address 127.0.0.1
+      group gf_server
+      start program = "/usr/local/bin/mtwilson start" with timeout 120 seconds
+      stop program = "/usr/local/bin/mtwilson stop" with timeout 120 seconds
+      if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+        and request "/mtwilson/v2/version" for 2 cycles
+      then restart
+      if 3 restarts within 10 cycles then timeout
+      depends on gf_installed" > /etc/monit/conf.d/glassfish.mtwilson
+  fi
 fi
 
+#tomcat.mtwilson
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
- echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
-	group tc_server
-	if does not exist then unmonitor
-#tomcat monitor
-	check host tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/mtwilson tomcat-start\"
-	stop program = \"/usr/local/bin/mtwilson tomcat-stop\"
-	if failed port 8443 TYPE TCP PROTOCOL HTTP
-		and request \"/\" for 3 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-# tomcat portal
-	check host mtwilson-portal-tomcat with address 127.0.0.1
-	start program = \"/usr/local/bin/mtwilson-portal start\"
-	stop program = \"/usr/local/bin/mtwilson-portal stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/mtwilson-portal/home.html\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat
-# Attestation Service
-	check host mtwilson-AS-tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/asctl start\"
-	stop program = \"/usr/local/bin/asctl stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/asstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat
-# Management Service
-#	check host mtwilson-MS-tomcat with address 127.0.0.1
-#	group tc_server
-#	start program = \"/usr/local/bin/msctl start\"
-#	stop program = \"/usr/local/bin/msctl stop\"
-#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on tc_installed
-#	depends on tomcat
-# Whitelist Service
-#	check host mtwilson-WLM-tomcat with address 127.0.0.1
-#	group tc_server
-#	start program = \"/usr/local/bin/wlmctl start\"
-#	stop program = \"/usr/local/bin/wlmctl stop\"
-#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on tc_installed
-#	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
-fi
+  if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
+    echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
+      check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
+      group tc_server
+      if does not exist then unmonitor
+    
+      # MtWilson Tomcat services
+      check host mtwilson-version-tomcat with address 127.0.0.1
+      group tc_server
+      start program = "/usr/local/bin/mtwilson start" with timeout 120 seconds
+      stop program = "/usr/local/bin/mtwilson stop" with timeout 120 seconds
+      if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+        and request "/mtwilson/v2/version" for 2 cycles
+      then restart
+      if 3 restarts within 10 cycles then timeout
+      depends on tc_installed" > /etc/monit/conf.d/tomcat.mtwilson
+  fi
 fi
 
 if [ -z "$NO_POSTGRES_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
-      echo "check process postgres matching \"postgresql\"
-   group pg-db
-   start program = \"/usr/sbin/service postgresql start\"
-   stop program = \"/usr/sbin/service postgresql stop\"
-   if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
+  if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
+    echo "check process postgres matching \"postgresql\"
+      group pg-db
+      start program = \"/usr/sbin/service postgresql start\"
+      stop program = \"/usr/sbin/service postgresql stop\"
+      if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
       then restart
-   if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
-   if 5 restarts within 5 cycles then timeout
-	depends on pg_bin
-
-check file pg_bin with path \"/usr/bin/psql\"
-	group pg-db
-	if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
-fi
+      if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
+      if 5 restarts within 5 cycles then timeout
+      depends on pg_bin
+  
+      check file pg_bin with path \"/usr/bin/psql\"
+      group pg-db
+      if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
+  fi
 fi
 
 if [ -z "$NO_MYSQL_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
-      echo "check process mysql matching \"mysql\"
-   group mysql_db
-   start program = \"/usr/sbin/service mysql start\"
-   stop program = \"/usr/sbin/service mysql stop\"
-   if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
-   if 5 restarts within 5 cycles then timeout
-   depends on mysql_bin
-   depends on mysql_rc
+  if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+    echo "check process mysql matching \"mysql\"
+      group mysql_db
+      start program = \"/usr/sbin/service mysql start\"
+      stop program = \"/usr/sbin/service mysql stop\"
+      if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
+      if 5 restarts within 5 cycles then timeout
+      depends on mysql_bin
+      depends on mysql_rc
 
-   check file mysql_bin with path /usr/sbin/mysqld
-   group mysql_db
-   if does not exist then unmonitor
+      check file mysql_bin with path /usr/sbin/mysqld
+      group mysql_db
+      if does not exist then unmonitor
 
-   check file mysql_rc with path /etc/init.d/mysql
-   group mysql_db
-   if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
-fi
+      check file mysql_rc with path /etc/init.d/mysql
+      group mysql_db
+      if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
+  fi
 fi
 
 echo  -n "Restarting monit service so new configs take effect... "
