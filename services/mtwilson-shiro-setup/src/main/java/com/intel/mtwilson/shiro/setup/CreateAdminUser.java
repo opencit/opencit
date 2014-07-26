@@ -492,7 +492,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
         return null;
     }
     private X509Certificate getTlsCertificate() throws KeyManagementException, KeyStoreException  {
-        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), My.configuration().getTlsKeystorePassword());
+        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), "changeit");   //My.configuration().getTlsKeystorePassword());
         for (String alias : tlsKeystore.aliases()) {
             log.debug("TLS Keystore alias: {}", alias);
             // make sure it has a SAML private key and certificate inside

@@ -2470,7 +2470,7 @@ glassfish_create_ssl_cert() {
   cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
   cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
-  local keystorePassword="$mtwilson_tls_keystore_password"   #changeit
+  local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
@@ -2867,7 +2867,7 @@ tomcat_create_ssl_cert() {
   cert_cns=`echo $cert_cns | sed -e 's/,$//'`
   cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
-  local keystorePassword="$mtwilson_tls_keystore_password"   #changeit
+  local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   local configDir="/opt/mtwilson/configuration"
   local keytool=${JAVA_HOME}/bin/keytool
