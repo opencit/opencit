@@ -497,7 +497,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             log.debug("TLS Keystore alias: {}", alias);
             // make sure it has a SAML private key and certificate inside
             try {
-                RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, My.configuration().getTlsKeystorePassword());
+                RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, "changeit");   //My.configuration().getTlsKeystorePassword());
                 log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
                 return credential.getCertificate();
             } catch (IOException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
