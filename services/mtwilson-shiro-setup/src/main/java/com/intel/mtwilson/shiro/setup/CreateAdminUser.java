@@ -497,9 +497,13 @@ public class CreateAdminUser extends DatabaseSetupTask {
             log.debug("TLS Keystore alias: {}", alias);
             // make sure it has a SAML private key and certificate inside
             try {
-                RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, "changeit");   //My.configuration().getTlsKeystorePassword());
-                log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
-                return credential.getCertificate();
+                if ("tomcat".equals(alias) || "s1as".equals(alias)) {
+                    RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, "changeit");   //My.configuration().getTlsKeystorePassword());
+                    log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
+                    return credential.getCertificate();
+                } else {
+                    log.warn("Cannot find TLS certificate with correct matching alias.");
+                }
             } catch (IOException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {
                 log.debug("Cannot read TLS key from keystore", e);
 //                validation("Cannot read SAML key from keystore"); // we are assuming the keystore only has one private key entry ... 
