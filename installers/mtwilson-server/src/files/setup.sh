@@ -825,8 +825,8 @@ if [ -z "$NO_GLASSFISH_MONIT" ]; then
       # MtWilson Glassfish services
       check host mtwilson-version-glassfish with address 127.0.0.1
       group gf_server
-      start program = "/usr/local/bin/mtwilson start" with timeout 120 seconds
-      stop program = "/usr/local/bin/mtwilson stop" with timeout 120 seconds
+      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
@@ -846,8 +846,8 @@ if [ -z "$NO_TOMCAT_MONIT" ]; then
       # MtWilson Tomcat services
       check host mtwilson-version-tomcat with address 127.0.0.1
       group tc_server
-      start program = "/usr/local/bin/mtwilson start" with timeout 120 seconds
-      stop program = "/usr/local/bin/mtwilson stop" with timeout 120 seconds
+      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
