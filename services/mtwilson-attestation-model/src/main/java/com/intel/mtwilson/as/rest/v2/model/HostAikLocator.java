@@ -21,8 +21,12 @@ public class HostAikLocator implements Locator<HostAik> {
     
     @Override
     public void copyTo(HostAik item) {
-        item.setHostUuid(hostUuid.toString());
-        item.setAikSha1(aikSha1);
+        if (hostUuid != null) {
+            item.setHostUuid(hostUuid.toString());
+        }
+        if (aikSha1 != null) {
+            item.setAikSha1(aikSha1);
+        }
     }
     
 }
