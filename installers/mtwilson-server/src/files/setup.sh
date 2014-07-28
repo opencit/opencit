@@ -201,8 +201,8 @@ auto_install "Installer requirements" "APICLIENT"
 mkdir -p /etc/intel/cloudsecurity
 chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
-  default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ "$default_mtwilson_tls_policy_name" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_name" == "TRUST_FIRST_CERTIFICATE" ]; then
+  default_mtwilson_tls_policy_id="$MTW_DEFAULT_TLS_POLICY_ID"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
+  if [ "$default_mtwilson_tls_policy_id" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_id" == "TRUST_FIRST_CERTIFICATE" ]; then
     #update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default TLS policy is insecure; the product guide contains information on enabling secure TLS policies"
   fi

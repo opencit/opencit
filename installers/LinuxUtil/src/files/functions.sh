@@ -3792,7 +3792,7 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_DEFAULT_TLS_POLICY_NAME=`echo $temp | awk -F'mtwilson.default.tls.policy.name=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
@@ -3803,7 +3803,7 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
       export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
-      export CONF_MTW_DEFAULT_TLS_POLICY_NAME=`read_property_from_file mtwilson.default.tls.policy.name "$mtw_props_path"`
+      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
       export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
@@ -3948,7 +3948,7 @@ load_defaults() {
   export DEFAULT_API_KEY_ALIAS=""
   export DEFAULT_API_KEY_PASS=""
   export DEFAULT_CONFIGURED_API_BASEURL=""
-  export DEFAULT_MTW_DEFAULT_TLS_POLICY_NAME=""
+  export DEFAULT_MTW_DEFAULT_TLS_POLICY_ID=""
   export DEFAULT_MTW_TLS_KEYSTORE_PASS=""
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
@@ -3974,7 +3974,7 @@ load_defaults() {
   export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
   export CONFIGURED_API_BASEURL=${CONFIGURED_API_BASEURL:-${CONF_CONFIGURED_API_BASEURL:-$DEFAULT_CONFIGURED_API_BASEURL}}
-  export MTW_DEFAULT_TLS_POLICY_NAME=${MTW_DEFAULT_TLS_POLICY_NAME:-${CONF_MTW_DEFAULT_TLS_POLICY_NAME:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_NAME}}
+  export MTW_DEFAULT_TLS_POLICY_ID=${MTW_DEFAULT_TLS_POLICY_ID:-${CONF_MTW_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_ID}}
   export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
