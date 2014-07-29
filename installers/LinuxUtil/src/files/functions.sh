@@ -3793,6 +3793,7 @@ load_conf() {
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTW_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
@@ -3804,6 +3805,7 @@ load_conf() {
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
       export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
       export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
+      export CONF_MTW_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
       export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
@@ -3949,6 +3951,7 @@ load_defaults() {
   export DEFAULT_API_KEY_PASS=""
   export DEFAULT_CONFIGURED_API_BASEURL=""
   export DEFAULT_MTW_DEFAULT_TLS_POLICY_ID=""
+  export DEFAULT_MTW_TLS_POLICY_ALLOW=""
   export DEFAULT_MTW_TLS_KEYSTORE_PASS=""
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
@@ -3975,6 +3978,7 @@ load_defaults() {
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
   export CONFIGURED_API_BASEURL=${CONFIGURED_API_BASEURL:-${CONF_CONFIGURED_API_BASEURL:-$DEFAULT_CONFIGURED_API_BASEURL}}
   export MTW_DEFAULT_TLS_POLICY_ID=${MTW_DEFAULT_TLS_POLICY_ID:-${CONF_MTW_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_ID}}
+  export MTW_TLS_POLICY_ALLOW=${MTW_TLS_POLICY_ALLOW:-${CONF_MTW_TLS_POLICY_ALLOW:-$DEFAULT_MTW_TLS_POLICY_ALLOW}}
   export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}

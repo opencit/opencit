@@ -217,12 +217,54 @@ else
     touch /etc/intel/cloudsecurity/mtwilson.properties
     chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
     export mtwilson_tls_keystore_password=`generate_password 32`
-    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
+#    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
     echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
+fi
+
+#MTW_TLS_POLICY_ALLOW
+prompt_with_default MTW_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "$MTW_TLS_POLICY_ALLOW"
+MTW_TLS_POLICY_ALLOW=`echo $MTW_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
+OIFS=$IFS
+IFS=',' read -ra POLICIES <<< "$MTW_TLS_POLICY_ALLOW"
+IFS=$OIFS
+TMP_MTW_TLS_POLICY_ALLOW=
+for i in "${POLICIES[@]}"; do
+  if [ "$i" == "certificate" ] || [ "$i" == "certificate-digest" ] || [ "$i" == "public-key" ] || [ "$i" == "public-key-digest" ] || [ "$i" == "TRUST_FIRST_CERTIFICATE" ] || [ "$i" == "INSECURE" ]; then
+    TMP_MTW_TLS_POLICY_ALLOW+="$i,"
+  fi
+done
+MTW_TLS_POLICY_ALLOW=`echo "$TMP_MTW_TLS_POLICY_ALLOW" | sed 's/\(.*\),/\1/'`
+
+if [ -n "$MTW_TLS_POLICY_ALLOW" ]; then
+  update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_TLS_POLICY_ALLOW"
+else
+  echo_failure "An allowed TLS policy must be defined."
+  exit -1
+fi
+
+#MTW_DEFAULT_TLS_POLICY_ID
+prompt_with_default MTW_DEFAULT_TLS_POLICY_ID "Mt Wilson Default TLS Policy ID: " "$MTW_DEFAULT_TLS_POLICY_ID"
+MTW_DEFAULT_TLS_POLICY_ID=`echo $MTW_DEFAULT_TLS_POLICY_ID | tr -d ' '`   # trim whitespace
+OIFS=$IFS
+IFS=',' read -ra POLICIES <<< "$MTW_TLS_POLICY_ALLOW"
+IFS=$OIFS
+TMP_MTW_DEFAULT_TLS_POLICY_ID=
+for i in "${POLICIES[@]}"; do
+  if [ "$i" == "$MTW_DEFAULT_TLS_POLICY_ID" ]; then
+    TMP_MTW_DEFAULT_TLS_POLICY_ID="$i"
+  fi
+done
+MTW_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTW_DEFAULT_TLS_POLICY_ID"`
+
+if [ -n "$MTW_DEFAULT_TLS_POLICY_ID" ]; then
+  update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_DEFAULT_TLS_POLICY_ID"
+else
+  echo_failure "Invalid default TLS policy. Policy must be allowed."
+  exit -1
 fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
