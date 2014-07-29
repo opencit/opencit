@@ -201,12 +201,12 @@ auto_install "Installer requirements" "APICLIENT"
 mkdir -p /etc/intel/cloudsecurity
 chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
-  default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ "$default_mtwilson_tls_policy_name" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_name" == "TRUST_FIRST_CERTIFICATE" ]; then
-    #update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
+  default_mtwilson_tls_policy_id="$MTW_DEFAULT_TLS_POLICY_ID"   #`read_property_from_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties`
+  if [ "$default_mtwilson_tls_policy_id" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_id" == "TRUST_FIRST_CERTIFICATE" ]; then
+    #update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default TLS policy is insecure; the product guide contains information on enabling secure TLS policies"
   fi
-  mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
+  export mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
   #if [ -z "$mtwilson_tls_keystore_password" ]; then
     # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
     #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
@@ -216,13 +216,55 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
 else
     touch /etc/intel/cloudsecurity/mtwilson.properties
     chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
-    mtwilson_tls_keystore_password=`generate_password 32`
-    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
+    export mtwilson_tls_keystore_password=`generate_password 32`
+#    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
     echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
+fi
+
+#MTW_TLS_POLICY_ALLOW
+prompt_with_default MTW_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "$MTW_TLS_POLICY_ALLOW"
+MTW_TLS_POLICY_ALLOW=`echo $MTW_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
+OIFS=$IFS
+IFS=',' read -ra POLICIES <<< "$MTW_TLS_POLICY_ALLOW"
+IFS=$OIFS
+TMP_MTW_TLS_POLICY_ALLOW=
+for i in "${POLICIES[@]}"; do
+  if [ "$i" == "certificate" ] || [ "$i" == "certificate-digest" ] || [ "$i" == "public-key" ] || [ "$i" == "public-key-digest" ] || [ "$i" == "TRUST_FIRST_CERTIFICATE" ] || [ "$i" == "INSECURE" ]; then
+    TMP_MTW_TLS_POLICY_ALLOW+="$i,"
+  fi
+done
+MTW_TLS_POLICY_ALLOW=`echo "$TMP_MTW_TLS_POLICY_ALLOW" | sed 's/\(.*\),/\1/'`
+
+if [ -n "$MTW_TLS_POLICY_ALLOW" ]; then
+  update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_TLS_POLICY_ALLOW"
+else
+  echo_failure "An allowed TLS policy must be defined."
+  exit -1
+fi
+
+#MTW_DEFAULT_TLS_POLICY_ID
+prompt_with_default MTW_DEFAULT_TLS_POLICY_ID "Mt Wilson Default TLS Policy ID: " "$MTW_DEFAULT_TLS_POLICY_ID"
+MTW_DEFAULT_TLS_POLICY_ID=`echo $MTW_DEFAULT_TLS_POLICY_ID | tr -d ' '`   # trim whitespace
+OIFS=$IFS
+IFS=',' read -ra POLICIES <<< "$MTW_TLS_POLICY_ALLOW"
+IFS=$OIFS
+TMP_MTW_DEFAULT_TLS_POLICY_ID=
+for i in "${POLICIES[@]}"; do
+  if [ "$i" == "$MTW_DEFAULT_TLS_POLICY_ID" ]; then
+    TMP_MTW_DEFAULT_TLS_POLICY_ID="$i"
+  fi
+done
+MTW_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTW_DEFAULT_TLS_POLICY_ID"`
+
+if [ -n "$MTW_DEFAULT_TLS_POLICY_ID" ]; then
+  update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_DEFAULT_TLS_POLICY_ID"
+else
+  echo_failure "Invalid default TLS policy. Policy must be allowed."
+  exit -1
 fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
@@ -813,164 +855,86 @@ fi
 mkdir -p /etc/monit/conf.d
 
 # create the monit rc files
+
+#glassfish.mtwilson
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
- echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-check file gf_installed with path \"/usr/share/glassfish4/bin/asadmin\"
-	group gf_server
-	if does not exist then unmonitor
-# Monitoring the glassfish java service
-	group gf_server
-	check process glassfish matching \"glassfish.jar\"
-	start program = \"/usr/local/bin/mtwilson glassfish-start\"
-	stop program = \"/usr/local/bin/mtwilson glassfish-stop\"
-	depends on gf_installed
-# Glassfish portal
-	check host mtwilson-portal-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/mtwilson-portal start\"
-	stop program = \"/usr/local/bin/mtwilson-portal stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/mtwilson-portal/home.html\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish
-# Attestation Service
-	check host mtwilson-AS-glassfish with address 127.0.0.1
-	group gf_server
-	start program = \"/usr/local/bin/asctl start\"
-	stop program = \"/usr/local/bin/asctl stop\"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/asstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on gf_installed
-	depends on glassfish
-## Management Service
-#	check host mtwilson-MS-glassfish with address 127.0.0.1
-#	group gf_server
-#	start program = \"/usr/local/bin/msctl start\"
-#	stop program = \"/usr/local/bin/msctl stop\"
-#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on gf_installed
-#	depends on glassfish
-## Whitelist Service
-#	check host mtwilson-WLM-glassfish with address 127.0.0.1
-#	group gf_server
-#	start program = \"/usr/local/bin/wlmctl start\"
-#	stop program = \"/usr/local/bin/wlmctl stop\"
-#	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on gf_installed
-#	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
-fi
+  if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
+    echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
+      check file gf_installed with path "/usr/share/glassfish4/bin/asadmin"
+      group gf_server
+      if does not exist then unmonitor
+
+      # MtWilson Glassfish services
+      check host mtwilson-version-glassfish with address 127.0.0.1
+      group gf_server
+      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+        and request "/mtwilson/v2/version" for 2 cycles
+      then restart
+      if 3 restarts within 10 cycles then timeout
+      depends on gf_installed" > /etc/monit/conf.d/glassfish.mtwilson
+  fi
 fi
 
+#tomcat.mtwilson
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
- echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
-	group tc_server
-	if does not exist then unmonitor
-#tomcat monitor
-	check host tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/mtwilson tomcat-start\"
-	stop program = \"/usr/local/bin/mtwilson tomcat-stop\"
-	if failed port 8443 TYPE TCP PROTOCOL HTTP
-		and request \"/\" for 3 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-# tomcat portal
-	check host mtwilson-portal-tomcat with address 127.0.0.1
-	start program = \"/usr/local/bin/mtwilson-portal start\"
-	stop program = \"/usr/local/bin/mtwilson-portal stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/mtwilson-portal/home.html\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat
-# Attestation Service
-	check host mtwilson-AS-tomcat with address 127.0.0.1
-	group tc_server
-	start program = \"/usr/local/bin/asctl start\"
-	stop program = \"/usr/local/bin/asctl stop\"
-	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/asstatus\" for 1 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-	depends on tc_installed
-	depends on tomcat
-# Management Service
-#	check host mtwilson-MS-tomcat with address 127.0.0.1
-#	group tc_server
-#	start program = \"/usr/local/bin/msctl start\"
-#	stop program = \"/usr/local/bin/msctl stop\"
-#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/ManagementService/resources/msstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on tc_installed
-#	depends on tomcat
-# Whitelist Service
-#	check host mtwilson-WLM-tomcat with address 127.0.0.1
-#	group tc_server
-#	start program = \"/usr/local/bin/wlmctl start\"
-#	stop program = \"/usr/local/bin/wlmctl stop\"
-#	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-#		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
-#	then restart
-#	if 3 restarts within 10 cycles then timeout
-#	depends on tc_installed
-#	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
-fi
+  if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
+    echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
+      check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
+      group tc_server
+      if does not exist then unmonitor
+    
+      # MtWilson Tomcat services
+      check host mtwilson-version-tomcat with address 127.0.0.1
+      group tc_server
+      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+        and request "/mtwilson/v2/version" for 2 cycles
+      then restart
+      if 3 restarts within 10 cycles then timeout
+      depends on tc_installed" > /etc/monit/conf.d/tomcat.mtwilson
+  fi
 fi
 
 if [ -z "$NO_POSTGRES_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
-      echo "check process postgres matching \"postgresql\"
-   group pg-db
-   start program = \"/usr/sbin/service postgresql start\"
-   stop program = \"/usr/sbin/service postgresql stop\"
-   if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
+  if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
+    echo "check process postgres matching \"postgresql\"
+      group pg-db
+      start program = \"/usr/sbin/service postgresql start\"
+      stop program = \"/usr/sbin/service postgresql stop\"
+      if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
       then restart
-   if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
-   if 5 restarts within 5 cycles then timeout
-	depends on pg_bin
-
-check file pg_bin with path \"/usr/bin/psql\"
-	group pg-db
-	if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
-fi
+      if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
+      if 5 restarts within 5 cycles then timeout
+      depends on pg_bin
+  
+      check file pg_bin with path \"/usr/bin/psql\"
+      group pg-db
+      if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
+  fi
 fi
 
 if [ -z "$NO_MYSQL_MONIT" ]; then 
-if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
-      echo "check process mysql matching \"mysql\"
-   group mysql_db
-   start program = \"/usr/sbin/service mysql start\"
-   stop program = \"/usr/sbin/service mysql stop\"
-   if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
-   if 5 restarts within 5 cycles then timeout
-   depends on mysql_bin
-   depends on mysql_rc
+  if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+    echo "check process mysql matching \"mysql\"
+      group mysql_db
+      start program = \"/usr/sbin/service mysql start\"
+      stop program = \"/usr/sbin/service mysql stop\"
+      if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
+      if 5 restarts within 5 cycles then timeout
+      depends on mysql_bin
+      depends on mysql_rc
 
-   check file mysql_bin with path /usr/sbin/mysqld
-   group mysql_db
-   if does not exist then unmonitor
+      check file mysql_bin with path /usr/sbin/mysqld
+      group mysql_db
+      if does not exist then unmonitor
 
-   check file mysql_rc with path /etc/init.d/mysql
-   group mysql_db
-   if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
-fi
+      check file mysql_rc with path /etc/init.d/mysql
+      group mysql_db
+      if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
+  fi
 fi
 
 echo  -n "Restarting monit service so new configs take effect... "

@@ -25,6 +25,7 @@ import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.repository.RepositoryStoreException;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -118,6 +119,9 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
             obj.AddOn_Connection_String = item.getConnectionUrl();
             obj.Description = item.getDescription();
             obj.Email = item.getEmail();
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
+            obj.tlsPolicyChoice = tlsPolicyChoice;
 
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object
@@ -178,6 +182,9 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
             obj.AddOn_Connection_String = item.getConnectionUrl();
             obj.Description = item.getDescription();
             obj.Email = item.getEmail();
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
+            obj.tlsPolicyChoice = tlsPolicyChoice;
 
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object

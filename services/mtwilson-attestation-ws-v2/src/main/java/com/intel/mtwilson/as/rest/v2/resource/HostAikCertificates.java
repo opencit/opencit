@@ -25,7 +25,7 @@ public class HostAikCertificates extends AbstractCertificateJsonapiResource<Host
     private HostAikCertificateRepository repository;
 
     public HostAikCertificates(HostAikCertificateRepository repository) {
-        this.repository = repository;
+        repository = new HostAikCertificateRepository();
     }
 
     @Override

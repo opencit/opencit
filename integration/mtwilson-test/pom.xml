@@ -384,7 +384,12 @@
             <artifactId>javax.ws.rs-api</artifactId>
             <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish ... -->
         </dependency>
-            <dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy-client-jaxrs2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
             </dependency>

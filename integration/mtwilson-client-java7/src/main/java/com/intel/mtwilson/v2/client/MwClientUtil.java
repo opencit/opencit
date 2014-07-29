@@ -125,7 +125,7 @@ public class MwClientUtil {
         
         try {
             
-            CaCertificates certClient = new CaCertificates(My.configuration().getClientProperties());
+            CaCertificates certClient = new CaCertificates(properties);
             X509Certificate rootCertificate = certClient.retrieveCaCertificate("root");
             X509Certificate samlCertificate = certClient.retrieveCaCertificate("saml");
             X509Certificate privacyCertificate = certClient.retrieveCaCertificate("privacy");

@@ -221,19 +221,30 @@ public class APIClient {
         ValidationUtil.validate(fingerprintHex);
         byte[] fingerprint = fromHex(fingerprintHex);
         ApiClientBO bo = new ApiClientBO();
-        ApiClientInfo info = bo.find(fingerprint);
-        ApiClientUpdateRequest apiClientRequest = new ApiClientUpdateRequest();
-        apiClientRequest.fingerprint = fingerprint;
-        apiClientRequest.enabled = false;
-        apiClientRequest.status = ApiClientStatus.CANCELLED.toString();
-        if (info.comment == null || info.comment.isEmpty()){
-            apiClientRequest.comment = String.format("Deleted on %s", Rfc822Date.format(new Date()));
+        
+        ApiClientSearchCriteria criteria = new ApiClientSearchCriteria();
+        criteria.fingerprintEqualTo = fingerprint;
+        List<ApiClientInfo> userList = bo.search(criteria);
+        if (userList != null && userList.size() == 1) {
+            log.debug("Found the user to delete.");
+            ApiClientInfo info = userList.get(0);
+            //ApiClientInfo info = bo.find(fingerprint);
+            ApiClientUpdateRequest apiClientRequest = new ApiClientUpdateRequest();
+            apiClientRequest.fingerprint = fingerprint;
+            apiClientRequest.enabled = false;
+            apiClientRequest.status = ApiClientStatus.CANCELLED.toString();
+            if (info.comment == null || info.comment.isEmpty()){
+                apiClientRequest.comment = String.format("Deleted on %s", Rfc822Date.format(new Date()));
+            }
+            else{
+                apiClientRequest.comment = String.format("%s. Deleted on %s", info.comment, Rfc822Date.format(new Date()));
+            }
+            // Removing the roles as well
+            apiClientRequest.roles = new String[]{}; //info.roles; 
+            bo.update(apiClientRequest, null);
+        } else {
+            log.debug("Did not find the user with fingerprint {} in the system. ", fingerprintHex);
         }
-        else{
-            apiClientRequest.comment = String.format("%s. Deleted on %s", info.comment, Rfc822Date.format(new Date()));
-        }
-        apiClientRequest.roles = info.roles;
-        bo.update(apiClientRequest, null);
     }
     
     private byte[] fromHex(String hex) {
