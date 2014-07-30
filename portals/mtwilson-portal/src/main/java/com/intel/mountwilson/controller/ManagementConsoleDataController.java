@@ -2872,10 +2872,12 @@ public class ManagementConsoleDataController extends MultiActionController {
         
         try {
             ApiClient apiClient = getApiClientService(req, ApiClient.class);
-            apiClient.setLocale(LocaleUtil.forLanguageTag(locale));
-            HttpSession session = req.getSession();
-            session.setAttribute("api-object", apiClient);
-            session.setAttribute("apiClientObject",apiClient);
+            if(apiClient != null){
+                apiClient.setLocale(LocaleUtil.forLanguageTag(locale));
+                HttpSession session = req.getSession();
+                session.setAttribute("api-object", apiClient);
+                session.setAttribute("apiClientObject",apiClient);
+            }
             responseView.addObject("locale", demoPortalServices.setLocale(username, locale, apiClient));
         } catch (DemoPortalException e) {
             e.printStackTrace();

@@ -148,8 +148,6 @@ public class Global {
             String keystoreUsername = My.configuration().getTagKeystoreUsername(); //configuration().getMtWilsonClientKeystoreUsername();
             String keystorePassword = My.configuration().getTagKeystorePassword(); //configuration().getMtWilsonClientKeystorePassword();
             
-            SimpleKeystore keystore = new SimpleKeystore(keystoreResource, keystorePassword);
-//            KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
             URL url = My.configuration().getMtWilsonURL();  //configuration().getMtWilsonURL();
             ApiClientFactory factory = new ApiClientFactory();
             //TlsPolicy tlsPolicy = V1TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(keystore);

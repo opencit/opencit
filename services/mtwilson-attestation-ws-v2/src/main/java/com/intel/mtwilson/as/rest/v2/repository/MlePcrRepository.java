@@ -98,7 +98,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:store")    
     public void store(MlePcr item) {
-        log.debug("MlePcr:Store - Got request to update Mle PCR with id {}.", item.getPcrIndex().toString()); 
+        log.debug("MlePcr:Store - Got request to update Mle PCR with id {}.", item.getPcrIndex()); 
         MlePcrLocator locator = new MlePcrLocator();
         locator.mleUuid = UUID.valueOf(item.getMleUuid());
         locator.pcrIndex = item.getPcrIndex();
@@ -125,7 +125,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     @Override
     @RequiresPermissions("mle_pcrs:create")    
     public void create(MlePcr item) {
-        log.debug("MlePcr:Create - Create a new Mle PCR with id {}.", item.getPcrIndex().toString());        
+        log.debug("MlePcr:Create - Create a new Mle PCR with id {}.", item.getPcrIndex());        
         MlePcrLocator locator = new MlePcrLocator();
         locator.mleUuid = UUID.valueOf(item.getMleUuid());
         locator.pcrIndex = item.getPcrIndex();

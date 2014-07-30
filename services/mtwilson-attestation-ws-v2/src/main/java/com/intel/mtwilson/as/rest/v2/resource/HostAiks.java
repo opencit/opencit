@@ -25,9 +25,7 @@ public class HostAiks extends AbstractJsonapiResource<HostAik, HostAikCollection
 
     private HostAikRepository repository;
 
-    public HostAiks(HostAikRepository repository) {
-        repository = new HostAikRepository();
-    }
+    public HostAiks(HostAikRepository repository) {}
 
     @Override
     protected HostAikCollection createEmptyCollection() {
