@@ -49,7 +49,7 @@ public class HostAttestations extends MtWilsonClient {
     /**
      * Forces a complete attestation cycle for the host whose UUID is specified. This does not return back the cached attestation result, instead
      * it creates a new one, caches it in the system and returns back the same to the caller.  <br>
-     * @param HostAttestation object with the UUID of the host for which the attestation has to be done. 
+     * @param obj HostAttestation object with the UUID of the host for which the attestation has to be done. 
      * @return HostAttestation object with the details trust report. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:create
@@ -106,7 +106,7 @@ public class HostAttestations extends MtWilsonClient {
 
     /**
      * Forces a complete attestation cycle for the host whose UUID is specified. The accept content type header should be set to "Accept: application/samlassertion+xml".
-     * @param HostAttestation object with the UUID of the host for which the attestation has to be done. 
+     * @param obj HostAttestation object with the UUID of the host for which the attestation has to be done. 
      * @return String having the SAML assertion that was just created. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:create
@@ -118,7 +118,7 @@ public class HostAttestations extends MtWilsonClient {
      * Input: {"host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681"} 
      * Output (SAML): <?xml version="1.0" encoding="UTF-8" ?>
      * <saml2:Assertion ID="HostTrustAssertion" IssueInstant="2014-05-03T01:51:40.924Z" Version="2.0">
-     * <saml2:Issuer>https://10.1.71.234:8181</saml2:Issuer>
+     * <saml2:Issuer>https://192.168.0.234:8181</saml2:Issuer>
      *  <Signature>
      *  <SignedInfo>
      *  <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments" />
@@ -243,7 +243,7 @@ public class HostAttestations extends MtWilsonClient {
      * Searches for the attestation results for the host with the specified criteria. Basic attestation report would be returned back to the caller for the
      * hosts matching the search criteria.If the user specifies the accept content type as "application/samlassertion+xml", then the latest valid cached SAML assertion
      * would be returned back to the caller.
-     * @param HostAttestationFilterCriteria object that specifies the search criteria.
+     * @param criteria HostAttestationFilterCriteria object that specifies the search criteria.
      * The possible search options include host attestation id (id), host UUID(host_id), host AIK (aik) and host name(nameEqualTo). By
      * default the last 10 attestation results would be returned back. The user can change this by additionally specifying the limit criteria (limit=5).
      * @return HostAttestationCollection object with a list of attestations for the hosts that match the filter criteria. 
@@ -253,10 +253,10 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://10.1.71.234:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2&limit=2
+     * https://server.com:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2&limit=2
      * Output: {"host_attestations":[{"id":"39cd1143-4f74-4767-8d82-9cb93d202115","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e",
-     * "host_name":"10.1.71.155","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}},
-     * {"id":"351408fd-53d4-4b65-8488-59e9867d091f","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e","host_name":"10.1.71.155",
+     * "host_name":"192.168.0.2","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}},
+     * {"id":"351408fd-53d4-4b65-8488-59e9867d091f","host_uuid":"7ad3f23a-4a60-4562-9d0a-777dd2cd788e","host_name":"192.168.0.2",
      * "host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
      * </pre>
      * @mtwSampleApiCall
@@ -277,7 +277,7 @@ public class HostAttestations extends MtWilsonClient {
     /**
      * Searches for the cached SAML attestation results for the host with the specified criteria. The latest cached SAML assertion would be returned
      * back if the cached value is still valid.
-     * @param HostAttestationFilterCriteria object that specifies the search criteria.
+     * @param criteria HostAttestationFilterCriteria object that specifies the search criteria.
      * The possible search options include host attestation id, host UUID, host AIK and host name. 
      * @return String object having the SAML assertion contents.
      * @since Mt.Wilson 2.0
@@ -286,7 +286,7 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwMethodType GET
      * @mtwSampleRestCall
      * <pre>
-     * https://10.1.71.234:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2
+     * https://server.com:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2
      * Output: {"host_attestations":
      *          [{"id":"32923691-9847-4493-86ee-3036a4f24940","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
      *              "host_name":"192.168.0.2","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
@@ -306,7 +306,8 @@ public class HostAttestations extends MtWilsonClient {
     }
     
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
-        if (properties != null && !properties.getProperty("mtwilson.api.keystore").isEmpty() && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
+        if (properties != null && properties.getProperty("mtwilson.api.keystore") != null && !properties.getProperty("mtwilson.api.keystore").isEmpty()
+                && properties.getProperty("mtwilson.api.keystore.password") != null && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
             SimpleKeystore keystore = new SimpleKeystore(new File(properties.getProperty("mtwilson.api.keystore")), properties.getProperty("mtwilson.api.keystore.password"));
             X509Certificate[] trustedSamlCertificates;
             try {

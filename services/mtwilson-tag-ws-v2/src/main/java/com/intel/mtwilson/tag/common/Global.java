@@ -14,6 +14,7 @@ import com.intel.mtwilson.tag.model.*;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.jaxrs2.client.PropertiesTlsPolicyFactory;
 import com.intel.mtwilson.tag.dao.TagJdbi;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import java.io.IOException;
@@ -147,11 +148,10 @@ public class Global {
             String keystoreUsername = My.configuration().getTagKeystoreUsername(); //configuration().getMtWilsonClientKeystoreUsername();
             String keystorePassword = My.configuration().getTagKeystorePassword(); //configuration().getMtWilsonClientKeystorePassword();
             
-            SimpleKeystore keystore = new SimpleKeystore(keystoreResource, keystorePassword);
-//            KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
             URL url = My.configuration().getMtWilsonURL();  //configuration().getMtWilsonURL();
             ApiClientFactory factory = new ApiClientFactory();
-            TlsPolicy tlsPolicy = V1TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(keystore);
+            //TlsPolicy tlsPolicy = V1TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(keystore);
+            TlsPolicy tlsPolicy = PropertiesTlsPolicyFactory.createTlsPolicy(My.configuration().getClientProperties());
             mtwilson = factory.clientForUserInResource(keystoreResource, keystoreUsername, keystorePassword, url, tlsPolicy);
             }
             catch(Exception e) {

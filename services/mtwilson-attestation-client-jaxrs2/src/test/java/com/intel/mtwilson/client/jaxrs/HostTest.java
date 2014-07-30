@@ -43,10 +43,11 @@ public class HostTest {
     @Test
     public void testCreate() {
         Host obj = new Host();
-        obj.setName("10.1.71.175");
-        obj.setConnectionUrl("https://10.1.71.162:443/sdk;Administrator;intel123!");
-        obj.setBiosMleUuid("b14e5039-373d-4743-aa65-1e24c23dd249");
-        obj.setVmmMleUuid("3a4503a1-1632-433f-bca7-5655ccbafec4");
+        obj.setName("10.1.71.155");
+        obj.setConnectionUrl("https://10.1.71.87:443/sdk;Administrator;P@ssw0rd");
+        obj.setBiosMleUuid("7e90c088-c9c7-486f-9480-9cd0a7a3b977");
+        obj.setVmmMleUuid("fb2cb173-5e19-446b-9161-aa7368c5c882");
+        obj.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
         Host createHost = client.createHost(obj);
         log.debug("New Host created with UUID {}.", createHost.getId().toString());
     }

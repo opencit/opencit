@@ -32,7 +32,7 @@ public class PollHosts extends MtWilsonClient {
     
     /**
      * Retrieves the trust status of the list of hosts specified. This API is added for the OpenStack integration.
-     * @param OpenStackHostTrustLevelQuery object with the UUID of the host for which the attestation has to be done. 
+     * @param obj OpenStackHostTrustLevelQuery object with the UUID of the host for which the attestation has to be done. 
      * @return HostAttestation object with the details trust report. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:search,retrieve
@@ -42,7 +42,7 @@ public class PollHosts extends MtWilsonClient {
      * <pre>
      * https://server.com:8181/mtwilson/v2/integrations/openstack/PollHosts
      * Input: {"hosts":["192.168.0.2"]} 
-     * Output: {"hosts":[{"host_name":"10.1.71.155","trust_lvl":"trusted","vtime":"Sat May 3 13:05:38 2014"}]}
+     * Output: {"hosts":[{"host_name":"192.168.0.2","trust_lvl":"trusted","vtime":"Sat May 3 13:05:38 2014"}]}
      * </pre>
      * @mtwSampleApiCall
      * <pre>

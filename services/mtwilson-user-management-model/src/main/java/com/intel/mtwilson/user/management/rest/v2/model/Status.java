@@ -11,5 +11,6 @@ package com.intel.mtwilson.user.management.rest.v2.model;
 public enum Status {
     APPROVED,
     PENDING,
-    REJECTED;
+    REJECTED,
+    CANCELLED;
 }

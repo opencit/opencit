@@ -327,7 +327,7 @@ public class ApiClientBO {
             
             log.debug("Update request roles: {}", (Object[])apiClientUpdateRequest.roles);
             // Clear the existing roles and update it with the new ones only if specified by the user
-            if ((apiClientUpdateRequest.roles != null) && (apiClientUpdateRequest.roles.length > 0) && (userLoginCertificate != null)) {
+            if ((apiClientUpdateRequest.roles != null) && (userLoginCertificate != null)) {
                 // Let us first delete the existing roles
                 log.debug("Looking for existing roles for user login certificate {}", userLoginCertificate.getId());
                 List<com.intel.mtwilson.user.management.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
@@ -363,6 +363,7 @@ public class ApiClientBO {
     private void clearRolesForApiClient(ApiClientX509 apiClientX509)  {
         for (ApiRoleX509 role : apiClientX509.getApiRoleX509Collection()) {
             try {
+                log.debug("clearRolesForApiClient: Deleting role {}", role.getApiRoleX509PK().getRole());
                 apiRoleX509JpaController.destroy(role.getApiRoleX509PK());
                 
             } catch (NonexistentEntityException ex) {
@@ -441,17 +442,19 @@ public class ApiClientBO {
                     apiClientX509.setComment(apiClientRequest.comment);            
 
                 apiClientX509JpaController.edit(apiClientX509); // IllegalOrphanException, NonexistentEntityException, Exception
-
+                log.debug("Updated the Api client X509 table");
+                
                 // Clear the existing roles and update it with the new ones only if specified by the user
-                if (apiClientRequest.roles != null && apiClientRequest.roles.length > 0) {
+                if (apiClientRequest.roles != null) {
                     clearRolesForApiClient(apiClientX509);
                     setRolesForApiClient(apiClientX509, apiClientRequest.roles);
-                }
+                } 
                 userName = apiClientX509.getUserNameFromName();                
             } else {
                 // Check if the user is in the V2 table. Otherwise we need to throw an error
+                log.debug("Looking up user login certificate {}", Hex.encodeHexString(apiClientRequest.fingerprint));
                 try (LoginDAO loginDao = MyJdbi.authz()) {
-                    UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha1(apiClientRequest.fingerprint);
+                    UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha256(apiClientRequest.fingerprint);
                     if (userLoginCertificate == null) {
                         log.error("User with fingerprint {} is not configured in the system.", Sha1Digest.valueOf(apiClientRequest.fingerprint).toHexString());
                         throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
@@ -591,7 +594,7 @@ public class ApiClientBO {
                     }
                 }
             } else if (criteria.fingerprintEqualTo != null) {
-                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha1(criteria.fingerprintEqualTo);
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(criteria.fingerprintEqualTo);
                 if (userLoginCertificate != null) {
                     list.add(convertToApiClientInfo(userLoginCertificate));
                 }

@@ -77,7 +77,7 @@ public class MleSourceRepository implements DocumentRepository<MleSource, MleSou
     @RequiresPermissions("mle_sources:store")    
     public void store(MleSource item) {
         if (item == null || item.getMleUuid() == null) { throw new RepositoryInvalidInputException();}
-        log.debug("MleSource:Store - Got request to update the mle source mapping for MLE with id {}.", item.getMleUuid().toString());        
+        log.debug("MleSource:Store - Got request to update the mle source mapping for MLE with id {}.", item.getMleUuid());        
         MleSourceLocator locator = new MleSourceLocator();
         locator.mleUuid = UUID.valueOf(item.getMleUuid());
         locator.id = item.getId();
@@ -86,7 +86,7 @@ public class MleSourceRepository implements DocumentRepository<MleSource, MleSou
         try {
             obj.setHostName(item.getName());
             new MleBO().updateMleSource(obj, item.getMleUuid());
-            log.debug("MleSource:Store - Successfully updated the mle source mapping for MLE with id {}.", item.getMleUuid().toString());        
+            log.debug("MleSource:Store - Successfully updated the mle source mapping for MLE with id {}.", item.getMleUuid());        
         } catch (Exception ex) {
             log.error("MleSource:Store - Error during MLE source host mapping update.", ex);
             throw new RepositoryStoreException(ex, locator);

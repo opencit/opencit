@@ -35,7 +35,7 @@ mtwilson.api.username=jonathan
 mtwilson.api.password=password
 mtwilson.api.url=http\://10.1.71.134\:8080/mtwilson/v1
 mtwilson.api.baseurl=http\://10.1.71.134\:8080/mtwilson/v1
-mtwilson.default.tls.policy.name=TRUST_FIRST_CERTIFICATE
+mtwilson.default.tls.policy.id=TRUST_FIRST_CERTIFICATE
 mtwilson.api.keystore=c\:/mtwilson/configuration/jonathan.jks
 mtwilson.api.keystore.password=beXyfVzb5D8oSHucNErVyw\=\=
 mtwilson.api.key.alias=CN\=jonathan

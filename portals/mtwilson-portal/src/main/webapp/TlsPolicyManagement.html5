@@ -208,7 +208,7 @@
             <label for="tlspolicy_delete_confirmation_name" data-i18n="table.policy_name">Name</label>
             <input id="tlspolicy_delete_confirmation_name" type="text" name="name" disabled/>
         </li>
-        <li>
+        <li style="display:none;">
             <label for="tlspolicy_delete_confirmation_hostrefcount" data-i18n="table.policy_hostrefcount">Referenced by</label>
             <input id="tlspolicy_delete_confirmation_hostrefcount" type="text" name="hostrefcount" disabled/>
         </li>

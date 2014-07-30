@@ -85,6 +85,9 @@ public class PublicKeyTlsPolicyCreator implements TlsPolicyCreator {
         if( tlsPolicyDescriptor.getMeta() == null ) {
             return metadata;
         }
+        if(tlsPolicyDescriptor.getMeta() == null) {
+            throw new IllegalArgumentException("TLS policy descriptor metadata cannot be null.");
+        }
         if( tlsPolicyDescriptor.getMeta().get("encoding") != null && !tlsPolicyDescriptor.getMeta().get("encoding").isEmpty() ) {
             metadata.encoding = tlsPolicyDescriptor.getMeta().get("encoding");
         }

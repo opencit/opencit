@@ -33,7 +33,7 @@ public class HostAikRepository implements DocumentRepository<HostAik, HostAikCol
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
-                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid);
+                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
                 if (obj != null) {
                     objCollection.getAiks().add(convert(obj));
                 }

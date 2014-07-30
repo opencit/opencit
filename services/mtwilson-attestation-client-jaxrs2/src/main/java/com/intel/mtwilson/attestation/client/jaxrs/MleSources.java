@@ -100,7 +100,6 @@ public class MleSources extends MtWilsonClient {
      * using the specified filter criteria.
      * @param criteria MleFilterCriteria object specifying the search criteria. Search options supported
      * include UUID of Mle.
-     * @return N/A
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mle_sources:delete,search
      * @mtwContentTypeReturned N/A
@@ -172,7 +171,7 @@ public class MleSources extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/mles/9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1/source/89a46064-c831-4c9b-acd7-1f0c8d1984de
-     * Output: {"id":"89a46064-c831-4c9b-acd7-1f0c8d1984de","name":"10.1.71.155","mle_uuid":"9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1"}
+     * Output: {"id":"89a46064-c831-4c9b-acd7-1f0c8d1984de","name":"192.168.0.2","mle_uuid":"9831bbe9-e993-4f41-a8d0-3f8b11a9f6f1"}
      * </pre>
      * @mtwSampleApiCall
      * <pre>

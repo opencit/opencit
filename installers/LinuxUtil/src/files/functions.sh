@@ -1158,11 +1158,27 @@ mysql_configure_connection() {
 #      fi
 }
 
-
 # requires a mysql connection that can access the existing database, OR (if it doesn't exist)
 # requires a mysql connection that can create databases and grant privileges
 # call mysql_configure_connection before calling this function
 mysql_create_database() {
+
+  #we first need to find if the user has specified a different port than the once currently configured for mysql
+  # find the my.conf location
+  mysql_cnf=`find / -name my.cnf 2>/dev/null | head -n 1`
+  #echo "MySQL configuration file is located at $mysql_cnf"
+  # check the current port that is configured. There should be 2 instances, one for server and one for client. Both of them should be updated
+  current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
+  #echo "MySQL is currently configured with port $current_port"
+  # if the required port is already configured. If not, we need to reconfigure
+  has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
+  if [ -z "$has_correct_port" ]; then
+    echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
+    sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
+    echo "Restarting MySQL for port change update to take effect."
+    service mysql restart >> $INSTALL_LOG_FILE
+  fi
+
   mysql_test_connection
   local create_sql="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
   local grant_sql="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
@@ -1946,15 +1962,19 @@ glassfish_detect() {
       if [[ -n "$java" ]]; then    
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
           gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          if [ -n "$gfuser" ]; then
+            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          fi
         fi
       else
         glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
           gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          if [ -n "$gfuser" ]; then
+            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          fi
         fi
       fi
     fi
@@ -1977,9 +1997,11 @@ glassfish_detect() {
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f $GLASSFISH_HOME/config/admin.passwd ]; then
+        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
           gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          if [ -n "$gfuser" ]; then
+            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+          fi
         fi
         echo "Found Glassfish: $GLASSFISH_HOME"
 #        echo "Found Glassfish: $glassfish"
@@ -2175,7 +2197,9 @@ glassfish_install() {
   
   # set JAVA_HOME for glassfish
   asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
-  echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  if [ -f "$asenvFile" ] && ! grep -q "AS_JAVA=" "$asenvFile"; then
+    echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  fi
   
   echo "Increasing glassfish max thread pool size to 200..."
   $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
@@ -2194,20 +2218,21 @@ glassfish_admin_user() {
   GF_CONFIG_PATH="$GLASSFISH_HOME/config"
   export AS_ADMIN_USER=$WEBSERVICE_USERNAME
   export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
+  export AS_ADMIN_PASSWORD_OLD=`cat $GF_CONFIG_PATH/admin.passwd 2>/dev/null | head -n 1 | cut -d'=' -f2`
   export AS_ADMIN_PASSWORDFILE=$GF_CONFIG_PATH/admin.passwd
   
-  if [ ! -f $GF_CONFIG_PATH/admin.user ]; then
+#  if [ ! -f $GF_CONFIG_PATH/admin.user ]; then
     echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > $GF_CONFIG_PATH/admin.user
-  fi
+#  fi
   
-  if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
-    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd
+#  if [ ! -f $GF_CONFIG_PATH/admin.passwd ]; then
+    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD_OLD}" > $GF_CONFIG_PATH/admin.passwd
     echo "AS_ADMIN_NEWPASSWORD=${AS_ADMIN_PASSWORD}" >> $GF_CONFIG_PATH/admin.passwd
-  fi
+#  fi
 
-  if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
-    echo "AS_ADMIN_PASSWORD=" > $GF_CONFIG_PATH/admin.passwd.old
-  fi
+#  if [ ! -f $GF_CONFIG_PATH/admin.passwd.old ]; then
+    echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD_OLD}" > $GF_CONFIG_PATH/admin.passwd.old
+#  fi
 
   chmod 600 $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
   #echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
@@ -2226,7 +2251,16 @@ glassfish_admin_user() {
 #expect eof
 #EOD
 #) > /dev/null 2>&1
-  $glassfish --user=$AS_ADMIN_USER --passwordfile=$GF_CONFIG_PATH/admin.passwd change-admin-password
+
+  # needed in case glassfish_detect has already added --user and --passwordfile options
+  changeAdminPassOptions=
+  if [[ "$glassfish" != *"--user="* ]]; then
+    changeAdminPassOptions+=" --user=$AS_ADMIN_USER"
+  fi
+  if [[ "$glassfish" != *"--passwordfile="* ]]; then
+    changeAdminPassOptions+=" --passwordfile=$GF_CONFIG_PATH/admin.passwd"
+  fi
+  $glassfish $changeAdminPassOptions change-admin-password     # no quotes; command doesn't handle well
 
   # set the password file appropriately for further reads
   echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > $GF_CONFIG_PATH/admin.passwd
@@ -2436,10 +2470,11 @@ glassfish_create_ssl_cert() {
   cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
   cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
-  local keystorePassword=changeit
+  local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
+  local configDir="/opt/mtwilson/configuration"
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   # does the keystore already have a cert with this alias? the alias has to be s1as (too much work to change it) so we check to see if a separate certificate file has been saved, indicating that s1as has already been replaced.
@@ -2482,9 +2517,12 @@ glassfish_create_ssl_cert() {
     $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
 
     #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${tmpHost}.crt" -out /tmp/mycert.der -outform DER
-    #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
-    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
+    #openssl x509 -in /tmp/mycert.der -inform DER -out "$configDir/ssl.crt.pem" -outform PEM
+    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" "$configDir/ssl.crt"
+    cp "$keystore" "$configDir/mtwilson-tls.jks"
+    mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
+    update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
@@ -2831,8 +2869,9 @@ tomcat_create_ssl_cert() {
   cert_cns=`echo $cert_cns | sed -e 's/,$//'`
   cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
-  local keystorePassword=changeit
+  local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
   local keystore=${TOMCAT_HOME}/ssl/.keystore
+  local configDir="/opt/mtwilson/configuration"
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   #local has_cert
@@ -2865,11 +2904,14 @@ tomcat_create_ssl_cert() {
     #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
     $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
     #$keytool -import -trustcacerts -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass ${keystorePassword}
-    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
-    cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" /etc/intel/cloudsecurity/ssl.crt
+    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
+    cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" "$configDir/ssl.crt"
+    cp "$keystore" "$configDir/mtwilson-tls.jks"
+    mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
+    update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     #cp ${keystore} /root/
-    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
+    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem "$configDir/ssl.crt.pem"
   fi
 }
 tomcat_env_report(){
@@ -3754,7 +3796,8 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_DEFAULT_TLS_POLICY_NAME=`echo $temp | awk -F'mtwilson.default.tls.policy.name=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTW_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
@@ -3765,7 +3808,8 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
       export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
-      export CONF_MTW_DEFAULT_TLS_POLICY_NAME=`read_property_from_file mtwilson.default.tls.policy.name "$mtw_props_path"`
+      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
+      export CONF_MTW_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
       export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
@@ -3910,7 +3954,8 @@ load_defaults() {
   export DEFAULT_API_KEY_ALIAS=""
   export DEFAULT_API_KEY_PASS=""
   export DEFAULT_CONFIGURED_API_BASEURL=""
-  export DEFAULT_MTW_DEFAULT_TLS_POLICY_NAME=""
+  export DEFAULT_MTW_DEFAULT_TLS_POLICY_ID=""
+  export DEFAULT_MTW_TLS_POLICY_ALLOW=""
   export DEFAULT_MTW_TLS_KEYSTORE_PASS=""
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
@@ -3936,7 +3981,8 @@ load_defaults() {
   export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
   export CONFIGURED_API_BASEURL=${CONFIGURED_API_BASEURL:-${CONF_CONFIGURED_API_BASEURL:-$DEFAULT_CONFIGURED_API_BASEURL}}
-  export MTW_DEFAULT_TLS_POLICY_NAME=${MTW_DEFAULT_TLS_POLICY_NAME:-${CONF_MTW_DEFAULT_TLS_POLICY_NAME:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_NAME}}
+  export MTW_DEFAULT_TLS_POLICY_ID=${MTW_DEFAULT_TLS_POLICY_ID:-${CONF_MTW_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_ID}}
+  export MTW_TLS_POLICY_ALLOW=${MTW_TLS_POLICY_ALLOW:-${CONF_MTW_TLS_POLICY_ALLOW:-$DEFAULT_MTW_TLS_POLICY_ALLOW}}
   export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}

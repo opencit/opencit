@@ -2,7 +2,7 @@
                         Mt Wilson API Quickstart
                         ------------------------
                         ------------------------
-                        2012-09-21
+                        2014-07-25
                         ------------------------
 
 Background
@@ -76,44 +76,65 @@ Getting started with the SDK
 	
 [images/mtw_sdk_steps.jpg] Installation-Configuration steps
 
+	
+* Importing the MTW jars
+
 	After the installation of Mt.Wilson Server and trust agent on the hosts (required only for Xen/KVM hosts), users can call into the APIs for performing various different functions. The sample code below shows how the users can request for access, create whitelists, register hosts and finally retrieve the attestation result of the registered hosts. Refer to the full API Documentation for details on all the available methods. To start with users need to include the MTW Jar files in their project and import the following packages:
 	
 +---
-import com.intel.mtwilson.v2.client.*;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.attestation.client.jaxrs.RegisterHosts;
-import com.intel.mtwilson.attestation.client.jaxrs.WhiteList;
-import com.intel.mtwilson.attestation.client.jaxrs.HostAttestations;
+import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.api.ClientException;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
+import com.intel.mtwilson.attestation.client.jaxrs.RegisterHosts;
+import com.intel.mtwilson.attestation.client.jaxrs.WhiteList;
+import com.intel.mtwilson.attestation.client.jaxrs.HostAttestations;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
+import com.intel.mtwilson.saml.TrustAssertion;
+import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 +---
 
-    Before you can make any API calls into Mt Wilson, you need to register and obtain access. Below steps will show you how to register with Mt Wilson and how to make API calls after your registration is approved. 
 
-* Registration
+* Client registration
 
-    The following code will create a keystore with the username in the specified directory. The keystore contains an RSA keypair that is used to authenticate your API calls to Mt Wilson. It also contains the Mt Wilson SSL certificate and SAML signing certificate, which are downloaded from the server.
-
-** Java
+    Before you can make any API calls into Mt Wilson, you need to register and obtain access. Below steps will show you how to register with Mt Wilson and how to make API calls after your registration is approved. The following code will create a keystore with the username in the specified directory. The keystore contains an RSA keypair that is used to authenticate your API calls to Mt Wilson. It also contains the Mt Wilson SSL certificate and SAML signing certificate, which are downloaded from the server. 
+	
+	In order for the API client library to communicate with the MTW server, the TLS policy has to be specified. Users can either choose Certificate,
+	Certificate-digest (SHA1 of the certificate), Public-key, Public-key-digest, TRUST_FIRST_CERTIFICATE or INSECURE. In the INSECURE option even though SSL would still be used, this option would not verify the authenticity of the server with which the connection is established. Whichever TLS policy is choosen, the required details for verifying that TLS policy should be provided to any call made to the MTW server. 
+	
+	Based on the TLS policy choosen, the corresponding implementation extension has to be registered. In the below example we will be using the Certificate-digest option.
+	
+	Note that the main difference between the Certificate TLS policies and the Public-key TLS policies is that the Certificate policy also enforces strict host name verification.
 
 +---
+//Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateTlsPolicyCreator.class);
+//Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator.class);
+//Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstCertificateTlsPolicyCreator.class);
+//Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator.class);
+//Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator.class);
+
+Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
+
+Properties properties = new Properties();        
+properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", "54 7c d2 1b a9 aa 38 4b 97 22 45 37 67 0e f6 9e d8 a1 4d b4");
+
 String userName = "testuser";
 String password = "password";
 URL server = new URL("https://mtw.server.com:8181/mtwilson/v2/");
-SimpleKeystore keystore = MwClientUtil.createUserInDirectoryV2(new java.io.File("c:\\mtwilson"), userName, password, server, "comments");
+SimpleKeystore keystore = MwClientUtil.createUserInDirectoryV2(new java.io.File("c:\\mtwilson"), userName, password, server, "comments", properties);
 +---
 
 
-*Setting up the properties required for the instantiation of the Client object
+*Setting up the properties
 
     After the request is created, contact the Mt Wilson administrator to approve your access request (offline step). After your registration is approved, you can use the API to access all the features Mt Wilson provides such as maintaining a whitelist, adding hosts,and obtaining a trust assertion on one or more hosts. To use the API, you need to create an Client object configured with your credentials and your Mt Wilson server, then use it to send requests to the Mt Wilson server. Notice that the variables directory, username, password, and servers are the same as what you used during registration.
-
-** Java
 
     It is up to the user how to pass in the required properties for the creation of the client object. Here we are using a simple helper function. For each of the client objects that would be created, the same set of properties need to be passed in.
 
@@ -125,10 +146,33 @@ private static Properties getClientProperties() {
 	properties.setProperty("mtwilson.api.keystore.password", "password");
 	properties.setProperty("mtwilson.api.key.alias", "testuser");
 	properties.setProperty("mtwilson.api.key.password", "password");
+	// Using the MTW Server's SSL certificate's SHA1 as the TLS policy to connect to MTW Server. Users can even use the other options specified earlier
+	properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", "54 7c d2 1b a9 aa 38 4b 97 22 45 37 67 0e f6 9e d8 a1 4d b4");
+	// Users can skip the TLS policy and specify the INSECURE option. 
+	// properties.setProperty("mtwilson.api.tls.policy.insecure", "true");
 	return properties;	
 }
 +---
 
+*Configuration of TLS policy
+	
+	Note that we need to specify the TLS policy that the MTW server should use to communicate with the host either for the purpose of whitelisting or registration/updates. For ESXi hosts, there would be one shared TLS policy per vCenter. Alternatively, users can add all the vCenter certificates into a single shared TLS policy as well.
+	
+	For Open source hosts (Xen/KVM), either we can configure individual policies for each or we can create a shared TLS policy using the CA that would sign all the SSL certificates for these hosts.
+	
++---
+HostTlsPolicy tlsPolicy = new HostTlsPolicy();
+tlsPolicy.setName("vCenter_shared_policy");
+tlsPolicy.setPrivate(false); // This is a shared policy
+TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+tlsPolicyDescriptor.setPolicyType("certificate-digest");
+tlsPolicyDescriptor.setData(Arrays.asList("d0 8f 07 b0 5c 6d 78 62 b9 27 48 ff 35 da 27 bf f2 03 b3 c1")); // Sha1 digest of the vCenter's SSL certificate
+Map<String, String> metaData = new HashMap<>();
+metaData.put("digest_algorithm","SHA-1");
+tlsPolicyDescriptor.setMeta(metaData);
+tlsPolicy.setDescriptor(tlsPolicyDescriptor);
+HostTlsPolicy createTlsPolicy = client.createTlsPolicy(tlsPolicy);
++---
 
 *Provisioning white lists / good known measurements
 
@@ -136,8 +180,8 @@ private static Properties getClientProperties() {
 	
 	In the below example we will use a VMware ESXi host. Please refer to the javadocs for the connection string formats for other types of hosts and also other options for configuring the white lists. 
 	
-** Java
-
+	Note that we need to specify the TLS policy that the MTW server should be using to communicate with the host to retrieve the good known measurements.
+	
 +---
 // Instantiate the api client object for white list creation with the specified properties 
 WhiteList whiteListClient = new WhiteList(getClientProperties());
@@ -146,6 +190,11 @@ WhiteList whiteListClient = new WhiteList(getClientProperties());
 TxtHostRecord gkvHost = new TxtHostRecord();
 gkvHost.HostName = "192.168.0.100";
 gkvHost.AddOn_Connection_String = "vmware:https://vcenter.server.com:443/sdk;admin;password";
+
+// Specify the TLS policy that should be used by the MTW server to talk to this host.
+TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+tlsPolicyChoice.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
+gkvHost.tlsPolicyChoice = tlsPolicyChoice;
 
 CreateWhiteListRpcInput rpcInput = new CreateWhiteListRpcInput();
 rpcInput.setHost(gkvHost);        
@@ -166,6 +215,12 @@ RegisterHosts registerHostClient = new RegisterHosts(getClientProperties());
 TxtHostRecord host = new TxtHostRecord();
 host.HostName = "192.168.0.100";
 host.AddOn_Connection_String = "vmware:https://vcenter.server.com:443/sdk;admin;password";
+
+// Specify the TLS policy that should be used by the MTW server to talk to this host.
+TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+tlsPolicyChoice.setTlsPolicyId("e1a527b5-2020-49c1-83be-6bd8bf641258");
+host.tlsPolicyChoice = tlsPolicyChoice;
+
 TxtHostRecordList hostList = new TxtHostRecordList();
 hostList.getHostRecords().add(host);
 
@@ -179,8 +234,8 @@ List<HostConfigResponse> registerHostsRpcOutput = registerHostClient.registerHos
 
     Once the host is registered, the user can request the attestation status of the host either in SAML or JSON format. The SAML assertion can be verified using the SAML certificate stored in the keystore created during host registration. Note that the input would be the UUID of the host.
 
-** Java
-
+	Note that the user need not specify the TLS policy explicitly while retrieving the host attestation report since the TLS policy option specified during the host registration would be already stored in the system.
+	
 +---
 HostAttestations attestationClient = new HostAttestations(getClientProperties());
 HostAttestation hostAttestation = new HostAttestation();

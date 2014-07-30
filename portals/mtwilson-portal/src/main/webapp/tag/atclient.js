@@ -1709,6 +1709,8 @@ function getSelectedSelectionDetails(selection_id) {
 
 }
 
+var certNameRetrieveStatusUpdated = false;
+
 function wait4Hosts2PopulateCerts() {
         var atag = mtwilson.atag;
         var data = atag.data;
@@ -1716,21 +1718,33 @@ function wait4Hosts2PopulateCerts() {
                 for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
                         data.certificates[cert_loop].subjectName = 'fetching..';
                 }
-                atag.view.sync();
+                if(!certNameRetrieveStatusUpdated) {
+                        atag.view.sync();
+                        certNameRetrieveStatusUpdated = true;
+                }
                 // Wait for a few millinseconds for the next check
-                setTimeout(populateCertsWithHostName, 100)
+                setTimeout(wait4Hosts2PopulateCerts, 100)
+        } else {
+                populateCertsWithHostName();
+
         }
 }
 
 function populateCertsWithHostName() {
         var atag = mtwilson.atag;
         var data = atag.data;
+        var isNameSet = false;
         for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
+                isNameSet = false;
                 for(host_loop = 0; host_loop < data.hosts.length; host_loop++) {
                         if(data.certificates[cert_loop].subject == data.hosts[host_loop].hardware_uuid) {
                                 data.certificates[cert_loop].subjectName = data.hosts[host_loop].name;
+                                isNameSet = true;
                                 continue;
                         }
+                }
+                if(!isNameSet) {
+                        data.certificates[cert_loop].subjectName = 'Not Available';
                 }
         }
         ajax.view.sync();

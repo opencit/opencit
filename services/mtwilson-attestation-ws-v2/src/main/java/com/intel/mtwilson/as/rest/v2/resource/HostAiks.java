@@ -21,12 +21,11 @@ import javax.ws.rs.Path;
 @V2
 @Path("/hosts/{host_id}/aiks")
 public class HostAiks extends AbstractJsonapiResource<HostAik, HostAikCollection, HostAikFilterCriteria, NoLinks<HostAik>, HostAikLocator> {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostAiks.class);
 
     private HostAikRepository repository;
 
-    public HostAiks(HostAikRepository repository) {
-        this.repository = repository;
-    }
+    public HostAiks(HostAikRepository repository) {}
 
     @Override
     protected HostAikCollection createEmptyCollection() {

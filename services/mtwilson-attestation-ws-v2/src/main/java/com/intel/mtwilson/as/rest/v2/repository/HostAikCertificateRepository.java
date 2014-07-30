@@ -34,7 +34,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
-                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid);
+                TblHosts obj = jpaController.findHostByUuid(criteria.hostUuid.toString());
                 if (obj != null) {
                     objCollection.getAikCertificates().add(convert(obj));
                 }
