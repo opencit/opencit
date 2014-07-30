@@ -1709,6 +1709,8 @@ function getSelectedSelectionDetails(selection_id) {
 
 }
 
+var certNameRetrieveStatusUpdated = false;
+
 function wait4Hosts2PopulateCerts() {
         var atag = mtwilson.atag;
         var data = atag.data;
@@ -1716,7 +1718,10 @@ function wait4Hosts2PopulateCerts() {
                 for(cert_loop = 0; cert_loop < data.certificates.length; cert_loop++) {
                         data.certificates[cert_loop].subjectName = 'fetching..';
                 }
-                atag.view.sync();
+                if(!certNameRetrieveStatusUpdated) {
+                        atag.view.sync();
+                        certNameRetrieveStatusUpdated = true;
+                }
                 // Wait for a few millinseconds for the next check
                 setTimeout(wait4Hosts2PopulateCerts, 100)
         } else {
