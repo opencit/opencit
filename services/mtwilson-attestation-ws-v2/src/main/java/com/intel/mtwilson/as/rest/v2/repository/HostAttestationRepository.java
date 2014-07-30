@@ -149,11 +149,6 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    
-    private Date getCacheStaleAfter(){
-        return new DateTime().minusSeconds(CACHE_VALIDITY_SECS).toDate();
-    }
-    
     private HostAttestation convert(TblTaLog obj, String hostName) {
         HostAttestation convObj = new HostAttestation();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
