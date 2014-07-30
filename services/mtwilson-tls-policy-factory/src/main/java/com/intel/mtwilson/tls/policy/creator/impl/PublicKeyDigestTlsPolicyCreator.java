@@ -94,6 +94,9 @@ public class PublicKeyDigestTlsPolicyCreator implements TlsPolicyCreator {
         if( tlsPolicyDescriptor.getMeta() == null ) {
             return metadata;
         }
+        if(tlsPolicyDescriptor.getMeta() == null) {
+            throw new IllegalArgumentException("TLS policy descriptor metadata cannot be null.");
+        }
         if( tlsPolicyDescriptor.getMeta().get("digestEncoding") != null && !tlsPolicyDescriptor.getMeta().get("digestEncoding").isEmpty() ) {
             metadata.digestEncoding = tlsPolicyDescriptor.getMeta().get("digestEncoding");
         }

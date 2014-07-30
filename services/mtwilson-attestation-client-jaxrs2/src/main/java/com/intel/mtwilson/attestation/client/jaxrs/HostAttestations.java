@@ -306,7 +306,8 @@ public class HostAttestations extends MtWilsonClient {
     }
     
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
-        if (properties != null && !properties.getProperty("mtwilson.api.keystore").isEmpty() && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
+        if (properties != null && properties.getProperty("mtwilson.api.keystore") != null && !properties.getProperty("mtwilson.api.keystore").isEmpty()
+                && properties.getProperty("mtwilson.api.keystore.password") != null && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
             SimpleKeystore keystore = new SimpleKeystore(new File(properties.getProperty("mtwilson.api.keystore")), properties.getProperty("mtwilson.api.keystore.password"));
             X509Certificate[] trustedSamlCertificates;
             try {
