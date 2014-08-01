@@ -229,6 +229,10 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public File getMeasureLogLaunchScript() {
         return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh");
     } 
+
+    public String getMtwilsonTlsPolicyCertificateSha1() {
+        return getConfiguration().getString("mtwilson.tls.cert.sha1");
+    }
     
     public Properties getMtWilsonClientProperties() {
         Properties properties = new Properties();
@@ -237,6 +241,8 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         properties.setProperty("mtwilson.api.password", getMtWilsonApiPassword());
         properties.setProperty("mtwilson.api.tls.policy.certificate.keystore.file", getTrustagentKeystoreFile().getAbsolutePath());
         properties.setProperty("mtwilson.api.tls.policy.certificate.keystore.password", getTrustagentKeystorePassword());
+        properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", getMtwilsonTlsPolicyCertificateSha1());
+        properties.setProperty("mtwilson.tls.cert.sha1", getMtwilsonTlsPolicyCertificateSha1());
         return properties;
     }
     
