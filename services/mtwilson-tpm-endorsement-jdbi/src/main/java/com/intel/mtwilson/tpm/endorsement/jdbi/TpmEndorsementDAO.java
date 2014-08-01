@@ -37,11 +37,11 @@ CREATE TABLE mw_tpm_endorsement (
 @RegisterArgumentFactory({UUIDArgument.class})
 @RegisterMapper({TpmEndorsementResultMapper.class,})
 public interface TpmEndorsementDAO extends Closeable {
-    @SqlUpdate("insert into mw_tpm_endorsement (id, hardware_uuid, issuer, revoked, certificate, comment) values (:id, :hardware_uuid, :issuer, :revoked, :certificate, :comment)")
+    @SqlUpdate("insert into mw_tpm_endorsement (id, hardware_uuid, issuer, revoked, certificate, comment) values (:id, :hardwareUuid, :issuer, :revoked, :certificate, :comment)")
      void insertTpmEndorsement(@BindBean TpmEndorsement TpmEndorsementRecord);
 //    void insertTpmEndorsement(@Bind("id") String id, @Bind("issuer") String issuer, @Bind("impl") String impl, @Bind("certificate_type") String certificateType, @Bind("certificate") byte[] certificate, @Bind("comment") String comment);
 
-    @SqlUpdate("update mw_tpm_endorsement set hardware_uuid=:hardware_uuid, issuer=:issuer, revoked=:revoked, certificate=:certificate, comment=:comment where id=:id")
+    @SqlUpdate("update mw_tpm_endorsement set hardware_uuid=:hardwareUuid, issuer=:issuer, revoked=:revoked, certificate=:certificate, comment=:comment where id=:id")
     void updateTpmEndorsement(@BindBean TpmEndorsement TpmEndorsementRecord);
 //    void updateTpmEndorsement(@Bind("id") String id, @Bind("issuer") String issuer, @Bind("impl") String impl, @Bind("certificate_type") String certificateType, @Bind("certificate") byte[] certificate, @Bind("comment") String comment);
     @SqlQuery("select id, hardware_uuid, issuer, revoked, certificate, comment from mw_tpm_endorsement")
