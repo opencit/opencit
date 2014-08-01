@@ -20,3 +20,10 @@ com.intel.mtwilson.trustagent.setup.RequestAikCertificate
 com.intel.mtwilson.trustagent.setup.RequestEndorsementCertificate
 com.intel.mtwilson.trustagent.setup.TakeOwnership
 com.intel.mtwilson.version.v2.resource.VersionHttpResource
+com.intel.mtwilson.tls.policy.creator.impl.CertificateTlsPolicyCreator
+com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator
+com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator
+com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator
+com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator
+com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstPublicKeyTlsPolicyCreator
+
