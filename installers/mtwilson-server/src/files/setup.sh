@@ -260,11 +260,11 @@ for i in "${POLICIES[@]}"; do
 done
 MTW_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTW_DEFAULT_TLS_POLICY_ID"`
 
-if [ -n "$MTW_DEFAULT_TLS_POLICY_ID" ]; then
+if [[ "$MTW_DEFAULT_TLS_POLICY_ID" == "INSECURE" || "$MTW_DEFAULT_TLS_POLICY_ID" == "TRUST_FIRST_CERTIFICATE" ]]; then
   update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_DEFAULT_TLS_POLICY_ID"
 else
-  echo_failure "Invalid default TLS policy. Policy must be allowed."
-  exit -1
+  echo_warning "Unable to determine default TLS policy."
+#  exit -1
 fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
