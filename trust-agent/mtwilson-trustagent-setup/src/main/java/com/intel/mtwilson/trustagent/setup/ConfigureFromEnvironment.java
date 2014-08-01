@@ -8,8 +8,16 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
 import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.configuration.MutableConfiguration;
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
 import com.intel.mtwilson.setup.AbstractSetupTask;
+import com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.CertificateTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstPublicKeyTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +61,14 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
         };
         allcaps = new AllCapsNamingStrategy();
         env = new KeyTransformerConfiguration(allcaps, new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1
+        
+        // TODO: load extensions temporarily so that installer works
+        Extensions.register(TlsPolicyCreator.class, CertificateTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, CertificateDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, PublicKeyTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, PublicKeyDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, InsecureTrustFirstPublicKeyTlsPolicyCreator.class);
     }
 
     @Override
