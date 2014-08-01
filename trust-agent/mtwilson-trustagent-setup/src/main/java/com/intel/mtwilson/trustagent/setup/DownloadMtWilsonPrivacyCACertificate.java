@@ -103,10 +103,8 @@ public class DownloadMtWilsonPrivacyCACertificate extends AbstractSetupTask {
         /*
         X509Certificate endorsementCertificate = client.retrieveCaCertificate("endorsement");
         keystore.addTrustedCaCertificate(endorsementCertificate, "endorsement");
-        keystore.save();
         */
-        
-        
+        keystore.save();
     }
     
 }
