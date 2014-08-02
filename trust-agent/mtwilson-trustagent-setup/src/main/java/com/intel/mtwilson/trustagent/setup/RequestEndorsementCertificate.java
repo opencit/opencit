@@ -158,10 +158,19 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
             validation("No endorsement authorities");
         }
         else {
+            String errorMessage = "";
             log.debug("Found {} endorsement authorities in {}", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
             // if we find one certificate authority that can verify our current EC, then we don't need to request a new EC
             if(!isEkSignedByEndorsementAuthority()) {
-                validation("Unable to verify TPM EC with %d authorities from %s", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
+                errorMessage = String.format("Unable to verify TPM EC with %d authorities from %s.", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
+                
+                // check if we have registered with MTW
+                if (!isEkRegisteredWithMtWilson()) {
+                    errorMessage += "EC is also not registered with Mt.Wilson";
+                    validation(errorMessage);
+                }
+
+//                validation("Unable to verify TPM EC with %d authorities from %s", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
             }
         }
     }
@@ -291,7 +300,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         tpmEndorsement.setCertificate(ekCert.getEncoded());
         tpmEndorsement.setComment("registered by trust agent");
         tpmEndorsement.setHardwareUuid(hostHardwareId.toString());
-        tpmEndorsement.setIssuer(ekCert.getSubjectX500Principal().getName()); // should be automatically set by server upon receiving the cert
+        tpmEndorsement.setIssuer(ekCert.getIssuerDN().getName()); // should be automatically set by server upon receiving the cert
         tpmEndorsement.setRevoked(false); // should default to false on server
         tpmEndorsementsClient.createTpmEndorsement(tpmEndorsement);
     }

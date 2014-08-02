@@ -202,7 +202,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
 
     private boolean isEkCertificateRegistered(X509Certificate ekCert) {
         try(TpmEndorsementDAO dao = TpmEndorsementJdbiFactory.tpmEndorsementDAO()) {
-            TpmEndorsement tpmEndorsement = dao.findTpmEndorsementByIssuerEqualTo(ekCert.getSubjectX500Principal().getName()); // SHOULD REALLY BE BY CERT SHA256
+            TpmEndorsement tpmEndorsement = dao.findTpmEndorsementByIssuerEqualTo(ekCert.getIssuerDN().getName()); // SHOULD REALLY BE BY CERT SHA256
             if(tpmEndorsement == null ) {
                 return false;
             }
