@@ -660,3 +660,5 @@ com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException
 com.intel.mtwilson.tag.model.SelectionFilterCriteria
 com.intel.mtwilson.tag.setup.cmd.TagCreateCaKey
 com.intel.mtwilson.rpc.v2.resource.CallableRpcAdapter
+com.intel.mtwilson.tpm.endorsement.jaxrs.resource.TpmEndorsementResource
+com.intel.mtwilson.tpm.endorsement.repository.TpmEndorsementRepository
