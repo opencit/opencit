@@ -1573,8 +1573,8 @@ function getFileContents() {
 	} else {
 	    var fileContents = ieReadFile(file);
 	    try{
-        	var xml = evt.target.result;
-		parseSelectionXML(xml);
+        	//var xml = evt.target.result;
+		parseSelectionXML(fileContents);
 		fileContentsRead = true;
 	    }catch(Exception){
 		//document.getElementById("fileContents").innerHTML = "error reading file";
@@ -1588,6 +1588,13 @@ function ieReadFile(filename)
 {
     try
     {
+	var reader = new FileReader();
+	reader.onloadend = function(){
+    // do something with this.result
+		return this.result;
+	}
+	reader.readAsText(filename);
+
         var fso  = new ActiveXObject("Scripting.FileSystemObject"); 
         var fh = fso.OpenTextFile(filename, 1); 
         var contents = fh.ReadAll(); 

@@ -122,12 +122,13 @@ ajax.apistyles = {
 
 ajax.util = {
     'calculateTimeDelta': function(response) {
-        log.debug("Response date: "+response.getHeader("Date"));
-        log.debug("Parsed response date: "+Date.parse(response.getHeader("Date")).toISOString());
-        log.debug("Response timestamp: "+Date.parse(response.getHeader("Date")).getTime());
-        log.debug("Current date: "+Date.today().toISOString());
-        log.debug("Current timestamp: "+Date.now());
-        ajax.timeDelta = Date.parse(response.getHeader("Date")).getTime() - Date.now(); // network delay is in here but not server processing time        
+//        log.debug("Response date: "+response.getHeader("Date"));
+//        log.debug("Parsed response date: "+Date.parse(response.getHeader("Date")).toISOString());
+//        log.debug("Response timestamp: "+Date.parse(response.getHeader("Date")).getTime());
+//        log.debug("Current date: "+Date.today().toISOString());
+//        log.debug("Current timestamp: "+Date.now());
+	var date = Date.parse(response.getHeader("Date")) || Date.now();
+        ajax.timeDelta = date.getTime() - Date.now(); // network delay is in here but not server processing time        
         log.debug("Time delta: "+ajax.timeDelta);
     }
 };
