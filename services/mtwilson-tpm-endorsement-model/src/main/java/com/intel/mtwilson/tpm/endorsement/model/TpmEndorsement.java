@@ -6,6 +6,8 @@ package com.intel.mtwilson.tpm.endorsement.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.mtwilson.jaxrs2.Document;
 
 /**
@@ -17,6 +19,7 @@ import com.intel.mtwilson.jaxrs2.Document;
 public class TpmEndorsement extends Document {
 //   private UUID id;
    private String hardwareUuid;
+   @Regex(RegexPatterns.ANY_VALUE)
    private String issuer;
    private boolean revoked;
    private byte[] certificate;
@@ -43,6 +46,7 @@ public class TpmEndorsement extends Document {
         this.hardwareUuid = hardwareUuid;
     }
     
+    @Regex(RegexPatterns.ANY_VALUE)
     public String getIssuer() {
         return issuer;
     }
