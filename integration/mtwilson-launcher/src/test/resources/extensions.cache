@@ -365,3 +365,7 @@ com.intel.mtwilson.as.rest.BulkHostTrust
 com.intel.mtwilson.client.cmd.CreateUser
 com.intel.mtwilson.as.rest.v2.model.OsLocator
 com.intel.mtwilson.shiro.jdbi.UserLoginPasswordRoleResultMapper
+com.intel.mtwilson.as.rest.v2.resource.HostAiks
+com.intel.mtwilson.as.rest.v2.model.HostAikCollection
+com.intel.mtwilson.as.rest.v2.model.HostAik
+
