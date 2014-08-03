@@ -22,6 +22,7 @@
 	<module>mtwilson-jackson</module>
 	<module>mtwilson-jaxrs2</module>
 	<module>mtwilson-jaxrs2-client</module>
+	<module>mtwilson-jaxrs2-jersey2.0-client</module>
 	<module>mtwilson-jaxrs2-server</module>
 	<module>mtwilson-patch</module>
   </modules>
