@@ -274,7 +274,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
                 return true;
             } catch (SignatureException e) {
                 log.debug("Endorsement CA '{}' did not sign TPM EC: {}", ca.getSubjectX500Principal().getName(), e.getMessage());
-            } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException e) {
+            } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | NullPointerException e) {
                 log.debug("Unable to verify TPM EC '{}': {}", ca.getSubjectX500Principal().getName(), e.getMessage());
             }
         }
