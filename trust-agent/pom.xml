@@ -23,6 +23,7 @@
     <module>mtwilson-trustagent-configuration</module>
     <module>mtwilson-trustagent-console</module>
     <module>mtwilson-trustagent-privacyca-niarl</module>
+	<module>mtwilson-trustagent-tpm-tools</module>
   </modules>
 
 
