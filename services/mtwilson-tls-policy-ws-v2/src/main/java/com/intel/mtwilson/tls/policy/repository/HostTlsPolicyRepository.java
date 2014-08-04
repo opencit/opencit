@@ -190,6 +190,9 @@ public class HostTlsPolicyRepository implements DocumentRepository<HostTlsPolicy
         HostTlsPolicyLocator locator = new HostTlsPolicyLocator();
         locator.id = item.getId();
 
+        if (item.getName() == null || item.getName().isEmpty())
+            throw new RepositoryCreateException("Some of the input fields are empty");
+        
         try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
             if ((dao.findTlsPolicyById(item.getId()) != null) || (dao.findTlsPolicyByNameEqualTo(item.getName()) != null)) {
                 log.error("HostTlsPolicy:Create - HostTlsPolicy {} will not be created since a duplicate HostTlsPolicy already exists.", item.getId().toString());                
