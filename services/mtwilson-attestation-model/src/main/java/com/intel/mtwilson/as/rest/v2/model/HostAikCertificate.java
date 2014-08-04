@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.validation.Unchecked;
 import com.intel.dcsg.cpg.x509.X509CertificateEncodingException;
 import com.intel.dcsg.cpg.x509.X509CertificateFormatException;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -56,6 +57,7 @@ public class HostAikCertificate extends CertificateDocument {
     
     @JsonIgnore
     @Override
+    @Unchecked
     public X509Certificate getX509Certificate() {
         if( certificate == null ) { return null; }
         try {
