@@ -1689,7 +1689,7 @@ Ajax.Base = Class.create({
     this.options = {
       method:       'post',
       asynchronous: true,
-      contentType:  'application/x-www-form-urlencoded',
+      contentType:  'application/json',
       encoding:     'UTF-8',
       parameters:   '',
       evalJSON:     true,
@@ -1721,6 +1721,7 @@ Ajax.Request = Class.create(Ajax.Base, {
 
     if (!['get', 'post'].include(this.method)) {
       params += (params ? '&' : '') + "_method=" + this.method;
+      this.url += (this.url.include('?') ? '&' : '?') + "_method=" + this.method;
       this.method = 'post';
     }
 
@@ -1766,7 +1767,7 @@ Ajax.Request = Class.create(Ajax.Base, {
     var headers = {
       'X-Requested-With': 'XMLHttpRequest',
       'X-Prototype-Version': Prototype.Version,
-      'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+      'Accept': 'application/json, text/javascript, text/html, application/xml, text/xml, */*'
     };
 
     if (this.method == 'post') {
