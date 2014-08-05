@@ -805,7 +805,7 @@ mtwilson.atag = mtwilson.atag || {};
 
 
                 for(var i = data.hosts.length-1; i >= 0; i--) {
-                    if(data.hosts[i].connection_url.indexOf('vmware') != -1) {// && data.hosts[i].connection_url.indexOf('vmware') == -1) {
+		    if(data.hosts[i].connection_url != undefined && data.hosts[i].connection_url.indexOf('vmware') != -1) {
                         data.hosts.splice(i, 1);
                     }
                 }
@@ -1558,7 +1558,13 @@ var selectedSelectionXML = '';
 var fileContentsRead = false;
 
 function getFileContents() {
-	var file = document.getElementById("fileForUpload").files[0];
+	var uploadHandle = document.getElementById("fileForUpload");
+	var file = "";
+	if(uploadHandle.files != undefined) {
+		file = uploadHandle.files[0];
+	} else {
+		file = uploadHandle.value;
+	}
 	if (file) {
 	    var reader = new FileReader();
 	    reader.readAsText(file, "UTF-8");
