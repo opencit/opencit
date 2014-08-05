@@ -320,6 +320,7 @@ mtwilson.atag = mtwilson.atag || {};
                     console.log(attr_object);
                 }
                 selection_create_form_removeAllValues();
+		loadSelsCall = true;
                 mtwilson.atag.searchSelections('selection-search-form');
                 break;
             case 'certificateRequests':
