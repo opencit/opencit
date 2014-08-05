@@ -1558,7 +1558,13 @@ var selectedSelectionXML = '';
 var fileContentsRead = false;
 
 function getFileContents() {
-	var file = document.getElementById("fileForUpload").files[0];
+	var uploadHandle = document.getElementById("fileForUpload");
+	var file = "";
+	if(uploadHandle.files != undefined) {
+		file = uploadHandle.files[0];
+	} else {
+		file = uploadHandle.value;
+	}
 	if (file) {
 	    var reader = new FileReader();
 	    reader.readAsText(file, "UTF-8");
