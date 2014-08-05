@@ -805,7 +805,7 @@ mtwilson.atag = mtwilson.atag || {};
 
 
                 for(var i = data.hosts.length-1; i >= 0; i--) {
-                    if(data.hosts[i].connection_url.indexOf('vmware') != -1) {// && data.hosts[i].connection_url.indexOf('vmware') == -1) {
+		    if(data.hosts[i].connection_url != undefined && data.hosts[i].connection_url.indexOf('vmware') != -1) {
                         data.hosts.splice(i, 1);
                     }
                 }
