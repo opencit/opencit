@@ -219,9 +219,6 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         byte[] ekCertBytes;
         try {
             ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
-            System.out.println("MEOW START!");
-            ReadEndorsementCertificate.getEndorsementIdentifier();
-            System.out.println("MEOW END!");
             log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
             ekCert = X509Util.decodeDerCertificate(ekCertBytes);
         } catch (TpmModuleException e) {
