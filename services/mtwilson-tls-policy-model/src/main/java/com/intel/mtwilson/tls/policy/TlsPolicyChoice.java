@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tls.policy;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
@@ -30,7 +31,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 @JacksonXmlRootElement(localName="tlsPolicyChoice")
 public class TlsPolicyChoice {
+    @JsonProperty
     private String tlsPolicyId; // key into the mw_tls_policy table
+    @JsonProperty
     private TlsPolicyDescriptor tlsPolicyDescriptor;
 
     public String getTlsPolicyId() {
@@ -49,7 +52,7 @@ public class TlsPolicyChoice {
 
     public void setTlsPolicyDescriptor(TlsPolicyDescriptor tlsPolicyDescriptor) {
         this.tlsPolicyDescriptor = tlsPolicyDescriptor;
-        if( tlsPolicyDescriptor != null ) {
+        if( tlsPolicyDescriptor.getPolicyType() != null && tlsPolicyDescriptor.getData() != null ) {
         this.tlsPolicyId = null;
         }
     }
