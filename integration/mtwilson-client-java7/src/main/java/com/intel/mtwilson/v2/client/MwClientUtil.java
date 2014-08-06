@@ -60,6 +60,33 @@ public class MwClientUtil {
         }
     }
     
+     /**
+     * Helper function to create a request of user's access along with the keystore with user's RSA keypair and MTW server's TLS, SAML, Privacy CA and Root certificates.
+     * @param directory Directory where the keystore need to be created
+     * @param username Name of the user. The keystore would be created with the same name as well.
+     * @param password Password for the account. This password would be used to encrypt the keystore as well.
+     * @param server IP address of the MTW server
+     * @param comments Any additional comments such as the roles needed by the user.
+     * @param properties For this keystore creation and user registration the TLS policy has to be specified in the properties. User can choose any of the
+     * supported TLS policies including certificate,certificate-digest,public-key,public-key-digest,TRUST_FIRST_CERTIFICATE,INSECURE. 
+     * @return Created user keystore object.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions None
+     * @mtwSampleApiCall
+     * <pre>
+     *  // Need to register the extension of the TlsPolicy being used to authenticate to the MTW server. In the example we are using the Insecure policy.
+     *  Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator.class);
+     * 
+     *  Properties properties = new Properties();
+     *  properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", "a1 81 3f 6e 67 3d 29 16 f6 e9 0b 5b e3 f2 1e 72 f9 3d 29 70");
+
+     *  String userName = "apiclient1";
+     *  String password = "password";
+     *  URL server = new URL("https://10.1.71.234:8181/mtwilson/v2/");
+     *                  
+     *  SimpleKeystore keystore = MwClientUtil.createUserInDirectoryV2(new java.io.File("c:\\intel\\mtwilson"), userName, password, server, "Admin role needed", properties);
+     * </pre>
+     */        
     public static SimpleKeystore createUserInDirectoryV2(File directory, String username, String password, URL server, String comments, Properties properties) throws IOException, ApiException, CryptographyException, ClientException {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
@@ -77,6 +104,35 @@ public class MwClientUtil {
         return createUserInResourceV2(resource, username, password, server, tlsPolicy, comments, locale, "TLS");
     }*/
 
+     /**
+     * Helper function to create a request of user's access along with the keystore with user's RSA keypair and MTW server's TLS, SAML, Privacy CA and Root certificates. 
+     * @param resource Resource object which would have the user's keystore
+     * @param username Name of the user. The keystore would be created with the same name as well.
+     * @param password Password for the account. This password would be used to encrypt the keystore as well.
+     * @param server IP address of the MTW server
+     * @param comments Any additional comments such as the roles needed by the user.
+     * @param properties For this keystore creation and user registration the TLS policy has to be specified in the properties. User can choose any of the
+     * supported TLS policies including certificate,certificate-digest,public-key,public-key-digest,TRUST_FIRST_CERTIFICATE,INSECURE. 
+     * @param locale Locale of the user (Currently not being used)
+     * @param tlsProtocol TLS protocol to be used. By default we use "TLS"
+     * @return Created user keystore object.
+     * @since Mt.Wilson 2.0
+     * @mtwRequiresPermissions None
+     * @mtwSampleApiCall
+     * <pre>
+     *  // Need to register the extension of the TlsPolicy being used to authenticate to the MTW server. In the example we are using the Insecure policy.
+     *  Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator.class);
+     * 
+     *  Properties properties = new Properties();
+     *  properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", "a1 81 3f 6e 67 3d 29 16 f6 e9 0b 5b e3 f2 1e 72 f9 3d 29 70");
+     *  String userName = "apiclient1";
+     *  String password = "password";
+     *  URL server = new URL("https://10.1.71.234:8181/mtwilson/v2/");
+     *  FileResource resource = new FileResource(new java.io.File("c:\\intel\\mtwilson\\"+userName+".jks"));
+     *                  
+     *  SimpleKeystore keystore = MwClientUtil.createUserInResourceV2(resource, userName, password, server, "Admin role needed", properties, null, "TLS");
+     * </pre>
+     */     
     public static SimpleKeystore createUserInResourceV2(Resource resource, String username, String password, 
             URL server, Properties properties, String comments, Locale locale, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
         

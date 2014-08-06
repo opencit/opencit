@@ -52,7 +52,7 @@ public class TlsPolicyChoice {
 
     public void setTlsPolicyDescriptor(TlsPolicyDescriptor tlsPolicyDescriptor) {
         this.tlsPolicyDescriptor = tlsPolicyDescriptor;
-        if( tlsPolicyDescriptor.getPolicyType() != null && tlsPolicyDescriptor.getData() != null ) {
+        if( tlsPolicyDescriptor != null ) {
         this.tlsPolicyId = null;
         }
     }

@@ -31,7 +31,7 @@ public class TlsPolicies extends MtWilsonClient {
     }
     
      /**
-     * Creates an new TlsPolicy in the system that could be during white listing or host registration for establishing trusted communication channel with the host.
+     * Creates an new TlsPolicy in the system that could be used during white listing or host registration for establishing trusted communication channel with the host.
      * @param hostTlsPolicy - HostTlsPolicy object that needs to be created. 
      * @return Created HostTlsPolicy object.
      * @since Mt.Wilson 2.0
