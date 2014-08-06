@@ -62,10 +62,10 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
         // use beanutils to copy the properties we need
         try {
 //            Map<String,Object> diff = PatchUtil.diff(input, rpcInstance);
-            log.debug("Going to copy input to rpc instance: {}", mapper.writeValueAsString(input)); // throws 
+//            log.debug("Going to copy input to rpc instance: {}", mapper.writeValueAsString(input)); // throws 
 //            PatchUtil.apply(diff, rpcInstance); // throws JsonProcessingException
             PatchUtil.copy(input, rpcInstance);
-            log.debug("RPC instance is now: {}", mapper.writeValueAsString(rpcInstance));
+//            log.debug("RPC instance is now: {}", mapper.writeValueAsString(rpcInstance));
         }
         catch(Exception e) {
             log.error("Error while setting task input: {}", e.getMessage());

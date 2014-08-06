@@ -234,7 +234,7 @@ public class VMwareClient implements TlsClient {
          // Connect to the vCenter server with the passed in parameters
          connect(vcenterConn[0], vcenterConn[1], vcenterConn[2]);
          */
-        log.debug("VSPHERE: Connection string: {}", vCenterConnectionString);
+//        log.debug("VSPHERE: Connection string: {}", vCenterConnectionString);
         ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
         log.debug("VSPHERE: Connecting to vcenter: {} for host: {}", vmware.getVCenter().toString(), vmware.getHost().toString());
         connect(vmware.toURL().toExternalForm(), vmware.getUsername(), vmware.getPassword());
