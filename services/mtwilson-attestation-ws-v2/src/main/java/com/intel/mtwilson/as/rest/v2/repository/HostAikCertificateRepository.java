@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.repository;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -84,7 +85,7 @@ public class HostAikCertificateRepository implements DocumentRepository<HostAikC
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             TblHosts obj = jpaController.findHostByUuid(item.getHostUuid());
             if (obj != null) {
-                obj.setAIKCertificate(item.getCertificate().toString());
+                obj.setAIKCertificate(X509Util.encodePemCertificate(item.getX509Certificate()));
 //                Sha1Digest aikSha1 = Sha1Digest.valueOf(item.getCertificate());
                 
                 jpaController.edit(obj);

@@ -101,6 +101,10 @@ cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJso
         <servlet-name>Jersey1</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
+	    <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter</param-value>
+        </init-param>
+        <init-param>
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>com.intel.mtwilson.jersey2.Jersey2Application1</param-value>
         </init-param>
@@ -152,6 +156,10 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         -->
         <servlet-name>Jersey2</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+	    <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter</param-value>
+        </init-param>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>com.intel.mtwilson.jersey2.LocalizableJersey2Application2</param-value>
