@@ -20,6 +20,7 @@ import com.intel.mtwilson.tpm.endorsement.model.TpmEndorsementFilterCriteria;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.ProvisionTPM;
 import com.intel.mtwilson.trustagent.niarl.Util;
+import com.intel.mtwilson.trustagent.tpm.tasks.ReadEndorsementCertificate;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.io.File;
@@ -218,6 +219,9 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         byte[] ekCertBytes;
         try {
             ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+            System.out.println("MEOW START!");
+            ReadEndorsementCertificate.getEndorsementIdentifier();
+            System.out.println("MEOW END!");
             log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
             ekCert = X509Util.decodeDerCertificate(ekCertBytes);
         } catch (TpmModuleException e) {

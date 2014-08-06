@@ -33,6 +33,11 @@
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     
 </project>
