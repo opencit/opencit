@@ -22,7 +22,7 @@ public class MwClientTest {
         public void doB() { log.debug("B"); }
     }
     
-    @Test
+    /*@Test
     public void testMwClientRegistry() {
         MwClientHolder mwClient = new MwClientHolder(new Properties());
         FeatureA a = new FeatureA();
@@ -33,5 +33,5 @@ public class MwClientTest {
         mwClient.set(FeatureB.class, b);
         FeatureB b2 = mwClient.get(FeatureB.class);
         b2.doB();
-    }
+    }*/
 }
