@@ -8262,6 +8262,8 @@ jQuery.extend({
 	},
 
 	getJSON: function( url, data, callback ) {
+		var d = new Date();
+		url += (url.indexOf('?') > 0? '&' : '?') + "time=" + d.getTime();
 		return jQuery.get( url, data, callback, "json" );
 	},
 

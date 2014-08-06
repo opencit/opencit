@@ -299,9 +299,9 @@ function doNotify(notice) {
 
 
 // pre-init: remove any previously created dialogs to prevent leaks
-$("div[class~=tlspolicy-edit-dialog]").each(function(i,el){el.remove();});
+/*$("div[class~=tlspolicy-edit-dialog]").each(function(i,el){el.remove();});
 $("div[class~=tlspolicy-delete-dialog]").each(function(i,el){el.remove();});
-
+*/
 // one time initialization
 var source = $("#tlspolicy_browse_table_row_template").html();
 var template = Handlebars.compile(source);
