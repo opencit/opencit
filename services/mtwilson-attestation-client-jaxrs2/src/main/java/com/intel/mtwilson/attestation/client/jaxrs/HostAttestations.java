@@ -305,6 +305,21 @@ public class HostAttestations extends MtWilsonClient {
         return hostSaml;
     }
     
+    /**
+     * Verifies the signature of the retrieved SAML assertion using the SAML certificate stored in the user keystore created during user registration.
+     * This functionality is available for the Api library users only.
+     * @param saml SAML assertion.
+     * @return TrustAssertion object having the status of verification.
+     * @since Mt.Wilson 2.0
+     * @mtwSampleApiCall
+     * <pre>
+     *   HostAttestations client = new HostAttestations(My.configuration().getClientProperties());
+     *   HostAttestation hostAttestation = new HostAttestation();
+     *   hostAttestation.setHostUuid("de07c08a-7fc6-4c07-be08-0ecb2f803681");
+     *   String hostSaml = client.createHostAttestationSaml(hostAttestation);
+     *   TrustAssertion verifyTrustAssertion = attestationClient.verifyTrustAssertion(createHostAttestationSaml);
+     * </pre>
+     */        
     public TrustAssertion verifyTrustAssertion(String saml) throws KeyManagementException, ApiException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException {
         if (properties != null && properties.getProperty("mtwilson.api.keystore") != null && !properties.getProperty("mtwilson.api.keystore").isEmpty()
                 && properties.getProperty("mtwilson.api.keystore.password") != null && !properties.getProperty("mtwilson.api.keystore.password").isEmpty()) {
