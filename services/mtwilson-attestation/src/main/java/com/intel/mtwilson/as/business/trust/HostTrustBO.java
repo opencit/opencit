@@ -150,15 +150,15 @@ public class HostTrustBO {
         boolean biosMLEFound = false, VMMMLEFound = false;
         
             // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
-            if( log.isDebugEnabled() ) {
-                try {
-                ObjectMapper mapper = new ObjectMapper();
-                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostObj)); //This statement may contain clear text passwords
-                }
-                catch(IOException e) {
-                    log.debug("cannot serialize host input to addHost", e);
-                }
-            }
+//            if( log.isDebugEnabled() ) {
+//                try {
+//                ObjectMapper mapper = new ObjectMapper();
+//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostObj)); //This statement may contain clear text passwords
+//                }
+//                catch(IOException e) {
+//                    log.debug("cannot serialize host input to addHost", e);
+//                }
+//            }
             
         
         try {
