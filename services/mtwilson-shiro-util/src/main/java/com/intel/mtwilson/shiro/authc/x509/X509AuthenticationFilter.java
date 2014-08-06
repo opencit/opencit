@@ -72,7 +72,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
             
             RsaSignatureInput signatureInput = getSignatureInputFromHttpRequest(httpRequest, authorization);
             String content = signatureInput.toString(); // may throw IllegalArgumentException if any required field is null or invalid
-            log.debug("Document content (signature input):\n'{}'\n", content);
+//            log.debug("Document content (signature input):\n'{}'\n", content);
             byte[] document = content.getBytes("UTF-8");
             byte[] signature = Base64.decodeBase64(authorization.signatureBase64);
             String signatureAlgorithm = signatureAlgorithm(authorization.signatureAlgorithm);
@@ -143,7 +143,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
         signatureInput.headerNames = a.headerNames;
         signatureInput.headers = getRequestHeaders(httpRequest, a.headerNames);
         signatureInput.body = getRequestBody(httpRequest); // throws IOException if error on read or if InputStream is not repeatable;
-        log.debug("signature input body is {} bytes:\n'{}'\n", signatureInput.body.length(), signatureInput.body);
+        log.debug("signature input body is {} bytes.", signatureInput.body.length());
         return signatureInput;
     }
 

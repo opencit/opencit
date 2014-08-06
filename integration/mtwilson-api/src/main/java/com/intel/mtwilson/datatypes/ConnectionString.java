@@ -445,7 +445,7 @@ public class ConnectionString {
             return String.format("https://%s:%d/sdk;u=%s;p=%s;h=%s", vcenterAddress.toString(), port, username, password, hostAddress.toString());
         }
         public static VmwareConnectionString forURL(String url) throws MalformedURLException {
-            log.debug("VmwareConnectionString forURL {}", url);
+//            log.debug("VmwareConnectionString forURL {}", url);
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }

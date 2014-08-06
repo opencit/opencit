@@ -176,14 +176,14 @@ public class RsaAuthorization {
         signatureBlock.url = new HttpRequestURL(requestUrl,urlParams).toString();
         signatureBlock.fingerprintBase64 = username;
         signatureBlock.body = requestBody;
-        log.debug("signature input body is {} bytes:\n'{}'\n", (signatureBlock.body==null?0:signatureBlock.body.length()), signatureBlock.body);
+        log.debug("signature input body is {} bytes.", (signatureBlock.body==null?0:signatureBlock.body.length()));
         signatureBlock.signatureAlgorithm = credential.algorithm();
         
         signatureBlock.headers = headers;
         signatureBlock.headerNames = new String[] { "X-Nonce", "Date" };
 
         String content = signatureBlock.toString();        
-        log.debug("signed content follows... {} bytes:\n'{}'\n", content.length(), content);
+        log.debug("signed content is {} bytes.", content.length());
         
         byte[] signature = credential.signature(content.getBytes("UTF-8"));
         String signatureBase64 = new String(Base64.encodeBase64(signature));
