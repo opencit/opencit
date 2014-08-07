@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 /**
  * Usage examples:
- * approve-user username --roles role1,role2 --permissions domain:action
- * approve-user username --roles role1,role2 --permissions domain1:action1 domain2:action2 domain3:action3 ...
- * approve-user username --permissions domain1:action1 domain2:action2 domain3:action3 ...
- * 
+ * mtwilson approve-user-login-certificate-request apiclient --roles administrator
+ * mtwilson approve-user-login-certificate-request apiclient --roles administrator --permissions domain:action
+ * mtwilson approve-user-login-certificate-request apiclient --roles administrator --permissions domain1:action1 domain2:action2 domain3:action3
+ * mtwilson approve-user-login-certificate-request apiclient --permissions domain1:action1 domain2:action2 domain3:action3
  * @author jbuhacoff
  */
 public class ApproveUserLoginCertificateRequest implements Command {
@@ -40,23 +40,25 @@ public class ApproveUserLoginCertificateRequest implements Command {
     private List<RolePermission> getPermissions(String[] args) {
         ArrayList<RolePermission> list = new ArrayList<>();
         int i;
-        
-        if (options.getBoolean("permissions")) {
+                
+        if (options.containsKey("permissions")) {
+            
+            // System.out.println("User has specified additional permissions");
 
             // Possible calling options are
             // ApproveUserLoginCertificateRequest username --roles role1,role2 --permissions domain1:action1 domain2:action2
             // ApproveUserLoginCertificateRequest username --permissions domain1:action1 domain2:action2
-            if (options.getBoolean("roles")) {
-                i = 4; // both roles and permissions are provided
+            if (options.containsKey("roles")) {
+                i = 2; // both roles and permissions are provided
             } else{
-                i = 2; //only permissions are provided
+                i = 1; //only permissions are provided
             }
 
             // Since multiple permissions could be specified, need to process all of them.
             for( ; i<args.length; i++) {
                 RolePermission rp = new RolePermission();
                 String permissions = args[i];
-
+                //System.out.println("Processing permission :" + permissions);
                 String[] parts = permissions.split(":");
                 if( parts.length == 3 ) {
                     rp.setPermitDomain(parts[0]);
@@ -89,9 +91,8 @@ public class ApproveUserLoginCertificateRequest implements Command {
     private List<Role> getRoles(String args[]) throws SQLException, IOException  {
         List<Role> requestedRoles = new ArrayList<>();
         String[] roles;
-        
-        if (options.getBoolean("roles")) {
-           roles = args[2].split(",");
+        if (options.containsKey("roles")) {
+           roles = args[1].split(",");
             if (roles != null && roles.length > 0) {
                 try (LoginDAO dao = MyJdbi.authz()) {
                     for (String role : roles) {
@@ -101,8 +102,10 @@ public class ApproveUserLoginCertificateRequest implements Command {
                             requestedRoles.add(systemRole);
                             log.debug("Role {} would be added to the user", role);
                         }
-                        else
+                        else {
+                            // System.out.println("Invalid role specified -" + role);
                             log.error("Role {} is not a valid role. It will not be assigned to the user", role);
+                        }
                     }
                 }
             }           
@@ -114,6 +117,7 @@ public class ApproveUserLoginCertificateRequest implements Command {
     public void execute(String[] args) throws Exception {
         // First the user specified should be verified to be in PENDING state.        
         String username = args[0];
+        
         try(LoginDAO dao = MyJdbi.authz()) {
             User user = dao.findUserByName(username);
             if (user == null) {
@@ -123,6 +127,7 @@ public class ApproveUserLoginCertificateRequest implements Command {
             UserLoginCertificate userLoginCertificate = dao.findUserLoginCertificateByUserId(user.getId());
             if (userLoginCertificate != null) {
                 if (userLoginCertificate.getStatus().equals(Status.APPROVED)) {
+                    //System.out.println("User has already been approved");
                     throw new IllegalAccessException("User has already been approved");
                 }
                 
@@ -130,6 +135,7 @@ public class ApproveUserLoginCertificateRequest implements Command {
                 userLoginCertificate.setStatus(Status.APPROVED);
                 userLoginCertificate.setEnabled(true);
                 dao.updateUserLoginCertificateById(userLoginCertificate.getId(), userLoginCertificate.isEnabled(), userLoginCertificate.getStatus(), userLoginCertificate.getComment());
+                //System.out.println("Approved the user login certificate for user -" + username);
                 log.debug("Approved the user login certificate for user {}", username);
                 
                 // Assign the list of role specified by the administrator
@@ -140,12 +146,14 @@ public class ApproveUserLoginCertificateRequest implements Command {
                         userCertRole.setLoginCertificateId(userLoginCertificate.getId());
                         userCertRole.setRoleId(role.getId());
                         dao.insertUserLoginCertificateRole(userCertRole.getLoginCertificateId(), userCertRole.getRoleId());
+                        //System.out.println("Added role to user" + role.getRoleName() + "--" + username);
                         log.debug("Assigned role {} to user login certificate for user {}", role.getRoleName(), username);
                     }
                 }
                 
                 List<RolePermission> rolePermissions = getPermissions(args);
                 if (rolePermissions != null && rolePermissions.size() > 0) {
+                    //System.out.println("About to process permission : " + rolePermissions.size());
                     String customRoleName = "UserRole:"+username;
                     Role customRole = dao.findRoleByName(customRoleName);
                     if (customRole == null) {
@@ -155,12 +163,14 @@ public class ApproveUserLoginCertificateRequest implements Command {
                         customRole.setRoleName(customRoleName);
                         customRole.setDescription("Custom role created for user with admin specified permissions.");
                         dao.insertRole(customRole.getId(), customRole.getRoleName(), customRole.getDescription());
+                        //System.out.println("Created custom role : " + customRoleName);
                         log.debug("Created a custom role {} for user {}.", customRole, username);
                     }
                     
                     for(RolePermission rolePermission : rolePermissions){
                         rolePermission.setId(new UUID());
                         dao.insertRolePermission(customRole.getId(), rolePermission.getPermitDomain(), rolePermission.getPermitAction(), rolePermission.getPermitSelection());
+                        //System.out.println("Adding permission for custom role " + rolePermission.getPermitDomain() + ":"  + rolePermission.getPermitAction());
                         log.debug("Added permission {}.{}.{} to role {}.", rolePermission.getPermitDomain(), 
                                 rolePermission.getPermitAction(), rolePermission.getPermitSelection(), customRole.getRoleName());
                     }
