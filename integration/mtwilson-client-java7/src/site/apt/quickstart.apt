@@ -132,11 +132,19 @@ SimpleKeystore keystore = MwClientUtil.createUserInDirectoryV2(new java.io.File(
 +---
 
 
-*Setting up the properties
+*Access Approval
 
-    After the request is created, contact the Mt Wilson administrator to approve your access request (offline step). After your registration is approved, you can use the API to access all the features Mt Wilson provides such as maintaining a whitelist, adding hosts,and obtaining a trust assertion on one or more hosts. To use the API, you need to create an Client object configured with your credentials and your Mt Wilson server, then use it to send requests to the Mt Wilson server. Notice that the variables directory, username, password, and servers are the same as what you used during registration.
+    After the request is created, because of security reasons, the access cannot be approved via API call. The access has to be approved offline by the administrator. The administrator has 2 options for approving the access request. He/She can use the portal with the installed credentials and approve the access request under "Administration->Pending Requests" tab. Alternatively, if the portal is not installed, the access can be approved via the command line utility to be run locally on the MTW server. Syntax for running the tool is shown below. The administrator can provide a list  of pre-defined role(s), which needs to be assigned to the user along with optional specific permissions that the user needs on the system resources such as oem,os,mle,hosts etc. If in case the administrator provides additional permissions, then a custom role would be automatically created (Userrole:username) and would be assigned to the user. If the administrator wants finer grain control over the permissions that the user needs to have, he can use this option.
 
-    It is up to the user how to pass in the required properties for the creation of the client object. Here we are using a simple helper function. For each of the client objects that would be created, the same set of properties need to be passed in.
++---
+ mtwilson approve-user-login-certificate-request username --roles administrator
+ mtwilson approve-user-login-certificate-request username --roles host_manager --permissions oem:create os:create mle:create
+ mtwilson approve-user-login-certificate-request username --permissions hosts:create
++---
+
+*Setting up the required properties
+	
+	After your user creation request is approved, the APIs can be used to access all the features Mt Wilson provides such as maintaining a whitelist, adding hosts,and obtaining a trust assertion on one or more hosts. To use the API, the client object needs to be configured with the credentials and the Mt Wilson server. Notice that the variables directory, username, password, and servers are the same as what was used during registration.
 
 +---
 private static Properties getClientProperties() {
@@ -148,7 +156,7 @@ private static Properties getClientProperties() {
 	properties.setProperty("mtwilson.api.key.password", "password");
 	// Using the MTW Server's SSL certificate's SHA1 as the TLS policy to connect to MTW Server. Users can even use the other options specified earlier
 	properties.setProperty("mtwilson.api.tls.policy.certificate.sha1", "54 7c d2 1b a9 aa 38 4b 97 22 45 37 67 0e f6 9e d8 a1 4d b4");
-	// Users can skip the TLS policy and specify the INSECURE option. 
+	// In case users do not want to implement TLS policy, they can skip the same by specifying the INSECURE option. 
 	// properties.setProperty("mtwilson.api.tls.policy.insecure", "true");
 	return properties;	
 }
@@ -156,7 +164,7 @@ private static Properties getClientProperties() {
 
 *Configuration of TLS policy
 	
-	Note that we need to specify the TLS policy that the MTW server should use to communicate with the host either for the purpose of whitelisting or registration/updates. For ESXi hosts, there would be one shared TLS policy per vCenter. Alternatively, users can add all the vCenter certificates into a single shared TLS policy as well.
+	Note that we need to specify the TLS policy that the MTW server should use to communicate with the host either for the purpose of whitelisting, host registration/updates and host attestation. For ESXi hosts, there would be one shared TLS policy per vCenter. Alternatively, users can add all the vCenter certificates into a single shared TLS policy as well.
 	
 	For Open source hosts (Xen/KVM), either we can configure individual policies for each or we can create a shared TLS policy using the CA that would sign all the SSL certificates for these hosts.
 	
@@ -205,8 +213,6 @@ boolean rpcOutput = whiteListClient.createWhitelist(rpcInput);
 *Host Registration
 
 	Now that the provisioning has been completed, we can register the host(s) for attestation. In the example below we are registering the same host that we used for white listing.
-
-** Java
 
 +---
 // Instantiate the api client for host registration with the specified properties
