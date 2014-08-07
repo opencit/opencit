@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.intel.mtwilson.linux</groupId>
   <artifactId>logrotate</artifactId>
-  <version>1.0</version>
+  <version>2.0.0</version>
 
   <packaging>pom</packaging>
   <name>Log Rotate Linux Installer</name>
@@ -11,7 +11,7 @@
     <parent>
 	<groupId>com.intel.mtwilson.linux</groupId>
 	<artifactId>mtwilson-linux</artifactId>
-	<version>2.0-SNAPSHOT</version>
+	<version>2.0.0</version>
     </parent>
   
   <properties>
