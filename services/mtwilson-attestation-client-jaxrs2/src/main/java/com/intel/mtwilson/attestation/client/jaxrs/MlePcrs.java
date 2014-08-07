@@ -140,8 +140,8 @@ public class MlePcrs extends MtWilsonClient {
      * @mtwMethodType PUT
      * @mtwSampleRestCall
      * <pre>
-     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs
-     * Input: {"pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
+     * https://server.com:8181/mtwilson/v2/mles/31021a8a-de64-4c5f-b314-8d3f077a55e5/pcrs/18
+     * Input: {"pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
      * Output: {"id":"38a793f8-ca70-4c9e-91cc-0474585c286d","mle_uuid":"31021a8a-de64-4c5f-b314-8d3f077a55e5",
      *   "pcr_index":"18","pcr_value":"AAAB6F19330613513101F04B88BCB7B79A8F250E"}
      * </pre>
