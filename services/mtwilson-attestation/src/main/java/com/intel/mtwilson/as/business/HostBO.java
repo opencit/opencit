@@ -332,7 +332,7 @@ public class HostBO {
                         // if there is a tls policy id, we save it directly in the host record
                         // but if there is a tls policy descriptor, we need to create or update a per-from.(private) tls policy and 
                         // then set its id on the host record
-                        if( from != null && from.getTlsPolicyDescriptor() != null ) {
+                        if( from != null && from.getTlsPolicyDescriptor() != null && from.getTlsPolicyDescriptor().getPolicyType() != null && !from.getTlsPolicyDescriptor().getPolicyType().isEmpty()) {
                             target.setTlsPolicyId(null);
                             target.setTlsPolicyDescriptor(from.getTlsPolicyDescriptor());
                             target.setTlsKeystore(null);
@@ -351,7 +351,7 @@ public class HostBO {
                             target.setTlsPolicyDescriptor(null);
                             target.setTlsKeystore(null);
                             target.setTlsPolicyName(null);
-                        }        
+                        }
     }
     private void storePrivateTlsPolicy(TblHosts target) throws IOException {
         // look for an existing private tls policy record - we ignore the (possibly) existing tls policy id in target because it might be a shared policy and we dont' want to update that one; if it's a private policy the dao will find it

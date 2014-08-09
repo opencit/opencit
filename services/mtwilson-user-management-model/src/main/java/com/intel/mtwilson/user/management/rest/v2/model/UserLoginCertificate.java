@@ -12,6 +12,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.x509.X509CertificateEncodingException;
 import com.intel.dcsg.cpg.x509.X509CertificateFormatException;
 import com.intel.mtwilson.jaxrs2.CertificateDocument;
@@ -133,7 +135,7 @@ public class UserLoginCertificate extends CertificateDocument {
         this.roles = roles;
     }
     
-    
+    @Regex(RegexPatterns.ANY_VALUE)
     @JsonIgnore
     @Override
     public X509Certificate getX509Certificate() {
@@ -147,6 +149,7 @@ public class UserLoginCertificate extends CertificateDocument {
         }
     }
 
+    @Regex(RegexPatterns.ANY_VALUE)
     @JsonIgnore
     @Override
     public void setX509Certificate(X509Certificate certificate) {
