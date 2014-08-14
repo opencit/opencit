@@ -629,7 +629,8 @@ public class TpmUtils {
 			throws CertificateException, 
 			CertificateEncodingException, 
 			java.security.cert.CertificateException{
-		java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+//		java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+                java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509", new BouncyCastleProvider());
 		return (java.security.cert.X509Certificate)cf.generateCertificate(new ByteArrayInputStream(certBytes));
 	}
 	/**

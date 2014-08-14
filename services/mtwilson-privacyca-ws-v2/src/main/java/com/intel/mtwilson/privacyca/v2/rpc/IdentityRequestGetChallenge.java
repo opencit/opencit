@@ -100,7 +100,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
 			TpmIdentityRequest tempEC = new TpmIdentityRequest(endorsementCertificate);
 			X509Certificate ekCert = TpmUtils.certFromBytes(tempEC.decryptRaw(caPrivKey));
             log.debug("Validating endorsement certificate");
-            if( !isEkCertificateVerifiedByAuthority(ekCert, endorsementCerts.get(ekCert.getIssuerDN().getName()))
+            if( !isEkCertificateVerifiedByAuthority(ekCert, endorsementCerts.get(ekCert.getIssuerDN().getName().trim()))
                     && !isEkCertificateVerifiedByAnyAuthority(ekCert, endorsementCerts.values()) 
                     && !isEkCertificateRegistered(ekCert)) {
                 // cannot trust the EC because it's not signed by any of our trusted EC CAs and is not in the mw_tpm_ec table
@@ -180,7 +180,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
                     return true;
             }
             catch(Exception e) {
-                log.debug("Failed to verify EC using CA {}: {}", ekCert.getIssuerDN().getName(), e.getMessage());
+                log.debug("Failed to verify EC using CA {}: {}", ekCert.getIssuerDN().getName().trim(), e.getMessage());
             }
                 }
             return false;
@@ -202,7 +202,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
 
     private boolean isEkCertificateRegistered(X509Certificate ekCert) {
         try(TpmEndorsementDAO dao = TpmEndorsementJdbiFactory.tpmEndorsementDAO()) {
-            TpmEndorsement tpmEndorsement = dao.findTpmEndorsementByIssuerEqualTo(ekCert.getIssuerDN().getName()); // SHOULD REALLY BE BY CERT SHA256
+            TpmEndorsement tpmEndorsement = dao.findTpmEndorsementByIssuerEqualTo(ekCert.getIssuerDN().getName().trim()); // SHOULD REALLY BE BY CERT SHA256
             if(tpmEndorsement == null ) {
                 return false;
             }
