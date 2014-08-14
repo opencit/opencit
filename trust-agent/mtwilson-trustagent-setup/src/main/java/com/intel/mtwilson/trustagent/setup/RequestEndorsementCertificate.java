@@ -301,7 +301,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         tpmEndorsement.setCertificate(ekCert.getEncoded());
         tpmEndorsement.setComment("registered by trust agent");
         tpmEndorsement.setHardwareUuid(hostHardwareId.toString());
-        tpmEndorsement.setIssuer(ekCert.getIssuerDN().getName().trim()); // should be automatically set by server upon receiving the cert
+        tpmEndorsement.setIssuer(ekCert.getIssuerDN().getName().replaceAll("\\x00", "")); // should be automatically set by server upon receiving the cert
         tpmEndorsement.setRevoked(false); // should default to false on server
         tpmEndorsementsClient.createTpmEndorsement(tpmEndorsement);
     }
