@@ -84,8 +84,9 @@ mtwilson_localhost_integration() {
   else
     iplist="127.0.0.1"
   fi
-  update_property_in_file mtwilson.api.trust /etc/intel/cloudsecurity/management-service.properties "$iplist"
-  update_property_in_file mtwilson.ssl.required /etc/intel/cloudsecurity/management-service.properties "false"
+#  update_property_in_file mtwilson.api.trust /etc/intel/cloudsecurity/management-service.properties "$iplist"
+#  update_property_in_file mtwilson.ssl.required /etc/intel/cloudsecurity/management-service.properties "false"
+  update_property_in_file iniHostRealm.allow /opt/mtwilson/configuration/shiro.ini "$iplist"
 }
 
 
