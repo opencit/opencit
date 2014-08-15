@@ -304,8 +304,9 @@ public class AssetTagCertBO {
             }            
 
             if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                log.error("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
-                throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
+                log.warn("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+//                throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
+                result = true;
             } else {
                 // Now that we have the asset tag identified, set the revoked flag to true.
                 MwAssetTagCertificate atagCert = atagCerts.get(0);
