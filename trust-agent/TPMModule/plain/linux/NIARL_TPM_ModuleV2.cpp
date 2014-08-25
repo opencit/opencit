@@ -3147,6 +3147,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 		{
 			b_trousers = true;
 		}
+                
 	}
 	if(i_success != 2)
 	{
@@ -3157,7 +3158,6 @@ void NIARL_TPM_ModuleV2::get_credential()
 	NIARL_Util_ByteBlob	ownerauth(s_ownerauth);
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
 	UINT32				wks_size = sizeof(wks_blob);
-
 
 //CONTEXT SECTION
 	TSS_RESULT		result;
@@ -3178,7 +3178,6 @@ void NIARL_TPM_ModuleV2::get_credential()
 	result = Tspi_Context_GetDefaultPolicy(context, &policy_default);
 		if(b_debug)	cerr << ' ' << result << " default policy" << endl;
 		if(b_log)	cerr << ' ' << result << " default policy" << endl;
-
 
 //TPM SECTION
 	TSS_HTPM		tpm;
@@ -3203,11 +3202,16 @@ void NIARL_TPM_ModuleV2::get_credential()
 		if(b_debug)	cerr << ' ' << result << " assign" << endl;
 		if(b_log)	cerr << ' ' << result << " assign" << endl;
 
-
 //NVSTORE SECTION
 	TSS_HNVSTORE	nvstore;
 	UINT32			cred_size;
 	BYTE*			cred_blob;
+	UINT32 nvIndex = TSS_NV_DEFINED|TPM_NV_INDEX_EKCert;
+	UINT32 ekbufLen;
+	BYTE *ekbuf;
+	UINT32 offset;
+	UINT32 ekOffset;
+	unsigned i;
 
 		if(b_debug)	cerr << "NVStore Section" << endl;
 		if(b_log)	clog << "NVStore Section" << endl;
@@ -3222,7 +3226,7 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	if(s_credtype.compare("EC") == 0)
 	{
-		result = Tspi_SetAttribUint32(nvstore, TSS_TSPATTRIB_NV_INDEX, NULL, TPM_NV_INDEX_EKCert);
+		result = Tspi_SetAttribUint32(nvstore, TSS_TSPATTRIB_NV_INDEX, NULL, nvIndex); //TPM_NV_INDEX_EKCert);
 			if(b_debug)	cerr << " EK cert selected" << endl;
 			if(b_log)	clog << " EK cert selected" << endl;
 	}
@@ -3255,52 +3259,102 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 		UINT32			counter = 0;
 
-		cred_size = 10;		//allow enough space to get DER x509 size header
+		//cred_size = 10;		//allow enough space to get DER x509 size header
+		cred_size = 128;
 		result = Tspi_NV_ReadValue(nvstore, 0, &cred_size, &cred_blob);
-
-		if((int)cred_blob[1] >= 128)	//size is too big for [1]
-		{
-			counter = (int)cred_blob[1] - 128;
-			cred_size = 0;				//reset cred size
-
-			for(UINT32 i = 0; i < counter; i++)
-			{
-				cred_size *= 256;					//base multiplier
-				cred_size += (int)cred_blob[2 + i];	//accumulator
-			}
+		//cout << cred_size << endl;
+		//for (i=0; i<cred_size; i++)
+		//  cout << setw(2) << setfill('0') << setbase(16) << (int)cred_blob[i];
+		//cout << endl;
+		//cout << endl;
+		for (i=0; i<cred_size-5; i++) {
+		  if (cred_blob[i]==0x30 && cred_blob[i+1]==0x82 && cred_blob[i+4]==0x30 && cred_blob[i+5]==0x82 )
+		  break;
 		}
-		else
-		{
-			cred_size = (int)cred_blob[1];
+		//cout << i << endl;
+		if (i == cred_size-5) {
+		  //fprintf(stderr, "No certificate header found\n");
+		  //goto error;
 		}
+		//cout << (int)cred_blob[i+2] << endl;
+		ekbufLen = (cred_blob[i+2] << 8) + cred_blob[i+3] + 4;
+		//cout << ekbufLen << endl;
+		ekbuf = (BYTE*)malloc(ekbufLen);
+		for (int inc=i; inc<cred_size; inc++) {
+		  ekbuf[inc-i]=cred_blob[inc];
+		}
+		//memcpy (ekbuf, cred_blob+i, cred_size-i);
+		//result = Tspi_Context_FreeMemory (context, cred_blob);
+		offset = cred_size;
+		ekOffset = cred_size-i;
 
-		cred_size += 4;
-
-		if(b_debug)	cerr << " Credential size is " << cred_size << endl;
-		if(b_log)	clog << " Credential size is " << cred_size << endl;
+		while (ekOffset < ekbufLen) {
+		  cred_size = ekbufLen-ekOffset;
+		  if (cred_size > 128)
+		    cred_size = 128;
+		  result = Tspi_NV_ReadValue(nvstore, offset, &cred_size, &cred_blob);
+		  for (int inc=0; inc<cred_size; inc++) {
+		    ekbuf[ekOffset+inc]=cred_blob[inc];
+		  }
+		  //memcpy (ekbuf+ekOffset, cred_blob, cred_size);
+		  //result = Tspi_Context_FreeMemory (context, cred_blob);
+		  offset += cred_size;
+		  ekOffset += cred_size;
+		  if (ekOffset == ekbufLen)
+		    break;
+		}
+		//for (i=0; i<ekbufLen; i++)
+		//  cout << setw(2) << setfill('0') << setbase(16) << (int)ekbuf[i];
 	}
-	else
-	{//NTru mode
-		result = Tspi_GetAttribUint32(nvstore, TSS_TSPATTRIB_NV_DATASIZE, NULL, &cred_size);
-			if(b_debug)	cerr << ' ' << result << " get nvstore size of " << cred_size << endl;
-			if(b_log)	cerr << ' ' << result << " get nvstore size of " << cred_size << endl;
-	}
 
-	result = Tspi_NV_ReadValue(nvstore, 0, &cred_size, &cred_blob);
-		if(b_debug)	cerr << ' ' << result << " nv read" << endl;
-		if(b_log)	cerr << ' ' << result << " nv read" << endl;
+//		if((int)cred_blob[1] >= 128)	//size is too big for [1]
+//		{
+//			counter = (int)cred_blob[1] - 128;
+//			cred_size = 0;				//reset cred size
+//
+//			for(UINT32 i = 0; i < counter; i++)
+//			{
+//				cred_size *= 256;					//base multiplier
+//				cred_size += (int)cred_blob[2 + i];	//accumulator
+//			}
+//		}
+//		else
+//		{
+//			cred_size = (int)cred_blob[1];
+//		}
+//
+//		cred_size += 4;
+//
+//		if(b_debug)	cerr << " Credential size is " << cred_size << endl;
+//		if(b_log)	clog << " Credential size is " << cred_size << endl;
+//	}
+//	else
+//	{//NTru mode
+//		result = Tspi_GetAttribUint32(nvstore, TSS_TSPATTRIB_NV_DATASIZE, NULL, &cred_size);
+//			if(b_debug)	cerr << ' ' << result << " get nvstore size of " << cred_size << endl;
+//			if(b_log)	cerr << ' ' << result << " get nvstore size of " << cred_size << endl;
+//	}
+//	result = Tspi_NV_ReadValue(nvstore, 0, &cred_size, &cred_blob);
+//		if(b_debug)	cerr << ' ' << result << " nv read" << endl;
+//		if(b_log)	cerr << ' ' << result << " nv read" << endl;
 		return_code = result;
-
 	if(result == 0)
 	{
-		for(UINT32 i = 0; i < cred_size; i++)
-			cout << setw(2) << setfill('0') << setbase(16) << (int)cred_blob[i];
+		//for(UINT32 i = 0; i < cred_size; i++)
+		//	cout << setw(2) << setfill('0') << setbase(16) << (int)cred_blob[i];
+	  for (i=0; i<ekbufLen; i++)
+	    cout << setw(2) << setfill('0') << setbase(16) << (int)ekbuf[i];
+	  /*cout << endl;
+	  cout << endl;
+	  for (i=0; i<ekbufLen; i++)
+	    cout << " - " <<(int)ekbuf[i];
+	  for (i=0; i<ekbufLen; i++)
+	    cout << setw(2) << setfill('0') <<  (int)ekbuf[i];
+	  */
 		if(b_debug) cerr << endl;
 		if(b_log) clog << endl;
-
-		result = Tspi_Context_FreeMemory(context, cred_blob);
+		//result = Tspi_Context_FreeMemory(context, cred_blob);
 	}
-
 
 //CLEANUP SECTION
 	result = Tspi_Context_CloseObject(context, policy_tpm);
@@ -3308,7 +3362,6 @@ void NIARL_TPM_ModuleV2::get_credential()
 
 	//result = Tspi_Context_FreeMemory(context, NULL);
 	result = Tspi_Context_Close(context);
-
 	return;
 }
 
