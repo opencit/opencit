@@ -79,8 +79,8 @@ mtwilson_saml_cert_report() {
 # arguments:   currently supports just one optional argument, IP address or hostname, to enable as trusted IN ADDITION TO 127.0.0.1
 mtwilson_localhost_integration() {
   local iplist;
-  if [ -n "$1" ]; then
-    iplist="127.0.0.1,$1"
+  if [ -n "$2" ]; then
+    iplist="127.0.0.1,$2"
   else
     iplist="127.0.0.1"
   fi
