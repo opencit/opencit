@@ -79,6 +79,7 @@ mtwilson_saml_cert_report() {
 # arguments:   currently supports just one optional argument, IP address or hostname, to enable as trusted IN ADDITION TO 127.0.0.1
 mtwilson_localhost_integration() {
   local iplist;
+  local finalIps;
   if [ -n "$2" ]; then
     iplist="127.0.0.1,$2"
   else
@@ -86,7 +87,32 @@ mtwilson_localhost_integration() {
   fi
 #  update_property_in_file mtwilson.api.trust /etc/intel/cloudsecurity/management-service.properties "$iplist"
 #  update_property_in_file mtwilson.ssl.required /etc/intel/cloudsecurity/management-service.properties "false"
-  update_property_in_file iniHostRealm.allow /opt/mtwilson/configuration/shiro.ini "$iplist"
+
+  OIFS=$IFS
+  IFS=',' read -ra newIps <<< "$iplist"
+  IFS=$OIFS
+
+  hostAllowPropertyName=iniHostRealm.allow
+  sed -i '/'"$hostAllowPropertyName"'/ s/^#//g' /opt/mtwilson/configuration/shiro.ini
+  hostAllow=`read_property_from_file $hostAllowPropertyName /opt/mtwilson/configuration/shiro.ini`
+  finalIps="$hostAllow"
+  if [ -z "$hostAllow" ]; then
+    iniHostRealmValue=`read_property_from_file iniHostRealm /opt/mtwilson/configuration/shiro.ini`
+    update_property_in_file iniHostRealm /opt/mtwilson/configuration/shiro.ini "$iniHostRealmValue\n$hostAllowPropertyName="
+  fi
+  for i in "${newIps[@]}"; do
+    OIFS=$IFS
+    IFS=',' read -ra oldIps <<< "$finalIps"
+    IFS=$OIFS
+    if [[ "${oldIps[*]}" != *"$i"* ]]; then
+      if [ -z "$finalIps" ]; then
+        finalIps="$i"
+      else
+        finalIps+=",$i"
+      fi
+    fi
+  done
+  update_property_in_file "$hostAllowPropertyName" /opt/mtwilson/configuration/shiro.ini "$finalIps";
 }
 
 
