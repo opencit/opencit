@@ -186,7 +186,7 @@ trousers_detect_and_run() {
   trousers=`which tcsd 2>/dev/null`
   if [ -z "$trousers" ]; then
     #echo_failure "trousers installation is required for trust agent to run successfully."
-    echo "trousers installation is required for trust agent to run successfully."
+    echo "trousers is required for trust agent to run"
     exit -1
   else
     $trousers
