@@ -4,13 +4,14 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.attestation.client.jaxrs.WhiteList;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.CreateWhiteListWithOptionsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,6 +27,9 @@ public class WhiteListTest {
     
     @BeforeClass
     public static void init() throws Exception {
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator.class);
+        
         client = new WhiteList(My.configuration().getClientProperties());
     }
     

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.client.jaxrs;
 
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.attestation.client.jaxrs.RegisterHosts;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsRpcInput;
@@ -14,6 +15,7 @@ import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +32,9 @@ public class RegisterHostTest {
     
     @BeforeClass
     public static void init() throws Exception {
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator.class);
+        
         client = new RegisterHosts(My.configuration().getClientProperties());
     }
     
@@ -63,7 +68,9 @@ public class RegisterHostTest {
         RegisterHostsWithOptionsRpcInput rpcInput = new RegisterHostsWithOptionsRpcInput();
         rpcInput.setHosts(hostConfigDataList);
         List<HostConfigResponse> rpcOutput = client.registerHostsWithOptions(rpcInput);
-        log.debug(rpcOutput.toString());
+        for (HostConfigResponse hcr : rpcOutput) {
+            log.debug(hcr.getHostName());
+        }
     }
 
 }
