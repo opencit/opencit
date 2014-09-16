@@ -156,7 +156,7 @@ public class WhiteList extends MtWilsonClient {
         if (result.getClass().equals(LinkedHashMap.class)) {
             LinkedHashMap resultMap = (LinkedHashMap)result;
             if (resultMap.containsKey("result")) {
-                isWhiteListCreated = (boolean) resultMap.get("result");
+                isWhiteListCreated = Boolean.parseBoolean(resultMap.get("result").toString().trim());
                 log.debug("Result of whitelist creation is {}.", isWhiteListCreated);
             }
         }
