@@ -11,6 +11,8 @@ import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -99,17 +101,29 @@ public class HostInfoCmd implements ICommand {
      * response of dmidecode -s bios-vendor -> S5500.86B.01.00.0060.090920111354
      */
     private void getBiosAndVersion() throws TAException, IOException {
-
         CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
-        context.setBiosOem(trim(result.getStdout()));
+        List<String> resultList = Arrays.asList(result.getStdout().split("\r\n"));
+        if (resultList != null && resultList.size() > 0) {
+            for (String data : resultList) {
+                if (data.trim().startsWith("#")) // ignore the comments
+                    continue;
+                context.setBiosOem(data.trim());
+                break;
+            }
+        }
         log.debug("Bios OEM: " + context.getBiosOem());
 
-
         CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
-        context.setBiosVersion(trim(result2.getStdout()));
+        resultList = Arrays.asList(result2.getStdout().split("\r\n"));
+        if (resultList != null && resultList.size() > 0) {
+            for (String data : resultList) {
+                if (data.trim().startsWith("#")) // ignore the comments
+                    continue;
+                context.setBiosVersion(data.trim());
+                break;
+            }
+        }
         log.debug("Bios Version: " + context.getBiosVersion());
-
-
     }
     /*
      * Sample response of "virsh version" command: 
