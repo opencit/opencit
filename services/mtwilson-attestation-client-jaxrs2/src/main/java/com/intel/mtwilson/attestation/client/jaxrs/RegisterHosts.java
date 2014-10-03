@@ -8,6 +8,7 @@ import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsRpcInput;
 import com.intel.mtwilson.as.rest.v2.model.RegisterHostsWithOptionsRpcInput;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
+import com.intel.mtwilson.i18n.ErrorCode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -83,8 +84,7 @@ public class RegisterHosts extends MtWilsonClient {
             LinkedHashMap resultMap = (LinkedHashMap)result;
             if (resultMap.containsKey("result")) {
                 LinkedHashMap outputHashMap = (LinkedHashMap) resultMap.get("result");
-                hostRecords = (List<HostConfigResponse>) outputHashMap.get("host_records");
-                log.debug(hostRecords.toString());
+                hostRecords = convertToHostConfigResponseList((List<LinkedHashMap>) outputHashMap.get("host_records"));
             }
         }
         return hostRecords;
@@ -153,11 +153,24 @@ public class RegisterHosts extends MtWilsonClient {
             LinkedHashMap resultMap = (LinkedHashMap)result;
             if (resultMap.containsKey("result")) {
                 LinkedHashMap outputHashMap = (LinkedHashMap) resultMap.get("result");
-                hostRecords = (List<HostConfigResponse>) outputHashMap.get("host_records");
-                log.debug(hostRecords.toString());
+                hostRecords = convertToHostConfigResponseList((List<LinkedHashMap>) outputHashMap.get("host_records"));
             }
         }
         return hostRecords;
     }
     
+    private List<HostConfigResponse> convertToHostConfigResponseList (List<LinkedHashMap> inputList) {
+        List<HostConfigResponse> hostRecords = new ArrayList<>();
+        for(int i=0; i< inputList.size(); i++) {
+            HostConfigResponse hcr = new HostConfigResponse();
+            hcr.setHostName((String)inputList.get(i).get("host_name"));
+            hcr.setStatus((String)inputList.get(i).get("status"));
+            hcr.setErrorMessage((String)inputList.get(i).get("error_message"));
+            ErrorCode ec = ErrorCode.valueOf((String)inputList.get(i).get("error_code"));
+            hcr.setErrorCode(ec);
+            log.debug("Processing the register host response for {}", hcr.getHostName());
+            hostRecords.add(hcr);
+        }        
+        return hostRecords;
+    }
 }

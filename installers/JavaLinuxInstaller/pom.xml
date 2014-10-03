@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>java</artifactId>
-  <version>2.0.0</version>
+  <version>1.7.0_51</version>
 
   <packaging>pom</packaging>
   <name>Java Linux Installer</name>
@@ -11,7 +11,7 @@
     <parent>
 	<groupId>com.intel.mtwilson.linux</groupId>
 	<artifactId>mtwilson-linux</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
     </parent>
   
   <properties>

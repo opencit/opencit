@@ -664,15 +664,21 @@ public class VMwareClient implements TlsClient {
         for (ManagedEntity me : mes) {
             if (me.getParent().getName().trim().equalsIgnoreCase(clusterName.trim())) {
                 log.debug("Host System found for cluster " + clusterName + ": " + me.getName());
-                TxtHostRecord hostObj = new TxtHostRecord();
-                hostObj.HostName = me.getName();
-                hostObj.AddOn_Connection_String = vmwareConnectionString;
-                hostObj.VMM_OSName = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.name");
-                hostObj.VMM_OSVersion = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.version");
-                hostObj.VMM_Version = getStringMEProperty("HostSystem", hostObj.HostName, "config.product.build");
-                hostObj.BIOS_Oem = getStringMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor");
-                hostObj.BIOS_Version = getStringMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion");
-                hostDetailList.add(hostObj);
+                String connectionState = getMEProperty("HostSystem",  me.getName(), "runtime.connectionState").toString().trim();
+                if (connectionState.equalsIgnoreCase("connected")) {
+                    log.debug("Adding host {} to the list of connected servers.", me.getName());
+                    TxtHostRecord hostObj = new TxtHostRecord();
+                    hostObj.HostName = me.getName();
+                    hostObj.AddOn_Connection_String = vmwareConnectionString;
+                    hostObj.VMM_OSName = getMEProperty("HostSystem", hostObj.HostName, "config.product.name").toString();
+                    hostObj.VMM_OSVersion = getMEProperty("HostSystem", hostObj.HostName, "config.product.version").toString();
+                    hostObj.VMM_Version = getMEProperty("HostSystem", hostObj.HostName, "config.product.build").toString();
+                    hostObj.BIOS_Oem = getMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor").toString();
+                    hostObj.BIOS_Version = getMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion").toString();
+                    hostDetailList.add(hostObj);
+                } else {
+                    log.info("Host {} is not currently connected to the vCenter. So, it would not be used for registration.", me.getName());
+                }
             }
             else {
                 log.debug(me.getName() + ": parent \"" + me.getParent().getName() + "\" does not match cluster name \"" + clusterName + "\"");

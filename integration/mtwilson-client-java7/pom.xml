@@ -15,7 +15,7 @@
     <parent> 
         <groupId>com.intel.mtwilson.integration</groupId> 
         <artifactId>mtwilson-integration</artifactId> 
-        <version>2.0.0</version> 
+        <version>2.0.1</version> 
     </parent>
 
     <build>
@@ -466,15 +466,18 @@
                                 <configuration>
                                     <attach>true</attach>
                                     <includeDependencySources>true</includeDependencySources>
-                                    <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
+                                    <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                                     <dependencySourceIncludes>
-                                       <!-- <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
-                                        <dependencySourceInclude>com.intel.dcsg.cpg:cpg-validation</dependencySourceInclude> -->
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceInclude>
                                         <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-client-jaxrs2</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tag-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-tls-policy-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-user-management-model</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.services:mtwilson-attestation-model</dependencySourceInclude>
                                     </dependencySourceIncludes>
+                                    <excludePackageNames>generated:com.intel.mountwilson.as.hostmanifestreport.data:com.intel.mountwilson.as.hosttrustreport.data</excludePackageNames> 
                                 </configuration>
                             </execution>
                         </executions>
