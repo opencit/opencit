@@ -848,6 +848,11 @@ reference : https://java.net/jira/browse/JERSEY-2325
                 <artifactId>jersey-media-multipart</artifactId>
                 <version>2.4.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>2.4.1</version>
+            </dependency>
         
         
             <!--  AttributeConverter interface and @Convert annotation are since javaee 7,  also javax.ws.rs.core.MultivaluedMap.addAll is since java7 -->
