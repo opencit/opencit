@@ -50,6 +50,7 @@ import org.apache.http.params.HttpParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.rfc822.Headers;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.CertificateTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.PublicKeyCertificateRepository;
@@ -319,7 +320,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         if ("https".equals(protocol)) {
             log.debug("Initializing {} connection", policy.getProtocolSelector().preferred());
-            SSLContext sslcontext = SSLContext.getInstance(policy.getProtocolSelector().preferred() /*tlsProtocol*/); // issue #870 allow client to configure TLS protocol version with mtwilson.api.ssl.protocol
+            SSLContext sslcontext = SSLContext.getInstance(TlsUtil.getSafeContextName(policy.getProtocolSelector().preferred()) /*tlsProtocol*/); // issue #870 allow client to configure TLS protocol version with mtwilson.api.ssl.protocol
             sslcontext.init(null, new X509TrustManager[]{policy.getTrustManager()}, null); // key manager, trust manager, securerandom
             SSLSocketFactory sf = new SSLSocketFactory(
                     sslcontext,

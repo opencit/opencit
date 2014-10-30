@@ -61,7 +61,9 @@ rm  -f tomcat-users.xml.old
 cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
-sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
+
+sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
+# alternative is to use xsltproc:  xsltproc -o server.xml tomcat-https.xsl server.xml.bak
 
 tomcat_permissions ${TOMCAT_HOME}
 
