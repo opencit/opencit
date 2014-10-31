@@ -1,16 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>mtwilson-server</artifactId>
+  <artifactId>mtwilson-server-zip</artifactId>
+  <groupId>com.intel.mtwilson.packages</groupId>
   <packaging>pom</packaging>
-  <name>mtwilson-server</name>
-  <description>Mt Wilson Attestation Server</description>
+  <name>mtwilson-server-zip</name>
+  <description>Mt Wilson Server in Zip distribution format</description>
     <parent>
-		<groupId>com.intel.mtwilson.features</groupId>
-		<artifactId>mtwilson-features</artifactId>
+		<groupId>com.intel.mtwilson.maven</groupId>
+		<artifactId>mtwilson-dist-feature</artifactId>
 		<version>3.0-SNAPSHOT</version>
+		<relativePath />
     </parent>
-
 
   <dependencies>
     <dependency>

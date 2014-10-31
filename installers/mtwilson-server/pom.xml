@@ -98,8 +98,8 @@
                 -->
                 
                 <dependency>
-                    <groupId>com.intel.mtwilson.features</groupId>
-                    <artifactId>mtwilson-server</artifactId>
+                    <groupId>com.intel.mtwilson.packages</groupId>
+                    <artifactId>mtwilson-server-zip</artifactId>
                     <version>${project.version}</version>
                     <type>zip</type>
                 </dependency>
@@ -231,8 +231,8 @@
                                         </artifactItem>
                                         -->
                                         <artifactItem>
-                                            <groupId>com.intel.mtwilson.features</groupId>
-                                            <artifactId>mtwilson-server</artifactId>
+                                            <groupId>com.intel.mtwilson.packages</groupId>
+                                            <artifactId>mtwilson-server-zip</artifactId>
                                             <version>${project.version}</version>
                                             <type>zip</type>
                                         </artifactItem>
@@ -353,8 +353,8 @@
                                         </artifactItem>       
                                         -->         
                                         <artifactItem>
-                                            <groupId>com.intel.mtwilson.features</groupId>
-                                            <artifactId>mtwilson-server</artifactId>
+                                            <groupId>com.intel.mtwilson.packages</groupId>
+                                            <artifactId>mtwilson-server-zip</artifactId>
                                             <version>${project.version}</version>
                                             <type>zip</type>
                                         </artifactItem>
