@@ -27,6 +27,10 @@
     
     <dependencies>
         <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-text-transform</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup-ext</artifactId>
 			<version>${project.version}</version>

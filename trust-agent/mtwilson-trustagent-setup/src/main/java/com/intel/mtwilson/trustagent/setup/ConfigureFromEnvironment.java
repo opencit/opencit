@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
 import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.configuration.MutableConfiguration;
 import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
+import com.intel.mtwilson.text.transform.AllCapsNamingStrategy;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator;
 import com.intel.mtwilson.tls.policy.creator.impl.CertificateTlsPolicyCreator;

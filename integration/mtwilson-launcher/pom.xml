@@ -28,6 +28,12 @@
 		<artifactId>mtwilson-launcher-ext</artifactId>
 		<version>${project.version}</version>            
         </dependency>
+        <!-- for Filter -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-pipe</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
         
         <dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>

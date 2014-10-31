@@ -11,7 +11,7 @@ import com.intel.mtwilson.setup.SetupTask;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.configuration.Configuration;
-import com.intel.dcsg.cpg.util.PascalCaseNamingStrategy;
+import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 
 /**
  * This setup command is a bridge between mtwilson-console and the new

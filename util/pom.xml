@@ -25,6 +25,8 @@
 	<module>mtwilson-jaxrs2-jersey2.0-client</module>
 	<module>mtwilson-jaxrs2-server</module>
 	<module>mtwilson-patch</module>
+	<module>mtwilson-pipe</module>
+	<module>mtwilson-text-transform</module>
   </modules>
 
 </project>

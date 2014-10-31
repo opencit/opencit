@@ -10,7 +10,7 @@ import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
 import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.util.AllCapsNamingStrategy;
+import com.intel.mtwilson.text.transform.AllCapsNamingStrategy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;

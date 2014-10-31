@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
-import com.intel.dcsg.cpg.util.PascalCaseNamingStrategy;
+import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import com.intel.dcsg.cpg.console.Command;

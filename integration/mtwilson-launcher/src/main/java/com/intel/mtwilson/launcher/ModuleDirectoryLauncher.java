@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.performance.AlarmClock;
 import com.intel.dcsg.cpg.util.ArrayIterator;
 import com.intel.dcsg.cpg.util.BreadthFirstTreeIterator;
 import com.intel.dcsg.cpg.util.FileTree;
-import com.intel.dcsg.cpg.util.Filter;
+import com.intel.mtwilson.pipe.Filter;
 import com.intel.dcsg.cpg.module.Container;
 import com.intel.dcsg.cpg.module.Module;
 import com.intel.dcsg.cpg.module.ModuleRepository;

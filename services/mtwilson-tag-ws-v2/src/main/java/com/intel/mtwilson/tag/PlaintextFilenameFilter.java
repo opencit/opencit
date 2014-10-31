@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.tag;
 
-import com.intel.dcsg.cpg.util.Filter;
+import com.intel.mtwilson.pipe.Filter;
 import java.io.File;
 import java.io.FilenameFilter;
 
