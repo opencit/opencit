@@ -112,9 +112,9 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jackson-util</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jackson</artifactId>
+            <version>0.1-SNAPSHOT</version>
             <optional>true</optional>
         </dependency>
         <dependency>
