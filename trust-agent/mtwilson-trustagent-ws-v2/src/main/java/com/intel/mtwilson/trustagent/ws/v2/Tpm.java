@@ -6,7 +6,7 @@ package com.intel.mtwilson.trustagent.ws.v2;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.net.IPv4Address;
-import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.BuildQuoteXMLCmd;
 import com.intel.mountwilson.trustagent.commands.CreateNonceFileCmd;

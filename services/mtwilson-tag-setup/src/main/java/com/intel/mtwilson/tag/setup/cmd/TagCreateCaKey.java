@@ -7,7 +7,7 @@ package com.intel.mtwilson.tag.setup.cmd;
 import com.intel.mtwilson.tag.setup.TagCommand;
 import com.intel.mtwilson.tag.model.File;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;

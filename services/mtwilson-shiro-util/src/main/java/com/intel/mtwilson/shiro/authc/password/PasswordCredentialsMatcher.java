@@ -5,7 +5,7 @@
 package com.intel.mtwilson.shiro.authc.password;
 
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;

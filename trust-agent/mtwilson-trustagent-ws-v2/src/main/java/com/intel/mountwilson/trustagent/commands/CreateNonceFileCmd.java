@@ -4,7 +4,7 @@
  */
 package com.intel.mountwilson.trustagent.commands;
 
-import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.io.ByteArray;
 import java.io.FileOutputStream;
 import java.io.IOException;
 

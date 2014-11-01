@@ -6,7 +6,7 @@ package test.attestation;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import org.apache.commons.codec.binary.Hex;

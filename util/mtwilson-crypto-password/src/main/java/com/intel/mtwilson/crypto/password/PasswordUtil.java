@@ -5,7 +5,7 @@
 package com.intel.mtwilson.crypto.password;
 
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.dcsg.cpg.util.ByteArray;
+import com.intel.dcsg.cpg.io.ByteArray;
 
 /**
  * This class is similar to HashedCredentialsMatcher that comes wtih 
