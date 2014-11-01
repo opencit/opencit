@@ -16,6 +16,7 @@
 	</parent>
   
   <modules>
+	<module>mtwilson-collection</module>
 	<module>mtwilson-crypto-password</module>
 	<module>mtwilson-dbcp</module>
 	<module>mtwilson-i18n</module>
@@ -27,6 +28,7 @@
 	<module>mtwilson-patch</module>
 	<module>mtwilson-pipe</module>
 	<module>mtwilson-text-transform</module>
+	<module>mtwilson-tree</module>
   </modules>
 
 </project>

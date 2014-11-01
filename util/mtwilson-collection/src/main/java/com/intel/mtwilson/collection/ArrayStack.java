@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.collection;
 
-import com.intel.dcsg.cpg.util.Stack;
 import java.util.ArrayList;
 
 /**
@@ -13,10 +12,12 @@ import java.util.ArrayList;
  */
 public class ArrayStack<E> extends ArrayList<E> implements Stack<E> {
 
+    @Override
     public void push(E item) {
         add(item);
     }
 
+    @Override
     public E pop() {
         int size = size();
         E item = get(size-1); // last element, throws IndexOutOfBoundsException if stack is empty
