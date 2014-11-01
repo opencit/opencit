@@ -6,7 +6,7 @@ package com.intel.mtwilson.launcher;
 
 import com.intel.dcsg.cpg.io.file.DirectoryFilter;
 import com.intel.dcsg.cpg.performance.AlarmClock;
-import com.intel.dcsg.cpg.util.ArrayIterator;
+import com.intel.mtwilson.collection.ArrayIterator;
 import com.intel.dcsg.cpg.util.BreadthFirstTreeIterator;
 import com.intel.dcsg.cpg.util.FileTree;
 import com.intel.mtwilson.pipe.Filter;

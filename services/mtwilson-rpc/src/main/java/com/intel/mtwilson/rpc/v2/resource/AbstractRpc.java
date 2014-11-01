@@ -5,7 +5,7 @@
 package com.intel.mtwilson.rpc.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.util.MultivaluedHashMap;
+import com.intel.mtwilson.collection.MultivaluedHashMap;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
 import com.intel.mtwilson.rpc.v2.model.RpcPriv;

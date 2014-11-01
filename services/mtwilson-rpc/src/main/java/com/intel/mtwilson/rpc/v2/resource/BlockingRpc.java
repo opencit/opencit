@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.rfc822.Message;
-import com.intel.dcsg.cpg.util.MultivaluedHashMap;
+import com.intel.mtwilson.collection.MultivaluedHashMap;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.RPC;

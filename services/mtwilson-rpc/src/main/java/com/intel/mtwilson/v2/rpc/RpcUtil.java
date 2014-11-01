@@ -116,8 +116,8 @@ public class RpcUtil {
         }
     }
     
-    public static com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String> convertHeadersToMultivaluedMap(HttpServletRequest request) {
-        com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String> map = new com.intel.dcsg.cpg.util.MultivaluedHashMap<String,String>();
+    public static com.intel.mtwilson.collection.MultivaluedHashMap<String,String> convertHeadersToMultivaluedMap(HttpServletRequest request) {
+        com.intel.mtwilson.collection.MultivaluedHashMap<String,String> map = new com.intel.mtwilson.collection.MultivaluedHashMap<String,String>();
         Enumeration<String> names = request.getHeaderNames();
         while(names.hasMoreElements()) {
             String name = names.nextElement();

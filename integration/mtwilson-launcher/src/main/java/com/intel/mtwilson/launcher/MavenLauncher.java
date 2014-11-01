@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import com.intel.dcsg.cpg.performance.AlarmClock;
-import com.intel.dcsg.cpg.util.ArrayIterator;
+import com.intel.mtwilson.collection.ArrayIterator;
 import com.intel.dcsg.cpg.module.Container;
 import com.intel.dcsg.cpg.classpath.MavenResolver;
 import com.intel.dcsg.cpg.module.Module;
