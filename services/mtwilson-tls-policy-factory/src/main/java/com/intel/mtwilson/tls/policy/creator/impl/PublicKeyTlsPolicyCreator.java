@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.tls.policy.creator.impl;
 
-import com.intel.dcsg.cpg.codec.ByteArrayCodec;
+import com.intel.mtwilson.codec.ByteArrayCodec;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.tls.policy.impl.PublicKeyTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutablePublicKeyRepository;

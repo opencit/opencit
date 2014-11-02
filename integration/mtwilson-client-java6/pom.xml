@@ -98,24 +98,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-i18n</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-locale</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-xml</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-rfc822</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-rfc822</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -267,12 +267,12 @@
         <!-- the ErrorCode class moved from mtwilson-api to mtwilson-i18n -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-i18n</artifactId>
+            <artifactId>mtwilson-util-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-tls-policy</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -389,8 +389,8 @@
         </dependency>-->
         <!-- end Java 1.5 backport dependencies -->
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-validation</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
     </dependencies>  
 

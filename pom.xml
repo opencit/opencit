@@ -619,131 +619,151 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
 
         		
     <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-authz-token</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-authz-token</artifactId>
             <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-classpath</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-classpath</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-codec</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-util-collection</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-configuration</artifactId>
         <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-codec</artifactId>
-        <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-configuration</artifactId>
-        <version>0.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-console</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-console</artifactId>
         <version>0.2-SNAPSHOT</version>
     </dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-crypto</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-crypto</artifactId>
 		<version>0.2-SNAPSHOT</version>
 	</dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-crypto-key</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-crypto-key</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto-password</artifactId>
+		<version>0.1-SNAPSHOT</version>
+        </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-dbcp</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-extensions</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-extensions</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-http</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-http</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-i18n</artifactId>
+		<version>3.0-SNAPSHOT</version>
+        </dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-i18n</artifactId>
-		<version>0.2-SNAPSHOT</version>
-	</dependency>
-	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-io</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-io</artifactId>
 		<version>0.2.1-SNAPSHOT</version>
 	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jackson</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbc</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-jpa</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-jpa</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-locale</artifactId>
 		<version>0.2-SNAPSHOT</version>
 	</dependency>
     <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-net</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-net</artifactId>
             <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-objectpool</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-objectpool</artifactId>
         <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-performance</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-performance</artifactId>
         <version>0.2-SNAPSHOT</version>
     </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-pipe</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
     <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-rfc822</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-rfc822</artifactId>
             <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-tls-policy</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-shiro</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
             <version>0.3-SNAPSHOT</version>
     </dependency>
-    <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-util-jdbc</artifactId>
-            <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-util-shiro</artifactId>
-            <version>0.1-SNAPSHOT</version>
-    </dependency>
 	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-validation</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-text-transform</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tree</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-validation</artifactId>
 		<version>0.2-SNAPSHOT</version>
 	</dependency>
     <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-xml</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
             <version>0.2-SNAPSHOT</version>
     </dependency>
 
-	<dependency>
-		<groupId>com.intel.mtwilson.util</groupId>
-		<artifactId>mtwilson-pipe</artifactId>
-		<version>0.1-SNAPSHOT</version>
-	</dependency>
-	<dependency>
-		<groupId>com.intel.mtwilson.util</groupId>
-		<artifactId>mtwilson-text-transform</artifactId>
-		<version>0.1-SNAPSHOT</version>
-	</dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-collection</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-tree</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
 	
         <dependency>
             <groupId>org.slf4j</groupId>

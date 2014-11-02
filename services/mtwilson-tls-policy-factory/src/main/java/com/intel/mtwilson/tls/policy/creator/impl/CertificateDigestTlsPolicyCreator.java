@@ -4,15 +4,15 @@
  */
 package com.intel.mtwilson.tls.policy.creator.impl;
 
-import com.intel.dcsg.cpg.codec.Base64Codec;
-import com.intel.dcsg.cpg.codec.Base64Util;
-import com.intel.dcsg.cpg.codec.ByteArrayCodec;
-import com.intel.dcsg.cpg.codec.HexCodec;
+import com.intel.mtwilson.codec.Base64Codec;
+import com.intel.mtwilson.codec.Base64Util;
+import com.intel.mtwilson.codec.ByteArrayCodec;
+import com.intel.mtwilson.codec.HexCodec;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.crypto.digest.DigestUtil;
 import com.intel.dcsg.cpg.crypto.digest.UnsupportedAlgorithmException;
-import com.intel.dcsg.cpg.codec.HexUtil;
+import com.intel.mtwilson.codec.HexUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.CertificateDigestTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.DigestRepository;
 import com.intel.dcsg.cpg.x509.repository.HashSetMutableDigestRepository;

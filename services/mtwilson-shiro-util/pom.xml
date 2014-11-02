@@ -38,16 +38,15 @@
             <version>1.2.2</version>
         </dependency>		
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-util-shiro</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-shiro</artifactId>
             <scope>test</scope>
         </dependency>		
 
 
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-crypto-password</artifactId>
-            <version>${project.version}</version>
+            <artifactId>mtwilson-util-crypto-password</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -110,12 +109,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-authz-token</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-authz-token</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-net</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-net</artifactId>
         </dependency>
 
         <dependency>

@@ -5,7 +5,7 @@
 
 package com.intel.mtwilson.trustagent.tpm.tools;
 
-import com.intel.dcsg.cpg.codec.HexUtil;
+import com.intel.mtwilson.codec.HexUtil;
 import com.intel.mtwilson.common.CommandResult;
 import com.intel.mtwilson.common.CommandUtil;
 import com.intel.mtwilson.common.TAException;

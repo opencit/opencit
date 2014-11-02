@@ -30,8 +30,8 @@
     <dependencies>
 
     <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-console</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-console</artifactId>
         </dependency>
 
         <dependency>

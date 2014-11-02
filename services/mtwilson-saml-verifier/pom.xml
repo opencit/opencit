@@ -69,8 +69,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
 
         <!-- end saml verification -->

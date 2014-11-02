@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft with a token implementation that can be used with OAuth 2.0: Token, TokenFactory, TokenValidator
+

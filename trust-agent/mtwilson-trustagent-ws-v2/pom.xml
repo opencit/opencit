@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2-server</artifactId>
+            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -72,16 +72,20 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-validation</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
 
         <dependency>
@@ -171,16 +175,16 @@
 
 
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-console</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-console</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-tls-policy</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-performance</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
         </dependency>
 
 

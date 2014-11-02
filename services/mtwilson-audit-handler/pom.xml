@@ -59,8 +59,8 @@
             <artifactId>commons-configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-jpa</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>

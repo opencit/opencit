@@ -1,0 +1,45 @@
+Changelog
+
+Removed JarClassIterator and JarClassPatternIterator (now they are in cpg-classpath)
+
+* Version 0.1
+
+List of classes present in the first draft of this module:
+
+ComponentActivationException.java     
+ComponentConnectionException.java
+ComponentDeactivationException.java   
+ComponentExportException.java         
+ComponentHolder.java                  
+ComponentNotificationException.java
+ComponentSearchConfiguration.java     
+Container.java                        
+DelegatingClassLoader.java            (tentative)
+DirectoryLauncher.java
+DirectoryModuleRepository.java        
+ExportHolder.java                     
+JarClassIterator.java                 
+JarClassPatternIterator.java
+JarComponentIterator.java             
+JarFileClassLoader.java               
+JarUtil.java                          
+LimitedClassLoader.java				  (moved to cpg-classpath)
+MultiJarFileClassLoader.java          (moved to cpg-classpath)
+MavenLauncher.java                    
+MavenResolver.java                    (will probably be rewritten as a MavenModuleRepository)
+Module.java
+ModuleActivationEvent.java            
+ModuleActivationException.java        
+ModuleClassLoader.java                
+ModuleDeactivationEvent.java
+ModuleDeactivationException.java      
+ModuleEvent.java                      
+ModuleRepository.java                 
+ModuleUtil.java
+MultiJarFileClassLoader.java          
+NoticeHolder.java                     
+NullClassLoader.java                  (tentative)
+ReflectionUtil.java
+Version.java                          
+VersionRange.java                     
+Whiteboard.java

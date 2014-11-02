@@ -1,0 +1,25 @@
+Changelog
+
+* Version 0.2
+
+Added JarClassIterator and JarClassPatternIterator (moved here from cpg-module)
+
+* Version 0.1
+
+Support classes for cpg-module to find and load modules.
+
+List of classes present in the first draft:
+
+ClassLoadingStrategy (interface)
+DirectoryResolver
+FencedClassLoadingStrategy
+FileResolver (interface)
+IsolatedClassLoadingStrategy
+JarFileClassLoader
+JarUtil
+LimitedClassLoader
+MavenResolver
+MultiJarFileClassLoader
+SharedClassLoadingStrategy
+StringWildcardFilter
+UnitedClassLoadingStrategy

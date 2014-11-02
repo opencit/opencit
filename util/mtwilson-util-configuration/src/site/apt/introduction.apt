@@ -1,0 +1,13 @@
+Introduction
+
+Apache Commons Configuration defines a "normal" Configuration interface which
+is mutable and inherits from a ImmutableConfiguration interface. This is
+awkward - checking to see if a configuration instance is mutable means just 
+checking if it is an instance of Configuration. But there's no way to check
+if an instance is immutable - because all instances inherit from ImmutableConfiguration.
+
+Doing it the other way makes more sense. Starting with a Configuration interface
+which is immutable, and having a subinterface which is a MutableConfiguration 
+allows programmers to know more intuitively whether the instance is readonly or
+mutable. 
+

@@ -4,7 +4,7 @@
  */
 package com.intel.mountwilson.trustagent.commands;
 
-import com.intel.dcsg.cpg.codec.HexUtil;
+import com.intel.mtwilson.codec.HexUtil;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;

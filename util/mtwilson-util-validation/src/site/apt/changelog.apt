@@ -1,0 +1,16 @@
+Changelog
+
+* Version 0.2
+
+  Added InputValidator
+  Added Validator annotation
+
+* Version 0.1.1
+
+  Added InputModel
+  Added Regex annotation
+
+* Version 0.1
+
+  First draft with Model, Fault, ObjectModel, BuilderModel, and Unchecked annotation
+

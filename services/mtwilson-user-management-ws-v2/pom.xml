@@ -25,9 +25,14 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-util-shiro</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-shiro</artifactId>
             <scope>test</scope>
+        </dependency> 
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-jdbi</artifactId>
+            <version>${project.version}</version>
         </dependency> 
 
         <dependency>
@@ -54,12 +59,12 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2-server</artifactId>
+            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -68,16 +73,16 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-validation</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
 
         <dependency>

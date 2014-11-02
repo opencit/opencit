@@ -4,11 +4,11 @@
  */
 package com.intel.mtwilson.tls.policy.factory;
 
-import com.intel.dcsg.cpg.codec.Base64Codec;
-import com.intel.dcsg.cpg.codec.Base64Util;
-import com.intel.dcsg.cpg.codec.ByteArrayCodec;
-import com.intel.dcsg.cpg.codec.HexCodec;
-import com.intel.dcsg.cpg.codec.HexUtil;
+import com.intel.mtwilson.codec.Base64Codec;
+import com.intel.mtwilson.codec.Base64Util;
+import com.intel.mtwilson.codec.ByteArrayCodec;
+import com.intel.mtwilson.codec.HexCodec;
+import com.intel.mtwilson.codec.HexUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.My;

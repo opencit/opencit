@@ -1,0 +1,28 @@
+Changelog
+
+* Version 0.1.1
+
+ Updated dependency on cpg-net to version 0.1.1
+
+ Added logback-test.xml for configuration of logback in JUnit tests
+
+* Version 0.1
+
+ List of classes present in the first version of this module:
+
+ AbstractCommand
+ Command
+ CommandFinder
+ ExtendedOptions
+ HyphenatedCommandFinder
+ Main
+ PackageCommandFinder
+ Term
+ TermProgressObserver
+ YesNo
+ Input
+ IntegerInput
+ InternetAddressInput
+ StringInput
+ URLInput
+ YesNoInput

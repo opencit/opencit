@@ -14,8 +14,8 @@
     <dependencies>  
         
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-extensions</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
         
 		<dependency>
@@ -75,12 +75,12 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2-server</artifactId>
+            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         

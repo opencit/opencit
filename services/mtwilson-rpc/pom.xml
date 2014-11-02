@@ -46,7 +46,8 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-collection</artifactId>
+            <artifactId>mtwilson-util-collection</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <!-- required for javax.ws.rs.QueryParam in RpcFilterCriteria and javax.ws.rs.Path in Rpcs resource -->
         <dependency>
@@ -87,33 +88,38 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
         -->
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-extensions</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-validation</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
+            <version>3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-rfc822</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-performance</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-rfc822</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -126,14 +132,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-patch</artifactId>
-            <version>${project.version}</version>
+            <artifactId>mtwilson-util-patch</artifactId>
+            <version>3.0-SNAPSHOT</version>
         </dependency>
         
         <!-- java object serialization for the mw_rpc table; we use xstream which depends on xpp3 which depends on xmlpull -->

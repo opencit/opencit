@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft, defining Configuration, MutableConfiguration, Value, MutableValue, CommonsConfigurationAdapter
+

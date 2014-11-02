@@ -26,7 +26,7 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2-client</artifactId>
+            <artifactId>mtwilson-util-jaxrs2-client</artifactId>
             <version>${project.version}</version>        
         </dependency>
 
@@ -54,8 +54,8 @@
             <artifactId>commons-configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-tls-policy</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -99,7 +99,7 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
 

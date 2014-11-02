@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft includes:  CipherCodec, Ciphertext, Plaintext, EncryptionKey, EncryptionKeySource, KeyNotFoundException, KeyPolicy, SecretKeyRepository, MutableSecretKeyRepository, HashMapMutableSecretKeyRepository, MessageIntegrityException, Protection, ProtectionBuilder, ProtectionPolicy, ProtectionPolicyBuilder, RandomSource.
+

@@ -1,0 +1,51 @@
+Changelog
+
+* Version 0.2
+
+  Fixed ArrayIndexOutOfBoundsException in UUID toString() by adding leading zeros to short UUIDs sometimes produced by java.util.UUID.randomUUID() to ensure the result is always 16 bytes
+  Added PropertiesUtil with load(File) and loadExisting(File) methods
+
+* Version 0.1.3
+
+  Fixed bug in UUID toHexString() that was omitting leading zeros; UUID now serializes to something like <bytes>Y2s9epnCQpq/rDDuqQzkNQ==</bytes>  using XStream
+
+* Version 0.1.3
+
+  Removed Rfc822Date, it is now in the cpg-rfc822 module.
+  Marked ByteArray deprecated, it is now in the cpg-util module and will be removed from cpg-io in 0.2
+
+* Version 0.1.2
+
+  Fixed ByteArray.fromHex to preserve leading zeros.
+  Added HexInput and HexUtil and Base64Util
+  Added Iso8601.valueOf(String) and Rfc822Date.valueOf(String)
+
+* Version 0.1.1
+
+  Added toBigInteger() converter and new ByteArray(BigInteger) constructor to ByteArray.
+  Added fromHex, equals, hashCode, toHexString, and concat(ByteArray...) to ByteArray.
+  Added UUID class.
+
+* Version 0.1
+
+List of classes present in the first version of this module:
+
+  AllCapsEnvironmentConfiguration
+  ByteArrayResource
+  Classpath
+  ConfigurationUtil
+  CopyResource
+  ExistingFileResource
+  ExistingFolder
+  FileResource
+  Filename
+  Folder
+  Platform
+  Resource
+  FileRepository
+  InternetMessage
+  Pem
+  PemLikeParser
+  Iso8601Date
+  Rfc822Date
+  DN (x500)

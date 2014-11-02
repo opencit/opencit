@@ -1,0 +1,16 @@
+Changelog
+
+* Version 0.1.1
+
+ Added @JsonValue annotation to the toString() method of InternetAddress for both Jackson 1.x and 2.x
+ Switched logging implementation from slf4j-simple to logback for testing
+ Added logback-test.xml for configuration of logback in JUnit tests
+
+* Version 0.1
+
+ List of classes present in the first version of this module:
+
+ Hostname
+ IPv4Address
+ IPv6Address
+ InternetAddress

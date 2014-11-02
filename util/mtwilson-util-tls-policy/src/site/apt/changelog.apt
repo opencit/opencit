@@ -1,0 +1,31 @@
+Changelog
+
+* Version 0.2
+
+  Added connect() and connect(timeout) methods to TlsConnection
+
+* Version 0.1
+
+List of classes present in the first version of this module:
+
+  TlsClient
+  TlsConnection
+  TlsPolicy
+  TlsPolicyBuilder
+  TlsPolicyException
+  TlsPolicyFactory
+  TlsPolicyManager
+  TlsUtil
+  TrustDelegate
+  UnknownCertificateException
+  AllowAllHostnameVerifier
+  AllowAllX509TrustManager
+  ApacheTlsClient
+  ApacheTlsPolicy
+  CerificateStoringX509TrustManager
+  ConsoleTrustDelegate
+  FirstCertificateTrustDelegate
+  InsecureTlsPolicy
+  StrictTlsPolicy
+  TrustKnownCetificateTlsPolicy
+

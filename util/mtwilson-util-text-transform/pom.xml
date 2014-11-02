@@ -26,7 +26,7 @@
         <!-- for Transformer interface -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-pipe</artifactId>
+            <artifactId>mtwilson-util-pipe</artifactId>
         </dependency>
 
         <!-- for StringUtils -->

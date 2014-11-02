@@ -4,7 +4,7 @@
  */
 package test.crypto;
 
-import com.intel.dcsg.cpg.codec.HexUtil;
+import com.intel.mtwilson.codec.HexUtil;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;

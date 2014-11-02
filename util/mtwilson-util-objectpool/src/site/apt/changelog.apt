@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft includes a generic ObjectPool interface, an AbstractObjectPool implementation, an AbstractValidatingObjectPool decorator implementation, and an optional ReturnOnCloseObjectFactory utility which uses javassist to generate dynamic proxies for pools of objects implementing Closeable
+

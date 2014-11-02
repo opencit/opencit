@@ -88,6 +88,10 @@
 			<artifactId>mtwilson-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+    <dependency>
+          <groupId>org.eclipse.persistence</groupId>
+          <artifactId>eclipselink</artifactId>
+    </dependency>
     
     <dependency>
       <groupId>org.springframework</groupId>
@@ -115,16 +119,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-validation</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-validation</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-io</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-io</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.intel.dcsg.cpg</groupId>
-        <artifactId>cpg-rfc822</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-rfc822</artifactId>
     </dependency>
   </dependencies>  
 

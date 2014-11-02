@@ -1,0 +1,19 @@
+Introduction
+
+Apache Commons Codec defines same-to-same codec interfaces. For
+example, the Encoder interface is encode Object->Object, the BinaryEncoder
+interface is encode byte[]->byte[], and the StringEncoder interface is
+encode String->String.
+
+There are certainly applications for such same-to-same codecs, and of course
+the common ones are already included in commons-codec.
+
+However, there is another category of encoding/decoding interfaces that
+is useful but not included in commons-codec:  encode Object->byte[] and
+encode byte[]->String are also known as serialization and its useful
+to define different encoders implementing these interfaces. For example,
+an ASN.1 DER encoder can implement encode Object->byte[] for X509Certificate
+objects, and a PEM encoder can implement encode byte[]->String for any
+DER-encoded object (actually any byte array can be base64-encoded and 
+wrapped with PEM-style banners).
+

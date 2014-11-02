@@ -1,0 +1,41 @@
+Changelog
+
+* Version 0.2-SNAPSHOT
+
+ Added dependency on cpg-crypto-key for new key generation and management capabilities. 
+ Added RandomUtil to provide convenient random bytes for passwords or nonces using the secure random number generator.
+ Parent POM updated to com.intel.dcsg.cpg:cpg:0.3-SNAPSHOT
+ Added getRepository() method to SimpleKeystore to return a KeystoreCertificateRepository backed with the SimpleKeystore's KeyStore
+ Added extend() method to Sha256Digest
+
+* Version 0.1.5-SNAPSHOT
+
+ Added Aes128CbcPkcs5 class which was Aes128 in Mt Wilson that used CBC/PKCS5 instead of OFB8/NoPadding used in Aes.
+ Added KeyStoreUtil
+
+* Version 0.1.4-SNAPSHOT
+
+ Added Aes class. Aes128 is now a subclass of Aes.
+
+* Version 0.1.3-SNAPSHOT
+
+ Removed HexInput, HexUtil, and Base64Util; they can now be found in cpg-io-0.1.2
+
+ Improved RsaUtil.decodePemPublicKey, RsaUtil.decodePemPrivateKey, and X509Util.decodePemCertificate to recognize the
+first block of valid data from a string containing possibly multiple blocks and surrounding text. This allows you
+to create a single file containing both a private key and public key or private key and certificate and parse each
+one out separately using the corresponding decode method.
+
+* Version 0.1.2-SNAPSHOT
+
+* Version 0.1.1-SNAPSHOT
+
+ X509Builder now also accepts alternativeName without ip: or dns: hint and tries to autodetect
+
+* Version 0.1-SNAPSHOT
+
+ Fork of Mt Wilson's crypto package
+
+ Added new features to support Mystery Hill: DataEnvelope, KeyEnvelope, PasswordKeyEnvelope, and CertificateRepository
+and related classes
+

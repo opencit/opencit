@@ -12,16 +12,9 @@ import org.junit.Test;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
-import java.io.StringReader;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.stream.StreamSource;
-import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft with JAXB helper protecting against CWE-611 improper restriction of XML External Entity references
+

@@ -42,24 +42,27 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2</artifactId>
+            <artifactId>mtwilson-util-jaxrs2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jackson</artifactId>
-            <version>${project.version}</version>
+            <artifactId>mtwilson-util-jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-patch</artifactId>
-            <version>${project.version}</version>
+            <artifactId>mtwilson-util-patch</artifactId>
+            <version>3.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-i18n</artifactId>
+            <artifactId>mtwilson-util-i18n</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-locale</artifactId>
         </dependency>
 
 		</dependencies>  

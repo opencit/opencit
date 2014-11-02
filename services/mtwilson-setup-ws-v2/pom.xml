@@ -69,7 +69,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2-server</artifactId>
+            <artifactId>mtwilson-util-jaxrs2-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         

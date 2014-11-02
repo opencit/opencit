@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.extensions.Scanner;
 import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.dcsg.cpg.performance.CountingIterator;
-import com.intel.dcsg.cpg.util.ArrayIterator;
+import com.intel.mtwilson.collection.ArrayIterator;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.feature.model.FeaturePermission;
 import com.intel.mtwilson.shiro.PermissionInfo;

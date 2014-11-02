@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft, defining ObjectCodec and ByteArrayCodec interfaces, and implementations Base64Codec and HexCodec (using commons-codec) and XStreamCodec (using xstream)
+

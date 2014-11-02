@@ -1,0 +1,6 @@
+Changelog
+
+* Version 0.1
+
+  First draft includes ConnectionPool, ConnectionDelegate, DataSourceDelegate, PoolingDataSource, ValidatingConnectionPool, and PooledConnection
+

@@ -2,6 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mtwilson-util-dbcp</artifactId>
+		<version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mtwilson-util-dbcp</name>
     <description>Database connection pooling utility</description>
@@ -34,7 +35,6 @@
         <dependency>
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi</artifactId>
-            <version>2.53</version>
 			<scope>test</scope>
         </dependency>        
         
@@ -59,17 +59,21 @@
         </dependency>
         
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-objectpool</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-util-jdbc</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-objectpool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbc</artifactId>
         </dependency>
         
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-performance</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
             <scope>test</scope>
         </dependency>
         
@@ -87,7 +91,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
 			<scope>test</scope>
         </dependency>
     </dependencies>  

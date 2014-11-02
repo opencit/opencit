@@ -15,12 +15,12 @@
     <dependencies>
 
         <dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-classpath</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
         <dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-extensions</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
         
         <dependency>
@@ -31,20 +31,21 @@
         <!-- for Filter -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-pipe</artifactId>
+            <artifactId>mtwilson-util-pipe</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-collection</artifactId>
+            <artifactId>mtwilson-util-collection</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-tree</artifactId>
+            <artifactId>mtwilson-util-tree</artifactId>
         </dependency>
         
         <dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-module</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-module</artifactId>
 		<version>0.2-SNAPSHOT</version>            
         </dependency>
 
@@ -57,19 +58,19 @@
             
             <!-- for use of AlarmClock for eventloop and for progress monitor -->
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-performance</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
         </dependency>
         <!-- for DirectoryFilter -->
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
 
 <!--
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
             <version>0.1.4-SNAPSHOT</version>
         </dependency>
             

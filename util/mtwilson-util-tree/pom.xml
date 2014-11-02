@@ -26,12 +26,12 @@
         <!-- for Filter -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-pipe</artifactId>
+            <artifactId>mtwilson-util-pipe</artifactId>
         </dependency>
         <!-- for ArrayStack -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>mtwilson-collection</artifactId>
+            <artifactId>mtwilson-util-collection</artifactId>
         </dependency>
         
         <!-- logging -->

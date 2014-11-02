@@ -32,8 +32,8 @@
 		
 
     <dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-i18n</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-locale</artifactId>
     </dependency>
 		
 
