@@ -843,7 +843,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
 	$LOG_COMPRESS
 	$LOG_DELAYCOMPRESS
 	$LOG_COPYTRUNCATE
-}" > /etc/logrotate.d/mtwilson.logrotate
+}" > /etc/logrotate.d/mtwilson
 fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
