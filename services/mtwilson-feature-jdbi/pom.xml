@@ -14,8 +14,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jdbi-util</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbi</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>

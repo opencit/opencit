@@ -26,7 +26,6 @@
 	<module>mtwilson-hostagent-ext</module>
 	<module>mtwilson-http-servlets</module>
 	<module>mtwilson-intel-hostagent</module>
-	<module>mtwilson-jdbi-util</module>
 	<module>mtwilson-jersey2-util</module>
 	<module>mtwilson-jooq-util</module>
 	<module>mtwilson-logback-util</module>
