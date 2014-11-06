@@ -27,7 +27,6 @@
 	<module>mtwilson-http-servlets</module>
 	<module>mtwilson-intel-hostagent</module>
 	<module>mtwilson-jersey2-util</module>
-	<module>mtwilson-jooq-util</module>
 	<module>mtwilson-logback-util</module>
 	<module>mtwilson-privacyca-model</module>
 	<module>mtwilson-privacyca-niarl</module>

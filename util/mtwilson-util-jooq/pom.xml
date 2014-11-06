@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mtwilson-jooq-util</artifactId>
+    <artifactId>mtwilson-util-jooq</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-jooq-util</name>
+    <name>mtwilson-util-jooq</name>
     <description>Utility classes for using JOOQ from http://jooq.org</description>
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util</artifactId>
 		<version>3.0-SNAPSHOT</version>
     </parent>
 
