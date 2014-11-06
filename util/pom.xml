@@ -33,7 +33,7 @@
 	<module>mtwilson-util-jackson</module>
 	<module>mtwilson-util-jaxrs2</module>
 	<module>mtwilson-util-jaxrs2-client</module>
-	<module>mtwilson-util-jaxrs2-jersey2.0-client</module>
+	<module>mtwilson-util-jaxrs2-client-jersey2.0</module>
 	<module>mtwilson-util-jaxrs2-server</module>
     <module>mtwilson-util-jdbc</module>
     <module>mtwilson-util-jpa</module>

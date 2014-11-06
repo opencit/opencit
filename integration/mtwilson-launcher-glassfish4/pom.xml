@@ -79,7 +79,7 @@ no indication of problems with these yet.
 
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-jaxrs2-jersey2.0-client</artifactId>
+            <artifactId>mtwilson-util-jaxrs2-client-jersey2.0</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

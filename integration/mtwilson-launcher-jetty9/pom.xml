@@ -135,8 +135,8 @@ This error message indicates you need a jersey implementation like org.glassfish
         
         <!-- include all the app dependencies -->
         <dependency>
-            <groupId>com.intel.mtwilson.features</groupId>
-            <artifactId>mtwilson-server</artifactId>
+            <artifactId>mtwilson-server-zip</artifactId>
+            <groupId>com.intel.mtwilson.packages</groupId>
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
