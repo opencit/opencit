@@ -60,8 +60,8 @@ This error message indicates you need jackson 1.x implementation like org.codeha
     <dependencies>
 
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-jetty9-util</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jetty9</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

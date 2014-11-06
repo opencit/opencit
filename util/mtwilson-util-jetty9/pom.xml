@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>mtwilson-jetty9-util</artifactId>
+    <artifactId>mtwilson-util-jetty9</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-jetty9-util</name>
+    <name>mtwilson-util-jetty9</name>
 
     <parent>
-        <groupId>com.intel.mtwilson.integration</groupId>
-        <artifactId>mtwilson-integration</artifactId>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util</artifactId>
         <version>3.0-SNAPSHOT</version>
     </parent>
     

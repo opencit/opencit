@@ -113,8 +113,8 @@
         
         <!-- begin jetty -->
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-jetty9-util</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jetty9</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- jetty ,  see complete list of available modules at http://mvnrepository.com/artifact/org.eclipse.jetty -->
