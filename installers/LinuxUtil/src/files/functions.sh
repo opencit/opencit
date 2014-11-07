@@ -5,8 +5,6 @@
 
 # CONFIGURATION:
 
-# 2014-06-04|17:44 TEST COMMIT
-
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 #conf_dir=/etc/intel/cloudsecurity
 DEFAULT_MTWILSON_JAVA_DIR=/opt/mtwilson/java
@@ -976,7 +974,7 @@ mysql_detect() {
   fi
   mysql=`which mysql 2>/dev/null`
   if [ -e "$mysql" ]; then
-    MYSQL_HOME=`dirname $mysql`
+    MYSQL_HOME=`dirname "$mysql"`
     echo "Found mysql client: $mysql"
     mysql_version ${min_version}
     if [ "$MYSQL_CLIENT_VERSION_OK" != "yes" ]; then
@@ -1480,7 +1478,7 @@ postgres_detect(){
   echo "psql=$psql" >> $INSTALL_LOG_FILE
   
   if [ -e "$psql" ]; then
-    POSTGRES_HOME=`dirname $psql`
+    POSTGRES_HOME=`dirname "$psql"`
     echo "Found postgres client: $psql" >> $INSTALL_LOG_FILE
     postgres_version ${min_version}
     if [ "$POSTGRES_CLIENT_VERSION_OK" != "yes" ]; then
@@ -1510,8 +1508,8 @@ postgres_server_detect() {
   for c in $postgres_candidates
   do
     local version_name=`$c --version 2>/dev/null | head -n 1 | awk '{ print $3 }'`
-    local bin_dir=`dirname $c`
-    local version_dir=`dirname $bin_dir`
+    local bin_dir=`dirname "$c"`
+    local version_dir=`dirname "$bin_dir"`
     echo "postgres candidate version=$version_name" >> $INSTALL_LOG_FILE
 
     if is_version_at_least "$version_name" "$min_version"; then
@@ -1951,7 +1949,7 @@ glassfish_detect() {
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
 
       if [[ -n "$java" ]]; then    
-        local java_bindir=`dirname $java`
+        local java_bindir=`dirname "$java"`
       fi
   # start with GLASSFISH_HOME if it is already configured
   if [[ -n "$GLASSFISH_HOME" ]]; then
@@ -1990,7 +1988,7 @@ glassfish_detect() {
 #  echo "Candidates: $GLASSFISH_CANDIDATES"
   for c in $GLASSFISH_CANDIDATES
   do
-      local parent=`dirname $c`
+      local parent=`dirname "$c"`
  #     echo "Checking Glassfish: $parent"
       if [ -f "$parent/bin/asadmin" ]; then
         GLASSFISH_HOME="$parent"
@@ -2613,7 +2611,7 @@ tomcat_detect() {
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
 
       if [[ -n "$java" ]]; then    
-        local java_bindir=`dirname $java`
+        local java_bindir=`dirname "$java"`
       fi
 
   # start with TOMCAT_HOME if it is already configured
@@ -2647,8 +2645,8 @@ tomcat_detect() {
   do
     #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
-      local conf_dir=`dirname $c`
-      local parent=`dirname $conf_dir`
+      local conf_dir=`dirname "$c"`
+      local parent=`dirname "$conf_dir"`
       if [ -f "$parent/bin/catalina.sh" ]; then
         export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
@@ -3060,9 +3058,9 @@ java_detect() {
     JAVA_JDK_CANDIDATES=`find / -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
     for c in $JAVA_JDK_CANDIDATES
     do
-        local java_bindir=`dirname $c`
+        local java_bindir=`dirname "$c"`
         if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname "$java_bindir"`
           java=$c
           JAVA_VERSION=`java_version`
           echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
@@ -3077,9 +3075,9 @@ java_detect() {
     JAVA_JRE_CANDIDATES=`find / -name java 2>/dev/null | grep jre | grep bin/java`
     for c in $JAVA_JRE_CANDIDATES
     do
-        java_bindir=`dirname $c`
+        java_bindir=`dirname "$c"`
         if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname "$java_bindir"`
           java=$c
           JAVA_VERSION=`java_version`
           echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
@@ -3094,10 +3092,10 @@ java_detect() {
     JAVA_BIN_CANDIDATES=`find / -name java 2>/dev/null | grep bin/java`
     for c in $JAVA_BIN_CANDIDATES
     do
-        java_bindir=`dirname $c`
+        java_bindir=`dirname "$c"`
         # in non-JDK and non-JRE folders the "java" command may be a symlink:
         if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname "$java_bindir"`
           java=$c
           JAVA_VERSION=`java_version`
           echo "Found Java: $c" >> $INSTALL_LOG_FILE
@@ -3107,8 +3105,8 @@ java_detect() {
         elif [ -h "$java_bindir/java" ]; then
           local javatarget=`readlink $c`
           if [ -f "$javatarget" ]; then
-            java_bindir=`dirname $javatarget`
-            export JAVA_HOME=`dirname $java_bindir`
+            java_bindir=`dirname "$javatarget"`
+            export JAVA_HOME=`dirname "$java_bindir"`
             java=$javatarget
             JAVA_VERSION=`java_version`
             echo "Found Java: $java" >> $INSTALL_LOG_FILE
