@@ -1168,17 +1168,21 @@ mysql_create_database() {
   mysql_cnf=`find / -name my.cnf 2>/dev/null | head -n 1`
   #echo "MySQL configuration file is located at $mysql_cnf"
   # check the current port that is configured. There should be 2 instances, one for server and one for client. Both of them should be updated
-  current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
-  #echo "MySQL is currently configured with port $current_port"
-  # if the required port is already configured. If not, we need to reconfigure
-  has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
-  if [ -z "$has_correct_port" ]; then
-    echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
-    sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
-    echo "Restarting MySQL for port change update to take effect."
-    service mysql restart >> $INSTALL_LOG_FILE
+  if [ -f "$mysql_cnf" ]; then
+    current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
+    #echo "MySQL is currently configured with port $current_port"
+    # if the required port is already configured. If not, we need to reconfigure
+    has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
+    if [ -z "$has_correct_port" ]; then
+      echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
+      sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
+      echo "Restarting MySQL for port change update to take effect."
+      service mysql restart >> $INSTALL_LOG_FILE
+    fi
+  else
+    echo "warning: my.cnf not found" >> $INSTALL_LOG_FILE
   fi
-
+	
   mysql_test_connection
   local create_sql="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
   local grant_sql="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
@@ -1678,16 +1682,20 @@ postgres_configure_connection() {
 postgres_create_database() {
 if postgres_server_detect ; then
   #we first need to find if the user has specified a different port than the once currently configured for postgres
-  current_port=`grep "port =" $postgres_conf | awk '{print $3}'`
-  has_correct_port=`grep $POSTGRES_PORTNUM $postgres_conf`
-  if [ -z "$has_correct_port" ]; then
-    echo "Port needs to be reconfigured from $current_port to $POSTGRES_PORTNUM"
-    sed -i s/$current_port/$POSTGRES_PORTNUM/g $postgres_conf 
-    echo "Restarting PostgreSQL for port change update to take effect."
-    postgres_restart >> $INSTALL_LOG_FILE
-    sleep 10
+  if [ -n "$postgres_conf" ]; then
+    current_port=`grep "port =" $postgres_conf | awk '{print $3}'`
+    has_correct_port=`grep $POSTGRES_PORTNUM $postgres_conf`
+    if [ -z "$has_correct_port" ]; then
+      echo "Port needs to be reconfigured from $current_port to $POSTGRES_PORTNUM"
+      sed -i s/$current_port/$POSTGRES_PORTNUM/g $postgres_conf 
+      echo "Restarting PostgreSQL for port change update to take effect."
+      postgres_restart >> $INSTALL_LOG_FILE
+      sleep 10
+    fi
+  else
+    echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
   fi
-
+	
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
     #echo_success "Database [${POSTGRES_DATABASE}] already exists"
@@ -1709,16 +1717,24 @@ if postgres_server_detect ; then
     postgres_connection_error=`cat /tmp/intel.postgres.err`
     echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
 
-    has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
-    if [ -z "$has_host" ]; then
-      echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
+	if [ -n "$postgres_pghb_conf" ]; then 
+      has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
+      if [ -z "$has_host" ]; then
+        echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
+      fi
+	else
+	  echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
     fi
-    
-    has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
-    if [ -z "$has_listen_addresses" ]; then
-       echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
-    fi
-    
+	
+	if [ -n "$postgres_conf" ]; then
+      has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
+      if [ -z "$has_listen_addresses" ]; then
+         echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
+      fi
+    else
+	  echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
+	fi
+	
     postgres_restart >> $INSTALL_LOG_FILE
     sleep 10
     postgres_test_connection
@@ -2197,8 +2213,12 @@ glassfish_install() {
   
   # set JAVA_HOME for glassfish
   asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
-  if [ -f "$asenvFile" ] && ! grep -q "AS_JAVA=" "$asenvFile"; then
-    echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+  if [ -n "$asenvFile" ]; then
+    if [ -f "$asenvFile" ] && ! grep -q "AS_JAVA=" "$asenvFile"; then
+      echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+    fi
+  else
+    echo "warning: asenv.conf not found" >> $INSTALL_LOG_FILE
   fi
   
   echo "Increasing glassfish max thread pool size to 200..."
@@ -3700,10 +3720,14 @@ call_tag_setupcommand() {
 
 file_encrypted() {
   local filename="${1}"
-  if grep -q "ENCRYPTED DATA" "$filename"; then
-    return 0 #"File encrypted: $filename"
+  if [ -n "$filename" ]; then
+    if grep -q "ENCRYPTED DATA" "$filename"; then
+      return 0 #"File encrypted: $filename"
+    else
+      return 1 #"File NOT encrypted: $filename"
+    fi
   else
-    return 1 #"File NOT encrypted: $filename"
+    return 2 # FILE NOT FOUND so cannot detect
   fi
 }
 
