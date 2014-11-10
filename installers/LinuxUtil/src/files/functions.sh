@@ -2658,13 +2658,15 @@ tomcat_detect() {
   #echo "tomcat variable is $tomcat"
   #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
+  # if we get here, then there was NOT already a tomcat configured
+  # that meets our minimum version requirement
+
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES
   do
-    #echo "debug tomcat candidate: $c"
-    if [ -z "$TOMCAT_HOME" ]; then
+      #echo "debug tomcat candidate: $c"
       local conf_dir=`dirname "$c"`
       local parent=`dirname "$conf_dir"`
       if [ -f "$parent/bin/catalina.sh" ]; then
@@ -2680,7 +2682,6 @@ tomcat_detect() {
           return 0
         fi
       fi
-    fi
   done
   echo_failure "Cannot find Tomcat"
   tomcat_clear
