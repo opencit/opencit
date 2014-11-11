@@ -26,6 +26,7 @@
     <module>mtwilson-util-crypto-key</module>
 	<module>mtwilson-util-crypto-password</module>
 	<module>mtwilson-util-dbcp</module>
+	<module>mtwilson-util-exec</module>
 	<module>mtwilson-util-extensions</module>
     <module>mtwilson-util-http</module>
 	<module>mtwilson-util-i18n</module>

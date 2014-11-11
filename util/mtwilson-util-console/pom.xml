@@ -17,17 +17,14 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-validation</artifactId>
-            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-net</artifactId>
-            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-performance</artifactId>
-            <version>0.2-SNAPSHOT</version>
             <optional>true</optional>
         </dependency>
     <dependency>
@@ -48,13 +45,11 @@
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
-		<version>1.9.2</version>
 		<scope>compile</scope>
     </dependency>
     <dependency>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>commons-lang3</artifactId>
-		<version>3.1</version>
     </dependency>
     <dependency>
       <groupId>commons-configuration</groupId>
