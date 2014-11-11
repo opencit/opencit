@@ -4,7 +4,7 @@
   <artifactId>mtwilson-linux-util</artifactId>
 
   <packaging>pom</packaging>
-  <name>Linux Utility</name>
+  <name>mtwilson-util-linux</name>
   <description>Self-extracting executable that installs Linux utility functions for Mt Wilson control scripts.</description>
 
     <parent>
