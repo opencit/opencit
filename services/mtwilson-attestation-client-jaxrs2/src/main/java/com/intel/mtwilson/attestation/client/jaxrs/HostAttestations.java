@@ -48,12 +48,13 @@ public class HostAttestations extends MtWilsonClient {
        
     /**
      * Forces a complete attestation cycle for the host whose UUID is specified. This does not return back the cached attestation result, instead
-     * it creates a new one, caches it in the system and returns back the same to the caller.  <br>
+     * it creates a new one, caches it in the system and returns back the same to the caller.  
+     * The accept content type header should be set to "Accept: application/json".<br>
      * @param obj HostAttestation object with the UUID of the host for which the attestation has to be done. 
      * @return HostAttestation object with the details trust report. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:create
-     * @mtwContentTypeReturned JSON/XML/YAML
+     * @mtwContentTypeReturned JSON
      * @mtwMethodType POST
      * @mtwSampleRestCall
      * <pre>
@@ -276,7 +277,7 @@ public class HostAttestations extends MtWilsonClient {
 
     /**
      * Searches for the cached SAML attestation results for the host with the specified criteria. The latest cached SAML assertion would be returned
-     * back if the cached value is still valid.
+     * back if the cached value is still valid. The accept content type header should be set to "Accept: application/samlassertion+xml".
      * @param criteria HostAttestationFilterCriteria object that specifies the search criteria.
      * The possible search options include host attestation id, host UUID, host AIK and host name. 
      * @return String object having the SAML assertion contents.
@@ -287,9 +288,50 @@ public class HostAttestations extends MtWilsonClient {
      * @mtwSampleRestCall
      * <pre>
      * https://server.com:8181/mtwilson/v2/host-attestations?nameEqualTo=192.168.0.2
-     * Output: {"host_attestations":
-     *          [{"id":"32923691-9847-4493-86ee-3036a4f24940","host_uuid":"de07c08a-7fc6-4c07-be08-0ecb2f803681",
-     *              "host_name":"192.168.0.2","host_trust_response":{"hostname":"192.168.0.2","trust":{"bios":true,"vmm":true,"location":false,"asset_tag":false}}}]}
+     * Output (SAML): <?xml version="1.0" encoding="UTF-8" ?>
+     * <saml2:Assertion ID="HostTrustAssertion" IssueInstant="2014-05-03T01:51:40.924Z" Version="2.0">
+     * <saml2:Issuer>https://192.168.0.234:8181</saml2:Issuer>
+     *  <Signature>
+     *  <SignedInfo>
+     *  <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments" />
+     *  <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+     *  <Reference URI="#HostTrustAssertion">
+     *  <Transforms>
+     *  <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+     *  </Transforms>
+     *  <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+     *  <DigestValue>44CUa4dBt1cDqoPMX64FmbFh3Yo=</DigestValue>
+     *  </Reference>
+     *  </SignedInfo>
+     *  <SignatureValue>DP94MAPedP+cxyGZKswavB6wkchr7B/jRI4SPO8PfjAQnK6OC/E4Y8PErwNdQxgdbac+kWCNsx+p zynOXajohUfSUoNrP4RZptl1zyTzNX3xbZ6Nm2gMT8sAP4YVHYj3KFHdzr8PNKLG0AmHA97vPNcc FMkZz+SYHNH0t8p4GxeZNyHaBgvccb9h3ciEYBrpR/Lk4jOOmlnZy24nWvXQ5vkGkGLEeP1SeQC+ 6OgtF4Dd3KVrcWxIDHnwiBRJQzKz8FUujElGzLx2WuXrTehz/652XcrR2BZWBydChl0lLOmuzlcL s5AcsmUoS9BTfGOFvc9bwt3uUq6YRgicI73qhA==</SignatureValue>
+     *  <KeyInfo>
+     *  <X509Data>
+     *  <X509Certificate>MIIDYzCCAkugAwIBAgIENgiqGDANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE CBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv bjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTQwNDIzMDQyNDQ0WhcNMjQwNDIwMDQyNDQ0WjBiMQsw CQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx EjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA A4IBDwAwggEKAoIBAQCCFAVZDs9WAe2RgF/zY1AwtLLKkI8JyzdRnfTR7FB+QA4SlF8rqg/413Hz ScxBPzNNfOXylyfkHpRrzqHuw2cYiFCE4yE1FpE4bfij7wF40MnyBYiJceHMH1lQpYgoX6Ll+oAE TVWespiOcYia5puTJ2ricOAZxdlklEgu9AVamjJwT//JjfMxhhKfIFZYMTuYnvdibGBvUY9CIDx5 RZWBlix6cMWMCLsuYsXlou5A8P1SEUv7dv75dDqE41dpmiduN0maX61OggO7WACeLbd95bQC+Hxr 5Wc4dsx8z9r9IuZ6+KlpqJ9Zxk12pPPt/s5XzVIS56wT4ooi/VczCeohAgMBAAGjITAfMB0GA1Ud DgQWBBR7omQkuYF8S4MJ+zk97+3QNv7/1zANBgkqhkiG9w0BAQsFAAOCAQEAd1vP55PscV21PmT6 TlNgicokTfJSGk3nNVQFmh8MDN2rnB0JDfhs1iPnaGUGgRNbK6/0EFKEvdX8gswqhehnOi3icJcI O+1c3vNqol5+UfJ0y9Fh9o5tZRzBe1qzxcMoq4/BozKNGUhHpaSzYJpCzKgyupHuOKqOki9xh6yb dpUqD153+Ze2FSIM1uR+URlL2zNHKozEBPOqLVooAEZLE1+RDxqmK1o/e3xEILj5L3eNGRoF1dlM PljwL6BXausdL6ZzRQHHTT5eC06ReQAfeBCHQJVPDsn3e+p8R35oyHLoglH7fFY7gHwasjZh44/O TD5a0rl/2SuHapQ6LsICYw==</X509Certificate>
+     *  </X509Data>
+     *  </KeyInfo>
+     *  </Signature>
+     *  <saml2:Subject>
+     *  <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">192.168.0.2</saml2:NameID>
+     *  <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches">
+     *  <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">AttestationService-0.5.4</saml2:NameID>
+     *  <saml2:SubjectConfirmationData Address="127.0.0.1" NotBefore="2014-05-03T01:51:40.924Z" NotOnOrAfter="2014-05-03T02:51:40.924Z" />
+     *  </saml2:SubjectConfirmation>
+     *  </saml2:Subject>
+     * <saml2:AttributeStatement>
+     * <saml2:Attribute Name="Host_Name"><saml2:AttributeValue xsi:type="xs:string">192.168.0.2</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="Host_Address"><saml2:AttributeValue xsi:type="xs:string">192.168.0.2</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="Trusted"><saml2:AttributeValue xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="Trusted_BIOS"><saml2:AttributeValue xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="BIOS_Name"><saml2:AttributeValue xsi:type="xs:string">Intel_Corporation_001</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="BIOS_Version"><saml2:AttributeValue xsi:type="xs:string">01.00.0060</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="BIOS_OEM"><saml2:AttributeValue xsi:type="xs:string">Intel Corporation</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="Trusted_VMM"><saml2:AttributeValue xsi:type="xs:anyType">true</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="VMM_Name"><saml2:AttributeValue xsi:type="xs:string">Intel_Thurley_VMware_ESXi</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="VMM_Version"><saml2:AttributeValue xsi:type="xs:string">5.1.0-799733</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="VMM_OSName"><saml2:AttributeValue xsi:type="xs:string">VMware_ESXi</saml2:AttributeValue></saml2:Attribute>
+     * <saml2:Attribute Name="VMM_OSVersion"><saml2:AttributeValue xsi:type="xs:string">5.1.0</saml2:AttributeValue></saml2:Attribute>
+     * </saml2:AttributeStatement>
+     * </saml2:Assertion>
      * </pre>
      * @mtwSampleApiCall
      * <pre>

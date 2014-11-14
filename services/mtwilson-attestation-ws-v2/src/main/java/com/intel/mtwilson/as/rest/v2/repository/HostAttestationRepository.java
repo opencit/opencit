@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
@@ -25,6 +26,7 @@ import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
+import java.io.IOException;
 
 import java.util.Date;
 import java.util.List;
@@ -89,16 +91,18 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @RequiresPermissions("host_attestations:retrieve")    
     public HostAttestation retrieve(HostAttestationLocator locator) {
         if (locator == null || locator.id == null) { return null;}
-        log.debug("HostAttestation:Store - Got request to retrieve the host attestation role with id {}.", locator.id.toString());        
+        log.debug("HostAttestation:Retrieve - Got request to retrieve the host attestation with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
             TblTaLog obj = My.jpa().mwTaLog().findByUuid(id);
             if (obj != null) {
-                HostAttestation haObj = convert(obj, obj.getHost_uuid_hex());
+                log.debug("HostAttestation:Retrieve - Retrieved the details from ta_log table for host with id {} - {}.", obj.getHostID(), obj.getHost_uuid_hex());
+                TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(obj.getHost_uuid_hex());
+                HostAttestation haObj = convert(obj, hostObj.getName());
                 return haObj;
             }
-        } catch (Exception ex) {
-            log.error("HostAttestation:Store - Error during retrieval of host attestation status from cache.", ex);
+        } catch (IOException | CryptographyException ex) {
+            log.error("HostAttestation:Retrieve - Error during retrieval of host attestation status from cache.", ex);
             throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
@@ -113,7 +117,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @Override
     @RequiresPermissions("host_attestations:create")    
     public void create(HostAttestation item) {
-        log.debug("HostAttestation:Create - Got request to create host attestation.");  
+        log.debug("HostAttestation:Create - Got request to create host attestation with id {}.", item.getId().toString());  
         HostAttestationLocator locator = new HostAttestationLocator();
         locator.id = item.getId();
         try {
