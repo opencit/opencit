@@ -69,6 +69,14 @@ import org.slf4j.LoggerFactory;
 /**
  * See also AbstractRpcResource which does something similar with HTTP 202 Accepted
  * 
+ * Currently supported request/response content-type combinations:
+ * 
+ * post application/json, accept application/pkix-cert  (binary)
+ * post application/json, accept application/json
+ * post application/xml, accept application/pkix-cert (binary)
+ * post application/xml, accept application/xml
+ * post message/rfc822 (encrypted xml), accept application/pkix-cert (binary)
+ * 
  * @author ssbangal and jbuhacoff
  */
 @V2
