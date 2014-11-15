@@ -139,7 +139,7 @@ xml_pcr()
 {
   echo "$BLANK6<module>"
   echo "$BLANK8<pcrNumber>$1</pcrNumber>"
-  if [ $4 -eq 4 ]; then
+  if [[ $4 -eq 4 ]]; then
     case $2 in
     1)
       echo "$BLANK8<name>tb_policy</name>"
@@ -400,17 +400,37 @@ else
   num=`get_line_number 'VL measurements'`
   line=`txt-stat | sed -n "$num, $((num+10)) p" | grep PCR | wc -l`
   pcr22_line=`txt-stat | sed -n "$num, $((num+10)) p" | grep "PCR 22" | wc -l`
-  ### now just support 2 same pcr index###
-  for((l=1;l<=$line;l++));do
-     str1="`txt-stat | sed -n "$num, $((num+10)) p" | grep PCR | sed -n "$l p"`"
-     #echo $str1
-     str2="`txt-stat | sed -n "$num, $((num+10)) p" | grep "alg 0004" | sed -n "$l p"`"
-     #echo $str2
-     index=`echo $str1 | awk -F: '{print $2}' | awk '{print $2}'`
-     value="`echo $str2 | awk -F: '{print $3}'  | sed "s/ //g" | sed "s/\t//g"`"
-     #echo $index $l $value $line $pcr22_line $((line-pcr22_line))
-     xml_pcr $index $l $value $((line-pcr22_line)) >>$OUTFILE
-  done
+
+  # figure out which version of txt-stat output we're seeing (1-line is older, 2-line is newer)
+  #echo '<!--' "line:$line" '-->' >>measureLog.xml
+  is_oneline=""
+  if [ -n "$is_oneline" ]; then
+      # output is one line per module or pcr
+      ### now just support 2 same pcr index###
+      for((l=1;l<=$line;l++));do
+         str="`txt-stat | sed -n "$num, $((num+4)) p" | grep PCR | sed -n "$l p"`"
+         #echo '<!--' "str:$str" '-->' >>measureLog.xml
+         index=`echo $str | awk -F: '{print $2}' | awk '{print $2}'`
+         value="`echo $str | awk -F: '{print $3}'  | sed "s/ //g" | sed "s/\t//g"`"
+         #echo '<!--' "1:$index 2:$l 3:$value 4:$line" '-->' >>measureLog.xml
+         xml_pcr $index $l $value $line >>measureLog.xml
+      done
+  else
+      # output looks like this, in two lines:
+      #TBOOT:     PCR 17 (alg count 1):
+      #TBOOT:             alg 0004: c3 43 84 97 fd a8 27 be 3b 32 1c 53 09 a2 04 f0 c9 e5 39 43
+      ### now just support 2 same pcr index###
+      for((l=1;l<=$line;l++));do
+         str1="`txt-stat | sed -n "$num, $((num+10)) p" | grep PCR | sed -n "$l p"`"
+         #echo '<!--' "str1:$str1" '-->' >>measureLog.xml
+         str2="`txt-stat | sed -n "$num, $((num+10)) p" | grep "alg 0004" | sed -n "$l p"`"
+         #echo '<!--' "str2:$str2" '-->' >>measureLog.xml
+         index=`echo $str1 | awk -F: '{print $2}' | awk '{print $2}'`
+         value="`echo $str2 | awk -F: '{print $3}'  | sed "s/ //g" | sed "s/\t//g"`"
+         #echo '<!--' "1:$index 2:$l 3:$value 4:$line pcr22:$pcr22_line" '-->' >>measureLog.xml
+         xml_pcr $index $l $value $((line-pcr22_line)) >>measureLog.xml
+      done
+  fi
 fi
 echo "$BLANK2$BLANK2</modules>" >>$OUTFILE
 echo "$BLANK2</txt>" >>$OUTFILE
