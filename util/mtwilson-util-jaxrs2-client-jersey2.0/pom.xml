@@ -3,7 +3,7 @@
 
     <artifactId>mtwilson-util-jaxrs2-client-jersey2.0</artifactId>
     <packaging>jar</packaging>
-    <name>mtwimtwilson-util-jaxrs2-client-jersey2.0</name>
+    <name>mtwilson-util-jaxrs2-client-jersey2.0</name>
     <description>Web Services client using JAX-RS 2.0 and jersey-client 2.0</description>
     <parent>
 		<groupId>com.intel.mtwilson.util</groupId>
