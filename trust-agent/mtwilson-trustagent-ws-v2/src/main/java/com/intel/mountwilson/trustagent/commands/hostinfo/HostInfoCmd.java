@@ -209,13 +209,20 @@ public class HostInfoCmd implements ICommand {
      * @throws TAexception
      * @throws IOException
      */
-      public void getHostUUID() throws TAException, IOException {
-          CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
-          String hostUUID = result.getStdout();
-          // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
-          
-          context.setHostUUID(trim(hostUUID));
-          log.info("Context set with host UUID info: " + context.getHostUUID());
-          
-      }
+    public void getHostUUID() throws TAException, IOException {
+        CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
+        // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
+        List<String> resultList = Arrays.asList(result.getStdout().split("\r\n"));
+        if (resultList != null && resultList.size() > 0) {
+            for (String data : resultList) {
+                if (data.trim().startsWith("#")) // ignore the comments
+                    continue;
+                context.setHostUUID(data.trim());
+                break;
+            }
+        }
+
+        log.info("Context set with host UUID info: " + context.getHostUUID());
+
+    }
 }
