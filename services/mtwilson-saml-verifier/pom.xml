@@ -63,6 +63,13 @@
             <version>1.4.3</version>
         </dependency>
             	    
+        <!-- ClasspathResourceResolver moved to mtwilson-util-xml -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
+        </dependency>
+                    
+                    
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>

@@ -7,11 +7,8 @@ package com.intel.mtwilson.xml;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import org.opensaml.xml.parse.ClasspathResolver;
-import org.w3c.dom.ls.LSInput;
-import org.w3c.dom.ls.LSResourceResolver;
 
 /**
  *
