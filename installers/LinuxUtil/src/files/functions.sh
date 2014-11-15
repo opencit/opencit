@@ -3211,7 +3211,7 @@ java_install() {
     fi
     local javafile=$JAVA_PACKAGE
     echo "Installing $javafile"  >> $INSTALL_LOG_FILE
-    is_targz=`echo $javafile | grep ".tar.gz$"`
+    is_targz=`echo $javafile | grep -E ".tar.gz$|.tgz$"`
     is_gzip=`echo $javafile | grep ".gz$"`
     is_bin=`echo $javafile | grep ".bin$"`
     javaname=`echo $javafile | awk -F . '{ print $1 }'`
@@ -3232,7 +3232,12 @@ java_install() {
     do
       #echo "$f"
       if [ -d "$f" ]; then
-        mv "$f" /usr/share
+        if [ -d "/usr/share/$f" ]; then
+          echo "Java already installed at /usr/share/$f"
+          export JAVA_HOME="/usr/share/$f"
+        else
+          mv "$f" /usr/share && export JAVA_HOME="/usr/share/$f"
+        fi
       fi
     done
     java_detect  >> $INSTALL_LOG_FILE
@@ -3698,7 +3703,7 @@ set_config_db_properties() {
 # Caller can set conf_dir to the directory where logback-stderr.xml is found; default provided by DEFAULT_MTWILSON_CONF_DIR
 call_setupcommand() {
   local java_lib_dir=${setupconsole_dir:-$DEFAULT_MTWILSON_JAVA_DIR}
-  if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
   $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
@@ -3708,7 +3713,7 @@ call_setupcommand() {
 # Caller can set setupconsole_dir to the directory where jars are found; default provided by DEFAULT_MTWILSON_JAVA_DIR
 call_tag_setupcommand() {
   local java_lib_dir=${setupconsole_dir:-$DEFAULT_MTWILSON_JAVA_DIR}
-  if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.dcsg.cpg.console.Main
   local jvm_memory=2048m
