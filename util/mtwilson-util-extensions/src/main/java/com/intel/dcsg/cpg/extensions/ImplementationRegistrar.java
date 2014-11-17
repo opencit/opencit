@@ -69,7 +69,7 @@ public class ImplementationRegistrar implements Registrar {
         boolean accepted = false;
         for (int i = 0; i < interfaces.length; i++) {
             if( acceptable == null || acceptable.contains(interfaces[i].getName()) ) {
-                Extensions.register(interfaces[i], clazz);
+                WhiteboardExtensionProvider.register(interfaces[i], clazz);
                 accepted = true;
             }
         }

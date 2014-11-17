@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PackageCommandFinder implements CommandFinder {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private String packageName = "com.intel.dcg.console.cmd";
+    private final String packageName;
     public PackageCommandFinder(String packageName) {
         this.packageName = packageName;
     }
@@ -35,7 +35,7 @@ public class PackageCommandFinder implements CommandFinder {
             Command command = (Command)commandObject;
             return command;
         }
-        catch(Exception e) {
+        catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             log.debug("Cannot load command "+commandName+" in package "+packageName+": "+e.toString());
             return null;
         }

@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.console;
 
+import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,25 +36,25 @@ public class HyphenatedCommandFinder extends PackageCommandFinder {
     private final Logger log = LoggerFactory.getLogger(getClass());
 //    private Pattern camelCase = Pattern.compile("[a-z][A-Z]"); // TODO: use the character classes to support all unicode camelcase
 //    private Pattern hyphenated = Pattern.compile("-([a-zA-Z0-9])"); // TODO: use the character classes to support all unicode letters / legal java class name letters
-    private final Map<String,String> map;
+    private final PascalCaseNamingStrategy converter; //Map<String,String> map;
     
     public HyphenatedCommandFinder(String packageName) {
         super(packageName);
-        map = null;
+        converter = new PascalCaseNamingStrategy();
     }
 
     public HyphenatedCommandFinder(String packageName, Map<String,String> conversionMap) {
         super(packageName);
-        map = conversionMap;
+        converter = new PascalCaseNamingStrategy(conversionMap);
     }
     
     @Override
     public Command forName(String commandName) {
         try {
             // first try converting the package name from hyphenated (import-config) to camel case (ImportConfig)
-            String camelCase = toCamelCase(commandName);
-            if( camelCase != null ) {
-                Command command = super.forName(camelCase);
+            String pascalCase = converter.toPascalCase(commandName);
+            if( pascalCase != null ) {
+                Command command = super.forName(pascalCase);
                 if( command != null ) {
                     return command;
                 }
@@ -66,29 +67,6 @@ public class HyphenatedCommandFinder extends PackageCommandFinder {
             return null;
         }
     }
-    
-    
-    /**
-     * The transformation of command-name to CommandName:
-     * First letter is uppercased
-     * Every letter after a hyphen is uppercased
-     * Hyphens are removed 
-     * @param propertyName
-     * @return all-uppercase version of property name, dots converted to underscores, and camelCase words separated by underscore
-     */
-    public String toCamelCase(String commandName) {
-        StringBuilder camelCaseWords = new StringBuilder();
-        String parts[] = commandName.split("-");
-        if( parts == null || parts.length == 0 ) { return null; }
-        for(int i=0; i<parts.length; i++) {
-            if( map != null && map.containsKey(parts[i]) ) {
-                camelCaseWords.append(map.get(parts[i]));
-            }
-            else {
-                camelCaseWords.append(StringUtils.capitalize(parts[i]));
-            }
-        }
-        return camelCaseWords.toString();
-    }
+
     
 }

@@ -6,6 +6,7 @@ package com.intel.dcsg.cpg.extensions.pojostyle;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.ExtensionUtil;
+import com.intel.dcsg.cpg.extensions.WhiteboardExtensionProvider;
 import java.util.List;
 import java.util.Set;
 import org.junit.Test;
@@ -38,17 +39,17 @@ public class PojoFinderTest {
     
     @Test
     public void testUsePlugins() {
-        Extensions.clearAll();
+        WhiteboardExtensionProvider.clearAll();
         // initialize whiteboard
         testEasyScanWithInterface();
         // now pretend to do something useful that requires fruit plugins
         eatFruit("apple");
         // runtime addition of new plugin
-        Extensions.register(Fruit.class, Carrot.class);
+        WhiteboardExtensionProvider.register(Fruit.class, Carrot.class);
         // now try to use it
         eatFruit("carrot");
         // runtime clearing of available plugins
-        Extensions.clear(Fruit.class);
+        WhiteboardExtensionProvider.clear(Fruit.class);
         eatFruit("banana"); // output: No registered implementations for com.intel.dcsg.cpg.whiteboard.Fruit
     }
 }

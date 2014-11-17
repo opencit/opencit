@@ -77,6 +77,33 @@ public class Main {
         }
         return null;
     }
+    
+    private String[] args;
+    
+    public void setArgs(String[] args) {
+        this.args = args;
+        if (log.isTraceEnabled()) {
+            log.trace("Number of args: {}", args.length);
+            for (String arg : args) {
+                log.trace("Arg: {}", arg);
+            }
+        }
+    }
+
+    public String[] getArgs() {
+        return args;
+    }
+    
+    
+    
+    public String getDefaultCommand() { return null; }
+    
+    public String getCommandName() {
+        if( args == null || args.length == 0 ) {
+            return getDefaultCommand();
+        }
+        return args[0];
+    }
 
     /**
      * @param args comprised of command name followed by arguments for that
@@ -84,7 +111,11 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            if (args.length == 0) {
+            Main main = new Main();
+            main.setArgs(args);
+            String commandName = main.getCommandName();
+            
+            if (commandName == null) {
                 log.error("Usage: <command> [args]");
                 System.exit(1);
             }
@@ -93,19 +124,12 @@ public class Main {
 //        Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);  
 //        globalLogger.setLevel(java.util.logging.Level.OFF);          
 
-            String commandName = args[0];
             try {
                 Command command = findCommand(commandName);
                 if (command == null) {
                     log.error("Unrecognized command: " + commandName);
                     System.exit(1);
                 } else {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Number of args: {}", args.length);
-                        for (String arg : args) {
-                            log.trace("Arg: {}", arg);
-                        }
-                    }
                     String[] subargs = Arrays.copyOfRange(args, 1, args.length);
                     //            command.setContext(ctx);
                     ExtendedOptions getopt = new ExtendedOptions(subargs);

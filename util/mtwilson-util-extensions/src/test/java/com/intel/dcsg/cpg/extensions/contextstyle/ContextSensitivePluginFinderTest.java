@@ -6,6 +6,7 @@ package com.intel.dcsg.cpg.extensions.contextstyle;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.ExtensionUtil;
+import com.intel.dcsg.cpg.extensions.WhiteboardExtensionProvider;
 import org.junit.Test;
 
 /**
@@ -39,11 +40,11 @@ public class ContextSensitivePluginFinderTest {
         viewShape(new Circle());
         viewShape(new Square());
         viewShape(new Triangle());
-        Extensions.clear(TriangleViewer.class);
+        WhiteboardExtensionProvider.clear(TriangleViewer.class);
         viewShape(new Triangle());  // should not find it
-        Extensions.register(ShapeViewer.class, TriangleViewer.class);
+        WhiteboardExtensionProvider.register(ShapeViewer.class, TriangleViewer.class);
         viewShape(new Triangle()); // should find it again
-        Extensions.clearAll();
+        WhiteboardExtensionProvider.clearAll();
         viewShape(new Triangle()); // should not find it
     }
     

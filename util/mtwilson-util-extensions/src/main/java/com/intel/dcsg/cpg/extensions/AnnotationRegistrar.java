@@ -5,7 +5,6 @@
 package com.intel.dcsg.cpg.extensions;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 
 /**
  * This class scans the classpath to find possible plugin classes and automatically adds
@@ -36,7 +35,7 @@ public class AnnotationRegistrar implements Registrar {
         if (ReflectionUtil.isAnnotatedClass(clazz, annotation)) {
             log.debug("Found extension {} with annotation {}", clazz.getSimpleName(), annotationName);
             // register under the specified annotation
-                Extensions.registerAnnotated(annotation, clazz);
+                WhiteboardExtensionProvider.registerAnnotated(annotation, clazz);
                 accepted = true;
         }
         else {
@@ -48,7 +47,7 @@ public class AnnotationRegistrar implements Registrar {
 //                log.debug("Scanning parent {}", parent.getName());
                 if( ReflectionUtil.isAnnotatedClass(parent, annotation)) {
                      log.debug("Found extension {} with annotation {} in parent {}", clazz.getSimpleName(), annotationName, parent.getClass().getName());
-                    Extensions.registerAnnotated(annotation, clazz);
+                    WhiteboardExtensionProvider.registerAnnotated(annotation, clazz);
                     accepted = true;
                 }
                 parent = parent.getSuperclass();

@@ -29,7 +29,7 @@ public class FactoryRegistrar implements Registrar {
             // register under each interface that it implements directly
             Class<?>[] interfaces = clazz.getInterfaces();
             for (int i = 0; i < interfaces.length; i++) {
-                Extensions.register(interfaces[i], clazz);
+                WhiteboardExtensionProvider.register(interfaces[i], clazz);
                 accepted = true;
             }
             // register under each interface that it inherits from parent / that parent implements
@@ -38,7 +38,7 @@ public class FactoryRegistrar implements Registrar {
                 log.debug("Scanning parent {}", parent.getName());
                 interfaces = parent.getInterfaces();
                 for (int i = 0; i < interfaces.length; i++) {
-                    Extensions.register(interfaces[i], clazz);
+                    WhiteboardExtensionProvider.register(interfaces[i], clazz);
                     accepted = true;
                 }
                 parent = parent.getSuperclass();

@@ -4,11 +4,9 @@
  */
 package com.intel.dcsg.cpg.extensions;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Functions in this class should be removed or refactored, they 

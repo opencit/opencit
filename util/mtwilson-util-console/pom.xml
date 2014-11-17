@@ -24,6 +24,10 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-text-transform</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-performance</artifactId>
             <optional>true</optional>
         </dependency>

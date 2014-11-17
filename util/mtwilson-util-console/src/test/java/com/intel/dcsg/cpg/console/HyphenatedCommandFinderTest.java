@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.console;
 
+import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import java.util.HashMap;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -19,22 +20,22 @@ public class HyphenatedCommandFinderTest {
 
     @Test
     public void testConvertHelloWorld() {
-        HyphenatedCommandFinder h = new HyphenatedCommandFinder("test");
-        assertEquals("HelloWorld", h.toCamelCase("hello-world"));
-        assertEquals("Oneword", h.toCamelCase("oneword"));
-        assertEquals("Mtwilson", h.toCamelCase("mtwilson"));
-        assertEquals("MtWilson", h.toCamelCase("mtWilson"));
+        PascalCaseNamingStrategy h = new PascalCaseNamingStrategy();
+        assertEquals("HelloWorld", h.toPascalCase("hello-world"));
+        assertEquals("Oneword", h.toPascalCase("oneword"));
+        assertEquals("Mtwilson", h.toPascalCase("mtwilson"));
+        assertEquals("MtWilson", h.toPascalCase("mtWilson"));
     }
 
     @Test
     public void testConvertMtWilsonWithMap() {
-        HashMap<String,String> map = new HashMap<String,String>();
+        HashMap<String,String> map = new HashMap<>();
         map.put("mtwilson", "MtWilson");
-        HyphenatedCommandFinder h = new HyphenatedCommandFinder("test", map);
-        assertEquals("HelloWorld", h.toCamelCase("hello-world"));
-        assertEquals("Oneword", h.toCamelCase("oneword"));
-        assertEquals("MtWilson", h.toCamelCase("mtwilson"));
-        assertEquals("MtWilson", h.toCamelCase("mtWilson"));
+        PascalCaseNamingStrategy h = new PascalCaseNamingStrategy(map);
+        assertEquals("HelloWorld", h.toPascalCase("hello-world"));
+        assertEquals("Oneword", h.toPascalCase("oneword"));
+        assertEquals("MtWilson", h.toPascalCase("mtwilson"));
+        assertEquals("MtWilson", h.toPascalCase("mtWilson"));
     }
 
 }

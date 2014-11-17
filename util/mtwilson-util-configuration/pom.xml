@@ -30,7 +30,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-codec</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         
         <!-- needed only if you use the XStreamCodec in conjunction with PropertiesConfiguration -->
