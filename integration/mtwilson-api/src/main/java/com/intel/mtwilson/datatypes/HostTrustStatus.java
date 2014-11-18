@@ -1,5 +1,6 @@
 package com.intel.mtwilson.datatypes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 //import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -12,6 +13,8 @@ public class HostTrustStatus
     @JsonProperty("bios") public boolean bios = false;
     @JsonProperty("vmm") public boolean vmm = false;
     @JsonProperty("location") public boolean location = false;
+    
+    @JsonIgnore
     @JsonProperty("asset_tag") public boolean asset_tag = false;
     
     public HostTrustStatus() {
