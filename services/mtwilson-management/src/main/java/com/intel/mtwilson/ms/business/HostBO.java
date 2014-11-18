@@ -126,17 +126,13 @@ public class HostBO {
      */
     private class MLEVerify extends Thread {
 
-        private MLEVerificationRequest mleVerifyObj;
         private String result;
         private boolean isError = false;
         private String errorMessage = "";
-        private HostAgent agent;
-        private boolean overwriteWhiteList = false;
+        private HostConfigData hostConfigData;
 
-        public MLEVerify(HostAgent agent, boolean overwriteWhiteList, MLEVerificationRequest mleVerifyObj) {
-            this.mleVerifyObj = mleVerifyObj;
-            this.agent = agent;
-            this.overwriteWhiteList = overwriteWhiteList;
+        public MLEVerify(HostConfigData hostConfigData) {
+            this.hostConfigData = hostConfigData;
         }
 
         @Override
@@ -147,11 +143,11 @@ public class HostBO {
             try {
                 // If the user has chosen to overwrite the white list, then we do need to check anything. Just 
                 // return back as not found.
-                if (overwriteWhiteList) {
+                if (hostConfigData.getOverWriteWhiteList()) {
                     result = "BIOS:false|VMM:false";
                 } else {
                     long threadStart = System.currentTimeMillis();
-                    result = new HostTrustBO().checkMatchingMLEExists(mleVerifyObj.getHostObj(), mleVerifyObj.getBiosPCRs(), mleVerifyObj.getVmmPCRs());
+                    result = new HostTrustBO().checkMatchingMLEExists(hostConfigData);
                     log.debug("TIMETAKEN: by the checkMLE thread:" + (System.currentTimeMillis() - threadStart));
                 }
 
@@ -790,8 +786,7 @@ public class HostBO {
                 HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList);
                 hostAttReportObj.start();
                 
-                MLEVerify mleVerifyObj = new MLEVerify(agent, hostConfigObj.getOverWriteWhiteList(),
-                        new MLEVerificationRequest(hostConfigObj.getTxtHostRecord(), hostConfigObj.getBiosPCRs(), hostConfigObj.getVmmPCRs()));
+                MLEVerify mleVerifyObj = new MLEVerify(hostConfigObj);
                 mleVerifyObj.start();
                 
                 hostAttReportObj.join();
@@ -1067,6 +1062,17 @@ public class HostBO {
                 mleObj.setOsName("");
                 mleObj.setOsVersion("");
                 mleObj.setOemName(hostObj.BIOS_Oem);
+                mleObj.setTarget_type(hostConfigObj.getBiosWLTarget().getValue());
+                switch(hostConfigObj.getBiosWLTarget()) {
+                    case BIOS_OEM :
+                        mleObj.setTarget_value(hostObj.BIOS_Oem);
+                        break;
+                    case BIOS_HOST :
+                        mleObj.setTarget_value(hostObj.HostName);
+                        break;
+                    default :
+                        mleObj.setTarget_value("");                        
+                }
 
                 // Now we need to create empty manifests for all the BIOS PCRs that need to be verified. 
                 String biosPCRs = hostConfigObj.getBiosPCRs();
@@ -1153,6 +1159,18 @@ public class HostBO {
                 mleVMMObj.setOsName(hostObj.VMM_OSName);
                 mleVMMObj.setOsVersion(hostObj.VMM_OSVersion);
                 mleVMMObj.setOemName("");
+                mleVMMObj.setTarget_type(hostConfigObj.getVmmWLTarget().getValue());
+                switch(hostConfigObj.getVmmWLTarget()) {
+                    case VMM_OEM :
+                        mleVMMObj.setTarget_value(hostObj.BIOS_Oem);
+                        break;
+                    case VMM_HOST :
+                        mleVMMObj.setTarget_value(hostObj.HostName);
+                        break;
+                    case VMM_GLOBAL :
+                    default :
+                        mleVMMObj.setTarget_value("");                        
+                }
 
                 // Let us create the dummy manifests now. We will update it later after
                 // host registration. NOTE: We should not add PCR19 into the required manifest
