@@ -339,7 +339,7 @@ public class HostBO {
             calibrateMLENames(hostConfigObj, false);
             
             if (registerHost) {
-                new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+                new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
             }
             
             return hostConfigObj;
@@ -474,8 +474,8 @@ public class HostBO {
      * @return
      */
     public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
-        TxtHostRecordList hostsToBeAddedList = new TxtHostRecordList();
-        TxtHostRecordList hostsToBeUpdatedList = new TxtHostRecordList();
+        HostConfigDataList hostsToBeAddedList = new HostConfigDataList();
+        HostConfigDataList hostsToBeUpdatedList = new HostConfigDataList();
         HostConfigResponseList results = new HostConfigResponseList();
         
         try {
@@ -494,7 +494,7 @@ public class HostBO {
                     try {
                         //hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
                         hostConfigObj = getHostMLEDetails(hostConfigObj, false);
-                        hostsToBeUpdatedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
+                        hostsToBeUpdatedList.getHostRecords().add(hostConfigObj);
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
                         error.setHostName(hostObj.HostName);
@@ -508,7 +508,7 @@ public class HostBO {
                     try {
                         //hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
                         hostConfigObj = getHostMLEDetails(hostConfigObj, false);
-                        hostsToBeAddedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
+                        hostsToBeAddedList.getHostRecords().add(hostConfigObj);
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
                         error.setHostName(hostObj.HostName);
