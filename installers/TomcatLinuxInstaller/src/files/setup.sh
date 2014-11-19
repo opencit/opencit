@@ -10,8 +10,10 @@ TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tar.gz 2>/dev/null | tail -n 1`
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
-if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; exit 1; fi
+if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
+
+echo "Setting up Tomcat in $TOMCAT_HOME..."
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
 if [ ! -d ${TOMCAT_HOME}/endorsed ]; then
@@ -40,6 +42,7 @@ if [[ -n "$mysqlconnector_files" ]]; then
 fi
 
 # Add the manager role give access to the tomcat user in the tomcat-users.xml
+echo "Editing tomcat-users.xml in $TOMCAT_CONF..."
 
 cd $TOMCAT_CONF
 userExists=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml`
@@ -58,6 +61,7 @@ rm  -f tomcat-users.xml.old
 #               clientAuth="false" sslProtocol="TLS"
 #               keystoreFile="/usr/share/apache-tomcat-7.0.34/ssl/keystore.jks" keystorePass="changeit" />
 # release the connectors!
+echo "Editing server.xml in $TOMCAT_CONF..."
 cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
@@ -67,4 +71,3 @@ sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.
 
 tomcat_permissions ${TOMCAT_HOME}
 
-echo "Starting Tomcat..."

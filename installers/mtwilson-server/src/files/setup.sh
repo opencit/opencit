@@ -3,10 +3,17 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+# equivalent to env_dir in mtwilson.sh
+MTWILSON_ENV_DIR=/opt/mtwilson/env.d
+
 currentUser=`whoami`
 if [ ! $currentUser == "root" ]; then
  echo_failure "You must be root user to install Mt Wilson."
  exit -1
+fi
+
+if [ ! -d $MTWILSON_ENV_DIR ]; then
+  mkdir -p $MTWILSON_ENV_DIR
 fi
 
 #load the functions file first so we can use the generatePassword function
@@ -575,6 +582,9 @@ fi
 
 java_detect
 
+echo "JAVA_HOME=$JAVA_HOME" > $MTWILSON_ENV_DIR/java
+echo "java=$java" >> $MTWILSON_ENV_DIR/java
+
 # Post java install setup and configuration
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -582,17 +592,23 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
-if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
-  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
-    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
-    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
-  fi
-  if ! grep -q "JAVA_HOME" /etc/environment; then
-    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
-  fi
-  
-  . /etc/environment
-fi
+# following code causes the current JAVA_HOME value to be appended to
+# whatever PATH is there (if it's not already there), which means that
+# if one time we detect openjdk, and add it, then next time detect oracle jdk,
+# it will always be added after any previously found jdk, so when using
+# that PATH and running "java" it will never start the most recently found jdk
+# unless we actually delete the other ones. 
+#if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
+#  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
+#    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+#    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
+#  fi
+#  if ! grep -q "JAVA_HOME" /etc/environment; then
+#    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+#  fi
+#  
+#  . /etc/environment
+#fi
 
 echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
@@ -640,6 +656,10 @@ if using_glassfish; then
 
   glassfish_detect
 
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV_DIR/glassfish
+  echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV_DIR/glassfish
+  echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV_DIR/glassfish
+
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
 	$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
@@ -686,6 +706,10 @@ elif using_tomcat; then
   fi
  
   tomcat_detect
+
+  echo "TOMCAT_HOME=$TOMCAT_HOME" > $MTWILSON_ENV_DIR/tomcat
+  echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV_DIR/tomcat
+  echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV_DIR/tomcat
 
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here

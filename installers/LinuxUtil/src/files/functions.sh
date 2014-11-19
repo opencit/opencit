@@ -2173,7 +2173,16 @@ glassfish_install() {
     auto_install "Glassfish requirements" "GLASSFISH"
     echo "Installing $GLASSFISH_PACKAGE"
     unzip $GLASSFISH_PACKAGE 2>&1  >/dev/null
-    mv glassfish4 /usr/share/
+    if [ -d "glassfish4" ]; then
+      if [ -d "/usr/share/glassfish4" ]; then
+        echo "Glassfish already installed at /usr/share/glassfish4"
+        export GLASSFISH_HOME="/usr/share/glassfish4"
+      else
+        mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4"
+      fi
+    fi
+
+
     # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
     if [ -f "/etc/hosts" ]; then
         local hostname=`hostname`
@@ -2536,6 +2545,7 @@ glassfish_create_ssl_cert() {
 # tomcat 
 
 tomcat_clear() {
+  TOMCAT_CONF=""
   TOMCAT_HOME=""
   tomcat_bin=""
   tomcat=""
@@ -2647,6 +2657,15 @@ tomcat_detect() {
         tomcat="$tomcat_bin"
       fi
     fi
+    if [ -z "$TOMCAT_CONF" ]; then
+      if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
+        export TOMCAT_CONF="$TOMCAT_HOME/conf"
+      else
+        # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
+        # reset the "tomcat" variable to force a new detection below
+        tomcat=""
+      fi
+    fi
     if [[ -n "$tomcat" ]]; then
       #TOMCAT_VERSION=`tomcat_version`
       tomcat_version
@@ -2702,7 +2721,14 @@ tomcat_install() {
       #fi
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
       local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
-      mv $tomcat_folder /usr/share
+      if [ -d "$tomcat_folder" ]; then
+        if [ -d "/usr/share/$tomcat_folder" ]; then
+          echo "Tomcat already installed at /usr/share/$tomcat_folder"
+          export TOMCAT_HOME="/usr/share/$tomcat_folder"
+        else
+          mv $tomcat_folder /usr/share && export TOMCAT_HOME="/usr/share/$tomcat_folder"
+        fi
+      fi
       tomcat_detect
     else
       TOMCAT_YUM_PACKAGES="tomcat7"
@@ -2958,8 +2984,8 @@ tomcat_init_manager() {
   tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
     awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
     in_comment{next}
-    {gsub(/<!--+([^-]|-[^-])*--+>/,"");
-    in_comment=sub(/<!--+.*/,"");
+    {gsub(/<\!--+([^-]|-[^-])*--+>/,"");
+    in_comment=sub(/<\!--+.*/,"");
     print}'|
     grep "<Connector"|grep "port="|head -n1`
 
