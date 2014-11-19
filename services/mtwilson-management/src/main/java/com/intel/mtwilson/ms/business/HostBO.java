@@ -31,6 +31,9 @@ import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
+import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSException;
@@ -260,7 +263,11 @@ public class HostBO {
 
                 // If we are setting host specific MLE, then we need to append the host name to the VMM Name as well
                 if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_HOST) {
-                    hostObj.VMM_Name = hostObj.HostName + "_" + hostObj.VMM_Name;
+                    String platformName = getPlatformName(hostObj.Processor_Info);
+                    if (!platformName.isEmpty())
+                        hostObj.VMM_Name = hostObj.HostName + "_" + platformName + "_" + hostObj.VMM_Name;
+                    else
+                        hostObj.VMM_Name = hostObj.HostName + "_" + hostObj.VMM_Name;
                 } else if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM) {
                     // Bug 799 & 791: Need to append the platform name too
                     String platformName = getPlatformName(hostObj.Processor_Info);
@@ -289,7 +296,7 @@ public class HostBO {
      * @param hostConfigObj
      * @return
      */
-    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj, boolean registerHost) {
+    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj) {
         
         try {
             My.initDataEncryptionKey();
@@ -337,11 +344,7 @@ public class HostBO {
             // Change the BIOS and VMM MLE names as per the target white list chosen by the user
             calibrateMLENames(hostConfigObj, true);
             calibrateMLENames(hostConfigObj, false);
-            
-            if (registerHost) {
-                new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
-            }
-            
+                        
             return hostConfigObj;
             
         } catch (MSException me) {
@@ -492,9 +495,10 @@ public class HostBO {
                     // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
                     // return back the same error to the user
                     try {
-                        //hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
-                        hostConfigObj = getHostMLEDetails(hostConfigObj, false);
+                        
+                        hostConfigObj = getHostMLEDetails(hostConfigObj);
                         hostsToBeUpdatedList.getHostRecords().add(hostConfigObj);
+                        
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
                         error.setHostName(hostObj.HostName);
@@ -506,9 +510,10 @@ public class HostBO {
                 } else {
                     log.debug(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
                     try {
-                        //hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
-                        hostConfigObj = getHostMLEDetails(hostConfigObj, false);
+                        
+                        hostConfigObj = getHostMLEDetails(hostConfigObj);
                         hostsToBeAddedList.getHostRecords().add(hostConfigObj);
+                        
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
                         error.setHostName(hostObj.HostName);
@@ -558,15 +563,16 @@ public class HostBO {
      */
     public boolean registerHostFromCustomData(HostConfigData hostConfigObj) {
 
-        boolean registerStatus;
+        boolean registerStatus = false;
         try {
             log.debug("Starting to process the registration for host: " + hostConfigObj.getTxtHostRecord().HostName);
 
-            hostConfigObj = getHostMLEDetails(hostConfigObj, true);            
-            registerStatus = true;
+            hostConfigObj = getHostMLEDetails(hostConfigObj);            
 
+            new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
+            
             log.debug("Successfully registered the host: " + hostConfigObj.getTxtHostRecord().HostName);
-            return registerStatus;
+            registerStatus = true;
 
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -576,6 +582,7 @@ public class HostBO {
             log.error("Unexpected errror during host registration. ", ex);
             throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
+        return registerStatus;
     }
 
     /**
@@ -1096,6 +1103,10 @@ public class HostBO {
 
                 } else {
                     log.debug("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
+                    if (hostConfigObj.getOverWriteWhiteList()) {
+                        log.debug("Details of MLE - {} information would be updated", hostObj.BIOS_Name);
+                        new MleBO().updateMle(mleObj, tblMleObj.getUuid_hex());
+                    }
                 }
             }
         } catch (MSException me) {
@@ -1201,6 +1212,16 @@ public class HostBO {
                     
                 } else {
                     log.debug("Database already has the configuration details for VMM MLE : " + hostObj.VMM_Name);
+                    if (hostConfigObj.getOverWriteWhiteList()) {
+                        log.debug("Details of MLE - {} information would be updated", hostObj.VMM_Name);
+                        new MleBO().updateMle(mleVMMObj, tblMleObj.getUuid_hex());
+                        
+                        // Now that we have updated the PCR manifest list, let us clear the modules so that if the host
+                        // from which we are updating the whitelist has fewer modules, then we would not have any older 
+                        // modules left behind from the previous host.
+                        deleteModulesForMLE(hostConfigObj);
+                    }
+                    
                 }
             }
         } catch (MSException me) {
@@ -1270,6 +1291,41 @@ public class HostBO {
         }
     }
 
+    /**
+     * Deletes all the modules except for host specific ones from the VMM MLE specified.
+     * @param hostConfigObj 
+     */
+    private void deleteModulesForMLE(HostConfigData hostConfigObj) {
+
+        try {
+
+            // We need to delete all the modules only if the overwrite flag is set. 
+            if (hostConfigObj.getOverWriteWhiteList() && hostConfigObj.addVmmWhiteList()) {
+                
+                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+                
+                TblMle tblMle = My.jpa().mwMle().findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                if (tblMle != null) {
+                    // Retrieve the list of all the modules for the specified VMM MLE.
+                    List<TblModuleManifest> moduleList = My.jpa().mwModuleManifest().findTblModuleManifestByMleUuid(tblMle.getUuid_hex());
+                    if (moduleList != null && moduleList.size() > 0) {
+                        for (TblModuleManifest moduleObj : moduleList) {
+                            if (moduleObj.getUseHostSpecificDigestValue()) // we cannot delete the host specific one since it would be referenced by the Hosts
+                                continue;
+                            My.jpa().mwModuleManifest().destroy(moduleObj.getId());
+                        }
+                    }
+                }
+                
+            }
+            
+        } catch (IOException | IllegalOrphanException | NonexistentEntityException ex) {
+            log.error("Error during the deletion of VMM modules {}. ", hostConfigObj.getTxtHostRecord().VMM_Name, ex);
+            throw new MSException(ErrorCode.WS_MODULE_WHITELIST_DELETE_ERROR, ex.getClass().getSimpleName());
+        }
+        
+    }
+    
     /**
      * Uploads the attestation report (event info and pcr info) into the White List Database for the specified good
      * known host.
@@ -1361,8 +1417,15 @@ public class HostBO {
                                 log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
 
                             } else {
-                                mleBO.updateModuleWhiteList(moduleObj, emt, null);
-                                log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                try {
+                                    mleBO.updateModuleWhiteList(moduleObj, emt, null);
+                                    log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                } catch (ASException ae) {
+                                    if (ae.getErrorCode() == ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST) {
+                                        mleBO.addModuleWhiteList(moduleObj, emt, null, null);
+                                        log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());                                        
+                                    }
+                                }
                             }
                         }
                     } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) { // pcr information would be available for all the hosts.

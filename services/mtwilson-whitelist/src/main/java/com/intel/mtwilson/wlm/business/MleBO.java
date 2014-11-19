@@ -1085,6 +1085,8 @@ public class MleBO {
                     log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
 
                     tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+                    if (tblModule == null)
+                        throw new NoResultException();
 
                 } catch (NoResultException nre) {
                     throw new ASException(nre, ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());
