@@ -726,5 +726,22 @@ public class TblMleJpaController implements Serializable {
         }        
         return mleList;        
     }
+
+    public List<TblMle> findByMleType(String mleType) {
+        List<TblMle> mleList = new ArrayList<>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findByMLEType");            
+            query.setParameter("mLEType", mleType);
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }        
+        return mleList;        
+    }
     
 }

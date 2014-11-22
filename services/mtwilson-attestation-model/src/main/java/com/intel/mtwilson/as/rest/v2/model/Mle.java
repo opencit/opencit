@@ -35,6 +35,8 @@ public class Mle extends Document{
     private String oemUuid;
     private String source; // source host used for whitelisting
     private List<ManifestData> mleManifests;
+    private String targetType;
+    private String targetValue;
     
     public String getName() {
         return name;
@@ -107,6 +109,23 @@ public class Mle extends Document{
     public void setMleManifests(List<ManifestData> mleManifests) {
         this.mleManifests = mleManifests;
     }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public String getTargetValue() {
+        return targetValue;
+    }
+
+    public void setTargetValue(String targetValue) {
+        this.targetValue = targetValue;
+    }
+    
     
     
 }

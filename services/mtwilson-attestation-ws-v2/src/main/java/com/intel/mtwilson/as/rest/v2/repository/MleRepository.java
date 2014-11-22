@@ -87,6 +87,13 @@ public class MleRepository implements DocumentRepository<Mle, MleCollection, Mle
                         mleCollection.getMles().add(convert(mleObj));
                     }
                 }                
+            } else if (criteria.mleType != null) {
+                List<TblMle> mleList = jpaController.findByMleType(criteria.mleType.name());
+                if (mleList != null && !mleList.isEmpty()) {
+                    for(TblMle mleObj : mleList) {
+                        mleCollection.getMles().add(convert(mleObj));
+                    }
+                }                
             }
         } catch (Exception ex) {
             log.error("Mle:Search - Error during MLE search.", ex);
@@ -255,6 +262,10 @@ public class MleRepository implements DocumentRepository<Mle, MleCollection, Mle
         if (mwMleSourceCollection != null && !mwMleSourceCollection.isEmpty()) {
             MwMleSource mleSource = (MwMleSource) mwMleSourceCollection.toArray()[0];
             mle.setSource(mleSource.getHostName());
+        }
+        if (tblMleObj.getTarget_type() != null && !tblMleObj.getTarget_type().isEmpty()) {
+            mle.setTargetType(tblMleObj.getTarget_type());
+            mle.setTargetValue(tblMleObj.getTarget_value());
         }
         return mle;
     }
