@@ -97,7 +97,9 @@ public class MleBO {
             log.debug("add mle os version: {}", mleData.getOsVersion());
             log.debug("add mle oem: {}", mleData.getOemName());
             log.debug("add mle attestation type: {}", mleData.getAttestationType());
-
+            log.debug("add mle target type: {}", mleData.getTarget_type());
+            log.debug("add mle target value: {}", mleData.getTarget_value());
+            
             TblMle tblMle = getMleDetails(mleData.getName(),
                     mleData.getVersion(), mleData.getOsName(),
                     mleData.getOsVersion(), mleData.getOemName());
@@ -423,6 +425,12 @@ public class MleBO {
             tblMle.setOem_uuid_hex(osOemUuid);
         }
 
+        if (mleData.getTarget_type() != null && !mleData.getTarget_type().isEmpty()) {
+            tblMle.setTarget_type(mleData.getTarget_type());
+            if (mleData.getTarget_value() != null)
+                tblMle.setTarget_value(mleData.getTarget_value());
+        }
+        
         return tblMle;
     }
 
@@ -1077,6 +1085,8 @@ public class MleBO {
                     log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
 
                     tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+                    if (tblModule == null)
+                        throw new NoResultException();
 
                 } catch (NoResultException nre) {
                     throw new ASException(nre, ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());

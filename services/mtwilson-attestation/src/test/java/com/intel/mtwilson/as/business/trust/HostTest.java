@@ -64,7 +64,11 @@ public class HostTest {
 //        hostObj.BIOS_Version = "01.00.0060";
 //        hostObj.VMM_Name = "Intel_Thurley_VMware_ESXi";
 //        hostObj.VMM_Version = "5.1.0-799733";
-        String result = hostTrustBO.checkMatchingMLEExists(hostObj, "0,17", "18");
+        HostConfigData hostConfigObj = new HostConfigData();
+        hostConfigObj.setTxtHostRecord(hostObj);
+        hostConfigObj.setBiosPCRs("0,17");
+        hostConfigObj.setVmmPCRs("18");
+        String result = hostTrustBO.checkMatchingMLEExists(hostConfigObj);
         System.out.println(result);
     }
 
@@ -80,8 +84,11 @@ public class HostTest {
         hostObj.VMM_Version = "5.1.0-799733";
         hostObj.VMM_OSName = "VMware_ESXi";
         hostObj.VMM_OSVersion = "5.1.0";
+        HostConfigData hostConfigObj = new HostConfigData();
+        hostConfigObj.setTxtHostRecord(hostObj);
         
-        HostResponse result = hostTrustBO.getTrustStatusOfHostNotInDBAndRegister(hostObj);
+        HostResponse result = hostTrustBO.getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
+        //HostResponse result = hostTrustBO.getTrustStatusOfHostNotInDBAndRegister(hostObj);
         System.out.println(result);
     }
     

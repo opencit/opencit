@@ -51,6 +51,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblMle.findByNameLike", query = "SELECT t FROM TblMle t WHERE t.name LIKE :name"),
     @NamedQuery(name = "TblMle.findBiosMleByVersion", query = "SELECT t FROM TblMle t WHERE t.version = :version and t.oemId.name = :oemName order by t.name"),
     @NamedQuery(name = "TblMle.findVmmMleByVersion", query = "SELECT t FROM TblMle t WHERE t.version = :version and t.osId.name = :osName and t.osId.version =:osVersion order by t.name"),
+    @NamedQuery(name = "TblMle.findBiosMleByTarget", query = "SELECT t FROM TblMle t WHERE t.version = :version and t.oemId.name = :oemName and t.target_type = :target_type and t.target_value = :target_value order by t.name"),
+    @NamedQuery(name = "TblMle.findVmmMleByTarget", query = "SELECT t FROM TblMle t WHERE t.version = :version and t.osId.name = :osName and t.osId.version =:osVersion and t.target_type = :target_type and t.target_value = :target_value order by t.name"),
     @NamedQuery(name = "TblMle.findByOsUuid", query = "SELECT t FROM TblMle t WHERE t.os_uuid_hex = :os_uuid_hex"),
     @NamedQuery(name = "TblMle.findByOemUuid", query = "SELECT t FROM TblMle t WHERE t.oem_uuid_hex = :oem_uuid_hex")})
 //    @NamedQuery(name = "TblMle.findVmmMleByNameSearchCriteria", query = "SELECT t FROM TblMle t WHERE t.name like :search or t.osId.name like :search"),
@@ -96,6 +98,12 @@ public class TblMle implements Serializable {
     @Basic(optional = true)
     @Column(name = "os_uuid_hex")
     private String os_uuid_hex;
+    @Basic(optional = true)
+    @Column(name = "target_type")
+    private String target_type;
+    @Basic(optional = true)
+    @Column(name = "target_value")
+    private String target_value;    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmmMleId")
     private Collection<TblHosts> tblHostsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "biosMleId")
@@ -201,6 +209,22 @@ public class TblMle implements Serializable {
 
     public void setOs_uuid_hex(String os_uuid_hex) {
         this.os_uuid_hex = os_uuid_hex;
+    }
+
+    public String getTarget_type() {
+        return target_type;
+    }
+
+    public void setTarget_type(String target_type) {
+        this.target_type = target_type;
+    }
+
+    public String getTarget_value() {
+        return target_value;
+    }
+
+    public void setTarget_value(String target_value) {
+        this.target_value = target_value;
     }
 
     

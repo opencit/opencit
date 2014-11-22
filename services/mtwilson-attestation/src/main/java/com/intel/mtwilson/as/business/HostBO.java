@@ -1125,15 +1125,15 @@ public class HostBO {
                 return hostObj;
         }
 
-        public HostResponse addHostByFindingMLE(TxtHostRecord hostObj) {
+        public HostResponse addHostByFindingMLE(HostConfigData hostObj) {
             try {
                 return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
             } catch (ASException ae){
                 throw ae;
-			}
-		}
+            }
+        }
 
-        public HostResponse updateHostByFindingMLE(TxtHostRecord hostObj) {
+        public HostResponse updateHostByFindingMLE(HostConfigData hostObj) {
             try {
                 return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
             } catch (ASException ae) {

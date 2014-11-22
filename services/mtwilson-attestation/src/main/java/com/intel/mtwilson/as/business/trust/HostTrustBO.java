@@ -145,15 +145,16 @@ public class HostTrustBO {
      * @return
      * @throws IOException 
      */
-    public HostResponse getTrustStatusOfHostNotInDBAndRegister(TxtHostRecord hostObj) {
+    public HostResponse getTrustStatusOfHostNotInDBAndRegister(HostConfigData hostConfigObj) {
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         boolean biosMLEFound = false, VMMMLEFound = false;
+        TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
         
             // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
 //            if( log.isDebugEnabled() ) {
 //                try {
 //                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostObj)); //This statement may contain clear text passwords
+//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostConfigObj)); //This statement may contain clear text passwords
 //                }
 //                catch(IOException e) {
 //                    log.debug("cannot serialize host input to addHost", e);
@@ -213,7 +214,36 @@ public class HostTrustBO {
             
             // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
             // numeric extensions if any.
-            List<TblMle> biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
+            List<TblMle> biosMLEList;
+            if (hostConfigObj.getBiosWLTarget() == null) {
+
+                log.debug("getTrustStatusOfHostNotInDB: Retrieving the list of MLEs with version {} for OEM {} for matching the whitelists.", 
+                        hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                
+                biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                
+            } else {
+                
+                String targetType = hostConfigObj.getBiosWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigObj.getBiosWLTarget()) {
+                    case BIOS_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case BIOS_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    default :
+                        targetValue = "";
+                }
+                
+                log.debug("getTrustStatusOfHostNotInDB: Retrieving the list of MLEs with version {} for OEM {} having target {}-{} for matching the whitelists.", 
+                        hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
+                
+                biosMLEList = mleJpa.findBiosMleByTarget(hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
+
+            }
+
             if (biosMLEList != null && !biosMLEList.isEmpty()) {
                 for (TblMle biosMLE : biosMLEList) {
                     log.debug("getTrustStatusOfHostNotInDB: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
@@ -263,7 +293,32 @@ public class HostTrustBO {
             
             // First let us find the matching VMM MLEs for the host that is configured in the system.
             //List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(hostObj.VMM_Name);
-            List<TblMle> vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+            List<TblMle> vmmMLEList; 
+            if (hostConfigObj.getVmmWLTarget() == null) {
+                
+                vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                
+            } else {
+                String targetType = hostConfigObj.getVmmWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigObj.getVmmWLTarget()) {
+                    case VMM_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case VMM_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    case VMM_GLOBAL :
+                    default :
+                        targetValue = "";
+                }
+
+                log.debug("getTrustStatusOfHostNotInDB: Retrieving the list of MLEs with VMM version {} for OS {} - {} having target {} - {} for matching the whitelists.", 
+                        hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
+                
+                vmmMLEList = mleJpa.findVmmMleByTarget(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
+                
+            }
             if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
                 for (TblMle vmmMLE : vmmMLEList) {
                     
@@ -1803,10 +1858,14 @@ public class HostTrustBO {
         return hostTrustStatus;
     }
 
-    public String checkMatchingMLEExists(TxtHostRecord hostObj, String biosPCRs, String vmmPCRs) {
+    public String checkMatchingMLEExists(HostConfigData hostConfigData) {
         boolean biosMLEFound = false, VMMMLEFound = false;
         
         try {
+            TxtHostRecord hostObj = hostConfigData.getTxtHostRecord();
+            String biosPCRs = hostConfigData.getBiosPCRs();
+            String vmmPCRs = hostConfigData.getVmmPCRs();
+            
             long getTrustStatusOfHostNotInDBStart = System.currentTimeMillis();
             
             log.debug("checkMatchingMLEExists: Starting to find the matching MLEs for host {}.", hostObj.HostName);
@@ -1845,8 +1904,28 @@ public class HostTrustBO {
             if (biosPCRs != null && !biosPCRs.isEmpty()) {
                 // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
                 // numeric extensions if any.
-                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with version {} for OEM {} for matching the whitelists.", hostObj.BIOS_Version, hostObj.BIOS_Oem);
-                List<TblMle> biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                
+                // In order to search for the matching BIOS name, we also need to add the target type and target value as filter criteria
+                // Let us take 2 EPSD hosts having the exact same BIOS. If the user wants to create 2 white lists for both the hosts, without
+                // adding this filter criteria of HostName, for the Host #2 we would match the Whitelist of Host #1 and hence we would not create
+                // a new white list. 
+                String targetType = hostConfigData.getBiosWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigData.getBiosWLTarget()) {
+                    case BIOS_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case BIOS_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    default :
+                        targetValue = "";
+                }
+                
+                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with version {} for OEM {} having target {}-{} for matching the whitelists.", 
+                        hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
+                
+                List<TblMle> biosMLEList = mleJpa.findBiosMleByTarget(hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
                 if (biosMLEList != null && !biosMLEList.isEmpty()) {
                     for (TblMle biosMLE : biosMLEList) {
                         log.debug("checkMatchingMLEExists: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
@@ -1906,8 +1985,32 @@ public class HostTrustBO {
             }
             
             if (vmmPCRs != null && !vmmPCRs.isEmpty()) {
+                
+                // In order to search for the matching VMM MLE, we also need to add the target type and target value as filter criteria
+                // Let us take 2 different OEM boxes having the exact same ESXi version installed. Lets say that the user whitelists using
+                // OEM Host #1. Assume that it creates VMM MLE with name DELL_Romley_VMware_ESXi. Now if the user wants to create the second
+                // white list using the HP host, then we need to not only compare the VMM version, OS name and OS version but also consider
+                // the OEM of the box from which the first whitelist was created. Otherwise it would match with the whitelist of Host #1 and
+                // we would not create the second white list.
+                String targetType = hostConfigData.getVmmWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigData.getVmmWLTarget()) {
+                    case VMM_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case VMM_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    case VMM_GLOBAL :
+                    default :
+                        targetValue = "";
+                }
+
+                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with VMM version {} for OS {} - {} having target {} - {} for matching the whitelists.", 
+                        hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
+                
                 // First let us find the matching VMM MLEs for the host that is configured in the system.
-                List<TblMle> vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                List<TblMle> vmmMLEList = mleJpa.findVmmMleByTarget(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
                 if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
                     for (TblMle vmmMLE : vmmMLEList) {
 
