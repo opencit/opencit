@@ -249,7 +249,7 @@ public class HostTrustBO {
                     log.debug("getTrustStatusOfHostNotInDB: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
                     tblHosts.setBiosMleId(biosMLE);
 
-                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                     PolicyEngine policyEngine = new PolicyEngine();
                     TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
@@ -326,7 +326,7 @@ public class HostTrustBO {
                     
                     tblHosts.setVmmMleId(vmmMLE);
 
-                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                     PolicyEngine policyEngine = new PolicyEngine();
                     TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
@@ -1957,7 +1957,7 @@ public class HostTrustBO {
                         
                         tblHosts.setBiosMleId(biosMLE);
 
-                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
