@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.DigestAlgorithm;
 import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.crypto.digest.DigestUtil;
 import com.intel.dcsg.cpg.crypto.key.password.CryptoCodec;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordCryptoCodecFactory;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
@@ -157,6 +158,15 @@ public class PasswordEncryptedFile {
         DataEnvelope envelope = DataEnvelope.fromPem(content); // throws IllegalArgumentException if the input is not in PEM format
         IOUtils.closeQuietly(in);
         
+        
+        // parse the envelope to understand what protection was used to encrypt this file
+        PasswordProtection existingProtection = getProtection(envelope);
+        // if the protection was specified but doesn't match the Key-Algorithm or Encryption-Algorithm headers, throw an exception
+        // two key parameters that make decryption impossible if they are not available are key length and algorithm name
+        if( protection != null && !isEqualProtection(protection, existingProtection)) {
+            throw new IllegalArgumentException("Specified protection parameters do not match encrypted data header");
+        }
+        
         // if protection was not explicitly specified we try to detect it from the Key-Algorithm and the Encryption-Algorithm headers
         if( protection == null && envelope.getHeader(KEY_ALGORITHM) != null ) {
             KeyAlgorithm keyAlgInfo = new KeyAlgorithm();
@@ -189,7 +199,7 @@ public class PasswordEncryptedFile {
             }
             
             byte[] ciphertext = envelope.getContent(); // XXX TODO needs to take into account the Content-Encoding... maybe pass it as a parameter? or maybe the envelope class should recognize that header by itself?
-            byte[] plaintext = cipher.decrypt(ciphertext);
+            byte[] plaintext = cipher.decrypt(ciphertext); // throws RuntimeException if there is any problem
             
             String integrityAlgorithm = envelope.getHeader(INTEGRITY_ALGORITHM);
             if( integrityAlgorithm == null ) { throw new IllegalArgumentException("Missing integrity algorithm name"); }
@@ -275,12 +285,41 @@ public class PasswordEncryptedFile {
         encrypt(content.getBytes());
     }
     
+    private PasswordProtection getProtection(DataEnvelope envelope) {
+        KeyAlgorithm keyAlgInfo = new KeyAlgorithm();
+        keyAlgInfo.parseKeyAlgorithm(envelope.getHeader(KEY_ALGORITHM));
+        PasswordProtectionBuilder passwordProtectionBuilder = PasswordProtectionBuilder.factory();
+        if( keyAlgInfo.iterations > 0 ) { passwordProtectionBuilder.iterations(keyAlgInfo.iterations); }
+        if( keyAlgInfo.saltBytes > 0 ) { passwordProtectionBuilder.saltBytes(keyAlgInfo.saltBytes); }
+        if( keyAlgInfo.keyLengthBits > 0 ) { passwordProtectionBuilder.keyLengthBits(keyAlgInfo.keyLengthBits); }
+        PasswordProtection envelopeProtection = passwordProtectionBuilder
+                .keyAlgorithm(keyAlgInfo.keyAlgorithm)
+                .algorithm(envelope.getHeader(ENCRYPTION_ALGORITHM))
+                .digestAlgorithm(envelope.getHeader(INTEGRITY_ALGORITHM))
+                .build();
+        log.debug("Envelope specifies algorithm {} key length {} block size {} key algorithm {} digest algorithm {}", envelopeProtection.getAlgorithm(), envelopeProtection.getKeyLengthBits(), envelopeProtection.getBlockSizeBytes(), envelopeProtection.getKeyAlgorithm(), envelopeProtection.getDigestAlgorithm());
+        return envelopeProtection;
+    }
+    
     private boolean isCorrectPassword(DataEnvelope envelope) throws CryptographyException {
         String encryptionKeyId = envelope.getHeader(ENCRYPTION_KEY_ID);
         if( encryptionKeyId == null ) { throw new IllegalArgumentException("Missing hashed password in encryption key id"); }
         PasswordHash savedPasswordHash = PasswordHash.valueOf(encryptionKeyId);
         PasswordHash comparePasswordHash = new PasswordHash(password, savedPasswordHash.getSalt());
         return comparePasswordHash.getHashBase64().equals(savedPasswordHash.getHashBase64());
+    }
+
+    private boolean isEqualProtection(PasswordProtection a, PasswordProtection b) {
+        // key algorithm
+        boolean keyAlg = (a.getKeyAlgorithm() == null && b.getKeyAlgorithm() == null) || (a.getKeyAlgorithm().equals(b.getKeyAlgorithm()));
+        boolean keyLen = (a.getKeyLengthBits() == b.getKeyLengthBits());
+        boolean encAlg = (a.getAlgorithm() == null && b.getAlgorithm() == null) || (a.getAlgorithm().equals(b.getAlgorithm()));
+        boolean digAlg = (a.getDigestAlgorithm() == null && b.getDigestAlgorithm() == null) || (DigestUtil.getJavaAlgorithmName(a.getDigestAlgorithm()).equals(DigestUtil.getJavaAlgorithmName(b.getDigestAlgorithm())));
+        log.debug("Key-Algorithm: {} <=> {}",a.getKeyAlgorithm(),b.getKeyAlgorithm() );
+        log.debug("Key length: {} <=> {}",a.getKeyLengthBits(),b.getKeyLengthBits());
+        log.debug("Encryption-Algorithm: {} <=> {}",a.getAlgorithm(),b.getAlgorithm());
+        log.debug("Digest-Algorithm: {} <=> {}",a.getDigestAlgorithm(),b.getDigestAlgorithm());
+        return keyAlg && encAlg && digAlg && keyLen;
     }
     
     private byte[] getPlaintextWithIntegrity(byte[] plaintext, DigestAlgorithm algorithm) throws IOException {
@@ -304,7 +343,7 @@ public class PasswordEncryptedFile {
         public int saltBytes;
         
         public String formatKeyAlgorithm() {
-            HashMap<String,Object> parameterMap = new HashMap<String,Object>();
+            HashMap<String,Object> parameterMap = new HashMap<>();
             if( keyLengthBits != 0 ) { parameterMap.put("key-length", new Integer(keyLengthBits)); }
             if( iterations != 0 ) { parameterMap.put("iterations", new Integer(iterations)); }
             if( saltBytes != 0 ) { parameterMap.put("salt-bytes", new Integer(saltBytes)); }
@@ -313,7 +352,7 @@ public class PasswordEncryptedFile {
                 return keyAlgorithm;
             }
             else {
-                ArrayList<String> parameterList = new ArrayList<String>();
+                ArrayList<String> parameterList = new ArrayList<>();
                 for(String parameterName : parameterMap.keySet()) {
                     Object parameterValue = parameterMap.get(parameterName);
                     if( parameterValue instanceof String ) {
@@ -337,7 +376,7 @@ public class PasswordEncryptedFile {
                 iterations = parameterizedHeaderValue.getParameters().containsKey("iterations") ? Integer.valueOf(parameterizedHeaderValue.getParameters().get("iterations")) : 0;
                 saltBytes = parameterizedHeaderValue.getParameters().containsKey("salt-bytes") ? Integer.valueOf(parameterizedHeaderValue.getParameters().get("salt-bytes")) : 0;
             }
-            catch(Exception e) {
+            catch(IOException | NumberFormatException e) {
                 throw new IllegalArgumentException("Invalid key algorithm: "+algorithm, e);
             }
         }

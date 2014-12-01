@@ -8,17 +8,31 @@ import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.console.AbstractCommand;
+import com.intel.dcsg.cpg.console.Command;
 import java.io.File;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jbuhacoff
  */
-public class CreateSelfSignedTlsKeyAndCertificateInKeystore extends AbstractCommand {
+public class CreateSelfSignedTlsKeyAndCertificateInKeystore implements Command {
+    protected Logger log = LoggerFactory.getLogger(getClass());
+    protected Configuration options = null;
+    
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+    
+    public Configuration getOptions() {
+        return options;
+    }
     
     @Override
     public void execute(String[] args) throws Exception {
@@ -39,15 +53,5 @@ public class CreateSelfSignedTlsKeyAndCertificateInKeystore extends AbstractComm
         System.out.println("Expires: "+cert.getNotAfter().toString());
         System.out.println("Keystore: "+keystoreFile.getAbsolutePath());
     }
-
-    @Override
-    protected void validate() {
-        // here we are supposed to check that the options are good?
-        //throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-
-    
- 
     
 }

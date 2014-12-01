@@ -1,6 +1,2 @@
-# this extension provider uses the Java ServiceLoader to find extensions
-# but is not actually registered here because it uses the Java ServiceLoader
-# to find other extension providers, so registering it would cause an 
-# infinite recursion
-# com.intel.dcsg.cpg.extensions.ServiceLoaderExtensionProvider
+com.intel.dcsg.cpg.extensions.ServiceLoaderExtensionProvider
 com.intel.dcsg.cpg.extensions.WhiteboardExtensionProvider

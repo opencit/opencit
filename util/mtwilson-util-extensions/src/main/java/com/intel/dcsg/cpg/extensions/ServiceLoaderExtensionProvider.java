@@ -19,7 +19,7 @@ import java.util.ServiceLoader;
 public class ServiceLoaderExtensionProvider implements ExtensionProvider {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ServiceLoaderExtensionProvider.class);
 
-    private HashMap<Class<?>,ServiceLoader<?>> map = new HashMap<>();
+    private HashMap<String,ServiceLoader<?>> map = new HashMap<>();
     
     @Override
     public void reload() {
@@ -30,10 +30,11 @@ public class ServiceLoaderExtensionProvider implements ExtensionProvider {
 
     @Override
     public Iterator<String> find(Class<?> extension) {
-        ServiceLoader<?> loader = map.get(extension);
+        log.debug("ServiceLoaderExtensionProvider {} find ServiceLoader: {}", this.hashCode(), extension.getName());
+        ServiceLoader<?> loader = map.get(extension.getName());
         if( loader == null ) {
             loader = ServiceLoader.load(extension);
-            map.put(extension, loader);
+            map.put(extension.getName(), loader);
         }
         ClassNameIterator it = new ClassNameIterator(loader.iterator());
         return it;

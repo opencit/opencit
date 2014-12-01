@@ -70,7 +70,7 @@ public abstract class ObjectModel implements Model {
     @Override
     public final boolean isValid() {
         if( faults == null || lastHashCode == null || lastHashCode != hashCode() ) {
-            faults = new ArrayList<Fault>(); // make a new list instead of clearing so that a caller can say getFaults(), make a change, then getFaults() again, and compare the faults. 
+            faults = new ArrayList<>(); // make a new list instead of clearing so that a caller can say getFaults(), make a change, then getFaults() again, and compare the faults. 
             validate();
             lastHashCode = hashCode();
         }

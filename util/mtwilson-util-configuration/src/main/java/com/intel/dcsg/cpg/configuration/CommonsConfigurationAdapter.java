@@ -18,6 +18,7 @@ public class CommonsConfigurationAdapter implements Configuration {
     protected ObjectPropertyCodec objectCodec;
     
     public CommonsConfigurationAdapter(org.apache.commons.configuration.Configuration cc) {
+        if( cc == null ) { throw new NullPointerException(); }
         this.cc = cc;
         this.objectCodec = new XStreamPropertyCodec(); // default; can override with setObjectCodec(...)
     }
@@ -67,7 +68,7 @@ public class CommonsConfigurationAdapter implements Configuration {
 
     @Override
     public Integer getInteger(String key, Integer defaultValue) {
-        return cc.getInt(key, defaultValue);
+        return cc.getInteger(key, defaultValue);
     }
 
     @Override

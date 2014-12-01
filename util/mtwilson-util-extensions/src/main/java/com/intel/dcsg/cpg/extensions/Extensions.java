@@ -96,6 +96,9 @@ public class Extensions {
     private static final Collection<ExtensionProvider> providers = new ArrayList<>();
 
     static {
+        // we use an instance of ServiceLoaderExtensionProvider to leverage
+        // Java's ServiceLoader interface to find all available ExtensionProvider
+        // implementations on the classpath
         ServiceLoaderExtensionProvider sl = new ServiceLoaderExtensionProvider();
         Iterator<String> providerNamesIterator = sl.find(ExtensionProvider.class);
         while (providerNamesIterator.hasNext()) {
