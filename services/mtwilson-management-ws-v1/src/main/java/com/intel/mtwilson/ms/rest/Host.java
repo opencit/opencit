@@ -158,6 +158,8 @@ public class Host {
     @Produces(MediaType.APPLICATION_JSON)
     public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws ApiException {
         ValidationUtil.validate(hostRecords);
+        HostConfigResponseList results = MSComponentFactory.getHostBO().registerHosts(hostRecords);
+        /*
         TxtHostRecordList newHostRecords = new TxtHostRecordList();
         
         for (HostConfigData host : hostRecords.getHostRecords()) {
@@ -172,7 +174,7 @@ public class Host {
         HostConfigResponseList results = bulkHostRegBO.registerHosts(newHostRecords);
         for (HostConfigResponse hr : results.getHostRecords()) {
             log.debug("Bulk Add Hosts: " + hr.getHostName() + ":" + hr.getStatus() + ":" + hr.getErrorMessage());
-        }
+        }*/
         return results;
 
 
