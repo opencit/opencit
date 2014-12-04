@@ -5,7 +5,7 @@
 package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
-import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.util.filesystem.Platform;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;

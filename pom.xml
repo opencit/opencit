@@ -688,6 +688,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
 		<artifactId>mtwilson-util-extensions</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-filesystem</artifactId>
+		<version>0.1-SNAPSHOT</version>
+    </dependency>
 	<dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-http</artifactId>

@@ -2,14 +2,9 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.launcher;
+package com.intel.dcsg.cpg.extensions;
 
-import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
-import com.intel.dcsg.cpg.extensions.Registrar;
-import com.intel.dcsg.cpg.extensions.Scanner;
 import java.io.FileInputStream;
-import com.intel.mtwilson.util.filesystem.Home;
-import com.intel.mtwilson.util.filesystem.Subfolder;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
@@ -18,8 +13,8 @@ import org.apache.commons.io.IOUtils;
  *
  * @author jbuhacoff
  */
-public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnable {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ExtensionCacheLauncher.class);
+public class ExtensionCacheLoader implements Runnable {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ExtensionCacheLoader.class);
     
     private File cacheFile;
     private Registrar[] registrars;
@@ -34,12 +29,11 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
      * parent; if you replace with another classloader you will have to set
      * its parent yourself.
      */
-    public ExtensionCacheLauncher() {
+    public ExtensionCacheLoader(String configurationPath) {
         // look for java extension cache file
-        Subfolder configuration = new Subfolder("configuration", new Home());
-        String cachePath = configuration.getPath() + File.separator + "extensions.cache"; //MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
-        log.debug("default extension cache file: {}", cachePath);
-        cacheFile = new File(cachePath);
+        String cacheFilePath = configurationPath + File.separator + "extensions.cache"; //MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
+        log.debug("default extension cache file: {}", cacheFilePath);
+        cacheFile = new File(cacheFilePath);
         registrars = new Registrar[] { new ImplementationRegistrar() } ;        
         log.debug("thread context class loader: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
     }

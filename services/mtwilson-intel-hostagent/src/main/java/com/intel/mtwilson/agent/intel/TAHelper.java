@@ -39,7 +39,7 @@ import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.util.filesystem.Platform;
 import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyFilesystem;

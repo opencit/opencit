@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.apache.commons.exec.ExecuteException;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.util.filesystem.Platform;
 import java.util.concurrent.ExecutionException;
 /**
  *

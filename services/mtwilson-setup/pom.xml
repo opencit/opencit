@@ -30,6 +30,10 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-filesystem</artifactId>
+        </dependency>
         
         <!-- these dependencies are required for our use of cpg-configuration -->
         <dependency>

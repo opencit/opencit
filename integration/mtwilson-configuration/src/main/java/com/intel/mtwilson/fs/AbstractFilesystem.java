@@ -5,7 +5,7 @@
 package com.intel.mtwilson.fs;
 
 import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
-import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.util.filesystem.Platform;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.io.File;
 import org.apache.commons.configuration.CompositeConfiguration;

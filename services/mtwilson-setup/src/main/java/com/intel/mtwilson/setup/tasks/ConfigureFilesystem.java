@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
-import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.util.filesystem.Platform;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.setup.AbstractSetupTask;

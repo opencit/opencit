@@ -19,7 +19,7 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.util.filesystem.Platform;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.setup.DatabaseSetupTask;

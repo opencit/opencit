@@ -6,8 +6,6 @@ package com.intel.mtwilson.launcher;
 
 import com.intel.dcsg.cpg.classpath.FileURLClassLoader;
 import com.intel.dcsg.cpg.classpath.JarClassIterator;
-import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
-import com.intel.dcsg.cpg.extensions.ExtensionUtil;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.extensions.Scanner;
@@ -15,8 +13,8 @@ import com.intel.dcsg.cpg.io.file.FilenameContainsFilter;
 import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.dcsg.cpg.performance.CountingIterator;
 import com.intel.mtwilson.collection.ArrayIterator;
-import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.util.filesystem.Home;
+import com.intel.mtwilson.util.filesystem.Subfolder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +48,8 @@ public class ExtensionDirectoryLauncher extends ExtensionLauncher implements Run
         if(parentClassLoader==null) { parentClassLoader = ExtensionDirectoryLauncher.class.getClassLoader(); }
         // look for java extension directory
 //        String javaPath = My.filesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java 
-        String javaPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java
+        Subfolder java = new Subfolder("java", new Home()); // for example /opt/mtwilson/java
+        String javaPath = java.getPath(); //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getJavaPath(); // for example, /opt/mtwilson/java
         log.debug("Default application java path: {}", javaPath);
 //        if( My.configuration().getmtwj)
         javaFolder = new File(javaPath);

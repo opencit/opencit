@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mtwilson-util-exec</artifactId>
+    <artifactId>mtwilson-util-filesystem</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>mtwilson-util-exec</name>
-    <description>Utilities for executing external programs; includes utilities simplifying use of Apache commons-exec</description>
+    <name>mtwilson-util-filesystem</name>
+    <description>Help for discovering local file locations for configuration, data, or other needs</description>
     <parent>
         <groupId>com.intel.mtwilson.util</groupId>
         <artifactId>mtwilson-util</artifactId>
@@ -20,12 +20,6 @@
         </dependency>
         
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-exec</artifactId>
-        </dependency>
-        <!-- end xstream codec and propertiesconfiguration dependencies -->
-    
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -34,14 +28,6 @@
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>        
-
-        <!-- for the Platform class -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-filesystem</artifactId>
-            <scope>test</scope>
-        </dependency>
-
 
     </dependencies>  
 </project>
