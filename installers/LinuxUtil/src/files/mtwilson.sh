@@ -537,6 +537,7 @@ case "$1" in
             rm -fr /etc/monit/conf.d/*.mtwilson
             echo "Restarting monit after removing configs"
             service monit stop &> /dev/null
+            service monit start &> /dev/null
             echo "Removing mtwilson logrotate files"
             rm -fr /etc/logrotate.d/mtwilson
         # java:  rm -rf /usr/share/jdk1.7.0_51
