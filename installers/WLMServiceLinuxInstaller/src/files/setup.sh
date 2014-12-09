@@ -76,7 +76,7 @@ mkdir -p /usr/local/bin
 cp wlmctl.sh /usr/local/bin/wlmctl
 chmod +x /usr/local/bin/wlmctl
 /usr/local/bin/wlmctl setup
-register_startup_script /usr/local/bin/wlmctl wlmctl
+#register_startup_script /usr/local/bin/wlmctl wlmctl
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

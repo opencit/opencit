@@ -1,4 +1,15 @@
 #!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          mtwilson
+# Required-Start:    $local_fs $network $remote_fs
+# Required-Stop:     $local_fs $network $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start mtwilson webserver
+# Description:       Enable mtwilson services
+### END INIT INFO
+
 # WARNING:
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
