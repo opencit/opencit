@@ -972,11 +972,11 @@ fi
 
 #Register mtwilson as a startup script, remove previous service startup scripts if they exist
 register_startup_script /usr/local/bin/mtwilson mtwilson >> $INSTALL_LOG_FILE
-remove_startup_script "asctl"
-remove_startup_script "msctl"
-remove_startup_script "mtwilson-portal"
-remove_startup_script "tdctl"
-remove_startup_script "wlmctl"
+remove_startup_script "asctl" >> $INSTALL_LOG_FILE
+remove_startup_script "msctl" >> $INSTALL_LOG_FILE
+remove_startup_script "mtwilson-portal" >> $INSTALL_LOG_FILE
+remove_startup_script "tdctl" >> $INSTALL_LOG_FILE
+remove_startup_script "wlmctl" >> $INSTALL_LOG_FILE
 
 #Save variables to properties file
 #if using_mysql; then   
