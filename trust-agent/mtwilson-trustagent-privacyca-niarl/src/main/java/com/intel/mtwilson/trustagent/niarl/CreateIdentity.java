@@ -12,7 +12,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
-import com.intel.mtwilson.configuration.Configurable;
+import com.intel.dcsg.cpg.configuration.Configurable;
 import com.intel.mtwilson.privacyca.v2.model.IdentityBlob;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeRequest;
