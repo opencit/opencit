@@ -191,6 +191,10 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-filesystem</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>

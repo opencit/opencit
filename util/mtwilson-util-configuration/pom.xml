@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mtwilson-util-configuration</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mtwilson-util-configuration</name>
     <description>Read-only Configuration and Read-write MutableConfiguration objects</description>
@@ -27,23 +27,6 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-text-transform</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-codec</artifactId>
-        </dependency>
-        
-        <!-- needed only if you use the XStreamCodec in conjunction with PropertiesConfiguration -->
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- end xstream codec and propertiesconfiguration dependencies -->
     
         <dependency>
             <groupId>org.slf4j</groupId>

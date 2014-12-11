@@ -4,11 +4,11 @@
  */
 package com.intel.dcsg.cpg.configuration;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A read-only configuration that is comprised of one or more configuration
@@ -18,209 +18,94 @@ import java.util.List;
  * so if you change the list or array of sources after creating the
  * CompositeConfiguration, it will not be affected.
  * 
+ * If a target is defined it's automatically the first source on the list.
+ * 
  * @author jbuhacoff
  */
-public class CompositeConfiguration implements Configuration {
+public class CompositeConfiguration extends AbstractConfiguration {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompositeConfiguration.class);
-    protected List<Configuration> sources;
+    protected final List<Configuration> sources;
+    protected final Configuration target;
+    
+    protected CompositeConfiguration() {
+        super();
+        this.target = null;
+        this.sources = new ArrayList<>();
+    }
     
     public CompositeConfiguration(List<Configuration> sources) {
+        this(sources, null);
+    }
+    public CompositeConfiguration(List<Configuration> sources, Configuration target) {
+        super();
         this.sources = new ArrayList<>();
+        if( target != null ) {
+            this.sources.add(target);
+        }
         this.sources.addAll(sources);
+        this.target = target;
     }
     public CompositeConfiguration(Configuration... sources) {
-        this.sources = new ArrayList<>();
-        this.sources.addAll(Arrays.asList(sources));
+        this(Arrays.asList(sources));
+    }
+
+    /**
+     * Edit the list of sources returned from this method to affect the
+     * sources checked by {@code get}.
+     * @return the mutable list of Configuration sources
+     */
+    public List<Configuration> getSources() {
+        return sources;
     }
     
-    // would be useful to have a contains(key) method to facilitate this
-    // so we don't have to consider null vs empty for strings in different
-    // implementations
-    public Configuration source(String key) {
+    public Configuration getSource(String key) {
         for(Configuration source : sources) {
-            String value = source.getString(key);
+            String value = source.get(key, null);
             if( value != null ) {
                 return source;
             }
         }
         return null;
     }
+
+    @Override
+    public Set<String> keys() {
+        HashSet<String> keys = new HashSet();
+        for(Configuration source : sources) {
+            keys.addAll(source.keys());
+        }
+        return keys;
+    }
+        
+    /**
+     * @param key
+     * @param defaultValue
+     * @return the value of key from the first source to have it, or defaultValue if none of the sources have it
+     */
+    @Override
+    public String get(String key, String defaultValue) {
+        for(Configuration source : sources) {
+            String value = source.get(key, null);
+            if( value != null ) {
+                return value;
+            }
+        }
+        return defaultValue;
+    }
     
     @Override
-    public Boolean getBoolean(String key) {
-        return getBoolean(key, null);
+    public void set(String key, String value) {
+        target.set(key, value);
+    }
+
+    public Configuration getTarget() {
+        return target;
     }
 
     @Override
-    public Boolean getBoolean(String key, Boolean defaultValue) {
-        for(Configuration source : sources) {
-            Boolean value = source.getBoolean(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
+    public boolean isEditable() {
+        return target != null && target.isEditable();
     }
-
-    @Override
-    public Byte getByte(String key) {
-        return getByte(key, null);
-    }
-
-    @Override
-    public Byte getByte(String key, Byte defaultValue) {
-        for(Configuration source : sources) {
-            Byte value = source.getByte(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public Short getShort(String key) {
-        return getShort(key, null);
-    }
-
-    @Override
-    public Short getShort(String key, Short defaultValue) {
-        for(Configuration source : sources) {
-            Short value = source.getShort(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public Integer getInteger(String key) {
-        return getInteger(key, null);
-    }
-
-    @Override
-    public Integer getInteger(String key, Integer defaultValue) {
-        for(Configuration source : sources) {
-            Integer value = source.getInteger(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public Long getLong(String key) {
-        return getLong(key, null);
-    }
-
-    @Override
-    public Long getLong(String key, Long defaultValue) {
-        for(Configuration source : sources) {
-            Long value = source.getLong(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public BigInteger getBigInteger(String key) {
-        return getBigInteger(key, null);
-    }
-
-    @Override
-    public BigInteger getBigInteger(String key, BigInteger defaultValue) {
-        for(Configuration source : sources) {
-            BigInteger value = source.getBigInteger(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public Float getFloat(String key) {
-        return getFloat(key, null);
-    }
-
-    @Override
-    public Float getFloat(String key, Float defaultValue) {
-        for(Configuration source : sources) {
-            Float value = source.getFloat(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public Double getDouble(String key) {
-        return getDouble(key, null);
-    }
-
-    @Override
-    public Double getDouble(String key, Double defaultValue) {
-        for(Configuration source : sources) {
-            Double value = source.getDouble(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(String key) {
-        return getBigDecimal(key, null);
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(String key, BigDecimal defaultValue) {
-        for(Configuration source : sources) {
-            BigDecimal value = source.getBigDecimal(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public String getString(String key) {
-        return getString(key, null);
-    }
-
-    @Override
-    public String getString(String key, String defaultValue) {
-        for(Configuration source : sources) {
-            log.debug("getString {} checking {}", key, source.getClass().getName());
-            String value = source.getString(key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public <T> T getObject(Class<T> objectClass, String key) {
-        return getObject(objectClass, key, null);
-    }
-
-    @Override
-    public <T> T getObject(Class<T> objectClass, String key, T defaultValue) {
-        for(Configuration source : sources) {
-            T value = source.getObject(objectClass, key);
-            if( value != null ) {
-                return value;
-            }
-        }
-        return defaultValue;
-    }
+    
     
 }

@@ -128,6 +128,7 @@ public class Extensions {
     private static List<Extension> list(Class<?> extension) {
         ArrayList<Extension> list = new ArrayList<>();
         for (ExtensionProvider provider : providers) {
+            log.debug("Looking for extension {} in provider {}", extension.getName(), provider.getClass().getName());
             Iterator<String> implementationNamesIterator = provider.find(extension);
             while (implementationNamesIterator.hasNext()) {
                 String name = implementationNamesIterator.next();

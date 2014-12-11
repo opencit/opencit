@@ -9,7 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * Transforms camel case "HelloWorld" to all caps "HELLO_WORLD"
+ * 
  * @author jbuhacoff
  */
 public class AllCapsNamingStrategy implements Transformer<String> {

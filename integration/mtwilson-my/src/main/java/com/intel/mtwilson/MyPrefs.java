@@ -4,9 +4,7 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.dcsg.cpg.console.ExtendedOptions;
 import java.util.prefs.Preferences;
-import org.apache.commons.configuration.Configuration;
 
 /**
  * Examples:

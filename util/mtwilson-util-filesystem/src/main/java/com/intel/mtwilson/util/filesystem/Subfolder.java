@@ -27,6 +27,14 @@ import java.io.File;
  * then all features that use the example constructor would end up pointing
  * to some global hypertext folder instead of their own.
  * 
+ * In summary, the reason to use this class instead of directly writing
+ * {@code root+File.separator+"subfolder"} is that using this class allows
+ * the user to change the location of subfolder by setting a system property
+ * like mtwilson.fs.subfolder or an environment variable MTWILSON_FS_SUBFOLDER.
+ * 
+ * If the subfolder location should not be configurable, then do not use this
+ * class. It is not appropriate for all situations.
+ * 
  * @author jbuhacoff
  */
 public class Subfolder extends ApplicationFolder {

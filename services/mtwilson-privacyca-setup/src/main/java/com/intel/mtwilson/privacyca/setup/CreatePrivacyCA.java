@@ -35,7 +35,7 @@ public class CreatePrivacyCA extends LocalSetupTask {
         
         if( identityPassword == null || identityPassword.isEmpty() ) {
             identityPassword = RandomUtil.randomBase64String(16); 
-            getConfiguration().setString("mtwilson.privacyca.aik.p12.password", identityPassword);
+            getConfiguration().set("mtwilson.privacyca.aik.p12.password", identityPassword);
         }
     }
 

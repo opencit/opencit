@@ -7,6 +7,7 @@ package com.intel.mtwilson.fs;
 import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
 import com.intel.mtwilson.util.filesystem.Platform;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.util.filesystem.Home;
 import java.io.File;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.EnvironmentConfiguration;
@@ -55,7 +56,9 @@ public abstract class AbstractFilesystem implements ApplicationFilesystem {
     @Override
     public String getApplicationPath() {
         if (applicationPath == null) {
-            applicationPath = getPlatformFilesystem().getApplicationRoot() + File.separator + getApplicationName();
+            Home home = new Home();
+            applicationPath = home.getPath(); //getPlatformFilesystem().getApplicationRoot() + File.separator + getApplicationName();
+            log.debug("Using mtwilson-util-filesystem in getApplicationPath: {}", applicationPath);
         }
         return applicationPath;
     }

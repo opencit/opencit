@@ -114,7 +114,13 @@ They will be created in target/site/apidocs
             <version>2.2.1</version>
             <optional>true</optional>
         </dependency>
-        
+
+        <!-- for ChainedIterator -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-collection</artifactId>
+        </dependency>
+                
         <!-- for Filter -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>

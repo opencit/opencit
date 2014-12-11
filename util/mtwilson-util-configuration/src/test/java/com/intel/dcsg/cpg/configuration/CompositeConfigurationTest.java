@@ -18,31 +18,31 @@ public class CompositeConfigurationTest {
     public void testCompositeConfiguration() {
         PropertiesConfiguration c1 = new PropertiesConfiguration();
         PropertiesConfiguration c2 = new PropertiesConfiguration();
-        c1.setString("fruit", "apple");
-        c2.setString("fruit", "banana");
-        c1.setInteger("number", 1);
-        c2.setBoolean("boolean", false);
+        c1.set("fruit", "apple");
+        c2.set("fruit", "banana");
+        c1.set("number", "1");
+        c2.set("boolean", "false");
         CompositeConfiguration cc = new CompositeConfiguration(c1, c2);
-        assertEquals("apple", cc.getString("fruit"));
-        assertEquals(Integer.valueOf(1), cc.getInteger("number"));
-        assertEquals(false, cc.getBoolean("boolean"));
-        assertNull(cc.getByte("missing"));
+        assertEquals("apple", cc.get("fruit", null));
+        assertEquals(Integer.valueOf(1), cc.get("number", null));
+        assertEquals(false, cc.get("boolean", null));
+        assertNull(cc.get("missing", null));
     }
     
     @Test
     public void testMutableCompositeConfiguration() {
         PropertiesConfiguration c1 = new PropertiesConfiguration();
         PropertiesConfiguration c2 = new PropertiesConfiguration();
-        c1.setString("fruit", "apple");
-        c2.setString("fruit", "banana");
-        c1.setInteger("number", 1);
-        c2.setBoolean("boolean", false);
+        c1.set("fruit", "apple");
+        c2.set("fruit", "banana");
+        c1.set("number", "1");
+        c2.set("boolean", "false");
         PropertiesConfiguration target = new PropertiesConfiguration();
-        MutableCompositeConfiguration cc = new MutableCompositeConfiguration(target, c1, c2);
-        assertEquals("apple", cc.getString("fruit"));
-        cc.setString("fruit", "carrot");
-        assertEquals("carrot", cc.getString("fruit"));
-        assertEquals("carrot", target.getString("fruit"));
+        CompositeConfiguration cc = new CompositeConfiguration(target, c1, c2);
+        assertEquals("apple", cc.get("fruit", null));
+        cc.set("fruit", "carrot");
+        assertEquals("carrot", cc.get("fruit", null));
+        assertEquals("carrot", target.get("fruit", null));
         
     }
 }

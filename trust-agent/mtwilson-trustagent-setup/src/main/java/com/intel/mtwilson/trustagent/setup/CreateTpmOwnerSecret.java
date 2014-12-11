@@ -49,7 +49,7 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
         // if the tpm is already owned.
         String tpmOwnerSecretHex = RandomUtil.randomHexString(20);
         log.info("Generated random owner secret"); 
-        getConfiguration().setString(TrustagentConfiguration.TPM_OWNER_SECRET, tpmOwnerSecretHex);
+        getConfiguration().set(TrustagentConfiguration.TPM_OWNER_SECRET, tpmOwnerSecretHex);
     }
     
     private boolean isTpmOwned() throws IOException {

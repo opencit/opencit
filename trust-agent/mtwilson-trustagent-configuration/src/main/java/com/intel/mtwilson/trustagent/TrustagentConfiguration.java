@@ -4,11 +4,10 @@
  */
 package com.intel.mtwilson.trustagent;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.net.NetUtils;
-import com.intel.mtwilson.configuration.AbstractConfiguration;
 import java.io.File;
 import com.intel.mtwilson.MyFilesystem;
 import java.io.FileInputStream;
@@ -25,7 +24,7 @@ import org.apache.commons.codec.binary.Hex;
  *
  * @author jbuhacoff
  */
-public class TrustagentConfiguration extends AbstractConfiguration {
+public class TrustagentConfiguration {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustagentConfiguration.class);
 
     // Variables such as TRUSTAGENT_HOME, TRUSTAGENT_CONF, etc. for filesystem
@@ -51,12 +50,13 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public final static String TPM_QUOTE_IPV4 = "tpm.quote.ipv4";
     public static final String HARDWARE_UUID = "hardware.uuid";
     
+    private Configuration conf;
+    
     public TrustagentConfiguration(org.apache.commons.configuration.Configuration configuration) {
-        this(new CommonsConfigurationAdapter(configuration));
+        this(new CommonsConfiguration(configuration));
     }
     public TrustagentConfiguration(Configuration configuration) {
-        super();
-        configure(configuration);
+        this.conf = configuration;
 //        initEnvironmentConfiguration(configuration);
     }
     /*
@@ -81,7 +81,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
      * @return 
      */
     public List<String> getMtWilsonTlsCertificateFingerprints() {        
-        String fingerprintCsv = getConfiguration().getString(MTWILSON_TLS_CERT_SHA1);
+        String fingerprintCsv = conf.get(MTWILSON_TLS_CERT_SHA1, null);
         if( fingerprintCsv == null || fingerprintCsv.isEmpty() ) {
             return Collections.EMPTY_LIST;
         }
@@ -96,16 +96,16 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     */
     
     public String getMtWilsonApiUrl() {
-        return getConfiguration().getString(MTWILSON_API_URL);// intentionally no default - this must be configured during setup
+        return conf.get(MTWILSON_API_URL, null);// intentionally no default - this must be configured during setup
     }
     public String getMtWilsonApiUsername() {
-        return getConfiguration().getString(MTWILSON_API_USERNAME);// intentionally no default - this must be configured during setup
+        return conf.get(MTWILSON_API_USERNAME, null);// intentionally no default - this must be configured during setup
     }
     public String getMtWilsonApiPassword() {
-        return getConfiguration().getString(MTWILSON_API_PASSWORD);// intentionally no default - this must be configured during setup
+        return conf.get(MTWILSON_API_PASSWORD, null);// intentionally no default - this must be configured during setup
     }
     public String getTpmOwnerSecretHex() {
-        return getConfiguration().getString(TPM_OWNER_SECRET); // intentionally no default - this must be generated during setup
+        return conf.get(TPM_OWNER_SECRET, null); // intentionally no default - this must be generated during setup
     }
     public byte[] getTpmOwnerSecret() {
         try {
@@ -116,7 +116,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         }
     }
     public String getTpmSrkSecretHex() {
-        return getConfiguration().getString(TPM_SRK_SECRET); // intentionally no default - this must be generated during setup
+        return conf.get(TPM_SRK_SECRET, null); // intentionally no default - this must be generated during setup
     }
     public byte[] getTpmSrkSecret() {
         try {
@@ -127,7 +127,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         }
     }
     public String getAikSecretHex() {
-        return getConfiguration().getString(AIK_SECRET); // intentionally no default - this must be generated during setup
+        return conf.get(AIK_SECRET, null); // intentionally no default - this must be generated during setup
     }
     public byte[] getAikSecret() {
         try {
@@ -138,7 +138,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         }
     }
     public int getAikIndex() {
-        return getConfiguration().getInteger(AIK_INDEX, 1); 
+        return Integer.valueOf(conf.get(AIK_INDEX, "1")); 
     }
     
     public File getAikCertificateFile() {
@@ -149,18 +149,18 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     
     public int getTrustagentHttpTlsPort() {
-        return getConfiguration().getInteger(TRUSTAGENT_HTTP_TLS_PORT, 1443);
+        return Integer.valueOf(conf.get(TRUSTAGENT_HTTP_TLS_PORT, "1443"));
     }
     public String getTrustagentTlsCertDn() {
-        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
+        return conf.get(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
     }
         
     public String getTrustagentTlsCertIp() {
-        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "");
+        return conf.get(TRUSTAGENT_TLS_CERT_IP, "");
     }
     public String[] getTrustagentTlsCertIpArray() throws SocketException {
-//        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
-        String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "").split(",");
+//        return conf.getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
+        String[] TlsCertIPs = conf.get(TRUSTAGENT_TLS_CERT_IP, "").split(",");
         if (TlsCertIPs != null && !TlsCertIPs[0].isEmpty()) {
             log.debug("Retrieved IPs from trust agent configuration: {}", (Object[])TlsCertIPs);
             return TlsCertIPs;
@@ -175,11 +175,11 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         return new String[]{"127.0.0.1"};
     }
     public String getTrustagentTlsCertDns() {
-        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "");
+        return conf.get(TRUSTAGENT_TLS_CERT_DNS, "");
     }
     public String[] getTrustagentTlsCertDnsArray() throws SocketException {
-//        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
-        String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
+//        return conf.getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
+        String[] TlsCertDNs = conf.get(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
         if (TlsCertDNs != null && !TlsCertDNs[0].isEmpty()) {
             log.debug("Retrieved Domain Names trust agent from configuration: {}", (Object[])TlsCertDNs);
             return TlsCertDNs;
@@ -198,7 +198,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
         return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.jks");
     }
     public String getTrustagentKeystorePassword() {
-        return getConfiguration().getString(TRUSTAGENT_KEYSTORE_PASSWORD); // intentionally no default - this must be generated during setup
+        return conf.get(TRUSTAGENT_KEYSTORE_PASSWORD, null); // intentionally no default - this must be generated during setup
     }
     
     public File getEndorsementAuthoritiesFile() {
@@ -216,14 +216,14 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     
     public boolean isDaaEnabled() {
-        return getConfiguration().getBoolean(DAA_ENABLED, false);
+        return Boolean.valueOf(conf.get(DAA_ENABLED, "false"));
     }
     public boolean isTpmQuoteWithIpAddress() {
-        return getConfiguration().getBoolean(TPM_QUOTE_IPV4, true);
+        return Boolean.valueOf(conf.get(TPM_QUOTE_IPV4, "true"));
     }
     
     public String getHardwareUuid() {
-        return getConfiguration().getString(HARDWARE_UUID);
+        return conf.get(HARDWARE_UUID, null);
     }
     
     public File getMeasureLogLaunchScript() {
@@ -231,7 +231,7 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     } 
 
     public String getMtwilsonTlsPolicyCertificateSha1() {
-        return getConfiguration().getString("mtwilson.tls.cert.sha1");
+        return conf.get("mtwilson.tls.cert.sha1", null);
     }
     
     public Properties getMtWilsonClientProperties() {

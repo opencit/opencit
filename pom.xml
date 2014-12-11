@@ -644,14 +644,14 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-collection</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
     <dependency>
         <groupId>com.intel.mtwilson.util</groupId>
         <artifactId>mtwilson-util-configuration</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>com.intel.mtwilson.util</groupId>

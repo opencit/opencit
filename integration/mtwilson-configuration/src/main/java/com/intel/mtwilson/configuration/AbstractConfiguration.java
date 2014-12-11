@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.configuration;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 
 /**
@@ -34,6 +34,6 @@ public class AbstractConfiguration implements Configurable {
      * @param configuration 
      */
     public void setConfiguration(org.apache.commons.configuration.Configuration configuration) {
-        this.configuration = new CommonsConfigurationAdapter(configuration);
+        this.configuration = new CommonsConfiguration(configuration);
     }
 }

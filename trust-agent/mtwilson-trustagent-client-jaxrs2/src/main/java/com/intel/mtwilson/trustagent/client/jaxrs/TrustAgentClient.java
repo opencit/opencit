@@ -4,13 +4,11 @@
  */
 package com.intel.mtwilson.trustagent.client.jaxrs;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.trustagent.model.*;
-import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;

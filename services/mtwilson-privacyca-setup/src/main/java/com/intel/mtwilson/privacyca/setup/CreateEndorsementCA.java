@@ -34,7 +34,7 @@ public class CreateEndorsementCA extends LocalSetupTask {
         
         if( endorsementPassword == null || endorsementPassword.isEmpty() ) {
             endorsementPassword = RandomUtil.randomBase64String(16); 
-            getConfiguration().setString("mtwilson.privacyca.ek.p12.password", endorsementPassword);
+            getConfiguration().set("mtwilson.privacyca.ek.p12.password", endorsementPassword);
         }
     }
 

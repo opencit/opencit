@@ -4,6 +4,10 @@
  */
 package com.intel.dcsg.cpg.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * TODO:  both CachingCompositeConfiguration and KeyTransformerConfiguration
  * in addition to the other configuration implementations make it obvious that
@@ -33,18 +37,54 @@ package com.intel.dcsg.cpg.configuration;
  * @author jbuhacoff
  */
 public abstract class AbstractConfiguration implements Configuration {
-//    private HashMap<Class<?> clazz, Converter> map;
-    
-    public <T> T get(Class<T> objectClass, String key) {
-        return get(objectClass, key, null);
-    }
-    public <T> T get(Class<T> objectClass, String key, T defaultValue) {
-        // look for a registered converter first
-        // Converter<T> converter = clazz.find(objectClss)
-        // try valueOf or string consructor 
-        return defaultValue;
+
+    /*
+    @Override
+    public String get(Property property) {
+        return get(property.getName(), property.getDefaultValue());
     }
     
-    public abstract void set(String key, Object newValue);
+    @Override
+    public void set(Property property, String value) {
+        set(property.getName(), value);
+    }
+    */
+    
+    @Override
+    public String get(String key) {
+        return get(key, null);
+    }
+    
+    /**
+     * Any changes to the returned Map will NOT affect the configuration
+     * instance.
+     * @return a Map instance with a copy of the configuration settings
+     */
+    public Map<String,String> toMap() {
+        HashMap<String,String> map = new HashMap<>();
+        for(String key : keys()) {
+            String value = get(key, null);
+            if( value != null ) {
+                map.put(key, value);
+            }  
+        }
+        return map;
+    }
+    
+    /**
+     * Any changes to the returned Properties will NOT affect the configuration
+     * instance.
+     * @return a Properties instance with a copy of the configuration settings
+     */
+    public Properties toProperties() {
+        Properties properties = new Properties();
+        for(String key : keys()) {
+            String value = get(key, null);
+            if( value != null ) {
+                properties.setProperty(key, value);
+            }  
+        }
+        return properties;
+    }
     
 }

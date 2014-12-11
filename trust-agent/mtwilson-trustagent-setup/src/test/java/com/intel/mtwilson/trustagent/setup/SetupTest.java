@@ -5,10 +5,8 @@
 package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
-import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.setup.SetupTask;
-import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
