@@ -114,14 +114,14 @@ public class JaxrsClientBuilder {
         }
         // X509 authorization 
         SimpleKeystore keystore = null;
-        String keystorePath = configuration.get("mtwilson.api.keystore", null);
-        String keystorePassword = configuration.get("mtwilson.api.keystore.password", null); 
+        String keystorePath = configuration.get("mtwilson.api.keystore");
+        String keystorePassword = configuration.get("mtwilson.api.keystore.password"); 
         if ( keystore != null && keystorePassword != null) {
             FileResource resource = new FileResource(new File(keystorePath));
             keystore = new SimpleKeystore(resource, keystorePassword);
         }
-        String keyAlias = configuration.get("mtwilson.api.key.alias", null);
-        String keyPassword = configuration.get("mtwilson.api.key.password", null);
+        String keyAlias = configuration.get("mtwilson.api.key.alias");
+        String keyPassword = configuration.get("mtwilson.api.key.password");
         if (keystore != null && keyAlias != null && keyPassword != null) {
             log.debug("Registering X509 credentials for {}", keyAlias);
             log.debug("Loading key {} from keystore {}", keyAlias, keystorePath);
@@ -130,15 +130,15 @@ public class JaxrsClientBuilder {
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
         // HMAC authorization
-        String clientId = configuration.get("mtwilson.api.clientId", null);
-        String secretKey =  configuration.get("mtwilson.api.secretKey", null) ;
+        String clientId = configuration.get("mtwilson.api.clientId");
+        String secretKey =  configuration.get("mtwilson.api.secretKey") ;
         if (clientId != null && secretKey != null) {
             log.debug("Registering HMAC credentials for {}", clientId);
             clientConfig.register(new HmacAuthorizationFilter(clientId, secretKey));
         }
         // BASIC authorization will only be registered if configuration is present but also the feature itself will only add an Authorization header if there isn't already one present
-        String username = configuration.get("mtwilson.api.username", null);
-        String password = configuration.get("mtwilson.api.password", null);
+        String username = configuration.get("mtwilson.api.username");
+        String password = configuration.get("mtwilson.api.password");
         if (username != null && password != null) {
             log.debug("Registering BASIC credentials for {}", username);
 //            clientConfig.register( new BasicPasswordAuthorizationFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
@@ -153,7 +153,7 @@ public class JaxrsClientBuilder {
     private void url() throws MalformedURLException {
         if (url == null) {
             if (configuration != null) {
-                url = new URL(configuration.get("mtwilson.api.url", configuration.get("mtwilson.api.baseurl", null))); // example: "http://localhost:8080/v2";
+                url = new URL(configuration.get("mtwilson.api.url", configuration.get("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
             }
         }
     }

@@ -18,7 +18,7 @@ public abstract class ApplicationFolder extends ConfigurableFolder {
     
     public ApplicationFolder() {
         super();
-        app = System.getProperty("app.name", "mtwilson");        
+        app = System.getProperty("mtwilson.application.id", "mtwilson");        
     }
     
     protected String getApplicationName() { return app; }

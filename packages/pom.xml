@@ -20,6 +20,8 @@
     </properties>
       
   <modules>
+	<module>mtwilson-client-javadoc</module>
+	<module>mtwilson-server-javadoc</module>
     <module>mtwilson-server-zip</module>
   </modules>
 

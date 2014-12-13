@@ -7,7 +7,6 @@ package com.intel.dcsg.cpg.configuration;
 import java.util.List;
 
 /**
- * This class is tentative
  * 
  * A composite configuration that automatically copies non-null values 
  * from the composite sources
