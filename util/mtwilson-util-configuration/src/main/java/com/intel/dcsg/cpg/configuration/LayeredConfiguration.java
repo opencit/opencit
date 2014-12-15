@@ -11,8 +11,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A read-only configuration that is comprised of one or more configuration
- * sources which are checked in order for each requested property.
+ * A layered configuration is comprised of one or more configuration sources.
+ * When {@code get} is called, it is delegated to the first layer. If that
+ * layer does not have the property defined, the request is delegated to 
+ * the second layer, and so on. If the last layer does not have the property
+ * defined, then null is returned.
+ * 
+ * A layered configuration is not editable. It can be used in conjunction with
+ * a valve configuration to set a single configuration source that can 
+ * accept edits.
  * 
  * The configuration sources are copied from the constructor arguments
  * so if you change the list or array of sources after creating the
@@ -22,30 +29,21 @@ import java.util.Set;
  * 
  * @author jbuhacoff
  */
-public class CompositeConfiguration extends AbstractConfiguration {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CompositeConfiguration.class);
+public class LayeredConfiguration extends AbstractConfiguration {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LayeredConfiguration.class);
     protected final List<Configuration> sources;
-    protected final Configuration target;
     
-    protected CompositeConfiguration() {
+    protected LayeredConfiguration() {
         super();
-        this.target = null;
         this.sources = new ArrayList<>();
     }
     
-    public CompositeConfiguration(List<Configuration> sources) {
-        this(sources, null);
-    }
-    public CompositeConfiguration(List<Configuration> sources, Configuration target) {
+    public LayeredConfiguration(List<Configuration> sources) {
         super();
         this.sources = new ArrayList<>();
-        if( target != null ) {
-            this.sources.add(target);
-        }
         this.sources.addAll(sources);
-        this.target = target;
     }
-    public CompositeConfiguration(Configuration... sources) {
+    public LayeredConfiguration(Configuration... sources) {
         this(Arrays.asList(sources));
     }
 
@@ -95,16 +93,12 @@ public class CompositeConfiguration extends AbstractConfiguration {
     
     @Override
     public void set(String key, String value) {
-        target.set(key, value);
-    }
-
-    public Configuration getTarget() {
-        return target;
+        throw new UnsupportedOperationException("A layered configuration is not editable");
     }
 
     @Override
     public boolean isEditable() {
-        return target != null && target.isEditable();
+        return false;
     }
     
     

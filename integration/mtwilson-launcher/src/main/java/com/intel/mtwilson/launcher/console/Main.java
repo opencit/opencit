@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.launcher.console;
 
-import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
+import com.intel.dcsg.cpg.configuration.LayeredConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.configuration.ReadonlyConfiguration;
@@ -61,7 +61,7 @@ public class Main {
         try {
             Properties properties = new Properties();
             properties.load(in);
-            return new ReadonlyConfiguration(new CompositeConfiguration(new PropertiesConfiguration(properties), defaults));
+            return new ReadonlyConfiguration(new LayeredConfiguration(new PropertiesConfiguration(properties), defaults));
         }
         catch(Exception e) {
             log.error("Cannot load application.properties", e);

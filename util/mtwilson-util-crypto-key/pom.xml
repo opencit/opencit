@@ -16,13 +16,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
         </dependency>
         <!-- used by PasswordProtectionBuilder to parse key algorithm value like  "PBKDF2WithHmacSHA1; iterations=1000; salt-bytes=8" -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-rfc822</artifactId>
-            <version>0.2-SNAPSHOT</version>
         </dependency>
 	<!--
         <dependency>
@@ -34,7 +32,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-performance</artifactId>
-            <version>0.2-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

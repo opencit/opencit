@@ -22,7 +22,7 @@ public class CompositeConfigurationTest {
         c2.set("fruit", "banana");
         c1.set("number", "1");
         c2.set("boolean", "false");
-        CompositeConfiguration cc = new CompositeConfiguration(c1, c2);
+        LayeredConfiguration cc = new LayeredConfiguration(c1, c2);
         assertEquals("apple", cc.get("fruit", null));
         assertEquals(Integer.valueOf(1), cc.get("number", null));
         assertEquals(false, cc.get("boolean", null));
@@ -38,7 +38,7 @@ public class CompositeConfigurationTest {
         c1.set("number", "1");
         c2.set("boolean", "false");
         PropertiesConfiguration target = new PropertiesConfiguration();
-        CompositeConfiguration cc = new CompositeConfiguration(target, c1, c2);
+        LayeredConfiguration cc = new LayeredConfiguration(target, c1, c2);
         assertEquals("apple", cc.get("fruit", null));
         cc.set("fruit", "carrot");
         assertEquals("carrot", cc.get("fruit", null));
