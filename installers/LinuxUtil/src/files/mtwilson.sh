@@ -177,6 +177,12 @@ Detected the following options on this server:"
     else
       glassfish_create_ssl_cert_prompt
     fi
+  elif using_tomcat; then
+    if [ -n "${MTWILSON_SERVER}" ]; then
+      tomcat_create_ssl_cert "${MTWILSON_SERVER}"
+    else
+      tomcat_create_ssl_cert_prompt
+    fi
   fi
 
   # new setup commands in mtwilson 2.0
