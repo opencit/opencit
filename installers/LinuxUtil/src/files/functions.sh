@@ -2265,7 +2265,7 @@ glassfish_admin_user() {
   expect=`which expect`  
   glassfish_detect
 
-  GF_CONFIG_PATH="$GLASSFISH_HOME/glassfish/config"
+  GF_CONFIG_PATH="$GLASSFISH_HOME/config"
   export AS_ADMIN_USER=$WEBSERVICE_USERNAME
   export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
   export AS_ADMIN_PASSWORD_OLD=`cat $GF_CONFIG_PATH/admin.passwd 2>/dev/null | head -n 1 | cut -d'=' -f2`
