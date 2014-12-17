@@ -534,6 +534,7 @@ case "$1" in
         rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
+        remove_startup_script "mtwilson"
         # configuration files
         echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         rm -rf /etc/intel/cloudsecurity
