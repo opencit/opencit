@@ -659,7 +659,7 @@ if using_glassfish; then
   echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV_DIR/glassfish
   echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV_DIR/glassfish
   echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV_DIR/glassfish
-
+  
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
 	$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
@@ -708,9 +708,10 @@ elif using_tomcat; then
   tomcat_detect
 
   echo "TOMCAT_HOME=$TOMCAT_HOME" > $MTWILSON_ENV_DIR/tomcat
+  echo "TOMCAT_CONF=$TOMCAT_CONF" >> $MTWILSON_ENV_DIR/tomcat
   echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV_DIR/tomcat
   echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV_DIR/tomcat
-
+  
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here
     #mtwilson tomcat-sslcert
@@ -968,6 +969,14 @@ echo "Done"
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
+
+#Register mtwilson as a startup script, remove previous service startup scripts if they exist
+register_startup_script /usr/local/bin/mtwilson mtwilson >> $INSTALL_LOG_FILE
+remove_startup_script "asctl" >> $INSTALL_LOG_FILE
+remove_startup_script "msctl" >> $INSTALL_LOG_FILE
+remove_startup_script "mtwilson-portal" >> $INSTALL_LOG_FILE
+remove_startup_script "tdctl" >> $INSTALL_LOG_FILE
+remove_startup_script "wlmctl" >> $INSTALL_LOG_FILE
 
 #Save variables to properties file
 #if using_mysql; then   
