@@ -18,6 +18,8 @@ import com.intel.mtwilson.policy.fault.TpmQuoteMissing;
  */
 public class TpmQuoteRequired extends BaseRule {
 
+    protected TpmQuoteRequired() { } // for desearializing jackson
+    
     @Override
     public RuleResult apply(HostReport hostReport) {
         RuleResult report = new RuleResult(this);

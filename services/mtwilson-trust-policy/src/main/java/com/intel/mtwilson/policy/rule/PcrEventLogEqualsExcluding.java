@@ -25,6 +25,8 @@ public class PcrEventLogEqualsExcluding extends PcrEventLogEquals {
     private static final List<String> hostSpecificModules = Arrays.asList(new String[] {"commandLine.", "initrd", "vmlinuz"});;
     private boolean excludeHostSpecificModules = false;
     
+    protected PcrEventLogEqualsExcluding() { } // for desearializing jackson
+    
     public PcrEventLogEqualsExcluding(PcrEventLog expected) {
         super(expected);
     }

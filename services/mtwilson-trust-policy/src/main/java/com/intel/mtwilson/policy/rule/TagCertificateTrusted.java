@@ -27,6 +27,8 @@ public class TagCertificateTrusted extends BaseRule {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TagCertificateTrusted.class);
     private X509Certificate[] trustedAuthorityCerts;
 
+    protected TagCertificateTrusted() { } // for desearializing jackson
+    
     public TagCertificateTrusted(X509Certificate[] trustedAuthorityCerts) {
         this.trustedAuthorityCerts = trustedAuthorityCerts;
     }
