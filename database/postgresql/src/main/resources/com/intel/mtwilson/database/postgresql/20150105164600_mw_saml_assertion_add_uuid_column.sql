@@ -1,6 +1,7 @@
 -- rksavino
 -- Updates for the mw_saml_assertion table
 ALTER TABLE mw_saml_assertion ADD COLUMN uuid_hex CHAR(36) NULL;
+ALTER TABLE mw_saml_assertion ADD COLUMN trust_report TEXT DEFAULT NULL;
 DO
 $$
 DECLARE
