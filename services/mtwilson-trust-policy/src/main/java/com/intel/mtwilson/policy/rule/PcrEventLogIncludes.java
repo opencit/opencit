@@ -29,6 +29,9 @@ import java.util.Set;
 public class PcrEventLogIncludes extends BaseRule {
     private PcrIndex pcrIndex;
     private Set<Measurement> expected;
+    
+    protected PcrEventLogIncludes() { } // for desearializing jackson
+    
     public PcrEventLogIncludes(PcrIndex pcrIndex, Measurement expected) {
         this.pcrIndex = pcrIndex;
         this.expected = new HashSet<Measurement>(1);

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
@@ -101,8 +102,12 @@ public class HostAttestations extends MtWilsonClient {
      */    
     public HostAttestation createHostAttestation(HostAttestation obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        Object newObj = getTarget().path("host-attestations").request(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        return (HostAttestation) newObj;
+//        Object o = getTarget().path("host-attestations").request(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
+//        ObjectMapper mapper = new ObjectMapper();
+//        try { log.debug("serializing host-attestations return object: {}", mapper.writeValueAsString(o)); } catch (Exception ex) {log.debug("test?");}
+        
+        HostAttestation result = getTarget().path("host-attestations").request(MediaType.APPLICATION_JSON).post(Entity.json(obj), HostAttestation.class);
+        return result;
     }
 
     /**
