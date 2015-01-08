@@ -29,7 +29,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblSamlAssertion.findByErrorMessage", query = "SELECT t FROM TblSamlAssertion t WHERE t.errorMessage = :errorMessage"),
     @NamedQuery(name = "TblSamlAssertion.findByCreatedTs", query = "SELECT t FROM TblSamlAssertion t WHERE t.createdTs = :createdTs"),
     @NamedQuery(name = "TblSamlAssertion.findByHostAndExpiry", query = "SELECT t FROM TblSamlAssertion t WHERE t.expiryTs > :now and t.hostId.name = :hostName ORDER BY t.expiryTs DESC"),
-    @NamedQuery(name = "TblSamlAssertion.findByHostID", query = "SELECT t FROM TblSamlAssertion t WHERE t.hostId = :hostId")})
+    @NamedQuery(name = "TblSamlAssertion.findByHostID", query = "SELECT t FROM TblSamlAssertion t WHERE t.hostId = :hostId"),
+    @NamedQuery(name = "TblSamlAssertion.findByAssertionUuid", query = "SELECT t FROM TblSamlAssertion t WHERE t.assertionUuid = :assertionUuid ORDER BY t.expiryTs DESC")})
 public class TblSamlAssertion implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -37,9 +38,15 @@ public class TblSamlAssertion implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID")
     private Integer id;
+    @Basic(optional = false)
+    @Column(name = "uuid_hex")
+    private String assertionUuid;
     @Lob
     @Column(name = "saml")
     private String saml;
+    @Basic(optional = false)
+    @Column(name = "trust_report")
+    private String trustReport;
     @Basic(optional = false)
     @Column(name = "expiry_ts")
     @Temporal(TemporalType.TIMESTAMP)
@@ -83,12 +90,28 @@ public class TblSamlAssertion implements Serializable {
         this.id = id;
     }
 
+    public String getAssertionUuid() {
+        return assertionUuid;
+    }
+
+    public void setAssertionUuid(String assertionUuid) {
+        this.assertionUuid = assertionUuid;
+    }
+    
     public String getSaml() {
         return saml;
     }
 
     public void setSaml(String saml) {
         this.saml = saml;
+    }
+    
+    public String getTrustReport() {
+        return trustReport;
+    }
+    
+    public void setTrustReport(String trustReport) {
+        this.trustReport = trustReport;
     }
 
     public Date getExpiryTs() {

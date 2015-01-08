@@ -93,7 +93,7 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
             } else return null;
             
             // since we have found the host with the specified criteria lets check if there is a valid cached saml assertion
-            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getName());
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getName()); //.getId().toString());
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
@@ -118,30 +118,18 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     @Produces(CryptoMediaType.APPLICATION_SAML)    
     @SuppressWarnings("empty-statement")
-    public String createSamlAssertion(HostAttestation item) {
+    public String createSamlAssertion(HostAttestation item) throws JsonProcessingException {
         log.debug("Creating new SAML assertion for host {}.", item.getHostUuid());
         HostAttestationLocator locator = new HostAttestationLocator();
         locator.id = item.getId();
         
         try { log.debug("createSamlAssertion: {}", mapper.writeValueAsString(item)); } catch(JsonProcessingException e) { log.debug("createSamlAssertion: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        String samlAssertion;
         
-        try {
-            TblHosts obj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
-            if (obj == null) {
-                log.error("Host specified with id {} is not valid.", item.getHostUuid());
-                throw new RepositoryInvalidInputException();
-            }
-            
-            samlAssertion = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), true);
-            
-        } catch (Exception ex) {
-            log.error("Error during generation of host saml assertion.", ex);
-            throw new RepositoryCreateException(ex, locator);
-        }        
+        repository.create(item);
         
-        return samlAssertion;
+        log.debug("createSamlAssertion: repository create record completed. SAML: {}", item.getSaml());
+        return item.getSaml();
     }
     
 }
