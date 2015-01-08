@@ -55,8 +55,6 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
         log.debug("HostAttestation:Search - Got request to search for host attestations.");        
         HostAttestationCollection hostAttestationCollection = new HostAttestationCollection();
         try {
-            String hostName;
-            //List<TblSamlAssertion> tblSamlAssertionList = new ArrayList<>();
             if (criteria.id != null) {
                 TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByAssertionUuid(criteria.id.toString());
                 TblHosts tblHosts = My.jpa().mwHosts().findHostById(tblSamlAssertion.getHostId().getId());
@@ -76,7 +74,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                 }
                 
                 if (tblHosts != null) {
-                    List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().findListByHostAndExpiry(tblHosts.getId().toString());
+                    List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().findListByHostAndExpiry(tblHosts.getName());
                     if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
                         for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
                             hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));

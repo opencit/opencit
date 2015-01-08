@@ -4,6 +4,9 @@
  */
 package com.intel.mtwilson.policy;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -24,6 +27,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class RuleResult {
     private final transient Logger log = LoggerFactory.getLogger(getClass().getName());
     private final Rule rule;

@@ -93,7 +93,7 @@ public class HostAttestations extends AbstractJsonapiResource<HostAttestation, H
             } else return null;
             
             // since we have found the host with the specified criteria lets check if there is a valid cached saml assertion
-            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getId().toString());
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(obj.getName()); //.getId().toString());
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
