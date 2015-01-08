@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy.rule;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.RuleResult;
@@ -22,6 +24,8 @@ import java.util.Date;
  *
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class TagCertificateTrusted extends BaseRule {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TagCertificateTrusted.class);
