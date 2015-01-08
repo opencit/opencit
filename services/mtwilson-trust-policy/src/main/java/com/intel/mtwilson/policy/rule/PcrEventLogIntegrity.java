@@ -42,6 +42,9 @@ import java.util.List;
  */
 public class PcrEventLogIntegrity extends BaseRule {
     private PcrIndex pcrIndex;
+    
+    protected PcrEventLogIntegrity() { } // for desearializing jackson
+    
     public PcrEventLogIntegrity(PcrIndex pcrIndex) {
         this.pcrIndex = pcrIndex;
     }

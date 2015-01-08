@@ -35,6 +35,8 @@ public class TrustReport {
     private ArrayList<RuleResult> results = new ArrayList<RuleResult>();
     private Logger log = LoggerFactory.getLogger(getClass());
     
+    public TrustReport() { } // for desearializing jackson
+    
     public TrustReport(HostReport hostReport, String policyName) {
         this.hostReport = hostReport;
         this.policyName = policyName;

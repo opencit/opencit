@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy.rule;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.BaseRule;
@@ -26,7 +28,9 @@ import com.intel.mtwilson.policy.fault.PcrValueMissing;
  */
 public class PcrMatchesConstant extends BaseRule {
     private final Pcr expected;
-    public PcrMatchesConstant(Pcr expected) {
+    
+    @JsonCreator
+    public PcrMatchesConstant(@JsonProperty("expectedPcr") Pcr expected) {
         this.expected = expected;
     }
     

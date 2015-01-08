@@ -35,9 +35,8 @@ public class RuleResult {
     }
     
     public final String getRuleName() { return rule.getClass().getName(); }
-    public final Rule getRule() { return rule; }
     
-
+    public final Rule getRule() { return rule; }
     
     public final void fault(Fault fault) {
         faults.add(fault);

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tag.model.x509;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -31,6 +32,7 @@ public class UTF8NameValueMicroformat extends ASN1Encodable {
         this.value = parts[1];
     }
     
+    @JsonIgnore
     public DERUTF8String getMicroformat() {
         return microformat;
     }

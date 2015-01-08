@@ -29,6 +29,9 @@ public class PcrMatchesVariable extends BaseRule {
     private PcrIndex pcrIndex;
     private Set<Variable> variables;
     private String expression;
+    
+    protected PcrMatchesVariable() { } // for desearializing jackson
+    
     public PcrMatchesVariable(PcrIndex pcrIndex, Set<Variable> variables, String expression) {
         this.pcrIndex = pcrIndex;
         this.variables = variables;

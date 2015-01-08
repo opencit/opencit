@@ -25,6 +25,8 @@ public class AikCertificateTrusted extends BaseRule {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AikCertificateTrusted.class);
     private X509Certificate[] trustedAuthorityCerts;
 
+    protected AikCertificateTrusted() { } // for desearializing jackson
+    
     public AikCertificateTrusted(X509Certificate[] trustedAuthorityCerts) {
         this.trustedAuthorityCerts = trustedAuthorityCerts;
     }

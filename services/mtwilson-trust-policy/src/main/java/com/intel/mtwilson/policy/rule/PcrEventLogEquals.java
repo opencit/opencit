@@ -30,8 +30,10 @@ import org.slf4j.LoggerFactory;
  */
 public class PcrEventLogEquals extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
-
     private PcrEventLog expected;
+
+    protected PcrEventLogEquals() { } // for desearializing jackson
+    
     public PcrEventLogEquals(PcrEventLog expected) {
         this.expected = expected;
     }
