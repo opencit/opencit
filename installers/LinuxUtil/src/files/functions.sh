@@ -770,7 +770,30 @@ register_startup_script() {
     $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
+}
 
+# Parameters:
+# - the name of the startup script (one word)
+remove_startup_script() {
+  local startup_name="${1}"
+  shift;
+
+  # RedHat and SUSE
+  chkconfig=`which chkconfig  2>/dev/null`
+  if [ -n "$chkconfig" ]; then
+    $chkconfig --del "${startup_name}"  2>/dev/null
+  fi
+
+  # Ubuntu
+  updatercd=`which update-rc.d  2>/dev/null`
+  if [ -n "$updatercd" ]; then
+    $updatercd -f "${startup_name}" remove 2>/dev/null
+  fi
+  
+  # try to install it as a startup script
+  if [ -d "/etc/init.d" ]; then
+    rm "/etc/init.d/${startup_name}" 2>/dev/null
+  fi
 }
 
 # Ensure the package actually needs to be installed before calling this function.
@@ -2181,8 +2204,6 @@ glassfish_install() {
         mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4"
       fi
     fi
-
-
     # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
     if [ -f "/etc/hosts" ]; then
         local hostname=`hostname`

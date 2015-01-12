@@ -89,7 +89,7 @@ mkdir -p /usr/local/bin
 cp wpctl.sh /usr/local/bin/wpctl
 chmod +x /usr/local/bin/wpctl
 /usr/local/bin/wpctl setup
-register_startup_script /usr/local/bin/wpctl wpctl
+#register_startup_script /usr/local/bin/wpctl wpctl
 
 
 if using_glassfish; then

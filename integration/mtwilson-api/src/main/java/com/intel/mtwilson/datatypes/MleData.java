@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 //import org.codehaus.jackson.annotate.JsonProperty;
@@ -37,6 +38,9 @@ public class MleData {
     private String oemName; // This will be set for MleType.BIOS
     /* End attributes added for phase 2*/
 
+    private String target_type; // User to store the MLE target type, which can be either GLOBAL, OEM or HOST
+    private String target_value; // This field will have the corresponding value of the TARGET_TYPE. For GLOBAL, this field will be empty.
+    
     public MleData() {
     }
 
@@ -190,6 +194,31 @@ public class MleData {
         return mleManifests;
     }
 
+    @JsonIgnore
+    @JsonProperty("target_type")
+    public String getTarget_type() {
+        return target_type;
+    }
+
+    @JsonIgnore
+    @JsonProperty("target_type")
+    public void setTarget_type(String target_type) {
+        this.target_type = target_type;
+    }
+
+    @JsonIgnore
+    @JsonProperty("target_value")
+    public String getTarget_value() {
+        return target_value;
+    }
+
+    @JsonIgnore
+    @JsonProperty("target_value")
+    public void setTarget_value(String target_value) {
+        this.target_value = target_value;
+    }
+
+    
     @Override
     public String toString() {
         return String.format("%s %s (%s %s) - %s", name, version, mleType.toString(), attestationType.toString(), description);

@@ -7,6 +7,8 @@ package com.intel.mtwilson.as.business;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.ASComponentFactory;
+import com.intel.mtwilson.datatypes.HostConfigData;
+import com.intel.mtwilson.datatypes.HostConfigDataList;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
@@ -47,28 +49,52 @@ public class BulkHostMgmtBO {
 
     public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) {
         // Set the updateHost flag to false since we are adding the hosts;
-        return addUpdateHosts(hostRecords, false);
+        return addUpdateHosts(convertToHostConfigDataList(hostRecords), false);
     }
     
     public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) {
         // Set the updateHost flag to true since we are adding the hosts;
+        return addUpdateHosts(convertToHostConfigDataList(hostRecords), true);
+    }
+    
+    public HostConfigResponseList addHosts(HostConfigDataList hostRecords) {
+        // Set the updateHost flag to false since we are adding the hosts;
+        return addUpdateHosts(hostRecords, false);
+    }
+    
+    public HostConfigResponseList updateHosts(HostConfigDataList hostRecords) {
+        // Set the updateHost flag to true since we are adding the hosts;
         return addUpdateHosts(hostRecords, true);
     }
     
+    private HostConfigDataList convertToHostConfigDataList(TxtHostRecordList hostRecords) {
+        HostConfigDataList wrapperList = new HostConfigDataList();
+        for (TxtHostRecord hostRecord : hostRecords.getHostRecords()) {
+            HostConfigData wrapperHostRecord = new HostConfigData();
+            // Explicity set the BIOS and VMM WhiteList targets to NULL so that we can use this
+            // value to determine whether the user had passed in just the TXTHostRecord or the
+            // complete Configuration record
+            wrapperHostRecord.setBiosWLTarget(null);
+            wrapperHostRecord.setVmmWLTarget(null);
+            wrapperHostRecord.setTxtHostRecord(hostRecord);
+            wrapperList.getHostRecords().add(wrapperHostRecord);
+        }
+        return wrapperList;
+    }
     /**
      * This function handles multithread calls for both add and update host functionalities.
      * @param hostRecords - List of the hosts that need to be added/updated
      * @param updateHost - flag indicating whether the hosts should be added or updated.
      * @return 
      */
-    private HostConfigResponseList addUpdateHosts(TxtHostRecordList hostRecords, boolean updateHost) {
+    private HostConfigResponseList addUpdateHosts(HostConfigDataList hostRecords, boolean updateHost) {
         HostConfigResponseList hostResponses = new HostConfigResponseList();
         ArrayList<Future<?>> taskStatus = new ArrayList<Future<?>>();
         Set<HostMgmt> tasks = new HashSet<HostMgmt>();
 
         try {
             
-            for (TxtHostRecord hostRecord : hostRecords.getHostRecords()) {
+            for (HostConfigData hostRecord : hostRecords.getHostRecords()) {
                 HostMgmt task = new HostMgmt(hostBO, hostRecord, updateHost);
                 tasks.add(task);
                 Future<?> status = scheduler.submit(task);
@@ -107,16 +133,16 @@ public class BulkHostMgmtBO {
     private class HostMgmt implements Runnable {
 
         private HostBO dao;
-        private TxtHostRecord hostObj;
+        private HostConfigData hostObj;
         private HostResponse result;
         private String hostName;
         private boolean isError = false;
         private boolean updateHost = false;
 
-        public HostMgmt(HostBO dao, TxtHostRecord hostObj, boolean updateHost) {
+        public HostMgmt(HostBO dao, HostConfigData hostObj, boolean updateHost) {
             this.dao = dao;
             this.hostObj = hostObj;
-            this.hostName = hostObj.HostName;
+            this.hostName = hostObj.getTxtHostRecord().HostName;
             this.updateHost = updateHost;
         }
 

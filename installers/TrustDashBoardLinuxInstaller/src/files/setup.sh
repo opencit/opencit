@@ -89,7 +89,7 @@ mkdir -p /usr/local/bin
 cp tdctl.sh /usr/local/bin/tdctl
 chmod +x /usr/local/bin/tdctl
 /usr/local/bin/tdctl setup
-register_startup_script /usr/local/bin/tdctl tdctl
+#register_startup_script /usr/local/bin/tdctl tdctl
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

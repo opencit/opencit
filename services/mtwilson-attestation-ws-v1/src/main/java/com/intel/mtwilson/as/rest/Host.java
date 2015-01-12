@@ -359,29 +359,32 @@ public class Host {
             return resultset;
         }
 
+        // The following 2 APIs were being used internally. Since we are directly calling into the Attestation layer BO from the Management service
+        // we do not need this API anymore.
+        
         //@RolesAllowed({"Attestation"})
-        @RequiresPermissions({"hosts:create","mles:search"}) 
-        @POST
-        @Consumes({MediaType.APPLICATION_JSON})
-        @Produces({MediaType.APPLICATION_JSON})
-        @Path("/mle")
-        public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
-                ValidationUtil.validate(hostRecord);
-                return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
-        }
-
-        //@RolesAllowed({"Attestation"})
-        @RequiresPermissions({"hosts:create","mles:search"}) 
-        @POST
-        @Consumes({MediaType.APPLICATION_JSON})
-        @Produces({MediaType.APPLICATION_JSON})
-        @Path("/mle/verify")
-        public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
-                ValidationUtil.validate(hostRecord);
-                String result = ASComponentFactory.getHostTrustBO().checkMatchingMLEExists(hostRecord, 
-                        hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
-                System.out.println("checkMatchingMLEExists RESULT:" + result);
-                return result;
-        }
+//        @RequiresPermissions({"hosts:create","mles:search"}) 
+//        @POST
+//        @Consumes({MediaType.APPLICATION_JSON})
+//        @Produces({MediaType.APPLICATION_JSON})
+//        @Path("/mle")
+//        public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
+//                ValidationUtil.validate(hostRecord);
+//                return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
+//        }
+//
+//        //@RolesAllowed({"Attestation"})
+//        @RequiresPermissions({"hosts:create","mles:search"}) 
+//        @POST
+//        @Consumes({MediaType.APPLICATION_JSON})
+//        @Produces({MediaType.APPLICATION_JSON})
+//        @Path("/mle/verify")
+//        public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
+//                ValidationUtil.validate(hostRecord);
+//                String result = ASComponentFactory.getHostTrustBO().checkMatchingMLEExists(hostRecord, 
+//                        hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
+//                System.out.println("checkMatchingMLEExists RESULT:" + result);
+//                return result;
+//        }
         
 }

@@ -82,7 +82,7 @@ chmod +x mtwilson-portal.sh
 mkdir -p /usr/local/bin
 cp mtwilson-portal.sh /usr/local/bin/mtwilson-portal
 /usr/local/bin/mtwilson-portal setup
-register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
+#register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

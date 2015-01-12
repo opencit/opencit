@@ -40,12 +40,16 @@ mkdir -p $(dirname $logfile)
 date > $logfile
 
 # Automatic install steps:
-# 1. Backup old files
-# 2. Create directory structure
-# 1. Install Mt Wilson Linux utilities (and use them in this script)
-# 2. Install JDK
-# 3. Compile TPM commands
-# 4. Install Trust Agent files
+# 1. Install prereqs
+# 2. Backup old files
+# 3. Create directory structure
+# 4. Install Mt Wilson Linux utilities (and use them in this script)
+# 5. Install JDK
+# 6. Compile TPM commands
+# 7. Install Trust Agent files
+
+##### install prereqs
+auto_install "TrustAgent requirements" "APPLICATION"
 
 ##### backup old files
 
@@ -219,9 +223,6 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   backup_file "${JAVA_HOME}/jre/lib/security/java.security"
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
-
-auto_install "TrustAgent requirements" "APPLICATION"
-
 
 # REDHAT ISSUE:
 # After installing libcrypto via the package manager, the library cannot be
