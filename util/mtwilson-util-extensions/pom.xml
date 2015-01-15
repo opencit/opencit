@@ -154,6 +154,17 @@ They will be created in target/site/apidocs
             <scope>test</scope>
         </dependency>
 -->
+    <!-- required to use AttributeEqualsFilter in mtwilson-util-pipe -->
+    <dependency>
+		<groupId>commons-beanutils</groupId>
+		<artifactId>commons-beanutils</artifactId>
+    </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>
@@ -170,10 +181,6 @@ They will be created in target/site/apidocs
             <artifactId>logback-classic</artifactId>
 			<optional>true</optional>
         </dependency>        
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
 
     </dependencies>  
     
