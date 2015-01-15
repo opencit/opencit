@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
@@ -21,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @since 1.2
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, property="rule_name")
 public interface Rule {
     RuleResult apply(HostReport hostReport); // applies the trust policy to the given host report and returns the resulting trust report

@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.Measurement;
@@ -31,6 +33,8 @@ import com.intel.mtwilson.tag.model.json.X509AttributeCertificateDeserializer;
  * (for vmware hosts) a PCR manifest without a TPM quote or AIK. 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class HostReport {
     public Map<String,String> variables; // such as host uuid, which may be referenced in calculated (dynamic) policy
     public PcrManifest pcrManifest; // list of all pcr's and their values... should be a complete list, with 0's for unused pcr's

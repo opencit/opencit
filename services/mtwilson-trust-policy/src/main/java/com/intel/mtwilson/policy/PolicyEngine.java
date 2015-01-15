@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +16,8 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class PolicyEngine {
     private Logger log = LoggerFactory.getLogger(getClass());
     
