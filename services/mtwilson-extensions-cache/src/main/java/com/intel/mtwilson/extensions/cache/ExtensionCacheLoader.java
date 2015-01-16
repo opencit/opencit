@@ -2,8 +2,11 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.dcsg.cpg.extensions;
+package com.intel.mtwilson.extensions.cache;
 
+import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
+import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.dcsg.cpg.extensions.Scanner;
 import java.io.FileInputStream;
 import java.io.File;
 import java.io.IOException;

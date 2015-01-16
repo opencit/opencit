@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * For example:
  * <code>
  * Map<String,String> availableCommands = loadCommandRegistry(); // not provided
- * RegistryCommandFinder finder = new RegistryCommandFinder(availableCommands);
+ * PluginRegistry<Command> finder = new PluginRegistry<Command>(availableCommands);
  * Command toRun = finder.forName("hello-world"); // will search for the registry for an entry with key "hello-world" 
  * </code>
  * 
@@ -48,19 +48,19 @@ public class PluginRegistry<T> {
      */
     public T lookup(String key) {
         if( registry == null ) {
-            throw new IllegalStateException("Cannot search for commands until registry is set");
+            throw new IllegalStateException("Plugin registry is not initialized");
         }
         log.debug("Searching for {} plugin: {}", extension.getName(), key);
         String fqcn = registry.get(key);
         if( fqcn == null || fqcn.isEmpty() ) {
-            log.debug("Command not registered: {}", key);
+            log.debug("No plugin registered for: {}", key);
             return null;
         }
         try {
-            Class commandClass = Class.forName(fqcn); // ClassNotFoundException
-            Object commandObject = commandClass.newInstance(); // InstantiationException, IllegalAccessException
-            T command = (T)commandObject;
-            return command;
+            Class pluginClass = Class.forName(fqcn); // ClassNotFoundException
+            Object pluginObject = pluginClass.newInstance(); // InstantiationException, IllegalAccessException
+            T plugin = (T)pluginObject;
+            return plugin;
         }
         catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             log.debug("Cannot load {} plugin {} from class {}: {}", extension.getName(), key, fqcn, e.toString());

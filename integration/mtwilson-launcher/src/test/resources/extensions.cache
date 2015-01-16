@@ -90,7 +90,6 @@ com.intel.mtwilson.setup.cmd.ConfigureLocal
 com.intel.mtwilson.shiro.jdbi.UserLoginCertificateResultMapper
 com.intel.mtwilson.as.rest.v2.model.HostAikLocator
 com.intel.mtwilson.as.rest.v2.resource.CaCertificates
-com.intel.mtwilson.configuration.AbstractMutableConfiguration
 com.intel.mtwilson.as.rest.v2.repository.MlePcrRepository
 com.intel.mtwilson.as.rest.PollHosts
 com.intel.mtwilson.as.rest.v2.rpc.CreateWhiteListWithOptionsRunnable
@@ -325,7 +324,6 @@ com.intel.mtwilson.setup.ValidationException
 com.intel.mtwilson.as.data.TblOs
 com.intel.mtwilson.fs.RelativeFilesystem
 com.intel.mtwilson.as.data.TblLocationPcr
-com.intel.mtwilson.configuration.AbstractConfiguration
 com.intel.mtwilson.setup.cmd.V2
 com.intel.mtwilson.tag.rest.v2.resource.SelectionKvAttributes
 com.intel.mtwilson.shiro.AuthorizationExceptionFilter

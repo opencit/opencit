@@ -31,6 +31,11 @@
 		<artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
         <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-extensions-cache</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-filesystem</artifactId>
         </dependency>

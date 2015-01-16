@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.configuration.LayeredConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.configuration.ReadonlyConfiguration;
-import com.intel.dcsg.cpg.extensions.ExtensionCacheLoader;
+import com.intel.mtwilson.extensions.cache.ExtensionCacheLoader;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.LogManager;

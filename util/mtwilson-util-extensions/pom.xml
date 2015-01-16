@@ -127,11 +127,18 @@ They will be created in target/site/apidocs
             <artifactId>mtwilson-util-pipe</artifactId>
         </dependency>
         
-       <!-- for DirectoryFilter -->
-    <dependency>
+        <!-- for CamelCaseToHyphenated in PluginRegistryFactory -->
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-io</artifactId>
+            <artifactId>mtwilson-util-text-transform</artifactId>
         </dependency>
+
+        <!-- for Observer -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
+        </dependency>
+                
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
