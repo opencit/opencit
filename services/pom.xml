@@ -13,12 +13,14 @@
 		<groupId>com.intel.mtwilson</groupId>
 		<artifactId>mtwilson</artifactId>
 		<version>3.0-SNAPSHOT</version>
+		<relativePath/>
 	</parent>
   
   <modules>
 	<module>mtwilson-audit-data</module>
 	<module>mtwilson-citrix-hostagent</module>
 	<module>mtwilson-configuration-ws-v2</module>
+	<module>mtwilson-extensions-cache</module>
 	<module>mtwilson-feature-jdbi</module>
 	<module>mtwilson-file-model</module>
 	<module>mtwilson-file-client-jaxrs2</module>
