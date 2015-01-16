@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
@@ -17,6 +19,8 @@ import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.controller.TblHostsJpaController;
+import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.policy.TrustReport;
@@ -25,6 +29,8 @@ import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import java.util.Date;
 import java.util.List;
@@ -47,58 +53,58 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     @RequiresPermissions("host_attestations:search")    
     public HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
         log.debug("HostAttestation:Search - Got request to search for host attestations.");        
-        HostAttestationCollection objCollection = new HostAttestationCollection();
+        HostAttestationCollection hostAttestationCollection = new HostAttestationCollection();
         try {
-            TblTaLogJpaController jpaController = My.jpa().mwTaLog();
             if (criteria.id != null) {
-                TblTaLog obj = jpaController.findByUuid(criteria.id.toString());
-                if (obj != null) {
-                    TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(obj.getHost_uuid_hex());
-                    objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
+                TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByAssertionUuid(criteria.id.toString());
+                TblHosts tblHosts = My.jpa().mwHosts().findHostById(tblSamlAssertion.getHostId().getId());
+                if (tblHosts != null) {
+                    hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));
                 }
             } else {
-                TblHosts hostObj;
+                TblHosts tblHosts = new TblHosts();
                 if (criteria.hostUuid != null) {
-                    hostObj = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
+                    tblHosts = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
                 } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
-                    hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
+                    tblHosts = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1);
                 } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                    hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
+                    tblHosts = My.jpa().mwHosts().findByName(criteria.nameEqualTo);
                 } else {
-                    // no condition specified
-                    hostObj = null;
+                    tblHosts = null;  // no condition specified
                 }
-                if (hostObj != null) {
-                    List<TblTaLog> taLogList = jpaController.findTrustStatusByHostId(hostObj.getId(), criteria.limit);
-                    if (taLogList != null && !taLogList.isEmpty()) {
-                        for (TblTaLog obj : taLogList) {
-                            objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
+                
+                if (tblHosts != null) {
+                    List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().findListByHostAndExpiry(tblHosts.getName());
+                    if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
+                        for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
+                            hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));
                         }
                     }
                 }
-            } 
+            }
         } catch (Exception ex) {
             log.error("HostAttestation:Search - Error during retrieval of host attestation status from cache.", ex);
             throw new RepositorySearchException(ex, criteria);
         }
-        log.debug("HostAttestation:Search - Returning back {} of results.", objCollection.getHostAttestations().size());                
-        return objCollection;
+        log.debug("HostAttestation:Search - Returning back {} of results.", hostAttestationCollection.getHostAttestations().size());                
+        return hostAttestationCollection;
     }
 
     @Override
     @RequiresPermissions("host_attestations:retrieve")    
     public HostAttestation retrieve(HostAttestationLocator locator) {
         if (locator == null || locator.id == null) { return null;}
-        log.debug("HostAttestation:Store - Got request to retrieve the host attestation role with id {}.", locator.id.toString());        
+        log.debug("HostAttestation:Retrieve - Got request to retrieve the host attestation with id {}.", locator.id.toString());        
         String id = locator.id.toString();
         try {
-            TblTaLog obj = My.jpa().mwTaLog().findByUuid(id);
-            if (obj != null) {
-                HostAttestation haObj = convert(obj, obj.getHost_uuid_hex());
-                return haObj;
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByAssertionUuid(id);
+            TblHosts tblHosts = My.jpa().mwHosts().findHostById(tblSamlAssertion.getHostId().getId());
+            if (tblSamlAssertion != null && tblHosts != null) {
+                log.debug("HostAttestation:Retrieve - Retrieved the details from mw_hosts and mw_saml_assertion for host with id {}.", tblHosts.getId());
+                return new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion);
             }
-        } catch (Exception ex) {
-            log.error("HostAttestation:Store - Error during retrieval of host attestation status from cache.", ex);
+        } catch (IOException | CryptographyException ex) {
+            log.error("HostAttestation:Retrieve - Error during retrieval of host attestation status from cache.", ex);
             throw new RepositoryRetrieveException(ex, locator);
         }
         return null;
@@ -111,29 +117,59 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
     }
 
     @Override
-    @RequiresPermissions("host_attestations:create")    
+    @RequiresPermissions("host_attestations:create")
     public void create(HostAttestation item) {
-        log.debug("HostAttestation:Create - Got request to create host attestation.");  
+        if (item.getId() == null) {
+            item.setId(new UUID());
+        }
+        
+        log.debug("HostAttestation:Create - Got request to create host attestation.");  //with id {}.", item.getHostUuid());
         HostAttestationLocator locator = new HostAttestationLocator();
         locator.id = item.getId();
+
         try {
-            HostTrustBO asBO = new HostTrustBO();
-            TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
-            if (hostObj != null) {
-                TrustReport htr = new HostTrustBO().getTrustReportForHost(hostObj, hostObj.getName());            
-                item.setHostName(hostObj.getName());
-                item.setTrustReport(htr);
-                // Need to cache the attestation report
-                asBO.logTrustReport(hostObj, htr);
+            TblHostsJpaController jpaController = My.jpa().mwHosts();
+            TblHosts obj;
+            if (item.getHostUuid() != null) {
+                obj = jpaController.findHostByUuid(item.getHostUuid());
+                if (obj == null) {
+                    log.error("Host specified with id {} is not valid.", item.getHostUuid());
+                    throw new RepositoryInvalidInputException();
+                }
+            } else if (item.getAikSha1() != null && !item.getAikSha1().isEmpty()) {
+                obj = jpaController.findByAikSha1(item.getAikSha1());
+                if (obj == null) {
+                    log.error("Host specified with aik sha1 {} is not valid.", item.getAikSha1());
+                    throw new RepositoryInvalidInputException();
+                }
+            } else if (item.getHostName() != null && !item.getHostName().isEmpty()) {
+                obj = jpaController.findByName(item.getHostName());
+                if (obj == null) {
+                    log.error("Host specified with name {} is not valid.", item.getHostName());
+                    throw new RepositoryInvalidInputException();
+                }
             } else {
-                log.error("HostAttestation:Create - Specified host with UUID {} does not exist in the system.", item.getHostUuid());
+                log.error("HostAttestation:Create - Invalid input specified. Must specify Host UUID, AIK SHA1, or Host Name.");
                 throw new RepositoryInvalidInputException(locator);
             }
+            
+            HostAttestation hostAttestation = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), item.getId().toString(), true);
+            item.setAikSha1(hostAttestation.getAikSha1());
+            item.setChallenge(hostAttestation.getChallenge());
+            item.setCreatedOn(hostAttestation.getCreatedOn());
+            item.setEtag(hostAttestation.getEtag());
+            item.setHostName(hostAttestation.getHostName());
+            item.setHostTrustResponse(hostAttestation.getHostTrustResponse());
+            item.setHostUuid(hostAttestation.getHostUuid());
+            item.setId(hostAttestation.getId());
+            item.setModifiedOn(hostAttestation.getModifiedOn());
+            item.setSaml(hostAttestation.getSaml());
+            item.setTrustReport(hostAttestation.getTrustReport());
         } catch (RepositoryException re) {
-            throw re;            
+            throw re;
         } catch (Exception ex) {
-            log.error("HostAttestation:Create - Error during creating a new attestation report.", ex);
-            throw new RepositoryCreateException(ex, locator);
+            log.error("Error during retrieval of host attestation status from cache.", ex);
+            throw new RepositorySearchException(ex);
         }
     }
 

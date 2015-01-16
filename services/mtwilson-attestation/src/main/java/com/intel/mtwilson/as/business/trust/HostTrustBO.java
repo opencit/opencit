@@ -31,6 +31,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.Fault;
 import com.intel.mtwilson.policy.HostReport;
@@ -145,15 +146,16 @@ public class HostTrustBO {
      * @return
      * @throws IOException 
      */
-    public HostResponse getTrustStatusOfHostNotInDBAndRegister(TxtHostRecord hostObj) {
+    public HostResponse getTrustStatusOfHostNotInDBAndRegister(HostConfigData hostConfigObj) {
         if( hostBO == null ) { throw new IllegalStateException("Invalid server configuration"); }
         boolean biosMLEFound = false, VMMMLEFound = false;
+        TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
         
             // JONATHAN BOOKMARK TODO COMMENT OUT THIS BLOCK  BECAUSE OF CLEAR TEXT PASSWORDS  AFTER DEBUGGING
 //            if( log.isDebugEnabled() ) {
 //                try {
 //                ObjectMapper mapper = new ObjectMapper();
-//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostObj)); //This statement may contain clear text passwords
+//                log.debug("getTrustStatusOfHostNotInDBAndRegister input: {}", mapper.writeValueAsString(hostConfigObj)); //This statement may contain clear text passwords
 //                }
 //                catch(IOException e) {
 //                    log.debug("cannot serialize host input to addHost", e);
@@ -213,13 +215,42 @@ public class HostTrustBO {
             
             // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
             // numeric extensions if any.
-            List<TblMle> biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
+            List<TblMle> biosMLEList;
+            if (hostConfigObj.getBiosWLTarget() == null) {
+
+                log.debug("getTrustStatusOfHostNotInDB: Retrieving the list of MLEs with version {} for OEM {} for matching the whitelists.", 
+                        hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                
+                biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                
+            } else {
+                
+                String targetType = hostConfigObj.getBiosWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigObj.getBiosWLTarget()) {
+                    case BIOS_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case BIOS_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    default :
+                        targetValue = "";
+                }
+                
+                log.debug("getTrustStatusOfHostNotInDB: Retrieving the list of MLEs with version {} for OEM {} having target {}-{} for matching the whitelists.", 
+                        hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
+                
+                biosMLEList = mleJpa.findBiosMleByTarget(hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
+
+            }
+
             if (biosMLEList != null && !biosMLEList.isEmpty()) {
                 for (TblMle biosMLE : biosMLEList) {
                     log.debug("getTrustStatusOfHostNotInDB: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
                     tblHosts.setBiosMleId(biosMLE);
 
-                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                     PolicyEngine policyEngine = new PolicyEngine();
                     TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
@@ -263,7 +294,32 @@ public class HostTrustBO {
             
             // First let us find the matching VMM MLEs for the host that is configured in the system.
             //List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(hostObj.VMM_Name);
-            List<TblMle> vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+            List<TblMle> vmmMLEList; 
+            if (hostConfigObj.getVmmWLTarget() == null) {
+                
+                vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                
+            } else {
+                String targetType = hostConfigObj.getVmmWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigObj.getVmmWLTarget()) {
+                    case VMM_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case VMM_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    case VMM_GLOBAL :
+                    default :
+                        targetValue = "";
+                }
+
+                log.debug("getTrustStatusOfHostNotInDB: Retrieving the list of MLEs with VMM version {} for OS {} - {} having target {} - {} for matching the whitelists.", 
+                        hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
+                
+                vmmMLEList = mleJpa.findVmmMleByTarget(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
+                
+            }
             if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
                 for (TblMle vmmMLE : vmmMLEList) {
                     
@@ -271,7 +327,7 @@ public class HostTrustBO {
                     
                     tblHosts.setVmmMleId(vmmMLE);
 
-                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                    Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                     PolicyEngine policyEngine = new PolicyEngine();
                     TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
@@ -1496,10 +1552,23 @@ public class HostTrustBO {
     }
 
     /**
-     * @param hostName
+     * @param tblHosts
+     * @param hostId
      * @return
      */
     public String getTrustWithSaml(TblHosts tblHosts, String hostId) {
+        String hostAttestationUuid = new UUID().toString();
+        log.debug("Generating new UUID for saml assertion record 2: {}", hostAttestationUuid);
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid).getSaml();
+    }
+    
+    /**
+     * @param tblHosts
+     * @param hostId
+     * @param hostAttestationUuid
+     * @return
+     */
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid) {
         try {
             //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
             //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
@@ -1508,6 +1577,7 @@ public class HostTrustBO {
 
             TxtHost host = getHostWithTrust(tblHosts, hostId,tblSamlAssertion);
             
+            tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
             tblSamlAssertion.setBiosTrust(host.isBiosTrusted());
             tblSamlAssertion.setVmmTrust(host.isVmmTrusted());
 
@@ -1547,10 +1617,13 @@ public class HostTrustBO {
             tblSamlAssertion.setExpiryTs(samlAssertion.expiry_ts);
             tblSamlAssertion.setCreatedTs(samlAssertion.created_ts);
             
-            
+            TrustReport hostTrustReport = getTrustReportForHost(tblHosts, tblHosts.getName());
+            tblSamlAssertion.setTrustReport(new ObjectMapper().writeValueAsString(hostTrustReport));
+            logTrustReport(tblHosts, hostTrustReport); // Need to cache the attestation report ### v1 requirement to log to mw_ta_log
+                
             My.jpa().mwSamlAssertion().create(tblSamlAssertion);
 
-            return samlAssertion.assertion ;
+            return buildHostAttestation(tblHosts, tblSamlAssertion);
         } catch (ASException e) {
             // ASException sets HTTP Status to 400 for all errors
             // We override that here to give more specific codes when possible:
@@ -1601,8 +1674,14 @@ public class HostTrustBO {
         }
         return getTrustWithSaml(tblHostsList);
     }
+        
+    public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
+        String hostAttestationUuid = new UUID().toString();
+        log.debug("Generating new UUID for saml assertion record 1: {}", hostAttestationUuid);
+        return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid, forceVerify).getSaml();
+    }
     
-        public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
+    public HostAttestation getTrustWithSaml(TblHosts tblHosts, String hostId, String hostAttestationUuid, boolean forceVerify) throws IOException {
         log.debug("getTrustWithSaml: Getting trust for host: " + tblHosts.getName() + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
@@ -1618,12 +1697,12 @@ public class HostTrustBO {
         }
         if(forceVerify != true){
             //TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
-            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(hostId);
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName()); //hostId);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
-                    return tblSamlAssertion.getSaml();
-                }else{
+                    return buildHostAttestation(tblHosts, tblSamlAssertion);
+                } else {
                     log.debug("Found assertion in cache with error set, returning that.");
                    throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
                 }
@@ -1633,9 +1712,11 @@ public class HostTrustBO {
         log.debug("Getting trust and saml assertion from host.");
         
         try {
-            return getTrustWithSaml(tblHosts, hostId);
+//            return getTrustWithSaml(tblHosts, hostId);
+            return getTrustWithSaml(tblHosts, hostId, hostAttestationUuid);
         }catch(Exception e) {
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
+            tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
             tblSamlAssertion.setHostId(tblHosts);
             //TxtHost hostTxt = getHostWithTrust(new Hostname(host),tblSamlAssertion); 
             //TxtHostRecord tmp = new TxtHostRecord();
@@ -1685,6 +1766,24 @@ public class HostTrustBO {
             throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
             //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
         }
+    }
+    
+    public HostAttestation buildHostAttestation(TblHosts tblHosts, TblSamlAssertion tblSamlAssertion) throws IOException {
+        HostAttestation hostAttestation = new HostAttestation();
+        hostAttestation.setAikSha1(tblHosts.getAikSha1());
+        //hostAttestation.setChallenge(tblHosts.getChallenge());
+        hostAttestation.setHostName(tblHosts.getName());
+        hostAttestation.setHostUuid(tblHosts.getUuid_hex()); //.getHardwareUuid());
+        hostAttestation.setId(UUID.valueOf(tblSamlAssertion.getAssertionUuid()));
+        hostAttestation.setSaml(tblSamlAssertion.getSaml());
+        hostAttestation.setTrustReport(new ObjectMapper().readValue(tblSamlAssertion.getTrustReport(), TrustReport.class));
+
+        HostTrustStatus hostTrustStatus = new HostTrustStatus();
+        hostTrustStatus.bios = tblSamlAssertion.getBiosTrust();
+        hostTrustStatus.vmm = tblSamlAssertion.getVmmTrust();
+        //hostTrustStatus.asset_tag = tblSamlAssertion.getAssetTagTrust();
+        hostAttestation.setHostTrustResponse(new HostTrustResponse(new Hostname(tblHosts.getName()), hostTrustStatus));
+        return hostAttestation;
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
@@ -1803,10 +1902,14 @@ public class HostTrustBO {
         return hostTrustStatus;
     }
 
-    public String checkMatchingMLEExists(TxtHostRecord hostObj, String biosPCRs, String vmmPCRs) {
+    public String checkMatchingMLEExists(HostConfigData hostConfigData) {
         boolean biosMLEFound = false, VMMMLEFound = false;
         
         try {
+            TxtHostRecord hostObj = hostConfigData.getTxtHostRecord();
+            String biosPCRs = hostConfigData.getBiosPCRs();
+            String vmmPCRs = hostConfigData.getVmmPCRs();
+            
             long getTrustStatusOfHostNotInDBStart = System.currentTimeMillis();
             
             log.debug("checkMatchingMLEExists: Starting to find the matching MLEs for host {}.", hostObj.HostName);
@@ -1845,8 +1948,28 @@ public class HostTrustBO {
             if (biosPCRs != null && !biosPCRs.isEmpty()) {
                 // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
                 // numeric extensions if any.
-                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with version {} for OEM {} for matching the whitelists.", hostObj.BIOS_Version, hostObj.BIOS_Oem);
-                List<TblMle> biosMLEList = mleJpa.findBiosMleByVersion(hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                
+                // In order to search for the matching BIOS name, we also need to add the target type and target value as filter criteria
+                // Let us take 2 EPSD hosts having the exact same BIOS. If the user wants to create 2 white lists for both the hosts, without
+                // adding this filter criteria of HostName, for the Host #2 we would match the Whitelist of Host #1 and hence we would not create
+                // a new white list. 
+                String targetType = hostConfigData.getBiosWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigData.getBiosWLTarget()) {
+                    case BIOS_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case BIOS_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    default :
+                        targetValue = "";
+                }
+                
+                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with version {} for OEM {} having target {}-{} for matching the whitelists.", 
+                        hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
+                
+                List<TblMle> biosMLEList = mleJpa.findBiosMleByTarget(hostObj.BIOS_Version, hostObj.BIOS_Oem, targetType, targetValue);
                 if (biosMLEList != null && !biosMLEList.isEmpty()) {
                     for (TblMle biosMLE : biosMLEList) {
                         log.debug("checkMatchingMLEExists: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
@@ -1878,7 +2001,7 @@ public class HostTrustBO {
                         
                         tblHosts.setBiosMleId(biosMLE);
 
-                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
@@ -1906,8 +2029,32 @@ public class HostTrustBO {
             }
             
             if (vmmPCRs != null && !vmmPCRs.isEmpty()) {
+                
+                // In order to search for the matching VMM MLE, we also need to add the target type and target value as filter criteria
+                // Let us take 2 different OEM boxes having the exact same ESXi version installed. Lets say that the user whitelists using
+                // OEM Host #1. Assume that it creates VMM MLE with name DELL_Romley_VMware_ESXi. Now if the user wants to create the second
+                // white list using the HP host, then we need to not only compare the VMM version, OS name and OS version but also consider
+                // the OEM of the box from which the first whitelist was created. Otherwise it would match with the whitelist of Host #1 and
+                // we would not create the second white list.
+                String targetType = hostConfigData.getVmmWLTarget().getValue();
+                String targetValue = "";
+                switch(hostConfigData.getVmmWLTarget()) {
+                    case VMM_OEM :
+                        targetValue = hostObj.BIOS_Oem;
+                        break;
+                    case VMM_HOST :
+                        targetValue = hostObj.HostName;
+                        break;
+                    case VMM_GLOBAL :
+                    default :
+                        targetValue = "";
+                }
+
+                log.debug("checkMatchingMLEExists: Retrieving the list of MLEs with VMM version {} for OS {} - {} having target {} - {} for matching the whitelists.", 
+                        hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
+                
                 // First let us find the matching VMM MLEs for the host that is configured in the system.
-                List<TblMle> vmmMLEList = mleJpa.findVmmMleByVersion(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                List<TblMle> vmmMLEList = mleJpa.findVmmMleByTarget(hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion, targetType, targetValue);
                 if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
                     for (TblMle vmmMLE : vmmMLEList) {
 

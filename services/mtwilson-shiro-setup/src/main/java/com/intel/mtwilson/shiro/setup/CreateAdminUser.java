@@ -492,13 +492,13 @@ public class CreateAdminUser extends DatabaseSetupTask {
         return null;
     }
     private X509Certificate getTlsCertificate() throws KeyManagementException, KeyStoreException  {
-        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), "changeit");   //My.configuration().getTlsKeystorePassword());
+        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), My.configuration().getTlsKeystorePassword());   //"changeit");
         for (String alias : tlsKeystore.aliases()) {
             log.debug("TLS Keystore alias: {}", alias);
             // make sure it has a SAML private key and certificate inside
             try {
                 if ("tomcat".equals(alias) || "s1as".equals(alias)) {
-                    RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, "changeit");   //My.configuration().getTlsKeystorePassword());
+                    RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, My.configuration().getTlsKeystorePassword());   //"changeit");
                     log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
                     return credential.getCertificate();
                 } else {

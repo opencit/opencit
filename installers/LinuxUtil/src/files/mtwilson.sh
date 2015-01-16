@@ -1,4 +1,15 @@
 #!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          mtwilson
+# Required-Start:    $local_fs $network $remote_fs
+# Required-Stop:     $local_fs $network $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start mtwilson webserver
+# Description:       Enable mtwilson services
+### END INIT INFO
+
 # WARNING:
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
@@ -165,6 +176,12 @@ Detected the following options on this server:"
       glassfish_create_ssl_cert "${MTWILSON_SERVER}"
     else
       glassfish_create_ssl_cert_prompt
+    fi
+  elif using_tomcat; then
+    if [ -n "${MTWILSON_SERVER}" ]; then
+      tomcat_create_ssl_cert "${MTWILSON_SERVER}"
+    else
+      tomcat_create_ssl_cert_prompt
     fi
   fi
 
@@ -523,6 +540,7 @@ case "$1" in
         rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
+        remove_startup_script "mtwilson"
         # configuration files
         echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         rm -rf /etc/intel/cloudsecurity
@@ -537,6 +555,7 @@ case "$1" in
             rm -fr /etc/monit/conf.d/*.mtwilson
             echo "Restarting monit after removing configs"
             service monit stop &> /dev/null
+            service monit start &> /dev/null
             echo "Removing mtwilson logrotate files"
             rm -fr /etc/logrotate.d/mtwilson
         # java:  rm -rf /usr/share/jdk1.7.0_51

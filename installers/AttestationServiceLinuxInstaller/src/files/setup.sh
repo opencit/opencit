@@ -83,7 +83,7 @@ mkdir -p /usr/local/bin
 cp asctl.sh /usr/local/bin/asctl
 chmod +x /usr/local/bin/asctl
 /usr/local/bin/asctl setup
-register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
+#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
 compile_aikqverify() {

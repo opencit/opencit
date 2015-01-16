@@ -770,7 +770,30 @@ register_startup_script() {
     $updatercd -f "${startup_name}" remove 2>/dev/null
     $updatercd "${startup_name}" defaults $@ 2>/dev/null
   fi
+}
 
+# Parameters:
+# - the name of the startup script (one word)
+remove_startup_script() {
+  local startup_name="${1}"
+  shift;
+
+  # RedHat and SUSE
+  chkconfig=`which chkconfig  2>/dev/null`
+  if [ -n "$chkconfig" ]; then
+    $chkconfig --del "${startup_name}"  2>/dev/null
+  fi
+
+  # Ubuntu
+  updatercd=`which update-rc.d  2>/dev/null`
+  if [ -n "$updatercd" ]; then
+    $updatercd -f "${startup_name}" remove 2>/dev/null
+  fi
+  
+  # try to install it as a startup script
+  if [ -d "/etc/init.d" ]; then
+    rm "/etc/init.d/${startup_name}" 2>/dev/null
+  fi
 }
 
 # Ensure the package actually needs to be installed before calling this function.
@@ -2396,7 +2419,7 @@ glassfish_uninstall() {
 # - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
 glassfish_sslcert_report() {
   local alias="${1:-s1as}"
-  local keystorePassword=changeit
+  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
@@ -2496,7 +2519,8 @@ glassfish_create_ssl_cert() {
     cert_cns=`echo $cert_cns | sed -e 's/,$//'`
     cert_sans=`echo $cert_sans | sed -e 's/,$//'`
     cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
-    local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
+
+    local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
     local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
     local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
     local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
@@ -2900,7 +2924,7 @@ tomcat_create_ssl_cert() {
     cert_cns=`echo $cert_cns | sed -e 's/,$//'`
     cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
-    local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
+    local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
     local keystore=${TOMCAT_HOME}/ssl/.keystore
     local configDir="/opt/mtwilson/configuration"
     local keytool=${JAVA_HOME}/bin/keytool
@@ -2947,7 +2971,7 @@ tomcat_env_report(){
 # - certificate alias to report on (default is tomcat, the tomcat default ssl cert alias)
 tomcat_sslcert_report() {
   local alias="${1:-tomcat}"
-  local keystorePassword=changeit
+  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }

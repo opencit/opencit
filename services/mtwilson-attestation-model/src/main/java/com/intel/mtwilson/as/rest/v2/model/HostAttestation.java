@@ -23,6 +23,7 @@ public class HostAttestation extends Document {
     private String challenge;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
+    private String saml;
 
     public String getHostUuid() {
         return hostUuid;
@@ -72,5 +73,11 @@ public class HostAttestation extends Document {
         this.hostTrustResponse = hostTrustResponse;
     }
     
+    public String getSaml() {
+        return saml;
+    }
     
+    public void setSaml(String saml) {
+        this.saml = saml;
+    }
 }

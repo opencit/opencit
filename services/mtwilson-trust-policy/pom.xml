@@ -3,7 +3,7 @@
 
     <artifactId>mtwilson-trust-policy</artifactId>
     <packaging>jar</packaging>
-    <name>Trust Policy Library</name>
+    <name>mtwilson-trust-policy</name>
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>

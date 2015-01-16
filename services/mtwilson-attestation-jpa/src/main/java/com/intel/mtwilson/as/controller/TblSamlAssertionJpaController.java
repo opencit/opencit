@@ -180,6 +180,22 @@ public class TblSamlAssertionJpaController implements Serializable {
 
     }
     
+    public List<TblSamlAssertion> findListByHostAndExpiry(String host) {
+        List<TblSamlAssertion> tblSamlAssertionList = null;
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblSamlAssertion.findByHostAndExpiry");
+            query.setParameter("now", new Date(System.currentTimeMillis()));
+            query.setParameter("hostName", host);
+
+            tblSamlAssertionList = query.getResultList();
+        } finally {
+                em.close();
+        }
+
+        return tblSamlAssertionList;
+    }
+    
     public List<TblSamlAssertion> findByHostID(TblHosts  hostID) {
         EntityManager em = getEntityManager();
         try {
@@ -193,5 +209,24 @@ public class TblSamlAssertionJpaController implements Serializable {
                 em.close();
         }
 
-    }    
+    }
+    
+    public TblSamlAssertion findByAssertionUuid(String assertionUuid) {
+        TblSamlAssertion tblSamlAssertion = null;
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblSamlAssertion.findByAssertionUuid");
+            query.setParameter("assertionUuid", assertionUuid);
+
+            List<TblSamlAssertion> list = query.getResultList();
+
+            if (list != null && list.size() > 0) {
+                tblSamlAssertion = list.get(0);
+            }
+        } finally {
+                em.close();
+        }
+
+        return tblSamlAssertion;
+    }
 }
