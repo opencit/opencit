@@ -2419,7 +2419,7 @@ glassfish_uninstall() {
 # - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
 glassfish_sslcert_report() {
   local alias="${1:-s1as}"
-  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+  local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
@@ -2520,7 +2520,7 @@ glassfish_create_ssl_cert() {
     cert_sans=`echo $cert_sans | sed -e 's/,$//'`
     cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
 
-    local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+    local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
     local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
     local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
     local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
@@ -2923,7 +2923,7 @@ tomcat_create_ssl_cert() {
     cert_cns=`echo $cert_cns | sed -e 's/,$//'`
     cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
-    local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+    local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
     local keystore=${TOMCAT_HOME}/ssl/.keystore
     local configDir="/opt/mtwilson/configuration"
     local keytool=${JAVA_HOME}/bin/keytool
@@ -2970,7 +2970,7 @@ tomcat_env_report(){
 # - certificate alias to report on (default is tomcat, the tomcat default ssl cert alias)
 tomcat_sslcert_report() {
   local alias="${1:-tomcat}"
-  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+  local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }
@@ -3845,9 +3845,9 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TLS_KEYSTORE_PASSWORD=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
       export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host "$mtw_props_path"`
@@ -3857,9 +3857,9 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
       export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
-      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
-      export CONF_MTW_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
-      export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
+      export CONF_MTWILSON_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
+      export CONF_MTWILSON_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
+      export CONF_MTWILSON_TLS_KEYSTORE_PASSWORD=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
   fi
@@ -4003,9 +4003,9 @@ load_defaults() {
   export DEFAULT_API_KEY_ALIAS=""
   export DEFAULT_API_KEY_PASS=""
   export DEFAULT_CONFIGURED_API_BASEURL=""
-  export DEFAULT_MTW_DEFAULT_TLS_POLICY_ID=""
-  export DEFAULT_MTW_TLS_POLICY_ALLOW=""
-  export DEFAULT_MTW_TLS_KEYSTORE_PASS=""
+  export DEFAULT_MTWILSON_DEFAULT_TLS_POLICY_ID=""
+  export DEFAULT_MTWILSON_TLS_POLICY_ALLOW=""
+  export DEFAULT_MTWILSON_TLS_KEYSTORE_PASSWORD=""
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
   export DEFAULT_TRUSTAGENT_KEYSTORE_PASS=""
@@ -4030,9 +4030,9 @@ load_defaults() {
   export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
   export CONFIGURED_API_BASEURL=${CONFIGURED_API_BASEURL:-${CONF_CONFIGURED_API_BASEURL:-$DEFAULT_CONFIGURED_API_BASEURL}}
-  export MTW_DEFAULT_TLS_POLICY_ID=${MTW_DEFAULT_TLS_POLICY_ID:-${CONF_MTW_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_ID}}
-  export MTW_TLS_POLICY_ALLOW=${MTW_TLS_POLICY_ALLOW:-${CONF_MTW_TLS_POLICY_ALLOW:-$DEFAULT_MTW_TLS_POLICY_ALLOW}}
-  export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
+  export MTWILSON_DEFAULT_TLS_POLICY_ID=${MTWILSON_DEFAULT_TLS_POLICY_ID:-${CONF_MTWILSON_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTWILSON_DEFAULT_TLS_POLICY_ID}}
+  export MTWILSON_TLS_POLICY_ALLOW=${MTWILSON_TLS_POLICY_ALLOW:-${CONF_MTWILSON_TLS_POLICY_ALLOW:-$DEFAULT_MTWILSON_TLS_POLICY_ALLOW}}
+  export MTWILSON_TLS_KEYSTORE_PASSWORD=${MTWILSON_TLS_KEYSTORE_PASSWORD:-${CONF_MTWILSON_TLS_KEYSTORE_PASSWORD:-$DEFAULT_MTWILSON_TLS_KEYSTORE_PASSWORD}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
   export TRUSTAGENT_KEYSTORE_PASS=${TRUSTAGENT_KEYSTORE_PASS:-${CONF_TRUSTAGENT_KEYSTORE_PASS:-$DEFAULT_TRUSTAGENT_KEYSTORE_PASS}}
