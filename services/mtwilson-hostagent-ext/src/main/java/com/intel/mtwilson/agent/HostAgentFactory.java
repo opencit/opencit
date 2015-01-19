@@ -5,26 +5,16 @@
 package com.intel.mtwilson.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.mtwilson.My;
-//import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
-//import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.mtwilson.model.InternetAddress;
-import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
-//import com.intel.dcsg.cpg.tls.policy.TrustCaAndVerifyHostnameTlsPolicy;
-//import com.intel.dcsg.cpg.tls.policy.TrustFirstCertificateTlsPolicy;
-//import com.intel.dcsg.cpg.tls.policy.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
-import java.security.KeyManagementException;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
-//import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.util.HashMap;
@@ -42,26 +32,7 @@ import java.util.List;
  */
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private Map<String,VendorHostAgentFactory> vendorFactoryMap = new HashMap<>();
     
-    public HostAgentFactory() {
-//        vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());
-//        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostAgentFactory());
-//        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostAgentFactory());
-        List<VendorHostAgentFactory> vendorHostAgentFactories = Extensions.findAll(VendorHostAgentFactory.class);
-        for(VendorHostAgentFactory vendorHostAgentFactory : vendorHostAgentFactories) {
-            vendorFactoryMap.put(vendorHostAgentFactory.getVendorProtocol(), vendorHostAgentFactory);
-            
-        }
-    }
-    
-    /**
-     * It is recommended to supply an EnumMap instance
-     * @param map of vendor host agent factories
-     */
-    public void setVendorFactoryMap(Map<String,VendorHostAgentFactory> map) {
-        vendorFactoryMap = map;
-    }
         
     private TxtHostRecord convert(TblHosts input) {
         TxtHostRecord converted = new TxtHostRecord();
@@ -159,11 +130,9 @@ public class HostAgentFactory {
             throw new IllegalArgumentException("Connection info missing"); 
         }
         String vendorProtocol = cs.getVendor().name().toLowerCase(); // INTEL, CITRIX, VMWARE becomes intel, citrix, vmware
-        if( vendorFactoryMap.containsKey(vendorProtocol) ) {
-            VendorHostAgentFactory factory = vendorFactoryMap.get(vendorProtocol);
-            if( factory != null ) {
-                return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
-            }
+        VendorHostAgentFactory factory = Plugins.findByAttribute(VendorHostAgentFactory.class, "vendorProtocol", vendorProtocol);
+        if( factory != null ) {
+            return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
         }
         log.error("HostAgentFactory: Unsupported host type: {}",vendorProtocol);
         throw new UnsupportedOperationException(String.format("Unsupported host type: %s",vendorProtocol));
@@ -175,11 +144,9 @@ public class HostAgentFactory {
             throw new IllegalArgumentException("Connection info missing"); 
         }
         String vendorProtocol = hostConnection.getVendor().name().toLowerCase();
-        if( vendorFactoryMap.containsKey(vendorProtocol) ) { // intel, citrix, vmware
-            VendorHostAgentFactory factory = vendorFactoryMap.get(vendorProtocol);
-                if( factory != null ) {
-                    return factory.getHostAgent(hostConnection.getConnectionString(), tlsPolicy);
-                }
+        VendorHostAgentFactory factory = Plugins.findByAttribute(VendorHostAgentFactory.class, "vendorProtocol", vendorProtocol);
+        if( factory != null ) {
+            return factory.getHostAgent(hostConnection.getConnectionString(), tlsPolicy);
         }
         throw new UnsupportedOperationException("No agent factory registered for this host");
     }

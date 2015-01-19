@@ -661,6 +661,7 @@ if using_glassfish; then
   echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV_DIR/glassfish
   echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV_DIR/glassfish
 
+  
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
       #$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0   ### THIS COMMAND DOES NOT WORK

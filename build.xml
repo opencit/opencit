@@ -22,29 +22,41 @@
 	
 	<target name="ready" depends="init">
 		<!-- the root pom -->
-		<exec executable="${cmd.maven}">
+		<exec executable="${cmd.maven}" resultproperty="mavenExitInstallPom">
 			<arg value="-DskipTests=true"/>
 			<arg value="-N"/>
 			<arg value="install"/>
 		</exec>
+		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
+			<condition><not><equals arg1="${mavenExitInstallPom}" arg2="0"/></not></condition>
+		</fail>
 		<!-- the maven archetypes depend on root pom -->
-		<exec executable="${cmd.maven}" dir="maven">
+		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallParents">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
 		</exec>
+		<fail message="Failed to install parent pom.xml files" status="${mavenExitInstallParents}">
+			<condition><not><equals arg1="${mavenExitInstallParents}" arg2="0"/></not></condition>
+		</fail>
 		<!-- clean all projects -->
-		<exec executable="${cmd.maven}">
+		<exec executable="${cmd.maven}" resultproperty="mavenExitClean">
 			<arg value="-DskipTests=true"/>
 			<arg value="clean"/>
 		</exec>
+		<fail message="Failed to clean project" status="${mavenExitClean}">
+			<condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
+		</fail>
 	</target>
 	
 	<target name="build" depends="init">
 		<!-- the root pom and all projects -->
-		<exec executable="${cmd.maven}">
+		<exec executable="${cmd.maven}" resultproperty="mavenExitInstall">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
 		</exec>
+		<fail message="Failed to build maven project" status="${mavenExitInstall}">
+			<condition><not><equals arg1="${mavenExitInstall}" arg2="0"/></not></condition>
+		</fail>
 	</target>
 
 	<target name="dist" depends="init">

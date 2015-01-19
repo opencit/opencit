@@ -6,6 +6,7 @@ package com.intel.mtwilson.tls.policy.factory;
 
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
@@ -306,7 +307,8 @@ public abstract class TlsPolicyFactory {
 //        } catch (Exception e) {
 //            log.warn("Cannot write debug log", e);
 //        }
-        TlsPolicyFactory factoryExtension = Extensions.require(TlsPolicyFactory.class, tlsPolicySubject);
+        log.debug("createFactory for policy class {}", tlsPolicySubject.getClass().getName());
+        TlsPolicyFactory factoryExtension = Plugins.findByConstructor(TlsPolicyFactory.class, tlsPolicySubject); //Extensions.require(TlsPolicyFactory.class, tlsPolicySubject);
         return factoryExtension;
         /*
         // we could use Java's SPI or Mt Wilson's Extensions here to dynamically find a subclasses of TlsPolicyFactory for the given input

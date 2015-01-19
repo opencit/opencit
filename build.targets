@@ -1,0 +1,5 @@
+# A successful build produces the following files:
+installers/mtwilson-server/target/mtwilson-server-3.0-SNAPSHOT-jdk_glassfish_monit.bin
+installers/TrustAgentLinuxInstaller/target/mtwilson-trustagent-installer-3.0-SNAPSHOT.bin
+installers/mtwilson-client-java6/target/mtwilson-client-java6-3.0-SNAPSHOT.zip
+installers/mtwilson-client-java7/target/mtwilson-client-java7-3.0-SNAPSHOT.zip
