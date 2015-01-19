@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +32,8 @@ import java.util.Set;
  * 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Policy {
     private String name;
     private Set<Rule> rules;

@@ -82,6 +82,11 @@
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-xml-provider</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-jackson</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 
 		</dependencies>  
