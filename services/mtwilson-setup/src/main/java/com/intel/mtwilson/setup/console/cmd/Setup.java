@@ -4,23 +4,20 @@
  */
 package com.intel.mtwilson.setup.console.cmd;
 
-import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
-import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
-import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.MyFilesystem;
-import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
+import com.intel.mtwilson.Filesystem;
+import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
+import com.intel.mtwilson.setup.SetupConfigurationProvider;
 import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupTask;
 import com.intel.mtwilson.setup.ValidationException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -49,11 +45,10 @@ import org.apache.commons.lang3.StringUtils;
  * the tasks,  use the --noexec option.
  * 
  * @author jbuhacoff
- * @deprecated use "setup" instead
  */
-public class SetupManager implements Command {
+public class Setup implements Command {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SetupManager.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Setup.class);
     private org.apache.commons.configuration.Configuration options = null;
 
     @Override
@@ -111,30 +106,8 @@ public class SetupManager implements Command {
 
 
     protected File getConfigurationFile() {
-        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "mtwilson.properties");
-        return file;
-    }
-
-    protected void registerExtensions() {
-        if( useExtensionCacheFile() ) { 
-            ExtensionCacheLauncher launcher = new ExtensionCacheLauncher();
-            launcher.setRegistrars(new Registrar[]{new ImplementationRegistrar(SetupTask.class)});
-            launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
-        }
-        else {
-            ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
-            launcher.setRegistrars(new Registrar[]{new ImplementationRegistrar(SetupTask.class)});
-            // by default the application java folder will be scanned
-            // which is /opt/mtwilson/java or /opt/trustagent/java 
-            // but user can choose to scan another folder by specifying the
-            // --ext-java=/path/to/folder  option
-            // note that this only makes sense when --no-ext-cache is also used
-            if( options.getString("ext-java") != null ) {
-                launcher.setJavaFolder(new File(options.getString("ext-java")));
-            }
-            
-            launcher.run(); // loads application jars, scans extension jars for the plugins as specified by getRegistrars()
-        }
+        Filesystem fs = new Filesystem();
+        return fs.getConfigurationFile();
     }
 
     /**
@@ -147,8 +120,6 @@ public class SetupManager implements Command {
      */
     @Override
     public void execute(String[] args) throws Exception {
-
-        registerExtensions();
 
         // now find the setup tasks that the user has asked for or use a default set
         if (args.length == 0) {
@@ -201,6 +172,7 @@ public class SetupManager implements Command {
     protected SetupTask findSetupTaskByName(String hyphenatedTaskName) throws IOException {
         PascalCaseNamingStrategy namingStrategy = new PascalCaseNamingStrategy(getConversionMap());
         String className = namingStrategy.toPascalCase(hyphenatedTaskName);
+        log.debug("Setup findSetupTaskByName: {} -> {}", hyphenatedTaskName, className);
         List<SetupTask> tasks = Extensions.findAll(SetupTask.class);
         for (SetupTask task : tasks) {
             if (task.getClass().getSimpleName().equals(className)) {
@@ -211,19 +183,21 @@ public class SetupManager implements Command {
         return null;
     }
 
-    protected void execute(SetupTask... tasks) throws IOException {
+    protected void execute(SetupTask... tasks) throws IOException, org.apache.commons.configuration.ConfigurationException {
         execute(Arrays.asList(tasks));
     }
 
-    protected void execute(List<SetupTask> tasks) throws IOException {
-        PropertiesConfiguration properties = loadConfiguration();
+    protected void execute(List<SetupTask> tasks) throws IOException, org.apache.commons.configuration.ConfigurationException {
+        SetupConfigurationProvider provider = new SetupConfigurationProvider(new EncryptedConfigurationProvider());
+        Configuration configuration = provider.load();
+//        Configuration configurationAdapter =  new CommonsConfiguration(configuration);
 //        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 
 //        MutableCompositeConfiguration configuration = new MutableCompositeConfiguration(properties, env);
         boolean error = false;
         try {
             for (SetupTask setupTask : tasks) {
                 String taskName = setupTask.getClass().getSimpleName();
-                setupTask.setConfiguration(properties);
+                setupTask.setConfiguration(configuration);
 //                log.debug("set tpm owner password {} for task {}", properties.getString("tpm.owner.secret"), taskName);
                 try {
                     if( setupTask.isConfigured() && setupTask.isValidated() && !isForceEnabled() ) {
@@ -287,7 +261,8 @@ public class SetupManager implements Command {
             log.error("Setup error: {}", e.getMessage());
             log.debug("Setup error", e);
         }
-        storeConfiguration(properties);
+        
+        provider.save(configuration);
         
         if( error ) {
             // the main application (cpg-console Main) will print this
@@ -296,37 +271,5 @@ public class SetupManager implements Command {
         }
     }
     
-    protected PropertiesConfiguration loadConfiguration() throws IOException {
-        File file = getConfigurationFile();
-        if (file.exists()) {
-            log.debug("Loading configuration file {}", file.getAbsolutePath());
-            try (FileInputStream in = new FileInputStream(file)) {
-                Properties properties = new Properties();
-                properties.load(in);
-                PropertiesConfiguration configuration = new PropertiesConfiguration(properties);
-                return configuration;
-            }
-        }
-        return new PropertiesConfiguration();
-    }
-
-    protected void storeConfiguration(PropertiesConfiguration configuration) throws IOException {
-        // write the configuration back to disk
-        log.debug("Starting store configuration to file");
-        File file = getConfigurationFile();
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            Properties properties = beforeStore(configuration.getProperties());
-            properties.store(out, "saved by mtwilson setup");
-        }
-        log.debug("Finished store configuration to file");
-    }
     
-    /**
-     * 
-     * @param properties
-     * @return must not return null
-     */
-    protected Properties beforeStore(Properties properties) {
-        return properties;
-    }
 }

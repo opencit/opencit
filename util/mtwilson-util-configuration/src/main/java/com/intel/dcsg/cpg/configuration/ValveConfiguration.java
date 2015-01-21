@@ -20,6 +20,10 @@ public class ValveConfiguration extends AbstractConfiguration {
     private Configuration readFrom;
     private Configuration writeTo;
 
+    public ValveConfiguration() {
+    }
+
+    
     public ValveConfiguration(Configuration readFrom, Configuration writeTo) {
         this.readFrom = readFrom;
         this.writeTo = writeTo;
@@ -32,6 +36,16 @@ public class ValveConfiguration extends AbstractConfiguration {
     public Configuration getWriteTo() {
         return writeTo;
     }
+
+    public void setReadFrom(Configuration readFrom) {
+        this.readFrom = readFrom;
+    }
+
+    public void setWriteTo(Configuration writeTo) {
+        this.writeTo = writeTo;
+    }
+    
+    
 
     /**
      * Delegates to the reading configuration.

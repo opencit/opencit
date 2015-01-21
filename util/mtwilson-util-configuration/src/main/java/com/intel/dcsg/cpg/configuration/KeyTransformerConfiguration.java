@@ -9,7 +9,7 @@ import java.util.Set;
 
 /**
  * This class is a decorator that can wrap any existing Configuration 
- * instance to tranform names of keys before they are passed to that
+ * instance to transform names of keys before they are passed to that
  * instance. For example if the application uses key names like 
  * java.style.properties it can automatically transform them to 
  * SHELL_STYLE_VARIABLES by using the KeyTransformerConfiguration with

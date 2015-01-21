@@ -25,7 +25,9 @@ import org.apache.commons.lang3.StringUtils;
  * for extensions 
  * 
  * You can execute this task from command line with something like this:
- * mtwilson setup setup-manager update-extensions-cache-file
+ * mtwilson setup update-extensions-cache-file
+ * 
+ * Or with an earlier version:  mtwilson setup setup-manager update-extensions-cache-file
  * 
  * @author jbuhacoff
  */

@@ -108,7 +108,13 @@
             <artifactId>mtwilson-repository-ext</artifactId>
             <version>${project.version}</version>        
         </dependency>
-        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-extensions-cache</artifactId>
+            <version>${project.version}</version>        
+        </dependency>
+
+                
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>

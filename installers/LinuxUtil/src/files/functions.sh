@@ -490,6 +490,27 @@ using_tomcat() {
     fi
   fi
 }
+# currently jetty is indicated either by WEBSERVER_VENDOR=jetty or by
+# absence of both tomcat and glassfish. there's not an independent
+# function for jetty_detect.
+using_jetty() {
+  if [[ -n "$WEBSERVER_VENDOR" ]]; then
+    if [[ "${WEBSERVER_VENDOR}" == "jetty" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    glassfish_detect 2>&1 > /dev/null
+    tomcat_detect 2>&1 > /dev/null
+    if [ -z "$GLASSFISH_HOME" ] && [ -z "$TOMCAT_HOME" ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
+
 using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
 using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
  
@@ -3033,6 +3054,76 @@ tomcat_init_manager() {
   fi
 }
 
+### FUNCTION LIBRARY: jetty
+
+
+jetty_running() {  
+  JETTY_RUNNING=''
+  if [ -n "$MTWILSON_HOME" ]; then
+    JETTY_PID=`ps gauwxx | grep java | grep -v grep | grep "$MTWILSON_HOME" | awk '{ print $2 }'`
+    echo JETTY_PID: $JETTY_PID >> $INSTALL_LOG_FILE
+    if [ -n "$JETTY_PID" ]; then
+      JETTY_RUNNING=yes
+      echo JETTY_RUNNING: $JETTY_RUNNING >> $INSTALL_LOG_FILE
+      return 0
+    fi
+  fi
+  return 1
+}
+
+jetty_running_report() {
+  echo -n "Checking Mt Wilson process... "
+  if jetty_running; then
+    echo_success "Running (pid $JETTY_PID)"
+  else
+    echo_failure "Not running"
+  fi
+}
+jetty_start() {
+  jetty_require 2>&1 > /dev/null
+  if jetty_running; then
+    echo_warning "Jetty already running [PID: $JETTY_PID]"
+  elif [ -n "$jetty" ]; then
+    echo -n "Waiting for Mt Wilson services to startup..."
+    # default is /opt/mtwilson/java
+    local java_lib_dir=${MTWILSON_JAVA_DIR:-$DEFAULT_MTWILSON_JAVA_DIR}
+    if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+    local mtwilson_jars=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
+    mainclass=com.intel.mtwilson.launcher.console.Main
+    local jvm_memory=2048m
+    local jvm_maxperm=512m
+    { $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$mtwilson_jars" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" ; } 2> /var/log/mtwilson.log
+    return $?
+  fi
+}
+
+jetty_shutdown() {
+  if jetty_running; then
+    if [ -n "$JETTY_PID" ]; then
+      kill -9 $JETTY_PID
+    fi
+  fi
+}
+jetty_stop() {
+  if ! jetty_running; then
+    echo_warning "Mt Wilson already stopped"
+  else
+    echo -n "Waiting for Mt Wilson services to shutdown..."
+    while jetty_running; do
+      jetty_shutdown 2>&1 > /dev/null
+      sleep 3
+    done
+    echo_success " Done"
+  fi
+}
+jetty_restart() {
+  jetty_stop
+  jetty_start
+  jetty_running_report
+}
+jetty_start_report() {
+  action_condition TOMCAT_RUNNING "Starting Mt Wilson" "jetty_start > /dev/null; jetty_running;"
+}
 
 ### FUNCTION LIBRARY: java
 

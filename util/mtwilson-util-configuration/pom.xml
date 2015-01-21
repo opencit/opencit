@@ -19,13 +19,25 @@
             <scope>test</scope>
         </dependency>
         
+        <!-- for optional classes KeyTransformerConfiguration, CommonsKeyTransformerConfiguration -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-pipe</artifactId>
+            <optional>true</optional>
         </dependency>
+        
+        <!-- for optional classes KeyTransformerConfiguration, CommonsKeyTransformerConfiguration, CommonsValveConfiguration -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-text-transform</artifactId>
+            <optional>true</optional>
+        </dependency>
+    
+        <!-- for optional classes supporting commons-configuration: CommonsConfiguration, CommonsConfigurationDecorator, CommonsKeyTransformerConfiguration, CommonsValveConfiguration -->
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <optional>true</optional>
         </dependency>
     
         <dependency>
@@ -38,13 +50,6 @@
             <optional>true</optional>
         </dependency>        
 
-        <!-- for the optional commons-configuration adapter -->
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- end optional commons-configuration dependency -->
 
     </dependencies>  
 </project>

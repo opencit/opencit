@@ -10,8 +10,8 @@
   <description>mtwilson-services</description>
 
 	<parent>
-		<groupId>com.intel.mtwilson</groupId>
-		<artifactId>mtwilson</artifactId>
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-root</artifactId>
 		<version>3.0-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
@@ -28,9 +28,10 @@
     <module>mtwilson-audit-handler</module>
     <module>mtwilson-citrix-hostagent</module>
     <module>mtwilson-configuration-ws-v2</module>
+    <module>mtwilson-extensions-cache</module>
     <module>mtwilson-feature-jdbi</module>
-    <module>mtwilson-file-model</module>
     <module>mtwilson-file-client-jaxrs2</module>
+    <module>mtwilson-file-model</module>
     <module>mtwilson-file-ws-v2</module>
     <module>mtwilson-hostagent-ext</module>
     <module>mtwilson-http-security</module>
@@ -50,11 +51,11 @@
     <module>mtwilson-rpc</module>
     <module>mtwilson-rpc-jdbi</module>
     <module>mtwilson-rpc-model</module>
-    <module>mtwilson-saml-verifier</module>
     <module>mtwilson-saml</module>
+    <module>mtwilson-saml-verifier</module>
+    <module>mtwilson-setup</module>
     <module>mtwilson-setup-ext</module>
     <module>mtwilson-setup-ws-v2</module>
-    <module>mtwilson-setup</module>
     <module>mtwilson-shiro-file</module>
     <module>mtwilson-shiro-jdbi</module>
     <module>mtwilson-shiro-setup</module>

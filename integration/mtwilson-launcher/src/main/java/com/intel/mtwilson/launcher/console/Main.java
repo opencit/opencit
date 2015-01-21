@@ -4,11 +4,11 @@
  */
 package com.intel.mtwilson.launcher.console;
 
+import com.intel.mtwilson.extensions.cache.ExtensionCacheLoader;
 import com.intel.dcsg.cpg.configuration.LayeredConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.configuration.ReadonlyConfiguration;
-import com.intel.mtwilson.extensions.cache.ExtensionCacheLoader;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.LogManager;
@@ -20,7 +20,7 @@ import java.util.logging.LogManager;
 public class Main {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Main.class);
-
+    public static final String APPLICATION_PROPERTIES = "/com/intel/mtwilson/application.properties";
     /**
      * @param args comprised of command name followed by arguments for that
      * command
@@ -29,10 +29,13 @@ public class Main {
         // turn off jdk logging because sshj logs to console
         LogManager.getLogManager().reset();
         log.debug("main called with args: {}", (Object[])args);
-        Configuration app = loadApplicationProperties();
-        // must set mtwilson.application.id before instantiating Filesystem
-        System.setProperty("mtwilson.application.id", app.get("id"));
-        log.debug("mtwilson.application.id = {}", app.get("id"));
+        
+        // the application properties are an interface to communicate basic
+        // settings to key components used during startup such as filesystem,
+        // configuration, and extensions
+        Configuration applicationProperties = loadApplicationProperties();
+        copyToSystemProperties(applicationProperties);
+        
         Filesystem fs = new Filesystem();
         // the extension manager loads the available extensions from the classpath (which must be set by the command line)
         ExtensionCacheLoader loader = new ExtensionCacheLoader(fs.getConfigurationPath()); // reads the files extensions.cache and extensions.prefs 
@@ -45,6 +48,25 @@ public class Main {
     }
     
     /**
+     * Copies settings from the given configuration to system properties.
+     * If any keys already exist, they are not replaced.
+     * @param conf to copy to system properties
+     */
+    private static void copyToSystemProperties(Configuration conf) {
+        for(String key : conf.keys()) {
+            String existingValue = System.getProperty(key);
+            if( existingValue == null ) {
+                String newValue = conf.get(key);
+                System.setProperty(key, newValue);
+                log.debug("Added property {} = {}", key, newValue);
+            }
+            else {
+                log.debug("Existing property {} = {}", key, existingValue);
+            }
+        }
+    }
+    
+    /**
      * The application.properties file is not required; all properties
      * have Mt Wilson defaults defined in this method. The application.properties
      * is only required to be on the classpath when reusing the Mt Wilson
@@ -52,9 +74,11 @@ public class Main {
      */
     private static Configuration loadApplicationProperties() {
         PropertiesConfiguration defaults = new PropertiesConfiguration();
-        defaults.set("id", "mtwilson");
-        defaults.set("name", "Mt Wilson");
-        InputStream in = Main.class.getResourceAsStream("/com/intel/mtwilson/application.properties");
+        defaults.set("application.id", "mtwilson");
+        defaults.set("application.name", "Mt Wilson");
+        defaults.set("configuation.file", "mtwilson.properties");
+        defaults.set("environment.prefix", "mtwilson");
+        InputStream in = Main.class.getResourceAsStream(APPLICATION_PROPERTIES);
         if( in == null ) {
             return new ReadonlyConfiguration(defaults);
         }

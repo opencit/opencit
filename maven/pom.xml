@@ -8,9 +8,9 @@
   <name>Mt Wilson Maven Parent Projects</name>
 
 	<parent>
-		<groupId>com.intel.mtwilson</groupId>
-		<artifactId>mtwilson</artifactId>
-		<version>3.0-SNAPSHOT</version>
+  <groupId>com.intel.mtwilson</groupId>
+  <artifactId>mtwilson-maven-build</artifactId>
+  <version>3.0-SNAPSHOT</version>
 	</parent>
   
   <modules>

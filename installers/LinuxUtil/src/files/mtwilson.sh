@@ -309,6 +309,11 @@ case "$1" in
           if [ -n "$TOMCAT_PID" ]; then
             echo $TOMCAT_PID > $MTWILSON_PID_FILE
           fi
+        elif using_jetty; then
+          jetty_start
+          if [ -n "$JETTY_PID" ]; then
+            echo $JETTY_PID > $MTWILSON_PID_FILE
+          fi
         fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;

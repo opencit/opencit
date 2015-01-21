@@ -23,24 +23,18 @@ public class ExtensionCacheLoader implements Runnable {
     private Registrar[] registrars;
     
     /**
-     * Initializes member variables parentClassLoader, 
-     * applicationClassLoader, and javaFolder; 
-     * they can be replaced using the
-     * available setter methods.
-     * 
-     * The applicationClassLoader is configured with parentClassLoader as its
-     * parent; if you replace with another classloader you will have to set
-     * its parent yourself.
      */
     public ExtensionCacheLoader(String configurationPath) {
-        // look for java extension cache file
-        String cacheFilePath = configurationPath + File.separator + "extensions.cache"; //MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
-        log.debug("default extension cache file: {}", cacheFilePath);
-        cacheFile = new File(cacheFilePath);
+        this(new File(configurationPath + File.separator + "extensions.cache"));
+    }
+
+    public ExtensionCacheLoader(File extensionsCacheFile) {
+        log.debug("extension cache file: {}", extensionsCacheFile.getAbsolutePath());
+        cacheFile = extensionsCacheFile;
         registrars = new Registrar[] { new ImplementationRegistrar() } ;        
         log.debug("thread context class loader: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
     }
-
+    
     public void setCacheFile(File cacheFile) {
         this.cacheFile = cacheFile;
         log.debug("set extension cache file: {}", cacheFile.getAbsolutePath());
