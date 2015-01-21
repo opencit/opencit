@@ -28,7 +28,7 @@
 	-->
     <module>mtwilson-configuration</module>
     <module>mtwilson-launcher</module>
-    <module>mtwilson-launcher-ext</module>
+    <module>mtwilson-launcher-api</module>
     <module>mtwilson-test</module>
     <module>mtwilson-version</module>
 	<module>mtwilson-launcher-glassfish4</module>
