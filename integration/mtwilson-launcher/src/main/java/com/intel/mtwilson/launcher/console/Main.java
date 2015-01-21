@@ -18,7 +18,6 @@ import java.util.logging.LogManager;
  * @author jbuhacoff
  */
 public class Main {
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Main.class);
     public static final String APPLICATION_PROPERTIES = "/com/intel/mtwilson/application.properties";
     /**
@@ -73,11 +72,7 @@ public class Main {
      * core libraries to create another application such as Trust Agent or KMS.
      */
     private static Configuration loadApplicationProperties() {
-        PropertiesConfiguration defaults = new PropertiesConfiguration();
-        defaults.set("application.id", "mtwilson");
-        defaults.set("application.name", "Mt Wilson");
-        defaults.set("configuation.file", "mtwilson.properties");
-        defaults.set("environment.prefix", "mtwilson");
+        Configuration defaults = getApplicationDefaultProperties();
         InputStream in = Main.class.getResourceAsStream(APPLICATION_PROPERTIES);
         if( in == null ) {
             return new ReadonlyConfiguration(defaults);
@@ -92,4 +87,14 @@ public class Main {
             return defaults;
         }
     }
+    
+    private static Configuration getApplicationDefaultProperties() {
+        PropertiesConfiguration defaults = new PropertiesConfiguration();
+        defaults.set("mtwilson.application.id", "mtwilson");
+        defaults.set("mtwilson.application.name", "Mt Wilson");
+        defaults.set("mtwilson.configuation.file", "mtwilson.properties");
+        defaults.set("mtwilson.environment.prefix", "mtwilson");
+        return defaults;
+    }
+    
 }

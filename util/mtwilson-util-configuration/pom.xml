@@ -5,7 +5,7 @@
     <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mtwilson-util-configuration</name>
-    <description>Read-only Configuration and Read-write MutableConfiguration objects</description>
+    <description>A simple configuration API with support for layered and read-only configurations</description>
     <parent>
         <groupId>com.intel.mtwilson.util</groupId>
         <artifactId>mtwilson-util</artifactId>

@@ -15,6 +15,12 @@
     <dependencies>
 
         <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-launcher-api</artifactId>
+		<version>${project.version}</version>            
+        </dependency>
+
+        <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
@@ -40,11 +46,6 @@
 		<artifactId>mtwilson-util-filesystem</artifactId>
         </dependency>
         
-        <dependency>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>mtwilson-launcher-api</artifactId>
-		<version>${project.version}</version>            
-        </dependency>
         <!-- for Filter -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>

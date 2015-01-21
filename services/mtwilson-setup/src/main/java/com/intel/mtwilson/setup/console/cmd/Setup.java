@@ -43,7 +43,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * If you want only to validate the configuration but not execute any of 
  * the tasks,  use the --noexec option.
- * 
+ * @since 3.0
  * @author jbuhacoff
  */
 public class Setup implements Command {

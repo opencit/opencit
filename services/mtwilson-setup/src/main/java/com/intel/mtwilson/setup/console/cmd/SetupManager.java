@@ -49,7 +49,7 @@ import org.apache.commons.lang3.StringUtils;
  * the tasks,  use the --noexec option.
  * 
  * @author jbuhacoff
- * @deprecated use "setup" instead
+ * @deprecated use {@code Setup} instead
  */
 public class SetupManager implements Command {
 
