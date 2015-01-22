@@ -62,7 +62,7 @@ public class ManifestSignatureRpc {
         String vmblobXml = "<vm_manifest><customer_id>1234</customer_id><image_id>1235289</image_id><manifest_hash>aaaaaa</manifest_hash></vm_manifest>";
         
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());
-        RsaCredentialX509 credential = keystore.getRsaCredentialX509("saml", My.configuration().getSamlKeystorePassword());
+        RsaCredentialX509 credential = keystore.getRsaCredentialX509(My.configuration().getSamlKeyAlias(), My.configuration().getSamlKeystorePassword());
         byte[] signature = credential.signature(vmblobXml.getBytes(Charset.forName("UTF-8")));
         
         log.debug("retrieve version");
