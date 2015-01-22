@@ -699,6 +699,10 @@ public class MyConfiguration {
     public String getSamlKeystorePassword() {
         return conf.getString("saml.key.password"); // bug #733 
     }
+    
+    public String getSamlKeyAlias() {
+        return conf.getString("saml.key.alias"); 
+    }
 
     ///////////////////////// tls policy  //////////////////////////////////
     public String getGlobalTlsPolicyId() {
