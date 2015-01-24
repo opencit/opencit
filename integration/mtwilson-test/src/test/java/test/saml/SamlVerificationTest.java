@@ -36,7 +36,7 @@ public class SamlVerificationTest {
         // generate SAML signing credential and save it in a keystore
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate certificate = X509Builder.factory().selfSigned("CN=saml", keypair).build();
-        File keystoreFile = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "test-saml.jks");
+        File keystoreFile = My.repository().getDirectory("saml"); //new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "test-saml.jks");
         if( keystoreFile.exists() ) { keystoreFile.delete(); }
         String password = RandomUtil.randomHexString(8);
         String alias = "samlkey1";

@@ -11,7 +11,7 @@ import com.intel.mtwilson.TrustAssertion;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.saml.TrustAssertion.HostTrustAssertion;
 import java.io.ByteArrayInputStream;
@@ -69,7 +69,7 @@ public class SamlTest {
 
     @Test
     public void testLoadSettings() throws IOException {
-        Configuration conf = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
+        Configuration conf = CommonsConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         System.out.println(conf.getString("mtwilson.api.baseurl", "unable to load settings"));
     }
     
@@ -84,7 +84,7 @@ public class SamlTest {
     
     @Test
     public void testGetSamlCertificate() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, KeyStoreException, IOException, CertificateException, UnrecoverableEntryException, ApiException, SignatureException, ClientException {
-        Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
+        Configuration config = CommonsConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         ApiClient api = new ApiClient(config);
         X509Certificate certificate = api.getSamlCertificate();
         log.debug("SAML Certificate Subject: {}", certificate.getSubjectX500Principal().getName());
@@ -98,7 +98,7 @@ public class SamlTest {
     
     @Test
     public void testGetSamlForHost() throws IOException, NoSuchAlgorithmException, KeyManagementException, MalformedURLException, KeyStoreException, CertificateException, UnrecoverableEntryException, ApiException, SignatureException, ClientException {
-        ApiClient api = new ApiClient(ConfigurationUtil.fromResource("/mtwilson-0.5.2.properties"));
+        ApiClient api = new ApiClient(CommonsConfigurationUtil.fromResource("/mtwilson-0.5.2.properties"));
         String xmloutput = api.getSamlForHost(new Hostname("10.1.71.149"));
         log.debug(xmloutput);
         TrustAssertion trustAssertion = api.verifyTrustAssertion(xmloutput);

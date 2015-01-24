@@ -10,7 +10,8 @@ import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedResource;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.Filesystem;
+import com.intel.mtwilson.Environment;
+import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.IOException;
 //import org.apache.commons.configuration.Configuration;
@@ -29,13 +30,13 @@ import java.io.IOException;
  */
 public class EncryptedConfigurationProvider implements ConfigurationProvider {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EncryptedConfigurationProvider.class);
-    private static final String KMS_PASSWORD = "KMS_PASSWORD";
+    private static final String PASSWORD = "PASSWORD"; // transforms into MTWILSON_PASSWORD, KMS_PASSWORD, etc. environment variables
     private File file;
     private PasswordProtection protection;
     private ResourceConfigurationProvider delegate;
 
     public EncryptedConfigurationProvider() {
-        this(System.getenv(KMS_PASSWORD));
+        this(Environment.get(PASSWORD));
     }
     
     /**
@@ -45,10 +46,10 @@ public class EncryptedConfigurationProvider implements ConfigurationProvider {
      */
     public EncryptedConfigurationProvider(String password) {
         if( password == null || password.isEmpty() ) {
-            throw new IllegalArgumentException("KMS password is required");
+            throw new IllegalArgumentException("Password is required");
         }
-        Filesystem fs = new Filesystem();
-        file = fs.getConfigurationFile();
+        MyConfiguration conf = new MyConfiguration();
+        file = conf.getConfigurationFile();
         FileResource resource = new FileResource(file);
         PasswordEncryptedResource encrypted = new PasswordEncryptedResource(resource, password, getProtection());
         delegate = new ResourceConfigurationProvider(encrypted);

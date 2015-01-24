@@ -21,6 +21,12 @@
         </dependency>
 
         <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-configuration</artifactId>
+		<version>${project.version}</version>            
+        </dependency>
+
+        <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
@@ -40,10 +46,6 @@
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>mtwilson-extensions-cache</artifactId>
         <version>3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-		<groupId>com.intel.mtwilson.util</groupId>
-		<artifactId>mtwilson-util-filesystem</artifactId>
         </dependency>
         
         <!-- for Filter -->

@@ -38,7 +38,7 @@
         <!-- for the Platform class -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-filesystem</artifactId>
+            <artifactId>mtwilson-util-io</artifactId>
             <scope>test</scope>
         </dependency>
 

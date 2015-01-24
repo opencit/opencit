@@ -5,7 +5,7 @@
 package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.SetupTask;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +43,7 @@ public class SetupTest {
     
     // copied from mtwilson-trustagent-console:Setup
     protected File getConfigurationFile() {
-        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
         return file;
     }
 

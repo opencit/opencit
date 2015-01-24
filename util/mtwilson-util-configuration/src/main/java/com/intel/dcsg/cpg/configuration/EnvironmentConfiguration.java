@@ -7,7 +7,8 @@ package com.intel.dcsg.cpg.configuration;
 import java.util.Set;
 
 /**
- *
+ * The keys are case-sensitive.
+ * 
  * @author jbuhacoff
  */
 public class EnvironmentConfiguration extends AbstractConfiguration {

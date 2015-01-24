@@ -39,10 +39,10 @@ import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mtwilson.util.filesystem.Platform;
+import com.intel.dcsg.cpg.io.Platform;
 import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
@@ -101,11 +101,11 @@ public class TAHelper {
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
 
-    public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
+    public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
-        String binPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.application() + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = My.repository().getDirectory("aikqverify").getAbsolutePath(); //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
         File bin = new File(binPath);
         File var = new File(varPath);
         if (bin.exists() && var.exists()) {

@@ -7,7 +7,7 @@ package com.intel.mtwilson.configuration.cmd;
 import com.intel.dcsg.cpg.console.InteractiveCommand;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.Filesystem;
+import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,8 +44,8 @@ public class ExportConfig extends InteractiveCommand {
     }
 
     public void export(OutputStream out, String password) throws IOException {
-        Filesystem fs = new Filesystem();
-        FileResource resource = new FileResource(fs.getConfigurationFile());
+        MyConfiguration config = new MyConfiguration();
+        FileResource resource = new FileResource(config.getConfigurationFile());
         PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
         
         String content = encryptedFile.loadString();

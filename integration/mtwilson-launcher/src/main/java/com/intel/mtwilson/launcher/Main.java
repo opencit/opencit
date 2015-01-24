@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.launcher;
 
-import com.intel.mtwilson.util.filesystem.Home;
+import com.intel.mtwilson.Folders;
 import java.io.File;
 
 /**
@@ -27,8 +27,7 @@ public class Main {
     
     public static void main(String[] args) {
         try {
-            Home home = new Home();
-        String mtwilsonHomePath = home.getPath();
+        String mtwilsonHomePath = Folders.application(); //home.getPath();
         
         // make sure MTWILSON_HOME exists
         File mtwilsonHome = new File(mtwilsonHomePath);

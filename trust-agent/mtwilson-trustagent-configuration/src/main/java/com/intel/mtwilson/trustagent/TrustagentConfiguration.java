@@ -8,8 +8,8 @@ import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.net.NetUtils;
+import com.intel.mtwilson.Folders;
 import java.io.File;
-import com.intel.mtwilson.MyFilesystem;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketException;
@@ -142,10 +142,10 @@ public class TrustagentConfiguration {
     }
     
     public File getAikCertificateFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "aik.pem");        
+        return new File(Folders.configuration() + File.separator + "aik.pem");        
     }
     public File getAikBlobFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "aik.blob");        
+        return new File(Folders.configuration() + File.separator + "aik.blob");        
     }
     
     public int getTrustagentHttpTlsPort() {
@@ -195,24 +195,24 @@ public class TrustagentConfiguration {
     }
     
     public File getTrustagentKeystoreFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.jks");
+        return new File(Folders.configuration() + File.separator + "trustagent.jks");
     }
     public String getTrustagentKeystorePassword() {
         return conf.get(TRUSTAGENT_KEYSTORE_PASSWORD, null); // intentionally no default - this must be generated during setup
     }
     
     public File getEndorsementAuthoritiesFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "endorsement.pem");
+        return new File(Folders.configuration() + File.separator + "endorsement.pem");
     }
 
     public File getTrustagentUserFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "users.txt");
+        return new File(Folders.configuration() + File.separator + "users.txt");
     }
     public File getTrustagentPermissionsFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "permissions.txt");
+        return new File(Folders.configuration() + File.separator + "permissions.txt");
     }
     public File getTrustagentEtagCacheFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "etag.cache");
+        return new File(Folders.configuration() + File.separator + "etag.cache");
     }
     
     public boolean isDaaEnabled() {
@@ -227,7 +227,7 @@ public class TrustagentConfiguration {
     }
     
     public File getMeasureLogLaunchScript() {
-        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh");
+        return new File(Folders.application() + File.separator + "bin" + File.separator + "module_analysis.sh");
     } 
 
     public String getMtwilsonTlsPolicyCertificateSha1() {
@@ -248,7 +248,7 @@ public class TrustagentConfiguration {
     
     
     public static TrustagentConfiguration loadConfiguration() throws IOException {
-        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
         if( file.exists() ) {
             try(FileInputStream in = new FileInputStream(file)) {
                 Properties properties = new Properties();

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import java.io.File;
 
@@ -15,16 +16,15 @@ import java.io.File;
 public class Filesystem extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Filesystem.class);
     
-    private com.intel.mtwilson.Filesystem fs = new com.intel.mtwilson.Filesystem();
     private File configuration;
     private File repository;
     
     @Override
     protected void configure() throws Exception {
-        log.debug("Configuration path: {}", fs.getConfigurationPath());
-        log.debug("Repository path: {}", fs.getRepositoryPath());
-        configuration = new File(fs.getConfigurationPath());
-        repository = new File(fs.getRepositoryPath());
+        configuration = new File(Folders.configuration());
+        repository = new File(Folders.repository());
+        log.debug("Configuration path: {}", configuration.getAbsolutePath());
+        log.debug("Repository path: {}", repository.getAbsolutePath());
     }
 
     @Override

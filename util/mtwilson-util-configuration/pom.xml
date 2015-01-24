@@ -19,14 +19,14 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- for optional classes KeyTransformerConfiguration, CommonsKeyTransformerConfiguration -->
+        <!-- for optional classes KeyTransformerConfiguration, AllCapsConfiguration, CommonsKeyTransformerConfiguration -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-pipe</artifactId>
             <optional>true</optional>
         </dependency>
         
-        <!-- for optional classes KeyTransformerConfiguration, CommonsKeyTransformerConfiguration, CommonsValveConfiguration -->
+        <!-- for optional classes KeyTransformerConfiguration, AllCapsConfiguration, CommonsKeyTransformerConfiguration, CommonsValveConfiguration -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-text-transform</artifactId>

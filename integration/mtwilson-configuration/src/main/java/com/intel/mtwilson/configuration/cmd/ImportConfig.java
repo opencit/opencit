@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.Filesystem;
+import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
 import org.apache.commons.io.IOUtils;
@@ -47,8 +47,8 @@ public class ImportConfig extends InteractiveCommand {
             protection = PasswordProtectionBuilder.factory().aes(128).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
         }
         
-        Filesystem fs = new Filesystem();
-        FileResource resource = new FileResource(fs.getConfigurationFile());
+        MyConfiguration config = new MyConfiguration();
+        FileResource resource = new FileResource(config.getConfigurationFile());
         PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password, protection);
 
         encryptedFile.saveString(content);

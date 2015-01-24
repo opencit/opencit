@@ -29,7 +29,6 @@
 	<module>mtwilson-util-dbcp</module>
 	<module>mtwilson-util-exec</module>
 	<module>mtwilson-util-extensions</module>
-	<module>mtwilson-util-filesystem</module>
     <module>mtwilson-util-http</module>
 	<module>mtwilson-util-i18n</module>
     <module>mtwilson-util-io</module>

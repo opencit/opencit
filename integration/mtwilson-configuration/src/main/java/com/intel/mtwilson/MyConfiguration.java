@@ -7,10 +7,8 @@ package com.intel.mtwilson;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
-import com.intel.mtwilson.util.filesystem.Platform;
+import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.io.pem.Pem;
-import com.intel.mtwilson.util.filesystem.Home;
-import com.intel.mtwilson.util.filesystem.Subfolder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -329,12 +327,12 @@ public class MyConfiguration {
      */
     public final String getDirectoryPath() {
 //        return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
-        return getDirectory().getAbsolutePath();
+        return Folders.configuration(); //getDirectory().getAbsolutePath();
     }
 
     public final File getDirectory() {
 //        return new File(getDirectoryPath());
-        return new File(getMtWilsonConf()); // use MTWILSON_CONF instead of java preferences, so admin can set it before running setup
+        return new File(Folders.configuration()); //new File(getMtWilsonConf()); // use MTWILSON_CONF instead of java preferences, so admin can set it before running setup
     }
     /* /// this one is a bad idea because the configuration can come from several places, and the config file is not the top priority source,
      * // so providing this could create a situation where someone think that by writing to this config file they can affect the configuration
@@ -402,6 +400,19 @@ public class MyConfiguration {
         }
         return files;
     }
+    
+    /**
+     * 
+     * @return File representing the configuration file kms.conf in the folder returned by @{code getConfiguration()}
+     */
+    public File getConfigurationFile() {
+        String path = Folders.configuration();
+        String filename = System.getProperty("mtwilson.configuration.file", "mtwilson.properties");  // kms overrides with "kms.conf" for example
+        File file = new File(path + File.separator + filename);
+        return file;
+    }
+    
+    
 
     public Configuration getConfiguration() {
         return conf;
@@ -812,9 +823,7 @@ public class MyConfiguration {
         }
         return mtwilsonHome;
         */
-        Home home = new Home();
-        log.debug("Using mtwilson-util-filesystem in getMtWilsonHome: {}", home.getPath());
-        return home.getPath();
+        return Folders.application();
     }
 
     /**
@@ -841,9 +850,7 @@ public class MyConfiguration {
         }
         return mtwilsonConf;
         */
-        Subfolder conf = new Subfolder("configuration", new Home());
-        log.debug("Using mtwilson-util-filesystem in getMtWilsonConf: {}", conf.getPath());
-        return conf.getPath();
+        return Folders.configuration();
     }
 
     /**
@@ -870,9 +877,11 @@ public class MyConfiguration {
     public String getMtWilsonJava() {
         String mtwilsonJava = System.getenv("MTWILSON_JAVA");
         log.debug("MTWILSON_JAVA={}", mtwilsonJava);
+        /*
         if (mtwilsonJava == null) {
             mtwilsonJava = conf.getString("mtwilson.fs.java");
         }
+        */
         if (mtwilsonJava == null) {
             mtwilsonJava = getMtWilsonHome() + File.separator + "java";
         }

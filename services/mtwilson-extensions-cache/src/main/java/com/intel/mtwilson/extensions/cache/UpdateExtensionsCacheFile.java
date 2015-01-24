@@ -4,14 +4,25 @@
  */
 package com.intel.mtwilson.extensions.cache;
 
+import com.intel.dcsg.cpg.classpath.JarClassIterator;
+import com.intel.dcsg.cpg.classpath.JarFileClassLoader;
+import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
+import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.dcsg.cpg.extensions.Scanner;
+import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.launcher.ext.annotations.Background;
+import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.launcher.ws.ext.V1;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.setup.LocalSetupTask;
-import com.intel.mtwilson.util.filesystem.Home;
-import com.intel.mtwilson.util.filesystem.Subfolder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -34,26 +45,102 @@ import org.apache.commons.lang3.StringUtils;
 public class UpdateExtensionsCacheFile extends LocalSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UpdateExtensionsCacheFile.class);
     
+    private File cacheFile;
+    private List<File> jarFiles;
+    private List<String> includePackages;
+    private List<String> excludePackages;
+    
     private String getCacheFilePath() {
+        return Folders.configuration() + File.separator + "extensions.cache";
+        /*
         Home home = new Home();
         Subfolder configuration = new Subfolder("configuration", home);
 //        return MyFilesystem.getApplicationFilesystem().getConfigurationPath()+File.separator+"extensions.cache";
         return configuration.getPath() + File.separator + "extensions.cache";
+        * */
     }
-    private File getCacheFile() {
-        return new File(getCacheFilePath());
+    
+    public File getCacheFile() {
+        if( cacheFile == null ) {
+            cacheFile = new File(getCacheFilePath());
+        }
+        return cacheFile;
     }
+
+    public void setCacheFile(File cacheFile) {
+        this.cacheFile = cacheFile;
+    }
+
+    public void setJarFiles(List<File> jarFiles) {
+        this.jarFiles = jarFiles;
+    }
+
+    /**
+     * Returns a list of File objects corresponding to each entry in the 
+     * classpath; skips directories such as "classes".
+     * @return 
+     */
+    public List<File> getJarFiles() {
+        if( jarFiles == null ) {
+            String classpath = System.getProperty("java.class.path");
+            String[] entries = StringUtils.split(classpath, System.getProperty("path.separator"));
+            jarFiles = new ArrayList<>();
+            for(String entry : entries) {
+                File file = new File(entry);
+                if( file.isFile() ) {
+                    jarFiles.add(file);
+                }
+            }
+        }
+        return jarFiles;
+    }
+
+    public void setIncludePackages(List<String> includePackages) {
+        this.includePackages = includePackages;
+    }
+
+ // as a default, we include only plugins from com.intel.*  
+            // if user needs to override, they can define includePackages 
+    public List<String> getIncludePackages() {
+        if( includePackages == null ) {
+            includePackages = Arrays.asList(new String[] {"com.intel"});
+
+        }
+        return includePackages;
+    }
+
+    public void setExcludePackages(List<String> excludePackages) {
+        if( excludePackages == null ) {
+            excludePackages = Arrays.asList(new String[] {"java", "javax"});
+
+        }
+        this.excludePackages = excludePackages;
+    }
+
+    public List<String> getExcludePackages() {
+        return excludePackages;
+    }
+    
+    
+    
     
     @Override
     protected void configure() throws Exception {
-        File extensionsCacheFile = new File(getCacheFilePath());
+        File extensionsCacheFile = getCacheFile();  // either set via setCacheFile() or determined automatically by getCacheFile()
+        log.debug("Extensions cache file: {}", extensionsCacheFile.getAbsolutePath());
+        // it's ok if the file itself doesn't exist yet, but the configuration folder it's supposed to be in should exist
         File configurationFolder = extensionsCacheFile.getParentFile();
-        checkFileExists("Mt Wilson configuration folder", configurationFolder.getAbsolutePath());
+        checkFileExists("Configuration folder", configurationFolder.getAbsolutePath());
     }
 
     @Override
     protected void validate() throws Exception {
-        if( checkFileExists("Extension cache file", getCacheFilePath()) ) {
+        if( checkFileExists("Extension cache file", getCacheFile().getAbsolutePath()) ) {
+            
+            // first implementation was not good because it caused all the
+            // jars to be scanned 3 times: pre-validate, execute, post-validate.
+            
+            /*
             // load the cache
             Set<String> cache = loadCache();
             // initialize the whiteboard
@@ -71,17 +158,54 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
             if( !inCacheButNotPresent.isEmpty() ) {
                 validation("Extensions cache missing added extensions: %s", StringUtils.join(", ", presentButNotInCache));
             }
+            */
+            
+            // second implementation compares date of extensions.cache file
+            // to date of all jars that will be scanned - so it's much quicker
+            // to determine if it's out of date;
+            // not concerned about jar files being deleted because if an 
+            // extension listed in cache isn't available it will be automatically
+            // ignored. 
+            if( !isUpdated(getCacheFile(), getJarFiles())) {
+                validation("Extension cache is out of date");
+            }
         }
         
     }
     
+    /**
+     * 
+     * @param target that should be modified whenever any source file changes
+     * @param sources to check against
+     * @return true if target is already updated (modified date more recent than any source) and false if target needs to be updated
+     */
+    private boolean isUpdated(File target, List<File> sources) {
+        boolean updated = true;
+        for(File source : sources) {
+            if( source.lastModified() > target.lastModified()) {
+                log.debug("Source {} is updated", source.getAbsolutePath());
+                updated = false;
+            }
+        }
+        return updated;
+    }
+    
+    
     private void scanExtensions() {
-//        ExtensionDirectoryLauncher launcher = new ExtensionDirectoryLauncher();
-//        launcher.setRegistrars(new Registrar[] { new ImplementationRegistrar(), new AnnotationRegistrar(V2.class), new AnnotationRegistrar(V1.class), new AnnotationRegistrar(RPC.class), new AnnotationRegistrar(Background.class) });
-//        launcher.run(); // loads and scans the jars
-        // **** WHAT'S NEEDED HERE IS REFERENCE TO SOMETHING IN MTWILSON-UTIL-EXTENSIONS THAT WILL SCAN ALL AVAILABLE EXTENSIONS.... SINCE IT CAN BE IN /OPT/MTWILSON/JAVA/* OR IN /OPT/MTWSILON/FEATURES/*/JAVA/*  NEED TOD ECIDE IF THAT'S ONE IMPLEMENTATION OR TWO, AND IF IT'S IMPLEMENTED IN MTWILSON-EXTENSIONS-FEATURES (WHICH WOULD ALSO COVER ANY OTHER FEATURE'S /OPT/MTWILSON/FEATURES/*/{WHATEVER} SCANNING) OR IN A COMBINATION OF MTWILSON-UTIL-EXTENSIONS AND MTWILSON-*SOMETHING* 
-        // **** (this is NOT the ExtensionCacheLoader which loads it from the extesnions.cache file,  it's the scanner that reads all the *.jar files to find extensions)
-        // **** AND it's also NOT a "launcher" because that specific task is going to be in the mtwilson-launcher project and will DEPEND on this and the other projects
+        // scan each jar in the classpath
+        ImplementationRegistrar implementationRegistrar = new ImplementationRegistrar();
+        implementationRegistrar.setIncludePackages(getIncludePackages());
+        implementationRegistrar.setExcludePackages(getExcludePackages());
+        Scanner scanner = new Scanner(new Registrar[] { implementationRegistrar, new AnnotationRegistrar(V2.class), new AnnotationRegistrar(V1.class), new AnnotationRegistrar(RPC.class), new AnnotationRegistrar(Background.class) });
+        for(File jarFile : getJarFiles()) {
+            try {
+                JarClassIterator it = new JarClassIterator(jarFile, new JarFileClassLoader(jarFile)); // throws IOException
+                scanner.scan(it);
+            }
+            catch(IOException e) {
+                log.debug("Failed to scan file: {}", jarFile.getAbsolutePath(), e);
+            }
+        }
     }
     
     private Set<String> getWhiteboardExtensions() {
@@ -105,7 +229,7 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
     
     private void storeCache(Set<String> extensions) throws IOException {
         String text = StringUtils.join(extensions, "\n");
-        try(FileOutputStream out = new FileOutputStream(new File(getCacheFilePath()))) {
+        try(FileOutputStream out = new FileOutputStream(getCacheFile())) {
             IOUtils.write(text, out);
         }        
     }
@@ -126,7 +250,7 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
 
     @Override
     protected void execute() throws Exception {
-        if( checkFileExists("Extension cache file", getCacheFilePath()) ) { 
+        if( checkFileExists("Extension cache file", getCacheFile().getAbsolutePath()) ) { 
             getCacheFile().delete(); 
         }
         Set<String> extensions = getWhiteboardExtensions();

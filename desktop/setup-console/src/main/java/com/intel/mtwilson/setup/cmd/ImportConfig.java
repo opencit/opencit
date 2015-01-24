@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.util.filesystem.Platform;
+import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.setup.SetupContext;

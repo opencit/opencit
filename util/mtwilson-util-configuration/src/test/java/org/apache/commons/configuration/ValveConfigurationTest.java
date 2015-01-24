@@ -4,7 +4,9 @@
  */
 package org.apache.commons.configuration;
 
+import com.intel.dcsg.cpg.configuration.CommonsKeyTransformerConfiguration;
 import com.intel.dcsg.cpg.configuration.CommonsValveConfiguration;
+import com.intel.mtwilson.text.transform.AllCapsNamingStrategy;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import static org.junit.Assert.assertEquals;
@@ -53,5 +55,34 @@ public class ValveConfigurationTest {
         assertEquals("banana",c2.getString("fruit"));
         // so because it's still in c2 you can still see it
         assertEquals("banana", vc.getString("fruit"));
+    }
+    
+    @Test
+    public void testCompositeValveConfiguration() {
+        CompositeConfiguration composite = new CompositeConfiguration();
+        // java system properties
+        MapConfiguration systemProperties = new MapConfiguration(System.getProperties());
+        composite.addConfiguration(systemProperties);
+        // environment variables, automatically translating from key.name to KEY_NAME,
+        EnvironmentConfiguration environment = new EnvironmentConfiguration();
+        CommonsKeyTransformerConfiguration allCapsEnvironment = new CommonsKeyTransformerConfiguration(new AllCapsNamingStrategy(), environment);
+        composite.addConfiguration(allCapsEnvironment);
+        // default values
+        PropertiesConfiguration defaults = new PropertiesConfiguration();
+        defaults.setProperty("foo", "bar");
+        defaults.setProperty("ku", "ku");
+        composite.addConfiguration(defaults);
+        // store all edits in a separate object 
+        PropertiesConfiguration edits = new PropertiesConfiguration();
+        // use the valve to ensure that changes only go to the writable configuration (and not to system properties or environment)
+        CommonsValveConfiguration valve = new CommonsValveConfiguration();
+        valve.setReadFrom(composite);
+        valve.setWriteTo(edits);
+        
+        assertEquals("bar", valve.getString("foo"));
+        valve.setProperty("newkey", "newvalue");
+        assertEquals("newvalue", edits.getString("newkey"));
+        assertFalse(edits.containsKey("ku"));
+        assertFalse(defaults.containsKey("newkey"));
     }
 }

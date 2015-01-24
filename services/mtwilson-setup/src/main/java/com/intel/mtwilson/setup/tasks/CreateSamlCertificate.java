@@ -48,7 +48,7 @@ public class CreateSamlCertificate extends LocalSetupTask {
     public static final String SAML_KEY_PASSWORD = "saml.key.password";
 
     public String getSamlKeystoreFile() {
-        return getConfiguration().get(SAML_KEYSTORE_FILE, My.filesystem().getConfigurationPath() + File.separator + "mtwilson-saml.jks");
+        return getConfiguration().get(SAML_KEYSTORE_FILE, My.configuration().getDirectoryPath() + File.separator + "mtwilson-saml.jks");
     }
 
     public void setSamlKeystoreFile(String samlKeystoreFile) {
@@ -205,7 +205,7 @@ public class CreateSamlCertificate extends LocalSetupTask {
         Pem samlCert = new Pem("CERTIFICATE", samlcert.getEncoded());
         Pem samlCaCert = new Pem("CERTIFICATE", cacert.getEncoded());
         String certificateChainPem = String.format("%s\n%s", samlCert.toString(), samlCaCert.toString());
-        File certificateChainPemFile = new File(My.filesystem().getConfigurationPath() + File.separator + "saml.crt.pem");
+        File certificateChainPemFile = new File(My.configuration().getDirectoryPath() + File.separator + "saml.crt.pem");
         try (FileOutputStream certificateChainPemFileOut = new FileOutputStream(certificateChainPemFile)) {
             IOUtils.write(certificateChainPem, certificateChainPemFileOut);
         } catch (IOException e) {

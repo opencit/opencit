@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.Filesystem;
+import java.io.File;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +19,9 @@ public class FilesystemTest {
     
     @Test
     public void testFilesystem() {
-        Filesystem fs = new Filesystem();
-        log.debug("Configuration folder: {}", fs.getConfigurationPath());
-        log.debug("Configuration file: {}", fs.getConfigurationFile());
-        log.debug("Repository folder: {}", fs.getRepositoryPath());
+        log.debug("Configuration folder: {}", Folders.configuration());
+        log.debug("Configuration file: {}", (new MyConfiguration()).getConfigurationFile().getAbsolutePath());
+        log.debug("Repository folder: {}", Folders.application()+File.separator+"repository");
         
     }
 }

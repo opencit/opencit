@@ -24,7 +24,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-collection</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -32,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-filesystem</artifactId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         
         <!-- these dependencies are required for our use of cpg-configuration -->

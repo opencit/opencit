@@ -5,8 +5,8 @@
 package com.intel.mtwilson.tag.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -143,13 +143,13 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
         String xml = retrieveOneXml(locator);
         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         UUID uuid = new UUID();
-        String plaintextFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".xml";
-        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
+        String plaintextFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".xml";
+        String encryptedFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".enc";
         File plaintextFile = new File(plaintextFilePath);
         try(FileOutputStream out = new FileOutputStream(plaintextFile)) {
             IOUtils.write(xml, out);
         }
-        String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        String tagCmdPath = Folders.application() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -p PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 

@@ -9,6 +9,8 @@ import com.intel.dcsg.cpg.configuration.LayeredConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.configuration.ReadonlyConfiguration;
+import com.intel.mtwilson.Environment;
+import com.intel.mtwilson.Folders;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.LogManager;
@@ -35,9 +37,8 @@ public class Main {
         Configuration applicationProperties = loadApplicationProperties();
         copyToSystemProperties(applicationProperties);
         
-        Filesystem fs = new Filesystem();
         // the extension manager loads the available extensions from the classpath (which must be set by the command line)
-        ExtensionCacheLoader loader = new ExtensionCacheLoader(fs.getConfigurationPath()); // reads the files extensions.cache and extensions.prefs 
+        ExtensionCacheLoader loader = new ExtensionCacheLoader(Folders.configuration()); // reads the files extensions.cache and extensions.prefs 
         loader.run();
         // the dispatcher finds the command specified in arg[0] and runs it
         Dispatcher dispatcher = new Dispatcher();
@@ -93,7 +94,7 @@ public class Main {
         defaults.set("mtwilson.application.id", "mtwilson");
         defaults.set("mtwilson.application.name", "Mt Wilson");
         defaults.set("mtwilson.configuation.file", "mtwilson.properties");
-        defaults.set("mtwilson.environment.prefix", "mtwilson");
+        defaults.set("mtwilson.environment.prefix", "MTWILSON_");
         return defaults;
     }
     

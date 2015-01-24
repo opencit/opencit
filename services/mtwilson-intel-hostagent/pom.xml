@@ -68,7 +68,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-filesystem</artifactId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>

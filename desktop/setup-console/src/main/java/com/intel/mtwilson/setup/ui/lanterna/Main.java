@@ -16,7 +16,7 @@ import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.TerminalSize;
-import com.intel.mtwilson.util.filesystem.Platform;
+import com.intel.dcsg.cpg.io.Platform;
 import java.nio.charset.Charset;
 
 /**

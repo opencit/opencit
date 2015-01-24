@@ -7,9 +7,8 @@ package com.intel.mtwilson.launcher;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.extensions.Scanner;
+import com.intel.mtwilson.Folders;
 import java.io.FileInputStream;
-import com.intel.mtwilson.util.filesystem.Home;
-import com.intel.mtwilson.util.filesystem.Subfolder;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
@@ -36,8 +35,8 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
      */
     public ExtensionCacheLauncher() {
         // look for java extension cache file
-        Subfolder configuration = new Subfolder("configuration", new Home());
-        String cachePath = configuration.getPath() + File.separator + "extensions.cache"; //MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
+        //Subfolder configuration = new Subfolder("configuration", new Home());
+        String cachePath = Folders.configuration() + File.separator + "extensions.cache"; //MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
         log.debug("default extension cache file: {}", cachePath);
         cacheFile = new File(cachePath);
         registrars = new Registrar[] { new ImplementationRegistrar() } ;        

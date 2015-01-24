@@ -6,21 +6,15 @@ package com.intel.mtwilson.configuration;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
-import com.intel.mtwilson.Filesystem;
-import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Iterator;
-import java.util.Set;
-//import org.apache.commons.configuration.Configuration;
-//import org.apache.commons.configuration.ConfigurationException;
-//import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -79,23 +73,23 @@ public class KmsConfigurationProviderTest {
     
     @Test
     public void testCreateNewConfiguration() throws IOException {
-        Filesystem fs = new Filesystem();
-        if( fs.getConfigurationFile().exists() ) {
-            fs.getConfigurationFile().delete();
+        MyConfiguration configuration = new MyConfiguration();
+        if( configuration.getConfigurationFile().exists() ) {
+            configuration.getConfigurationFile().delete();
         }
-        assertFalse(fs.getConfigurationFile().exists());
+        assertFalse(configuration.getConfigurationFile().exists());
         EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider("password");
         Configuration conf = provider.load();
         conf.set("foo", "bar");
         provider.save(conf);
-        assertTrue(fs.getConfigurationFile().exists());
+        assertTrue(configuration.getConfigurationFile().exists());
     }
     
     @Test
     public void testLoadExistingConfiguration() throws IOException {
         testCreateNewConfiguration();
-        Filesystem fs = new Filesystem();
-        assertTrue(fs.getConfigurationFile().exists());
+        MyConfiguration configuration = new MyConfiguration();
+        assertTrue(configuration.getConfigurationFile().exists());
         EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider("password");
         Configuration conf = provider.load();
         assertEquals("bar", conf.get("foo"));

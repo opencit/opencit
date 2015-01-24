@@ -4,13 +4,12 @@
  */
 package com.intel.mtwilson.setup.console.cmd;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.Filesystem;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import com.intel.mtwilson.setup.SetupConfigurationProvider;
 import com.intel.mtwilson.setup.ConfigurationException;
@@ -106,8 +105,9 @@ public class Setup implements Command {
 
 
     protected File getConfigurationFile() {
-        Filesystem fs = new Filesystem();
-        return fs.getConfigurationFile();
+//        Filesystem fs = new Filesystem();
+//        return fs.getConfigurationFile();
+        return My.configuration().getConfigurationFile();
     }
 
     /**

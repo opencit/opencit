@@ -11,6 +11,14 @@
     </parent>
 
     <dependencies>
+        
+        <!-- configuration folder location for reading/writing extensions.cache file -->
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-configuration</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+        
 		<!-- SetupTask -->
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
@@ -35,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-filesystem</artifactId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         
 		<!--

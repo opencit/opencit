@@ -5,9 +5,9 @@
 package com.intel.mtwilson.v1;
 
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
-import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
+import com.intel.dcsg.cpg.configuration.CommonsAllCapsEnvironmentConfiguration;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
-import com.intel.mtwilson.util.filesystem.Platform;
+import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import java.io.File;
 import java.io.FileInputStream;
