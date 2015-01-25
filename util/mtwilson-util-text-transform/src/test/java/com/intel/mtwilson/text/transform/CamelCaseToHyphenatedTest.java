@@ -47,4 +47,14 @@ public class CamelCaseToHyphenatedTest {
         assertEquals("test-mt-wilson", transformer.transform("TestMtWilson"));
         
     }
+
+    @Test
+    public void testCommandNames() {
+        CamelCaseToHyphenated transformer = new CamelCaseToHyphenated();
+        assertEquals("create-tls-certificate", transformer.transform("CreateTlsCertificate"));
+        assertEquals("create-key-management-certificate", transformer.transform("CreateKeyManagementCertificate"));
+        assertEquals("export-config", transformer.transform("ExportConfig"));
+        
+    }
+
 }

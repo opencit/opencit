@@ -38,22 +38,25 @@ public class CamelCaseToHyphenated implements Transformer<String> {
         String result = propertyName;
         // replace 
         Matcher e = abbreviationEnd.matcher(result);
-        if( e.find() ) {
+        if( e.find() && e.groupCount() == 3 ) {
             log.debug("found abbreviationEnd, before: {}", result);
             result = e.replaceFirst(e.group(1)+"-"+e.group(2)+e.group(3).toLowerCase()); // turns "fooBAR" to "foo-Bar"
             log.debug("found abbreviationEnd, after: {}", result);
         }
         Matcher a = abbreviation.matcher(result);
-        if( a.find() ) {
+        while( a.find() && a.groupCount() == 3 ) {
             log.debug("found abbreviation, before: {}", result);
-            result = a.replaceAll(a.group(1)+a.group(2).toLowerCase()+"-"+a.group(3)); // turns "FOOBar" to "Foo-Bar" (they will be lowercased later)
+//            log.debug("groups: {}", a.groupCount());
+            result = a.replaceFirst(a.group(1)+a.group(2).toLowerCase()+"-"+a.group(3)); // turns "FOOBar" to "Foo-Bar" (they will be lowercased later)
             log.debug("found abbreviation, after: {}", result);
+            a = camelCase.matcher(result);
         }
         Matcher c = camelCase.matcher(result);
-        if( c.find() ) {
+        while( c.find() && c.groupCount() == 2 ) {
             log.debug("found camelCase, before: {}", result);
-            result = c.replaceAll(c.group(1)+"-"+c.group(2)); // turns "fooBar" to "foo-Bar"
+            result = c.replaceFirst(c.group(1)+"-"+c.group(2)); // turns "fooBar" to "foo-Bar"
             log.debug("found camelCase, after: {}", result);
+            c = camelCase.matcher(result);
         }
         return result.toLowerCase();
     }
