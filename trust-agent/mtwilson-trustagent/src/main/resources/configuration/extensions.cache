@@ -26,4 +26,7 @@ com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator
 com.intel.mtwilson.tls.policy.creator.impl.PublicKeyDigestTlsPolicyCreator
 com.intel.mtwilson.tls.policy.creator.impl.InsecureTlsPolicyCreator
 com.intel.mtwilson.tls.policy.creator.impl.InsecureTrustFirstPublicKeyTlsPolicyCreator
-
+com.intel.mtwilson.trustagent.setup.CreateBindingKey
+com.intel.mtwilson.trustagent.setup.CertifyBindingKey
+com.intel.mtwilson.trustagent.setup.CreateSigningKey
+com.intel.mtwilson.trustagent.setup.CertifySigningKey
