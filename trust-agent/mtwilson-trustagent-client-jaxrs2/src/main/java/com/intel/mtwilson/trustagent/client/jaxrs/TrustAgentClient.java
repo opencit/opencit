@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.model.VMAttestationReport;
 import com.intel.mtwilson.trustagent.model.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -81,4 +82,9 @@ public class TrustAgentClient extends MtWilsonClient {
         return tpmQuoteResponse;
     }
 
+    public VMAttestationReport getVMAttestationReport(String vmInstanceId) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        // TODO call into the TA REST API.
+        return null;
+    }
 }
