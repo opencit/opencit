@@ -300,7 +300,7 @@ BwIDAQAB
     }
 
     @Override
-    public VMAttestationReport getVMAttestationReport() throws IOException {
+    public VMAttestationReport getVMAttestationReport(String vmInstanceId) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

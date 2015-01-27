@@ -4,12 +4,18 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.repository;
 
-import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.as.controller.TblHostsJpaController;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestation;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationCollection;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationFilterCriteria;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationLocator;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.model.VMAttestationReport;
+import com.intel.mtwilson.repository.RepositorySearchException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 
@@ -20,20 +26,31 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 public class VMAttestationRepository implements DocumentRepository<VMAttestation, VMAttestationCollection, VMAttestationFilterCriteria, VMAttestationLocator> {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VMAttestationRepository.class);
-    
-    private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
-    private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-        
+            
     @Override
     @RequiresPermissions("vm_attestations:search")    
     public VMAttestationCollection search(VMAttestationFilterCriteria criteria) {
         log.debug("HostAttestation:Search - Got request to search for VM attestations.");        
         VMAttestationCollection objCollection = new VMAttestationCollection();
-        VMAttestation obj = new VMAttestation();
-        obj.setHostName(criteria.hostName);
-        obj.setVmInstanceId(criteria.vmInstanceId);
-        obj.setTrustStatus(true);
-        objCollection.getVMAttestations().add(obj);
+        try {
+            if (criteria.hostName != null && !criteria.hostName.isEmpty() && 
+                    criteria.vmInstanceId != null && !criteria.vmInstanceId.isEmpty()) {
+
+                TblHostsJpaController jpaController = My.jpa().mwHosts();
+                TblHosts obj = jpaController.findByName(criteria.hostName);
+                if (obj != null) {
+                    HostAgentFactory factory = new HostAgentFactory();
+                    HostAgent agent = factory.getHostAgent(obj);
+                    VMAttestationReport vmAttestationReport = agent.getVMAttestationReport(criteria.vmInstanceId);
+                    objCollection.getVMAttestations().add(convert(vmAttestationReport, criteria));
+                }
+                
+            }
+        } catch (Exception ex) {
+            log.error("Host:Retrieve - Error during search for hosts.", ex);
+            throw new RepositorySearchException(ex, criteria);
+        }
+        
         return objCollection;
     }
 
@@ -70,4 +87,12 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
    
+    private VMAttestation convert(VMAttestationReport obj, VMAttestationFilterCriteria criteria) {
+        VMAttestation convObj = new VMAttestation();
+        convObj.setHostName(criteria.hostName);
+        convObj.setVmInstanceId(criteria.vmInstanceId);
+        convObj.setTrustStatus(obj.isTrustStatus());
+        return convObj;
+    }
+    
 }

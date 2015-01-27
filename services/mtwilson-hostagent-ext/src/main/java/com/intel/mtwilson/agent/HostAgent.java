@@ -230,6 +230,6 @@ public interface HostAgent {
     
     void setAssetTag(Sha1Digest tag) throws IOException;
     
-    VMAttestationReport getVMAttestationReport() throws IOException;
+    VMAttestationReport getVMAttestationReport(String vmInstanceId) throws IOException;
     
 }
