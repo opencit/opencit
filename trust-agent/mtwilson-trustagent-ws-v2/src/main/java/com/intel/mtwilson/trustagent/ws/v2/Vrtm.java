@@ -14,8 +14,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.HostInfo;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMAttestationReport;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.core.Context;
 
 
@@ -31,31 +34,22 @@ import javax.ws.rs.core.Context;
 @Path("/vrtm")
 public class Vrtm {
     
-    @GET
+    @POST
     @Path("/reports")
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public String getVMAttesationReport(@Context HttpServletRequest request) throws TAException {
-        String outs = "Hello World" + request.getQueryString();
-        return outs;
-        /*
-        String responseXML =
-                "<host_info>"
-                + "<timeStamp>" + new Date(System.currentTimeMillis()).toString() + "</timeStamp>"
-                + "<clientIp>" + CommandUtil.getHostIpAddress() + "</clientIp>"
-                + "<errorCode>" + context.getErrorCode().getErrorCode() + "</errorCode>"
-                + "<errorMessage>" + context.getErrorCode().getMessage() + "</errorMessage>"
-                + "<osName>" + context.getOsName() + "</osName>"
-                + "<osVersion> " + context.getOsVersion() + "</osVersion>"
-                + "<biosOem>" + context.getBiosOem() + "</biosOem>"
-                + "<biosVersion> " + context.getBiosVersion()+ "</biosVersion>"
-                + "<vmmName>" + context.getVmmName() + "</vmmName>"
-                + "<vmmVersion>" + context.getVmmVersion() + "</vmmVersion>"
-                + "<processorInfo>" + context.getProcessorInfo() + "</processorInfo>"
-                +"<hostUUID>" + context.getHostUUID() + "</hostUUID>"
-                + "</host_info>";
-        return responseXML;
-        */
-    
+    public VMAttestationReport getVMAttesationReport(VMAttestationRequest vmAttestationRequest) throws TAException {
+        
+        String vmInstanceId = vmAttestationRequest.getVmInstanceId();
+        
+        VMAttestationReport vmAttestationReport = new VMAttestationReport();
+        //read vrtm
+        
+        //set report
+        vmAttestationReport.setVmInstanceId(vmInstanceId);
+        vmAttestationReport.setTrustStatus(true);
+        
+        return vmAttestationReport;
+
     }
 }
