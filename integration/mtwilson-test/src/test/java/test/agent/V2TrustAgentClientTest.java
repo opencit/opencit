@@ -100,7 +100,7 @@ public class V2TrustAgentClientTest {
 
     @Test
     public void testVMAttestationRequest() throws Exception {
-        VMAttestationReport vmAttestationReport = client.getVMAttestationReport("heeeeeeelllllo Savino smokes");
+        VMAttestationReport vmAttestationReport = client.getVMAttestationReport("test vm instance id");
         ObjectMapper mapper = new ObjectMapper();
 //        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
         log.debug(mapper.writeValueAsString(vmAttestationReport));
