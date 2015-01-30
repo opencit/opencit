@@ -81,4 +81,15 @@ public class TrustAgentClient extends MtWilsonClient {
         return tpmQuoteResponse;
     }
 
+    public X509Certificate getBindingKeyCertificate() {
+        log.debug("target: {}", getTarget().getUri().toString());
+        X509Certificate aik = getTarget()
+                .path("/binding-key-certificate")
+                .request()
+                .accept(CryptoMediaType.APPLICATION_PKIX_CERT)
+                .get(X509Certificate.class);
+        return aik;
+    }
+
+    
 }
