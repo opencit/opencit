@@ -207,4 +207,10 @@ public class IntelHostAgent implements HostAgent {
         log.debug("calling trustAgentClient with " + tag.toHexString() + " | " +  hm.get("Host_UUID"));
         trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
     }
+    
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }

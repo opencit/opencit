@@ -297,4 +297,10 @@ BwIDAQAB
             throw new IOException(e);
         }
     }
+
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }

@@ -229,4 +229,5 @@ public interface HostAgent {
     
     void setAssetTag(Sha1Digest tag) throws IOException;
     
+    X509Certificate getBindingKeyCertificate();    
 }

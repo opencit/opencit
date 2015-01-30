@@ -215,4 +215,17 @@ public class IntelHostAgent2 implements HostAgent {
         //trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
         client.writeTag(tag.toByteArray(), UUID.valueOf(hm.get("Host_UUID")));
     }
+    
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        try {
+            X509Certificate bindingKeyCert = client.getBindingKeyCertificate();
+            return bindingKeyCert;
+        }
+        catch(Exception e) {
+            log.debug("Cannot retrieve Binding key certificate: {}", e.toString(), e);
+            return null;
+        }
+    }
+    
 }
