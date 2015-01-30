@@ -352,4 +352,9 @@ public class VmwareHostAgent implements HostAgent {
     public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
         throw new UnsupportedOperationException("Unsupported operation");
     }
+
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
