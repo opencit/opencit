@@ -55,6 +55,13 @@
 		</fail>
 	</target>
 	
+	<target name="clean" depends="init">
+		<!-- the root pom and all projects -->
+		<exec executable="${cmd.maven}">
+			<arg value="clean"/>
+		</exec>
+	</target>
+	
 	<target name="build" depends="init">
 		<!-- the root pom and all projects -->
 		<exec executable="${cmd.maven}" resultproperty="mavenExitInstall">

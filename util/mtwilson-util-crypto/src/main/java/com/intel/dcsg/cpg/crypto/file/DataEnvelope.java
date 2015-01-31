@@ -28,7 +28,7 @@ import java.util.Set;
  * the hash when saving the file again - and possibly with a different
  * password!
  * 
- * 
+ * <pre>
 -----BEGIN ENCRYPTED DATA-----
 EnvelopeKeyId: bkaz4lbv/y0=:etpZPPlmwEilwbNxzBHRCd+FyWQMw1akygtgIPent6w=
 EnvelopeAlgorithm: PBEWithMD5AndDES/CBC/PKCS5Padding
@@ -41,6 +41,7 @@ zoJ/NBdEIMdHNUh0h11GQCXAQXOSL6Fx2hRdcicm6j1CPd3AFrTt9EATmd4Hj+D4
 91jDYXElALfdSbiO0A9Mz6USUepTXwlfVV/cbBpLRz5Rqnyg2EwI2tZRU+E+Cusb
 /b6hcuWyzva895YMUCSyDaLgSsIqRWmXxQV1W2bAgRbs8jD8VF+G9w==
 -----END ENCRYPTED DATA-----
+ * </pre>
  * 
  * @since 0.1
  * @author jbuhacoff

@@ -6,7 +6,8 @@ package com.intel.mtwilson.configuration.cmd;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.console.InteractiveCommand;
-import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 /**
  * Display or set a specific configuration key 
  * 
@@ -33,13 +34,12 @@ public class Config extends InteractiveCommand {
             throw new IllegalArgumentException("Usage: Config <key> [--delete|newValue]");
         }            
         
-        
-            EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider();
+            ConfigurationProvider provider = ConfigurationFactory.getConfigurationProvider();
             Configuration configuration = provider.load();
 
             String existingValue = configuration.get(key);
 
-            if( existingValue != null ) {
+            if( newValue == null && existingValue != null ) {
                 System.out.println(existingValue);
             }
             
@@ -50,6 +50,7 @@ public class Config extends InteractiveCommand {
             
             if( newValue != null ) {
                 configuration.set(key, newValue);
+                System.out.println(newValue);
                 updated = true;
             }
             

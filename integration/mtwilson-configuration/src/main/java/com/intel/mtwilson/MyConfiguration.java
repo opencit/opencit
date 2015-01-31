@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -403,13 +404,10 @@ public class MyConfiguration {
     
     /**
      * 
-     * @return File representing the configuration file kms.conf in the folder returned by @{code getConfiguration()}
+     * @return File representing the configuration file mtwilson.properties in the folder returned by @{code getConfiguration()}
      */
     public File getConfigurationFile() {
-        String path = Folders.configuration();
-        String filename = System.getProperty("mtwilson.configuration.file", "mtwilson.properties");  // kms overrides with "kms.conf" for example
-        File file = new File(path + File.separator + filename);
-        return file;
+        return ConfigurationFactory.getConfigurationFile();
     }
     
     

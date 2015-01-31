@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.ext.Provider;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -193,10 +194,9 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
     
     private void scanExtensions() {
         // scan each jar in the classpath
-        ImplementationRegistrar implementationRegistrar = new ImplementationRegistrar();
-        implementationRegistrar.setIncludePackages(getIncludePackages());
-        implementationRegistrar.setExcludePackages(getExcludePackages());
-        Scanner scanner = new Scanner(new Registrar[] { implementationRegistrar, new AnnotationRegistrar(V2.class), new AnnotationRegistrar(V1.class), new AnnotationRegistrar(RPC.class), new AnnotationRegistrar(Background.class) });
+        Scanner scanner = new Scanner(new Registrar[] { new ImplementationRegistrar(), new AnnotationRegistrar(V2.class), new AnnotationRegistrar(V1.class), new AnnotationRegistrar(RPC.class), new AnnotationRegistrar(Background.class), new AnnotationRegistrar(Provider.class) });
+        scanner.setIncludePackages(getIncludePackages());
+        scanner.setExcludePackages(getExcludePackages());
         for(File jarFile : getJarFiles()) {
             try {
                 JarClassIterator it = new JarClassIterator(jarFile, new JarFileClassLoader(jarFile)); // throws IOException

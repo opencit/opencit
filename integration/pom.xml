@@ -34,7 +34,9 @@
 	<module>mtwilson-launcher-glassfish4</module>
     <module>mtwilson-launcher-jetty9</module>
 	<module>mtwilson-launcher-tomcat7</module>
+	<!--
     <module>mtwilson-feature</module>
+	-->
     <module>mtwilson-feature-xml</module>
 	<module>mtwilson-tag-selection-xml</module>
 	<module>mtwilson-tag-selection-json</module>

@@ -4,12 +4,18 @@
  */
 package com.intel.mtwilson.extensions.cache;
 
+import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.extensions.Scanner;
+import com.intel.mtwilson.launcher.ext.annotations.Background;
+import com.intel.mtwilson.launcher.ws.ext.RPC;
+import com.intel.mtwilson.launcher.ws.ext.V1;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.FileInputStream;
 import java.io.File;
 import java.io.IOException;
+import javax.ws.rs.ext.Provider;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -31,7 +37,7 @@ public class ExtensionCacheLoader implements Runnable {
     public ExtensionCacheLoader(File extensionsCacheFile) {
         log.debug("extension cache file: {}", extensionsCacheFile.getAbsolutePath());
         cacheFile = extensionsCacheFile;
-        registrars = new Registrar[] { new ImplementationRegistrar() } ;        
+        registrars = new Registrar[] { new ImplementationRegistrar(), new AnnotationRegistrar(V2.class), new AnnotationRegistrar(V1.class), new AnnotationRegistrar(RPC.class), new AnnotationRegistrar(Background.class), new AnnotationRegistrar(Provider.class) } ;        
         log.debug("thread context class loader: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
     }
     

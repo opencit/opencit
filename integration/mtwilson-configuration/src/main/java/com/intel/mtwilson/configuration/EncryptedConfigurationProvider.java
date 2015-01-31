@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedResource;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
@@ -30,27 +31,30 @@ import java.io.IOException;
  */
 public class EncryptedConfigurationProvider implements ConfigurationProvider {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EncryptedConfigurationProvider.class);
-    private static final String PASSWORD = "PASSWORD"; // transforms into MTWILSON_PASSWORD, KMS_PASSWORD, etc. environment variables
     private File file;
     private PasswordProtection protection;
     private ResourceConfigurationProvider delegate;
 
-    public EncryptedConfigurationProvider() {
-        this(Environment.get(PASSWORD));
+    /**
+     * Configures the provider using the provided password. The provider
+     * does not attempt to decrypt the configuration until you call {@code load()}
+     * @param file containing the encrypted configuration
+     * @param password to decrypt the file
+     */
+    public EncryptedConfigurationProvider(File file, String password) {
+        this(new FileResource(file), password);
     }
     
     /**
      * Configures the provider using the provided password. The provider
      * does not attempt to decrypt the configuration until you call {@code load()}
-     * @param password 
+     * @param resource containing the encrypted configuration
+     * @param password to decrypt the file
      */
-    public EncryptedConfigurationProvider(String password) {
+    public EncryptedConfigurationProvider(Resource resource, String password) {
         if( password == null || password.isEmpty() ) {
             throw new IllegalArgumentException("Password is required");
         }
-        MyConfiguration conf = new MyConfiguration();
-        file = conf.getConfigurationFile();
-        FileResource resource = new FileResource(file);
         PasswordEncryptedResource encrypted = new PasswordEncryptedResource(resource, password, getProtection());
         delegate = new ResourceConfigurationProvider(encrypted);
     }
@@ -80,10 +84,7 @@ public class EncryptedConfigurationProvider implements ConfigurationProvider {
      */
     @Override
     public Configuration load() throws IOException {
-        if( file.exists() ) {
-            return delegate.load();
-        }
-        return new PropertiesConfiguration();
+        return delegate.load();
     }
 
     /**

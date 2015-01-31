@@ -39,6 +39,7 @@
     <module>mtwilson-http-servlets</module>
     <module>mtwilson-intel-hostagent</module>
     <module>mtwilson-jersey2-util</module>
+    <module>mtwilson-jersey2-util-v1</module>
     <module>mtwilson-localization</module>
     <module>mtwilson-management</module>
     <module>mtwilson-management-jpa</module>
@@ -47,7 +48,7 @@
     <module>mtwilson-privacyca-niarl</module>
     <module>mtwilson-privacyca-setup</module>
     <module>mtwilson-privacyca-ws-v2</module>
-    <module>mtwilson-repository-ext</module>
+    <module>mtwilson-repository-api</module>
     <module>mtwilson-rpc</module>
     <module>mtwilson-rpc-jdbi</module>
     <module>mtwilson-rpc-model</module>

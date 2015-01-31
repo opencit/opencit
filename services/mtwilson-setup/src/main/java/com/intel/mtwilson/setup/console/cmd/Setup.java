@@ -10,6 +10,7 @@ import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import com.intel.mtwilson.setup.SetupConfigurationProvider;
 import com.intel.mtwilson.setup.ConfigurationException;
@@ -188,7 +189,7 @@ public class Setup implements Command {
     }
 
     protected void execute(List<SetupTask> tasks) throws IOException, org.apache.commons.configuration.ConfigurationException {
-        SetupConfigurationProvider provider = new SetupConfigurationProvider(new EncryptedConfigurationProvider());
+        SetupConfigurationProvider provider = new SetupConfigurationProvider(ConfigurationFactory.getConfigurationProvider());
         Configuration configuration = provider.load();
 //        Configuration configurationAdapter =  new CommonsConfiguration(configuration);
 //        Configuration env = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), new EnvironmentConfiguration()); // transforms mtwilson.ssl.cert.sha1 to MTWILSON_SSL_CERT_SHA1 

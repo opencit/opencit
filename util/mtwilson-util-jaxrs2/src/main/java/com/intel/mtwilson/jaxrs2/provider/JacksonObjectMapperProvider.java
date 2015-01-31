@@ -52,7 +52,7 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         return defaultObjectMapper;
     }
  
-    public ObjectMapper createDefaultMapper() {
+    public static ObjectMapper createDefaultMapper() {
         log.debug("JacksonObjectMapperProvider createDefaultMapper");
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);

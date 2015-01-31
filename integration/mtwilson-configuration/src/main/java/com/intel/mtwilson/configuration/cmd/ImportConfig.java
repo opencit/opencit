@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import org.apache.commons.io.IOUtils;
 /**
- * TODO:  this command has been improved in mtwilson, should be using just that one 
- * instead of a copy.
  * 
  * @author jbuhacoff
  */

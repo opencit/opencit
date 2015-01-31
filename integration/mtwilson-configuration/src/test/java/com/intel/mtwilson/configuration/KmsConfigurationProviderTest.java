@@ -78,7 +78,7 @@ public class KmsConfigurationProviderTest {
             configuration.getConfigurationFile().delete();
         }
         assertFalse(configuration.getConfigurationFile().exists());
-        EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider("password");
+        EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider(configuration.getConfigurationFile(), "password");
         Configuration conf = provider.load();
         conf.set("foo", "bar");
         provider.save(conf);
@@ -90,7 +90,7 @@ public class KmsConfigurationProviderTest {
         testCreateNewConfiguration();
         MyConfiguration configuration = new MyConfiguration();
         assertTrue(configuration.getConfigurationFile().exists());
-        EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider("password");
+        EncryptedConfigurationProvider provider = new EncryptedConfigurationProvider(configuration.getConfigurationFile(), "password");
         Configuration conf = provider.load();
         assertEquals("bar", conf.get("foo"));
         // show the entire configuration

@@ -37,9 +37,17 @@ public class Main {
         Configuration applicationProperties = loadApplicationProperties();
         copyToSystemProperties(applicationProperties);
         
+        // TODO:  the ExtensionCacheLoader is in the mtwilson-extensions-cache
+        //        project (good) and next step is to make an extension point
+        //        right here for @Init / @Startup and add that annotation to
+        //        ExtensionCacheLoader so the launcher doesn't have a direct
+        //        dependency to it.  Might need to make that an interface instead
+        //        of an annotation so it can be declared via Java's Service Loader
+        //        (since extension cache wouldn't be loaded at that point!)
         // the extension manager loads the available extensions from the classpath (which must be set by the command line)
         ExtensionCacheLoader loader = new ExtensionCacheLoader(Folders.configuration()); // reads the files extensions.cache and extensions.prefs 
         loader.run();
+        
         // the dispatcher finds the command specified in arg[0] and runs it
         Dispatcher dispatcher = new Dispatcher();
         dispatcher.setArgs(args);

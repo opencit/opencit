@@ -91,10 +91,19 @@
             <version>${project.version}</version>
         </dependency>
 			-->
+            
+        <!-- needed to register @V1, @V2, @RPC annotated classes -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        
+        <!-- needed to register @Provider annotated classes -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         
         
