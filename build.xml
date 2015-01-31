@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="kms" default="build" basedir=".">
+	<description>
+	Run "ant ready" to ensure you have all pre-requisites to build
+	Run "ant" or "ant build" to build the entire project
+	Run "ant ready build packages" to clean build and generate packages
+	Run "ant build packages" to rebuild only and generate packages
+	Run "ant packages" to generate packages (requires prior build)
+	</description>
+	
+	<target name="info">
+		<echoproperties/>
+	</target>
+	
+	<target name="init">
+		<condition property="cmd.maven" value="mvn.bat">
+			<os family="windows"/>
+		</condition>
+		<condition property="cmd.maven" value="mvn">
+			<os family="unix"/>
+		</condition>
+	</target>
+	
+	<target name="ready" depends="init">
+		<!-- the root pom -->
+		<exec executable="${cmd.maven}">
+			<arg value="-DskipTests=true"/>
+			<arg value="-N"/>
+			<arg value="install"/>
+		</exec>
+		<!-- the maven archetypes depend on root pom -->
+		<exec executable="${cmd.maven}" dir="maven">
+			<arg value="-DskipTests=true"/>
+			<arg value="install"/>
+		</exec>
+		<!-- clean all projects -->
+		<exec executable="${cmd.maven}">
+			<arg value="-DskipTests=true"/>
+			<arg value="clean"/>
+		</exec>
+	</target>
+	
+	<target name="clean" depends="init">
+		<!-- the root pom and all projects -->
+		<exec executable="${cmd.maven}">
+			<arg value="clean"/>
+		</exec>
+	</target>
+	
+	<target name="build" depends="init">
+		<!-- the root pom and all projects except packages -->
+		<exec executable="${cmd.maven}">
+			<arg value="-DskipTests=true"/>
+			<arg value="install"/>
+		</exec>
+	</target>
+
+</project>
