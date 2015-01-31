@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +27,13 @@ public class Measurement extends ObjectModel {
         this.label = label;
     }
 
-    public Measurement(Sha1Digest digest, String label, Map<String,String> info) {
+    @JsonCreator
+    public Measurement(@JsonProperty("value") Sha1Digest digest, @JsonProperty("label") String label, @JsonProperty("info") Map<String,String> info) {
         this.digest = digest;
         this.label = label;
-        this.info.putAll(info);
+        if( info != null ) {
+            this.info.putAll(info);
+        }
     }
     
     public Sha1Digest getValue() { return digest; }

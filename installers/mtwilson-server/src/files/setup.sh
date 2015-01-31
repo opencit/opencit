@@ -224,6 +224,7 @@ else
     touch /etc/intel/cloudsecurity/mtwilson.properties
     chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
     export mtwilson_tls_keystore_password=`generate_password 32`
+    export MTW_TLS_KEYSTORE_PASS="$mtwilson_tls_keystore_password"
 #    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
     echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
@@ -662,10 +663,12 @@ if using_glassfish; then
   
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
-	$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+      #$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0   ### THIS COMMAND DOES NOT WORK
+      gf_logging_properties=$(find "$GLASSFISH_HOME" -name logging.properties | head -1)
+      sed -i "s/com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=.*/com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0/g" "$gf_logging_properties"
   else
-	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
-	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+    echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
+    echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
   fi
 
   #if [ -e $glassfish_bin ]; then
@@ -676,13 +679,14 @@ if using_glassfish; then
   #  echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
   #fi
   
-  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
-    # glassfish init code here
-    mtwilson glassfish-sslcert
-    # glassfish init end
-  else
-    echo_warning "Skipping webservice init"
-  fi
+  ### WHAT IS THIS USED FOR???
+  #if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+  #  # glassfish init code here
+  #  mtwilson glassfish-sslcert
+  #  # glassfish init end
+  #else
+  #  echo_warning "Skipping webservice init"
+  #fi
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
@@ -712,20 +716,21 @@ elif using_tomcat; then
   echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV_DIR/tomcat
   echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV_DIR/tomcat
   
-  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
-    # tomcat init code here
-    #mtwilson tomcat-sslcert
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start >> $INSTALL_LOG_FILE 2>&1
-    fi
-  # opt_tomcat init end
-  else
-    echo_warning "Skipping webservice init"
-  fi
+  ### WHAT IS THIS USED FOR???
+  #if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+  #  # tomcat init code here
+  #  #mtwilson tomcat-sslcert
+  #  if tomcat_running; then 
+  #    echo "Restarting Tomcat ..."
+  #    tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+  #  else
+  #    echo "Starting Tomcat ..."
+  #    tomcat_start >> $INSTALL_LOG_FILE 2>&1
+  #  fi
+  ## opt_tomcat init end
+  #else
+  #  echo_warning "Skipping webservice init"
+  #fi
  
 fi
 
