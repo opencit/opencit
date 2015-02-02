@@ -5914,10 +5914,13 @@ void NIARL_TPM_ModuleV2::certify_key()
 	if(result == 0)
 	{
 		for(UINT32 i = 0; i < mod_size; i++)
-			cerr << setw(2) << setfill('0') << setbase(16) << (int)mod_blob[i];
+			cout << setw(2) << setfill('0') << setbase(16) << (int)mod_blob[i];
 		if(b_debug) cerr << endl;
 		if(b_log) clog << endl;
 
+		// adding the separator for the key modulus
+		if(!b_debug && !b_log) if(!b_debug && !b_log) cout << ' ';
+		
 		result = Tspi_Context_FreeMemory(context, mod_blob);
 	}
 
