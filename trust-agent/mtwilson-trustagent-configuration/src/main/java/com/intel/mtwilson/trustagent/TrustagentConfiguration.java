@@ -283,8 +283,12 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     }
     
     // TODO : This need to be changed to a correct TCG cert file format.
+    public File getBindingKeyModulusFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pub");        
+    }
+
     public File getBindingKeyTCGCertificateFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.hex");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.ckf");        
     }
 
     public File getBindingKeyX509CertificateFile() {

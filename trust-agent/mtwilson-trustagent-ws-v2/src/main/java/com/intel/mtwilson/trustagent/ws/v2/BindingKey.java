@@ -35,13 +35,12 @@ public class BindingKey {
             return null;
         }
         else {
-            //TODO-Sudhir - Replace this with the binding key certificate
             TrustagentRepository repository = new TrustagentRepository(configuration);
-            X509Certificate aikCertificate = repository.getAikCertificate();
-            if( aikCertificate == null ) {
-                throw new WebApplicationException(Response.serverError().header("Error", "Cannot load AIK certificate file").build());
+            X509Certificate bkCertificate = repository.getBindingKeyCertificate();
+            if( bkCertificate == null ) {
+                throw new WebApplicationException(Response.serverError().header("Error", "Cannot load Binding key certificate file").build());
             }
-            return aikCertificate;
+            return bkCertificate;
         }
     }
  

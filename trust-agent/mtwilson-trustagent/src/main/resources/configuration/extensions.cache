@@ -31,4 +31,3 @@ com.intel.mtwilson.trustagent.setup.CertifyBindingKey
 com.intel.mtwilson.trustagent.setup.CreateSigningKey
 com.intel.mtwilson.trustagent.setup.CertifySigningKey
 com.intel.mtwilson.trustagent.ws.v2.BindingKey
-com.intel.mtwilson.trustagent.ws.v2.SigningKey
