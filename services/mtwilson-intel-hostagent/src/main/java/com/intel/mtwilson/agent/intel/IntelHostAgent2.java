@@ -16,6 +16,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.VMAttestationReport;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -228,4 +229,10 @@ public class IntelHostAgent2 implements HostAgent {
         }
     }
     
+
+    @Override
+    public VMAttestationReport getVMAttestationReport(String vmInstanceId) {
+        // TODO Need to call into the REST API on TA
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
