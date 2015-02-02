@@ -12,11 +12,11 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.repository.RepositoryCreateException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import gov.niarl.his.privacyca.TpmCertifyKey;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 
@@ -25,38 +25,65 @@ import org.apache.commons.io.IOUtils;
  * @author ssbangal
  */
 @RPC("certify-host-binding-key")
-@JacksonXmlRootElement(localName="certify_host_binding_key")
-public class CertifyHostBindingKeyRunnable implements Runnable{
+@JacksonXmlRootElement(localName = "certify_host_binding_key")
+public class CertifyHostBindingKeyRunnable implements Runnable {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertifyHostBindingKeyRunnable.class);
+    private byte[] publicKeyModulus;
+    private byte[] tpmCertifyKey;
+    private String bindingKeyPemCertificate;
 
-    private String tcgCertificateAsHex;
-    private String pemCertificate;
-
-    public String getTcgCertificateAsHex() {
-        return tcgCertificateAsHex;
+    public byte[] getPublicKeyModulus() {
+        return publicKeyModulus;
     }
 
-    public void setTcgCertificateAsHex(String tcgCertificateAsHex) {
-        this.tcgCertificateAsHex = tcgCertificateAsHex;
+    public void setPublicKeyModulus(byte[] publicKeyModulus) {
+        this.publicKeyModulus = publicKeyModulus;
     }
 
-    public String getPemCertificate() {
-        return pemCertificate;
+    public byte[] getTpmCertifyKey() {
+        return tpmCertifyKey;
     }
 
-    public void setPemCertificate(String pemCertificate) {
-        this.pemCertificate = pemCertificate;
+    public void setTpmCertifyKey(byte[] tpmCertifyKey) {
+        this.tpmCertifyKey = tpmCertifyKey;
     }
 
-    
+    public String getBindingKeyPemCertificate() {
+        return bindingKeyPemCertificate;
+    }
+
+    public void setBindingKeyPemCertificate(String bindingKeyPemCertificate) {
+        this.bindingKeyPemCertificate = bindingKeyPemCertificate;
+    }
+
     @Override
-    @RequiresPermissions({"hosts:create","hosts:store"})
+    @RequiresPermissions({"hosts:create", "hosts:store"})
     public void run() {
         try {
-            if (tcgCertificateAsHex != null) {
-                log.debug("Starting to verify the TCG certificate and generate the MTW certified certificate: {}.", tcgCertificateAsHex);
-                
+            if (publicKeyModulus != null && tpmCertifyKey != null) {
+
+                log.debug("Starting to verify the TCG certificate and generate the MTW certified certificate.");
+
+                log.debug("Public key modulus {} and TpmCertifyKey data {} are specified.",
+                        TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey));
+
+
+                // TODO-Sudhir : Validate the public key modulus against the public key digest in the certify key info.
+
+                // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
+                byte[] pubExp = new byte[3];
+                pubExp[0] = (byte) (0x01 & 0xff);
+                pubExp[1] = (byte) (0x00);
+                pubExp[2] = (byte) (0x01 & 0xff);
+                RSAPublicKey pubBk = TpmUtils.makePubKey(publicKeyModulus, pubExp);
+
+                if (pubBk != null) {
+                    log.debug("Successfully created the public key from the modulus specified");
+                } else {
+                    throw new Exception("Error during the creation of the public key from the modulus and exponent");
+                }
+
                 // first load the ca key
                 byte[] combinedPrivateKeyAndCertPemBytes;
                 try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
@@ -64,33 +91,35 @@ public class CertifyHostBindingKeyRunnable implements Runnable{
                 }
                 PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
                 X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
-                
-                TpmCertifyKey tpmCertifyKey = new TpmCertifyKey(TpmUtils.hexStringToByteArray(tcgCertificateAsHex));
+
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
-                    .commonName("CN=Binding_Key_Certificate")
-                    .subjectPublicKey(tpmCertifyKey.getKey())
-                    .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
-                    .issuerPrivateKey(cakey)
-                    .issuerName(cacert)
-                    .keyUsageDigitalSignature()
-                    .keyUsageNonRepudiation()
-                    .keyUsageKeyEncipherment()
-                    .extKeyUsageIsCritical()
-                    .randomSerial()
-                    .build();
-                
+                        .commonName("CN=Binding_Key_Certificate")
+                        .subjectPublicKey(pubBk)
+                        .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
+                        .issuerPrivateKey(cakey)
+                        .issuerName(cacert)
+                        .keyUsageDigitalSignature()
+                        .keyUsageNonRepudiation()
+                        .keyUsageKeyEncipherment()
+                        .extKeyUsageIsCritical()
+                        .randomSerial()
+                        .build();
+
                 if (bkCert != null) {
-                    pemCertificate = X509Util.encodePemCertificate(bkCert);
+                    bindingKeyPemCertificate = X509Util.encodePemCertificate(bkCert);
                 } else {
                     throw new Exception("Error during creation of the MTW signed binding key certificate");
                 }
-                log.debug("Successfully created the MTW signed PEM certificate for binding key: {}.", pemCertificate);
+
+                log.debug("Successfully created the MTW signed PEM certificate for binding key: {}.", X509Util.encodePemCertificate(bkCert));
+
+            } else {
+                throw new Exception("Invalid input specified or input value missing.");
             }
         } catch (Exception ex) {
             log.error("Error during MTW signed binding key certificate.", ex);
             throw new RepositoryCreateException();
         }
     }
-    
 }
