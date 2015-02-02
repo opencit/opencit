@@ -17,10 +17,10 @@ import com.intel.dcsg.cpg.io.Copyable;
  */
 public class CipherKeyAttributes extends Attributes implements Copyable {
 //    public static enum Attributes { cipherAlgorithm, cipherKeyLength, cipherMode, cipherPaddingMode; }
-    private String cipherAlgorithm;
-    private Integer cipherKeyLength;
-    private String cipherMode;
-    private String cipherPaddingMode;
+    private String algorithm;
+    private Integer keyLength;
+    private String mode;
+    private String paddingMode;
     
     /**
      * For a certificate, refers to the algorithm of the enclosed public key.
@@ -28,13 +28,13 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
      */
     
     
-    public String getCipherAlgorithm() {
-        return cipherAlgorithm;
+    public String getAlgorithm() {
+        return algorithm;
 //        return (String)attributes.get(Attributes.cipherAlgorithm.name());
     }
 
-    public void setCipherAlgorithm(String cipherAlgorithm) {
-        this.cipherAlgorithm = cipherAlgorithm;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
 //        attributes.put(Attributes.cipherAlgorithm.name(), cipherAlgorithm);
     }
 
@@ -47,13 +47,13 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
      * Examples of key length for RSA: 1024, 2048
      */
     
-    public Integer getCipherKeyLength() {
-        return cipherKeyLength;
+    public Integer getKeyLength() {
+        return keyLength;
 //        return (Integer)attributes.get(Attributes.cipherKeyLength.toString());
     }
 
-    public void setCipherKeyLength(Integer cipherKeyLength) {
-        this.cipherKeyLength = cipherKeyLength;
+    public void setKeyLength(Integer keyLength) {
+        this.keyLength = keyLength;
 //        attributes.put(Attributes.cipherKeyLength.name(), cipherKeyLength);
     }
     
@@ -68,29 +68,30 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
      * Examples: CBC, OFB
      */
     
-    public String getCipherMode() {
-        return cipherMode;
+    public String getMode() {
+        return mode;
 //        return (String)attributes.get(Attributes.cipherMode.toString());
     }
 
-    public void setCipherMode(String cipherMode) {
-        this.cipherMode = cipherMode;
+    public void setMode(String mode) {
+        this.mode = mode;
 //        attributes.put(Attributes.cipherMode.name(), cipherMode);
     }
 
     
     /**
-     * Padding mode used with this key. 
+     * Padding mode used with this key. For example: ANSIX923, ISO10126,
+     * None, PKCS7, Zeros, PKCS15, OAEP.
      * Examples: 
      */
 
-    public String getCipherPaddingMode() {
-        return cipherPaddingMode;
+    public String getPaddingMode() {
+        return paddingMode;
 //        return (String)attributes.get(Attributes.cipherPaddingMode.toString());
     }
 
-    public void setCipherPaddingMode(String cipherPaddingMode) {
-        this.cipherPaddingMode = cipherPaddingMode;
+    public void setPaddingMode(String paddingMode) {
+        this.paddingMode = paddingMode;
 //        attributes.put(Attributes.cipherPaddingMode.name(), cipherPaddingMode);
     }
 
@@ -110,10 +111,10 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
     
     public void copyFrom(CipherKeyAttributes source) {
         super.copyFrom(source);
-        this.cipherAlgorithm = source.cipherAlgorithm;
-        this.cipherKeyLength = source.cipherKeyLength;
-        this.cipherMode = source.cipherMode;
-        this.cipherPaddingMode = source.cipherPaddingMode;
+        this.algorithm = source.algorithm;
+        this.keyLength = source.keyLength;
+        this.mode = source.mode;
+        this.paddingMode = source.paddingMode;
     }
 
 }

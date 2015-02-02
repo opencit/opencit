@@ -9,20 +9,20 @@ package com.intel.mtwilson.util.crypto.key2;
  * need a key.
  * @author jbuhacoff
  */
-public class DigestKey extends DigestKeyAttributes {
-    private byte[] digestKeyId;
+public class IntegrityKey extends IntegrityKeyAttributes {
+    private byte[] keyId;
     private byte[] encoded;
     
     /**
      * The key id can be used to look up the key in a database or 
      * key server when the encoded key is not present
      */
-    public byte[] getDigestKeyId() {
-        return digestKeyId;
+    public byte[] getKeyId() {
+        return keyId;
     }
 
-    public void setDigestKeyId(byte[] digestKeyId) {
-        this.digestKeyId = digestKeyId;
+    public void setKeyId(byte[] keyId) {
+        this.keyId = keyId;
     }
 
 
@@ -43,17 +43,17 @@ public class DigestKey extends DigestKeyAttributes {
 
     
     @Override
-    public DigestKey copy() {
-        DigestKey newInstance = new DigestKey();
+    public IntegrityKey copy() {
+        IntegrityKey newInstance = new IntegrityKey();
         newInstance.copyFrom(this);
 //        copy.digestKeyId = this.digestKeyId;
 //        copy.encoded = this.encoded;
         return newInstance;
     }
     
-    public void copyFrom(DigestKey source) {
+    public void copyFrom(IntegrityKey source) {
         super.copyFrom(source);
-        this.digestKeyId = source.digestKeyId;
+        this.keyId = source.keyId;
         this.encoded = source.encoded;
     }
 

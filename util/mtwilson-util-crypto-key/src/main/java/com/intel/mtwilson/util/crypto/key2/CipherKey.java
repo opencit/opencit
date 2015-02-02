@@ -4,30 +4,26 @@
  */
 package com.intel.mtwilson.util.crypto.key2;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import java.util.Map;
-
 /**
  *
  * @author jbuhacoff
  */
 public class CipherKey extends CipherKeyAttributes {
 //    public static enum Attributes { cipherKeyId, encoded; }
-    private String cipherKeyId;
+    private String keyId;
     private byte[] encoded;
     
     /**
      * The key id can be used to look up the key in a database or 
      * key server when the encoded key is not present
      */
-    public String getCipherKeyId() {
-        return cipherKeyId;
+    public String getKeyId() {
+        return keyId;
 //        return (String)attributes.get(Attributes.cipherKeyId.name());
     }
 
-    public void setCipherKeyId(String cipherKeyId) {
-        this.cipherKeyId = cipherKeyId;
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
 //        attributes.put(Attributes.cipherKeyId.name(), cipherKeyId);
     }
 
@@ -63,7 +59,7 @@ public class CipherKey extends CipherKeyAttributes {
     
     public void copyFrom(CipherKey source) {
         super.copyFrom(source);
-        this.cipherKeyId = source.cipherKeyId;
+        this.keyId = source.keyId;
         this.encoded = source.encoded;
     }
 

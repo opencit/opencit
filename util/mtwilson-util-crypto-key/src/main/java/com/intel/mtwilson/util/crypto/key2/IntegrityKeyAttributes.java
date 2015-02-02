@@ -10,20 +10,20 @@ import com.intel.dcsg.cpg.io.Copyable;
  *
  * @author jbuhacoff
  */
-public class DigestKeyAttributes extends Attributes implements Copyable {
-    private String digestAlgorithm;
-    private Integer digestKeyLength;
+public class IntegrityKeyAttributes extends Attributes implements Copyable {
+    private String algorithm;
+    private Integer keyLength;
     
     /**
      * Refers to the digest algorithm used in HMAC-digestAlgorithm.
      * Examples: MD5, SHA-1, SHA-256
      */
-    public String getDigestAlgorithm() {
-        return digestAlgorithm;
+    public String getAlgorithm() {
+        return algorithm;
     }
 
-    public void setDigestAlgorithm(String digestAlgorithm) {
-        this.digestAlgorithm = digestAlgorithm;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
     }
 
 
@@ -46,29 +46,29 @@ public class DigestKeyAttributes extends Attributes implements Copyable {
      */
 
     
-    public Integer getDigestKeyLength() {
-        return digestKeyLength;
+    public Integer getKeyLength() {
+        return keyLength;
     }
 
-    public void setDigestKeyLength(Integer digestKeyLength) {
-        this.digestKeyLength = digestKeyLength;
+    public void setKeyLength(Integer keyLength) {
+        this.keyLength = keyLength;
     }
 
 
     
     @Override
-    public DigestKeyAttributes copy() {
-        DigestKeyAttributes newInstance = new DigestKeyAttributes();
+    public IntegrityKeyAttributes copy() {
+        IntegrityKeyAttributes newInstance = new IntegrityKeyAttributes();
         newInstance.copyFrom(this);
 //        copy.digestAlgorithm = this.digestAlgorithm;
 //        copy.digestKeyLength = this.digestKeyLength;
         return newInstance;
     }
     
-    public void copyFrom(DigestKeyAttributes source) {
+    public void copyFrom(IntegrityKeyAttributes source) {
         super.copyFrom(source);
-        this.digestAlgorithm = source.digestAlgorithm;
-        this.digestKeyLength = source.digestKeyLength;
+        this.algorithm = source.algorithm;
+        this.keyLength = source.keyLength;
     }
 
 }
