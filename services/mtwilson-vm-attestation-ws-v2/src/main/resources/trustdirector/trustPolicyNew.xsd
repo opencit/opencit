@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="mtwilson:trustdirector:policy:1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="TrustPolicy">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Director">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="customer_id"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Image" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="image_id">
+                  <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="36" fixed="true" />
+                        <xs:pattern value="[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="image_hash">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:string" name="digestAlg"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Launch_Control_Policy" minOccurs="0">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="MeasureOnly"/>
+                  <xs:enumeration value="MeasureAndEnforce"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:element>
+        <xs:element name="encryption" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="dek_key"/>
+              <xs:element type="xs:string" name="checksum"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="geotag" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="attribute" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="text"/>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="oid" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="options">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Dir" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:integer" name="file_count" use="required"/>
+                      <xs:attribute type="xs:string" name="filter" use="required"/>
+                      <xs:attribute type="xs:string" name="name" use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element type="xs:boolean" name="Hidden_Files"/>
+              <xs:element name="Measurement_Exclude_Files" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="FilePath" maxOccurs="unbounded" minOccurs="0"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Manifest">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="measurements">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="File" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute type="xs:string" name="path" use="optional"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="digestAlg"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
