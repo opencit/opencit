@@ -15,7 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.HostInfo;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
-import com.intel.mtwilson.trustagent.model.VMAttestationReport;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -38,18 +38,18 @@ public class Vrtm {
     @Path("/reports")
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public VMAttestationReport getVMAttesationReport(VMAttestationRequest vmAttestationRequest) throws TAException {
+    public VMAttestationResponse getVMAttesationReport(VMAttestationRequest vmAttestationRequest) throws TAException {
         
         String vmInstanceId = vmAttestationRequest.getVmInstanceId();
         
-        VMAttestationReport vmAttestationReport = new VMAttestationReport();
+        VMAttestationResponse vmAttestationResponse = new VMAttestationResponse();
         //read vrtm
         
         //set report
-        vmAttestationReport.setVmInstanceId(vmInstanceId);
-        vmAttestationReport.setTrustStatus(true);
+        vmAttestationResponse.setVmInstanceId(vmInstanceId);
+        vmAttestationResponse.setTrustStatus(true);
         
-        return vmAttestationReport;
+        return vmAttestationResponse;
 
     }
 }
