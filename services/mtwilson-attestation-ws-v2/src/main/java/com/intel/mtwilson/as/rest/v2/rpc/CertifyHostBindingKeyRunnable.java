@@ -6,11 +6,13 @@ package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.repository.RepositoryCreateException;
+import gov.niarl.his.privacyca.TpmCertifyKey;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
@@ -63,13 +65,15 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null) {
 
-                log.debug("Starting to verify the TCG certificate and generate the MTW certified certificate.");
+                log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
 
                 log.debug("Public key modulus {} and TpmCertifyKey data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey));
 
-
-                // TODO-Sudhir : Validate the public key modulus against the public key digest in the certify key info.
+                boolean validatePublicKeyDigest = validatePublicKeyDigest();
+                if (!validatePublicKeyDigest) {
+                    throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
+                }
 
                 // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
                 byte[] pubExp = new byte[3];
@@ -89,9 +93,9 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
                     combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
                 }
+                
                 PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
                 X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
-
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
                         .commonName("CN=Binding_Key_Certificate")
@@ -121,5 +125,28 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
             log.error("Error during MTW signed binding key certificate.", ex);
             throw new RepositoryCreateException();
         }
+    }
+    
+    private boolean validatePublicKeyDigest() throws Exception {
+        try {
+            
+            log.debug("Validating the public key.");
+            byte[] calculatedModulusDigest = Sha1Digest.digestOf(publicKeyModulus).toByteArray();
+            
+            TpmCertifyKey certifiedKey = new TpmCertifyKey(tpmCertifyKey);
+            byte[] providedDigest = certifiedKey.getPublicKeyDigest();
+            
+            log.debug("Calculated public key digest is {} -- passed in public key digest is {}", 
+                    TpmUtils.byteArrayToHexString(calculatedModulusDigest), TpmUtils.byteArrayToHexString(certifiedKey.getPublicKeyDigest()));
+            
+            for (int i = 0; i < calculatedModulusDigest.length; i++) {
+                if(calculatedModulusDigest[i] != providedDigest[i])
+                    return false;
+            }
+            
+            return true;
+        } catch (TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException ex) {
+            throw ex;
+        }        
     }
 }
