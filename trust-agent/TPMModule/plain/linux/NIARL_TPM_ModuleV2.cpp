@@ -5732,6 +5732,8 @@ void NIARL_TPM_ModuleV2::certify_key()
 	string				keytype;
 	string				s_keyauth;
 	int					i_keyindex = 0;
+	string				s_aikauth;
+	int					aik_keyindex = 0;
 	bool				b_pkcs = false;
 
 	if(b_debug)	cerr << "Entering the certify_key() command." << endl;
@@ -5766,22 +5768,46 @@ void NIARL_TPM_ModuleV2::certify_key()
 			i_keyindex = atoi(s_argv[i].c_str());
 			i_success++;
 			if(b_debug)	cerr << "Key Index: " << i_keyindex << endl;
-		}		
+		}	
+
+		if(s_argv[i].compare("-aik_auth") == 0)
+		{
+			if(++i >= i_argc) return;
+			s_aikauth = s_argv[i];
+			i_success++;
+			if(b_debug)	cerr << "Aik Auth: " << s_aikauth << endl;
+		}
+
+		if(s_argv[i].compare("-aik_index") == 0)
+		{
+			if(++i >= i_argc) return;
+			aik_keyindex = atoi(s_argv[i].c_str());
+			i_success++;
+			if(b_debug)	cerr << "AIK Index: " << aik_keyindex << endl;
+		}
+		
 	}
 	
-	if(i_success != 3)
+	if(i_success != 5)
 	{
 		return_code = -1 * ERROR_ARG_MISSING;
 		return;
 	}
 
 	NIARL_Util_ByteBlob	keyauth(s_keyauth);
+	NIARL_Util_ByteBlob	aikauth(s_aikauth);
+	
 	BYTE				wks_blob[] = TSS_WELL_KNOWN_SECRET;
 	UINT32				wks_size = sizeof(wks_blob);
 
 	// Binding key UUID
 	TSS_UUID			uuid_new_key = TSS_UUID_USK2;
 	uuid_new_key.rgbNode[5] = (BYTE)i_keyindex;	
+
+	// AIK UUID
+	TSS_UUID			uuid_aik = TSS_UUID_USK2;
+	uuid_aik.rgbNode[5] = (BYTE)aik_keyindex;
+	uuid_aik.rgbNode[0] = 0x04;
 	
 //CONTEXT SECTION
 	TSS_RESULT		result;
@@ -5843,6 +5869,40 @@ void NIARL_TPM_ModuleV2::certify_key()
 		if(b_debug)	cerr << ' ' << result << " assign srk policy" << endl;
 		if(b_log)	cerr << ' ' << result << " assign srk policy" << endl;
 
+//AIK OPERATIONS (SET)
+	TSS_HKEY		aik;
+	TSS_HPOLICY		policy_aik;
+	//UINT32			init_flags	= TSS_KEY_TYPE_IDENTITY | TSS_KEY_SIZE_2048  | TSS_KEY_VOLATILE | TSS_KEY_AUTHORIZATION | TSS_KEY_NOT_MIGRATABLE;
+
+		if(b_debug)	cerr << "AIK Section" << endl;
+		if(b_log)	clog << "AIK Section" << endl;
+
+	//result = Tspi_Context_CreateObject(context, TSS_OBJECT_TYPE_RSAKEY, init_flags, &aik);
+	//	if(b_debug)	cerr << ' ' << result << " create aik object" << endl;
+	//	if(b_log)	clog << ' ' << result << " create aik object" << endl;
+
+	result = Tspi_Context_GetKeyByUUID(context, TSS_PS_TYPE_SYSTEM, uuid_aik, &aik);
+		if(b_debug)	cerr << ' ' << result << " get uuid" << endl;
+		if(b_log)	clog << ' ' << result << " get uuid" << endl;
+
+	result = Tspi_Key_LoadKey(aik, srk);
+		if(b_debug)	cerr << ' ' << result << " load aik" << endl;
+		if(b_log)	clog << ' ' << result << " load aik" << endl;
+
+	result = Tspi_GetPolicyObject(aik, TSS_POLICY_USAGE, &policy_aik);
+		if(b_debug)	cerr << ' ' << result << " Get aik policy" << endl;
+		if(b_log)	clog << ' ' << result << " Get aik policy" << endl;
+
+	result = Tspi_Policy_SetSecret(policy_aik, TSS_SECRET_MODE_PLAIN, aikauth.size, aikauth.blob);
+		if(b_debug)	cerr << ' ' << result << " set aik auth" << endl;
+		if(b_log)	clog << ' ' << result << " set aik auth" << endl;
+
+	//result = Tspi_Policy_AssignToObject(policy_aik, aik);
+	//	if(b_debug)	cerr << ' ' << result << " assign" << endl;
+	//	if(b_log)	clog << ' ' << result << " assign" << endl;
+
+
+		
 //KEY OPERATIONS (NOT SET YET)
 	TSS_HKEY		key;
 	TSS_HPOLICY		policy_key;
@@ -5908,8 +5968,8 @@ void NIARL_TPM_ModuleV2::certify_key()
 		if(b_log)	cerr << ' ' << result << " CREATE KEY" << endl;
 
 	result = Tspi_GetAttribData(key, TSS_TSPATTRIB_RSAKEY_INFO, TSS_TSPATTRIB_KEYINFO_RSA_MODULUS, &mod_size, &mod_blob);
-		if(b_debug)	cerr << ' ' << result << " get modulus" << endl;
-		if(b_log)	cerr << ' ' << result << " get modulus" << endl;
+		if(b_debug)	cerr << ' ' << result << " get modulus. Size is :" << mod_size << endl;
+		if(b_log)	cerr << ' ' << result << " get modulus. Size is :" << mod_size << endl;
 
 	if(result == 0)
 	{
@@ -5952,7 +6012,7 @@ void NIARL_TPM_ModuleV2::certify_key()
 		if(b_debug)	cerr << ' ' << result << " register new key" << endl;
 		if(b_log)	cerr << ' ' << result << " register new key" << endl;*/
 
-	TSS_HKEY	hCertifyingKey;
+/*	TSS_HKEY	hCertifyingKey;
 	result = Tspi_Context_CreateObject(context, TSS_OBJECT_TYPE_RSAKEY, TSS_KEY_SIZE_2048 |TSS_KEY_TYPE_SIGNING, &hCertifyingKey);	
 	if(b_debug)	cerr << ' ' << result << " Create the new certifying key object" << endl;
 	if(b_log)	cerr << ' ' << result << " Create the new certifying key object" << endl;
@@ -5963,7 +6023,7 @@ void NIARL_TPM_ModuleV2::certify_key()
 	
 	result = Tspi_Key_LoadKey(hCertifyingKey, srk);	
 	if(b_debug)	cerr << ' ' << result << " Load the new certifying key " << endl;
-	if(b_log)	cerr << ' ' << result << " Load the new certifying key " << endl;
+	if(b_log)	cerr << ' ' << result << " Load the new certifying key " << endl;*/
 		
 // CERTIFY KEY SECTION
 	TSS_VALIDATION pValidationData;
@@ -5976,7 +6036,7 @@ void NIARL_TPM_ModuleV2::certify_key()
 	pValidationData.ulExternalDataLength = 20;
 	pValidationData.rgbExternalData = data;
 	
-	result = Tspi_Key_CertifyKey(key, hCertifyingKey, &pValidationData);
+	result = Tspi_Key_CertifyKey(key, aik, &pValidationData);
 		if(b_debug)	cerr << ' ' << result << " certify key" << endl;
 		if(b_log)	clog << ' ' << result << " certify key" << endl;
 		return_code = result;
