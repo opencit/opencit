@@ -16,7 +16,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
-import com.intel.mtwilson.trustagent.model.VMAttestationReport;
+import com.intel.mtwilson.model.VMAttestationReport;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
