@@ -14,7 +14,7 @@ import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationCollection;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationFilterCriteria;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationLocator;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
-import com.intel.mtwilson.model.VMAttestationReport;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import com.intel.mtwilson.repository.RepositorySearchException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -41,7 +41,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                 if (obj != null) {
                     HostAgentFactory factory = new HostAgentFactory();
                     HostAgent agent = factory.getHostAgent(obj);
-                    VMAttestationReport vmAttestationReport = agent.getVMAttestationReport(criteria.vmInstanceId);
+                    VMAttestationResponse vmAttestationReport = agent.getVMAttestationReport(criteria.vmInstanceId);
                     objCollection.getVMAttestations().add(convert(vmAttestationReport, criteria));
                 }
                 
@@ -87,7 +87,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
    
-    private VMAttestation convert(VMAttestationReport obj, VMAttestationFilterCriteria criteria) {
+    private VMAttestation convert(VMAttestationResponse obj, VMAttestationFilterCriteria criteria) {
         VMAttestation convObj = new VMAttestation();
         convObj.setHostName(criteria.hostName);
         convObj.setVmInstanceId(criteria.vmInstanceId);

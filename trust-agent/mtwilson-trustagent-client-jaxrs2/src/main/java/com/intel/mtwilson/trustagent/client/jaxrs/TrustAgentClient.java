@@ -94,7 +94,6 @@ public class TrustAgentClient extends MtWilsonClient {
     }
 
     
-    public VMAttestationReport getVMAttestationReport(String vmInstanceId) {        
     public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {        
         VMAttestationRequest vmAttestationRequest = new VMAttestationRequest();
         vmAttestationRequest.setVmInstanceId(vmInstanceId);
