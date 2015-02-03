@@ -16,6 +16,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -214,5 +215,24 @@ public class IntelHostAgent2 implements HostAgent {
         log.debug("calling trustAgentClient with " + tag.toHexString() + " | " +  hm.get("Host_UUID"));
         //trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
         client.writeTag(tag.toByteArray(), UUID.valueOf(hm.get("Host_UUID")));
+    }
+    
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        try {
+            X509Certificate bindingKeyCert = client.getBindingKeyCertificate();
+            return bindingKeyCert;
+        }
+        catch(Exception e) {
+            log.debug("Cannot retrieve Binding key certificate: {}", e.toString(), e);
+            return null;
+        }
+    }
+    
+
+    @Override
+    public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {
+        // TODO Need to call into the REST API on TA
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

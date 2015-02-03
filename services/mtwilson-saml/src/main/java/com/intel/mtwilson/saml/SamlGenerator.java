@@ -441,6 +441,11 @@ public class SamlGenerator {
                 attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
             }
             
+            if (host.getBindingKeyCertificate() != null && !host.getBindingKeyCertificate().isEmpty()) {
+                attrStatement.getAttributes().add(createStringAttribute("Binding_Key_Certificate", host.getBindingKeyCertificate()));                
+            }
+            
+            
             return attrStatement;
             
         }

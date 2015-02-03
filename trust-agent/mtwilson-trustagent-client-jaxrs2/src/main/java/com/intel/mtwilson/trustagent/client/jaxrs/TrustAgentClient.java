@@ -9,6 +9,8 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import com.intel.mtwilson.trustagent.model.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -81,4 +83,27 @@ public class TrustAgentClient extends MtWilsonClient {
         return tpmQuoteResponse;
     }
 
+    public X509Certificate getBindingKeyCertificate() {
+        log.debug("target: {}", getTarget().getUri().toString());
+        X509Certificate aik = getTarget()
+                .path("/binding-key-certificate")
+                .request()
+                .accept(CryptoMediaType.APPLICATION_PKIX_CERT)
+                .get(X509Certificate.class);
+        return aik;
+    }
+
+    
+    public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {        
+        VMAttestationRequest vmAttestationRequest = new VMAttestationRequest();
+        vmAttestationRequest.setVmInstanceId(vmInstanceId);
+        log.debug("target: {}", getTarget().getUri().toString());
+
+        VMAttestationResponse vmAttestationResponse = getTarget()
+                .path("/vrtm/reports")
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(vmAttestationRequest), VMAttestationResponse.class);
+        return vmAttestationResponse;
+    }
 }

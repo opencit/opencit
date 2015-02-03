@@ -1579,6 +1579,10 @@ public class HostTrustBO {
                 tagCertificate = null;
             }
 
+            if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
+            }
+            
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate);
 
             

@@ -50,6 +50,8 @@ public class TrustagentConfiguration extends AbstractConfiguration {
     public final static String DAA_ENABLED = "daa.enabled"; // default false for 1.2 and 2.0
     public final static String TPM_QUOTE_IPV4 = "tpm.quote.ipv4";
     public static final String HARDWARE_UUID = "hardware.uuid";
+    public static final String BINDING_KEY_SECRET = "binding.key.secret";
+    public static final String BINDING_KEY_INDEX = "binding.key.index";
     
     public TrustagentConfiguration(org.apache.commons.configuration.Configuration configuration) {
         this(new CommonsConfigurationAdapter(configuration));
@@ -262,4 +264,39 @@ public class TrustagentConfiguration extends AbstractConfiguration {
             return configuration;
         }
     }
+    
+    // Helper methods for the Binding key
+    public String getBindingKeySecretHex() {
+        return getConfiguration().getString(BINDING_KEY_SECRET); // intentionally no default - this must be generated during setup
+    }
+    
+    public byte[] getBindingKeySecret() {
+        try {
+            return Hex.decodeHex(getAikSecretHex().toCharArray());
+        }catch(DecoderException e) {
+            throw new IllegalArgumentException("Invalid Binding Key secret", e);
+        }
+    }
+    
+    public int getBindingKeyIndex() {
+        return getConfiguration().getInteger(BINDING_KEY_INDEX, 3); 
+    }
+    
+    // TODO : This need to be changed to a correct TCG cert file format.
+    public File getBindingKeyModulusFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pub");        
+    }
+
+    public File getBindingKeyTCGCertificateFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.ckf");        
+    }
+
+    public File getBindingKeyX509CertificateFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pem");        
+    }
+
+    public File getBindingKeyBlobFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.blob");        
+    }
+
 }
