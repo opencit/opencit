@@ -31,6 +31,10 @@ import org.apache.commons.io.IOUtils;
 public class CertifyHostBindingKeyRunnable implements Runnable {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertifyHostBindingKeyRunnable.class);
+    // This OID is used for storing the TCG standard certificate as an attr within the x.509 cert.
+    // We are using this OID as we could not find any specific OID for the certifyKey structure.
+    private static final String tcgCertExtOid = "2.23.133.6"; 
+    
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
     private String bindingKeyPemCertificate;
@@ -108,6 +112,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         .keyUsageKeyEncipherment()
                         .extKeyUsageIsCritical()
                         .randomSerial()
+                        .noncriticalExtension(tcgCertExtOid, tpmCertifyKey)
                         .build();
 
                 if (bkCert != null) {
