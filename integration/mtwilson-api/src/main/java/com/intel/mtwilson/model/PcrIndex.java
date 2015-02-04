@@ -135,5 +135,7 @@ public class PcrIndex extends ObjectModel {
         }
     }
     
-    
+    public static PcrIndex valueOf(String istr) {
+        return valueOf(Integer.valueOf(istr));
+    }
 }

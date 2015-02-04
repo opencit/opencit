@@ -2,6 +2,8 @@ package com.intel.mtwilson.model;
 
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
+import java.util.List;
 //import org.codehaus.jackson.annotate.JsonValue;
 
 /**
@@ -49,6 +51,42 @@ public class PcrManifest extends ObjectModel {
 
     public Pcr getPcr(PcrIndex pcrIndex) {
         return pcrs[pcrIndex.toInteger()];
+    }
+    
+    public List<Pcr> getPcrs() {
+        ArrayList<Pcr> pcrsList = new ArrayList<>();
+        for (Pcr pcr : pcrs) {
+            if (pcr != null)
+                pcrsList.add(pcr);
+        }
+        return pcrsList;
+    }
+    
+    public void setPcrs(List<Pcr> pcrsList) {
+        for (int i = 0; i < 23; i++) {
+            pcrs[i] = null;
+        }
+        for (Pcr pcr : pcrsList) {
+            setPcr(pcr);
+        }
+    }
+    
+    public List<PcrEventLog> getPcrEventLogs() {
+        ArrayList<PcrEventLog> pcrEventLogsList = new ArrayList<>();
+        for (PcrEventLog pcrEventLog : pcrEventLogs) {
+            if (pcrEventLog != null)
+                pcrEventLogsList.add(pcrEventLog);
+        }
+        return pcrEventLogsList;
+    }
+    
+    public void setPcrEventLogs(List<PcrEventLog> pcrEventLogsList) {
+        for (int i = 0; i < 23; i++) {
+            pcrEventLogs[i] = null;
+        }
+        for (PcrEventLog pcrEventLog : pcrEventLogsList) {
+            setPcrEventLog(pcrEventLog);
+        }
     }
     
     public void clearPcr(int index) {
@@ -108,7 +146,6 @@ public class PcrManifest extends ObjectModel {
      * 
      * @see java.lang.Object#toString()
      */
-    @JsonValue
     @Override
     public String toString() {
         String result = "";

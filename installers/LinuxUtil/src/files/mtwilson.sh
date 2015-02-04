@@ -177,6 +177,12 @@ Detected the following options on this server:"
     else
       glassfish_create_ssl_cert_prompt
     fi
+  elif using_tomcat; then
+    if [ -n "${MTWILSON_SERVER}" ]; then
+      tomcat_create_ssl_cert "${MTWILSON_SERVER}"
+    else
+      tomcat_create_ssl_cert_prompt
+    fi
   fi
 
   # new setup commands in mtwilson 2.0
@@ -534,6 +540,7 @@ case "$1" in
         rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
+        remove_startup_script "mtwilson"
         # configuration files
         echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         rm -rf /etc/intel/cloudsecurity
