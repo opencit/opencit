@@ -56,6 +56,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import javax.xml.bind.PropertyException;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -810,8 +811,10 @@ public class TAHelper {
                     }
                     reader.next();
                 }
-            } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+            } catch (FactoryConfigurationError | XMLStreamException | NumberFormatException ex) {
+                // bug #2171 we need to throw an exception to prevent the host from being registered with an error manifest
+                //log.error(ex.getMessage(), ex); 
+                throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
 

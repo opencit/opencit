@@ -1616,7 +1616,7 @@ public class HostBO {
             privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
             //IOUtils.closeQuietly(privacyCaIn);
-            log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
+            log.info("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
         } catch(IOException | CertificateException e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file
