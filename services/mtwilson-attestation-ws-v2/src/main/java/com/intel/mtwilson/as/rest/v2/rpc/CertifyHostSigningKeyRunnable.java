@@ -6,13 +6,11 @@ package com.intel.mtwilson.as.rest.v2.rpc;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.repository.RepositoryCreateException;
-import gov.niarl.his.privacyca.TpmCertifyKey;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
@@ -26,18 +24,15 @@ import org.apache.commons.io.IOUtils;
  *
  * @author ssbangal
  */
-@RPC("certify-host-binding-key")
-@JacksonXmlRootElement(localName = "certify_host_binding_key")
-public class CertifyHostBindingKeyRunnable implements Runnable {
+@RPC("certify-host-signing-key")
+@JacksonXmlRootElement(localName = "certify_host_signing_key")
+public class CertifyHostSigningKeyRunnable implements Runnable {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertifyHostBindingKeyRunnable.class);
-    // This OID is used for storing the TCG standard certificate as an attr within the x.509 cert.
-    // We are using this OID as we could not find any specific OID for the certifyKey structure.
-    protected static final String tcgCertExtOid = "2.23.133.6"; 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertifyHostSigningKeyRunnable.class);
     
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
-    private String bindingKeyPemCertificate;
+    private String signingKeyPemCertificate;
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;
@@ -55,13 +50,14 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         this.tpmCertifyKey = tpmCertifyKey;
     }
 
-    public String getBindingKeyPemCertificate() {
-        return bindingKeyPemCertificate;
+    public String getSigningKeyPemCertificate() {
+        return signingKeyPemCertificate;
     }
 
-    public void setBindingKeyPemCertificate(String bindingKeyPemCertificate) {
-        this.bindingKeyPemCertificate = bindingKeyPemCertificate;
+    public void setSigningKeyPemCertificate(String signingKeyPemCertificate) {
+        this.signingKeyPemCertificate = signingKeyPemCertificate;
     }
+
 
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
@@ -69,14 +65,14 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         try {
             if (publicKeyModulus != null && tpmCertifyKey != null) {
 
-                log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
+                log.debug("Starting to verify the Signing key TCG certificate and generate the MTW certified certificate.");
 
                 log.debug("Public key modulus {} and TpmCertifyKey data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey));
 
-                boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+                boolean validatePublicKeyDigest = CertifyHostBindingKeyRunnable.validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
                 if (!validatePublicKeyDigest) {
-                    throw new Exception("Public key specified does not map to the public key digest in the TCG binding certificate");
+                    throw new Exception("Public key specified does not map to the public key digest in the TCG signing key certificate");
                 }
 
                 // Generate the TCG standard exponent to create the RSApublic key from the modulus specified.
@@ -102,7 +98,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
-                        .commonName("CN=Binding_Key_Certificate")
+                        .commonName("CN=Signing_Key_Certificate")
                         .subjectPublicKey(pubBk)
                         .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
                         .issuerPrivateKey(cakey)
@@ -112,46 +108,24 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         .keyUsageKeyEncipherment()
                         .extKeyUsageIsCritical()
                         .randomSerial()
-                        .noncriticalExtension(tcgCertExtOid, tpmCertifyKey)
+                        .noncriticalExtension(CertifyHostBindingKeyRunnable.tcgCertExtOid, tpmCertifyKey)
                         .build();
 
                 if (bkCert != null) {
-                    bindingKeyPemCertificate = X509Util.encodePemCertificate(bkCert);
+                    signingKeyPemCertificate = X509Util.encodePemCertificate(bkCert);
                 } else {
-                    throw new Exception("Error during creation of the MTW signed binding key certificate");
+                    throw new Exception("Error during creation of the MTW signed signing key certificate");
                 }
 
-                log.debug("Successfully created the MTW signed PEM certificate for binding key: {}.", X509Util.encodePemCertificate(bkCert));
+                log.debug("Successfully created the MTW signed PEM certificate for signing key: {}.", X509Util.encodePemCertificate(bkCert));
 
             } else {
                 throw new Exception("Invalid input specified or input value missing.");
             }
         } catch (Exception ex) {
-            log.error("Error during MTW signed binding key certificate.", ex);
+            log.error("Error during MTW signed signing key certificate.", ex);
             throw new RepositoryCreateException();
         }
     }
     
-    protected static boolean validatePublicKeyDigest(byte[] publicKeyModulus, byte[] tcgCertificate) throws Exception {
-        try {
-            
-            log.debug("Validating the public key.");
-            byte[] calculatedModulusDigest = Sha1Digest.digestOf(publicKeyModulus).toByteArray();
-            
-            TpmCertifyKey certifiedKey = new TpmCertifyKey(tcgCertificate);
-            byte[] providedDigest = certifiedKey.getPublicKeyDigest();
-            
-            log.debug("Calculated public key digest is {} -- passed in public key digest is {}", 
-                    TpmUtils.byteArrayToHexString(calculatedModulusDigest), TpmUtils.byteArrayToHexString(certifiedKey.getPublicKeyDigest()));
-            
-            for (int i = 0; i < calculatedModulusDigest.length; i++) {
-                if(calculatedModulusDigest[i] != providedDigest[i])
-                    return false;
-            }
-            
-            return true;
-        } catch (TpmUtils.TpmBytestreamResouceException | TpmUtils.TpmUnsignedConversionException ex) {
-            throw ex;
-        }        
-    }
 }

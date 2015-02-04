@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.as.rest.v2.model.BindingKeyEndorsementRequest;
+import com.intel.mtwilson.as.rest.v2.model.SigningKeyEndorsementRequest;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import java.net.URL;
 import java.util.LinkedHashMap;
@@ -18,10 +19,6 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * <code>Hosts</code> is the class used for creation, updation and deletion of Hosts in the Mt.Wilson system.
- * @author ssbangal
- */
 public class HostTpmKeys extends MtWilsonClient {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
@@ -55,6 +52,24 @@ public class HostTpmKeys extends MtWilsonClient {
             if (resultMap.containsKey("binding_key_pem_certificate")) {
                 pemCertificate = resultMap.get("binding_key_pem_certificate").toString().trim();
                 log.debug("Result of certifying host binding key is {}.", pemCertificate);
+            }
+        }
+        return pemCertificate;
+    }
+
+    public String createSigningKeyCertificate(SigningKeyEndorsementRequest obj) throws JsonProcessingException {
+        log.debug("target: {}", getTarget().getUri().toString());
+        ObjectMapper mapper = new ObjectMapper();
+        log.debug("pojo: {}", mapper.writeValueAsString(obj));
+        String pemCertificate = "";
+        Object result = getTarget().path("rpc/certify-host-signing-key").request().accept(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
+        log.debug("Type of result is {}", result.getClass().getCanonicalName());
+        if (result.getClass().equals(LinkedHashMap.class)) {
+            LinkedHashMap resultMap = (LinkedHashMap)result;
+            log.debug(resultMap.toString());
+            if (resultMap.containsKey("signing_key_pem_certificate")) {
+                pemCertificate = resultMap.get("signing_key_pem_certificate").toString().trim();
+                log.debug("Result of certifying host signing key is {}.", pemCertificate);
             }
         }
         return pemCertificate;
