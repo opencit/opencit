@@ -661,4 +661,5 @@ com.intel.mtwilson.tag.model.SelectionFilterCriteria
 com.intel.mtwilson.tag.setup.cmd.TagCreateCaKey
 com.intel.mtwilson.rpc.v2.resource.CallableRpcAdapter
 com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable
+com.intel.mtwilson.as.rest.v2.rpc.CertifyHostSigningKeyRunnable
 com.intel.mtwilson.attestation.client.jaxrs.HostTpmKeys

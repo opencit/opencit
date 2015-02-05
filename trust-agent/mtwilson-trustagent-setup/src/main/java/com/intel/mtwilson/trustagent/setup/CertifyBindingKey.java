@@ -79,7 +79,7 @@ public class CertifyBindingKey extends AbstractSetupTask {
         log.debug("Public key modulus path is : {}", pubKeyModulus);
 
         BindingKeyEndorsementRequest obj = new BindingKeyEndorsementRequest();
-        obj.setPublicKeyModulus(SetupUtils.readblob(tcgCertPath));
+        obj.setPublicKeyModulus(SetupUtils.readblob(pubKeyModulus));
         obj.setTpmCertifyKey(SetupUtils.readblob(tcgCertPath));
         
         log.debug("Creating TLS policy");
