@@ -5,7 +5,7 @@
 package com.intel.mtwilson.collection;
 
 /**
- *
+ * A minimalist, read-only Collection interface 
  * @author jbuhacoff
  */
 public interface Collection<T> extends Iterable<T> {

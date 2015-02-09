@@ -2,17 +2,18 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.util.crypto.key2;
+package com.intel.dcsg.cpg.io;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.intel.dcsg.cpg.io.Copyable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * TODO:  this class belongs in a more general setting such as util-io
+ * 
  * Extensible with new attributes via the attributes map and Jackson's
  * annotations JsonAnyGetter and JsonAnySetter. Note: if attributes was another
  * object instead of a map we could have used the JsonUnwrapped annotation
