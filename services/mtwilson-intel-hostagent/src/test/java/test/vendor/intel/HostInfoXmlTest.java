@@ -9,6 +9,7 @@ import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import java.io.IOException;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
 /**
