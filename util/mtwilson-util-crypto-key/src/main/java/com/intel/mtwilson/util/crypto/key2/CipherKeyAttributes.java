@@ -4,30 +4,41 @@
  */
 package com.intel.mtwilson.util.crypto.key2;
 
+import com.intel.dcsg.cpg.io.Attributes;
 import com.intel.dcsg.cpg.io.Copyable;
 
 /**
  * Extensible with new attributes via the attributes map and Jackson's
  * annotations JsonAnyGetter and JsonAnySetter.  
- * Note: if attributes was another object instead of a map we could have
- * used the JsonUnwrapped annotation instead to flatten its attributes
- * into this parent class.
  * 
  * @author jbuhacoff
  */
 public class CipherKeyAttributes extends Attributes implements Copyable {
 //    public static enum Attributes { cipherAlgorithm, cipherKeyLength, cipherMode, cipherPaddingMode; }
+    private String keyId;
     private String algorithm;
     private Integer keyLength;
     private String mode;
     private String paddingMode;
     
     /**
+     * The key id can be used to look up the key in a database or 
+     * key server when the encoded key is not present
+     */
+    public String getKeyId() {
+        return keyId;
+//        return (String)attributes.get(Attributes.cipherKeyId.name());
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+//        attributes.put(Attributes.cipherKeyId.name(), cipherKeyId);
+    }
+    
+    /**
      * For a certificate, refers to the algorithm of the enclosed public key.
      * Examples: AES, RSA
      */
-    
-    
     public String getAlgorithm() {
         return algorithm;
 //        return (String)attributes.get(Attributes.cipherAlgorithm.name());
@@ -46,7 +57,6 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
      * Examples of key length for AES: 128, 256
      * Examples of key length for RSA: 1024, 2048
      */
-    
     public Integer getKeyLength() {
         return keyLength;
 //        return (Integer)attributes.get(Attributes.cipherKeyLength.toString());
@@ -66,8 +76,7 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
      * required so that all users of the key know which cipher mode should
      * be used with it.
      * Examples: CBC, OFB
-     */
-    
+     */    
     public String getMode() {
         return mode;
 //        return (String)attributes.get(Attributes.cipherMode.toString());
@@ -84,7 +93,6 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
      * None, PKCS7, Zeros, PKCS15, OAEP.
      * Examples: 
      */
-
     public String getPaddingMode() {
         return paddingMode;
 //        return (String)attributes.get(Attributes.cipherPaddingMode.toString());
@@ -111,6 +119,7 @@ public class CipherKeyAttributes extends Attributes implements Copyable {
     
     public void copyFrom(CipherKeyAttributes source) {
         super.copyFrom(source);
+        this.keyId = source.keyId;
         this.algorithm = source.algorithm;
         this.keyLength = source.keyLength;
         this.mode = source.mode;

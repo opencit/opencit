@@ -4,19 +4,36 @@
  */
 package com.intel.mtwilson.util.crypto.key2;
 
+import com.intel.dcsg.cpg.io.Attributes;
 import com.intel.dcsg.cpg.io.Copyable;
+import java.util.List;
 
 /**
  *
  * @author jbuhacoff
  */
 public class IntegrityKeyAttributes extends Attributes implements Copyable {
+    private String keyId;
     private String algorithm;
     private Integer keyLength;
+    private List<String> manifest;
     
     /**
-     * Refers to the digest algorithm used in HMAC-digestAlgorithm.
-     * Examples: MD5, SHA-1, SHA-256
+     * The key id can be used to look up the key in a database or 
+     * key server when the encoded key is not present
+     */
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+    
+    /**
+     * Refers to the signature algorithm, for example RSA-SHA256 
+     * or HMAC-SHA256.  This includes choice of RSA or HMAC as well as
+     * the digest algorithm used with it. 
      */
     public String getAlgorithm() {
         return algorithm;
@@ -31,7 +48,7 @@ public class IntegrityKeyAttributes extends Attributes implements Copyable {
     /**
      * In bits, and always refers to the plaintext key without any
      * encoding or encryption. 
-     * The key length can be any length up to B, the block length of the
+     * For HMAC, the key length can be any length up to B, the block length of the
      * corresponding hash function. Key length should be at least L ,
      * the output length of the hash function. 
      * Therefore:   L lte K lte B.
@@ -43,9 +60,10 @@ public class IntegrityKeyAttributes extends Attributes implements Copyable {
      * SHA256 input block size (B) is 512-bit (64 byte), output size (L) is 256-bit (32 byte)
      * SHA384 input block size (B) is 1024-bit (128 byte), output size (L) is 384-bit (48 byte)
      * SHA512 input block size (B) is 1024-bit (128 byte), output size (L) is 512-bit (64 byte)
+     * 
+     * For RSA, the key length can be any valid RSA key length such as 1024
+     * or 2048.
      */
-
-    
     public Integer getKeyLength() {
         return keyLength;
     }
@@ -53,6 +71,26 @@ public class IntegrityKeyAttributes extends Attributes implements Copyable {
     public void setKeyLength(Integer keyLength) {
         this.keyLength = keyLength;
     }
+
+    /**
+     * The manifest indicates what is being covered by the 
+     * integrity signature. It could be a document, or a
+     * document and its metadata, or some other set of related
+     * items. The manifest is an ordered list - the items
+     * are concatenated in the order specified in the manifest
+     * before applying the digest.
+     * 
+     * @return 
+     */
+    public List<String> getManifest() {
+        return manifest;
+    }
+
+    public void setManifest(List<String> manifest) {
+        this.manifest = manifest;
+    }
+    
+    
 
 
     
@@ -67,6 +105,7 @@ public class IntegrityKeyAttributes extends Attributes implements Copyable {
     
     public void copyFrom(IntegrityKeyAttributes source) {
         super.copyFrom(source);
+        this.keyId = source.keyId;
         this.algorithm = source.algorithm;
         this.keyLength = source.keyLength;
     }

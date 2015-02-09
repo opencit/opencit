@@ -10,20 +10,8 @@ package com.intel.mtwilson.util.crypto.key2;
  * @author jbuhacoff
  */
 public class IntegrityKey extends IntegrityKeyAttributes {
-    private byte[] keyId;
     private byte[] encoded;
     
-    /**
-     * The key id can be used to look up the key in a database or 
-     * key server when the encoded key is not present
-     */
-    public byte[] getKeyId() {
-        return keyId;
-    }
-
-    public void setKeyId(byte[] keyId) {
-        this.keyId = keyId;
-    }
 
 
     
@@ -53,7 +41,7 @@ public class IntegrityKey extends IntegrityKeyAttributes {
     
     public void copyFrom(IntegrityKey source) {
         super.copyFrom(source);
-        this.keyId = source.keyId;
+//        this.keyId = source.keyId;
         this.encoded = source.encoded;
     }
 

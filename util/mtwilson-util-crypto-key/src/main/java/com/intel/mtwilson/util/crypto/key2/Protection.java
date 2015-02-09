@@ -14,9 +14,27 @@ import com.intel.dcsg.cpg.io.Copyable;
  * @author jbuhacoff
  */
 public class Protection implements Copyable {
-    public CipherKey encryption;
-    public IntegrityKey integrity;
+    private CipherKeyAttributes encryption;
+    private IntegrityKeyAttributes integrity;
 
+    private Protection() {
+    }
+
+    
+    public Protection(CipherKeyAttributes encryption, IntegrityKeyAttributes integrity) {
+        this.encryption = encryption;
+        this.integrity = integrity;
+    }
+
+    public CipherKeyAttributes getEncryption() {
+        return encryption;
+    }
+
+    public IntegrityKeyAttributes getIntegrity() {
+        return integrity;
+    }
+
+    
     @Override
     public Protection copy() {
         Protection newInstance = new Protection();

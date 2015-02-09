@@ -10,22 +10,8 @@ package com.intel.mtwilson.util.crypto.key2;
  */
 public class CipherKey extends CipherKeyAttributes {
 //    public static enum Attributes { cipherKeyId, encoded; }
-    private String keyId;
     private byte[] encoded;
     
-    /**
-     * The key id can be used to look up the key in a database or 
-     * key server when the encoded key is not present
-     */
-    public String getKeyId() {
-        return keyId;
-//        return (String)attributes.get(Attributes.cipherKeyId.name());
-    }
-
-    public void setKeyId(String keyId) {
-        this.keyId = keyId;
-//        attributes.put(Attributes.cipherKeyId.name(), cipherKeyId);
-    }
 
     
     
@@ -59,7 +45,7 @@ public class CipherKey extends CipherKeyAttributes {
     
     public void copyFrom(CipherKey source) {
         super.copyFrom(source);
-        this.keyId = source.keyId;
+//        this.keyId = source.keyId;
         this.encoded = source.encoded;
     }
 
