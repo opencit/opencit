@@ -224,15 +224,22 @@ public class IntelHostAgent2 implements HostAgent {
             return bindingKeyCert;
         }
         catch(Exception e) {
-            log.debug("Cannot retrieve Binding key certificate: {}", e.toString(), e);
-            return null;
+            log.error("Cannot retrieve Binding key certificate: {}", e.toString(), e);
+            throw e;
         }
     }
     
 
     @Override
     public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {
-        // TODO Need to call into the REST API on TA
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            VMAttestationResponse vmAttestationReport = client.getVMAttestationReport(vmInstanceId);
+            log.debug("VM Attestation result is {}", vmAttestationReport.isTrustStatus());
+            return vmAttestationReport;
+        }
+        catch(Exception e) {
+            log.error("Cannot retrieve Binding key certificate: {}", e.toString(), e);
+            throw e;
+        }
     }
 }
