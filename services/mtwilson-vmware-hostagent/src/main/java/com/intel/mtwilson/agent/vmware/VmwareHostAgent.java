@@ -11,6 +11,7 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
@@ -351,5 +352,15 @@ public class VmwareHostAgent implements HostAgent {
     @Override
     public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
         throw new UnsupportedOperationException("Unsupported operation");
+    }
+
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public VMAttestationResponse getVMAttestationReport(String vmInstanceId) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
