@@ -2,17 +2,18 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.trustagent.cmd;
+package com.intel.mtwilson.shiro.file.cmd;
 
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.dcsg.cpg.console.input.Input;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.shiro.file.LoginDAO;
-import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import org.apache.commons.configuration.Configuration;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -24,7 +25,6 @@ import java.util.List;
  */
 public class Password implements Command {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Password.class);
-    private TrustagentConfiguration configuration;
     private Configuration options;
     private LoginDAO dao;
     
@@ -74,11 +74,12 @@ public class Password implements Command {
 
     @Override
     public void execute(String[] args) throws Exception {
-        configuration = TrustagentConfiguration.loadConfiguration();
+        File userFile = new File(Folders.configuration()+File.separator+"users.txt");
+        File permissionFile = new File(Folders.configuration()+File.separator+"permissions.txt");
         
         // store or replace the user record
         log.debug("Loading users and permissions");
-        dao = new LoginDAO(configuration.getTrustagentUserFile(), configuration.getTrustagentPermissionsFile());
+        dao = new LoginDAO(userFile, permissionFile);
         
         // usage:   username  (prompt for password, no permissions)
         // usage:   username password  (no permissions)

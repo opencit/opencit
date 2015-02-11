@@ -2,33 +2,25 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.trustagent.setup;
+package com.intel.mtwilson.shiro.file.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.Platform;
+import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.shiro.file.LoginDAO;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
-import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
- * NOTE: this task is deprecated by mtwilson-shiro-setup/mtwilson-shiro-file including a similar
- * task but without specific permissions, so an admin can either set the
- * username and passowrd in environment variables or just create the username
- * automatically with this task and add application-specific permissions using
- * a command immediately after.
- * 
- * Trust agent admin user permissions:  tpm:provision, tpm:quote, host:info, aik:create
- * 
  * @author jbuhacoff
  */
-public class CreateAdminUser extends LocalSetupTask {
+public class AdminUser extends LocalSetupTask {
     private File userFile;
     private File permissionFile;
     private String username;
@@ -36,14 +28,12 @@ public class CreateAdminUser extends LocalSetupTask {
     private boolean isNewPassword = false;
     
     private String getUsername() {
-        if( System.getenv("TRUSTAGENT_ADMIN_USERNAME") != null ) {
-            return System.getenv("TRUSTAGENT_ADMIN_USERNAME");
-        }
-        return "admin";
+        return Environment.get("ADMIN_USERNAME", "admin");
     }
     private String getPassword() {
-        if( System.getenv("TRUSTAGENT_ADMIN_PASSWORD") != null ) {
-            return System.getenv("TRUSTAGENT_ADMIN_PASSWORD");
+        String existing = Environment.get("ADMIN_PASSWORD");
+        if( existing != null ) {
+            return existing;
         }
         isNewPassword = true;
         return RandomUtil.randomBase64String(8).replace("=","_"); 
@@ -54,9 +44,8 @@ public class CreateAdminUser extends LocalSetupTask {
     protected void configure() throws Exception {
         username = getUsername();
         password = getPassword();
-        TrustagentConfiguration trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
-        userFile = trustagentConfiguration.getTrustagentUserFile();
-        permissionFile = trustagentConfiguration.getTrustagentPermissionsFile();
+        userFile = new File(Folders.configuration()+File.separator+"users.txt");
+        permissionFile = new File(Folders.configuration()+File.separator+"permissions.txt");
     }
 
     @Override
@@ -85,10 +74,7 @@ public class CreateAdminUser extends LocalSetupTask {
             user.setSalt(RandomUtil.randomByteArray(8));
             user.setPasswordHash(PasswordUtil.hash(password.getBytes(), user));
             loginDAO.createUser(user);
-            loginDAO.addPermission(username, "tpm:provision");
-            loginDAO.addPermission(username, "tpm:quote");
-            loginDAO.addPermission(username, "host:info");
-            loginDAO.addPermission(username, "aik:create");
+            loginDAO.addPermission(username, "*:*");
         }
         if( isNewPassword ) {
             // save the password to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
