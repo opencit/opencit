@@ -86,11 +86,11 @@ public class CreateAdminUser extends LocalSetupTask {
         if( isNewPassword ) {
             // save the password to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
             File privateDir = new File(Folders.configuration() + File.separator + "private");
+            if( !privateDir.exists() ) { privateDir.mkdirs(); }
             if( Platform.isUnix() ) {
                 Runtime.getRuntime().exec("chmod 700 "+privateDir.getAbsolutePath());
             }
             File passwordFile = privateDir.toPath().resolve("password.txt").toFile();
-            if( !privateDir.exists() ) { privateDir.mkdirs(); }
             FileUtils.writeStringToFile(passwordFile, ""); // first create an empty file so we can set permissions before writing the password to it
             if( Platform.isUnix() ) {
                 Runtime.getRuntime().exec("chmod 600 "+passwordFile.getAbsolutePath());
