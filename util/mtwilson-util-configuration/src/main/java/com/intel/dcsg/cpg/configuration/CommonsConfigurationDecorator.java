@@ -27,7 +27,7 @@ public class CommonsConfigurationDecorator extends org.apache.commons.configurat
             configuration.set(key, (String)value);
         }
         else {
-            configuration.set(key, value.toString());
+            configuration.set(key, String.valueOf(value));
         }
     }
 
