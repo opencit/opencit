@@ -238,7 +238,7 @@ public class IntelHostAgent2 implements HostAgent {
             return vmAttestationReport;
         }
         catch(Exception e) {
-            log.error("Cannot retrieve Binding key certificate: {}", e.toString(), e);
+            log.error("Cannot retrieve VM attestation report: {}", e.toString(), e);
             throw e;
         }
     }

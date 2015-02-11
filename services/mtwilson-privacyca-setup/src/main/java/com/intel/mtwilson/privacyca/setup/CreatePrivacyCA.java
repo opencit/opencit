@@ -44,13 +44,21 @@ public class CreatePrivacyCA extends LocalSetupTask {
         if( !identityPemFile.exists() ) {
             validation("Privacy CA certs file does not exist");
         }
+        if( !identityP12.exists() ) {
+            validation("Privacy CA P12 file does not exist");
+        }
     }
 
     @Override
     protected void execute() throws Exception {
         TpmUtils.createCaP12(2048, identityIssuer, identityPassword, identityP12.getAbsolutePath(), identityCertificateValidityDays);
         X509Certificate pcaCert = TpmUtils.certFromP12(identityP12.getAbsolutePath(), identityPassword);
-        FileUtils.writeStringToFile(identityPemFile, X509Util.encodePemCertificate(pcaCert)); 
+        String self = X509Util.encodePemCertificate(pcaCert);
+        String existingPrivacyAuthorities = "";
+        if( identityPemFile.exists() ) {
+            existingPrivacyAuthorities = FileUtils.readFileToString(identityPemFile);
+        }
+        FileUtils.writeStringToFile(identityPemFile, String.format("%s\n%s", existingPrivacyAuthorities,self)); 
     }
     
 }

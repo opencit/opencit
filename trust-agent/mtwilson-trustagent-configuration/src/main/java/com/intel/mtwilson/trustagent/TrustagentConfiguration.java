@@ -271,7 +271,7 @@ public class TrustagentConfiguration {
     
     // Helper methods for the Binding key
     public String getBindingKeySecretHex() {
-        return getConfiguration().getString(BINDING_KEY_SECRET); // intentionally no default - this must be generated during setup
+        return conf.get(BINDING_KEY_SECRET); // intentionally no default - this must be generated during setup
     }
     
     public byte[] getBindingKeySecret() {
@@ -283,29 +283,29 @@ public class TrustagentConfiguration {
     }
     
     public int getBindingKeyIndex() {
-        return getConfiguration().getInteger(BINDING_KEY_INDEX, 3); 
+        return Integer.valueOf(conf.get(BINDING_KEY_INDEX, "3")); 
     }
     
     public File getBindingKeyModulusFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pub");        
+        return new File(Folders.configuration() + File.separator + "bindingkey.pub");        
     }
 
     // TODO : Decide the extenstion with which the TCG certificate should be stored.    
     public File getBindingKeyTCGCertificateFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.ckf");        
+        return new File(Folders.configuration() + File.separator + "bindingkey.ckf");        
     }
 
     public File getBindingKeyX509CertificateFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pem");        
+        return new File(Folders.configuration() + File.separator + "bindingkey.pem");        
     }
 
     public File getBindingKeyBlobFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.blob");        
+        return new File(Folders.configuration() + File.separator + "bindingkey.blob");        
     }
 
     // Helper methods for the Signing key
     public String getSigningKeySecretHex() {
-        return getConfiguration().getString(SIGNING_KEY_SECRET); // intentionally no default - this must be generated during setup
+        return conf.get(SIGNING_KEY_SECRET); // intentionally no default - this must be generated during setup
     }
     
     public byte[] getSigningKeySecret() {
@@ -317,24 +317,24 @@ public class TrustagentConfiguration {
     }
     
     public int getSigningKeyIndex() {
-        return getConfiguration().getInteger(SIGNING_KEY_INDEX, 4); 
+        return Integer.valueOf(conf.get(SIGNING_KEY_INDEX, "4")); 
     }
     
     public File getSigningKeyModulusFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.pub");        
+        return new File(Folders.configuration() + File.separator + "signingkey.pub");        
     }
 
     // TODO : Decide the extenstion with which the TCG certificate should be stored.        
     public File getSigningKeyTCGCertificateFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.ckf");        
+        return new File(Folders.configuration() + File.separator + "signingkey.ckf");        
     }
 
     public File getSigningKeyX509CertificateFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.pem");        
+        return new File(Folders.configuration() + File.separator + "signingkey.pem");        
     }
 
     public File getSigningKeyBlobFile() {
-        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.blob");        
+        return new File(Folders.configuration() + File.separator + "signingkey.blob");        
     }
     
 }

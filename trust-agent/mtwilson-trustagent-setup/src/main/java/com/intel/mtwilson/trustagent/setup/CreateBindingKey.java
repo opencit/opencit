@@ -91,7 +91,7 @@ public class CreateBindingKey extends AbstractSetupTask {
         String bindingKeySecretHex = RandomUtil.randomHexString(20);
         log.info("Generated random Binding key secret"); 
         
-        getConfiguration().setString(TrustagentConfiguration.BINDING_KEY_SECRET, bindingKeySecretHex);
+        getConfiguration().set(TrustagentConfiguration.BINDING_KEY_SECRET, bindingKeySecretHex);
         
         // Call into the TpmModule certifyKey function to create the binding key and certify the same using AIK to build the chain of trust.
         HashMap<String, byte[]> certifyKey = TpmModule.certifyKey(TrustagentConfiguration.BINDING_KEY_NAME, trustagentConfiguration.getBindingKeySecret(), 

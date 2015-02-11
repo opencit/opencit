@@ -41,7 +41,10 @@ public class CreateEndorsementCA extends LocalSetupTask {
     @Override
     protected void validate() throws Exception {
         if( !endorsementPemFile.exists() ) {
-            validation("Privacy CA certs file does not exist");
+            validation("Endorsement CA certs file does not exist");
+        }
+        if( !endorsementP12.exists() ) {
+            validation("Endorsement P12 file does not exist");
         }
     }
 

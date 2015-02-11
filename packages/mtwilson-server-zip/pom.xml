@@ -70,7 +70,13 @@
       <artifactId>mtwilson-console</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-extensions-cache</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+        
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-attestation</artifactId>
@@ -94,6 +100,11 @@
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-attestation-ws-v2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-vm-attestation-ws-v2</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
