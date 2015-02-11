@@ -18,7 +18,14 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
- *
+ * NOTE: this task is deprecated by mtwilson-shiro-setup including a similar
+ * task but without specific permissions, so an admin can either set the
+ * username and passowrd in environment variables or just create the username
+ * automatically with this task and add application-specific permissions using
+ * a command immediately after.
+ * 
+ * Trust agent admin user permissions:  tpm:provision, tpm:quote, host:info, aik:create
+ * 
  * @author jbuhacoff
  */
 public class CreateAdminUser extends LocalSetupTask {
