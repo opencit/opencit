@@ -144,12 +144,12 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         keystore.save();
         
         // save the settings in configuration
-        getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DN, dn);
+        getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DN, dn);
         if( ip != null ) {
-            getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_IP, StringUtils.join(ip, ","));
+            getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_IP, StringUtils.join(ip, ","));
         }
         if( dns != null ) {
-            getConfiguration().setString(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DNS, StringUtils.join(dns, ","));
+            getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_TLS_CERT_DNS, StringUtils.join(dns, ","));
         }
     }
     

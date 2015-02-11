@@ -57,7 +57,7 @@ mtwilson.api.key.password=beXyfVzb5D8oSHucNErVyw\=\=
      */
     @Test
     public void registerWithConfiguration() throws Exception {
-        File directory = new File(My.filesystem().getConfigurationPath());
+        File directory = My.configuration().getDirectory(); //new File(My.filesystem().getConfigurationPath());
         String username = testProperties.getProperty("mtwilson.api.username");
         String password = testProperties.getProperty("mtwilson.api.keystore.password");
         URL server = new URL(testProperties.getProperty("mtwilson.api.url")); // My.configuration().getMtWilsonURL();
@@ -102,7 +102,7 @@ mtwilson.api.key.password=beXyfVzb5D8oSHucNErVyw\=\=
     @Test
     public void registerWithExistingKey() throws Exception {
         // configuration
-        File directory = new File(My.filesystem().getConfigurationPath());
+        File directory = My.configuration().getDirectory(); //new File(My.filesystem().getConfigurationPath());
         String username = My.configuration().getClientProperties().getProperty("mtwilson.api.key.alias");
         String password = My.configuration().getClientProperties().getProperty("mtwilson.api.keystore.password");
         URL server = My.configuration().getMtWilsonURL();

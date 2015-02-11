@@ -1,5 +1,7 @@
 package com.intel.mtwilson.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 
@@ -22,7 +24,8 @@ public class Pcr extends ObjectModel {
         this(new PcrIndex(pcrNumber), new Sha1Digest(sha1Digest));
     }
     
-    public Pcr(int pcrNumber, String sha1Digest) {
+    @JsonCreator
+    public Pcr(@JsonProperty("index") int pcrNumber, @JsonProperty("value") String sha1Digest) {
         this(new PcrIndex(pcrNumber), new Sha1Digest(sha1Digest));
     }
     

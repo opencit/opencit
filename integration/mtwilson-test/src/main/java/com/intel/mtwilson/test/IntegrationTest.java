@@ -46,14 +46,14 @@ public class IntegrationTest {
 
     @BeforeClass
     public static void login() throws Exception {
-        String filename = My.filesystem().getConfigurationPath() + File.separator + "test.properties";
+        String filename = My.configuration().getDirectoryPath()+File.separator+"test.properties";//My.filesystem().getConfigurationPath() + File.separator + "test.properties";
         File file = new File(filename);
         try (FileInputStream in = new FileInputStream(file)) {
             Properties properties = new Properties();
             properties.load(in);
             String username = properties.getProperty("login.username");
             String password = properties.getProperty("login.password");
-            File ini = new File(My.filesystem().getConfigurationPath() + File.separator + "shiro-junit.ini");
+            File ini = new File(My.configuration().getDirectoryPath() + File.separator + "shiro-junit.ini");
             Login.existingUser(ini, username, password);
         }
 

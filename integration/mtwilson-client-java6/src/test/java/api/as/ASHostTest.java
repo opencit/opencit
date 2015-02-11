@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.*;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +39,7 @@ public class ASHostTest {
     private static ApiClient c;
     @BeforeClass
     public static void setup() throws IOException, ClientException  {
-        c = new ApiClient(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
+        c = new ApiClient(CommonsConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
     }
     
     //@Test

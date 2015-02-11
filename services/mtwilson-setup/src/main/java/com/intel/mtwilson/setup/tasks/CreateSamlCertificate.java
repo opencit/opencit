@@ -48,43 +48,43 @@ public class CreateSamlCertificate extends LocalSetupTask {
     public static final String SAML_KEY_PASSWORD = "saml.key.password";
 
     public String getSamlKeystoreFile() {
-        return getConfiguration().getString(SAML_KEYSTORE_FILE, My.filesystem().getConfigurationPath() + File.separator + "mtwilson-saml.jks");
+        return getConfiguration().get(SAML_KEYSTORE_FILE, My.configuration().getDirectoryPath() + File.separator + "mtwilson-saml.jks");
     }
 
     public void setSamlKeystoreFile(String samlKeystoreFile) {
-        getConfiguration().setString(SAML_KEYSTORE_FILE, samlKeystoreFile);
+        getConfiguration().set(SAML_KEYSTORE_FILE, samlKeystoreFile);
     }
 
     public String getSamlKeystorePassword() {
-        return getConfiguration().getString(SAML_KEYSTORE_PASSWORD); // no default here, will return null if not configured: only the configure() method will generate a new random password if necessary
+        return getConfiguration().get(SAML_KEYSTORE_PASSWORD, null); // no default here, will return null if not configured: only the configure() method will generate a new random password if necessary
     }
 
     public void setSamlKeystorePassword(String samlKeystorePassword) {
-        getConfiguration().setString(SAML_KEYSTORE_PASSWORD, samlKeystorePassword);
+        getConfiguration().set(SAML_KEYSTORE_PASSWORD, samlKeystorePassword);
     }
 
     public String getSamlKeyAlias() {
-        return getConfiguration().getString(SAML_KEY_ALIAS, "mtwilson-saml");
+        return getConfiguration().get(SAML_KEY_ALIAS, "mtwilson-saml");
     }
 
     public void setSamlKeyAlias(String samlKeyAlias) {
-        getConfiguration().setString(SAML_KEY_ALIAS, samlKeyAlias);
+        getConfiguration().set(SAML_KEY_ALIAS, samlKeyAlias);
     }
 
     public String getSamlKeyPassword() {
-        return getConfiguration().getString(SAML_KEY_PASSWORD); // no default here, will return null if not configured: only the configure() method will generate a new random password if necessary
+        return getConfiguration().get(SAML_KEY_PASSWORD, null); // no default here, will return null if not configured: only the configure() method will generate a new random password if necessary
     }
 
     public void setSamlKeyPassword(String samlKeyPassword) {
-        getConfiguration().setString(SAML_KEY_PASSWORD, samlKeyPassword);
+        getConfiguration().set(SAML_KEY_PASSWORD, samlKeyPassword);
     }
 
     public String getSamlCertificateDistinguishedName() {
-        return getConfiguration().getString(SAML_CERTIFICATE_DN, "CN=mtwilson-saml,OU=mtwilson");
+        return getConfiguration().get(SAML_CERTIFICATE_DN, "CN=mtwilson-saml,OU=mtwilson");
     }
 
     public void setSamlCertificateDistinguishedName(String samlDistinguishedName) {
-        getConfiguration().setString(SAML_CERTIFICATE_DN, samlDistinguishedName);
+        getConfiguration().set(SAML_CERTIFICATE_DN, samlDistinguishedName);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class CreateSamlCertificate extends LocalSetupTask {
         Pem samlCert = new Pem("CERTIFICATE", samlcert.getEncoded());
         Pem samlCaCert = new Pem("CERTIFICATE", cacert.getEncoded());
         String certificateChainPem = String.format("%s\n%s", samlCert.toString(), samlCaCert.toString());
-        File certificateChainPemFile = new File(My.filesystem().getConfigurationPath() + File.separator + "saml.crt.pem");
+        File certificateChainPemFile = new File(My.configuration().getDirectoryPath() + File.separator + "saml.crt.pem");
         try (FileOutputStream certificateChainPemFileOut = new FileOutputStream(certificateChainPemFile)) {
             IOUtils.write(certificateChainPem, certificateChainPemFileOut);
         } catch (IOException e) {

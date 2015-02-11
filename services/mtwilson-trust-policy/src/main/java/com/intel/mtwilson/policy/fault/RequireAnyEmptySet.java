@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy.fault;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.policy.Fault;
 
 /**
@@ -13,6 +15,8 @@ import com.intel.mtwilson.policy.Fault;
  * 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class RequireAnyEmptySet extends Fault {
     public RequireAnyEmptySet() {
         super("RequireAny policy set must contain at least one policy");

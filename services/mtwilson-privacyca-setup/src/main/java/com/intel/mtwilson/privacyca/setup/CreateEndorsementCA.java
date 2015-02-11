@@ -34,14 +34,17 @@ public class CreateEndorsementCA extends LocalSetupTask {
         
         if( endorsementPassword == null || endorsementPassword.isEmpty() ) {
             endorsementPassword = RandomUtil.randomBase64String(16); 
-            getConfiguration().setString("mtwilson.privacyca.ek.p12.password", endorsementPassword);
+            getConfiguration().set("mtwilson.privacyca.ek.p12.password", endorsementPassword);
         }
     }
 
     @Override
     protected void validate() throws Exception {
         if( !endorsementPemFile.exists() ) {
-            validation("Privacy CA certs file does not exist");
+            validation("Endorsement CA certs file does not exist");
+        }
+        if( !endorsementP12.exists() ) {
+            validation("Endorsement P12 file does not exist");
         }
     }
 

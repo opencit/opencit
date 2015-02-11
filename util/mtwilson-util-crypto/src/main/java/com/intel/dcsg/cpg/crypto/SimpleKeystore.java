@@ -20,7 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: this class is not simple enough; need to simplify usage
+ * NOTE: this class is not simple enough; please see SecretKeyStore and PrivateKeyStore
+ * in the kms project for easier replacements.
  *
  * Currently uses Java default keystore type "JKS" but later we may implement an
  * AES-128 keystore encryption provider.

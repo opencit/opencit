@@ -4,7 +4,7 @@
  */
 package test.saml;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.tag.common.X509AttrBuilder;
@@ -159,7 +159,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
     @Test
     public void testGenerateSamlWithAssetTags() throws Exception {
         // equivalent of private SamlGenerator getSamlGenerator() in HostTrustBO:
-        SamlGenerator samlGenerator = new SamlGenerator(new CommonsConfigurationAdapter(My.configuration().getConfiguration()));
+        SamlGenerator samlGenerator = new SamlGenerator(new CommonsConfiguration(My.configuration().getConfiguration()));
         samlGenerator.setIssuer("junit-test"); // String defaultIssuer = "https://" + localhost.getHostAddress() + ":8181/AttestationService"; // TODO:  need  to get our local address from the web container or configuration (mtwilson.api.baseurl) instead of hard-coding this here
         // generate assertion
         HostTrustStatus trust = new HostTrustStatus();

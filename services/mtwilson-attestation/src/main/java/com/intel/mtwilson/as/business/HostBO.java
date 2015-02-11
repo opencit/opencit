@@ -218,6 +218,9 @@ public class HostBO {
                         // for all hosts (used to be just vmware, but no reason right now to make it vmware-specific...), if pcr 22 happens to match our location database, populate the location field in the host record
                             tblHosts.setLocation( getLocation(pcrManifest) );
                         
+                        // Add the binding key certificate if available. This certificate can be used by 
+                        // any 3rd party component to encrypt data that should be decrypted only on this host.
+                        setBindingKeyCertificate(tblHosts, agent);
                         
                         //Bug: 597, 594 & 583. Here we were trying to get the length of the TlsKeystore without checking if it is NULL or not. 
                         // If in case it is NULL, it would throw NullPointerException                        
@@ -509,6 +512,10 @@ public class HostBO {
                         tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
                         tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
 
+                        // Add the binding key certificate if available. This certificate can be used by 
+                        // any 3rd party component to encrypt data that should be decrypted only on this host.
+                        setBindingKeyCertificate(tblHosts, agent);
+                        
                 storePrivateTlsPolicy(tblHosts); // will create a new private policy, or update an existing one, or delete an existing private policy (if host now has a shared policy)
                         
 			My.jpa().mwHosts().edit(tblHosts);
@@ -1215,4 +1222,27 @@ public class HostBO {
             log.info("Error during asset tag unmapping for the host {}. Details: {}.", name, ex.getMessage());
         }
     }
+    
+    /**
+     * Retrieves the binding key certificate from the host if available. This binding key certificate
+     * can be used by any component to encrypt the data that only the host should be able to decrypt.
+     * @param tblHosts
+     * @param agent 
+     */
+    private void setBindingKeyCertificate(TblHosts tblHosts, HostAgent agent) {
+        
+        tblHosts.setBindingKeyCertificate("");
+        
+        try {            
+            log.debug("About to update the binding key certificate for host: {}", tblHosts.getName());
+            X509Certificate cert = agent.getBindingKeyCertificate();
+            String bindingKeyCertificate = X509Util.encodePemCertificate(cert);
+            tblHosts.setBindingKeyCertificate(bindingKeyCertificate);
+            log.debug("Updated the host: {} with binding key certificate: {}", tblHosts.getName(), bindingKeyCertificate);
+        } catch (UnsupportedOperationException ex) {
+        } catch (Exception ex) {
+            log.error("Error during retrieval of the binding key certificate from the host {}.", tblHosts.getName());
+        }        
+    }
+    
 }

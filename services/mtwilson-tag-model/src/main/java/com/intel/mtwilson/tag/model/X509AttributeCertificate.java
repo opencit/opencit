@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.tag.model;
 
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.x509.UTF8NameValueMicroformat;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
@@ -110,7 +110,8 @@ public class X509AttributeCertificate {
      * @param encodedCertificate
      * @return
      */
-    public static X509AttributeCertificate valueOf(byte[] encodedCertificate) {
+    @JsonCreator
+    public static X509AttributeCertificate valueOf(@JsonProperty("encoded") byte[] encodedCertificate) {
         X509AttributeCertificate result = new X509AttributeCertificate(encodedCertificate);
         X509AttributeCertificateHolder cert;
         try {
@@ -151,6 +152,7 @@ public class X509AttributeCertificate {
         result.tags2 = new ArrayList<>();
         result.tagsOther = new ArrayList<>();
         for (Attribute attr : attributes) {
+            log.debug("attr {} is {}", attr.hashCode(), attr.toString());
             result.attributes.add(attr);
             for (ASN1Encodable value : attr.getAttributeValues()) {
 //                log.trace("encoded value: {}", Base64.encodeBase64String(value.getEncoded())); // throws IOException

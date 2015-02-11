@@ -1,8 +1,5 @@
 
 import com.intel.mtwilson.MyConfiguration;
-import com.intel.mtwilson.fs.ApplicationFilesystem;
-import com.intel.mtwilson.fs.ConfigurableFilesystem;
-import com.intel.mtwilson.fs.FeatureFilesystem;
 import java.io.IOException;
 import org.junit.Test;
 
@@ -17,7 +14,7 @@ import org.junit.Test;
  */
 public class FilesystemTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FilesystemTest.class);
-
+/*
     @Test
     public void testDefaultFilesystem() {
         ApplicationFilesystem fs = new ConfigurableFilesystem();
@@ -33,7 +30,7 @@ public class FilesystemTest {
         log.debug("sql = {}", bootstrapFilesystem.getSqlPath());
         log.debug("var = {}", bootstrapFilesystem.getVarPath());
     }
-    
+    */
     @Test
     public void testRetrieveLocale() throws IOException {
         MyConfiguration myConfiguration = new MyConfiguration();

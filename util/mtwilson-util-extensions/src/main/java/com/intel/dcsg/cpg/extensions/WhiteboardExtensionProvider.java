@@ -337,6 +337,16 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
     @Override
     public void reload() {
 //        throw new UnsupportedOperationException("Not supported yet.");
+        /**
+         * Because the whiteboard is passive, and any component can register
+         * extensions on the whiteboard, what we need here is a mechanism
+         * for those other components to opt-in and register themselves
+         * as well in a separate list of Runnables maybe that we can call
+         * on reload in order to do whatever they do again and re-register
+         * all the extensions (in case there's a change - because reload
+         * would be triggered by a feature/extensions manager probably or
+         * manually by the user after adding/removing/upgrading somthing)
+         */
     }
 
     @Override

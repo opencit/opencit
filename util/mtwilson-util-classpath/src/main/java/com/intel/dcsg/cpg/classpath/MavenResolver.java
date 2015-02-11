@@ -109,7 +109,7 @@ Maven-Classpath: ./org/restlet/jse/org.restlet/2.2-M4/org.restlet-2.2-
     @Override
     public Set<File> resolveClasspath(Manifest manifest) {
         log.debug("Resolving classpath in manifest");
-        HashSet<File> files = new HashSet<File>();
+        HashSet<File> files = new HashSet<>();
         // how to locate the module that contains this manifest:
 //        String groupId = manifest.getMainAttributes().getValue("Maven-GroupId");
 //        String artifactId = manifest.getMainAttributes().getValue("Maven-ArtifactId");
@@ -126,7 +126,7 @@ Maven-Classpath: ./org/restlet/jse/org.restlet/2.2-M4/org.restlet-2.2-
     // this is the opposite of resolveClasspath .... this one lists the missing artifacts only
     public Set<String> listMissingArtifacts(Manifest manifest) {
         log.debug("Checking for missing artifacts in classpath");
-        HashSet<String> missing = new HashSet<String>();
+        HashSet<String> missing = new HashSet<>();
         // how to locate the module that contains this manifest:
 //        String groupId = manifest.getMainAttributes().getValue("Maven-GroupId");
 //        String artifactId = manifest.getMainAttributes().getValue("Maven-ArtifactId");
@@ -235,7 +235,7 @@ Maven-Classpath: ./org/restlet/jse/org.restlet/2.2-M4/org.restlet-2.2-
         // repository folder exists, now try to find the artifact
         FileTree tree = new FileTree();
         DirectoryFilter folderFilter = new DirectoryFilter();
-        DepthFirstTreeIterator<File> it = new DepthFirstTreeIterator<File>(tree, directory, folderFilter);
+        DepthFirstTreeIterator<File> it = new DepthFirstTreeIterator<>(tree, directory, folderFilter);
         File found = null;
         while (it.hasNext()) {
             File folder = it.next();
