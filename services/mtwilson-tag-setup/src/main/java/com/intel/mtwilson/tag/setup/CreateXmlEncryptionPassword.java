@@ -23,7 +23,7 @@ public class CreateXmlEncryptionPassword extends AbstractSetupTask {
         if( password == null || password.isEmpty() ) {
             password = RandomUtil.randomBase64String(16).replace("/", "!").replace("=", "-"); 
             log.info("Generated random password for xml encryption"); 
-            getConfiguration().setString(TagConfiguration.TAG_PROVISION_XML_ENCRYPTION_PASSWORD, password);
+            getConfiguration().set(TagConfiguration.TAG_PROVISION_XML_ENCRYPTION_PASSWORD, password);
         }
     }
 

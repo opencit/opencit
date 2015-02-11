@@ -49,7 +49,7 @@ public class PBKDFCryptoCodec implements CryptoCodec {
 //            SecretKey dek = createSecretKey(salt); // throws InvalidKeySpecException, NoSuchAlgorithmException
             SecretKey dek = secretKeyGenerator.generateSecretKey(password, salt, protection);
             log.debug("cipher {}", protection.getCipher());
-            log.debug("secret key {}", dek.getEncoded());
+//            log.debug("secret key {}", dek.getEncoded());
             // and use the key to encrypt the message
             byte[] iv = generateIV(); //cipher.getIV();
 

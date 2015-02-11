@@ -44,4 +44,19 @@ public class TrustagentRepository {
         }
     }
     
+    public X509Certificate getBindingKeyCertificate() throws IOException, CertificateException {
+        try {
+            File bkCertificateFile = configuration.getBindingKeyX509CertificateFile();
+            if (!bkCertificateFile.exists()) {
+                throw new FileNotFoundException(bkCertificateFile.getAbsolutePath());
+            }
+            String bkPem = FileUtils.readFileToString(bkCertificateFile);
+            X509Certificate bkCertificate = X509Util.decodePemCertificate(bkPem);
+            return bkCertificate;
+        } catch (IOException | CertificateException e) {
+            log.debug("Cannot load Binding Key certificate", e);
+            return null;
+        }
+    }
+    
 }

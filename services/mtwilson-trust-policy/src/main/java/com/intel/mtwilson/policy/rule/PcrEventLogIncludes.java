@@ -47,7 +47,7 @@ public class PcrEventLogIncludes extends BaseRule {
     }
     
     public PcrIndex getPcrIndex() { return pcrIndex; }
-    public Set<Measurement> getMeasurements() { return expected; }
+    public Set<Measurement> getExpected() { return expected; }
     
     
     @Override

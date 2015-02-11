@@ -260,6 +260,15 @@ public class TrustAssertion {
             PublicKey publicKey = RsaUtil.decodePemPublicKey(pem);
             return publicKey;
         }
+        
+        public X509Certificate getBindingKeyCertificate() throws CertificateException {
+            String pem = assertionMap.get("Binding_Key_Certificate");
+            if (pem == null || pem.isEmpty()) {
+                return null;
+            }
+            X509Certificate cert = X509Util.decodePemCertificate(pem);
+            return cert;
+        }        
 
         public boolean isHostTrusted() {
             String trusted = assertionMap.get("Trusted");

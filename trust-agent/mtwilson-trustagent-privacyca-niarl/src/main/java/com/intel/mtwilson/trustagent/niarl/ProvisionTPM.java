@@ -10,7 +10,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
 import com.intel.mtwilson.client.jaxrs.PrivacyCA;
-import com.intel.mtwilson.configuration.Configurable;
+import com.intel.dcsg.cpg.configuration.Configurable;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmUtils;

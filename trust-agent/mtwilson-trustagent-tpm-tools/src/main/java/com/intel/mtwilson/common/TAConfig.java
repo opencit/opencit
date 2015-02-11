@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.common;
 
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import java.io.File;
 import java.util.Properties;
 import org.apache.commons.configuration.CompositeConfiguration;
@@ -74,7 +74,7 @@ public class TAConfig {
         CompositeConfiguration composite = new CompositeConfiguration();
         
         // first priority is the configuration file
-        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
         PropertiesConfiguration standard = new PropertiesConfiguration(file);
         dumpConfiguration(standard, "file:"+file.getAbsolutePath());
         composite.addConfiguration(standard);

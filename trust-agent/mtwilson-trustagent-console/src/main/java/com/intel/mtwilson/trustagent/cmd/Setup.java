@@ -5,7 +5,7 @@
 package com.intel.mtwilson.trustagent.cmd;
 
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.setup.console.cmd.SetupManager;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
@@ -21,7 +21,7 @@ public class Setup extends SetupManager implements Command {
     
     @Override
     protected File getConfigurationFile() {
-        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
+        File file = My.configuration().getConfigurationFile(); // new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
         return file;
     }
 

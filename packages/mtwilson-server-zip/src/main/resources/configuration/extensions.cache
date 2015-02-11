@@ -633,14 +633,12 @@ com.intel.mtwilson.audit.data.AuditLogEntry
 com.intel.mtwilson.shiro.authc.host.HostCredentialsMatcher
 com.intel.mtwilson.wlm.helper.WLMLocalizationFilter
 com.intel.mtwilson.tag.PlaintextFilenameFilter
-com.intel.mtwilson.configuration.AbstractMutableConfiguration
 com.intel.mtwilson.setup.cmd.ConfigureRemote
 com.intel.mtwilson.as.rest.v2.model.CaCertificate
 com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory
 com.intel.mtwilson.as.rest.v2.repository.OsRepository
 com.intel.mtwilson.audit.helper.AuditHandlerException
 com.intel.mtwilson.as.rest.PollHosts
-com.intel.mtwilson.configuration.AbstractConfiguration
 com.intel.mtwilson.as.rest.v2.model.Mle
 com.intel.mtwilson.as.data.TblOs
 com.intel.mtwilson.tls.policy.factory.impl.TblHostsTlsPolicyFactory$TblHostsHostDescriptor
@@ -662,3 +660,6 @@ com.intel.mtwilson.tag.setup.cmd.TagCreateCaKey
 com.intel.mtwilson.rpc.v2.resource.CallableRpcAdapter
 com.intel.mtwilson.tpm.endorsement.jaxrs.resource.TpmEndorsementResource
 com.intel.mtwilson.tpm.endorsement.repository.TpmEndorsementRepository
+com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable
+com.intel.mtwilson.as.rest.v2.rpc.CertifyHostSigningKeyRunnable
+com.intel.mtwilson.attestation.client.jaxrs.HostTpmKeys

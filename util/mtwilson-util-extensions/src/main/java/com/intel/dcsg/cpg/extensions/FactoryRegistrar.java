@@ -19,8 +19,6 @@ public class FactoryRegistrar implements Registrar {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FactoryRegistrar.class);
 
-    // TODO:  scan classpath for ALL classes that implement ANY interface and register them... anything can become a plugin by just replacing the jars with something else that implements the same interface!
-    
     // scans given set of classes for classes that are named *Factory and automatically registers them
     @Override
     public boolean accept(Class<?> clazz) {

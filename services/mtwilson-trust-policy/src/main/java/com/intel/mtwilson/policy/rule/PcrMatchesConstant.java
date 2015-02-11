@@ -34,7 +34,7 @@ public class PcrMatchesConstant extends BaseRule {
     private final Pcr expected;
     
     @JsonCreator
-    public PcrMatchesConstant(@JsonProperty("expectedPcr") Pcr expected) {
+    public PcrMatchesConstant(@JsonProperty("expected_pcr") Pcr expected) {
         this.expected = expected;
     }
     

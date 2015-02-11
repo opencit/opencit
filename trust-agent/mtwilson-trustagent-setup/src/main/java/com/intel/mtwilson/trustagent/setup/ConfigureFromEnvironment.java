@@ -4,10 +4,9 @@
  */
 package com.intel.mtwilson.trustagent.setup;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
 import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
-import com.intel.dcsg.cpg.configuration.MutableConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.text.transform.AllCapsNamingStrategy;
 import com.intel.mtwilson.setup.AbstractSetupTask;
@@ -20,10 +19,6 @@ import com.intel.mtwilson.tls.policy.creator.impl.PublicKeyTlsPolicyCreator;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -32,7 +27,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ConfigureFromEnvironment extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigureFromEnvironment.class);
-    private MutableConfiguration configuration;
+    private Configuration configuration;
     private String[] variables;
     private AllCapsNamingStrategy allcaps;
     private Configuration env;
@@ -75,8 +70,8 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
     protected void validate() throws Exception {
         ArrayList<String> updatelist = new ArrayList<>();
         for (String variable : variables) {
-            String envValue = env.getString(variable);
-            String confValue = configuration.getString(variable);
+            String envValue = env.get(variable, null);
+            String confValue = configuration.get(variable, null);
             log.debug("checking to see if environment variable [{}] needs to be added to configuration", variable);
             log.debug("env {} property {}", envValue, confValue);
             if (envValue != null && !envValue.isEmpty() && (confValue == null || !confValue.equals(envValue))) {
@@ -93,10 +88,10 @@ public class ConfigureFromEnvironment extends AbstractSetupTask {
     @Override
     protected void execute() throws Exception {
         for (String variable : variables) {
-            String envValue = env.getString(variable);
+            String envValue = env.get(variable, null);
             if (envValue != null && !envValue.isEmpty()) {
                 log.debug("Copying environment variable {} to configuration property {} with value {}", allcaps.toAllCaps(variable), variable, envValue);
-                configuration.setString(variable, envValue);
+                configuration.set(variable, envValue);
             }
         }
     }

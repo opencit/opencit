@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup;
 
-import com.intel.dcsg.cpg.configuration.MutableConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.Model;
@@ -17,11 +17,11 @@ import java.util.List;
  * to run a setup task with an alternative provided configuration and it would
  * be counter-intuitive for configuration to come from somewhere else.
  * Subclasses can write generated configuration properties back to the
- * MutableConfiguration object obtained from getConfiguration() and the
+ * Configuration object obtained from getConfiguration() and the
  * application is responsible for saving that into mtwilson.properties after
  * running the setup tasks.
  * It is expected that an application running multiple setup tasks in a 
- * sequence will initialize them all with the same MutableConfiguration 
+ * sequence will initialize them all with the same Configuration 
  * instance so each step can build on previous steps.
  * 
  * Generated properties that should not be saved into configuration but instead
@@ -45,7 +45,7 @@ public abstract class AbstractSetupTask implements SetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractSetupTask.class);
 
 //    private transient Integer lastHashCode = null;
-    private transient MutableConfiguration configuration = new PropertiesConfiguration();
+    private transient Configuration configuration = new PropertiesConfiguration();
     private transient ArrayList<Fault> configurationFaults = new ArrayList<>();
     private transient ArrayList<Fault> validationFaults = new ArrayList<>();
 
@@ -62,7 +62,7 @@ public abstract class AbstractSetupTask implements SetupTask {
      * user input. 
      * 
      * Typically the configure() method will store the configuration in either
-     * private member variables for transient settings or into the provided MutableConfiguration
+     * private member variables for transient settings or into the provided Configuration
      * object itself for persistent settings. Those member variables and
      * saved configuration can then be accessed from validate() and execute().
      * 
@@ -94,11 +94,11 @@ public abstract class AbstractSetupTask implements SetupTask {
     abstract protected void execute() throws Exception;
 
     @Override
-    public void setConfiguration(MutableConfiguration configuration) {
+    public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public MutableConfiguration getConfiguration() {
+    public Configuration getConfiguration() {
         return configuration;
     }
     

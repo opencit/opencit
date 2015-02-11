@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-ext</artifactId>
+            <artifactId>mtwilson-repository-api</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -71,7 +71,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

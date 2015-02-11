@@ -3,8 +3,9 @@
 	<description>
 	Run "ant ready" to ensure you have all pre-requisites to build
 	Run "ant" or "ant build" to build the entire project
-	Run "ant dist" to also build javadocs and other packaging
-	Run "ant post" to publish the files to a shared server
+	Run "ant ready build packages" to clean build and generate packages
+	Run "ant build packages" to rebuild only and generate packages
+	Run "ant packages" to generate packages (requires prior build)
 	</description>
 	
 	<target name="info">
@@ -22,9 +23,16 @@
 	
 	<target name="ready" depends="init">
 		<!-- the root pom -->
+		<!--
 		<exec executable="${cmd.maven}" resultproperty="mavenExitInstallPom">
 			<arg value="-DskipTests=true"/>
 			<arg value="-N"/>
+			<arg value="install"/>
+		</exec>
+		-->
+		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-root" resultproperty="mavenExitInstallPom">
+			<arg value="-DskipTests=true"/>
+			<arg value="clean"/>
 			<arg value="install"/>
 		</exec>
 		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
@@ -48,6 +56,13 @@
 		</fail>
 	</target>
 	
+	<target name="clean" depends="init">
+		<!-- the root pom and all projects -->
+		<exec executable="${cmd.maven}">
+			<arg value="clean"/>
+		</exec>
+	</target>
+	
 	<target name="build" depends="init">
 		<!-- the root pom and all projects -->
 		<exec executable="${cmd.maven}" resultproperty="mavenExitInstall">
@@ -59,25 +74,14 @@
 		</fail>
 	</target>
 
-	<target name="dist" depends="init">
+	<target name="packages" depends="init">
 		<!-- the root pom and all projects -->
-		<exec executable="${cmd.maven}">
+		<exec executable="${cmd.maven}" dir="packages">
 			<arg value="-DskipTests=true"/>
 			<arg value="clean"/>
 			<arg value="install"/>
 		</exec>
 	</target>
 
-	<target name="post" depends="init">
-		<!-- the root pom and all projects -->
-		<!-- TODO: this needs to be refined so only 
-			 the mtwilson-server, trust-director,
-			 trust-agent, etc. deliverables are shared...
-			 not every single artifact -->
-		<exec executable="${cmd.maven}">
-			<arg value="-DskipTests=true"/>
-			<arg value="deploy"/>
-		</exec>
-	</target>
 	
 </project>

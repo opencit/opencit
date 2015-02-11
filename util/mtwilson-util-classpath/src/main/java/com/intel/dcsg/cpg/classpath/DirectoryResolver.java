@@ -23,7 +23,7 @@ public class DirectoryResolver implements FileResolver {
     
     @Override
     public Set<File> resolveClasspath(Manifest manifest) {
-        HashSet<File> files = new HashSet<File>();
+        HashSet<File> files = new HashSet<>();
         String classpath[] = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH).split(" ");
         for(String artifactName : classpath) {
             files.add(directory.toPath().resolve(artifactName).toFile());

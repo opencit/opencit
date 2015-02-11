@@ -48,7 +48,7 @@
 	
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -78,6 +78,10 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>

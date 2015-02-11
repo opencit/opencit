@@ -6,7 +6,6 @@ package com.intel.dcsg.cpg.console;
 
 import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * </code>
  *
  * @author jbuhacoff
+ * @deprecated use PluginRegistry and PluginRegistryFactory
  */
 public class HyphenatedCommandFinder extends PackageCommandFinder {
     private final Logger log = LoggerFactory.getLogger(getClass());

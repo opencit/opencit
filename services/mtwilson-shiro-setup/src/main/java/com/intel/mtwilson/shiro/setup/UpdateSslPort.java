@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.shiro.setup;
 
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import java.io.File;
 import java.net.URL;
@@ -26,7 +26,7 @@ public class UpdateSslPort extends LocalSetupTask {
     
     @Override
     protected void configure() throws Exception {
-        shiroIniFile = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "shiro.ini");
+        shiroIniFile = new File(Folders.configuration() + File.separator + "shiro.ini");
         if (!shiroIniFile.exists()) {
             configuration("File not found: shiro.ini");
         }

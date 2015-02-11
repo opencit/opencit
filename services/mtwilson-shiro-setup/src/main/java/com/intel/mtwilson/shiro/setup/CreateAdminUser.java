@@ -20,7 +20,6 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Platform;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
@@ -32,6 +31,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
@@ -460,7 +460,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
 
     private void storeAdminPassword() throws IOException {
         // save the password to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
-        File privateDir = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "private");
+        File privateDir = new File(Folders.configuration() + File.separator + "private");
         if (!privateDir.exists()) {
             privateDir.mkdirs();
         }
