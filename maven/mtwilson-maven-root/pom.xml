@@ -205,7 +205,6 @@
         <plugin>
             <groupId>pl.project13.maven</groupId>
             <artifactId>git-commit-id-plugin</artifactId>
-            <version>2.1.9</version>
             <executions>
                 <execution>
                     <phase>initialize</phase>
@@ -223,6 +222,7 @@
             </executions>
         </plugin>
         
+        <!--
 		<plugin>
 		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
 		    <artifactId>svn-revision-number-maven-plugin</artifactId>
@@ -235,6 +235,7 @@
 			</execution>
 		    </executions>
 		</plugin>
+        -->
         
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -358,8 +359,14 @@
         
         <pluginManagement>
             <plugins>
-                
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.1.9</version>
+        </plugin>
+                                
 		<!-- begin SVN revision plugin (makes available properties like svn.revision) -->
+        <!--
 		<plugin>
 		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
 		    <artifactId>svn-revision-number-maven-plugin</artifactId>
@@ -372,6 +379,7 @@
 			</entries>
 		    </configuration>
 		</plugin>
+        -->
                 
                 <!-- specify version of maven-compiler-plugin, do not skip tests (use -DskipTests=true on command line to skip tests) -->
             <plugin>
@@ -395,7 +403,7 @@
                 <archive>
                     <manifestEntries>
                       <Release>${project.version}</Release>
-                      <Build-Number>${svn.revision}</Build-Number>
+                      <!-- <Build-Number>${svn.revision}</Build-Number> -->
                     </manifestEntries>
                 </archive>
             </configuration>
