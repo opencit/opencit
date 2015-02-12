@@ -29,6 +29,7 @@
     <module>mtwilson-citrix-hostagent</module>
     <module>mtwilson-configuration-ws-v2</module>
     <module>mtwilson-extensions-cache</module>
+    <module>mtwilson-extensions-ws-v2</module>
     <module>mtwilson-feature-jdbi</module>
     <module>mtwilson-file-client-jaxrs2</module>
     <module>mtwilson-file-model</module>

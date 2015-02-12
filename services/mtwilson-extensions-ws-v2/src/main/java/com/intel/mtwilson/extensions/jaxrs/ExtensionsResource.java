@@ -2,10 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.configuration.v2.resource;
+package com.intel.mtwilson.extensions.jaxrs;
 
 import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.mtwilson.configuration.v2.model.ExtensionFilterCriteria;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.util.HashSet;
 import java.util.List;
