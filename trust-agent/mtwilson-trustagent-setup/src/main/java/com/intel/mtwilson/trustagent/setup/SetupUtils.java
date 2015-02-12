@@ -51,5 +51,11 @@ public class SetupUtils {
         }
     }    
     
+    public static String readString(String absoluteFilePath) throws IOException {
+        File file = new File(absoluteFilePath);
+        try(FileInputStream in = new FileInputStream(file)) { 
+            return IOUtils.toString(in);
+        }
+    }    
     
 }

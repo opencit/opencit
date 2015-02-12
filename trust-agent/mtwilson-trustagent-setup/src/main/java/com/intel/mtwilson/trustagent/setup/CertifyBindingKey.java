@@ -39,12 +39,12 @@ public class CertifyBindingKey extends AbstractSetupTask {
         }
         username = trustagentConfiguration.getMtWilsonApiUsername();
         password = trustagentConfiguration.getMtWilsonApiPassword();
-        if( username == null || username.isEmpty() ) {
-            configuration("Mt Wilson username is not set");
-        }
-        if( password == null || password.isEmpty() ) {
-            configuration("Mt Wilson password is not set");
-        }
+//        if( username == null || username.isEmpty() ) {
+//            configuration("Mt Wilson username is not set");
+//        }
+//        if( password == null || password.isEmpty() ) {
+//            configuration("Mt Wilson password is not set");
+//        }
         
         keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
         if( keystoreFile == null || !keystoreFile.exists() ) {
@@ -74,13 +74,19 @@ public class CertifyBindingKey extends AbstractSetupTask {
         log.info("Calling into MTW to certify the TCG standard binding key");
         String tcgCertPath = trustagentConfiguration.getBindingKeyTCGCertificateFile().getAbsolutePath(); 
         String pubKeyModulus = trustagentConfiguration.getBindingKeyModulusFile().getAbsolutePath();
+        String tcgCertSignaturePath = trustagentConfiguration.getBindingKeyTCGCertificateSignatureFile().getAbsolutePath();
+        String aikCertPath = trustagentConfiguration.getAikCertificateFile().getAbsolutePath();
         
         log.debug("TCG Cert path is : {}", tcgCertPath);
         log.debug("Public key modulus path is : {}", pubKeyModulus);
+        log.debug("TCG Cert signature path is : {}", tcgCertSignaturePath);
+        log.debug("AIK Certificate path is : {}", aikCertPath);
 
         BindingKeyEndorsementRequest obj = new BindingKeyEndorsementRequest();
         obj.setPublicKeyModulus(SetupUtils.readblob(pubKeyModulus));
         obj.setTpmCertifyKey(SetupUtils.readblob(tcgCertPath));
+        obj.setTpmCertifyKeySignature(SetupUtils.readblob(tcgCertSignaturePath)); 
+        obj.setAikPemCertificate(SetupUtils.readString(aikCertPath));
         
         log.debug("Creating TLS policy");
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
@@ -88,8 +94,8 @@ public class CertifyBindingKey extends AbstractSetupTask {
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
         Properties clientConfiguration = new Properties();
-        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, username);
-        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, "admin");
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, "password");
         
         HostTpmKeys client = new HostTpmKeys(clientConfiguration, tlsConnection);
         String bindingKeyPemCertificate = client.createBindingKeyCertificate(obj);

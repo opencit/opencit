@@ -19,6 +19,8 @@ public class SigningKeyEndorsementRequest{
     
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
+    private byte[] tpmCertifyKeySignature;
+    private String aikPemCertificate;
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;
@@ -35,4 +37,22 @@ public class SigningKeyEndorsementRequest{
     public void setTpmCertifyKey(byte[] tpmCertifyKey) {
         this.tpmCertifyKey = tpmCertifyKey;
     }    
+
+    public byte[] getTpmCertifyKeySignature() {
+        return tpmCertifyKeySignature;
+    }
+
+    public void setTpmCertifyKeySignature(byte[] tpmCertifyKeySignature) {
+        this.tpmCertifyKeySignature = tpmCertifyKeySignature;
+    }
+
+    public String getAikPemCertificate() {
+        return aikPemCertificate;
+    }
+
+    public void setAikPemCertificate(String aikPemCertificate) {
+        this.aikPemCertificate = aikPemCertificate;
+    }
+    
+    
 }

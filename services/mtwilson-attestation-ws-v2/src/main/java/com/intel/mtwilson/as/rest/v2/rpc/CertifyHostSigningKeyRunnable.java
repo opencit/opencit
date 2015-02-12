@@ -15,10 +15,17 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
 import java.security.PrivateKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
+import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.isAikCertifiedByPrivacyCA;
+import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.isCertifiedKeySignatureValid;
+import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.tcgCertSignatureOid;
+import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.tcgCertExtOid;
+import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.validatePublicKeyDigest;
+import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.validateCertifyKeyData;
 
 /**
  *
@@ -33,6 +40,8 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
     private String signingKeyPemCertificate;
+    private byte[] tpmCertifyKeySignature;
+    private String aikPemCertificate;
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;
@@ -58,19 +67,58 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
         this.signingKeyPemCertificate = signingKeyPemCertificate;
     }
 
+    public byte[] getTpmCertifyKeySignature() {
+        return tpmCertifyKeySignature;
+    }
 
+    public void setTpmCertifyKeySignature(byte[] tpmCertifyKeySignature) {
+        this.tpmCertifyKeySignature = tpmCertifyKeySignature;
+    }
+
+    public String getAikPemCertificate() {
+        return aikPemCertificate;
+    }
+
+    public void setAikPemCertificate(String aikPemCertificate) {
+        this.aikPemCertificate = aikPemCertificate;
+    }
+
+    
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
         try {
-            if (publicKeyModulus != null && tpmCertifyKey != null) {
+            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikPemCertificate != null) {
 
                 log.debug("Starting to verify the Signing key TCG certificate and generate the MTW certified certificate.");
 
-                log.debug("Public key modulus {} and TpmCertifyKey data {} are specified.",
-                        TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey));
+                log.debug("Public key modulus {}, TpmCertifyKey data {} & TpmCertifyKeySignature data {} are specified.",
+                        TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
 
-                boolean validatePublicKeyDigest = CertifyHostBindingKeyRunnable.validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
+                // Verify the encryption scheme, key flags etc
+                validateCertifyKeyData(tpmCertifyKey, false);
+                
+                X509Certificate decodedAikPemCertificate = X509Util.decodePemCertificate(aikPemCertificate);
+                log.debug("AIK Certificate {}", decodedAikPemCertificate.getIssuerX500Principal().getName());
+                
+                // Need to verify if the AIK is signed by the trusted Privacy CA, which would also ensure that the EK is verified.
+                byte[] privacyCAPemBytes;
+                try (FileInputStream privacyCAPemFile = new FileInputStream(My.configuration().getPrivacyCaIdentityCacertsFile())) {
+                    privacyCAPemBytes = IOUtils.toByteArray(privacyCAPemFile);
+                }
+                
+                X509Certificate privacyCACert = X509Util.decodePemCertificate(new String(privacyCAPemBytes));
+                log.debug("Privacy CA Certificate {}", privacyCACert.getIssuerX500Principal().getName());
+
+                if (!isAikCertifiedByPrivacyCA(decodedAikPemCertificate, privacyCACert)) {
+                    throw new CertificateException("The specified AIK certificate is not trusted.");
+                }
+                
+                if (!isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikPemCertificate)) {
+                    throw new CertificateException("The signature specified for the certifiy key does not match.");
+                }
+                
+                boolean validatePublicKeyDigest = validatePublicKeyDigest(publicKeyModulus, tpmCertifyKey);
                 if (!validatePublicKeyDigest) {
                     throw new Exception("Public key specified does not map to the public key digest in the TCG signing key certificate");
                 }
@@ -108,7 +156,8 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         .keyUsageKeyEncipherment()
                         .extKeyUsageIsCritical()
                         .randomSerial()
-                        .noncriticalExtension(CertifyHostBindingKeyRunnable.tcgCertExtOid, tpmCertifyKey)
+                        .noncriticalExtension(tcgCertExtOid, tpmCertifyKey)
+                        .noncriticalExtension(tcgCertSignatureOid, tpmCertifyKeySignature)
                         .build();
 
                 if (bkCert != null) {

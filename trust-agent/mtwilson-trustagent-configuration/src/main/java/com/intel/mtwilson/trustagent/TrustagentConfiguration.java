@@ -4,12 +4,13 @@
  */
 package com.intel.mtwilson.trustagent;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.net.NetUtils;
-import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.AbstractConfiguration;
 import java.io.File;
+import com.intel.mtwilson.MyFilesystem;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketException;
@@ -24,7 +25,7 @@ import org.apache.commons.codec.binary.Hex;
  *
  * @author jbuhacoff
  */
-public class TrustagentConfiguration {
+public class TrustagentConfiguration extends AbstractConfiguration {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustagentConfiguration.class);
 
     // Variables such as TRUSTAGENT_HOME, TRUSTAGENT_CONF, etc. for filesystem
@@ -56,13 +57,12 @@ public class TrustagentConfiguration {
     public static final String SIGNING_KEY_SECRET = "signing.key.secret";
     public static final String SIGNING_KEY_INDEX = "signing.key.index";
     
-    private Configuration conf;
-    
     public TrustagentConfiguration(org.apache.commons.configuration.Configuration configuration) {
-        this(new CommonsConfiguration(configuration));
+        this(new CommonsConfigurationAdapter(configuration));
     }
     public TrustagentConfiguration(Configuration configuration) {
-        this.conf = configuration;
+        super();
+        configure(configuration);
 //        initEnvironmentConfiguration(configuration);
     }
     /*
@@ -87,7 +87,7 @@ public class TrustagentConfiguration {
      * @return 
      */
     public List<String> getMtWilsonTlsCertificateFingerprints() {        
-        String fingerprintCsv = conf.get(MTWILSON_TLS_CERT_SHA1, null);
+        String fingerprintCsv = getConfiguration().getString(MTWILSON_TLS_CERT_SHA1);
         if( fingerprintCsv == null || fingerprintCsv.isEmpty() ) {
             return Collections.EMPTY_LIST;
         }
@@ -102,16 +102,16 @@ public class TrustagentConfiguration {
     */
     
     public String getMtWilsonApiUrl() {
-        return conf.get(MTWILSON_API_URL, null);// intentionally no default - this must be configured during setup
+        return getConfiguration().getString(MTWILSON_API_URL);// intentionally no default - this must be configured during setup
     }
     public String getMtWilsonApiUsername() {
-        return conf.get(MTWILSON_API_USERNAME, null);// intentionally no default - this must be configured during setup
+        return getConfiguration().getString(MTWILSON_API_USERNAME);// intentionally no default - this must be configured during setup
     }
     public String getMtWilsonApiPassword() {
-        return conf.get(MTWILSON_API_PASSWORD, null);// intentionally no default - this must be configured during setup
+        return getConfiguration().getString(MTWILSON_API_PASSWORD);// intentionally no default - this must be configured during setup
     }
     public String getTpmOwnerSecretHex() {
-        return conf.get(TPM_OWNER_SECRET, null); // intentionally no default - this must be generated during setup
+        return getConfiguration().getString(TPM_OWNER_SECRET); // intentionally no default - this must be generated during setup
     }
     public byte[] getTpmOwnerSecret() {
         try {
@@ -122,7 +122,7 @@ public class TrustagentConfiguration {
         }
     }
     public String getTpmSrkSecretHex() {
-        return conf.get(TPM_SRK_SECRET, null); // intentionally no default - this must be generated during setup
+        return getConfiguration().getString(TPM_SRK_SECRET); // intentionally no default - this must be generated during setup
     }
     public byte[] getTpmSrkSecret() {
         try {
@@ -133,7 +133,7 @@ public class TrustagentConfiguration {
         }
     }
     public String getAikSecretHex() {
-        return conf.get(AIK_SECRET, null); // intentionally no default - this must be generated during setup
+        return getConfiguration().getString(AIK_SECRET); // intentionally no default - this must be generated during setup
     }
     public byte[] getAikSecret() {
         try {
@@ -144,29 +144,29 @@ public class TrustagentConfiguration {
         }
     }
     public int getAikIndex() {
-        return Integer.valueOf(conf.get(AIK_INDEX, "1")); 
+        return getConfiguration().getInteger(AIK_INDEX, 1); 
     }
     
     public File getAikCertificateFile() {
-        return new File(Folders.configuration() + File.separator + "aik.pem");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "aik.pem");        
     }
     public File getAikBlobFile() {
-        return new File(Folders.configuration() + File.separator + "aik.blob");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "aik.blob");        
     }
     
     public int getTrustagentHttpTlsPort() {
-        return Integer.valueOf(conf.get(TRUSTAGENT_HTTP_TLS_PORT, "1443"));
+        return getConfiguration().getInteger(TRUSTAGENT_HTTP_TLS_PORT, 1443);
     }
     public String getTrustagentTlsCertDn() {
-        return conf.get(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
+        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DN, "CN=trustagent");
     }
         
     public String getTrustagentTlsCertIp() {
-        return conf.get(TRUSTAGENT_TLS_CERT_IP, "");
+        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "");
     }
     public String[] getTrustagentTlsCertIpArray() throws SocketException {
-//        return conf.getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
-        String[] TlsCertIPs = conf.get(TRUSTAGENT_TLS_CERT_IP, "").split(",");
+//        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "127.0.0.1").split(",");
+        String[] TlsCertIPs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_IP, "").split(",");
         if (TlsCertIPs != null && !TlsCertIPs[0].isEmpty()) {
             log.debug("Retrieved IPs from trust agent configuration: {}", (Object[])TlsCertIPs);
             return TlsCertIPs;
@@ -181,11 +181,11 @@ public class TrustagentConfiguration {
         return new String[]{"127.0.0.1"};
     }
     public String getTrustagentTlsCertDns() {
-        return conf.get(TRUSTAGENT_TLS_CERT_DNS, "");
+        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "");
     }
     public String[] getTrustagentTlsCertDnsArray() throws SocketException {
-//        return conf.getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
-        String[] TlsCertDNs = conf.get(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
+//        return getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "localhost").split(",");
+        String[] TlsCertDNs = getConfiguration().getString(TRUSTAGENT_TLS_CERT_DNS, "").split(",");
         if (TlsCertDNs != null && !TlsCertDNs[0].isEmpty()) {
             log.debug("Retrieved Domain Names trust agent from configuration: {}", (Object[])TlsCertDNs);
             return TlsCertDNs;
@@ -201,43 +201,43 @@ public class TrustagentConfiguration {
     }
     
     public File getTrustagentKeystoreFile() {
-        return new File(Folders.configuration() + File.separator + "trustagent.jks");
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.jks");
     }
     public String getTrustagentKeystorePassword() {
-        return conf.get(TRUSTAGENT_KEYSTORE_PASSWORD, null); // intentionally no default - this must be generated during setup
+        return getConfiguration().getString(TRUSTAGENT_KEYSTORE_PASSWORD); // intentionally no default - this must be generated during setup
     }
     
     public File getEndorsementAuthoritiesFile() {
-        return new File(Folders.configuration() + File.separator + "endorsement.pem");
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "endorsement.pem");
     }
 
     public File getTrustagentUserFile() {
-        return new File(Folders.configuration() + File.separator + "users.txt");
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "users.txt");
     }
     public File getTrustagentPermissionsFile() {
-        return new File(Folders.configuration() + File.separator + "permissions.txt");
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "permissions.txt");
     }
     public File getTrustagentEtagCacheFile() {
-        return new File(Folders.configuration() + File.separator + "etag.cache");
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "etag.cache");
     }
     
     public boolean isDaaEnabled() {
-        return Boolean.valueOf(conf.get(DAA_ENABLED, "false"));
+        return getConfiguration().getBoolean(DAA_ENABLED, false);
     }
     public boolean isTpmQuoteWithIpAddress() {
-        return Boolean.valueOf(conf.get(TPM_QUOTE_IPV4, "true"));
+        return getConfiguration().getBoolean(TPM_QUOTE_IPV4, true);
     }
     
     public String getHardwareUuid() {
-        return conf.get(HARDWARE_UUID, null);
+        return getConfiguration().getString(HARDWARE_UUID);
     }
     
     public File getMeasureLogLaunchScript() {
-        return new File(Folders.application() + File.separator + "bin" + File.separator + "module_analysis.sh");
+        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh");
     } 
 
     public String getMtwilsonTlsPolicyCertificateSha1() {
-        return conf.get("mtwilson.tls.cert.sha1", null);
+        return getConfiguration().getString("mtwilson.tls.cert.sha1");
     }
     
     public Properties getMtWilsonClientProperties() {
@@ -254,7 +254,7 @@ public class TrustagentConfiguration {
     
     
     public static TrustagentConfiguration loadConfiguration() throws IOException {
-        File file = new File(Folders.configuration() + File.separator + "trustagent.properties");
+        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
         if( file.exists() ) {
             try(FileInputStream in = new FileInputStream(file)) {
                 Properties properties = new Properties();
@@ -271,7 +271,7 @@ public class TrustagentConfiguration {
     
     // Helper methods for the Binding key
     public String getBindingKeySecretHex() {
-        return conf.get(BINDING_KEY_SECRET); // intentionally no default - this must be generated during setup
+        return getConfiguration().getString(BINDING_KEY_SECRET); // intentionally no default - this must be generated during setup
     }
     
     public byte[] getBindingKeySecret() {
@@ -283,29 +283,33 @@ public class TrustagentConfiguration {
     }
     
     public int getBindingKeyIndex() {
-        return Integer.valueOf(conf.get(BINDING_KEY_INDEX, "3")); 
+        return getConfiguration().getInteger(BINDING_KEY_INDEX, 3); 
     }
     
     public File getBindingKeyModulusFile() {
-        return new File(Folders.configuration() + File.separator + "bindingkey.pub");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pub");        
     }
 
     // TODO : Decide the extenstion with which the TCG certificate should be stored.    
     public File getBindingKeyTCGCertificateFile() {
-        return new File(Folders.configuration() + File.separator + "bindingkey.ckf");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.ckf");        
+    }
+
+    public File getBindingKeyTCGCertificateSignatureFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.sig");        
     }
 
     public File getBindingKeyX509CertificateFile() {
-        return new File(Folders.configuration() + File.separator + "bindingkey.pem");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.pem");        
     }
 
     public File getBindingKeyBlobFile() {
-        return new File(Folders.configuration() + File.separator + "bindingkey.blob");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "bindingkey.blob");        
     }
 
     // Helper methods for the Signing key
     public String getSigningKeySecretHex() {
-        return conf.get(SIGNING_KEY_SECRET); // intentionally no default - this must be generated during setup
+        return getConfiguration().getString(SIGNING_KEY_SECRET); // intentionally no default - this must be generated during setup
     }
     
     public byte[] getSigningKeySecret() {
@@ -317,24 +321,28 @@ public class TrustagentConfiguration {
     }
     
     public int getSigningKeyIndex() {
-        return Integer.valueOf(conf.get(SIGNING_KEY_INDEX, "4")); 
+        return getConfiguration().getInteger(SIGNING_KEY_INDEX, 4); 
     }
     
     public File getSigningKeyModulusFile() {
-        return new File(Folders.configuration() + File.separator + "signingkey.pub");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.pub");        
     }
 
     // TODO : Decide the extenstion with which the TCG certificate should be stored.        
     public File getSigningKeyTCGCertificateFile() {
-        return new File(Folders.configuration() + File.separator + "signingkey.ckf");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.ckf");        
+    }
+
+    public File getSigningKeyTCGCertificateSignatureFile() {
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.sig");        
     }
 
     public File getSigningKeyX509CertificateFile() {
-        return new File(Folders.configuration() + File.separator + "signingkey.pem");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.pem");        
     }
 
     public File getSigningKeyBlobFile() {
-        return new File(Folders.configuration() + File.separator + "signingkey.blob");        
+        return new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "signingkey.blob");        
     }
     
 }
