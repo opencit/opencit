@@ -208,13 +208,13 @@ auto_install "Installer requirements" "APICLIENT"
 mkdir -p /etc/intel/cloudsecurity
 chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
-  default_mtwilson_tls_policy_id="$MTW_DEFAULT_TLS_POLICY_ID"   #`read_property_from_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties`
+  default_mtwilson_tls_policy_id="${MTWILSON_DEFAULT_TLS_POLICY_ID:-$MTW_DEFAULT_TLS_POLICY_ID}"   #`read_property_from_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ "$default_mtwilson_tls_policy_id" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_id" == "TRUST_FIRST_CERTIFICATE" ]; then
     #update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default TLS policy is insecure; the product guide contains information on enabling secure TLS policies"
   fi
-  export mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
-  #if [ -z "$mtwilson_tls_keystore_password" ]; then
+  export MTWILSON_TLS_KEYSTORE_PASSWORD="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
+  #if [ -z "$MTWILSON_TLS_KEYSTORE_PASSWORD" ]; then
     # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
     #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
@@ -223,20 +223,20 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
 else
     touch /etc/intel/cloudsecurity/mtwilson.properties
     chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
-    export mtwilson_tls_keystore_password=`generate_password 32`
+    export MTWILSON_TLS_KEYSTORE_PASSWORD=`generate_password 32`
 #    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
     echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
+    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_TLS_KEYSTORE_PASSWORD"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
 fi
 
 #MTW_TLS_POLICY_ALLOW
-prompt_with_default MTW_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "$MTW_TLS_POLICY_ALLOW"
-MTW_TLS_POLICY_ALLOW=`echo $MTW_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
+prompt_with_default MTWILSON_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "${MTWILSON_TLS_POLICY_ALLOW:-MTW_TLS_POLICY_ALLOW}"
+MTWILSON_TLS_POLICY_ALLOW=`echo $MTWILSON_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
 OIFS=$IFS
-IFS=',' read -ra POLICIES <<< "$MTW_TLS_POLICY_ALLOW"
+IFS=',' read -ra POLICIES <<< "$MTWILSON_TLS_POLICY_ALLOW"
 IFS=$OIFS
 TMP_MTW_TLS_POLICY_ALLOW=
 for i in "${POLICIES[@]}"; do
@@ -244,31 +244,31 @@ for i in "${POLICIES[@]}"; do
     TMP_MTW_TLS_POLICY_ALLOW+="$i,"
   fi
 done
-MTW_TLS_POLICY_ALLOW=`echo "$TMP_MTW_TLS_POLICY_ALLOW" | sed 's/\(.*\),/\1/'`
+MTWILSON_TLS_POLICY_ALLOW=`echo "$TMP_MTW_TLS_POLICY_ALLOW" | sed 's/\(.*\),/\1/'`
 
-if [ -n "$MTW_TLS_POLICY_ALLOW" ]; then
-  update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_TLS_POLICY_ALLOW"
+if [ -n "$MTWILSON_TLS_POLICY_ALLOW" ]; then
+  update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_TLS_POLICY_ALLOW"
 else
   echo_failure "An allowed TLS policy must be defined."
   exit -1
 fi
 
 #MTW_DEFAULT_TLS_POLICY_ID
-prompt_with_default MTW_DEFAULT_TLS_POLICY_ID "Mt Wilson Default TLS Policy ID: " "$MTW_DEFAULT_TLS_POLICY_ID"
-MTW_DEFAULT_TLS_POLICY_ID=`echo $MTW_DEFAULT_TLS_POLICY_ID | tr -d ' '`   # trim whitespace
+prompt_with_default MTWILSON_DEFAULT_TLS_POLICY_ID "Mt Wilson Default TLS Policy ID: " "${MTWILSON_DEFAULT_TLS_POLICY_ID:-$MTW_DEFAULT_TLS_POLICY_ID}"
+MTWILSON_DEFAULT_TLS_POLICY_ID=`echo $MTWILSON_DEFAULT_TLS_POLICY_ID | tr -d ' '`   # trim whitespace
 OIFS=$IFS
-IFS=',' read -ra POLICIES <<< "$MTW_TLS_POLICY_ALLOW"
+IFS=',' read -ra POLICIES <<< "$MTWILSON_TLS_POLICY_ALLOW"
 IFS=$OIFS
 TMP_MTW_DEFAULT_TLS_POLICY_ID=
 for i in "${POLICIES[@]}"; do
-  if [ "$i" == "$MTW_DEFAULT_TLS_POLICY_ID" ]; then
+  if [ "$i" == "$MTWILSON_DEFAULT_TLS_POLICY_ID" ]; then
     TMP_MTW_DEFAULT_TLS_POLICY_ID="$i"
   fi
 done
-MTW_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTW_DEFAULT_TLS_POLICY_ID"`
+MTWILSON_DEFAULT_TLS_POLICY_ID=`echo "$TMP_MTW_DEFAULT_TLS_POLICY_ID"`
 
-if [[ "$MTW_DEFAULT_TLS_POLICY_ID" == "INSECURE" || "$MTW_DEFAULT_TLS_POLICY_ID" == "TRUST_FIRST_CERTIFICATE" ]]; then
-  update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "$MTW_DEFAULT_TLS_POLICY_ID"
+if [[ "$MTWILSON_DEFAULT_TLS_POLICY_ID" == "INSECURE" || "$MTWILSON_DEFAULT_TLS_POLICY_ID" == "TRUST_FIRST_CERTIFICATE" ]]; then
+  update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_DEFAULT_TLS_POLICY_ID"
 else
   echo_warning "Unable to determine default TLS policy."
 #  exit -1
@@ -659,13 +659,16 @@ if using_glassfish; then
   echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV_DIR/glassfish
   echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV_DIR/glassfish
   echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV_DIR/glassfish
+
   
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
-	$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+      #$glassfish set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0   ### THIS COMMAND DOES NOT WORK
+      gf_logging_properties=$(find "$GLASSFISH_HOME" -name logging.properties | head -1)
+      sed -i "s/com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=.*/com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0/g" "$gf_logging_properties"
   else
-	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
-	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+    echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
+    echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
   fi
 
   #if [ -e $glassfish_bin ]; then
@@ -676,13 +679,14 @@ if using_glassfish; then
   #  echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
   #fi
   
-  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
-    # glassfish init code here
-    mtwilson glassfish-sslcert
-    # glassfish init end
-  else
-    echo_warning "Skipping webservice init"
-  fi
+  ### WHAT IS THIS USED FOR???
+  #if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+  #  # glassfish init code here
+  #  mtwilson glassfish-sslcert
+  #  # glassfish init end
+  #else
+  #  echo_warning "Skipping webservice init"
+  #fi
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
@@ -712,20 +716,21 @@ elif using_tomcat; then
   echo "tomcat=\"$tomcat\"" >> $MTWILSON_ENV_DIR/tomcat
   echo "tomcat_bin=$tomcat_bin" >> $MTWILSON_ENV_DIR/tomcat
   
-  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
-    # tomcat init code here
-    #mtwilson tomcat-sslcert
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start >> $INSTALL_LOG_FILE 2>&1
-    fi
-  # opt_tomcat init end
-  else
-    echo_warning "Skipping webservice init"
-  fi
+  ### WHAT IS THIS USED FOR???
+  #if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+  #  # tomcat init code here
+  #  #mtwilson tomcat-sslcert
+  #  if tomcat_running; then 
+  #    echo "Restarting Tomcat ..."
+  #    tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+  #  else
+  #    echo "Starting Tomcat ..."
+  #    tomcat_start >> $INSTALL_LOG_FILE 2>&1
+  #  fi
+  ## opt_tomcat init end
+  #else
+  #  echo_warning "Skipping webservice init"
+  #fi
  
 fi
 
@@ -810,7 +815,7 @@ update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_IS
 #fi
 
 #call_setupcommand create-database
-call_tag_setupcommand setup-manager update-extensions-cache-file 2> /dev/null
+call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 call_tag_setupcommand setup-manager initialize-db --force
 
 call_tag_setupcommand tag-init-database

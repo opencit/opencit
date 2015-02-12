@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-ext</artifactId>
+            <artifactId>mtwilson-repository-api</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>

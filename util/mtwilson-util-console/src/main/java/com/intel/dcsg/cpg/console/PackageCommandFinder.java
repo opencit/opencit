@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
  * </code>
  * 
  * @author jbuhacoff
+ * @deprecated use PluginRegistry and PluginRegistryFactory
  */
 public class PackageCommandFinder implements CommandFinder {
     private final Logger log = LoggerFactory.getLogger(getClass());

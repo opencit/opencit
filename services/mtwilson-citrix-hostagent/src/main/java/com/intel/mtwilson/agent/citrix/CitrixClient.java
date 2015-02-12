@@ -17,7 +17,7 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
@@ -89,8 +89,8 @@ public class CitrixClient {
         //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
 
         // check mtwilson 2.0 configuration first
-        String binPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.application() + File.separator + "bin"; //.getBinPath();
+        String varPath = Folders.repository("aikqverify");
         log.debug("binpath = {}", binPath);
         log.debug("varpath = {}", varPath);
         File bin = new File(binPath);

@@ -6,7 +6,7 @@ package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.Platform;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.shiro.file.LoginDAO;
@@ -85,7 +85,7 @@ public class CreateAdminUser extends LocalSetupTask {
         }
         if( isNewPassword ) {
             // save the password to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
-            File privateDir = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "private");
+            File privateDir = new File(Folders.configuration() + File.separator + "private");
             if( Platform.isUnix() ) {
                 Runtime.getRuntime().exec("chmod 700 "+privateDir.getAbsolutePath());
             }

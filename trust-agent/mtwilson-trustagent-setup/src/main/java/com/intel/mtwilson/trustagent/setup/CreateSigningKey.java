@@ -63,7 +63,7 @@ public class CreateSigningKey extends AbstractSetupTask {
         String signingKeySecretHex = RandomUtil.randomHexString(20);
         log.debug("Generated random Signing key secret"); 
         
-        getConfiguration().setString(TrustagentConfiguration.SIGNING_KEY_SECRET, signingKeySecretHex);
+        getConfiguration().set(TrustagentConfiguration.SIGNING_KEY_SECRET, signingKeySecretHex);
         
         // Call into the TpmModule certifyKey function to create the signing key and certify the same using the AIK so that we have the chain of trust.
         HashMap<String, byte[]> certifyKey = TpmModule.certifyKey(TrustagentConfiguration.SIGNING_KEY_NAME, trustagentConfiguration.getSigningKeySecret(), 

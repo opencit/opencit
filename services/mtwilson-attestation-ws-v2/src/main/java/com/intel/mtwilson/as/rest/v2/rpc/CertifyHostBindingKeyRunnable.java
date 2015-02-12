@@ -33,7 +33,10 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CertifyHostBindingKeyRunnable.class);
     // This OID is used for storing the TCG standard certificate as an attr within the x.509 cert.
     // We are using this OID as we could not find any specific OID for the certifyKey structure.
-    protected static final String tcgCertExtOid = "2.23.133.6"; 
+    // 2.23.133.6 is the OID for joint-isu-itu-t(2) international-organizations(23) tcg(133) tcg-ce(6) 
+    // and we are adding to it certify-key-validation-data(434188) to be specific because there is
+    // no official TCG OID for this in the TCG Credential Profiles v1.2 specification (level2 revision8).
+    protected static final String tcgCertExtOid = "2.23.133.6.434188"; 
     
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
@@ -107,8 +110,6 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         .expires(RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS, TimeUnit.DAYS)
                         .issuerPrivateKey(cakey)
                         .issuerName(cacert)
-                        .keyUsageDigitalSignature()
-                        .keyUsageNonRepudiation()
                         .keyUsageKeyEncipherment()
                         .extKeyUsageIsCritical()
                         .randomSerial()

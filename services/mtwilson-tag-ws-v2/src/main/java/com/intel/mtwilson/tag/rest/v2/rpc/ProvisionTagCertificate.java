@@ -4,22 +4,16 @@
  */
 package com.intel.mtwilson.tag.rest.v2.rpc;
 
-import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
-import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
-import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.api.ApiException;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.tag.PlaintextFilenameFilter;
 import com.intel.mtwilson.tag.TagCertificateAuthority;
 import com.intel.mtwilson.tag.TagConfiguration;
 import com.intel.mtwilson.tag.Util;
-import com.intel.mtwilson.tag.common.Global;
 import com.intel.mtwilson.tag.common.X509AttrBuilder;
 import com.intel.mtwilson.tag.model.Certificate;
 import com.intel.mtwilson.tag.model.CertificateCollection;
@@ -29,7 +23,6 @@ import com.intel.mtwilson.tag.model.CertificateRequestLocator;
 import com.intel.mtwilson.tag.model.X509AttributeCertificate;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRepository;
 import com.intel.mtwilson.tag.rest.v2.repository.CertificateRequestRepository;
-import com.intel.mtwilson.tag.selection.SelectionBuilder;
 import com.intel.mtwilson.tag.selection.xml.AttributeType;
 import com.intel.mtwilson.tag.selection.xml.SelectionType;
 import com.intel.mtwilson.tag.selection.xml.SelectionsType;
@@ -63,8 +56,6 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * See also AbstractRpcResource which does something similar with HTTP 202 Accepted
@@ -396,12 +387,12 @@ public class ProvisionTagCertificate  {
         byte[] content = passwordEncryptedFile.decrypt();
         */
         UUID uuid = new UUID();
-        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
+        String encryptedFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".enc";
         File encryptedFile = new File(encryptedFilePath);
         try(FileOutputStream out = new FileOutputStream(encryptedFile)) {
             IOUtils.write(message, out);
         }
-        String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        String tagCmdPath = Folders.application() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"decrypt.sh -p PASSWORD "+ encryptedFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 

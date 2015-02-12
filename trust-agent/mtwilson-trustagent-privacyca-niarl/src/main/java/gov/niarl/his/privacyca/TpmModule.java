@@ -13,7 +13,7 @@
 
 package gov.niarl.his.privacyca;
 
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import gov.niarl.his.privacyca.TpmUtils.TpmBytestreamResouceException;
 import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
 
@@ -144,7 +144,7 @@ public class TpmModule {
 		final String new_TROUSERS_MODE = "TrousersMode";
 		final String DEBUG_MODE = "DebugMode";
 		FileInputStream PropertyFile = null;
-		final String newTpmModuleExePath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath(); // "./exe";
+		final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
 		final String newExeName = "NIARL_TPM_Module";
 		String newTrousersMode = "False";
 		String debugMode = "False";

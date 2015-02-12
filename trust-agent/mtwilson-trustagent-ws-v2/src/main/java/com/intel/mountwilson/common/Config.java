@@ -4,7 +4,7 @@
  */
 package com.intel.mountwilson.common;
 
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,7 +44,7 @@ public class Config {
 	static{
 //        TrustagentConfiguration configuration = TrustagentConfiguration.loadConfiguration();
 //		File propFile = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "trustagent.properties");
-        homeFolder = MyFilesystem.getApplicationFilesystem().getConfigurationPath();
+        homeFolder = Folders.configuration();
         LoggerFactory.getLogger(Config.class.getName()).warn("Home folder. Using " + homeFolder);
     }
     
@@ -80,13 +80,13 @@ public class Config {
     
      
     public static String getAppPath(){
-        return MyFilesystem.getApplicationFilesystem().getApplicationPath();
+        return Folders.application();
     }
     
     
     
     public static String getBinPath() {
-        return MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        return Folders.application() + File.separator + "bin"; //.getBinPath();
     }
     
     

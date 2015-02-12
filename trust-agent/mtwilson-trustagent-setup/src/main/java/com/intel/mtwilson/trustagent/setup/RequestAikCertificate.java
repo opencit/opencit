@@ -4,13 +4,8 @@
  */
 package com.intel.mtwilson.trustagent.setup;
 
-import com.intel.dcsg.cpg.configuration.CompositeConfiguration;
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.configuration.EnvironmentConfiguration;
-import com.intel.dcsg.cpg.configuration.KeyTransformerConfiguration;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.text.transform.AllCapsNamingStrategy;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
@@ -123,7 +118,7 @@ public class RequestAikCertificate extends AbstractSetupTask {
         System.setProperty("javax.net.ssl.keyStorePassword", config.getTrustagentKeystorePassword());
         */
         CreateIdentity provisioner = new CreateIdentity();
-        provisioner.configure(config.getConfiguration());
+        provisioner.configure(getConfiguration());
         provisioner.run();
     }
     
