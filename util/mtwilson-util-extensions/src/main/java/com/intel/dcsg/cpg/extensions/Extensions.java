@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -125,15 +126,32 @@ public class Extensions {
         }
     }
 
+    /**
+     * Providers are in priority order, so if multiple providers return the
+     * SAME IMPLEMENTATION class name of an extension interface, 
+     * only the first provider's implementation will be
+     * used. 
+     * @param extension
+     * @return 
+     */
     private static List<Extension> list(Class<?> extension) {
-        ArrayList<Extension> list = new ArrayList<>();
+        HashMap<String,Extension> unique = new HashMap<>(); // implementation class name -> extension descriptor
+        ArrayList<Extension> list = new ArrayList<>(); // we use the map to prevent duplicates but the list stores the results in order: in provider order and then in the order returned by each provider
         for (ExtensionProvider provider : providers) {
             log.debug("Looking for extension {} in provider {}", extension.getName(), provider.getClass().getName());
             Iterator<String> implementationNamesIterator = provider.find(extension);
             while (implementationNamesIterator.hasNext()) {
                 String name = implementationNamesIterator.next();
-                list.add(new Extension(provider, name));
-                log.debug("Extension {} implementation {} provider {}", extension.getName(), name, provider.getClass().getName());
+                Extension alreadyListed = unique.get(name);
+                if( alreadyListed == null ) {
+                    Extension e = new Extension(provider, name);
+                    unique.put(name, e);
+                    list.add(e);
+                    log.debug("Extension {} implementation {} provider {}", extension.getName(), name, provider.getClass().getName());
+                }
+                else {
+                    log.debug("Extension {} ignoring implementation {} from provider {} because already registered from provider {}", extension.getName(), name, provider.getClass().getName(), alreadyListed.provider.getClass().getName());
+                }
             }
         }
         return list;
