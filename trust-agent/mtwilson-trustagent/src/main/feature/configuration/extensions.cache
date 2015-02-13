@@ -1,4 +1,4 @@
-com.intel.mtwilson.trustagent.cmd.Setup
+com.intel.mtwilson.trustagent.cmd.Password
 com.intel.mtwilson.trustagent.cmd.StartHttpServer
 com.intel.mtwilson.trustagent.cmd.Version
 com.intel.mtwilson.trustagent.ws.v2.Aik
