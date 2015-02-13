@@ -197,6 +197,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     protected static void validateCertifyKeyData(byte[] tcgCertificate, boolean isBindingKey) 
             throws Exception {
         int TPM_ES_RSAESOAEP_SHA1_MGF1 = 0x0003;
+        int TPM_ES_NONE = 0x0001;
         int TPM_VOLATILE = 0x00000004;
         int TPM_KEY_SIGNING = 0x0010; // This SHALL indicate a signing key.
         int TPM_KEY_BIND = 0x0014; // This SHALL indicate a key that can be used for TPM_Bind and TPM_UnBind operations only
@@ -214,11 +215,16 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     certifiedKey.getKeyParms().getAlgorithmId(), certifiedKey.getKeyParms().getEncScheme(), 
                     certifiedKey.getKeyParms().getSigScheme(), TpmUtils.byteArrayToHexString(certifiedKey.getKeyParms().getSubParams().toByteArray()));      
             
-            if ( certifiedKey.getKeyParms().getEncScheme() != TPM_ES_RSAESOAEP_SHA1_MGF1) {
+            if ( isBindingKey && certifiedKey.getKeyParms().getEncScheme() != TPM_ES_RSAESOAEP_SHA1_MGF1) {
                 log.error("Invalid encryption scheme used. Using {} scheme instead of RSA.", certifiedKey.getKeyParms().getEncScheme());
                 throw new Exception ("Invalid encryption scheme used for creating the key.");
             } 
             
+            if ( !isBindingKey && certifiedKey.getKeyParms().getEncScheme() != TPM_ES_NONE) {
+                log.error("Invalid encryption scheme used. Using {} scheme instead of No scheme.", certifiedKey.getKeyParms().getEncScheme());
+                throw new Exception ("Invalid encryption scheme used for creating the key.");
+            } 
+
             if (certifiedKey.getTpmKeyFlags() != TPM_VOLATILE) {
                 log.error("Invalid flag specified during the key creation. Using {} instead of {}.", certifiedKey.getTpmKeyFlags(), TPM_VOLATILE);
                 throw new Exception ("Invalid flag specified during the key creation.");
