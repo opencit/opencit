@@ -44,12 +44,12 @@ public class CertifyBindingKey extends AbstractSetupTask {
         }
         username = trustagentConfiguration.getMtWilsonApiUsername();
         password = trustagentConfiguration.getMtWilsonApiPassword();
-//        if( username == null || username.isEmpty() ) {
-//            configuration("Mt Wilson username is not set");
-//        }
-//        if( password == null || password.isEmpty() ) {
-//            configuration("Mt Wilson password is not set");
-//        }
+        if( username == null || username.isEmpty() ) {
+            configuration("Mt Wilson username is not set");
+        }
+        if( password == null || password.isEmpty() ) {
+            configuration("Mt Wilson password is not set");
+        }
         
         keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
         if( keystoreFile == null || !keystoreFile.exists() ) {
@@ -91,7 +91,7 @@ public class CertifyBindingKey extends AbstractSetupTask {
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(bindingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(bindingKeyTCGCertificate));
         obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(bindingKeyTCGCertificateSignature)); 
-        obj.setAikPemCertificate(FileUtils.readFileToString(bindingKeyModulus));
+        obj.setAikPemCertificate(FileUtils.readFileToString(aikPemCertificate));
         
         log.debug("Creating TLS policy");
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
@@ -99,8 +99,8 @@ public class CertifyBindingKey extends AbstractSetupTask {
         TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
         
         Properties clientConfiguration = new Properties();
-        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, "admin");
-        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, "password");
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, username);
+        clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
         
         HostTpmKeys client = new HostTpmKeys(clientConfiguration, tlsConnection);
         String bindingKeyPemCertificate = client.createBindingKeyCertificate(obj);
