@@ -91,19 +91,6 @@ public class Setup implements Command {
     protected boolean continueAfterRuntimeException() {
         return options.getBoolean("continue", false);
     }
-    
-    /**
-     * loading extensions listed in extensions.cache is fast but if
-     * the user is trying to run a newly added setup task then it would
-     * not be found there 
-     * by adding the option --no-ext-cache the user can force scanning
-     * of all jar files in the classpath for extensions
-     * @return 
-     */
-    protected boolean useExtensionCacheFile() {
-        return options.getBoolean("ext-cache", true);
-    }
-
 
     protected File getConfigurationFile() {
 //        Filesystem fs = new Filesystem();

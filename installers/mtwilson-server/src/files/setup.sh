@@ -233,7 +233,8 @@ else
 fi
 
 #MTW_TLS_POLICY_ALLOW
-prompt_with_default MTWILSON_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "${MTWILSON_TLS_POLICY_ALLOW:-MTW_TLS_POLICY_ALLOW}"
+echo "Available TLS policies: certificate, certificate-digest, public-key, public-key-digest, TRUST_FIRST_CERTIFICATE, INSECURE"
+prompt_with_default MTWILSON_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "${MTWILSON_TLS_POLICY_ALLOW:-$MTW_TLS_POLICY_ALLOW}"
 MTWILSON_TLS_POLICY_ALLOW=`echo $MTWILSON_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
 OIFS=$IFS
 IFS=',' read -ra POLICIES <<< "$MTWILSON_TLS_POLICY_ALLOW"
