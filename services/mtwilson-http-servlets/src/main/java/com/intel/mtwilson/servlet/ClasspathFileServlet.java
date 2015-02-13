@@ -24,7 +24,7 @@ public class ClasspathFileServlet extends HttpServlet
      * so requests look like "/index.html" so after concatenating the path
      * would be "/www/index.html"
      */
-    private String relativePath = "/www"; 
+    private String relativePath = "/www";  // should be changed to "/publicResources"
     
 	// wait for a GET from client, then perform these actions
     @Override
