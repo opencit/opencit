@@ -39,26 +39,4 @@ public class TcbMeasurement {
     public void setMeasurements(List<ITcbMeasurementData> measurements) {
         this.measurements = measurements;
     }
-    
-    
-    
-//    private List<TcbMeasurementData> tcbMeasurementDataList;
-//    @XmlElementWrapper(name = "tcb_measurement_data_list")
-//    @XmlElements({
-//        @XmlElement(namexcccccccccccccccccccc = "file", type = TcbMeasurementFile.class),
-//        @XmlElement(name = "dir", type = TcbMeasurementDirectory.class)
-//    })
-//    public void setTcbMeasurementDataList(List<TcbMeasurementData> tcbMeasurementDataList) {
-//        this.tcbMeasurementDataList = tcbMeasurementDataList;
-//    }
-//    
-//    public List<TcbMeasurementData> getTcbMeasurementDataList() {
-//        return tcbMeasurementDataList;
-//    }
-    
-//    @XmlElement(name = "file")
-//    private TcbMeasurementFile file;
-//    @XmlElement(name = "dir")
-//    private TcbMeasurementDirectory directory;
-//    private List<TcbMeasurementData> tcbMeasurementDataList;
 }
