@@ -9,7 +9,7 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
-import com.intel.mtwilson.trustagent.model.TcbMeasurement;
+import com.intel.mtwilson.trustagent.measurement.TcbMeasurement;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;

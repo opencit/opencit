@@ -206,6 +206,13 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-xml</artifactId>
+            <version>0.2-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties />
     

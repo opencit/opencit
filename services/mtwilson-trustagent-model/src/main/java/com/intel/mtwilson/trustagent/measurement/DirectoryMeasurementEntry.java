@@ -2,22 +2,20 @@
  * Copyright (C) 2015 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.trustagent.model;
+package com.intel.mtwilson.trustagent.measurement;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
 
 /**
  *
  * @author rksavino
  */
 @XmlRootElement(name = "dir")
-public class TcbMeasurementDirectory implements ITcbMeasurementData {
+public class DirectoryMeasurementEntry extends MeasurementEntry {
     private String path;
     private String exclude;
     private String include;
-    private String value;
     
     @XmlAttribute
     public String getPath() {
@@ -44,14 +42,5 @@ public class TcbMeasurementDirectory implements ITcbMeasurementData {
     
     public void setInclude(String include) {
         this.include = include;
-    }
-    
-    @XmlValue
-    public String getValue() {
-        return value;
-    }
-    
-    public void setValue(String value) {
-        this.value = value;
     }
 }

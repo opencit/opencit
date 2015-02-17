@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.trustagent.model;
+package com.intel.mtwilson.trustagent.measurement;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "measurements")
 public class TcbMeasurement {
     private String digestAlg;
-    private List<ITcbMeasurementData> measurements = null;
+    private List<MeasurementEntry> measurements = null;
 
     @XmlAttribute
     public String getDigestAlg() {
@@ -29,14 +29,14 @@ public class TcbMeasurement {
     }
     
     @XmlElementRefs({
-        @XmlElementRef(name = "file", type = TcbMeasurementFile.class),
-        @XmlElementRef(name = "dir", type = TcbMeasurementDirectory.class)
+        @XmlElementRef(name = "file", type = FileMeasurementEntry.class),
+        @XmlElementRef(name = "dir", type = DirectoryMeasurementEntry.class)
     })
-    public List<ITcbMeasurementData> getMeasurements() {
+    public List<MeasurementEntry> getMeasurements() {
         return measurements;
     }
     
-    public void setMeasurements(List<ITcbMeasurementData> measurements) {
+    public void setMeasurements(List<MeasurementEntry> measurements) {
         this.measurements = measurements;
     }
 }
