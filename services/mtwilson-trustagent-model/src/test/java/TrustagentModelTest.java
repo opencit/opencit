@@ -44,6 +44,6 @@ public class TrustagentModelTest {
             log.warn("IOException: {}", e); //e.getMessage());
         } catch (Exception e) {
             log.warn("Exception: {}", e); //e.getMessage());
-        }   
+        }
     }
 }
