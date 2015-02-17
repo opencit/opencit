@@ -5,14 +5,11 @@
 package com.intel.mtwilson.configuration;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedResource;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
-import com.intel.mtwilson.Environment;
-import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.IOException;
 //import org.apache.commons.configuration.Configuration;

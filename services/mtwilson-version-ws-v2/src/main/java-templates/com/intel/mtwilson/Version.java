@@ -7,7 +7,7 @@ package com.intel.mtwilson;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
- * The constants in this class are substituted by Maven using hte
+ * The constants in this class are substituted by Maven using the
  * templating-maven-plugin
  * @author jbuhacoff
  */

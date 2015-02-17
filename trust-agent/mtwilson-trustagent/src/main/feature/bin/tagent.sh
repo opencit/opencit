@@ -80,7 +80,7 @@ trustagent_setup() {
   elif [ "$tasklist" == "--force" ]; then
     tasklist="$TRUSTAGENT_SETUP_TASKS --force"
   fi
-  java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup configure-from-environment $tasklist
+  java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main setup configure-from-environment $tasklist
   return $?
 }
 
@@ -104,7 +104,7 @@ trustagent_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd /opt/trustagent
-      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main start-http-server >>$TRUSTAGENT_HTTP_LOG_FILE 2>&1 &
+      java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main start-http-server >>$TRUSTAGENT_HTTP_LOG_FILE 2>&1 &
       echo $! > $TRUSTAGENT_PID_FILE
     )
     if trustagent_is_running; then
@@ -128,7 +128,7 @@ trustagent_is_running() {
   fi
   if [ -z "$TRUSTAGENT_PID" ]; then
     # check the process list just in case the pid file is stale
-    TRUSTAGENT_PID=$(ps ww | grep -v grep | grep java | grep "com.intel.dcsg.cpg.console.Main start-http-server" | awk '{ print $1 }')
+    TRUSTAGENT_PID=$(ps ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start-http-server" | awk '{ print $1 }')
   fi
   if [ -z "$TRUSTAGENT_PID" ]; then
     # trust agent is not running
@@ -257,7 +257,7 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
-      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
+      java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $*
     fi
     ;;
 esac
