@@ -1,0 +1,7 @@
+<measurements digestAlg="sha1">
+<file path="/path/to/the/file">da39a3ee5e6b4b0d3255bfef95601890afd80709</file>
+<file path="/path/to/the/file">da39a3ee5e6b4b0d3255bfef95601890afd80709</file>
+<dir path="/path/to/directory">da39a3ee5e6b4b0d3255bfef95601890afd80709</dir>
+<dir path="/path/to/directory" include="^include.regex.here$" exclude="^exclude.regex.here$">da39a3ee5e6b4b0d3255bfef95601890afd80709</dir>
+<file path="/path/to/the/file">da39a3ee5e6b4b0d3255bfef95601890afd80709</file>
+</measurements>
