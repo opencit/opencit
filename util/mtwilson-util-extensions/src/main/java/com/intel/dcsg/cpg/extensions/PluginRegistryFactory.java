@@ -44,13 +44,13 @@ public class PluginRegistryFactory {
             // if the name was already registered by an earlier extension
             // in the list, we warn the user and override it
             if( map.containsKey(transformedName) ) {
-                log.warn("Registry already contains a key {} to class {}", transformedName, map.get(transformedName));
+                log.warn("Registry already contains a key {} to class {}, replacing with {}", transformedName, map.get(transformedName), fqcn);
             }
             map.put(transformedName, fqcn);
             
             String qualifiedName = String.format("%s:%s", packageName, transformedName);
             if( map.containsKey(qualifiedName)) {
-                log.warn("Registry already contains a key {} to class {}", qualifiedName, map.get(qualifiedName));
+                log.warn("Registry already contains a key {} to class {}, replacing with {}", qualifiedName, map.get(qualifiedName), fqcn);
             }
             map.put(qualifiedName, fqcn);
             

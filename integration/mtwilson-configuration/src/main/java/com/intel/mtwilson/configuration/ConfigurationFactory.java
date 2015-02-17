@@ -66,21 +66,34 @@ public class ConfigurationFactory {
      */
     public static ConfigurationProvider getConfigurationProvider() throws IOException {
         if( provider == null ) {
-            // 1. locate and read the configuration file
+            // locate the configuration file
             File file = getConfigurationFile();
-            try (FileInputStream in = new FileInputStream(file)) {
-                String content = IOUtils.toString(in);
-                // 2. detect if it's encrypted: it would start with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
+            if( file.exists() ) {
+                // load existing configuration
+                try (FileInputStream in = new FileInputStream(file)) {
+                    String content = IOUtils.toString(in);
+                    // 2. detect if it's encrypted: it would start with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
 
-                if (Pem.isPem(content)) {
-                    // 3. read encrypted configuration
-                    String password = Environment.get(PASSWORD);
-//                    ByteArrayResource resource = new ByteArrayResource(content.getBytes(Charset.forName("UTF-8")));
-                    provider = new EncryptedConfigurationProvider(new FileResource(file), password);
-                } else {
-                    // 3. read plain configuration
-//                    ByteArrayResource resource = new ByteArrayResource(content.getBytes(Charset.forName("UTF-8")));
-                    provider = new ResourceConfigurationProvider(new FileResource(file));
+                    if (Pem.isPem(content)) {
+                        // 3. read encrypted configuration
+                        String password = Environment.get(PASSWORD);
+    //                    ByteArrayResource resource = new ByteArrayResource(content.getBytes(Charset.forName("UTF-8")));
+                        provider = new EncryptedConfigurationProvider(new FileResource(file), password);
+                    } else {
+                        // 3. read plain configuration
+    //                    ByteArrayResource resource = new ByteArrayResource(content.getBytes(Charset.forName("UTF-8")));
+                        provider = new ResourceConfigurationProvider(new FileResource(file));
+                    }
+                }
+            }
+            else {
+                // create new configuration; if a password variable is set, assume the configuration should be encrypted
+                String password = Environment.get(PASSWORD);
+                if( password == null ) {
+                    provider = new EmptyConfigurationProvider(new ResourceConfigurationProvider(new FileResource(file)));
+                }
+                else {
+                    provider = new EmptyConfigurationProvider(new EncryptedConfigurationProvider(new FileResource(file), password));
                 }
             }
         }
