@@ -11,6 +11,7 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 #package_var_bin_dir=${package_var_dir}/bin
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_features_dir=/opt/mtwilson/features
+aikqverify_dir=${package_features_dir}/aikqverify
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51
@@ -92,7 +93,7 @@ compile_aikqverify() {
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
   auto_install "Developer tools" "DEVELOPER" 
   AIKQVERIFY_OK=''
-  cd /var/opt/intel/aikverifyhome/bin
+  cd ${aikqverify_dir}/bin
   make  2>&1 > /dev/null
   rm -f aikqverify.o
   rm -f Makefile
@@ -102,7 +103,6 @@ compile_aikqverify() {
   fi
 }
 
-aikqverify_dir=${package_features_dir}/aikqverify
 mkdir -p ${aikqverify_dir}/bin
 mkdir -p ${aikqverify_dir}/data
 chmod +x aikqverify/openssl.sh
