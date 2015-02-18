@@ -443,7 +443,6 @@ com.intel.mtwilson.tag.rest.v2.repository.SelectionKvAttributeRepository
 com.intel.mtwilson.as.rest.v2.resource.Oems
 com.intel.mtwilson.tls.policy.factory.impl.TxtHostRecordTlsPolicyFactory$TxtHostRecordObjectTlsPolicy
 com.intel.mtwilson.user.management.rest.v2.resource.UserLoginCertificates
-com.intel.mtwilson.setup.cmd.ExportConfig
 com.intel.mtwilson.v2.test.params.ParameterResource
 com.intel.mtwilson.rpc.v2.resource.RpcRepository
 com.intel.mtwilson.tag.dao.jooq.generated.tables.records.MwFileRecord
@@ -757,7 +756,6 @@ com.intel.mtwilson.setup.cmd.FindHost
 com.intel.mtwilson.user.management.rest.v2.model.RolePermission
 com.intel.mtwilson.tag.model.SelectionLocator
 com.intel.mtwilson.configuration.v2.resource.ExtensionsResource
-com.intel.mtwilson.setup.cmd.ImportConfig
 com.intel.mtwilson.policy.rule.TagCertificateTrusted
 com.intel.mtwilson.tag.model.KvAttributeCollection
 com.intel.mtwilson.ms.controller.ApiClientX509JpaController
