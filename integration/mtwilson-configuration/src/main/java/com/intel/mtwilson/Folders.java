@@ -18,6 +18,7 @@ public class Folders {
 
     private static String application;
     private static String configuration;
+    private static String features;
     private static String repository;
 
     public static String application() {
@@ -34,13 +35,27 @@ public class Folders {
         return configuration;
     }
 
+    public static String features() {
+        if (features == null) {
+            features = locateFeaturesFolder();
+        }
+        return features;
+    }
+    
+    public static String features(String featureId) {
+        if (features == null) {
+            features = locateFeaturesFolder();
+        }
+        return features + File.separator + featureId;
+    }
+    
     public static String repository() {
         if (repository == null) {
             repository = locateRepositoryFolder();
         }
         return repository;
     }
-
+    
     public static String repository(String featureId) {
         if (repository == null) {
             repository = locateRepositoryFolder();
@@ -115,6 +130,18 @@ public class Folders {
         path = application() + File.separator + "configuration"; //initConfigurationFolder(applicationId, application/*, configurationFile*/);        
         return path;
     }
+    
+    private static String locateFeaturesFolder() {
+        // new mtwilson 3.0 setting, environment variable like MTWILSON_FEATURES
+        String path = Environment.get("FEATURES");
+        if (path != null) {
+            return path;
+        }
+        
+        // use a subfolder "features" under the application folder
+        path = application() + File.separator + "features"; //initConfigurationFolder(applicationId, application/*, configurationFile*/);        
+        return path;
+    }
 
     private static String locateRepositoryFolder() {
         // new mtwilson 3.0 setting, environment variable like MTWILSON_REPOSITORY
@@ -130,7 +157,7 @@ public class Folders {
             return path;
         }
 
-        // use a subfolder "configuration" under the application folder
+        // use a subfolder "repository" under the application folder
         path = application() + File.separator + "repository"; //initConfigurationFolder(applicationId, application/*, configurationFile*/);        
         return path;
     }
