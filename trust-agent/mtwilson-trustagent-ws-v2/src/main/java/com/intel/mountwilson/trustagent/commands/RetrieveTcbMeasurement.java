@@ -5,6 +5,7 @@
  */
 package com.intel.mountwilson.trustagent.commands;
 
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
@@ -13,11 +14,7 @@ import com.intel.mtwilson.trustagent.measurement.TcbMeasurement;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -33,27 +30,29 @@ public class RetrieveTcbMeasurement implements ICommand {
     }
 
     @Override
-    public void execute() {
-        try {
-            InputStream in = new FileInputStream(context.getTcbMeasurementXmlFile());
-            String xml = IOUtils.toString(in, Charset.forName("UTF-8"));
-            log.info("TCB measurement XML string: {}", xml);
+    public void execute() throws TAException {
+        if (!context.getTcbMeasurementXmlFile().exists()) {
+            log.warn("TCB measurement XML file not present.");
+        } else {
+            try {
+                InputStream in = new FileInputStream(context.getTcbMeasurementXmlFile());
+                String xml = IOUtils.toString(in, Charset.forName("UTF-8"));
+                log.info("TCB measurement XML string: {}", xml);
 
-            JAXBContext tcbMeasurementJaxbContext = JAXBContext.newInstance(TcbMeasurement.class);
-            Unmarshaller um = tcbMeasurementJaxbContext.createUnmarshaller();
-            TcbMeasurement tcbMeasurement = (TcbMeasurement) um.unmarshal(new StringReader(xml));
-            log.info("TcbMeasurement unmarshalled successfully.");
+                JAXB jaxb = new JAXB();
+                TcbMeasurement tcbMeasurement = jaxb.read(xml, TcbMeasurement.class);
+                log.info("TcbMeasurement unmarshalled successfully.");
+                String tcbMeasurementString = jaxb.write(tcbMeasurement);
+                log.info("Marshalled TcbMeasurement: {}", tcbMeasurementString);
 
-            javax.xml.bind.Marshaller m = tcbMeasurementJaxbContext.createMarshaller();
-            StringWriter sw = new StringWriter();
-            m.marshal(tcbMeasurement, sw);
-            log.info("Marshalled TcbMeasurement: {}", sw.toString());
-            
-            context.setTcbMeasurement(sw.toString());
-        } catch (IOException e) {
-            log.warn("IOException, invalid measurement.xml: {}", e.getMessage());
-        } catch (Exception e) {
-            log.warn("Exception, invalid measurement.xml: {}", e.getMessage());
+                context.setTcbMeasurement(tcbMeasurementString);
+            } catch (IOException e) {
+                log.warn("IOException, invalid measurement.xml: {}", e.getMessage());
+                throw new TAException(ErrorCode.BAD_REQUEST, "Invalid measurement.xml file. Cannot unmarshal/marshal object using jaxb.");
+            } catch (Exception e) {
+                log.warn("Exception, invalid measurement.xml: {}", e.getMessage());
+                throw new TAException(ErrorCode.BAD_REQUEST, "Invalid measurement.xml file. Cannot unmarshal/marshal object using jaxb.");
+            }
         }
     }
 }
