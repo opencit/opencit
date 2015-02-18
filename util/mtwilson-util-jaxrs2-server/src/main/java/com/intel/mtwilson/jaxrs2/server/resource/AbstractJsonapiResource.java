@@ -7,6 +7,7 @@ package com.intel.mtwilson.jaxrs2.server.resource;
 import com.intel.mtwilson.jaxrs2.server.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.jaxrs2.AbstractDocument;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -44,7 +45,7 @@ import javax.ws.rs.core.Response;
  *
  * @author jbuhacoff
  */
-public abstract class AbstractJsonapiResource<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> extends AbstractSimpleResource<T,C,F,P,L> {
+public abstract class AbstractJsonapiResource<T extends AbstractDocument, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> extends AbstractSimpleResource<T,C,F,P,L> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractJsonapiResource.class);
 

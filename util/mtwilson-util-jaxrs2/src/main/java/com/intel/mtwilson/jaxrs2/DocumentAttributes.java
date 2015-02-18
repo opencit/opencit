@@ -1,41 +1,28 @@
 /*
- * Copyright (C) 2013 Intel Corporation
+ * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
 package com.intel.mtwilson.jaxrs2;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.io.Attributes;
 import com.intel.dcsg.cpg.io.ByteArray;
 import java.net.URL;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
- *
- * When using Jackson to serialize a Document subclass, the default behavior
- * is to omit null or empty fields. When using Jackson to de-serialize a
- * Document subclass, the default behavior is to ignore unknown fields. 
- * The combination is intended to facilitate backward-compatible future changes
- * in the API.
+ * Encapsulates some common attributes of documents such as
+ * href, etag, createdOn, modifiedOn.  Specific fields are
+ * optional or required according to the application.
  * 
  * @author jbuhacoff
  */
-//@JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY) // jackson 1.9
-@JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
-@JsonIgnoreProperties(ignoreUnknown=true)
-public abstract class Document extends AbstractDocument {
+public class DocumentAttributes extends Attributes {
     private URL href;
-    private final HashMap<String,Object> meta = new HashMap<>();
-    private final HashMap<String,Object> links = new HashMap<>();
     private String etag;
     private Date createdOn; 
     private Date modifiedOn;
-    
+
     public URL getHref() {
         return href;
     }
@@ -44,14 +31,6 @@ public abstract class Document extends AbstractDocument {
         this.href = href;
     }
     
-    
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-    public Map<String, Object> getLinks() {
-        return links;
-    }
 
     public Date getCreatedOn() {
         return createdOn;
@@ -75,6 +54,14 @@ public abstract class Document extends AbstractDocument {
 
     
 
+    /**
+     * If an etag is already set, returns the existing etag.
+     * Otherwise, if the modifiedOn date is set, returns a SHA-1 
+     * digest of the modifiedOn date.
+     * Otherwise, returns null.
+     * 
+     * @return 
+     */
     public String getEtag() {
         if( etag != null ) { return etag; }
         if( modifiedOn != null ) {
@@ -85,4 +72,6 @@ public abstract class Document extends AbstractDocument {
         }
         return null;
     }
+    
+    
 }

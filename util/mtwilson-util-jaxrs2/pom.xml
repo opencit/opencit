@@ -85,7 +85,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jackson</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
 
 
