@@ -7,6 +7,7 @@ package com.intel.mtwilson.configuration.cmd;
 import com.intel.dcsg.cpg.console.InteractiveCommand;
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,23 +24,36 @@ public class ExportConfig extends InteractiveCommand {
     public void execute(String[] args) throws Exception {
         
         
-        if( args.length == 1 ) {
-            String password = getExistingPassword("the Server Configuration File", "env-password");
+        String password;
+        if( options != null && options.containsKey("env-password") ) {
+            password = getExistingPassword("the Server Configuration File", "env-password");
+        }
+        else {
+            password = Environment.get("PASSWORD");
+            if( password == null ) {
+                throw new IllegalArgumentException("Usage: ImportConfig <outfile|--out=outfile|--stdout> [--env-password=PASSWORD_VAR]");
+            }
+        }
+        
+        if( options != null && options.containsKey("out") ) {
+            String filename = options.getString("out");
+            try(FileOutputStream out = new FileOutputStream(new File(filename))) {
+                export(out, password);
+            }
+        }
+        else if( options != null && options.getBoolean("stdout", false) ) {
+            log.debug("Output filename not provided; exporting to stdout");
+            export(System.out, password);
+        }
+        else if( args.length == 1 ) {
             String filename = args[0];
             try(FileOutputStream out = new FileOutputStream(new File(filename))) {
                 export(out, password);
             }
         }
-        else if( args.length < 1 && options != null && options.containsKey("stdout")) { 
-            log.debug("Output filename not provided; exporting to stdout");
-            // usage: ExportConfig <outfile> [--env-password CONFIG_PASSWD]
-            String password = getExistingPassword("the Server Configuration File", "env-password");
-            export(System.out, password);
-        }
         else {
-            throw new IllegalArgumentException("Usage: ExportConfig <outfile|--stdout> [--env-password=KMS_PASSWORD]");
+            throw new IllegalArgumentException("Usage: ImportConfig <outfile|--out=outfile|--stdout> [--env-password=PASSWORD_VAR]");
         }
-        
         
     }
 

@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtection;
 import com.intel.dcsg.cpg.crypto.key.password.PasswordProtectionBuilder;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.MyConfiguration;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,22 +23,34 @@ public class ImportConfig extends InteractiveCommand {
     @Override
     public void execute(String[] args) throws Exception {
         
+        String password;
+        if( options != null && options.containsKey("env-password") ) {
+            password = getNewPassword("the Server Configuration File", "env-password");
+        }
+        else {
+            password = Environment.get("PASSWORD");
+            if( password == null ) {
+                throw new IllegalArgumentException("Usage: ImportConfig <infile|--in=infile|--stdin> [--env-password=PASSWORD_VAR]");
+            }
+        }
+                
         String content;
-        
-        if( args.length == 1 ) {
-            String filename = args[0];
-            try(FileInputStream in = new FileInputStream(new File(filename))) {
+        if( options != null && options.containsKey("in") ) {
+            try (FileInputStream in = new FileInputStream(new File(options.getString("in")))) {
                 content = IOUtils.toString(in);
             }
         }
-        else if( args.length < 1 && options != null && options.containsKey("stdin")) { 
+        else if( options != null && options.getBoolean("stdin", false) ) {
             content = IOUtils.toString(System.in);
+        }else if( args.length == 1 ) {
+            String filename = args[0];
+            try (FileInputStream in = new FileInputStream(new File(filename))) {
+                content = IOUtils.toString(in);
+            }
         }
         else {
-            throw new IllegalArgumentException("Usage: ImportConfig <infile|--stdin> [--env-password=KMS_PASSWORD]");
+            throw new IllegalArgumentException("Usage: ImportConfig <infile|--in=infile|--stdin> [--env-password=PASSWORD_VAR]");
         }
-        
-        String password = getNewPassword("the Server Configuration File", "env-password");
         
         PasswordProtection protection = PasswordProtectionBuilder.factory().aes(256).block().sha256().pbkdf2WithHmacSha1().saltBytes(8).iterations(1000).build();
         if( !protection.isAvailable() ) {
