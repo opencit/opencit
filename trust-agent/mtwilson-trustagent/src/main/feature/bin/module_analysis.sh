@@ -4,7 +4,7 @@
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
 if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="txt-stat"; fi
 # 2.0 outputs to /opt/trustagent/var/measureLog.xml
-OUTFILE=/opt/trustagent/var/measureLog.xml
+OUTFILE=${OUTFILE:-/opt/trustagent/var/measureLog.xml}
 # 1.2 outputs to measureLog.xml in current directory
 #OUTFILE=measureLog.xml
 #skaja, use this script to generate measureLog for modules from rc3 

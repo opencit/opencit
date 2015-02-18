@@ -18,7 +18,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
- * NOTE: this task is deprecated by mtwilson-shiro-setup including a similar
+ * NOTE: this task is deprecated by mtwilson-shiro-setup/mtwilson-shiro-file including a similar
  * task but without specific permissions, so an admin can either set the
  * username and passowrd in environment variables or just create the username
  * automatically with this task and add application-specific permissions using

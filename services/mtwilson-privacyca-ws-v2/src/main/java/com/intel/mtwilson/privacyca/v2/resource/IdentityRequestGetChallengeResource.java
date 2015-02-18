@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.privacyca.v2.resource;
 
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
@@ -23,7 +22,8 @@ import javax.ws.rs.core.MediaType;
 @V2
 @Path("/privacyca/identity-challenge-request")
 public class IdentityRequestGetChallengeResource {
-    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdentityRequestGetChallengeResource.class);
+
     /**
      * 
      * @param derEncodedIdentityChallengeRequest is an ASN.1 structure  SEQUENCE ( DEROCTETSTREAM identityRequest , DEROCTETSTREAM endorsementCertificate )

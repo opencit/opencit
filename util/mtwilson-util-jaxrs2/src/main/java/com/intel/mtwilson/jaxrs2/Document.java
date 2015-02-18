@@ -28,8 +28,7 @@ import java.util.Map;
 //@JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY) // jackson 1.9
 @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
 @JsonIgnoreProperties(ignoreUnknown=true)
-public abstract class Document {
-    private UUID id;
+public abstract class Document extends AbstractDocument {
     private URL href;
     private final HashMap<String,Object> meta = new HashMap<>();
     private final HashMap<String,Object> links = new HashMap<>();
@@ -37,14 +36,6 @@ public abstract class Document {
     private Date createdOn; 
     private Date modifiedOn;
     
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public URL getHref() {
         return href;
     }

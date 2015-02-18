@@ -2,17 +2,23 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.configuration.v2.model;
+package com.intel.mtwilson.extensions.jaxrs;
 
-import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
-import com.intel.mtwilson.repository.FilterCriteria;
+//import com.intel.mtwilson.configuration.v2.model.Configuration;
+//import com.intel.mtwilson.jaxrs2.DefaultFilterCriteria;
+//import com.intel.mtwilson.repository.FilterCriteria;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 
 /**
  *
  * @author jbuhacoff
  */
-public class ExtensionFilterCriteria extends DefaultFilterCriteria implements FilterCriteria<Configuration> {
+public class ExtensionFilterCriteria /*extends DefaultFilterCriteria*/ /*implements FilterCriteria<Configuration>*/ {
+    @QueryParam("filter")
+    @DefaultValue("true")
+    public Boolean filter = false;
+    
     /**
      * The extension fully-qualified class name 
      */
