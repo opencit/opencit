@@ -158,7 +158,6 @@ public class Folders {
             return path;
         }
 
-
         String applicationId = System.getProperty("mtwilson.application.id", "mtwilson");
 
         // with no *_LOGS environment variable and no matching log directory,
