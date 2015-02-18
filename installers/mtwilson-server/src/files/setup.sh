@@ -328,13 +328,6 @@ if [[ ! -h "/opt/mtwilson/configuration" ]]; then
   ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
 fi
 
-# copy extensions.cache file
-if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 600 extensions.cache
-  cp extensions.cache /opt/mtwilson/configuration
-fi
-
-
 find_installer() {
   local installer="${1}"
   binfile=`ls -1 $installer-*.bin 2>/dev/null | head -n 1`
