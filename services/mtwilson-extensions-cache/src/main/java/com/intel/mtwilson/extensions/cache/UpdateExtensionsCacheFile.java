@@ -171,6 +171,9 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
                 validation("Extension cache is out of date");
             }
         }
+        else {
+            validation("Extensions cache file does not exist");
+        }
         
     }
     

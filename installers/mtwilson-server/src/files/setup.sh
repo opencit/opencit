@@ -629,6 +629,7 @@ chmod -R 770 /opt/mtwilson/bin
 mkdir -p /opt/mtwilson/env.d
 #chown -R root /opt/mtwilson/env.d
 
+call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
