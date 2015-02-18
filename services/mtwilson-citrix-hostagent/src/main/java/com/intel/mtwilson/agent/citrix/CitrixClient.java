@@ -89,8 +89,8 @@ public class CitrixClient {
         //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
 
         // check mtwilson 2.0 configuration first
-        String binPath = Folders.application() + File.separator + "bin"; //.getBinPath();
-        String varPath = Folders.repository("aikqverify");
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //.getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data";
         log.debug("binpath = {}", binPath);
         log.debug("varpath = {}", varPath);
         File bin = new File(binPath);

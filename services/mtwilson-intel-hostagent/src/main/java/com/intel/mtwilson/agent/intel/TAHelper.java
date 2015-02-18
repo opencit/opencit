@@ -56,6 +56,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import javax.xml.bind.PropertyException;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -106,8 +107,8 @@ public class TAHelper {
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
-        String binPath = Folders.application() + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = My.repository().getDirectory("aikqverify").getAbsolutePath(); //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data"; //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
         File bin = new File(binPath);
         File var = new File(varPath);
         if (bin.exists() && var.exists()) {
@@ -816,8 +817,10 @@ public class TAHelper {
                     }
                     reader.next();
                 }
-            } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+            } catch (FactoryConfigurationError | XMLStreamException | NumberFormatException ex) {
+                // bug #2171 we need to throw an exception to prevent the host from being registered with an error manifest
+                //log.error(ex.getMessage(), ex); 
+                throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
 
