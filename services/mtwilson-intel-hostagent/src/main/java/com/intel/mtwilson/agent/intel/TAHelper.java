@@ -104,8 +104,8 @@ public class TAHelper {
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
-        String binPath = Folders.application() + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = My.repository().getDirectory("aikqverify").getAbsolutePath(); //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data"; //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
         File bin = new File(binPath);
         File var = new File(varPath);
         if (bin.exists() && var.exists()) {
