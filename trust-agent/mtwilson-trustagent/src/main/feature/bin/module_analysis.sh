@@ -3,6 +3,7 @@
 # Usage: ./module_analysis.sh   (reads from txt-stat output)
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
 if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="txt-stat"; fi
+INFILE_TCB_MEASUREMENT_SHA1=${INFILE_TCB_MEASUREMENT_SHA1:-/var/log/trustagent/measurement.sha1}
 # 2.0 outputs to /opt/trustagent/var/measureLog.xml
 OUTFILE=/opt/trustagent/var/measureLog.xml
 # 1.2 outputs to measureLog.xml in current directory
@@ -553,6 +554,15 @@ else
     #echo '<!--' "vl_current_indent:$vl_current_indent" '-->' >>$OUTFILE
   done
 fi
+
+### looks for tcb measurement hash in /var/log/trustagent/measurement.sha1, adds
+### as a module to OUTFILE
+if [ -f "$INFILE_TCB_MEASUREMENT_SHA1" ]; then
+  measurement_name="tbootxm"
+  measurement=$(cat "$INFILE_TCB_MEASUREMENT_SHA1")
+  xml_pcr2 "19" "$measurement" "$measurement_name" >>$OUTFILE
+fi
+
 echo "$BLANK2$BLANK2</modules>" >>$OUTFILE
 echo "$BLANK2</txt>" >>$OUTFILE
 echo "</measureLog>" >>$OUTFILE
