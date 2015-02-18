@@ -205,7 +205,6 @@ com.intel.mtwilson.setup.ui.console.StringInput
 com.intel.mtwilson.as.rest.v2.resource.MleSources
 com.intel.mtwilson.as.rest.v2.repository.HostRepository
 com.intel.mtwilson.v2.test.rpc.AddIntegersRunnable
-com.intel.mtwilson.configuration.v2.resource.ConfigurationResource
 com.intel.mtwilson.as.rest.v2.model.UserRoleLocator
 com.intel.mtwilson.jackson.PublicKeySerializer
 com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria
@@ -344,7 +343,6 @@ com.intel.mtwilson.shiro.jdbi.LocaleArgument
 com.intel.mtwilson.audit.data.AuditLogEntry
 com.intel.mtwilson.as.rest.v2.resource.UserRoles
 com.intel.mtwilson.tag.dao.jdbi.FileResultMapper
-com.intel.mtwilson.v2.test.extensions.ExtensionsResource
 com.intel.mtwilson.tag.model.KvAttributeLocator
 com.intel.mtwilson.as.ASPersistenceManager
 com.intel.mtwilson.setup.cmd.Wizard
