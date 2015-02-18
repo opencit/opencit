@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 /**
- *
+ * NOTE: this task is deprecated by mtwilson-shiro-file including a similar
+ * task but without trustagent specific permissions.
+ * 
  * @author jbuhacoff
  */
 public class Password implements Command {
