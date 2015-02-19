@@ -63,6 +63,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +102,8 @@ public class TAHelper {
 //	private EntityManagerFactory entityManagerFactory;
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
-
+    private String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
+    
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
@@ -549,8 +551,12 @@ public class TAHelper {
                     xtw.writeAttribute("PackageName", "");
                     xtw.writeAttribute("PackageVendor", "");
                     xtw.writeAttribute("PackageVersion", "");
-                    // since there will be only 2 modules for PCR 19, which changes across hosts, we will consider them as host specific ones
-                    xtw.writeAttribute("UseHostSpecificDigest", "true");
+                    if (ArrayUtils.contains(openSourceHostSpecificModules, eventLog.getLabel())) {
+                        // For Xen, these modules would be vmlinuz and initrd and for KVM it would just be initrd.
+                        xtw.writeAttribute("UseHostSpecificDigest", "true");
+                    } else {
+                        xtw.writeAttribute("UseHostSpecificDigest", "false");
+                    }
                     xtw.writeEndElement();
                 }
             }

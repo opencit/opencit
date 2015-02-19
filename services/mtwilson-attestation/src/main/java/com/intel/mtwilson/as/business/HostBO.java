@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -75,6 +76,7 @@ public class HostBO {
 
 	private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
 	public static final PcrIndex LOCATION_PCR = PcrIndex.PCR22;
+        private static final String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
@@ -883,7 +885,8 @@ public class HostBO {
                             //					tblHostSpecificManifest.setHostID(tblHosts.getId());
                             tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
                             tblHostSpecificManifests.add(tblHostSpecificManifest);
-                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
+                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null
+                                && ArrayUtils.contains(openSourceHostSpecificModules, m.getInfo().get("ComponentName"))) {
 
                             log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
                                     "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");

@@ -19,6 +19,7 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
+import com.intel.mountwilson.trustagent.commands.RetrieveTcbMeasurement;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.TrustagentRepository;
 import javax.ws.rs.Consumes;
@@ -107,6 +108,7 @@ public class Tpm {
 
             // Get the module information
             new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
+            new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
             
