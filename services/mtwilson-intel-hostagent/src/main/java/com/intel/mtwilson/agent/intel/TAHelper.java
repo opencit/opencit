@@ -56,12 +56,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import javax.xml.bind.PropertyException;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,12 +102,13 @@ public class TAHelper {
 //	private EntityManagerFactory entityManagerFactory;
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
-
+    private String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
+    
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
-        String binPath = Folders.application() + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = My.repository().getDirectory("aikqverify").getAbsolutePath(); //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data"; //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
         File bin = new File(binPath);
         File var = new File(varPath);
         if (bin.exists() && var.exists()) {
@@ -548,8 +551,12 @@ public class TAHelper {
                     xtw.writeAttribute("PackageName", "");
                     xtw.writeAttribute("PackageVendor", "");
                     xtw.writeAttribute("PackageVersion", "");
-                    // since there will be only 2 modules for PCR 19, which changes across hosts, we will consider them as host specific ones
-                    xtw.writeAttribute("UseHostSpecificDigest", "true");
+                    if (ArrayUtils.contains(openSourceHostSpecificModules, eventLog.getLabel())) {
+                        // For Xen, these modules would be vmlinuz and initrd and for KVM it would just be initrd.
+                        xtw.writeAttribute("UseHostSpecificDigest", "true");
+                    } else {
+                        xtw.writeAttribute("UseHostSpecificDigest", "false");
+                    }
                     xtw.writeEndElement();
                 }
             }
@@ -810,8 +817,10 @@ public class TAHelper {
                     }
                     reader.next();
                 }
-            } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+            } catch (FactoryConfigurationError | XMLStreamException | NumberFormatException ex) {
+                // bug #2171 we need to throw an exception to prevent the host from being registered with an error manifest
+                //log.error(ex.getMessage(), ex); 
+                throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
 

@@ -2,10 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.configuration.v2.resource;
+package com.intel.mtwilson.configuration.jaxrs.server;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.mtwilson.configuration.v2.resource.*;
 import com.intel.mtwilson.configuration.v2.model.Configuration;
 import com.intel.mtwilson.configuration.v2.model.ConfigurationFilterCriteria;
 import com.intel.mtwilson.configuration.v2.model.ConfigurationCollection;
@@ -13,6 +12,12 @@ import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.configuration.jaxrs.ConfigurationDocument;
+import com.intel.mtwilson.configuration.jaxrs.ConfigurationDocumentCollection;
+import com.intel.mtwilson.configuration.jaxrs.ConfigurationDocumentFilterCriteria;
+import com.intel.mtwilson.configuration.jaxrs.server.ConfigurationDocumentLocator;
+import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,27 +32,29 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
- *
+ * Represents the application and feature configurations and allows editing individual
+ * settings.
+ * 
  * @author jbuhacoff
  */
 @V2
-//@Stateless
 @Path("/configurations_unused") 
-public class ConfigurationResource extends AbstractResource<Configuration,ConfigurationCollection,ConfigurationFilterCriteria,NoLinks<Configuration>> {
+public class ConfigurationResource extends AbstractJsonapiResource<ConfigurationDocument,ConfigurationDocumentCollection,ConfigurationDocumentFilterCriteria,NoLinks<ConfigurationDocument>,ConfigurationDocumentLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationResource.class);
     private static final Pattern xmlTagName = Pattern.compile("(?:^[a-z].*)");
     
+    private ConfigurationDocumentRepository repository;
+    
     @RequiresPermissions("configurations:search")        
-    @Override
-    protected ConfigurationCollection search(ConfigurationFilterCriteria criteria) {
-        ConfigurationCollection configurations = new ConfigurationCollection();
+    protected ConfigurationDocumentCollection search(ConfigurationDocumentFilterCriteria criteria) {
+        ConfigurationDocumentCollection configurations = new ConfigurationDocumentCollection();
         Configuration configuration = retrieve("local");
-        configurations.getConfigurations().add(configuration);
+        ConfigurationDocument settings = new ConfigurationDocument();
+        configurations.getDocuments().add(settings);
         return configurations;
     }
 
     @RequiresPermissions("configurations:retrieve")        
-    @Override
     protected Configuration retrieve(String id) {
         Configuration configuration = null;
         if( "local".equals(id) ) {
@@ -118,22 +125,6 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
         return configuration;
     }
 
-    @RequiresPermissions("configurations:create")        
-    @Override
-    protected void create(Configuration item) {
-        // store it...
-    }
-    @RequiresPermissions("configurations:store")        
-    @Override
-    protected void store(Configuration item) {
-        // store it...
-    }
-
-    @RequiresPermissions("configurations:delete")        
-    @Override
-    protected void delete(String id) {
-    }
-
     /*
     @Override
     protected RpcFilterCriteria createFilterCriteriaWithId(String id) {
@@ -142,9 +133,16 @@ public class ConfigurationResource extends AbstractResource<Configuration,Config
         return criteria;
     }
     */
+
+    
     @Override
-    protected ConfigurationCollection createEmptyCollection() {
-        return new ConfigurationCollection();
+    protected ConfigurationDocumentCollection createEmptyCollection() {
+        return new ConfigurationDocumentCollection();
+    }
+
+    @Override
+    protected DocumentRepository<ConfigurationDocument, ConfigurationDocumentCollection, ConfigurationDocumentFilterCriteria, ConfigurationDocumentLocator> getRepository() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

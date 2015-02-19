@@ -86,7 +86,6 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-validation</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

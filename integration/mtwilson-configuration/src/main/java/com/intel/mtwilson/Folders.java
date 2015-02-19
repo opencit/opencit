@@ -18,6 +18,8 @@ public class Folders {
 
     private static String application;
     private static String configuration;
+    private static String features;
+    private static String log;
     private static String repository;
 
     public static String application() {
@@ -33,21 +35,42 @@ public class Folders {
         }
         return configuration;
     }
+    
+    public static String log() {
+        if (log == null) {
+            log = locateLogFolder();
+        }
+        return log;
+    }
 
+    public static String features() {
+        if (features == null) {
+            features = locateFeaturesFolder();
+        }
+        return features;
+    }
+    
+    public static String features(String featureId) {
+        if (features == null) {
+            features = locateFeaturesFolder();
+        }
+        return features + File.separator + featureId;
+    }
+    
     public static String repository() {
         if (repository == null) {
             repository = locateRepositoryFolder();
         }
         return repository;
     }
-
+    
     public static String repository(String featureId) {
         if (repository == null) {
             repository = locateRepositoryFolder();
         }
         return repository + File.separator + featureId;
     }
-
+    
     /**
      * Represents the application folder, for example /opt/mtwilson or
      * C:\mtwilson, which can be set using the MTWILSON_HOME environment
@@ -116,6 +139,48 @@ public class Folders {
         return path;
     }
 
+    private static String locateFeaturesFolder() {
+        // new mtwilson 3.0 setting, environment variable like MTWILSON_FEATURES
+        String path = Environment.get("FEATURES");
+        if (path != null) {
+            return path;
+        }
+        
+        // use a subfolder "features" under the application folder
+        path = application() + File.separator + "features"; //initConfigurationFolder(applicationId, application/*, configurationFile*/);        
+        return path;
+    }
+    
+    private static String locateLogFolder() {
+        // get value of environment variable MTWILSON_LOGS, or KMS_LOGS, etc.
+        String path = Environment.get("LOGS");
+        if (path != null) {
+            return path;
+        }
+
+        String applicationId = System.getProperty("mtwilson.application.id", "mtwilson");
+
+        // with no *_LOGS environment variable and no matching log directory,
+        // use default platform-specific locations
+        if (Platform.isUnix()) {
+            return "/var/log/" + applicationId; // like /var/log/mtwilson
+        }
+        if (Platform.isWindows()) {
+            return application() + File.separator + "logs"; // like C:/mtwilson/logs
+        }
+
+        // any other platform, we don't have a default so choose a directory
+        // under the user directory or current directory if no log directory is
+        // defined
+        path = System.getProperty("user.home", ".");
+        if (path != null) {
+            return path + File.separator + applicationId;
+        }
+
+        // finally, use current directory
+        return ".";
+    }
+
     private static String locateRepositoryFolder() {
         // new mtwilson 3.0 setting, environment variable like MTWILSON_REPOSITORY
         String path = Environment.get("REPOSITORY");
@@ -130,7 +195,7 @@ public class Folders {
             return path;
         }
 
-        // use a subfolder "configuration" under the application folder
+        // use a subfolder "repository" under the application folder
         path = application() + File.separator + "repository"; //initConfigurationFolder(applicationId, application/*, configurationFile*/);        
         return path;
     }

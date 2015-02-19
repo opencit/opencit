@@ -133,7 +133,7 @@ com.intel.mtwilson.as.rest.v2.model.MleSourceLocator
 com.intel.mtwilson.as.helper.ASConfiguration
 com.intel.mtwilson.ms.MSPersistenceManager
 com.intel.mtwilson.launcher.ExtensionCacheLauncher
-com.intel.mtwilson.setup.cmd.ImportConfig
+com.intel.mtwilson.configuration.cmd.ImportConfig
 com.intel.mtwilson.setup.cmd.InitDatabase
 com.intel.mtwilson.tag.rest.v2.rpc.RevokeTagCertificate
 com.intel.mtwilson.shiro.authc.password.JdbcPasswordRealm
@@ -205,7 +205,6 @@ com.intel.mtwilson.setup.ui.console.StringInput
 com.intel.mtwilson.as.rest.v2.resource.MleSources
 com.intel.mtwilson.as.rest.v2.repository.HostRepository
 com.intel.mtwilson.v2.test.rpc.AddIntegersRunnable
-com.intel.mtwilson.configuration.v2.resource.ConfigurationResource
 com.intel.mtwilson.as.rest.v2.model.UserRoleLocator
 com.intel.mtwilson.jackson.PublicKeySerializer
 com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria
@@ -313,7 +312,7 @@ com.intel.mtwilson.tag.dao.jdbi.CertificateRequestResultMapper
 com.intel.mtwilson.as.rest.v2.repository.FileRepository
 com.intel.mtwilson.as.rest.v2.resource.Mles
 com.intel.mtwilson.as.rest.v2.repository.HostTlsPolicyRepository
-com.intel.mtwilson.setup.cmd.ExportConfig
+com.intel.mtwilson.configuration.cmd.ExportConfig
 com.intel.mtwilson.setup.SetupException
 com.intel.mtwilson.rpc.v2.resource.AsyncRpc
 com.intel.mtwilson.tag.dao.jooq.generated.tables.MwTagKvattribute
@@ -344,7 +343,6 @@ com.intel.mtwilson.shiro.jdbi.LocaleArgument
 com.intel.mtwilson.audit.data.AuditLogEntry
 com.intel.mtwilson.as.rest.v2.resource.UserRoles
 com.intel.mtwilson.tag.dao.jdbi.FileResultMapper
-com.intel.mtwilson.v2.test.extensions.ExtensionsResource
 com.intel.mtwilson.tag.model.KvAttributeLocator
 com.intel.mtwilson.as.ASPersistenceManager
 com.intel.mtwilson.setup.cmd.Wizard

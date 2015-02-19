@@ -328,13 +328,6 @@ if [[ ! -h "/opt/mtwilson/configuration" ]]; then
   ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
 fi
 
-# copy extensions.cache file
-if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 600 extensions.cache
-  cp extensions.cache /opt/mtwilson/configuration
-fi
-
-
 find_installer() {
   local installer="${1}"
   binfile=`ls -1 $installer-*.bin 2>/dev/null | head -n 1`
@@ -629,6 +622,7 @@ chmod -R 770 /opt/mtwilson/bin
 mkdir -p /opt/mtwilson/env.d
 #chown -R root /opt/mtwilson/env.d
 
+call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
@@ -786,9 +780,12 @@ update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.propert
 #update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASSWORD"
 #update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASSWORD"
 
-MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
-prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
-if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
+if [ ! -z "$opt_portals" ]; then
+  MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
+  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+  if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
+fi
+
 prompt_with_default MTWILSON_TAG_CERT_IMPORT_AUTO "Mt Wilson Tag Certificate Auto Import: " ${MTWILSON_TAG_CERT_IMPORT_AUTO:-true}
 update_property_in_file "mtwilson.atag.html5.dir" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_HTML5_DIR"
 update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_CERT_IMPORT_AUTO"

@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO:  this class belongs in a more general setting such as util-io
- * 
  * Extensible with new attributes via the attributes map and Jackson's
  * annotations JsonAnyGetter and JsonAnySetter. Note: if attributes was another
  * object instead of a map we could have used the JsonUnwrapped annotation

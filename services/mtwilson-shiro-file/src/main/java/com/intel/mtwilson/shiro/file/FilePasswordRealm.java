@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.shiro.file;
 
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.shiro.Username;
 import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
@@ -34,6 +35,13 @@ public class FilePasswordRealm extends AuthorizingRealm {
     
     private String userFilePath;
     private String permissionFilePath;
+
+    public FilePasswordRealm() {
+        userFilePath = Folders.configuration() + File.separator + "users.txt";
+        permissionFilePath = Folders.configuration() + File.separator + "permissions.txt";
+    }
+    
+    
 
     public void setUserFilePath(String userFilePath) {
         this.userFilePath = userFilePath;

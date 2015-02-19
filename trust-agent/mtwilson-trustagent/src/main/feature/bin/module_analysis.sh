@@ -2,9 +2,12 @@
 #Analysis tboot log
 # Usage: ./module_analysis.sh   (reads from txt-stat output)
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
-if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="txt-stat"; fi
+TXTSTAT=$(which txt-stat 2>/dev/null)
+TXTSTAT=${TXTSTAT:-"/usr/sbin/txt-stat"}
+if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="$TXTSTAT"; fi
+INFILE_TCB_MEASUREMENT_SHA1=${INFILE_TCB_MEASUREMENT_SHA1:-/var/log/trustagent/measurement.sha1}
 # 2.0 outputs to /opt/trustagent/var/measureLog.xml
-OUTFILE=/opt/trustagent/var/measureLog.xml
+OUTFILE=${OUTFILE:-/opt/trustagent/var/measureLog.xml}
 # 1.2 outputs to measureLog.xml in current directory
 #OUTFILE=measureLog.xml
 #skaja, use this script to generate measureLog for modules from rc3 
@@ -553,6 +556,15 @@ else
     #echo '<!--' "vl_current_indent:$vl_current_indent" '-->' >>$OUTFILE
   done
 fi
+
+### looks for tcb measurement hash in /var/log/trustagent/measurement.sha1, adds
+### as a module to OUTFILE
+if [ -f "$INFILE_TCB_MEASUREMENT_SHA1" ]; then
+  measurement_name="tbootxm"
+  measurement=$(cat "$INFILE_TCB_MEASUREMENT_SHA1")
+  xml_pcr2 "19" "$measurement" "$measurement_name" >>$OUTFILE
+fi
+
 echo "$BLANK2$BLANK2</modules>" >>$OUTFILE
 echo "$BLANK2</txt>" >>$OUTFILE
 echo "</measureLog>" >>$OUTFILE
