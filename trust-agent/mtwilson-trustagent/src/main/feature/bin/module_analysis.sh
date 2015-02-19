@@ -2,7 +2,7 @@
 #Analysis tboot log
 # Usage: ./module_analysis.sh   (reads from txt-stat output)
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
-if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="txt-stat"; fi
+if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="/usr/sbin/txt-stat"; fi
 INFILE_TCB_MEASUREMENT_SHA1=${INFILE_TCB_MEASUREMENT_SHA1:-/var/log/trustagent/measurement.sha1}
 # 2.0 outputs to /opt/trustagent/var/measureLog.xml
 OUTFILE=${OUTFILE:-/opt/trustagent/var/measureLog.xml}
