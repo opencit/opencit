@@ -38,7 +38,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
  * @author jbuhacoff
  */
 @V2
-@Path("/configurations") 
+@Path("/configurations_unused") 
 public class ConfigurationResource extends AbstractJsonapiResource<ConfigurationDocument,ConfigurationDocumentCollection,ConfigurationDocumentFilterCriteria,NoLinks<ConfigurationDocument>,ConfigurationDocumentLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationResource.class);
     private static final Pattern xmlTagName = Pattern.compile("(?:^[a-z].*)");
