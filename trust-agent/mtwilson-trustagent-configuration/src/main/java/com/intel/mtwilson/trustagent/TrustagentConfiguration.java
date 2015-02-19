@@ -234,7 +234,11 @@ public class TrustagentConfiguration {
     
     public File getMeasureLogLaunchScript() {
         return new File(Folders.application() + File.separator + "bin" + File.separator + "module_analysis.sh");
-    } 
+    }
+    
+    public File getTcbMeasurementXmlFile() {
+        return new File(Folders.log() + File.separator + "measurement.xml");
+    }
 
     public String getMtwilsonTlsPolicyCertificateSha1() {
         return conf.get("mtwilson.tls.cert.sha1", null);

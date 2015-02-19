@@ -45,6 +45,7 @@ public class TADataContext {
     private String assetTagHash;
     private TpmQuoteResponse tpmQuoteResponse;
     private String sessionId;
+    private String tcbMeasurement;
     
     public String getSessionId() {
         if( sessionId == null ) {
@@ -269,11 +270,23 @@ public class TADataContext {
     public File getMeasureLogLaunchScript() {
 //        return Config.getInstance().getProperty("modulesScript.filename");
         return new File(Folders.application() + File.separator + "bin" + File.separator + "module_analysis.sh"); // Config.getInstance().getProperty("modulesScript.filename"));
-    } 
+    }
     
     public File getMeasureLogXmlFile() {
         //return Config.getInstance().getProperty("modulesXml.filename");
         return new File(Folders.repository() + File.separator + "measureLog.xml"); // Config.getInstance().getProperty("modulesXml.filename"));
+    }
+    
+    public File getTcbMeasurementXmlFile() {
+        return new File(Folders.log() + File.separator + "measurement.xml");
+    }
+    
+    public String getTcbMeasurement() {
+        return tcbMeasurement;
+    }
+    
+    public void setTcbMeasurement(String tcbMeasurement) {
+        this.tcbMeasurement = tcbMeasurement;
     }
     
     public void setModules(String allModules) {
