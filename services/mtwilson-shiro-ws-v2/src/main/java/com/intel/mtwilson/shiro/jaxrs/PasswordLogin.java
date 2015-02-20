@@ -96,21 +96,22 @@ public class PasswordLogin {
         PrincipalCollection principals = currentUser.getPrincipals();
 
         Collection<Username> usernames = principals.byType(Username.class);
-        Collection<UserId> userIds = principals.byType(UserId.class);
-        Collection<LoginPasswordId> loginPasswordIds = principals.byType(LoginPasswordId.class);
+        log.debug("Found {} username principals", usernames.size());
+//        Collection<UserId> userIds = principals.byType(UserId.class);
+//        Collection<LoginPasswordId> loginPasswordIds = principals.byType(LoginPasswordId.class);
 
         Username username = getFirstElementFromCollection(usernames);
-        UserId userId = getFirstElementFromCollection(userIds);
-        LoginPasswordId loginPasswordId = getFirstElementFromCollection(loginPasswordIds);
-        if ( username == null || userId == null || loginPasswordId == null ) {
+//        UserId userId = getFirstElementFromCollection(userIds);
+//        LoginPasswordId loginPasswordId = getFirstElementFromCollection(loginPasswordIds);
+        if ( username == null /* || userId == null || loginPasswordId == null */ ) {
             log.error("One of the required parameters is missing. Login request cannot be processed");
             throw new IllegalStateException();
         }
         
         // this block of code repeated in EncryptedTokenAuthenticationFilter
         EncryptedTokenContent tokenContent = new EncryptedTokenContent();
-        tokenContent.loginPasswordId = loginPasswordId.getLoginPasswordId().toString(); // passwordLoginIds.iterator().next().getLoginPasswordId().toString();
-        tokenContent.userId = userId.getUserId().toString(); // userIds.iterator().next().getUserId().toString();
+//        tokenContent.loginPasswordId = loginPasswordId.getLoginPasswordId().toString(); // passwordLoginIds.iterator().next().getLoginPasswordId().toString();
+//        tokenContent.userId = userId.getUserId().toString(); // userIds.iterator().next().getUserId().toString();
         tokenContent.username = username.getUsername(); // usernames.iterator().next().getUsername();
         XStream xs = new XStream();
         String tokenContentXml = xs.toXML(tokenContent);
