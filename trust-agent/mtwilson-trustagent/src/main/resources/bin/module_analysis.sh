@@ -2,7 +2,9 @@
 #Analysis tboot log
 # Usage: ./module_analysis.sh   (reads from txt-stat output)
 #        ./module_analysis.sh  file1  (reads from previously saved output in file1)
-if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="txt-stat"; fi
+TXTSTAT=$(which txt-stat 2>/dev/null)
+TXTSTAT=${TXTSTAT:-"/usr/sbin/txt-stat"}
+if [ -n "$1" ]; then INFILE="cat $1"; else INFILE="$TXTSTAT"; fi
 # 2.0 outputs to /opt/trustagent/var/measureLog.xml
 OUTFILE=${OUTFILE:-/opt/trustagent/var/measureLog.xml}
 # 1.2 outputs to measureLog.xml in current directory
