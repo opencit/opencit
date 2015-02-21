@@ -36,6 +36,7 @@
     <module>mtwilson-feature-xml</module>
 	<module>mtwilson-tag-selection-xml</module>
 	<module>mtwilson-tag-selection-json</module>
+    <module>mtwilson-trustpolicy-xml</module>
   </modules>
 
 
