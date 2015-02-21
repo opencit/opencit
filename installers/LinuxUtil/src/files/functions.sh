@@ -1033,8 +1033,9 @@ mysql_server_detect() {
   if [[ -n "$mysqld" && -f "$mysqld" ]]; then
     return 0
   fi
-  if [[ -f /sbin/service && -f /etc/init.d/mysqld ]]; then
-    mysqld="service mysqld"
+  mysql_installed=$(which mysql 2>/dev/null)
+  if [ -n "$mysql_installed" ]; then
+    mysqld="service mysql"
     echo "Found mysql server: $mysqld"
     return 0
   fi
@@ -1588,9 +1589,11 @@ postgres_server_detect() {
   POSTGRES_SERVER_VERSION_SHORT="$best_version_short"
 
   echo "server version $POSTGRES_SERVER_VERSION" >> $INSTALL_LOG_FILE
-  if [[ -f /etc/init.d/postgresql ]]; then
-    postgres_com=/etc/init.d/postgresql
+  postgresql_installed=$(which psql 2>/dev/null)
+  if [ -n "$postgresql_installed" ]; then
+    postgres_com="service postgresql"
   fi
+
   postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
   postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
   # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
@@ -1824,7 +1827,7 @@ postgres_install_scripts() {
 postgres_running() {  
   POSTGRES_SERVER_RUNNING=''
   if [ -n "$postgres_com" ]; then
-    local is_running=`$postgres_com status | grep running`
+    local is_running=`$postgres_com status | grep online`
     if [ -n "$is_running" ]; then
       POSTGRES_SERVER_RUNNING=yes
     fi
