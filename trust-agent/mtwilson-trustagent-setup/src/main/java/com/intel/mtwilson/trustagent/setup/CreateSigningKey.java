@@ -11,6 +11,7 @@ import gov.niarl.his.privacyca.TpmCertifyKey;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
 import java.util.HashMap;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -22,6 +23,7 @@ public class CreateSigningKey extends AbstractSetupTask {
     private File signingKeyBlob;
     private File signingKeyModulus;
     private File signingKeyTCGCertificate;
+    private File signingKeyTCGCertificateSignature;
     
     @Override
     protected void configure() throws Exception {
@@ -48,6 +50,11 @@ public class CreateSigningKey extends AbstractSetupTask {
             validation("TCG standard certificate for the signing key does not exist.");
         }
 
+        signingKeyTCGCertificateSignature = trustagentConfiguration.getSigningKeyTCGCertificateSignatureFile();
+        if (signingKeyTCGCertificateSignature == null || !signingKeyTCGCertificateSignature.exists()) {
+            validation("TCG standard certificate for the signing key does not exist.");
+        }
+
         signingKeyModulus = trustagentConfiguration.getSigningKeyModulusFile();
         if (signingKeyModulus == null || !signingKeyModulus.exists()) {
             validation("Public component of signing key does not exist.");
@@ -70,21 +77,24 @@ public class CreateSigningKey extends AbstractSetupTask {
                 trustagentConfiguration.getSigningKeyIndex(), trustagentConfiguration.getAikSecret(), trustagentConfiguration.getAikIndex());
         
         // Store the public key modulus, tcg standard certificate (output of certifyKey) & the private key blob.
-        String blobPath = trustagentConfiguration.getSigningKeyBlobFile().getAbsolutePath();
-        String tcgCertPath = trustagentConfiguration.getSigningKeyTCGCertificateFile().getAbsolutePath(); 
-        String pubKeyModulus = trustagentConfiguration.getSigningKeyModulusFile().getAbsolutePath();
+        signingKeyBlob = trustagentConfiguration.getSigningKeyBlobFile();
+        signingKeyTCGCertificate = trustagentConfiguration.getSigningKeyTCGCertificateFile(); 
+        signingKeyModulus = trustagentConfiguration.getSigningKeyModulusFile();
+        signingKeyTCGCertificateSignature = trustagentConfiguration.getSigningKeyTCGCertificateSignatureFile();
         
-        log.debug("Blob path is : {}", blobPath);
-        log.debug("TCG Cert path is : {}", tcgCertPath);
-        log.debug("Public key modulus path is : {}", pubKeyModulus);
+        log.debug("Blob path is : {}", signingKeyBlob.getAbsolutePath());
+        log.debug("TCG Cert path is : {}", signingKeyTCGCertificate.getAbsolutePath());
+        log.debug("TCG Cert signature path is : {}", signingKeyTCGCertificateSignature.getAbsolutePath());        
+        log.debug("Public key modulus path is : {}", signingKeyModulus.getAbsolutePath());
         
-        SetupUtils.writeblob(pubKeyModulus, certifyKey.get("keymod"));
-        SetupUtils.writeblob(blobPath, certifyKey.get("keyblob"));
-        SetupUtils.writeblob(tcgCertPath, certifyKey.get("keydata"));
+        FileUtils.writeByteArrayToFile(signingKeyModulus, certifyKey.get("keymod"));
+        FileUtils.writeByteArrayToFile(signingKeyBlob, certifyKey.get("keyblob"));
+        FileUtils.writeByteArrayToFile(signingKeyTCGCertificate, certifyKey.get("keydata"));
+        FileUtils.writeByteArrayToFile(signingKeyTCGCertificateSignature, certifyKey.get("keysig"));
         
         TpmCertifyKey tpmCertifyKey = new TpmCertifyKey(certifyKey.get("keydata"));
         log.debug("TCG Signing Key contents: {} - {}", tpmCertifyKey.getKeyParms().getAlgorithmId(), tpmCertifyKey.getKeyParms().getTrouSerSmode());
         
-        log.info("Successfully created the signing key TCG certificate and the same has been stored at {}.", tcgCertPath);
+        log.info("Successfully created the signing key TCG certificate and the same has been stored at {}.", signingKeyTCGCertificate.getAbsolutePath());
     }    
 }

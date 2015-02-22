@@ -298,6 +298,10 @@ public class TrustagentConfiguration {
     public File getBindingKeyTCGCertificateFile() {
         return new File(Folders.configuration() + File.separator + "bindingkey.ckf");        
     }
+    
+    public File getBindingKeyTCGCertificateSignatureFile() {
+        return new File(Folders.configuration() + File.separator + "bindingkey.sig");        
+    }
 
     public File getBindingKeyX509CertificateFile() {
         return new File(Folders.configuration() + File.separator + "bindingkey.pem");        
@@ -331,6 +335,10 @@ public class TrustagentConfiguration {
     // TODO : Decide the extenstion with which the TCG certificate should be stored.        
     public File getSigningKeyTCGCertificateFile() {
         return new File(Folders.configuration() + File.separator + "signingkey.ckf");        
+    }
+
+    public File getSigningKeyTCGCertificateSignatureFile() {
+        return new File(Folders.configuration() + File.separator + "signingkey.sig");        
     }
 
     public File getSigningKeyX509CertificateFile() {
