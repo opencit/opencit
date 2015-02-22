@@ -6,7 +6,6 @@ package com.intel.mtwilson.jaxrs2.server.resource;
 
 import com.intel.mtwilson.jaxrs2.AbstractDocument;
 import com.intel.mtwilson.repository.SearchableRepository;
-import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.jaxrs2.DocumentCollection;
 import com.intel.mtwilson.repository.FilterCriteria;
 import com.intel.mtwilson.repository.Locator;

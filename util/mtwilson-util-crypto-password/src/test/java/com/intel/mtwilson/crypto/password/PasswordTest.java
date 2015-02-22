@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto.password;
 
+import com.intel.dcsg.cpg.crypto.key.password.Password;
 import org.junit.Test;
 
 /**
