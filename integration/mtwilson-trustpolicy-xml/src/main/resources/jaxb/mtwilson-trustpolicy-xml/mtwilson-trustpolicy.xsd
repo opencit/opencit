@@ -41,7 +41,7 @@ and open the template in the editor.
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Launch_Control_Policy" minOccurs="0">
+        <xs:element name="LaunchControlPolicy" minOccurs="0">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
                       <xs:enumeration value="MeasureOnly"/>
