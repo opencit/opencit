@@ -7,32 +7,33 @@ package com.intel.mtwilson.collection;
 import java.util.Iterator;
 
 /**
- * Unlike ArrayIterator in commons-collections, this one uses generics for compile-time type checking.
+ * Wraps any array with an Iterator interface. This class is similar to
+ * org.apache.commons.collections.iterators.ArrayIterator but that one
+ * is not generic so it always returns Object and you have to cast your
+ * elements. This class helps prevent typing mistakes by using Java generics.
+ * 
+ * The remove() operation is not supported by this class and will throw
+ * UnsupportedOperationException if you try to use it.
+ * @since 0.1
  * @author jbuhacoff
  */
 public class ArrayIterator<T> implements Iterator<T> {
-    private T[] array;
+    private T[] array = null;
     private int index = 0;
     public ArrayIterator(T[] array) {
         this.array = array;
     }
-    
     @Override
     public boolean hasNext() {
-        if( array == null ) { return false; }
-        return index < array.length;
+        return array != null && index < array.length;
     }
-
     @Override
     public T next() {
-        T next = array[index];
         index++;
-        return next;
+        return array[index-1];
     }
-
     @Override
     public void remove() {
-        throw new UnsupportedOperationException(); // "Cannot remove element from array"); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException();
     }
-    
 }

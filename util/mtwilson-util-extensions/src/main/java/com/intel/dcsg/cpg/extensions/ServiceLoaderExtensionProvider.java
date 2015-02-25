@@ -28,6 +28,14 @@ public class ServiceLoaderExtensionProvider implements ExtensionProvider {
         }
     }
 
+    /**
+     * Uses Java's ServiceLoader to find implementations for the given
+     * extension interface. The ServiceLoader is cached for subsequent
+     * invocations.
+     * 
+     * @param extension
+     * @return 
+     */
     @Override
     public Iterator<String> find(Class<?> extension) {
         log.debug("ServiceLoaderExtensionProvider {} find ServiceLoader: {}", this.hashCode(), extension.getName());
@@ -74,6 +82,15 @@ public class ServiceLoaderExtensionProvider implements ExtensionProvider {
         throw new ExtensionNotFoundException(name);
     }
     
+    /**
+     * Wraps any iterator and returns the class name of each item instead of
+     * the item itself.
+     * 
+     * The {@code hasNext()}, {@code next()}, and {@code remove()} methods are
+     * all delegated to the wrapped iterator, with the {@code next()} method
+     * modified to return the class name of the item.
+     * 
+     */
     public static class ClassNameIterator implements Iterator<String> {
         private Iterator<?> source;
         public ClassNameIterator(Iterator<?> source) {

@@ -9,7 +9,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
+ * Transforms hyphenated "hello-world" to pascal case "HelloWorld"
+ * 
  * @author jbuhacoff
  */
 public class PascalCaseNamingStrategy implements Transformer<String> {

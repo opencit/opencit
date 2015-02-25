@@ -32,6 +32,7 @@ import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
+import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.Fault;
 import com.intel.mtwilson.policy.HostReport;
@@ -80,6 +81,8 @@ public class HostTrustBO {
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS;
     private Resource samlKeystoreResource = null;
+    private ObjectMapper mapper;
+
     
     private HostBO hostBO = new HostBO(); 
     
@@ -90,6 +93,9 @@ public class HostTrustBO {
     
     public HostTrustBO() {
         super();
+        JacksonObjectMapperProvider provider = new JacksonObjectMapperProvider();
+        provider = new JacksonObjectMapperProvider();
+        mapper = provider.createDefaultMapper();
         loadSamlSigningKey();
     }
     
@@ -1594,6 +1600,10 @@ public class HostTrustBO {
                 tagCertificate = null;
             }
 
+            if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
+            }
+            
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate);
 
             
@@ -1618,7 +1628,7 @@ public class HostTrustBO {
             tblSamlAssertion.setCreatedTs(samlAssertion.created_ts);
             
             TrustReport hostTrustReport = getTrustReportForHost(tblHosts, tblHosts.getName());
-            tblSamlAssertion.setTrustReport(new ObjectMapper().writeValueAsString(hostTrustReport));
+            tblSamlAssertion.setTrustReport(mapper.writeValueAsString(hostTrustReport));
             logTrustReport(tblHosts, hostTrustReport); // Need to cache the attestation report ### v1 requirement to log to mw_ta_log
                 
             My.jpa().mwSamlAssertion().create(tblSamlAssertion);
@@ -1776,7 +1786,7 @@ public class HostTrustBO {
         hostAttestation.setHostUuid(tblHosts.getUuid_hex()); //.getHardwareUuid());
         hostAttestation.setId(UUID.valueOf(tblSamlAssertion.getAssertionUuid()));
         hostAttestation.setSaml(tblSamlAssertion.getSaml());
-        hostAttestation.setTrustReport(new ObjectMapper().readValue(tblSamlAssertion.getTrustReport(), TrustReport.class));
+        hostAttestation.setTrustReport(mapper.readValue(tblSamlAssertion.getTrustReport(), TrustReport.class));
 
         HostTrustStatus hostTrustStatus = new HostTrustStatus();
         hostTrustStatus.bios = tblSamlAssertion.getBiosTrust();

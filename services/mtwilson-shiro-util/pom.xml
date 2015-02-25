@@ -37,6 +37,18 @@
             <artifactId>shiro-aspectj</artifactId>
             <version>1.2.2</version>
         </dependency>		
+        
+        
+        <!-- for @V2 annotation on AuthorizationExceptionMapper -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-launcher-api</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>		
+        -->
+        
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-shiro</artifactId>
@@ -98,11 +110,13 @@
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

@@ -7,9 +7,11 @@
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=attestation-service
 package_dir=/opt/intel/cloudsecurity/${package_name}
-package_var_dir=/var/opt/intel/aikverifyhome
-package_var_bin_dir=${package_var_dir}/bin
+#package_var_dir=/var/opt/intel/aikverifyhome
+#package_var_bin_dir=${package_var_dir}/bin
 package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_features_dir=/opt/mtwilson/features
+aikqverify_dir=${package_features_dir}/aikqverify
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51
@@ -91,7 +93,7 @@ compile_aikqverify() {
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
   auto_install "Developer tools" "DEVELOPER" 
   AIKQVERIFY_OK=''
-  cd /var/opt/intel/aikverifyhome/bin
+  cd ${aikqverify_dir}/bin
   make  2>&1 > /dev/null
   rm -f aikqverify.o
   rm -f Makefile
@@ -101,10 +103,10 @@ compile_aikqverify() {
   fi
 }
 
-mkdir -p ${package_var_dir}/bin
-mkdir -p ${package_var_dir}/data
+mkdir -p ${aikqverify_dir}/bin
+mkdir -p ${aikqverify_dir}/data
 chmod +x aikqverify/openssl.sh
-cp aikqverify/* ${package_var_dir}/bin/
+cp aikqverify/* ${aikqverify_dir}/bin/
 echo "Compiling aikqverify (may take a long time)... " >> $INSTALL_LOG_FILE
 compile_aikqverify >> $INSTALL_LOG_FILE
 if [ -n "$AIKQVERIFY_OK" ]; then
@@ -113,19 +115,19 @@ else
   echo "Compile FAILED" >> $INSTALL_LOG_FILE
 fi
 
-chown -R $MTWILSON_OWNER "${package_var_dir}"
-chmod -R 700 "${package_var_dir}"
-chmod -R 600 "${package_var_dir}/data"
+chown -R $MTWILSON_OWNER "${aikqverify_dir}"
+chmod -R 700 "${aikqverify_dir}"
+chmod -R 600 "${aikqverify_dir}/data"
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
-  #glassfish_permissions "${package_var_dir}"
+  #glassfish_permissions "${aikqverify_dir}"
   #glassfish_permissions "${package_var_bin_dir}"
 elif using_tomcat; then
   tomcat_permissions "${intel_conf_dir}"
   tomcat_permissions "${package_dir}"
-  #tomcat_permissions "${package_var_dir}"
+  #tomcat_permissions "${aikqverify_dir}"
   #tomcat_permissions "${package_var_bin_dir}" 
 fi
 

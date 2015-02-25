@@ -29,7 +29,7 @@ public class ExtendedOptions {
     }
     
     private void parse() {
-        ArrayList<String> rest = new ArrayList<String>(args.length);
+        ArrayList<String> rest = new ArrayList<>(args.length);
         int appendAll = -1;
         Properties opts = new Properties();
         for(int i=0; i<args.length; i++) {

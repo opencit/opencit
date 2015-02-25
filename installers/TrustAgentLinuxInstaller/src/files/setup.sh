@@ -444,6 +444,7 @@ fi
 # and make sure it's successful before trying to start the trust agent
 # NOTE: only the output from start-http-server is redirected to the logfile;
 #       the stdout from the setup command will be displayed
+/usr/local/bin/tagent setup update-extensions-cache-file --force 2>/dev/null
 /usr/local/bin/tagent setup
 /usr/local/bin/tagent start >>$logfile  2>&1
 

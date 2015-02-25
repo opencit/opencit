@@ -119,7 +119,7 @@ public class IdentityRequestGetChallenge implements Callable<byte[]> {
             
             // save the challenge and idproof for use in identity request submit response if the client successfully answers the challenge
             // the filename is the challenge (in hex) and the content is the idproof
-            File datadir = new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); 
+            File datadir = My.repository().getDirectory("privacyca-aik-requests"); //new File(My.filesystem().getBootstrapFilesystem().getVarPath() + File.separator + "privacyca-aik-requests"); 
             if( !datadir.exists() ) { datadir.mkdirs(); }
             String filename = TpmUtils.byteArrayToHexString(identityRequestChallenge); //Hex.encodeHexString(identityRequestChallenge)
             log.debug("Filename: {}", filename);

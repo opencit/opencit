@@ -31,7 +31,7 @@ public class CreateTpmSrkSecret extends AbstractSetupTask {
     protected void execute() throws Exception {
         String tpmSrkSecretHex = "0000000000000000000000000000000000000000"; // to match existing ProvisionTPM hard-coded value;  
         log.info("Generated well-known SRK secret"); 
-        getConfiguration().setString(TrustagentConfiguration.TPM_SRK_SECRET, tpmSrkSecretHex);
+        getConfiguration().set(TrustagentConfiguration.TPM_SRK_SECRET, tpmSrkSecretHex);
     }
     
 }

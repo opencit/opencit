@@ -213,8 +213,8 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
     #update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default TLS policy is insecure; the product guide contains information on enabling secure TLS policies"
   fi
-  export mtwilson_tls_keystore_password="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
-  #if [ -z "$mtwilson_tls_keystore_password" ]; then
+  export MTWILSON_TLS_KEYSTORE_PASSWORD="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
+  #if [ -z "$MTWILSON_TLS_KEYSTORE_PASSWORD" ]; then
     # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
     #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
@@ -223,18 +223,18 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
 else
     touch /etc/intel/cloudsecurity/mtwilson.properties
     chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
-    export mtwilson_tls_keystore_password=`generate_password 32`
-    export MTWILSON_TLS_KEYSTORE_PASSWORD="$mtwilson_tls_keystore_password"
+    export MTWILSON_TLS_KEYSTORE_PASSWORD=`generate_password 32`
 #    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
     echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
+    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$MTWILSON_TLS_KEYSTORE_PASSWORD"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
 fi
 
 #MTW_TLS_POLICY_ALLOW
-prompt_with_default MTWILSON_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "${MTWILSON_TLS_POLICY_ALLOW:-MTW_TLS_POLICY_ALLOW}"
+echo "Available TLS policies: certificate, certificate-digest, public-key, public-key-digest, TRUST_FIRST_CERTIFICATE, INSECURE"
+prompt_with_default MTWILSON_TLS_POLICY_ALLOW "Mt Wilson Allowed TLS Policies: " "${MTWILSON_TLS_POLICY_ALLOW:-$MTW_TLS_POLICY_ALLOW}"
 MTWILSON_TLS_POLICY_ALLOW=`echo $MTWILSON_TLS_POLICY_ALLOW | tr -d ' '`   # trim whitespace
 OIFS=$IFS
 IFS=',' read -ra POLICIES <<< "$MTWILSON_TLS_POLICY_ALLOW"
@@ -327,13 +327,6 @@ if [[ ! -h "/opt/mtwilson/configuration" ]]; then
   mkdir -p /opt/mtwilson
   ln -s "/etc/intel/cloudsecurity" "/opt/mtwilson/configuration"
 fi
-
-# copy extensions.cache file
-if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 600 extensions.cache
-  cp extensions.cache /opt/mtwilson/configuration
-fi
-
 
 find_installer() {
   local installer="${1}"
@@ -629,6 +622,7 @@ chmod -R 770 /opt/mtwilson/bin
 mkdir -p /opt/mtwilson/env.d
 #chown -R root /opt/mtwilson/env.d
 
+call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
@@ -660,6 +654,7 @@ if using_glassfish; then
   echo "GLASSFISH_HOME=$GLASSFISH_HOME" > $MTWILSON_ENV_DIR/glassfish
   echo "glassfish=\"$glassfish\"" >> $MTWILSON_ENV_DIR/glassfish
   echo "glassfish_bin=$glassfish_bin" >> $MTWILSON_ENV_DIR/glassfish
+
   
   if [ -e $glassfish_bin ]; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
@@ -785,9 +780,12 @@ update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.propert
 #update_property_in_file "mtwilson.atag.keystore.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEYSTORE_PASSWORD"
 #update_property_in_file "mtwilson.atag.key.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_KEY_PASSWORD"
 
-MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
-prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
-if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
+if [ ! -z "$opt_portals" ]; then
+  MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
+  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+  if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
+fi
+
 prompt_with_default MTWILSON_TAG_CERT_IMPORT_AUTO "Mt Wilson Tag Certificate Auto Import: " ${MTWILSON_TAG_CERT_IMPORT_AUTO:-true}
 update_property_in_file "mtwilson.atag.html5.dir" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_HTML5_DIR"
 update_property_in_file "tag.provision.autoimport" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_CERT_IMPORT_AUTO"
@@ -815,7 +813,7 @@ update_property_in_file "tag.issuer.dn" $CONFIG_DIR/mtwilson.properties "$TAG_IS
 #fi
 
 #call_setupcommand create-database
-call_tag_setupcommand setup-manager update-extensions-cache-file 2> /dev/null
+call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 call_tag_setupcommand setup-manager initialize-db --force
 
 call_tag_setupcommand tag-init-database

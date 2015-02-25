@@ -34,7 +34,7 @@ while(it.hasNext()) {
  */
 public class ProgressIterator<T> implements Iterator<T>,Value<Long> {
     protected CountingIterator<T> iterator = null;
-    protected Monitor<Long> monitor = new Monitor<Long>();
+    protected Monitor<Long> monitor = new Monitor<>();
     protected boolean enabled = false;
     public ProgressIterator(Iterable<T> iterable) {
         this(iterable.iterator(),new LogObserver());
@@ -46,7 +46,7 @@ public class ProgressIterator<T> implements Iterator<T>,Value<Long> {
         this(iterable.iterator(),observer);
     }
     public ProgressIterator(Iterator<T> iterator, Observer<Long> observer) {
-        this.iterator = new CountingIterator<T>(iterator);
+        this.iterator = new CountingIterator<>(iterator);
         monitor.setValue(this.iterator);
         monitor.setObserver(observer);
     }

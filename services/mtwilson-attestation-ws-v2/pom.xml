@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -235,6 +235,11 @@
             <version>0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>                        
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-privacyca-niarl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
     </dependencies>
     
