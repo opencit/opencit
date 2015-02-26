@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.util.crypto.keystore;
 
+import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
@@ -58,6 +59,13 @@ public abstract class AbstractKeyStore implements Closeable {
         open();
     }
 
+    public AbstractKeyStore(String keystoreType, Resource keystoreResource, Password keystorePassword) throws KeyStoreException, IOException {
+        this.keystoreType = keystoreType;
+        this.keystoreResource = keystoreResource;
+        this.keystorePassword = keystorePassword.toCharArray();
+        open();
+    }
+    
     private void open() throws KeyStoreException, IOException {
         this.keystore = KeyStore.getInstance(keystoreType);
         if( keystoreFile != null ) {

@@ -22,7 +22,7 @@ public class BouncyCastleModule extends Module {
 
     @Override
     public Version version() {
-        return new Version(1, 0, 0, "com.intel.mtwilson.services", "mtwilson-tag-model", null);
+        return new Version(1, 0, 0, "com.intel.mtwilson.util", "mtwilson-util-jackson-bouncycastle", null);
     }
 
     @Override

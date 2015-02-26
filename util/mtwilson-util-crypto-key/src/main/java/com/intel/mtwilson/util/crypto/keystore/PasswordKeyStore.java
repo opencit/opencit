@@ -58,6 +58,14 @@ public class PasswordKeyStore extends AbstractKeyStore implements Closeable {
         this.keyProtectionDelegate = new SinglePasswordKeyProtectionDelegate(keystorePassword);
         this.factory = SecretKeyFactory.getInstance("PBE"); // throws NoSuchAlgorithmException
     }
+    public PasswordKeyStore(String keystoreType, Resource keystoreResource, Password keystorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException {
+        super(keystoreType, keystoreResource, keystorePassword);
+//        super.setKeyProtectionDelegate(new SinglePasswordKeyProtectionDelegate(keystorePassword));
+        this.keystore = super.keystore();
+//        this.keystorePassword = keystorePassword;
+        this.keyProtectionDelegate = new SinglePasswordKeyProtectionDelegate(keystorePassword);
+        this.factory = SecretKeyFactory.getInstance("PBE"); // throws NoSuchAlgorithmException
+    }
 
 
     /**

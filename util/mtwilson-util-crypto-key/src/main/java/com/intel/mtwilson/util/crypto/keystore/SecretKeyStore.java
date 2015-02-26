@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.util.crypto.keystore;
 
+import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.Resource;
 import java.io.Closeable;
 import java.io.File;
@@ -45,6 +46,13 @@ public class SecretKeyStore extends AbstractKeyStore implements Closeable {
         this.keyProtectionDelegate = new SinglePasswordKeyProtectionDelegate(keystorePassword);
     }
     public SecretKeyStore(String keystoreType, Resource keystoreResource, char[] keystorePassword) throws KeyStoreException, IOException {
+        super(keystoreType, keystoreResource, keystorePassword);
+//        super.setKeyProtectionDelegate(new SinglePasswordKeyProtectionDelegate(keystorePassword));
+        this.keystore = super.keystore();
+//        this.keystorePassword = keystorePassword;
+        this.keyProtectionDelegate = new SinglePasswordKeyProtectionDelegate(keystorePassword);
+    }
+    public SecretKeyStore(String keystoreType, Resource keystoreResource, Password keystorePassword) throws KeyStoreException, IOException {
         super(keystoreType, keystoreResource, keystorePassword);
 //        super.setKeyProtectionDelegate(new SinglePasswordKeyProtectionDelegate(keystorePassword));
         this.keystore = super.keystore();

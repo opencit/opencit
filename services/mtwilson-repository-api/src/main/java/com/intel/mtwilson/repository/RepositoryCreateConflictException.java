@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.repository;
 
@@ -9,7 +9,6 @@ package com.intel.mtwilson.repository;
  * @author ssbangal
  */
 public class RepositoryCreateConflictException extends RepositoryCreateException {
-    private Locator locator;
     
     public RepositoryCreateConflictException() {
         super();
@@ -24,22 +23,15 @@ public class RepositoryCreateConflictException extends RepositoryCreateException
     }
 
     public RepositoryCreateConflictException(Throwable cause, Locator locator) {
-        super(cause);
-        this.locator = locator;
+        super(cause, locator);
     }
     
     public RepositoryCreateConflictException(Locator locator) {
-        super();
-        this.locator = locator;
+        super(locator);
     }
     
     public RepositoryCreateConflictException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    @Override
-    public Locator getLocator() {
-        return super.getLocator();
     }
 
 }

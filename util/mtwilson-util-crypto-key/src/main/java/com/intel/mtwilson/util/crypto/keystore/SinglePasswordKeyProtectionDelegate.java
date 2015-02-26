@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.util.crypto.keystore;
 
+import com.intel.dcsg.cpg.crypto.key.password.Password;
+
 /**
  * Used to set the same password for each key entry. This can simplify 
  * keystore management for non-interactive applications but may be less
@@ -18,6 +20,9 @@ public class SinglePasswordKeyProtectionDelegate implements KeyProtectionDelegat
         this.password = password;
     }
     
+    public SinglePasswordKeyProtectionDelegate(Password password) {
+        this.password = password.toCharArray();
+    }
     
     @Override
     public char[] getPassword(String keyId) {

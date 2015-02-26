@@ -36,9 +36,9 @@ public class X509BuilderTest {
         if( cert == null ) {
             for(Fault fault : builder.getFaults()) {
                 log.error("Cannot create certificate: {}", fault.toString());
-                if( fault.getCause() != null ) {
-                    log.error("Cause", fault.getCause());
-                }
+//                if( !fault.getFaults().isEmpty() ) {
+//                    log.error("{} related faults", fault.getFaults().size());
+//                }
             }
             fail();
         }
@@ -126,9 +126,9 @@ kTlWckvoRGsfPb0gEueR4LXpTCEQ0FQNUAPPdF9O9oWjoyYT+VYT3MhA9OA4a4XR
         if( cert == null ) {
             for(Fault fault : builder.getFaults()) {
                 log.error("Cannot create certificate: {}", fault.toString());
-                if( fault.getCause() != null ) {
-                    log.error("Cause", fault.getCause());
-                }
+//                if( fault.getCause() != null ) {
+//                    log.error("Cause", fault.getCause());
+//                }
             }
             fail();
         }
