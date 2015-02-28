@@ -11,6 +11,8 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.codec.Base64Util;
+import com.intel.mtwilson.codec.HexUtil;
 import com.intel.mtwilson.tls.policy.TlsProtection;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
 import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
@@ -22,6 +24,7 @@ import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -236,8 +239,8 @@ public abstract class TlsPolicyFactory {
      * @return 
      */
     public static TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
-        String policyName = tlsPolicyDescriptor.getPolicyType();
-        log.debug("Trying to read TlsPolicy name {}", policyName);
+        String policyType = tlsPolicyDescriptor.getPolicyType();
+        log.debug("Trying to read TlsPolicy type {}", policyType);
         List<TlsPolicyCreator> creators = Extensions.findAll(TlsPolicyCreator.class);
         for(TlsPolicyCreator creator : creators ) {
             try {
@@ -271,6 +274,9 @@ public abstract class TlsPolicyFactory {
         tlsPolicyDescriptor.setPolicyType(policyType);
         tlsPolicyDescriptor.setData(new ArrayList<String>());
         tlsPolicyDescriptor.getData().add(policyData);
+//        tlsPolicyDescriptor.setMeta(new HashMap<String,String>());
+//        if( HexUtil.isHex(policyData) ) { tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex"); }
+//        if( Base64Util.isBase64(policyData) ) { tlsPolicyDescriptor.getMeta().put("digestEncoding", "base64"); }
         return createTlsPolicy(tlsPolicyDescriptor);
     }
 
