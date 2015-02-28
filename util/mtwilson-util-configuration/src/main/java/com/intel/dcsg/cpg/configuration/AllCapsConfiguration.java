@@ -54,12 +54,11 @@ public class AllCapsConfiguration extends AbstractConfiguration {
      * returns a result if there exists a configuration key JAVA_HOME
      * 
      * @param key
-     * @param defaultValue
      * @return 
      */
     @Override
-    public String get(String key, String defaultValue) {
-        return delegate.get(allcaps.transform(key), defaultValue);
+    public String get(String key) {
+        return delegate.get(allcaps.transform(key));
     }
 
     /**

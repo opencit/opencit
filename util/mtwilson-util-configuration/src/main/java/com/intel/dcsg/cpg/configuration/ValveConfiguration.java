@@ -59,12 +59,11 @@ public class ValveConfiguration extends AbstractConfiguration {
     /**
      * Delegates to the reading configuration.
      * @param key
-     * @param defaultValue
      * @return 
      */
     @Override
-    public String get(String key, String defaultValue) {
-        return readFrom.get(key, defaultValue);
+    public String get(String key) {
+        return readFrom.get(key);
     }
 
     /**
