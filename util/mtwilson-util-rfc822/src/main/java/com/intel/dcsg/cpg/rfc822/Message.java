@@ -96,7 +96,7 @@ public class Message {
     public Message(byte[] content, MultivaluedHashMap<String,String> headers) {
         this.content = content;
         if( headers != null ) {
-            this.headers.putAll(headers);
+            this.headers.put(headers);
         }
     }
     
@@ -105,12 +105,12 @@ public class Message {
     
     public MultivaluedHashMap<String,String> getHeaderMap() { return headers; }
     
-    public String getContentType() { return headers.get(CONTENT_TYPE); }
+    public String getContentType() { return headers.getFirst(CONTENT_TYPE); }
     public void setContentType(String contentType) { headers.put(CONTENT_TYPE, contentType); }
-    public String getContentTransferEncoding() { return headers.get(CONTENT_TRANSFER_ENCODING); }
+    public String getContentTransferEncoding() { return headers.getFirst(CONTENT_TRANSFER_ENCODING); }
     public void setContentTransferEncoding(String contentTransferEncoding) { headers.put(CONTENT_TRANSFER_ENCODING, contentTransferEncoding); }
-    public Integer getContentLength() { String contentLength = headers.get(CONTENT_LENGTH); if( contentLength == null ) { return null; } return Integer.valueOf(contentLength); }
-    public void setContentLength(Integer length) { if( length == null ) { headers.put(CONTENT_LENGTH, null); } else { headers.put(CONTENT_LENGTH, length.toString()); } }
+    public Integer getContentLength() { String contentLength = headers.getFirst(CONTENT_LENGTH); if( contentLength == null ) { return null; } return Integer.valueOf(contentLength); }
+    public void setContentLength(Integer length) { if( length == null ) { headers.remove(CONTENT_LENGTH); } else { headers.put(CONTENT_LENGTH, length.toString()); } }
     
     public static Message parse(String content) throws IOException {
         return parse(content.getBytes("UTF-8"));
@@ -167,11 +167,11 @@ public class Message {
             // at least one header is required so we generate a content-length header
             headers.put(CONTENT_LENGTH, String.valueOf(content.length));
         }
-        Set<String> attrNames = headers.keySet();
+        Set<String> attrNames = headers.keys();
         ArrayList<String> sortedAttrNames = new ArrayList<>(attrNames);
         Collections.sort(sortedAttrNames);
         for(String attrName : sortedAttrNames) {
-            List<String> values = headers.getAll(attrName);
+            List<String> values = headers.get(attrName);
             for(String value : values) {
                 header.append(String.format("%s: %s", attrName, value));
                 header.append(NEWLINE);

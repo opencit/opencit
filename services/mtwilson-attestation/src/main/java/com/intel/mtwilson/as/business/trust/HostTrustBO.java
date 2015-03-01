@@ -1665,7 +1665,9 @@ public class HostTrustBO {
     
     public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
         My.initDataEncryptionKey();
+        log.debug("getTrustWithSamlByAik calling getHostByAik for aik {}", aik.toString());
         TblHosts tblHosts = getHostByAik(aik);
+        log.debug("getTrustWithSamlByAik calling getTrustWithSaml for host {} aik {}", tblHosts.getName(), aik.toString());
         return getTrustWithSaml(tblHosts, aik.toString(), forceVerify);
     }
 
