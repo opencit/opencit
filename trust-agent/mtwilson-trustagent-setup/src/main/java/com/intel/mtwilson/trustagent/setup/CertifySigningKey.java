@@ -14,6 +14,7 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.net.URL;
 import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -29,6 +30,10 @@ public class CertifySigningKey extends AbstractSetupTask {
     private String password;
     private File keystoreFile;
     private String keystorePassword;
+    private File aikPemCertificate;
+    private File signingKeyModulus;
+    private File signingKeyTCGCertificate;
+    private File signingKeyTCGCertificateSignature;
     
     @Override
     protected void configure() throws Exception {
@@ -70,16 +75,22 @@ public class CertifySigningKey extends AbstractSetupTask {
 
     @Override
     protected void execute() throws Exception {
-               
-        String tcgCertPath = trustagentConfiguration.getSigningKeyTCGCertificateFile().getAbsolutePath(); 
-        String pubKeyModulus = trustagentConfiguration.getSigningKeyModulusFile().getAbsolutePath();
+
+        aikPemCertificate = trustagentConfiguration.getAikCertificateFile();
+        signingKeyTCGCertificate = trustagentConfiguration.getSigningKeyTCGCertificateFile(); 
+        signingKeyModulus = trustagentConfiguration.getSigningKeyModulusFile();
+        signingKeyTCGCertificateSignature = trustagentConfiguration.getSigningKeyTCGCertificateSignatureFile();
         
-        log.debug("TCG Cert path is : {}", tcgCertPath);
-        log.debug("Public key modulus path is : {}", pubKeyModulus);
-        
+        log.debug("AIK Cert path is : {}", aikPemCertificate.getAbsolutePath());
+        log.debug("TCG Cert path is : {}", signingKeyTCGCertificate.getAbsolutePath());
+        log.debug("TCG Cert signature path is : {}", signingKeyTCGCertificateSignature.getAbsolutePath());        
+        log.debug("Public key modulus path is : {}", signingKeyModulus.getAbsolutePath());
+                
         SigningKeyEndorsementRequest obj = new SigningKeyEndorsementRequest();
-        obj.setPublicKeyModulus(SetupUtils.readblob(pubKeyModulus));
-        obj.setTpmCertifyKey(SetupUtils.readblob(tcgCertPath));
+        obj.setPublicKeyModulus(FileUtils.readFileToByteArray(signingKeyModulus));
+        obj.setTpmCertifyKey(FileUtils.readFileToByteArray(signingKeyTCGCertificate));
+        obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(signingKeyTCGCertificateSignature)); 
+        obj.setAikPemCertificate(FileUtils.readFileToString(aikPemCertificate));
         
         log.debug("Creating TLS policy");
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
@@ -94,7 +105,7 @@ public class CertifySigningKey extends AbstractSetupTask {
         String signingKeyPemCertificate = client.createSigningKeyCertificate(obj);
         log.debug("MTW signed PEM certificate is {} ", signingKeyPemCertificate);
         
-        SetupUtils.writeString(trustagentConfiguration.getSigningKeyX509CertificateFile().getAbsolutePath(), signingKeyPemCertificate);
+        FileUtils.writeStringToFile(trustagentConfiguration.getSigningKeyX509CertificateFile(), signingKeyPemCertificate);
         log.info("Successfully created the MTW signed X509Certificate for the signing key and stored at {}.", 
                 trustagentConfiguration.getSigningKeyX509CertificateFile().getAbsolutePath());
     }    

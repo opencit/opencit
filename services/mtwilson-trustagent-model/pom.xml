@@ -207,8 +207,8 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-xml</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
             <version>0.2-SNAPSHOT</version>
             <scope>test</scope>
             <type>jar</type>

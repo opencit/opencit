@@ -11,6 +11,7 @@ import gov.niarl.his.privacyca.TpmCertifyKey;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
 import java.util.HashMap;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -23,37 +24,11 @@ public class CreateBindingKey extends AbstractSetupTask {
     private File bindingKeyBlob;
     private File bindingKeyModulus;
     private File bindingKeyTCGCertificate;
-    private String url;
-    private String username;
-    private String password;
-    private File keystoreFile;
-    private String keystorePassword;
+    private File bindingKeyTCGCertificateSignature;
     
     @Override
     protected void configure() throws Exception {
-        trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
-        url = trustagentConfiguration.getMtWilsonApiUrl();
-        if( url == null || url.isEmpty() ) {
-            configuration("Mt Wilson URL is not set");
-        }
-        username = trustagentConfiguration.getMtWilsonApiUsername();
-        password = trustagentConfiguration.getMtWilsonApiPassword();
-        if( username == null || username.isEmpty() ) {
-            configuration("Mt Wilson username is not set");
-        }
-        if( password == null || password.isEmpty() ) {
-            configuration("Mt Wilson password is not set");
-        }
-        
-        keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
-        if( keystoreFile == null || !keystoreFile.exists() ) {
-            configuration("Trust Agent keystore does not exist");
-        }
-        keystorePassword = trustagentConfiguration.getTrustagentKeystorePassword();
-        if( keystorePassword == null || keystorePassword.isEmpty() ) {
-            configuration("Trust Agent keystore password is not set");
-        }        
-        
+        trustagentConfiguration = new TrustagentConfiguration(getConfiguration());        
     }
 
     @Override
@@ -74,6 +49,11 @@ public class CreateBindingKey extends AbstractSetupTask {
         bindingKeyTCGCertificate = trustagentConfiguration.getBindingKeyTCGCertificateFile();
         if (bindingKeyTCGCertificate == null || !bindingKeyTCGCertificate.exists()) {
             validation("TCG standard certificate for the binding key does not exist.");
+        }
+
+        bindingKeyTCGCertificateSignature = trustagentConfiguration.getBindingKeyTCGCertificateSignatureFile();
+        if (bindingKeyTCGCertificateSignature == null || !bindingKeyTCGCertificateSignature.exists()) {
+            validation("Signature file of the TCG standard certificate for the binding key does not exist.");
         }
 
         bindingKeyModulus = trustagentConfiguration.getBindingKeyModulusFile();
@@ -97,22 +77,25 @@ public class CreateBindingKey extends AbstractSetupTask {
         HashMap<String, byte[]> certifyKey = TpmModule.certifyKey(TrustagentConfiguration.BINDING_KEY_NAME, trustagentConfiguration.getBindingKeySecret(), 
                 trustagentConfiguration.getBindingKeyIndex(), trustagentConfiguration.getAikSecret(), trustagentConfiguration.getAikIndex());
         
-        String blobPath = trustagentConfiguration.getBindingKeyBlobFile().getAbsolutePath();
-        String tcgCertPath = trustagentConfiguration.getBindingKeyTCGCertificateFile().getAbsolutePath(); 
-        String pubKeyModulus = trustagentConfiguration.getBindingKeyModulusFile().getAbsolutePath();
+        bindingKeyBlob = trustagentConfiguration.getBindingKeyBlobFile();
+        bindingKeyTCGCertificate = trustagentConfiguration.getBindingKeyTCGCertificateFile(); 
+        bindingKeyModulus = trustagentConfiguration.getBindingKeyModulusFile();
+        bindingKeyTCGCertificateSignature = trustagentConfiguration.getBindingKeyTCGCertificateSignatureFile();
         
-        log.debug("Blob path is : {}", blobPath);
-        log.debug("TCG Cert path is : {}", tcgCertPath);
-        log.debug("Public key modulus path is : {}", pubKeyModulus);
+        log.debug("Blob path is : {}", bindingKeyBlob.getAbsolutePath());
+        log.debug("TCG Cert path is : {}", bindingKeyTCGCertificate.getAbsolutePath());
+        log.debug("TCG Cert signature path is : {}", bindingKeyTCGCertificateSignature.getAbsolutePath());
+        log.debug("Public key modulus path is : {}", bindingKeyModulus.getAbsolutePath());
         
-        SetupUtils.writeblob(pubKeyModulus, certifyKey.get("keymod"));
-        SetupUtils.writeblob(blobPath, certifyKey.get("keyblob"));
-        SetupUtils.writeblob(tcgCertPath, certifyKey.get("keydata"));
+        FileUtils.writeByteArrayToFile(bindingKeyModulus, certifyKey.get("keymod"));
+        FileUtils.writeByteArrayToFile(bindingKeyBlob, certifyKey.get("keyblob"));
+        FileUtils.writeByteArrayToFile(bindingKeyTCGCertificate, certifyKey.get("keydata"));
+        FileUtils.writeByteArrayToFile(bindingKeyTCGCertificateSignature, certifyKey.get("keysig"));
         
         TpmCertifyKey tpmCertifyKey = new TpmCertifyKey(certifyKey.get("keydata"));
         log.debug("TCG Binding Key contents: {} - {}", tpmCertifyKey.getKeyParms().getAlgorithmId(), tpmCertifyKey.getKeyParms().getTrouSerSmode());
 
-        log.info("Successfully created the Binding key TCG certificate and the same has been stored at {}.", tcgCertPath);
+        log.info("Successfully created the Binding key TCG certificate and the same has been stored at {}.", bindingKeyTCGCertificate.getAbsolutePath());
                 
     }    
 }

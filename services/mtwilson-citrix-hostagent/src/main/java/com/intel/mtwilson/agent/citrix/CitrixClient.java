@@ -98,7 +98,7 @@ public class CitrixClient {
         if (bin.exists() && var.exists()) {
             aikverifyhomeBin = binPath;
             aikverifyhomeData = varPath;
-            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
+            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl.sh" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
         } else {
             // mtwilson 1.2 configuration
