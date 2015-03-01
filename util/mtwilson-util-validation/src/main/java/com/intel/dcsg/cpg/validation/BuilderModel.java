@@ -4,6 +4,8 @@
  */
 package com.intel.dcsg.cpg.validation;
 
+import com.intel.mtwilson.util.validation.faults.Invalid;
+import com.intel.mtwilson.util.validation.faults.Thrown;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -60,15 +62,15 @@ public abstract class BuilderModel implements Model {
     }
     
     protected final void fault(Throwable e, String description) {
-        faults.add(new Fault(e, description));
+        faults.add(new Thrown(e, description));
     }
     
     protected final void fault(Throwable e, String format, Object... args) {
-        faults.add(new Fault(e, format, args));
+        faults.add(new Thrown(e, format, args));
     }
 
     protected final void fault(Model m, String format, Object... args) {
-        faults.add(new Fault(m, format, args));
+        faults.add(new Invalid(m, format, args));
     }
         
     /**

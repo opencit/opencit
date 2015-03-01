@@ -13,18 +13,18 @@ import java.util.Map;
  * @author jbuhacoff
  */
 public class Headers {
-    private MultivaluedHashMap<String,String> headers;
+    private final MultivaluedHashMap<String,String> headers;
     public Headers() {
-        this.headers = new MultivaluedHashMap<String,String>();
+        this.headers = new MultivaluedHashMap<>();
     }
     public Headers(MultivaluedHashMap<String,String> headers) {
-        this.headers = new MultivaluedHashMap<String,String>();
-        for(String key : headers.keySet()) {
-            this.headers.addAll(key, headers.getAll(key));
+        this.headers = new MultivaluedHashMap<>();
+        for(String key : headers.keys()) {
+            this.headers.add(key, headers.get(key));
         }
     }
     public Headers(Map<String,String> headers) {
-        this.headers = new MultivaluedHashMap<String,String>();
+        this.headers = new MultivaluedHashMap<>();
         for(String key : headers.keySet()) {
             this.headers.put(key, headers.get(key));
         }
@@ -34,7 +34,7 @@ public class Headers {
      * @return a list of all the header names; you can then use each one of these names with getFirst, getAll, removeAll, etc.
      */
     public Collection<String> names() {
-        return headers.keySet();
+        return headers.keys();
     }
     /**
      * 
@@ -42,7 +42,7 @@ public class Headers {
      * @return the first header matching the given name; null if none found
      */
     public String getFirst(String name) {
-        return headers.get(name);
+        return headers.getFirst(name);
     }
     /**
      * 
@@ -50,7 +50,7 @@ public class Headers {
      * @return all header values for the given header name; null if no headers with this name; never an empty collection
      */
     public Collection<String> getAll(String name) {
-        return headers.getAll(name);
+        return headers.get(name);
     }
     /**
      * Add a header with the given name and value
@@ -74,6 +74,10 @@ public class Headers {
      * @param value 
      */
     public void remove(String name, String value) {
-        headers.removeAll(name, value);
+        headers.remove(name, value);
+    }
+    
+    public void clear() {
+        headers.clear();
     }
 }

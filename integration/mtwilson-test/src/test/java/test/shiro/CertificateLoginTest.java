@@ -39,14 +39,14 @@ public class CertificateLoginTest {
     public static void createUserLoginCertificate() throws Exception {
         user = new User();
         user.setId(new UUID());
-        user.setComment("automatically created by setup");
+//        user.setComment("automatically created by setup"); // now it needs to be a list of roles
         user.setUsername(username);
         keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
         certificate = X509Builder.factory().selfSigned(String.format("CN=%s", username), keyPair).expires(365, TimeUnit.DAYS).build();
         userLoginCertificate = new UserLoginCertificate();
         userLoginCertificate.setId(new UUID());
         userLoginCertificate.setCertificate(certificate.getEncoded());
-        userLoginCertificate.setComment("automatically created by setup");
+//        userLoginCertificate.setComment("automatically created by setup"); // now it needs to be a list of roles
         userLoginCertificate.setEnabled(true);
         userLoginCertificate.setExpires(certificate.getNotAfter());
         userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(certificate.getEncoded()).toByteArray());

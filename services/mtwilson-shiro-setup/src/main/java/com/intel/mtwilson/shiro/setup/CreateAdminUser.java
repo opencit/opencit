@@ -219,7 +219,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
         if (user == null) {
             user = new User();
             user.setId(new UUID());
-            user.setComment("automatically created by setup");
+            user.setComment("");
 //            user.setEnabled(true);
 //            user.setStatus(Status.APPROVED);
             user.setUsername(username);
@@ -252,7 +252,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             userLoginPassword.setPasswordHash(PasswordUtil.hash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
             userLoginPassword.setStatus(Status.APPROVED);
-            userLoginPassword.setComment("automatically created by setup");            
+//            userLoginPassword.setComment("automatically created by setup");  // now it needs to be a list of roles           
             loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
                     userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
                     userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
@@ -392,7 +392,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             userLoginCertificate = new UserLoginCertificate();
             userLoginCertificate.setId(new UUID());
             userLoginCertificate.setCertificate(certificate.getEncoded());
-            userLoginCertificate.setComment("automatically created by setup");
+//            userLoginCertificate.setComment("automatically created by setup"); // now it needs to be a list of roles
             userLoginCertificate.setEnabled(true);
             userLoginCertificate.setExpires(certificate.getNotAfter());
             userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(certificate.getEncoded()).toByteArray());

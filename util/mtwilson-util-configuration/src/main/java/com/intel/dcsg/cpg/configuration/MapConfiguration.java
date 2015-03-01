@@ -54,12 +54,8 @@ public class MapConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String get(String key, String defaultValue) {
-        String value = map.get(key);
-        if( value != null ) {
-            return value;
-        }
-        return defaultValue;
+    public String get(String key) {
+        return map.get(key);
     }
 
     @Override

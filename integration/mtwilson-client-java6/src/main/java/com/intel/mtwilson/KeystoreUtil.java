@@ -392,6 +392,7 @@ public class KeystoreUtil {
         }
         ApiClient c;
         try {
+            log.debug("Registering client certificate");
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
 //            c = new ApiClient(server, rsaCredential, keystore, config); //ClientException

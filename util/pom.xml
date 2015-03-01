@@ -17,6 +17,7 @@
 	</parent>
   
   <modules>
+    <module>mtwilson-util-archive</module>
     <module>mtwilson-util-authz-token</module>
     <module>mtwilson-util-classpath</module>
 	<module>mtwilson-util-codec</module>

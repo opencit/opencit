@@ -24,12 +24,8 @@ public class EnvironmentConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String get(String key, String defaultValue) {
-        String value = System.getenv(key);
-        if( value != null ) {
-            return value;
-        }
-        return defaultValue;
+    public String get(String key) {
+        return System.getenv(key);
     }
 
     @Override

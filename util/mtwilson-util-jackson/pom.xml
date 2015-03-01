@@ -83,6 +83,11 @@
             <artifactId>mtwilson-util-crypto</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+            <optional>true</optional>
+        </dependency>
 
 		</dependencies>  
     

@@ -33,8 +33,8 @@ public class ReadonlyConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String get(String key, String defaultValue) {
-        return configuration.get(key, defaultValue);
+    public String get(String key) {
+        return configuration.get(key);
     }
 
     public String get(Property property) {

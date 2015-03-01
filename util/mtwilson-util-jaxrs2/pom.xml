@@ -48,6 +48,13 @@
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         
+        <!-- Fault -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+        </dependency>
+
+                
         <!-- jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

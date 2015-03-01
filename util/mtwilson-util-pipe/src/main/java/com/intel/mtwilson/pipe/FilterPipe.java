@@ -40,5 +40,9 @@ public class FilterPipe<T> implements Filter<T> {
         return result;
     }
 
+    public List<Filter<T>> getFilters() {
+        return filters;
+    }
+
     
 }
