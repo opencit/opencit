@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Maybe this class should be moved to mtwilson-util-jaxrs2 or mtwilson-api
  * 
  * @author jbuhacoff
  */

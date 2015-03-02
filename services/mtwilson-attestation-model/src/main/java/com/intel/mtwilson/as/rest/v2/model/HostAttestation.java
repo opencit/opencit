@@ -20,6 +20,7 @@ public class HostAttestation extends Document {
     private String hostUuid;
     private String hostName;
     private String aikSha1;
+    private String aikPublicKeySha1;
     private String challenge;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
@@ -49,6 +50,14 @@ public class HostAttestation extends Document {
         this.aikSha1 = aikSha1;
     }
 
+    public String getAikPublicKeySha1() {
+        return aikSha1;
+    }
+
+    public void setAikPublicKeySha1(String aikSha1) {
+        this.aikSha1 = aikSha1;
+    }
+    
     public String getChallenge() {
         return challenge;
     }
