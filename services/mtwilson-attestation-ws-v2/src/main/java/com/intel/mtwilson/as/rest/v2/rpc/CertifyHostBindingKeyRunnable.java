@@ -20,18 +20,12 @@ import java.io.FileInputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -47,8 +41,8 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
     private byte[] tpmCertifyKeySignature;
-    private String aikPemCertificate;
-    private String bindingKeyPemCertificate;
+    private byte[] aikDerCertificate;
+    private byte[] bindingKeyDerCertificate;
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;
@@ -66,14 +60,6 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         this.tpmCertifyKey = tpmCertifyKey;
     }
 
-    public String getBindingKeyPemCertificate() {
-        return bindingKeyPemCertificate;
-    }
-
-    public void setBindingKeyPemCertificate(String bindingKeyPemCertificate) {
-        this.bindingKeyPemCertificate = bindingKeyPemCertificate;
-    }
-
     public byte[] getTpmCertifyKeySignature() {
         return tpmCertifyKeySignature;
     }
@@ -82,25 +68,31 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
         this.tpmCertifyKeySignature = tpmCertifyKeySignature;
     }
 
-    public String getAikPemCertificate() {
-        return aikPemCertificate;
+    public byte[] getAikDerCertificate() {
+        return aikDerCertificate;
     }
 
-    public void setAikPemCertificate(String aikPemCertificate) {
-        this.aikPemCertificate = aikPemCertificate;
+    public void setAikDerCertificate(byte[] aikDerCertificate) {
+        this.aikDerCertificate = aikDerCertificate;
     }
 
+    public byte[] getBindingKeyDerCertificate() {
+        return bindingKeyDerCertificate;
+    }
+
+    public void setBindingKeyDerCertificate(byte[] bindingKeyDerCertificate) {
+        this.bindingKeyDerCertificate = bindingKeyDerCertificate;
+    }
     
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
         try {
-            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikPemCertificate != null) {
+            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
 
                 log.debug("Starting to verify the Binding key TCG certificate and generate the MTW certified certificate.");
 
                 // Verify the encryption scheme, key flags etc
-//                validateCertifyKeyData(tpmCertifyKey, true);
                 if( !CertifyKey.isBindingKey(new TpmCertifyKey(tpmCertifyKey))) {
                     throw new Exception("Not a valid binding key");
                 }
@@ -108,8 +100,8 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                log.debug("Public key modulus {}, TpmCertifyKey data {}  & TpmCertifyKeySignature data {} are specified.",
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
                 
-                X509Certificate decodedAikPemCertificate = X509Util.decodePemCertificate(aikPemCertificate);
-                log.debug("AIK Certificate {}", decodedAikPemCertificate.getIssuerX500Principal().getName());
+                X509Certificate decodedAikDerCertificate = X509Util.decodeDerCertificate(aikDerCertificate);
+                log.debug("AIK Certificate {}", decodedAikDerCertificate.getIssuerX500Principal().getName());
                 
                 // Need to verify if the AIK is signed by the trusted Privacy CA, which would also ensure that the EK is verified.
                 byte[] privacyCAPemBytes;
@@ -120,11 +112,11 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                 X509Certificate privacyCACert = X509Util.decodePemCertificate(new String(privacyCAPemBytes));
                 log.debug("Privacy CA Certificate {}", privacyCACert.getIssuerX500Principal().getName());
                 
-                if (!isAikCertifiedByPrivacyCA(decodedAikPemCertificate, privacyCACert)) {
+                if (!isAikCertifiedByPrivacyCA(decodedAikDerCertificate, privacyCACert)) {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
                 
-                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikPemCertificate.getPublicKey())) {
+                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
                     throw new CertificateException("The signature specified for the certifiy key does not match.");
                 }
                 
@@ -146,14 +138,11 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                     throw new Exception("Error during the creation of the public key from the modulus and exponent");
                 }
 
-                // first load the ca key
-                byte[] combinedPrivateKeyAndCertPemBytes;
-                try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
-                    combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
-                }
+                // first load the privacy ca key                
+                log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
+                RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
+                X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 
-                PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
-                X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
                         .commonName("CN=Binding_Key_Certificate")
@@ -170,7 +159,7 @@ public class CertifyHostBindingKeyRunnable implements Runnable {
                         .build();
 
                 if (bkCert != null) {
-                    bindingKeyPemCertificate = X509Util.encodePemCertificate(bkCert);
+                    bindingKeyDerCertificate = X509Util.encodeDerCertificate(bkCert);
                 } else {
                     throw new Exception("Error during creation of the MTW signed binding key certificate");
                 }

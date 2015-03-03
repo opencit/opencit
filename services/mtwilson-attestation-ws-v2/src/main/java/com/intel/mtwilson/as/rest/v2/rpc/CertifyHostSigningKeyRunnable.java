@@ -14,7 +14,6 @@ import com.intel.mtwilson.repository.RepositoryCreateException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
-import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -24,6 +23,7 @@ import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.is
 import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.validatePublicKeyDigest;
 import com.intel.mtwilson.util.tpm12.CertifyKey;
 import gov.niarl.his.privacyca.TpmCertifyKey;
+import java.security.interfaces.RSAPrivateKey;
 
 /**
  *
@@ -37,9 +37,9 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
     
     private byte[] publicKeyModulus;
     private byte[] tpmCertifyKey;
-    private String signingKeyPemCertificate;
+    private byte[] signingKeyDerCertificate;
     private byte[] tpmCertifyKeySignature;
-    private String aikPemCertificate;
+    private byte[] aikDerCertificate;
 
     public byte[] getPublicKeyModulus() {
         return publicKeyModulus;
@@ -57,14 +57,6 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
         this.tpmCertifyKey = tpmCertifyKey;
     }
 
-    public String getSigningKeyPemCertificate() {
-        return signingKeyPemCertificate;
-    }
-
-    public void setSigningKeyPemCertificate(String signingKeyPemCertificate) {
-        this.signingKeyPemCertificate = signingKeyPemCertificate;
-    }
-
     public byte[] getTpmCertifyKeySignature() {
         return tpmCertifyKeySignature;
     }
@@ -73,20 +65,27 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
         this.tpmCertifyKeySignature = tpmCertifyKeySignature;
     }
 
-    public String getAikPemCertificate() {
-        return aikPemCertificate;
+    public byte[] getSigningKeyDerCertificate() {
+        return signingKeyDerCertificate;
     }
 
-    public void setAikPemCertificate(String aikPemCertificate) {
-        this.aikPemCertificate = aikPemCertificate;
+    public void setSigningKeyDerCertificate(byte[] signingKeyDerCertificate) {
+        this.signingKeyDerCertificate = signingKeyDerCertificate;
     }
 
-    
+    public byte[] getAikDerCertificate() {
+        return aikDerCertificate;
+    }
+
+    public void setAikDerCertificate(byte[] aikDerCertificate) {
+        this.aikDerCertificate = aikDerCertificate;
+    }
+
     @Override
     @RequiresPermissions({"host_signing_key_certificates:create"})
     public void run() {
         try {
-            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikPemCertificate != null) {
+            if (publicKeyModulus != null && tpmCertifyKey != null && tpmCertifyKeySignature != null && aikDerCertificate != null) {
 
                 log.debug("Starting to verify the Signing key TCG certificate and generate the MTW certified certificate.");
 
@@ -99,8 +98,8 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                     throw new Exception("Not a valid signing key");
                 }
                 
-                X509Certificate decodedAikPemCertificate = X509Util.decodePemCertificate(aikPemCertificate);
-                log.debug("AIK Certificate {}", decodedAikPemCertificate.getIssuerX500Principal().getName());
+                X509Certificate decodedAikDerCertificate = X509Util.decodeDerCertificate(aikDerCertificate);
+                log.debug("AIK Certificate {}", decodedAikDerCertificate.getIssuerX500Principal().getName());
                 
                 // Need to verify if the AIK is signed by the trusted Privacy CA, which would also ensure that the EK is verified.
                 byte[] privacyCAPemBytes;
@@ -111,11 +110,11 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                 X509Certificate privacyCACert = X509Util.decodePemCertificate(new String(privacyCAPemBytes));
                 log.debug("Privacy CA Certificate {}", privacyCACert.getIssuerX500Principal().getName());
 
-                if (!isAikCertifiedByPrivacyCA(decodedAikPemCertificate, privacyCACert)) {
+                if (!isAikCertifiedByPrivacyCA(decodedAikDerCertificate, privacyCACert)) {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
                 
-                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikPemCertificate.getPublicKey())) {
+                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikDerCertificate.getPublicKey())) {
                     throw new CertificateException("The signature specified for the certifiy key does not match.");
                 }
                 
@@ -137,14 +136,11 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                     throw new Exception("Error during the creation of the public key from the modulus and exponent");
                 }
 
-                // first load the ca key
-                byte[] combinedPrivateKeyAndCertPemBytes;
-                try (FileInputStream cakeyIn = new FileInputStream(My.configuration().getCaKeystoreFile())) {
-                    combinedPrivateKeyAndCertPemBytes = IOUtils.toByteArray(cakeyIn);
-                }
+                // Load the Privacy CA key
+                log.debug("PrivacyCA.p12: {}", My.configuration().getPrivacyCaIdentityP12().getAbsolutePath());
+                RSAPrivateKey cakey = TpmUtils.privKeyFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
+                X509Certificate cacert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                 
-                PrivateKey cakey = RsaUtil.decodePemPrivateKey(new String(combinedPrivateKeyAndCertPemBytes));
-                X509Certificate cacert = X509Util.decodePemCertificate(new String(combinedPrivateKeyAndCertPemBytes));
                 X509Builder caBuilder = X509Builder.factory();
                 X509Certificate bkCert = caBuilder
                         .commonName("CN=Signing_Key_Certificate")
@@ -161,7 +157,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         .build();
 
                 if (bkCert != null) {
-                    signingKeyPemCertificate = X509Util.encodePemCertificate(bkCert);
+                    signingKeyDerCertificate = X509Util.encodeDerCertificate(bkCert);
                 } else {
                     throw new Exception("Error during creation of the MTW signed signing key certificate");
                 }

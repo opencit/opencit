@@ -7,12 +7,14 @@ package com.intel.mtwilson.trustagent.setup;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.as.rest.v2.model.BindingKeyEndorsementRequest;
 import com.intel.mtwilson.attestation.client.jaxrs.HostTpmKeys;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 
@@ -90,8 +92,11 @@ public class CertifyBindingKey extends AbstractSetupTask {
         BindingKeyEndorsementRequest obj = new BindingKeyEndorsementRequest();
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(bindingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(bindingKeyTCGCertificate));
-        obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(bindingKeyTCGCertificateSignature)); 
-        obj.setAikPemCertificate(FileUtils.readFileToString(aikPemCertificate));
+        obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(bindingKeyTCGCertificateSignature));
+        
+        X509Certificate aikCert = X509Util.decodePemCertificate(FileUtils.readFileToString(aikPemCertificate));
+        byte[] encodedAikDerCertificate = X509Util.encodeDerCertificate(aikCert);
+        obj.setAikDerCertificate(encodedAikDerCertificate);
         
         log.debug("Creating TLS policy");
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
@@ -103,10 +108,11 @@ public class CertifyBindingKey extends AbstractSetupTask {
         clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
         
         HostTpmKeys client = new HostTpmKeys(clientConfiguration, tlsConnection);
-        String bindingKeyPemCertificate = client.createBindingKeyCertificate(obj);
-        log.debug("MTW signed PEM certificate is {} ", bindingKeyPemCertificate);
+        X509Certificate bindingKeyCertificate = client.createBindingKeyCertificate(obj);
+        String pemCertificate = X509Util.encodePemCertificate(bindingKeyCertificate);
+        log.debug("MTW signed PEM certificate is {} ", pemCertificate);
         
-        FileUtils.writeStringToFile(bindingKeyPem, bindingKeyPemCertificate);
+        FileUtils.writeStringToFile(bindingKeyPem, pemCertificate);
         log.debug("Successfully created the MTW signed X509Certificate for the binding key and stored at {}.", 
                 bindingKeyPem.getAbsolutePath());
         
