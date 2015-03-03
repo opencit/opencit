@@ -51,11 +51,11 @@ public class HostAttestation extends Document {
     }
 
     public String getAikPublicKeySha1() {
-        return aikSha1;
+        return aikPublicKeySha1;
     }
 
-    public void setAikPublicKeySha1(String aikSha1) {
-        this.aikSha1 = aikSha1;
+    public void setAikPublicKeySha1(String aikPublicKeySha1) {
+        this.aikPublicKeySha1 = aikPublicKeySha1;
     }
     
     public String getChallenge() {

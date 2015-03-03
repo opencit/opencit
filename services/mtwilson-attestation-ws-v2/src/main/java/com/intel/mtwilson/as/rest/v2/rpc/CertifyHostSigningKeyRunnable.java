@@ -21,11 +21,9 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.isAikCertifiedByPrivacyCA;
-import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.isCertifiedKeySignatureValid;
-import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.tcgCertSignatureOid;
-import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.tcgCertExtOid;
 import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.validatePublicKeyDigest;
-import static com.intel.mtwilson.as.rest.v2.rpc.CertifyHostBindingKeyRunnable.validateCertifyKeyData;
+import com.intel.mtwilson.util.tpm12.CertifyKey;
+import gov.niarl.his.privacyca.TpmCertifyKey;
 
 /**
  *
@@ -96,7 +94,10 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         TpmUtils.byteArrayToHexString(publicKeyModulus), TpmUtils.byteArrayToHexString(tpmCertifyKey), TpmUtils.byteArrayToHexString(tpmCertifyKeySignature));
 
                 // Verify the encryption scheme, key flags etc
-                validateCertifyKeyData(tpmCertifyKey, false);
+//                validateCertifyKeyData(tpmCertifyKey, false);
+                if( !CertifyKey.isSigningKey(new TpmCertifyKey(tpmCertifyKey))) {
+                    throw new Exception("Not a valid signing key");
+                }
                 
                 X509Certificate decodedAikPemCertificate = X509Util.decodePemCertificate(aikPemCertificate);
                 log.debug("AIK Certificate {}", decodedAikPemCertificate.getIssuerX500Principal().getName());
@@ -114,7 +115,7 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                     throw new CertificateException("The specified AIK certificate is not trusted.");
                 }
                 
-                if (!isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikPemCertificate)) {
+                if (!CertifyKey.isCertifiedKeySignatureValid(tpmCertifyKey, tpmCertifyKeySignature, decodedAikPemCertificate.getPublicKey())) {
                     throw new CertificateException("The signature specified for the certifiy key does not match.");
                 }
                 
@@ -153,11 +154,10 @@ public class CertifyHostSigningKeyRunnable implements Runnable {
                         .issuerName(cacert)
                         .keyUsageDigitalSignature()
                         .keyUsageNonRepudiation()
-                        .keyUsageKeyEncipherment()
                         .extKeyUsageIsCritical()
                         .randomSerial()
-                        .noncriticalExtension(tcgCertExtOid, tpmCertifyKey)
-                        .noncriticalExtension(tcgCertSignatureOid, tpmCertifyKeySignature)
+                        .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_OID, tpmCertifyKey)
+                        .noncriticalExtension(CertifyKey.TCG_STRUCTURE_CERTIFY_INFO_SIGNATURE_OID, tpmCertifyKeySignature)
                         .build();
 
                 if (bkCert != null) {

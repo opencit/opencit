@@ -1,9 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mtwilson-shiro-ws-v2</artifactId>
+    <artifactId>mtwilson-shiro-api</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-shiro-ws-v2</name>
   
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
@@ -13,10 +12,6 @@
 
     <dependencies>  
         
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-        </dependency>
         
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
@@ -28,19 +23,6 @@
     	<artifactId>jackson-dataformat-xml</artifactId>
         <optional>true</optional>
     </dependency>
-    <!--
-    <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.13</version>
-        <optional>true</optional>
-    </dependency>
-    -->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- required for javax.ws.rs.QueryParam in RpcFilterCriteria and javax.ws.rs.Path in Rpcs resource -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -48,27 +30,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- required for javax.ejb.Stateless in Rpcs resource -->
-        <dependency>
-            <groupId>javax.ejb</groupId>
-            <artifactId>javax.ejb-api</artifactId>
-            <version>3.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-util</artifactId>
             <version>${project.version}</version>
         </dependency>
-	<dependency>
-	    <groupId>com.intel.mtwilson.util</groupId>
-	    <artifactId>mtwilson-util-authz-token</artifactId>
-  	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.util</groupId>
 	    <artifactId>mtwilson-util-extensions</artifactId>
@@ -94,11 +59,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
 		
