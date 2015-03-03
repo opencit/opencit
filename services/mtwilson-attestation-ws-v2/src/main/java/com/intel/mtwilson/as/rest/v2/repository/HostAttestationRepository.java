@@ -142,6 +142,12 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                     log.error("Host specified with aik sha1 {} is not valid.", item.getAikSha1());
                     throw new RepositoryInvalidInputException();
                 }
+            } else if (item.getAikPublicKeySha1() != null && !item.getAikPublicKeySha1().isEmpty()) {
+                obj = jpaController.findByAikPublicKeySha1(item.getAikPublicKeySha1());
+                if (obj == null) {
+                    log.error("Host specified with aik public key sha1 {} is not valid.", item.getAikPublicKeySha1());
+                    throw new RepositoryInvalidInputException();
+                }
             } else if (item.getHostName() != null && !item.getHostName().isEmpty()) {
                 obj = jpaController.findByName(item.getHostName());
                 if (obj == null) {

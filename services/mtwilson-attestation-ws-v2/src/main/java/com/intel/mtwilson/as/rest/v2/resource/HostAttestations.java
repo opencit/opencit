@@ -10,9 +10,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
-
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
@@ -23,7 +21,6 @@ import com.intel.mtwilson.jaxrs2.NoLinks;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
-import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;

@@ -111,7 +111,10 @@ public class HostAttestations extends MtWilsonClient {
     }
 
     /**
-     * Forces a complete attestation cycle for the host whose UUID is specified. The accept content type header should be set to "Accept: application/samlassertion+xml".
+     * Forces a complete attestation cycle for the specified host. 
+     * The host can be specified by UUID, AIK Certificate SHA-1, 
+     * AIK Public Key SHA-1, or HostName.
+     * The accept content type header should be set to "Accept: application/samlassertion+xml".
      * @param obj HostAttestation object with the UUID of the host for which the attestation has to be done. 
      * @return String having the SAML assertion that was just created. 
      * @since Mt.Wilson 2.0
