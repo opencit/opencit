@@ -24,6 +24,7 @@ import javax.ws.rs.Consumes;
 import org.apache.commons.codec.binary.Base64;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.trustdirector.xml.Manifest;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -97,12 +98,12 @@ public class ManifestSignatureRpc {
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
     @RequiresPermissions("vm_manifests:certify")
     
-    public String signImageManifest(String input) throws Exception {
+    public TrustPolicy signImageManifest(TrustPolicy input) throws Exception {
         JAXB codec = new JAXB();
-        Manifest manifest = codec.read(input, Manifest.class);
-        log.debug("Input is: "+codec.write(manifest));
-        String signature = generateDsig(input);
-        return signature;        
+//        Manifest manifest = codec.read(input, TrustPolicy.class);
+//        log.debug("Input is: "+codec.write(manifest));
+        String signedTrustPolicy = generateDsig(codec.write(input));
+        return codec.read(signedTrustPolicy, TrustPolicy.class);        
         
     }
     

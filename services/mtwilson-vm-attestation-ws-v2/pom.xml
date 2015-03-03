@@ -151,6 +151,12 @@
             <artifactId>mtwilson-trustagent-model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-trustpolicy-xml</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>  
 
 
