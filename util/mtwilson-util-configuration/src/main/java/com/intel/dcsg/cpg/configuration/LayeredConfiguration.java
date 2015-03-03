@@ -77,18 +77,17 @@ public class LayeredConfiguration extends AbstractConfiguration {
         
     /**
      * @param key
-     * @param defaultValue
-     * @return the value of key from the first source to have it, or defaultValue if none of the sources have it
+     * @return the value of key from the first source to have it, or null if none of the sources have it
      */
     @Override
-    public String get(String key, String defaultValue) {
+    public String get(String key) {
         for(Configuration source : sources) {
-            String value = source.get(key, null);
+            String value = source.get(key);
             if( value != null ) {
                 return value;
             }
         }
-        return defaultValue;
+        return null;
     }
     
     @Override

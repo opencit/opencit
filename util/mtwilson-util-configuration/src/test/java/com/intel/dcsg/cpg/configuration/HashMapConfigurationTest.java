@@ -29,7 +29,7 @@ public class HashMapConfigurationTest {
     @Test
     public void testCreateConfiguration() {
         MapConfiguration c = createConfiguration();
-        assertEquals("bar", c.get("foo", null));
+        assertEquals("bar", c.get("foo"));
     }
     
 }

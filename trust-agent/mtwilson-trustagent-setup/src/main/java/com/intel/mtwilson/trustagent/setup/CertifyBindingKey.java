@@ -60,6 +60,7 @@ public class CertifyBindingKey extends AbstractSetupTask {
             configuration("Trust Agent keystore password is not set");
         }        
         
+        bindingKeyPem = trustagentConfiguration.getBindingKeyX509CertificateFile();
     }
 
     @Override
@@ -67,7 +68,6 @@ public class CertifyBindingKey extends AbstractSetupTask {
         trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         
         // Now check for the existence of the MTW signed PEM file.
-        bindingKeyPem = trustagentConfiguration.getBindingKeyX509CertificateFile();
         if (bindingKeyPem == null || !bindingKeyPem.exists()) {
             validation("MTW signed Binding Key certificate does not exist.");
         }        
@@ -106,9 +106,9 @@ public class CertifyBindingKey extends AbstractSetupTask {
         String bindingKeyPemCertificate = client.createBindingKeyCertificate(obj);
         log.debug("MTW signed PEM certificate is {} ", bindingKeyPemCertificate);
         
-        FileUtils.writeStringToFile(trustagentConfiguration.getBindingKeyX509CertificateFile(), bindingKeyPemCertificate);
-        log.info("Successfully created the MTW signed X509Certificate for the binding key and stored at {}.", 
-                trustagentConfiguration.getSigningKeyX509CertificateFile().getAbsolutePath());
+        FileUtils.writeStringToFile(bindingKeyPem, bindingKeyPemCertificate);
+        log.debug("Successfully created the MTW signed X509Certificate for the binding key and stored at {}.", 
+                bindingKeyPem.getAbsolutePath());
         
     }
 }

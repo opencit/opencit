@@ -559,6 +559,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
 		<artifactId>commons-collections</artifactId>
 		<version>3.2.1</version>
 	</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.9</version>
+        </dependency>
             <dependency>
                 <groupId>commons-configuration</groupId>
                 <artifactId>commons-configuration</artifactId>
@@ -621,6 +626,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
         </dependency>        
 
         		
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-archive</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-authz-token</artifactId>
@@ -639,12 +649,12 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-collection</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
     <dependency>
         <groupId>com.intel.mtwilson.util</groupId>
         <artifactId>mtwilson-util-configuration</artifactId>
-        <version>0.3-SNAPSHOT</version>
+        <version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>com.intel.mtwilson.util</groupId>
@@ -764,7 +774,7 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
 	<dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-validation</artifactId>
-		<version>0.2-SNAPSHOT</version>
+		<version>0.3-SNAPSHOT</version>
 	</dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>

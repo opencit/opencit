@@ -55,6 +55,7 @@ public class GenerateModulesCmd implements ICommand {
         log.debug("About to run the command: " + context.getMeasureLogLaunchScript());
         long startTime = System.currentTimeMillis();
         String outputPath = String.format("%s.%s", context.getMeasureLogXmlFile().getAbsolutePath(), RandomUtil.randomHexString(16));
+        log.info("Module output file: {}", String.format("OUTFILE=%s", outputPath));
         CommandUtil.runCommand(CommandUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()), new String[] { String.format("OUTFILE=%s", outputPath) });
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));

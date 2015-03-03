@@ -38,12 +38,8 @@ public class PropertiesConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String get(String key, String defaultValue) {
-        String value = properties.getProperty(key);
-        if( value == null ) {
-            return defaultValue;
-        }
-        return value;
+    public String get(String key) {
+        return properties.getProperty(key);
     }    
     @Override
     public void set(String key, String value) {

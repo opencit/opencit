@@ -30,7 +30,7 @@ public class SignatureWriter {
         byte[] contentDigest = MessageDigest.getInstance("SHA-256").digest(content);
         String contentId = Base64.encodeBase64String(contentDigest);
         // if the message object does not have a content-id , we add it.  
-        List<String> contentIds = message.getHeaderMap().getAll("Content-ID");
+        List<String> contentIds = message.getHeaderMap().get("Content-ID");
         if( contentIds == null ) { contentIds = new ArrayList<String>(); }
         if( !contentIds.contains(contentId)) {
             message.getHeaderMap().add("Content-ID", contentId);

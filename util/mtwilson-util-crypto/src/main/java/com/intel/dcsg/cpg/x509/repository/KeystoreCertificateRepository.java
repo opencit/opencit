@@ -53,6 +53,10 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
         this.keystore = keystore;
         this.password = keystorePassword.toCharArray();
     }
+    public KeystoreCertificateRepository(KeyStore keystore, char[] keystorePassword) {
+        this.keystore = keystore;
+        this.password = keystorePassword;
+    }
     
     public KeystoreCertificateRepository(String keystorePath, String keystorePassword) throws KeyStoreException, FileNotFoundException, IOException, NoSuchAlgorithmException, CertificateException {
         this(new FileResource(new File(keystorePath)), keystorePassword);

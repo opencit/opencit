@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.repository;
 
@@ -32,6 +32,11 @@ public class RepositoryCreateException extends RepositoryException {
         super(message, cause);
     }
 
+    public RepositoryCreateException(Locator locator) {
+        super();
+        this.locator = locator;
+    }
+    
     public Locator getLocator() {
         return locator;
     }

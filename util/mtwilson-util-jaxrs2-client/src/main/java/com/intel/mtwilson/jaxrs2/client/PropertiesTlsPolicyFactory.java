@@ -73,18 +73,22 @@ public class PropertiesTlsPolicyFactory {
         } else if (certificateDigestSha256 != null) {
             tlsPolicyDescriptor.setPolicyType("certificate-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-256");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(certificateDigestSha256);
         } else if (certificateDigestSha1 != null) {
             tlsPolicyDescriptor.setPolicyType("certificate-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-1");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(certificateDigestSha1);
         } else if (publicKeyDigestSha256 != null) {
             tlsPolicyDescriptor.setPolicyType("public-key-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-256");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(publicKeyDigestSha256);
         } else if (publicKeyDigestSha1 != null) {
             tlsPolicyDescriptor.setPolicyType("public-key-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-1");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(publicKeyDigestSha1);
         } else if (insecure != null && insecure.equalsIgnoreCase("true")) {
             tlsPolicyDescriptor.setPolicyType("INSECURE");

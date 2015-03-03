@@ -189,7 +189,7 @@ public class CreateSamlCertificate extends LocalSetupTask {
 //            log.error("Failed to create certificate"); // no need to print this, if the build failed there are guaranteed to be faults to print...
             List<Fault> faults = builder.getFaults();
             for (Fault fault : faults) {
-                log.error(String.format("%s%s", fault.toString(), fault.getCause() == null ? "" : ": " + fault.getCause().getMessage()));
+                log.error(String.format("%s: %s", fault.getClass().getName(), fault.toString()));
                 validation(fault); 
             }
             throw new SetupException("Cannot generate SAML certificate");
