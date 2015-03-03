@@ -115,7 +115,7 @@ public class X509AuthenticationFilter extends HttpAuthenticationFilter {
         String authorizationText = httpRequest.getHeader(getAuthorizationHeaderName());
         log.debug("Parsing authorization header: {}", authorizationText);
         Authorization authorization = parseAuthorization(authorizationText);
-        log.info("X509CertificateAuthorization: Request timestamp ok");
+        log.debug("X509CertificateAuthorization: parsed authorization");
         return authorization;
     }
 
