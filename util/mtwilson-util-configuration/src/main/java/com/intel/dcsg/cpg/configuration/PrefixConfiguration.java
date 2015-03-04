@@ -31,11 +31,14 @@ public class PrefixConfiguration extends AbstractConfiguration {
         this.prefix = prefix;
     }
 
+    /**
+     * 
+     * @return the prefix such as "MTWILSON_" or "mtwilson."
+     */
     public String getPrefix() {
         return prefix;
     }
-    
-    
+
     /**
      * Filters returned keys to only those having the prefix; and removes
      * the prefix before returning the keys so that callers can pass the

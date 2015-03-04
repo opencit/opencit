@@ -57,7 +57,7 @@ public class PasswordLogin {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PasswordLogin.class);
 
 //    private TokenFactory factory;
-    @RequiresGuest
+//    @RequiresGuest  // causes it to fail when someone is already logged in, which is not convenient because then user has to close browser and "forget" credentials if they want to log in again (for example if they reloaded entry point)
     @POST
     @Consumes({MediaType.APPLICATION_FORM_URLENCODED})
 //    public void submitLoginForm(@Context final HttpServletRequest request, @Context final HttpServletResponse response, @FormParam("username") String username, @FormParam("password") String password) {
@@ -70,7 +70,7 @@ public class PasswordLogin {
         log.debug("Successfully processed login request with auth token {}.", passwordLoginResponse.getAuthorizationToken());
     }
 
-    @RequiresGuest
+//    @RequiresGuest
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
