@@ -35,6 +35,9 @@
                             <schemaIncludes>
                                 <include>jaxb/mtwilson-measurement-xml/*.xsd</include>
                             </schemaIncludes>
+                            <bindingIncludes>
+                                <include>jaxb/mtwilson-measurement-xml/*.xjb</include>
+                            </bindingIncludes>
                             <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-measurement-xml.episode</episodeFile>
                             <generatePackage>com.intel.mtwilson.measurement.xml</generatePackage>
                         </configuration>

@@ -81,6 +81,25 @@ public class Password implements Command {
         log.debug("Loading users and permissions");
         dao = new LoginDAO(userFile, permissionFile);
         
+        if( options.getBoolean("list", false) ) {
+            if( args.length > 0 ) {
+                // list all permissions for specified user
+                String username = args[0];
+                List<UserPermission> userPermissions = dao.getPermissions(username);
+                for(UserPermission userPermission : userPermissions) {
+                    System.out.println(userPermission.toString());
+                }
+            }
+            else {
+                // list all users and exit, ignore other arguments
+                List<String> users = dao.listUsernames();
+                for(String user : users) {
+                    System.out.println(user);
+                }
+            }
+            return;
+        }
+        
         // usage:   username  (prompt for password, no permissions)
         // usage:   username password  (no permissions)
         // usage:   username password permissions
