@@ -68,7 +68,12 @@ public class ExtensionCacheLoader implements Runnable {
     public void run() {
         // add all the jar files to a classloader
         try {
-            load(getCacheFile(), getRegistrars());
+            if( cacheFile.exists() ) {
+                load(cacheFile, registrars);
+            }
+            else {
+                log.debug("Cache file does not exist: {}", cacheFile.getAbsolutePath());
+            }
         }
         catch(IOException e) {
             log.error("Cannot load extension cache file", e);
@@ -76,34 +81,36 @@ public class ExtensionCacheLoader implements Runnable {
         
     }
     
+    /**
+     * It is an error to call this method when the cache file does not exist.
+     * 
+     * @param cacheFile
+     * @param registrars
+     * @throws IOException 
+     */
     public void load(File cacheFile, Registrar[] registrars) throws IOException {
-        if( cacheFile.exists() ) {
-            long time0 = System.currentTimeMillis();
-            long count = 0;
-            Scanner scanner = new Scanner(registrars);
-            try(FileInputStream in = new FileInputStream(cacheFile)) {
-                String content = IOUtils.toString(in);
-                String[] lines = content.split("[\n\r]");
-                for(int i=0; i<lines.length; i++) {
-                    if( lines[i] == null || lines[i].trim().isEmpty() ) { continue; }
-                    String className = lines[i];
-                    try {
-                        log.debug("Loading extension: {}", className);
-                        Class<?> clazz = Class.forName(className);
-                        scanner.scan(clazz);
-                        count++;
-                    }
-                    catch(Exception e) {
-                        log.error("Cannot load class {}: {}", className, e.getMessage());
-                    }
+        long time0 = System.currentTimeMillis();
+        long count = 0;
+        Scanner scanner = new Scanner(registrars);
+        try(FileInputStream in = new FileInputStream(cacheFile)) {
+            String content = IOUtils.toString(in);
+            String[] lines = content.split("[\n\r]");
+            for(int i=0; i<lines.length; i++) {
+                if( lines[i] == null || lines[i].trim().isEmpty() ) { continue; }
+                String className = lines[i];
+                try {
+                    log.debug("Loading extension: {}", className);
+                    Class<?> clazz = Class.forName(className);
+                    scanner.scan(clazz);
+                    count++;
+                }
+                catch(Exception e) {
+                    log.error("Cannot load class {}: {}", className, e.getMessage());
                 }
             }
-            long time1 = System.currentTimeMillis();
-            log.debug("Loaded {} extensions in {}ms", count, time1-time0);
         }
-        else {
-            log.warn("Extension cache file does not exist: {}", cacheFile.getAbsolutePath());
-        }
+        long time1 = System.currentTimeMillis();
+        log.debug("Loaded {} extensions in {}ms", count, time1-time0);
     }
     
 }
