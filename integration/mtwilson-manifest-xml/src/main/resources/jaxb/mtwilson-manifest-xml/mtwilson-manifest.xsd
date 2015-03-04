@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="mtwilson:trustdirector:policy:1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+        <xs:element name="Manifest">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dir" maxOccurs="unbounded" minOccurs="0">
+                    <xs:complexType>
+                      <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                          <xs:attribute type="xs:string" name="Path" use="required"/>
+                          <xs:attribute type="xs:string" name="Include" use="required"/>
+                          <xs:attribute type="xs:string" name="Exclude" use="required"/>                      
+                        </xs:extension>
+                      </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element> 
+                <xs:element name="File" maxOccurs="unbounded" minOccurs="0">
+                  <xs:complexType>
+                    <xs:simpleContent>
+                      <xs:extension base="xs:string">
+                        <xs:attribute type="xs:string" name="Path" use="optional"/>
+                      </xs:extension>
+                    </xs:simpleContent>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+              <xs:attribute type="xs:string" name="DigestAlg"/>
+            </xs:complexType>
+        </xs:element>
+</xs:schema>
