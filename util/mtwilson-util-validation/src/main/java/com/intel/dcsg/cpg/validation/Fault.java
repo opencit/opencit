@@ -105,7 +105,7 @@ public class Fault implements Faults {
 //    @JsonValue
     @Override
     public String toString() {
-        return description; // should never be null because we set it in every constructor
+        return String.format("[%s: %s]", getClass().getName(), description); // should never be null because we set it in every constructor
         /*
         return StringUtils.join(new String[] {
             (description == null ? "" : description), // XXX TODO if we have a localizable Message object use that instead
