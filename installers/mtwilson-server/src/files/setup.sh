@@ -16,6 +16,8 @@ if [ ! -d $MTWILSON_ENV_DIR ]; then
   mkdir -p $MTWILSON_ENV_DIR
 fi
 
+rm -rf /opt/mtwilson/java 2>/dev/null
+
 #load the functions file first so we can use the generatePassword function
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
