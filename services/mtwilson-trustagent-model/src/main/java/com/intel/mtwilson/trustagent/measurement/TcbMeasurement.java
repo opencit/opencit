@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author rksavino
  */
-@XmlRootElement(name = "measurements")
+@XmlRootElement(name = "Measurements")
 public class TcbMeasurement {
     private String digestAlg;
     private List<MeasurementEntry> measurements = null;
@@ -29,8 +29,8 @@ public class TcbMeasurement {
     }
     
     @XmlElementRefs({
-        @XmlElementRef(name = "file", type = FileMeasurementEntry.class),
-        @XmlElementRef(name = "dir", type = DirectoryMeasurementEntry.class)
+        @XmlElementRef(name = "File", type = FileMeasurementEntry.class),
+        @XmlElementRef(name = "Dir", type = DirectoryMeasurementEntry.class)
     })
     public List<MeasurementEntry> getMeasurements() {
         return measurements;

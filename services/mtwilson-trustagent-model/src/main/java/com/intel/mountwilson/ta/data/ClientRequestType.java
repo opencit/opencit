@@ -46,7 +46,8 @@ import javax.xml.bind.annotation.XmlType;
     "errorMessage",
     "aikcert",
     "quote",
-    "eventLog"
+    "eventLog",
+    "tcbMeasurement"
 })
 public class ClientRequestType {
 
@@ -64,6 +65,8 @@ public class ClientRequestType {
     protected String quote;
     @XmlElement(required = true)
     protected String eventLog; // This will have the list of modules from the event log, which we will parse later.
+    @XmlElement(required = true)
+    protected String tcbMeasurement; // This will have the list of additional modules including applications/data installed on top of OS.
     /**
      * Gets the value of the timestamp property.
      * 
@@ -209,4 +212,13 @@ public class ClientRequestType {
         this.eventLog = eventLog;
     }
 
+    public String getTcbMeasurement() {
+        return tcbMeasurement;
+    }
+
+    public void setTcbMeasurement(String tcbMeasurement) {
+        this.tcbMeasurement = tcbMeasurement;
+    }
+
+    
 }

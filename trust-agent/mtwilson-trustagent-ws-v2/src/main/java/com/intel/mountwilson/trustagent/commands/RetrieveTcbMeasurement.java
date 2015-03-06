@@ -36,13 +36,13 @@ public class RetrieveTcbMeasurement implements ICommand {
         } else {
             try {
                 InputStream in = new FileInputStream(context.getTcbMeasurementXmlFile());
-                String xml = IOUtils.toString(in, Charset.forName("UTF-8"));
-                log.info("TCB measurement XML string: {}", xml);
+                String tcbMeasurementString = IOUtils.toString(in, Charset.forName("UTF-8"));
+                log.info("TCB measurement XML string: {}", tcbMeasurementString);
 
-                JAXB jaxb = new JAXB();
-                TcbMeasurement tcbMeasurement = jaxb.read(xml, TcbMeasurement.class);
-                log.info("TcbMeasurement unmarshalled successfully.");
-                String tcbMeasurementString = jaxb.write(tcbMeasurement);
+//                JAXB jaxb = new JAXB();
+//                TcbMeasurement tcbMeasurement = jaxb.read(xml, TcbMeasurement.class);
+//                log.info("TcbMeasurement unmarshalled successfully.");
+//                String tcbMeasurementString = jaxb.write(tcbMeasurement);
                 log.info("Marshalled TcbMeasurement: {}", tcbMeasurementString);
 
                 context.setTcbMeasurement(tcbMeasurementString);
