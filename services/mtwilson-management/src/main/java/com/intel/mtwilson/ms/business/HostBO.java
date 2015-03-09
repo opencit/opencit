@@ -109,7 +109,7 @@ public class HostBO {
             try {
                 long threadStart = System.currentTimeMillis();
                  attestationReport = agent.getHostAttestationReport(requiredPCRs);
-                 measurementXmlLog = agent.getPcrManifest().getMeasurementXmlLog();
+                 measurementXmlLog = agent.getPcrManifest().getMeasurementXml();
                  log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
             } catch (Throwable te) {
                 isError = true;

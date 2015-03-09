@@ -24,6 +24,7 @@ import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.model.XmlMeasurementLog;
 import java.io.FileInputStream;
 //import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.IOException;
@@ -216,22 +217,25 @@ AIK Certificate: null
             String tcbMeasurementString = IOUtils.toString(in);
             log.info("XML string: {}", tcbMeasurementString);
 
-            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty()) {
-
-                JAXB measurementLogJaxb = new JAXB();
-                com.intel.mtwilson.measurement.xml.Measurements measurementLog = measurementLogJaxb.read(tcbMeasurementString, com.intel.mtwilson.measurement.xml.Measurements.class);
-                                
-                if (measurementLog.getMeasurements().size() > 0) {
-                    for (com.intel.mtwilson.measurement.xml.MeasurementType measurementLogEntry : measurementLog.getMeasurements()) {
-                        if (measurementLogEntry.getClass().equals(com.intel.mtwilson.measurement.xml.DirectoryMeasurementType.class)) {
-                            com.intel.mtwilson.measurement.xml.DirectoryMeasurementType dirEntry = (com.intel.mtwilson.measurement.xml.DirectoryMeasurementType) measurementLogEntry;
-                            log.debug("Directory details {} - {} - {} - {}", dirEntry.getPath(), dirEntry.getValue(), dirEntry.getExclude(), dirEntry.getInclude());
-                        } else {
-                            log.debug("File details {} - {}", measurementLogEntry.getPath(), measurementLogEntry.getValue());
-                        }                            
-                    }
-                }
-            }
+            XmlMeasurementLog xmLog = new XmlMeasurementLog(PcrIndex.PCR19, tcbMeasurementString);
+            log.debug(xmLog.toString());
+            
+//            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty()) {
+//
+//                JAXB measurementLogJaxb = new JAXB();
+//                com.intel.mtwilson.measurement.xml.Measurements measurementLog = measurementLogJaxb.read(tcbMeasurementString, com.intel.mtwilson.measurement.xml.Measurements.class);
+//                                
+//                if (measurementLog.getMeasurements().size() > 0) {
+//                    for (com.intel.mtwilson.measurement.xml.MeasurementType measurementLogEntry : measurementLog.getMeasurements()) {
+//                        if (measurementLogEntry.getClass().equals(com.intel.mtwilson.measurement.xml.DirectoryMeasurementType.class)) {
+//                            com.intel.mtwilson.measurement.xml.DirectoryMeasurementType dirEntry = (com.intel.mtwilson.measurement.xml.DirectoryMeasurementType) measurementLogEntry;
+//                            log.debug("Directory details {} - {} - {} - {}", dirEntry.getPath(), dirEntry.getValue(), dirEntry.getExclude(), dirEntry.getInclude());
+//                        } else {
+//                            log.debug("File details {} - {}", measurementLogEntry.getPath(), measurementLogEntry.getValue());
+//                        }                            
+//                    }
+//                }
+//            }
             
         } catch (IOException e) {
             log.warn("IOException: {}", e); //e.getMessage());

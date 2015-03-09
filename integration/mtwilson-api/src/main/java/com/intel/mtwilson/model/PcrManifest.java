@@ -37,10 +37,10 @@ import java.util.List;
 public class PcrManifest extends ObjectModel {
     private final Pcr[] pcrs = new Pcr[24];
     private final PcrEventLog[] pcrEventLogs = new PcrEventLog[24];
-    private String measurementXmlLog;
+    private String measurementXml;
     
     public PcrManifest() {
-        this.measurementXmlLog = "";
+        this.measurementXml = "";
     }
     
     public void setPcr(Pcr pcr) {
@@ -188,12 +188,12 @@ public class PcrManifest extends ObjectModel {
         
     }
 
-    public String getMeasurementXmlLog() {
-        return measurementXmlLog;
+    public String getMeasurementXml() {
+        return measurementXml;
     }
 
-    public void setMeasurementXmlLog(String measurementXmlLog) {
-        this.measurementXmlLog = measurementXmlLog;
+    public void setMeasurementXml(String measurementXml) {
+        this.measurementXml = measurementXml;
     }
 
 }

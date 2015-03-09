@@ -379,7 +379,7 @@ public class TAHelper {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             log.info("Got PCR map");
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
-                pcrManifest.setMeasurementXmlLog(tcbMeasurementString);
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
             
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
@@ -393,7 +393,7 @@ public class TAHelper {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
-                pcrManifest.setMeasurementXmlLog(tcbMeasurementString);
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
             
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
@@ -481,7 +481,7 @@ public class TAHelper {
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
-                pcrManifest.setMeasurementXmlLog(tcbMeasurementString);
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
             log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
@@ -495,7 +495,7 @@ public class TAHelper {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
             if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
-                pcrManifest.setMeasurementXmlLog(tcbMeasurementString);
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
             
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {

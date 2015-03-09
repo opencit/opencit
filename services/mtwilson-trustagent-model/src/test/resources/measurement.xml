@@ -1,11 +1,11 @@
-<Measurements xmlns="mtwilson:trustdirector:measurements:1.1" DigestAlg="sha256">
-    <Dir Path="/boot">296fae22949de5e16c75e0fef135e6346b0e125768d72f7f30e25662e9b114a3</Dir>
-    <File Path="/boot/grub/stage1">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</File>
-    <File Path="/boot/grub/e2fs_stage1_5">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</File>
-    <File Path="/boot/grub/stage2">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</File>
-    <File Path="/boot/grub/menu.lst">0a1cfafd98f3f87dc079d41b9fe1391dcac8a41badf2d845648f95fe0edcd6c4</File>
-    <File Path="/boot/initrd.img-3.0.0-12-virtual">683972bff3c4d3d69f25504a2ca0a046772e21ebba4c67e4b857f4061e3cb143</File>
-    <File Path="/boot/config-3.0.0-12-virtual">2be73211f10b30c5d2705058d4d4991d0108b3b787578145a7e8dfb740b7c232</File>
-    <File Path="/boot/vmlinuz-3.0.0-12-virtual">fd844dea53352d5165a056bbb0f1af5af195600545de601c824decd5a30d3c49</File>
-    <Dir Path="/path/to/directory" Include="^include.regex.here$" Exclude="^exclude.regex.here$">da39a3ee5e6b4b0d3255bfef95601890afd80709</Dir>
+<Measurements xmlns="mtwilson:trustdirector:measurements:1.1" DigestAlg="sha1">
+    <Dir Path="/boot">1a39a3ee5e6b4b0d3255bfef95601890afd80709</Dir>
+    <File Path="/boot/grub/stage1">2a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <File Path="/boot/grub/e2fs_stage1_5">3a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <File Path="/boot/grub/stage2">4a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <File Path="/boot/grub/menu.lst">5a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <File Path="/boot/initrd.img-3.0.0-12-virtual">6a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <File Path="/boot/config-3.0.0-12-virtual">7a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <File Path="/boot/vmlinuz-3.0.0-12-virtual">8a39a3ee5e6b4b0d3255bfef95601890afd80709</File>
+    <Dir Path="/path/to/directory" Include="^include.regex.here$" Exclude="^exclude.regex.here$">9a39a3ee5e6b4b0d3255bfef95601890afd80709</Dir>
 </Measurements>

@@ -25,13 +25,18 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.as.controller.MwMeasurementXmlJpaController;
+import com.intel.mtwilson.as.data.MwMeasurementXml;
 import com.intel.mtwilson.model.Vmm;
+import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.rule.PcrEventLogEqualsExcluding;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.policy.rule.TagCertificateTrusted;
+import com.intel.mtwilson.policy.rule.XmlMeasurementLogEquals;
+import com.intel.mtwilson.policy.rule.XmlMeasurementLogIntegrity;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -64,6 +69,7 @@ public class JpaPolicyReader {
     private TblHostSpecificManifestJpaController pcrHostSpecificManifestJpaController;
     private TblModuleManifestJpaController moduleManifestJpaController;
     private TblLocationPcrJpaController locationPcrJpaController;
+    private MwMeasurementXmlJpaController measurementXmlJpaController;
 
     public JpaPolicyReader(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
@@ -72,6 +78,7 @@ public class JpaPolicyReader {
         moduleManifestJpaController = new TblModuleManifestJpaController(entityManagerFactory);
         locationPcrJpaController = new TblLocationPcrJpaController(entityManagerFactory);
         pcrHostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(entityManagerFactory);
+        measurementXmlJpaController = new MwMeasurementXmlJpaController(entityManagerFactory);
     }
     
     
@@ -329,4 +336,41 @@ public class JpaPolicyReader {
         
         return list;
     }    
+    
+    public Set<Rule> loadXmlMeasurementLogRuleForVmm(Vmm vmm, TblHosts tblHosts) {
+
+        log.debug("loadXmlMeasurementLogRuleForVmm: Adding XmlMeasurementLogRules for verification");
+        HashSet<Rule> list = new HashSet<>();
+        Sha1Digest finalXmlWhitelistValue = null;
+        
+        TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
+        Collection<TblModuleManifest> tblModuleManifestCollection = vmmMle.getTblModuleManifestCollection();
+        for(TblModuleManifest moduleObj : tblModuleManifestCollection) {
+            if (moduleObj.getComponentName().equalsIgnoreCase("tbootxm")) {
+                finalXmlWhitelistValue = Sha1Digest.valueOf(moduleObj.getDigestValue());
+                break;
+            }                    
+        }
+
+        MwMeasurementXml xmlMeasurement = measurementXmlJpaController.findByMleId(vmmMle.getId());
+        
+        // Ensure we have the final hash of measurement log and the measurement log itself is whitelisted before adding the
+        // rules for verification
+        if (finalXmlWhitelistValue != null && xmlMeasurement != null && !xmlMeasurement.getContent().isEmpty()) {
+            // First lets add the measurement log verification rule
+            XmlMeasurementLog xmlMeasurementLog = new XmlMeasurementLog(PcrIndex.PCR19, xmlMeasurement.getContent());
+            XmlMeasurementLogEquals xmlMeasurementLogEqualsRule = new XmlMeasurementLogEquals(xmlMeasurementLog);
+            xmlMeasurementLogEqualsRule.setMarkers(TrustMarker.VMM.name());
+            list.add(xmlMeasurementLogEqualsRule);
+            
+            // Next we should also verify the integrity of the measurement log by calculating the final hash and
+            // comparing it to the whitelist value.
+            XmlMeasurementLogIntegrity xmlMeasurementLogIntegrityRule = new XmlMeasurementLogIntegrity(finalXmlWhitelistValue, PcrIndex.PCR19);
+            xmlMeasurementLogIntegrityRule.setMarkers(TrustMarker.VMM.name());
+            list.add(xmlMeasurementLogIntegrityRule);
+        }    
+        
+        return list;
+    }
+    
 }
