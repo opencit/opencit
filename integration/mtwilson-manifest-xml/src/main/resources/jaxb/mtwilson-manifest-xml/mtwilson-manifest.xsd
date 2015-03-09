@@ -5,7 +5,7 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
 
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="mtwilson:trustdirector:policy:1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="mtwilson:trustdirector:manifest:1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
         <xs:element name="Manifest">
             <xs:complexType>
               <xs:sequence>
