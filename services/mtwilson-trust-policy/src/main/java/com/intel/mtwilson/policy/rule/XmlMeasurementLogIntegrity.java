@@ -13,8 +13,8 @@ import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.RuleResult;
-import com.intel.mtwilson.policy.fault.PcrValueMismatch;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissing;
+import com.intel.mtwilson.policy.fault.XmlMeasurementValueMismatch;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
                 // make sure the expected pcr value matches the actual pcr value
                 if( !expectedValue.equals(actualValue) ) {
                     log.info("XmlMeasurementLogIntegrity: Mismatch in the expected final hash value for the XML Measurement log.");
-                    report.fault(new PcrValueMismatch(pcrIndex, expectedValue, actualValue) );
+                    report.fault(new XmlMeasurementValueMismatch(expectedValue, actualValue) );
                 } else {
                     log.debug("Verified the integrity of the XML measurement log successfully.");
                 }
