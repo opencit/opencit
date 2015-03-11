@@ -7,12 +7,14 @@ package com.intel.mtwilson.trustagent.setup;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.as.rest.v2.model.SigningKeyEndorsementRequest;
 import com.intel.mtwilson.attestation.client.jaxrs.HostTpmKeys;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import java.io.File;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 
@@ -60,14 +62,13 @@ public class CertifySigningKey extends AbstractSetupTask {
             configuration("Trust Agent keystore password is not set");
         }        
         
+        signingKeyPem = trustagentConfiguration.getSigningKeyX509CertificateFile();
     }
 
     @Override
     protected void validate() throws Exception {
-        trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
         
         // Now check for the existence of the MTW signed PEM file.
-        signingKeyPem = trustagentConfiguration.getSigningKeyX509CertificateFile();
         if (signingKeyPem == null || !signingKeyPem.exists()) {
             validation("MTW signed Signing Key certificate does not exist.");
         }        
@@ -90,7 +91,10 @@ public class CertifySigningKey extends AbstractSetupTask {
         obj.setPublicKeyModulus(FileUtils.readFileToByteArray(signingKeyModulus));
         obj.setTpmCertifyKey(FileUtils.readFileToByteArray(signingKeyTCGCertificate));
         obj.setTpmCertifyKeySignature(FileUtils.readFileToByteArray(signingKeyTCGCertificateSignature)); 
-        obj.setAikPemCertificate(FileUtils.readFileToString(aikPemCertificate));
+        
+        X509Certificate aikCert = X509Util.decodePemCertificate(FileUtils.readFileToString(aikPemCertificate));
+        byte[] encodedAikDerCertificate = X509Util.encodeDerCertificate(aikCert);
+        obj.setAikDerCertificate(encodedAikDerCertificate);
         
         log.debug("Creating TLS policy");
         TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
@@ -102,11 +106,12 @@ public class CertifySigningKey extends AbstractSetupTask {
         clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
         
         HostTpmKeys client = new HostTpmKeys(clientConfiguration, tlsConnection);
-        String signingKeyPemCertificate = client.createSigningKeyCertificate(obj);
-        log.debug("MTW signed PEM certificate is {} ", signingKeyPemCertificate);
+        X509Certificate signingKeyCertificate = client.createSigningKeyCertificate(obj);
+        String pemCertificate = X509Util.encodePemCertificate(signingKeyCertificate);
+        log.debug("MTW signed PEM certificate is {} ", pemCertificate);
         
-        FileUtils.writeStringToFile(trustagentConfiguration.getSigningKeyX509CertificateFile(), signingKeyPemCertificate);
-        log.info("Successfully created the MTW signed X509Certificate for the signing key and stored at {}.", 
-                trustagentConfiguration.getSigningKeyX509CertificateFile().getAbsolutePath());
+        FileUtils.writeStringToFile(signingKeyPem, pemCertificate);
+        log.debug("Successfully created the MTW signed X509Certificate for the signing key and stored at {}.", 
+                signingKeyPem.getAbsolutePath());
     }    
 }

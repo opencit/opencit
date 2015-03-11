@@ -11,7 +11,6 @@ import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.console.Command;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
-import com.intel.mtwilson.configuration.EncryptedConfigurationProvider;
 import com.intel.mtwilson.setup.SetupConfigurationProvider;
 import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.SetupException;

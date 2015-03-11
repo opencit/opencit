@@ -8,6 +8,9 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.Model;
+import com.intel.mtwilson.setup.faults.ConfigurationFault;
+import com.intel.mtwilson.setup.faults.ValidationFault;
+import com.intel.mtwilson.util.validation.faults.Thrown;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,47 +166,40 @@ public abstract class AbstractSetupTask implements SetupTask {
     }
 
     protected final void configuration(String description) {
-        configurationFaults.add(new Fault(description));
+        configurationFaults.add(new ConfigurationFault(description));
     }
     
     protected final void configuration(String format, Object... args) {
-        configurationFaults.add(new Fault(format, args));
+        configurationFaults.add(new ConfigurationFault(format, args));
     }
     
     protected final void configuration(Throwable e, String description) {
-        configurationFaults.add(new Fault(e, description));
-    }
-    
-    protected final void configuration(Throwable e, String format, Object... args) {
-        configurationFaults.add(new Fault(e, format, args));
-    }
-    
-    protected final void configuration(Model m, String format, Object... args) {
-        configurationFaults.add(new Fault(m, format, args));
+        configurationFaults.add(new Thrown(e, description));
     }
 
+    protected final void configuration(Throwable e, String format, Object... args) {
+        configurationFaults.add(new Thrown(e, format, args));
+    }
+   
+    
     protected final void validation(Fault fault) {
         validationFaults.add(fault);
     }
 
     protected final void validation(String description) {
-        validationFaults.add(new Fault(description));
+        validationFaults.add(new ValidationFault(description));
     }
     
     protected final void validation(String format, Object... args) {
-        validationFaults.add(new Fault(format, args));
+        validationFaults.add(new ValidationFault(format, args));
     }
     
     protected final void validation(Throwable e, String description) {
-        validationFaults.add(new Fault(e, description));
+        validationFaults.add(new Thrown(e, description));
     }
     
     protected final void validation(Throwable e, String format, Object... args) {
-        validationFaults.add(new Fault(e, format, args));
-    }
-    
-    protected final void validation(Model m, String format, Object... args) {
-        validationFaults.add(new Fault(m, format, args));
+        validationFaults.add(new Thrown(e, format, args));
     }
     
     // convenience methods

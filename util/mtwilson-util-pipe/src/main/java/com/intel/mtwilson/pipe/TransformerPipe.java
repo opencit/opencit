@@ -11,6 +11,9 @@ import java.util.List;
  * A transformer that encapsulates one or more other transformers in sequence,
  * piping the result of one transformer to the next, and returns the final
  * result.
+ * 
+ * If the list is empty, the input is returned unmodified (identity transformation)
+ * 
  * @author jbuhacoff
  */
 public class TransformerPipe<T> implements Transformer<T> {
@@ -33,5 +36,8 @@ public class TransformerPipe<T> implements Transformer<T> {
         return result;
     }
 
+    public List<Transformer<T>> getTransformers() {
+        return transformers;
+    }
     
 }

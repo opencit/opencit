@@ -31,11 +31,14 @@ public class PrefixConfiguration extends AbstractConfiguration {
         this.prefix = prefix;
     }
 
+    /**
+     * 
+     * @return the prefix such as "MTWILSON_" or "mtwilson."
+     */
     public String getPrefix() {
         return prefix;
     }
-    
-    
+
     /**
      * Filters returned keys to only those having the prefix; and removes
      * the prefix before returning the keys so that callers can pass the
@@ -59,15 +62,14 @@ public class PrefixConfiguration extends AbstractConfiguration {
      * Tolerant for input, if prefix is "foo." then calling get("bar") is
      * equivalent to calling get("foo.bar")
      * @param key
-     * @param defaultValue
      * @return 
      */
     @Override
-    public String get(String key, String defaultValue) {
+    public String get(String key) {
         if( accept(key) ) {
-            return delegate.get(key, defaultValue);
+            return delegate.get(key);
         }
-        return delegate.get(prefix(key), defaultValue);
+        return delegate.get(prefix(key));
     }
     
     /**

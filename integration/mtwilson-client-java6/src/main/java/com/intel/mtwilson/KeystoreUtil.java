@@ -9,7 +9,6 @@ import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
@@ -20,32 +19,13 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 import java.util.Set;
-import javax.net.ssl.TrustManager;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
-import com.intel.mtwilson.attestation.client.jaxrs.CaCertificates;
-import com.intel.mtwilson.user.management.client.jaxrs.RegisterUsers;
-import com.intel.mtwilson.user.management.client.jaxrs.UserLoginCertificates;
-import com.intel.mtwilson.user.management.client.jaxrs.Users;
-import com.intel.mtwilson.user.management.rest.v2.model.RegisterUserWithCertificate;
-import com.intel.mtwilson.user.management.rest.v2.model.User;
-import com.intel.mtwilson.user.management.rest.v2.model.UserLoginCertificate;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.logging.Level;
-//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -392,6 +372,7 @@ public class KeystoreUtil {
         }
         ApiClient c;
         try {
+            log.debug("Registering client certificate");
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
 //            c = new ApiClient(server, rsaCredential, keystore, config); //ClientException

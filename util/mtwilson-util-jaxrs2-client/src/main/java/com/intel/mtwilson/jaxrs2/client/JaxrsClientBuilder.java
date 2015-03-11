@@ -28,7 +28,9 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.filter.LoggingFilter;
 import com.intel.mtwilson.jaxrs2.feature.JacksonFeature;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -99,6 +101,7 @@ public class JaxrsClientBuilder {
      * @return
      */
     public JaxrsClientBuilder configuration(Properties properties) {
+        log.debug("Building client with properties: {}", properties.stringPropertyNames());
         configuration = new PropertiesConfiguration(properties);
         return this;
     }
@@ -112,11 +115,13 @@ public class JaxrsClientBuilder {
         if (configuration == null) {
             return;
         }
+        log.debug("Configuring client authentication");
         // X509 authorization 
         SimpleKeystore keystore = null;
         String keystorePath = configuration.get("mtwilson.api.keystore");
         String keystorePassword = configuration.get("mtwilson.api.keystore.password"); 
-        if ( keystore != null && keystorePassword != null) {
+        if ( keystorePath != null && keystorePassword != null) {
+            log.debug("Loading keystore from path {}", keystorePath);
             FileResource resource = new FileResource(new File(keystorePath));
             keystore = new SimpleKeystore(resource, keystorePassword);
         }

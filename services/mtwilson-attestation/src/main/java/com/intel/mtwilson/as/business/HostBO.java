@@ -974,8 +974,17 @@ public class HostBO {
                 TblHosts tblHosts = My.jpa().mwHosts().findByName(hostName.toString());
                 return tblHosts;
         }
+        
+        /**
+         * 
+         * @param aik must be the SHA-1 digest of the  AIK PUBLIC KEY (not certificate)
+         * @return
+         * @throws CryptographyException
+         * @throws IOException 
+         */
 	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException, IOException { // datatype.Hostname
-		TblHosts tblHosts = My.jpa().mwHosts().findByAikSha1(aik.toString());
+        log.debug("getHostByAik calling findByAikPublicKeySha1 for aik {}", aik.toString());
+		TblHosts tblHosts = My.jpa().mwHosts().findByAikPublicKeySha1(aik.toString());
 		return tblHosts;
 	}
 

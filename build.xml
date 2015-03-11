@@ -38,6 +38,14 @@
 		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
 			<condition><not><equals arg1="${mavenExitInstallPom}" arg2="0"/></not></condition>
 		</fail>
+		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-java" resultproperty="mavenExitInstallJavaPom">
+			<arg value="-DskipTests=true"/>
+			<arg value="clean"/>
+			<arg value="install"/>
+		</exec>
+		<fail message="Failed to install top level java pom.xml file" status="${mavenExitInstallJavaPom}">
+			<condition><not><equals arg1="${mavenExitInstallJavaPom}" arg2="0"/></not></condition>
+		</fail>
 		<!-- the maven archetypes depend on root pom -->
 		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallParents">
 			<arg value="-DskipTests=true"/>
@@ -46,6 +54,9 @@
 		<fail message="Failed to install parent pom.xml files" status="${mavenExitInstallParents}">
 			<condition><not><equals arg1="${mavenExitInstallParents}" arg2="0"/></not></condition>
 		</fail>
+	</target>
+	
+	<target name="clean" depends="init">
 		<!-- clean all projects -->
 		<exec executable="${cmd.maven}" resultproperty="mavenExitClean">
 			<arg value="-DskipTests=true"/>
@@ -54,13 +65,6 @@
 		<fail message="Failed to clean project" status="${mavenExitClean}">
 			<condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
 		</fail>
-	</target>
-	
-	<target name="clean" depends="init">
-		<!-- the root pom and all projects -->
-		<exec executable="${cmd.maven}">
-			<arg value="clean"/>
-		</exec>
 	</target>
 	
 	<target name="build" depends="init">

@@ -5,7 +5,6 @@
 package com.intel.mtwilson.jaxrs2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.intel.dcsg.cpg.io.Attributes;
 import java.util.ArrayList;
 import java.util.List;
 //import org.codehaus.jackson.map.annotate.JsonSerialize;

@@ -21,7 +21,7 @@ public class KeyTransformerConfigurationTest {
         env.set("FRUIT_COLOR", "red");
         env.set("FRUIT_SHAPE", "circle");
         KeyTransformerConfiguration config = new KeyTransformerConfiguration(new AllCapsNamingStrategy(), env);
-        assertEquals("red", config.get("fruit.color", null));
-        assertEquals("circle", config.get("fruit.shape", null));
+        assertEquals("red", config.get("fruit.color"));
+        assertEquals("circle", config.get("fruit.shape"));
     }
 }

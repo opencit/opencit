@@ -36,8 +36,8 @@ public class CommonsConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String get(String key, String defaultValue) {
-        return cc.getString(key, defaultValue);
+    public String get(String key) {
+        return cc.getString(key);
     }
 
     @Override

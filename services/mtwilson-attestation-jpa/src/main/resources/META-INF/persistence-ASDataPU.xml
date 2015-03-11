@@ -21,7 +21,7 @@
     <class>com.intel.mtwilson.as.data.MwKeystore</class>
     <class>com.intel.mtwilson.as.data.MwAssetTagCertificate</class>
     <class>com.intel.mtwilson.as.data.MwProcessorMapping</class>
-
+    <class>com.intel.mtwilson.as.data.MwMeasurementXml</class>
     <!--
     this is configured by BaseBO using values from ASConfig
     <properties>

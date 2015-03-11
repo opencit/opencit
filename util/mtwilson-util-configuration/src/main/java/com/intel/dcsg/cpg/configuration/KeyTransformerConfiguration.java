@@ -40,8 +40,8 @@ public class KeyTransformerConfiguration extends AbstractConfiguration implement
     }
     
     @Override
-    public String get(String key, String defaultValue) {
-        return configuration.get(transformer.transform(key), defaultValue);
+    public String get(String key) {
+        return configuration.get(transformer.transform(key));
     }
     
     @Override

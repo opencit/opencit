@@ -259,7 +259,7 @@ public class TagCertificateAuthority {
         if (attributeCertificateBytes == null) {
             log.error("Cannot build attribute certificate");
             for (Fault fault : builder.getFaults()) {
-                log.error(String.format("%s%s", fault.toString(), fault.getCause() == null ? "" : ": " + fault.getCause().getMessage()));
+                log.error(String.format("%s: %s", fault.getClass().getName(), fault.toString()));
             }
             throw new IllegalArgumentException("Cannot build attribute certificate");
         }
