@@ -40,6 +40,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
+import com.intel.dcsg.cpg.xml.JAXB;
 import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
@@ -355,6 +356,10 @@ public class TAHelper {
 
         log.debug("created RSA key file for session id: " + sessionId);
 
+        // Verify if there is TCBMeasurement Data. This data would be available if we are extending the root of trust to applications and data on the OS
+        String tcbMeasurementString = clientRequestType.getTcbMeasurement();
+        log.debug("TCB Measurement XML is {}", tcbMeasurementString);
+        
         log.debug("Event log: {}", clientRequestType.getEventLog()); // issue #879
         byte[] eventLogBytes = Base64.decodeBase64(clientRequestType.getEventLog());// issue #879
         log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
@@ -373,6 +378,9 @@ public class TAHelper {
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             log.info("Got PCR map");
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
+            
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -384,6 +392,9 @@ public class TAHelper {
         } else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
+            
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -456,6 +467,10 @@ public class TAHelper {
 
         log.debug("created RSA key file for session id: " + sessionId);
 
+        // Verify if there is TCBMeasurement Data. This data would be available if we are extending the root of trust to applications and data on the OS
+        String tcbMeasurementString = tpmQuoteResponse.tcbMeasurement;
+        log.debug("TCB Measurement XML is {}", tcbMeasurementString);
+
         log.debug("Event log: {}", tpmQuoteResponse.eventLog); // issue #879
         byte[] eventLogBytes = Base64.decodeBase64(tpmQuoteResponse.eventLog);// issue #879
         log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
@@ -465,6 +480,8 @@ public class TAHelper {
 
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
             log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
@@ -477,6 +494,9 @@ public class TAHelper {
         } else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
+            
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();

@@ -15,4 +15,4 @@ BEGIN
    END LOOP;
 END$$;
 
-INSERT INTO changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20150105164600,NOW(),'Added UUID column for mw_saml_assertion');
+INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20150105164600,NOW(),'Added UUID column for mw_saml_assertion');

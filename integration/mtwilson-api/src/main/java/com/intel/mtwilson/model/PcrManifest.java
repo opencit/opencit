@@ -37,8 +37,10 @@ import java.util.List;
 public class PcrManifest extends ObjectModel {
     private final Pcr[] pcrs = new Pcr[24];
     private final PcrEventLog[] pcrEventLogs = new PcrEventLog[24];
-
+    private String measurementXml;
+    
     public PcrManifest() {
+        this.measurementXml = "";
     }
     
     public void setPcr(Pcr pcr) {
@@ -184,6 +186,14 @@ public class PcrManifest extends ObjectModel {
             fault("Pcr manifest does not have any event log entries");
         }*/
         
+    }
+
+    public String getMeasurementXml() {
+        return measurementXml;
+    }
+
+    public void setMeasurementXml(String measurementXml) {
+        this.measurementXml = measurementXml;
     }
 
 }

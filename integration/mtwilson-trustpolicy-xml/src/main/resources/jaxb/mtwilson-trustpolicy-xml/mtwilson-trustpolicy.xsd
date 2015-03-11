@@ -42,19 +42,35 @@ and open the template in the editor.
           </xs:complexType>
         </xs:element>
         <xs:element name="LaunchControlPolicy" minOccurs="0">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                      <xs:enumeration value="MeasureOnly"/>
-                      <xs:enumeration value="MeasureAndEnforce"/>
-                    </xs:restriction>
-                </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="MeasureOnly"/>
+                  <xs:enumeration value="MeasureAndEnforce"/>
+                </xs:restriction>
+            </xs:simpleType>
         </xs:element>
         <xs:element name="Encryption" minOccurs="0">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element type="xs:string" name="DekKey"/>
-              <xs:element type="xs:string" name="Checksum"/>
-            </xs:sequence>
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="Key">
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                    <xs:attribute type="xs:string" name="URL"/>                        
+                                </xs:extension>
+                            </xs:simpleContent>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Checksum">
+                        <xs:complexType>
+                            <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                    <xs:attribute type="xs:string" name="DigestAlg"/>                        
+                                </xs:extension>
+                            </xs:simpleContent>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
           </xs:complexType>
         </xs:element>
         <xs:element name="Geotag" minOccurs="0">

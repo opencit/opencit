@@ -364,4 +364,4 @@ com.intel.mtwilson.shiro.jdbi.UserLoginPasswordRoleResultMapper
 com.intel.mtwilson.as.rest.v2.resource.HostAiks
 com.intel.mtwilson.as.rest.v2.model.HostAikCollection
 com.intel.mtwilson.as.rest.v2.model.HostAik
-
+com.intel.mtwilson.as.data.MwMeasurementXml
