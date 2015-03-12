@@ -794,7 +794,7 @@ remove_startup_script() {
   
   # try to install it as a startup script
   if [ -d "/etc/init.d" ]; then
-    rm "/etc/init.d/${startup_name}" 2>/dev/null
+    rm -f "/etc/init.d/${startup_name}" 2>/dev/null
   fi
 }
 
@@ -1534,12 +1534,12 @@ postgres_server_detect() {
   # best_version_bin is the complete path to the binary like /usr/lib/postgresql/9.1/bin/postgres
 
   # find candidates like /usr/lib/postgresql/9.1/bin/postgres
-  postgres_candidates=`find / -name postgres 2>/dev/null | grep bin`
+  postgres_candidates=$(find / -name postgres 2>/dev/null | grep bin)
   for c in $postgres_candidates
   do
-    local version_name=`$c --version 2>/dev/null | head -n 1 | awk '{ print $3 }'`
-    local bin_dir=`dirname $c`
-    local version_dir=`dirname $bin_dir`
+    local version_name=$($c --version 2>/dev/null | head -n 1 | awk '{ print $3 }')
+    local bin_dir=$(dirname $c)
+    local version_dir=$(dirname $bin_dir)
     echo "postgres candidate version=$version_name" >> $INSTALL_LOG_FILE
 
     if is_version_at_least "$version_name" "$min_version"; then
@@ -1548,12 +1548,12 @@ postgres_server_detect() {
         echo "setting best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
-        best_version_short=`basename $version_dir`
+        best_version_short=$(echo $version_name | sed 's/\.[0-9]*//2') #$(basename $version_dir)
       elif is_version_at_least "$version_name" "$best_version"; then
         echo "current best version $best_version" >> $INSTALL_LOG_FILE
         best_version="$version_name"
         best_version_bin="$c"
-        best_version_short=`basename $version_dir`
+        best_version_short=$(echo $version_name | sed 's/\.[0-9]*//2') #$(basename $version_dir)
       fi
     fi
   done
@@ -1574,8 +1574,11 @@ postgres_server_detect() {
   if [ -n "$postgresql_installed" ]; then
     postgres_com="service postgresql"
   fi
-  postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
-  postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
+  postgres_pghb_conf=$(find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1)
+  postgres_conf=$(find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1)
+  if [ -z "$postgres_pghb_conf" ]; then postgres_pghb_conf=$(find / -name pg_hba.conf 2>/dev/null | head -n 1); fi
+  if [ -z "$postgres_conf" ]; then postgres_conf=$(find / -name postgresql.conf 2>/dev/null | head -n 1); fi
+
   # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
   echo "postgres_pghb_conf=$postgres_pghb_conf" >> $INSTALL_LOG_FILE
   echo "postgres_conf=$postgres_conf" >> $INSTALL_LOG_FILE
@@ -1636,7 +1639,7 @@ postgres_test_connection() {
 
   #check if postgres is installed and we can connect with provided credencials
 
-  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>/tmp/intel.postgres.err >/dev/nulll
+  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>/tmp/intel.postgres.err >/dev/null
    if [ $? -eq 0 ]; then
     is_postgres_available="yes"
     return 0
@@ -1742,23 +1745,23 @@ if postgres_server_detect ; then
     postgres_connection_error=`cat /tmp/intel.postgres.err`
     echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
 
-	if [ -n "$postgres_pghb_conf" ]; then 
+    if [ -n "$postgres_pghb_conf" ]; then 
       has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
       if [ -z "$has_host" ]; then
         echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
       fi
-	else
-	  echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
+    else
+      echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
     fi
 	
-	if [ -n "$postgres_conf" ]; then
+    if [ -n "$postgres_conf" ]; then
       has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
       if [ -z "$has_listen_addresses" ]; then
          echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
       fi
     else
-	  echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
-	fi
+      echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
+    fi
 	
     postgres_restart >> $INSTALL_LOG_FILE
     sleep 10
@@ -2491,63 +2494,80 @@ function valid_ip() {
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 glassfish_create_ssl_cert() {
-#  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
-#  return
-  if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
-    if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-    glassfish_require
-    local serverName="${1}"
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  glassfish_require
+  local serverName="${1}"
+  serverName=$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//')
 
-    # Create an array of host ips and dns names from csv list passed into function
-    serverName=`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//'`
-    OIFS="$IFS"
-    IFS=','
-    read -a hostArray <<< "${serverName}"
-    IFS="$OIFS"
-  
-    # create common names and sans strings by parsing array
-    local cert_cns=""
-    local cert_sans=""
-    for i in "${hostArray[@]}"; do
-      cert_cns+="CN=$i,"
-      tmpCN=""
-      if valid_ip "$i"; then 
-        tmpCN="ip:$i"
-      else
-        tmpCN="dns:$i"
-      fi
-      cert_sans+="$tmpCN,"
-    done
-    cert_cns=`echo $cert_cns | sed -e 's/,$//'`
-    cert_sans=`echo $cert_sans | sed -e 's/,$//'`
-    cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
+  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+  local domain_found=$($glassfish list-domains | head -n 1 | awk '{ print $1 }')
+  local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
+  local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
+  local configDir="/opt/mtwilson/configuration"
+  local keytool=${JAVA_HOME}/bin/keytool
+  local mtwilson=$(which mtwilson 2>/dev/null)
+  local tmpHost=$(echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
 
-    local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
-    local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
-    local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
-    local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
-    local configDir="/opt/mtwilson/configuration"
-    local keytool=${JAVA_HOME}/bin/keytool
-    local mtwilson=`which mtwilson 2>/dev/null`
-    local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
+  # Create an array of host ips and dns names from csv list passed into function
+  OIFS="$IFS"
+  IFS=','
+  read -a hostArray <<< "${serverName}"
+  IFS="$OIFS"
 
-    # Check if there is already a certificate for this serverName in the Glassfish keystore
-    local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
-    if [ -n "$has_cert" ]; then
-      echo "SSL Certificate for ${serverName} already exists"
+  # create common names and sans strings by parsing array
+  local cert_cns=""
+  local cert_sans=""
+  for i in "${hostArray[@]}"; do
+    cert_cns+="CN=$i,"
+    tmpCN=""
+    if valid_ip "$i"; then 
+      tmpCN="ip:$i"
     else
-      echo "Creating SSL Certificate for ${serverName}..."
-      # Delete public insecure certs within keystore.jks and cacerts.jks
-      $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-      $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-      $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
-      $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
-
-      # Update keystore.jks
-      $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
-      $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+      tmpCN="dns:$i"
     fi
+    cert_sans+="$tmpCN,"
+  done
+  cert_cns=$(echo $cert_cns | sed -e 's/,$//')
+  cert_sans=$(echo $cert_sans | sed -e 's/,$//')
+  cert_cns='CN='$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g')
 
+  # Check if there is already a certificate for this serverName in the Glassfish keystore
+  has_cert=$($keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+
+  if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
+    if [ -z "$has_cert" ]; then
+      echo "Updating Glassfish master password..."
+      #change glassfish master password which is the keystore password
+      glassfish_stop >/dev/null
+      GF_CONFIG_PATH="${GLASSFISH_HOME}/glassfish/domains/domain1/config"
+      mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup"
+      touch "${GF_CONFIG_PATH}/master.passwd"
+      echo "AS_ADMIN_MASTERPASSWORD=changeit" > "${GF_CONFIG_PATH}/master.passwd"
+      echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
+      $glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" domain1
+      rm "${GF_CONFIG_PATH}/master.passwd"
+      glassfish_start >/dev/null
+    fi
+    
+    echo "Creating SSL Certificate for ${serverName}..."
+    # Delete public insecure certs within keystore.jks and cacerts.jks
+    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    
+    if [ -z "$has_cert" ]; then
+      echo "Restarting Glassfish as a new SSL certificate was generated..."
+      glassfish_restart >/dev/null
+    fi
+  fi
+
+  has_cert=$($keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+  if [ -n "$has_cert" ]; then
     # Export certificates from keystore.jks
     $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
     $keytool -export -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
@@ -2561,8 +2581,8 @@ glassfish_create_ssl_cert() {
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
-    echo "Restarting Glassfish domain..."
-    glassfish_restart
+  else
+    echo_warning "No SSL certificate found in Glassfish keystore"
   fi
 }
 
@@ -2894,71 +2914,75 @@ tomcat_create_ssl_cert_prompt() {
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 tomcat_create_ssl_cert() {
-#  echo_warning "This feature has been disabled: tomcat_create_ssl_cert"
-#  return
-  if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
-    if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-    tomcat_require
-    local serverName="${1}"
-  
-    # Create an array of host ips and dns names from csv list passed into function
-    serverName=`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//'`
-    OIFS="$IFS"
-    IFS=','
-    read -a hostArray <<< "${serverName}"
-    IFS="$OIFS"
-  
-    # create common names and sans strings by parsing array
-    local cert_cns=""
-    local cert_sans=""
-    for i in "${hostArray[@]}"; do
-      cert_cns+="CN=$i,"
-   
-      tmpCN=""
-      if valid_ip "$i"; then 
-       tmpCN="ip:$i"
-      else
-       tmpCN="dns:$i"
-      fi
-      cert_sans+="$tmpCN,"
-    done
-    cert_cns=`echo $cert_cns | sed -e 's/,$//'`
-    cert_sans=`echo $cert_sans | sed -e 's/,$//'`
+  if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+  tomcat_require
+  local serverName="${1}"
+  serverName=$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//')
 
-    local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
-    local keystore=${TOMCAT_HOME}/ssl/.keystore
-    local configDir="/opt/mtwilson/configuration"
-    local keytool=${JAVA_HOME}/bin/keytool
-    local mtwilson=`which mtwilson 2>/dev/null`
+  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+  local keystore="${TOMCAT_HOME}/ssl/.keystore"
+  local tomcatServerXml="${TOMCAT_HOME}/conf/server.xml"
+  local configDir="/opt/mtwilson/configuration"
+  local keytool="${JAVA_HOME}/bin/keytool"
+  local mtwilson=$(which mtwilson 2>/dev/null)
+  local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
+
+  # Create an array of host ips and dns names from csv list passed into function
+  OIFS="$IFS"
+  IFS=','
+  read -a hostArray <<< "${serverName}"
+  IFS="$OIFS"
   
-    mkdir -p ${TOMCAT_HOME}/ssl
-    # Check if there is already a certificate for this serverName in the Tomcat keystore
-    local has_cert=`$keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$cert_cns"`
-  
-    if [ -n "$has_cert" ]; then
-      echo "SSL Certificate for ${serverName} already exists"
+  # create common names and sans strings by parsing array
+  local cert_cns=""
+  local cert_sans=""
+  for i in "${hostArray[@]}"; do
+    cert_cns+="CN=$i,"
+    tmpCN=""
+    if valid_ip "$i"; then 
+      tmpCN="ip:$i"
     else
-      echo "Creating SSL Certificate for ${serverName}..."
-      local tmpHost=`echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g'`
-    
-      # Delete public insecure certs within keystore.jks and cacerts.jks
-      $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-
-      # Update keystore.jks
-      $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+      tmpCN="dns:$i"
     fi
+    cert_sans+="$tmpCN,"
+  done
+  cert_cns=$(echo $cert_cns | sed -e 's/,$//')
+  cert_sans=$(echo $cert_sans | sed -e 's/,$//')
+  
+  mkdir -p ${TOMCAT_HOME}/ssl
+  # Check if there is already a certificate for this serverName in the Tomcat keystore
+  has_cert=$($keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
 
-    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore tomcat "$keystorePassword"
+  if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
+    if [ -z "$has_cert" ]; then
+      echo "Updating keystore password in Tomcat server.xml..."
+      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$MTW_TLS_KEYSTORE_PASS"'\" \/>/g' "$tomcatServerXml"
+      echo "Restarting Tomcat as a new SSL certificate was generated..."
+      tomcat_restart >/dev/null
+    fi
+    
+    echo "Creating SSL Certificate for ${serverName}..."
+    # Delete public insecure certs within keystore.jks and cacerts.jks
+    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    if [ -z "$has_cert" ]; then
+      echo "Restarting Tomcat as a new SSL certificate was generated..."
+      tomcat_restart >/dev/null
+    fi
+  fi
+  
+  has_cert=$($keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+  if [ -n "$has_cert" ]; then
     $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
-    #$keytool -import -trustcacerts -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass ${keystorePassword}
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
     cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" "$configDir/ssl.crt"
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
-    #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
-    #cp ${keystore} /root/
-    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem "$configDir/ssl.crt.pem"
+  else
+    echo_warning "No SSL certificate found in Tomcat keystore"
   fi
 }
 tomcat_env_report(){

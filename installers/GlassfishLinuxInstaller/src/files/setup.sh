@@ -40,17 +40,18 @@ fi
 
 cp *.jar ${GLASSFISH_HOME}/glassfish/modules/
 
-glassfish_stop
+#glassfish_stop
 
-#change glassfish master password which is the keystore password
-GF_CONFIG_PATH="${GLASSFISH_HOME}/glassfish/domains/domain1/config"
-mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup"
-touch "${GF_CONFIG_PATH}/master.passwd"
-echo "AS_ADMIN_MASTERPASSWORD=changeit" > "${GF_CONFIG_PATH}/master.passwd"
-echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
-$glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" domain1
-rm "${GF_CONFIG_PATH}/master.passwd"
+# moved to glassfish_create_ssl_cert method
+##change glassfish master password which is the keystore password
+#GF_CONFIG_PATH="${GLASSFISH_HOME}/glassfish/domains/domain1/config"
+#mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup"
+#touch "${GF_CONFIG_PATH}/master.passwd"
+#echo "AS_ADMIN_MASTERPASSWORD=changeit" > "${GF_CONFIG_PATH}/master.passwd"
+#echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
+#$glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" domain1
+#rm "${GF_CONFIG_PATH}/master.passwd"
 
-glassfish_start
+#glassfish_start
 
 echo

@@ -100,8 +100,10 @@ monitrc=`cat /etc/init.d/monit | grep CONFIG= | cut -d= -f2 | sed 's/\"//g'`
 
 mkdir -p /etc/monit/conf.d
 
-if ! grep -q "include /etc/monit/conf.d/*" $monitrc; then 
- echo "include /etc/monit/conf.d/*" >> $monitrc
+if [ -n "$monitrc" ]; then
+  if ! grep -q "include /etc/monit/conf.d/*" $monitrc; then
+    echo "include /etc/monit/conf.d/*" >> $monitrc
+  fi
 fi
 
 
