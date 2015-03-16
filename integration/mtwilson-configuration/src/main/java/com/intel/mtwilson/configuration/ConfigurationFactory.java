@@ -6,16 +6,13 @@ package com.intel.mtwilson.configuration;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.ReadonlyConfiguration;
-import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.Folders;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
 
 /**

@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.jaxrs2;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.intel.dcsg.cpg.io.Attributes;
 import com.intel.dcsg.cpg.io.UUID;
 
@@ -21,8 +23,16 @@ import com.intel.dcsg.cpg.io.UUID;
  * 
  * @author jbuhacoff
  */
-public abstract class AbstractDocument extends Attributes {
+public abstract class AbstractDocument {
     private UUID id;
+    
+    @JsonUnwrapped
+    private final Attributes extensions = new Attributes();
+
+    public AbstractDocument() {
+    }
+    
+    
     
     public UUID getId() {
         return id;
@@ -30,6 +40,11 @@ public abstract class AbstractDocument extends Attributes {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    @JsonIgnore
+    public Attributes getExtensions() {
+        return extensions;
     }
 
     

@@ -170,11 +170,11 @@ public class Setup implements Command {
         return null;
     }
 
-    protected void execute(SetupTask... tasks) throws IOException, org.apache.commons.configuration.ConfigurationException {
+    protected void execute(SetupTask... tasks) throws IOException {
         execute(Arrays.asList(tasks));
     }
 
-    protected void execute(List<SetupTask> tasks) throws IOException, org.apache.commons.configuration.ConfigurationException {
+    public void execute(List<SetupTask> tasks) throws IOException {
         SetupConfigurationProvider provider = new SetupConfigurationProvider(ConfigurationFactory.getConfigurationProvider());
         Configuration configuration = provider.load();
 //        Configuration configurationAdapter =  new CommonsConfiguration(configuration);
