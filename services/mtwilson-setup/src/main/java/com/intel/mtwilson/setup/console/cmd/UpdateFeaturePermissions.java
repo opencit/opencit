@@ -11,6 +11,7 @@ import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.extensions.Scanner;
 import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
 import com.intel.dcsg.cpg.performance.CountingIterator;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.collection.ArrayIterator;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.feature.model.FeaturePermission;
@@ -51,7 +52,7 @@ public class UpdateFeaturePermissions implements Command {
         // for now we will use a feature_id that is all zero's since we don't have 
         // that mechanism in place yet, and feature_name will be "mtwilson-2.0"
         // (in the future feature_name may be separated from feature_version)
-        String javaPath = My.filesystem().getBootstrapFilesystem().getJavaPath();
+        String javaPath = Folders.application()+File.separator+"java"; //My.filesystem().getBootstrapFilesystem().getJavaPath();
         log.debug("java path: {}", javaPath);
         File javaFolder = new File(javaPath);
         FilenameEndsWithFilter jarfilter = new FilenameEndsWithFilter(".jar");

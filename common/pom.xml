@@ -9,9 +9,10 @@
   <name>Mt Wilson Common Projects</name>
 
 	<parent>
-		<groupId>com.intel.mtwilson</groupId>
-		<artifactId>mtwilson</artifactId>
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-java</artifactId>
 		<version>3.0-SNAPSHOT</version>
+        <relativePath/>
 	</parent>
   
   <modules>

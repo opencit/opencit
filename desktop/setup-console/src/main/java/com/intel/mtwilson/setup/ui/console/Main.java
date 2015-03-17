@@ -36,6 +36,7 @@ import org.apache.commons.configuration.Configuration;
  * java -cp setup-console-0.5.4-SNAPSHOT-with-dependencies.jar com.intel.mtwilson.setup.ui.console.Main cluster   (not implemented yet)
  * 
  * @author jbuhacoff
+ * @deprecated use mtwilson-util-console
  */
 public class Main {
     public static final Console console = System.console();

@@ -19,6 +19,12 @@
                     <include>**/*.properties</include>
                 </includes>
             </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>*</include>
+                </includes>
+            </testResource>
         </testResources>	
 	
         <plugins>
@@ -199,6 +205,13 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
+            <version>0.2-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>jar</type>
         </dependency>
     </dependencies>
     <properties />

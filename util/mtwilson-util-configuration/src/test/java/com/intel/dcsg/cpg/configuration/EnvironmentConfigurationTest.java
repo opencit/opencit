@@ -16,6 +16,6 @@ public class EnvironmentConfigurationTest {
     @Test
     public void testEnv() {
         EnvironmentConfiguration env = new EnvironmentConfiguration();
-        log.debug("JAVA_HOME = {}", env.getString("JAVA_HOME"));
+        log.debug("JAVA_HOME = {}", env.get("JAVA_HOME"));
     }
 }

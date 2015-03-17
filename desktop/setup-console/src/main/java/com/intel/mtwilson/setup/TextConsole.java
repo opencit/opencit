@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author jbuhacof
+ * @deprecated use mtwilson-util-console
  */
 public class TextConsole {
     private static Logger log = LoggerFactory.getLogger(TextConsole.class);

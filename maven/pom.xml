@@ -8,14 +8,17 @@
   <name>Mt Wilson Maven Parent Projects</name>
 
 	<parent>
-		<groupId>com.intel.mtwilson</groupId>
-		<artifactId>mtwilson</artifactId>
-		<version>3.0-SNAPSHOT</version>
+  <groupId>com.intel.mtwilson</groupId>
+  <artifactId>mtwilson-maven-build</artifactId>
+  <version>3.0-SNAPSHOT</version>
 	</parent>
   
   <modules>
     <module>mtwilson-dist-java-zip</module>
 	<module>mtwilson-feature-zip</module>
+    <module>mtwilson-maven-java</module>
+    <module>mtwilson-maven-package</module>
+    <module>mtwilson-maven-root</module>
   </modules>
 
 

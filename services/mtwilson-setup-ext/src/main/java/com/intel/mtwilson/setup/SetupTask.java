@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup;
 
-import com.intel.dcsg.cpg.configuration.MutableConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.validation.Fault;
 import java.util.List;
 
@@ -85,6 +85,6 @@ public interface SetupTask extends Runnable {
      * 
      * @param configuration 
      */
-    void setConfiguration(MutableConfiguration configuration);
+    void setConfiguration(Configuration configuration);
     
 }

@@ -29,7 +29,7 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -102,7 +102,7 @@
             <artifactId>stringtemplate</artifactId>
             <version>3.2.1</version>
         </dependency>
-	 <dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>                

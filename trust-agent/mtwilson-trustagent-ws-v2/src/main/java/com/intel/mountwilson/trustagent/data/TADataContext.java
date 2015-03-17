@@ -9,7 +9,7 @@ import java.io.File;
 
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.ErrorCode;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -45,6 +45,7 @@ public class TADataContext {
     private String assetTagHash;
     private TpmQuoteResponse tpmQuoteResponse;
     private String sessionId;
+    private String tcbMeasurement;
     
     public String getSessionId() {
         if( sessionId == null ) {
@@ -163,11 +164,11 @@ public class TADataContext {
     }
 
     public String getCertificateFolder() {
-        return MyFilesystem.getApplicationFilesystem().getConfigurationPath();
+        return Folders.configuration();
     }
 
     public String getDataFolder() {
-        String path = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + getSessionId();
+        String path = Folders.repository() + File.separator + getSessionId();
         File dir = new File(path);
         if( !dir.exists() ) {
             if( dir.mkdirs() ) {
@@ -268,12 +269,24 @@ public class TADataContext {
     
     public File getMeasureLogLaunchScript() {
 //        return Config.getInstance().getProperty("modulesScript.filename");
-        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath() + File.separator + "module_analysis.sh"); // Config.getInstance().getProperty("modulesScript.filename"));
-    } 
+        return new File(Folders.application() + File.separator + "bin" + File.separator + "module_analysis.sh"); // Config.getInstance().getProperty("modulesScript.filename"));
+    }
     
     public File getMeasureLogXmlFile() {
         //return Config.getInstance().getProperty("modulesXml.filename");
-        return new File(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "measureLog.xml"); // Config.getInstance().getProperty("modulesXml.filename"));
+        return new File(Folders.repository() + File.separator + "measureLog.xml"); // Config.getInstance().getProperty("modulesXml.filename"));
+    }
+    
+    public File getTcbMeasurementXmlFile() {
+        return new File(Folders.log() + File.separator + "measurement.xml");
+    }
+    
+    public String getTcbMeasurement() {
+        return tcbMeasurement;
+    }
+    
+    public void setTcbMeasurement(String tcbMeasurement) {
+        this.tcbMeasurement = tcbMeasurement;
     }
     
     public void setModules(String allModules) {

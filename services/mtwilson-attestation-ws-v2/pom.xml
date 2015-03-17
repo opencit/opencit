@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -67,12 +67,21 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tpm12</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-privacyca-niarl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-tag-model</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>postgresql</groupId>
@@ -235,6 +244,11 @@
             <version>0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>                        
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-privacyca-niarl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
     </dependencies>
     

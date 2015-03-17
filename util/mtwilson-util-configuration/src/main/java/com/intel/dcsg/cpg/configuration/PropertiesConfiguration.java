@@ -5,6 +5,7 @@
 package com.intel.dcsg.cpg.configuration;
 
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * If the property is null (missing) or has an empty string value, the
@@ -13,7 +14,7 @@ import java.util.Properties;
  * 
  * @author jbuhacoff
  */
-public class PropertiesConfiguration extends MutableStringConfiguration {
+public class PropertiesConfiguration extends AbstractConfiguration {
     private Properties properties;
     
     public PropertiesConfiguration() {
@@ -30,13 +31,18 @@ public class PropertiesConfiguration extends MutableStringConfiguration {
         
     public Properties getProperties() { return properties; }
 
+
     @Override
-    protected String get(String key) {
-        return properties.getProperty(key);
+    public Set<String> keys() {
+        return properties.stringPropertyNames();
     }
 
     @Override
-    protected void set(String key, String value) {
+    public String get(String key) {
+        return properties.getProperty(key);
+    }    
+    @Override
+    public void set(String key, String value) {
         if( value == null ) {
             properties.remove(key);
         }
@@ -44,4 +50,11 @@ public class PropertiesConfiguration extends MutableStringConfiguration {
             properties.setProperty(key, value);
         }
     }
+
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
+
+    
 }

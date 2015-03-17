@@ -80,6 +80,12 @@ public class LoginDAO  {
         return users.get(username);
     }
     
+    public List<String> listUsernames() {
+        ArrayList<String> list = new ArrayList<>();
+        list.addAll(users.keySet());
+        return list;
+    }
+    
     public void deleteUserByName(String username) throws IOException {
         if( !users.containsKey(username)) {
             throw new IllegalArgumentException("User does not exist");

@@ -8,7 +8,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.jaxrs2.server.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.validation.Faults;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.jaxrs2.AbstractDocument;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,6 +24,9 @@ import com.intel.mtwilson.repository.Locator;
 import com.intel.mtwilson.jaxrs2.Patch;
 import com.intel.mtwilson.jaxrs2.PatchLink;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.BeanParam;
@@ -74,10 +80,26 @@ import javax.ws.rs.core.Response;
  */
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
-public abstract class AbstractSimpleResource<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> {
+public abstract class AbstractSimpleResource<T extends AbstractDocument, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> implements Faults {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractSimpleResource.class);
     private ObjectMapper mapper = new ObjectMapper(); // for debugging only
+    
+    private ArrayList<Fault> faults = new ArrayList<>();
+
+    @Override
+    public List<Fault> getFaults() {
+        return faults;
+    }
+    
+    /**
+     * Add a fault to the list of faults that will be returned with an error status
+     * @param fault 
+     */
+    protected void fault(Fault fault) {
+        faults.add(fault);
+    }
+    
 /*
     private SimpleRepository<T,C,F,L> repository;
     

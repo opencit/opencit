@@ -6,6 +6,7 @@ package com.intel.mtwilson.setup.tasks;
 
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.validation.ObjectModel;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.setup.ConfigurationException;
@@ -33,8 +34,8 @@ public class ConfigureFilesystem extends LocalSetupTask {
 
     @Override
     protected void configure() throws Exception {
-        mtwilsonHome = My.filesystem().getApplicationPath(); //My.configuration().getMtWilsonHome();
-        mtwilsonConf = My.filesystem().getConfigurationPath(); //My.configuration().getMtWilsonConf();
+        mtwilsonHome = Folders.application(); //My.filesystem().getApplicationPath(); //My.configuration().getMtWilsonHome();
+        mtwilsonConf = My.configuration().getDirectoryPath(); // My.filesystem().getConfigurationPath(); //My.configuration().getMtWilsonConf();
         if (mtwilsonHome == null) {
             configuration("MTWILSON_HOME is not configured");
         }

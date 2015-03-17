@@ -435,6 +435,9 @@ fi
 #  export TRUSTAGENT_TLS_CERT_DNS=$DEFAULT_TRUSTAGENT_TLS_CERT_DNS
 #fi
 
+# before running any tagent commands update the extensions cache file
+/usr/local/bin/tagent setup update-extensions-cache-file --force 2>/dev/null
+
 # create a trustagent username "mtwilson" with no password and all privileges
 # which allows mtwilson to access it until mtwilson UI is updated to allow
 # entering username and password for accessing the trust agent

@@ -4,31 +4,17 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
-import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignatureInput;
-import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignature;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.My;
-import java.io.File;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import java.nio.charset.Charset;
 import javax.ws.rs.Consumes;
-import org.apache.commons.codec.binary.Base64;
-import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.dcsg.cpg.xml.JAXB;
-import com.intel.trustdirector.xml.Manifest;
+import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.InvalidAlgorithmParameterException;
@@ -40,7 +26,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.crypto.dsig.DigestMethod;
@@ -51,7 +36,6 @@ import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMSignContext;
-import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
@@ -64,46 +48,26 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * POST /manifest-signature
- * Content-Type: application/xml
- * Request body:
- * <manifest_signature_input>
- *  <vm_image_id>123456</vm_image_id>
- *  <manifest_hash>abcdef01234567890</manifest_hash>
- * </manifest_signature_input>
- * 
- * Response body:
- * <manifest_signature>
- *  <vm_image_id>123456</vm_image_id>
- *  <manifest_hash>abcdef01234567890</manifest_hash>
- *  <customer_id>982734</customer_id>
- *  <signature>abcdef01234567890abcdef01234567890</signature>
- * </manifest_signature>
- * 
  * @author jbuhacoff
  */
 @V2
-//@Stateless
-@Path("/manifest-signature")
+@Path("/trustpolicy-signature")
 public class ManifestSignatureRpc {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManifestSignatureRpc.class);
     
     @POST
-    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
-    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
+    @Consumes({MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_XML})
     @RequiresPermissions("vm_manifests:certify")
     
-    public String signImageManifest(String input) throws Exception {
-        JAXB codec = new JAXB();
-        Manifest manifest = codec.read(input, Manifest.class);
-        log.debug("Input is: "+codec.write(manifest));
-        String signature = generateDsig(input);
-        return signature;        
-        
+    public String signImageTrustPolicy(String xml) throws Exception {
+        JAXB jaxb = new JAXB();
+        String validatedXml = jaxb.write(jaxb.read(xml, TrustPolicy.class));
+        String signedXml = generateDsig(validatedXml);
+        return signedXml;
     }
     
    public String generateDsig(String xml) throws Exception, NoSuchAlgorithmException, InvalidAlgorithmParameterException, KeyStoreException, UnrecoverableEntryException, IOException, CertificateException{
@@ -163,7 +127,7 @@ public class ManifestSignatureRpc {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer trans = tf.newTransformer();
         trans.transform(new DOMSource(doc), new StreamResult(result));
-        log.debug(result.toString());
+        log.debug("Signed TP is: "+result.toString());
         return result.toString();        
    }
 }

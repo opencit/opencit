@@ -4,7 +4,7 @@
  */
 package test.api;
 
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.My;
@@ -39,7 +39,7 @@ public class ApiTest {
     
     @BeforeClass
     public static void init() throws Exception {
-        File directory = new File(My.filesystem().getConfigurationPath());
+        File directory = My.configuration().getDirectory(); //new File(My.filesystem().getConfigurationPath());
         String username = My.configuration().getClientProperties().getProperty("mtwilson.api.username");
         String password = My.configuration().getClientProperties().getProperty("mtwilson.api.password");
         URL server = My.configuration().getMtWilsonURL();
@@ -72,7 +72,7 @@ public class ApiTest {
     
     @Test
     public void testMediaType() throws IOException, ApiException, SignatureException, ClientException {
-        ApiClientTest act = new ApiClientTest(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
+        ApiClientTest act = new ApiClientTest(CommonsConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
         String[] roles = {Role.Whitelist.toString(), Role.Attestation.toString(), Role.Security.toString()};
         ApiClientCreateRequest user = new ApiClientCreateRequest();
         String testStr = "[\"X509Certificate\":\"AAAAAAAAAAAAAA==\",\"Roles\":[\"Whitelist\",\"Attestation\",\"Security\"]]";
@@ -85,7 +85,7 @@ public class ApiTest {
     @Test
     public void testGetLocales() throws IOException, ClientException, ApiException, SignatureException {
         try {
-            ApiClientTest act = new ApiClientTest(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
+            ApiClientTest act = new ApiClientTest(CommonsConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
             String[] locales = act.getLocales();
             System.out.println("LOCALES: " + Arrays.toString(locales));
         } catch (Exception e) {

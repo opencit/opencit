@@ -38,6 +38,7 @@ public class KeyEnvelope {
     
     /*
      * This is an example of a PEM format file of an RSA private key.  Notice it has http/smtp-like headers, an empty line, and then base64-encoded-chunked content.
+     * <pre>
 -----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED
 DEK-Info: DES-EDE3-CBC,F2D4E6438DBD4EA8
@@ -50,6 +51,7 @@ zoJ/NBdEIMdHNUh0h11GQCXAQXOSL6Fx2hRdcicm6j1CPd3AFrTt9EATmd4Hj+D4
 91jDYXElALfdSbiO0A9Mz6USUepTXwlfVV/cbBpLRz5Rqnyg2EwI2tZRU+E+Cusb
 /b6hcuWyzva895YMUCSyDaLgSsIqRWmXxQV1W2bAgRbs8jD8VF+G9w==
 -----END RSA PRIVATE KEY-----
+* </pre>
      * 
      * See also: http://etutorials.org/Programming/secure+programming/Chapter+7.+Public+Key+Cryptography/7.17+Representing+Keys+and+Certificates+in+Plaintext+PEM+Encoding/
      * 

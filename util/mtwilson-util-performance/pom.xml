@@ -72,11 +72,14 @@
       <type>jar</type>
     </dependency>
    -->    
+
+    <!-- for StatUtil used by PerformanceInfo -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <type>jar</type>
     </dependency>
+
     <!-- begin logging support -->
         <dependency>
 		<groupId>org.slf4j</groupId>

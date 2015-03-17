@@ -38,7 +38,7 @@
     -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- required for javax.ws.rs.QueryParam in RpcFilterCriteria and javax.ws.rs.Path in Rpcs resource -->
@@ -68,6 +68,10 @@
 	<dependency>
 	    <groupId>com.intel.mtwilson.util</groupId>
 	    <artifactId>mtwilson-util-authz-token</artifactId>
+  	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.util</groupId>
+	    <artifactId>mtwilson-util-extensions</artifactId>
   	</dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>

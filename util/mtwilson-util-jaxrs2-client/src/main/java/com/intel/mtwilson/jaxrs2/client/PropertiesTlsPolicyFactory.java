@@ -51,16 +51,15 @@ public class PropertiesTlsPolicyFactory {
     }
 
     public static TlsPolicy createTlsPolicy(Configuration configuration) {
-        // TODO: load tls policy using configuration... per-host policy, digest, insecure, shared policy from database...
-        String certificateKeystoreFile = configuration.getString("mtwilson.api.tls.policy.certificate.keystore.file");
-        String certificateKeystorePassword = configuration.getString("mtwilson.api.tls.policy.certificate.keystore.password");
-        String certificateDigestSha256 = configuration.getString("mtwilson.api.tls.policy.certificate.sha256");
-        String certificateDigestSha1 = configuration.getString("mtwilson.api.tls.policy.certificate.sha1");
-        String publicKeyKeystoreFile = configuration.getString("mtwilson.api.tls.policy.publickey.keystore.file");
-        String publicKeyKeystorePassword = configuration.getString("mtwilson.api.tls.policy.publickey.keystore.password");
-        String publicKeyDigestSha256 = configuration.getString("mtwilson.api.tls.policy.publickey.sha256");
-        String publicKeyDigestSha1 = configuration.getString("mtwilson.api.tls.policy.publickey.sha1");
-        String insecure = configuration.getString("mtwilson.api.tls.policy.insecure");
+        String certificateKeystoreFile = configuration.get("tls.policy.certificate.keystore.file", configuration.get("mtwilson.api.tls.policy.certificate.keystore.file", null));
+        String certificateKeystorePassword = configuration.get("tls.policy.certificate.keystore.password", configuration.get("mtwilson.api.tls.policy.certificate.keystore.password", null));
+        String certificateDigestSha256 = configuration.get("tls.policy.certificate.sha256", configuration.get("mtwilson.api.tls.policy.certificate.sha256", null));
+        String certificateDigestSha1 = configuration.get("tls.policy.certificate.sha1", configuration.get("mtwilson.api.tls.policy.certificate.sha1", null));
+        String publicKeyKeystoreFile = configuration.get("tls.policy.publickey.keystore.file", configuration.get("mtwilson.api.tls.policy.publickey.keystore.file", null));
+        String publicKeyKeystorePassword = configuration.get("tls.policy.publickey.keystore.password", configuration.get("mtwilson.api.tls.policy.publickey.keystore.password", null));
+        String publicKeyDigestSha256 = configuration.get("tls.policy.publickey.sha256", configuration.get("mtwilson.api.tls.policy.publickey.sha256", null));
+        String publicKeyDigestSha1 = configuration.get("tls.policy.publickey.sha1", configuration.get("mtwilson.api.tls.policy.publickey.sha1", null));
+        String insecure = configuration.get("tls.policy.insecure", configuration.get("mtwilson.api.tls.policy.insecure", null));
         TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
         tlsPolicyDescriptor.setMeta(new HashMap<String, String>());
         tlsPolicyDescriptor.setData(new ArrayList<String>());
@@ -73,18 +72,22 @@ public class PropertiesTlsPolicyFactory {
         } else if (certificateDigestSha256 != null) {
             tlsPolicyDescriptor.setPolicyType("certificate-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-256");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(certificateDigestSha256);
         } else if (certificateDigestSha1 != null) {
             tlsPolicyDescriptor.setPolicyType("certificate-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-1");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(certificateDigestSha1);
         } else if (publicKeyDigestSha256 != null) {
             tlsPolicyDescriptor.setPolicyType("public-key-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-256");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(publicKeyDigestSha256);
         } else if (publicKeyDigestSha1 != null) {
             tlsPolicyDescriptor.setPolicyType("public-key-digest");
             tlsPolicyDescriptor.getMeta().put("digestAlgorithm", "SHA-1");
+            tlsPolicyDescriptor.getMeta().put("digestEncoding", "hex");
             tlsPolicyDescriptor.getData().add(publicKeyDigestSha1);
         } else if (insecure != null && insecure.equalsIgnoreCase("true")) {
             tlsPolicyDescriptor.setPolicyType("INSECURE");

@@ -14,7 +14,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;

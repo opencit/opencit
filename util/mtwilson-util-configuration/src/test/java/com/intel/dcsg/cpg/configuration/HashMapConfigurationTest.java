@@ -4,7 +4,6 @@
  */
 package com.intel.dcsg.cpg.configuration;
 
-import com.thoughtworks.xstream.XStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -19,8 +18,7 @@ public class HashMapConfigurationTest {
     
     private MapConfiguration createConfiguration() {
         MapConfiguration c = new MapConfiguration();
-        c.setString("foo", "bar");
-        c.setObject("apple", new Fruit("apple","green"));
+        c.set("foo", "bar");
         return c;
     }
     /**
@@ -31,38 +29,7 @@ public class HashMapConfigurationTest {
     @Test
     public void testCreateConfiguration() {
         MapConfiguration c = createConfiguration();
-        assertEquals("bar", c.getString("foo"));
-        assertEquals("green", c.getObject(Fruit.class, "apple").color);
+        assertEquals("bar", c.get("foo"));
     }
     
-    /**
-2014-02-22 14:41:48,160 DEBUG [main] c.i.d.c.c.HashMapConfigurationTest [HashMapConfigurationTest.java:43] xml = 
-<com.intel.dcsg.cpg.configuration.HashMapConfiguration>
-  <map>
-    <entry>
-      <string>apple</string>
-      <com.intel.dcsg.cpg.configuration.HashMapConfigurationTest_-Fruit>
-        <name>apple</name>
-        <color>green</color>
-      </com.intel.dcsg.cpg.configuration.HashMapConfigurationTest_-Fruit>
-    </entry>
-    <entry>
-      <string>foo</string>
-      <string>bar</string>
-    </entry>
-  </map>
-</com.intel.dcsg.cpg.configuration.HashMapConfiguration>
-     * 
-     */
-    @Test
-    public void testSerializeConfiguration() {
-        Configuration c = createConfiguration();
-        XStream xs = new XStream();
-        String xml = xs.toXML(c);
-        log.debug("xml = {}", xml);
-        Configuration c2 = (Configuration)xs.fromXML(xml);
-        assertEquals("bar", c2.getString("foo"));
-        assertEquals("green", c2.getObject(Fruit.class, "apple").color);
-        
-    }
 }

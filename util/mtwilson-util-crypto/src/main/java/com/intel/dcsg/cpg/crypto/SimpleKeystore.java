@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
@@ -20,7 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: this class is not simple enough; need to simplify usage
+ * NOTE: this class is not simple enough; please see SecretKeyStore and PrivateKeyStore
+ * in the kms project for easier replacements.
  *
  * Currently uses Java default keystore type "JKS" but later we may implement an
  * AES-128 keystore encryption provider.
@@ -47,12 +49,12 @@ public class SimpleKeystore {
     public static String SAML = "SAML";
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final KeyStore keystore;
-    private final String keystorePassword;
+    private final Password keystorePassword;
     private final Resource keystoreResource;
 
     public SimpleKeystore(KeyStore keystore, String password) throws KeyManagementException {
         this.keystore = keystore;
-        this.keystorePassword = password;
+        this.keystorePassword = new Password(password.toCharArray());
         this.keystoreResource = new ByteArrayResource();
     }
 
@@ -66,6 +68,9 @@ public class SimpleKeystore {
      * @throws KeyManagementException
      */
     public SimpleKeystore(Resource resource, String password) throws KeyManagementException {
+        this(resource, new Password(password.toCharArray()));
+    }
+    public SimpleKeystore(Resource resource, Password password) throws KeyManagementException {
         keystoreResource = resource;
         keystorePassword = password;
         try {
@@ -136,7 +141,7 @@ public class SimpleKeystore {
     }
 
     public KeystoreCertificateRepository getRepository() {
-        return new KeystoreCertificateRepository(keystore, keystorePassword);
+        return new KeystoreCertificateRepository(keystore, keystorePassword.toCharArray());
     }
 
     public void save() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
@@ -185,6 +190,9 @@ public class SimpleKeystore {
      * certificate associated with the key
      */
     public RsaCredentialX509 getRsaCredentialX509(String keyAlias, String keyPassword) throws FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, CryptographyException {
+        return getRsaCredentialX509(keyAlias, new Password(keyPassword.toCharArray()));
+    }
+    public RsaCredentialX509 getRsaCredentialX509(String keyAlias, Password keyPassword) throws FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, CryptographyException {
         // load the key pair
         if (keystore.containsAlias(keyAlias) && keystore.isKeyEntry(keyAlias)) {
             Key key = keystore.getKey(keyAlias, keyPassword.toCharArray());
@@ -239,7 +247,10 @@ public class SimpleKeystore {
     }
 
     public X509Certificate getX509CertificateWithPassword(String certAlias, String password) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
-        KeyStore.PrivateKeyEntry certEntry = (KeyStore.PrivateKeyEntry) keystore.getEntry(certAlias, new KeyStore.PasswordProtection(password.toCharArray()));
+        return getX509CertificateWithPassword(certAlias, password.toCharArray());
+    }
+    public X509Certificate getX509CertificateWithPassword(String certAlias, char[] password) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
+        KeyStore.PrivateKeyEntry certEntry = (KeyStore.PrivateKeyEntry) keystore.getEntry(certAlias, new KeyStore.PasswordProtection(password));
         X509Certificate myCertificate = certificateIn(certEntry);
         if (myCertificate != null) {
             return myCertificate;
@@ -261,7 +272,7 @@ public class SimpleKeystore {
             throw new KeyStoreException("Cannot load certificate with alias: " + certAlias);
         } catch (UnrecoverableEntryException e) {
             // automatically try again with the keystore password
-            return getX509CertificateWithPassword(certAlias, keystorePassword);
+            return getX509CertificateWithPassword(certAlias, keystorePassword.toCharArray());
         }
     }
 
@@ -380,6 +391,9 @@ public class SimpleKeystore {
      * @param keyPassword
      */
     public void addKeyPairX509(PrivateKey privateKey, X509Certificate cert, String alias, String keyPassword) throws KeyManagementException {
+        addKeyPairX509(privateKey, cert, alias, new Password(keyPassword.toCharArray()));
+    }
+    public void addKeyPairX509(PrivateKey privateKey, X509Certificate cert, String alias, Password keyPassword) throws KeyManagementException {
         try {
             List<String> aliases = Collections.list(keystore.aliases());
             if (aliases.contains(alias)) {
