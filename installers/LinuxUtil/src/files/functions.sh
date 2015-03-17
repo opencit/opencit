@@ -2497,16 +2497,17 @@ glassfish_create_ssl_cert() {
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"
-  serverName=$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//')
+  serverName=$(echo "$serverName" | sed -e 's/ //g' | sed -e 's/,$//')
 
   local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local domain_found=$($glassfish list-domains | head -n 1 | awk '{ print $1 }')
-  local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
-  local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
+  local GF_CONFIG_PATH="${GLASSFISH_HOME}/domains/${domain_found}/config"
+  local keystore="${GF_CONFIG_PATH}/keystore.jks"
+  local cacerts="${GF_CONFIG_PATH}/cacerts.jks"
   local configDir="/opt/mtwilson/configuration"
-  local keytool=${JAVA_HOME}/bin/keytool
+  local keytool="${JAVA_HOME}/bin/keytool"
   local mtwilson=$(which mtwilson 2>/dev/null)
-  local tmpHost=$(echo $serverName | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
+  local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
 
   # Create an array of host ips and dns names from csv list passed into function
   OIFS="$IFS"
@@ -2527,38 +2528,38 @@ glassfish_create_ssl_cert() {
     fi
     cert_sans+="$tmpCN,"
   done
-  cert_cns=$(echo $cert_cns | sed -e 's/,$//')
-  cert_sans=$(echo $cert_sans | sed -e 's/,$//')
-  cert_cns='CN='$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g')
+  cert_cns=$(echo "$cert_cns" | sed -e 's/,$//')
+  cert_sans=$(echo "$cert_sans" | sed -e 's/,$//')
+  cert_cns='CN='$(echo "$serverName" | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g')
 
   # Check if there is already a certificate for this serverName in the Glassfish keystore
-  has_cert=$($keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+  has_cert=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
 
   if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     if [ -z "$has_cert" ]; then
       echo "Updating Glassfish master password..."
       #change glassfish master password which is the keystore password
       glassfish_stop >/dev/null
-      GF_CONFIG_PATH="${GLASSFISH_HOME}/glassfish/domains/domain1/config"
+      
       mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup"
       touch "${GF_CONFIG_PATH}/master.passwd"
       echo "AS_ADMIN_MASTERPASSWORD=changeit" > "${GF_CONFIG_PATH}/master.passwd"
       echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
-      $glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" domain1
+      $glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
       rm "${GF_CONFIG_PATH}/master.passwd"
       glassfish_start >/dev/null
     fi
     
     echo "Creating SSL Certificate for ${serverName}..."
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
-    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
-    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias s1as  -keystore "$keystore" -storepass "$keystorePassword" 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore "$keystore" -storepass "$keystorePassword" 2>&1 >/dev/null
+    $keytool -delete -alias s1as -keystore "$cacerts" -storepass "$keystorePassword" 2>&1 >/dev/null
+    $keytool -delete -alias glassfish-instance -keystore "$cacerts" -storepass "$keystorePassword" 2>&1 >/dev/null
 
     # Update keystore.jks
-    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
-    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
+    $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
     
     if [ -z "$has_cert" ]; then
       echo "Restarting Glassfish as a new SSL certificate was generated..."
@@ -2566,18 +2567,18 @@ glassfish_create_ssl_cert() {
     fi
   fi
 
-  has_cert=$($keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+  has_cert=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
   if [ -n "$has_cert" ]; then
     # Export certificates from keystore.jks
-    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
-    $keytool -export -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword
+    $keytool -export -alias s1as -file "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" -keystore "$keystore" -storepass "$keystorePassword"
+    $keytool -export -alias glassfish-instance -file "${GF_CONFIG_PATH}/ssl.gi.${tmpHost}.crt" -keystore "$keystore" -storepass "$keystorePassword"
 
     # Update cacerts.jks
-    $keytool -importcert -noprompt -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
-    $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${tmpHost}.crt" -keystore $cacerts -storepass $keystorePassword
+    $keytool -importcert -noprompt -alias s1as -file "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" -keystore "$cacerts" -storepass "$keystorePassword"
+    $keytool -importcert -noprompt -alias glassfish-instance -file "${GF_CONFIG_PATH}/ssl.gi.${tmpHost}.crt" -keystore "$cacerts" -storepass "$keystorePassword"
 
-    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${tmpHost}.crt" "$configDir/ssl.crt"
+    openssl x509 -in "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
+    cp "${GF_CONFIG_PATH}/ssl.s1as.${tmpHost}.crt" "$configDir/ssl.crt"
     cp "$keystore" "$configDir/mtwilson-tls.jks"
     mtwilson_tls_cert_sha1=`openssl sha1 -hex "$configDir/ssl.crt" | awk -F '=' '{ print $2 }' | tr -d ' '`
     update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$configDir/mtwilson.properties" "$mtwilson_tls_cert_sha1"
