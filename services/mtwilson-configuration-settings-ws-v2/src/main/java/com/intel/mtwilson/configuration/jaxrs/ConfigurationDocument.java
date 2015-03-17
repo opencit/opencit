@@ -6,14 +6,14 @@ package com.intel.mtwilson.configuration.jaxrs;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.mtwilson.jaxrs2.Document2;
+import com.intel.mtwilson.jaxrs2.Document;
 import java.util.ArrayList;
 
 /**
  *
  * @author jbuhacoff
  */
-public class ConfigurationDocument extends Document2 {
+public class ConfigurationDocument extends Document {
     
     @JsonDeserialize(as=ArrayList.class, contentAs=Setting.class)
     private ArrayList<Setting> settings;

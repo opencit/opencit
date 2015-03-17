@@ -206,4 +206,7 @@ public class MyJpa {
         return new MwAssetTagCertificateJpaController(pm.getASData());
     }
     
+    public MwMeasurementXmlJpaController mwMeasurementXml() throws IOException {
+        return new MwMeasurementXmlJpaController(pm.getASData());
+    }
 }

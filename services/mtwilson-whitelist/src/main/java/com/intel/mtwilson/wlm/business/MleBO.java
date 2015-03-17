@@ -250,6 +250,13 @@ public class MleBO {
                 pcrManifestJpaController.destroy(manifest.getId());
             }
 
+            // Delete the entries in the mw_measurement_xml table
+            MwMeasurementXmlJpaController mxJpa = My.jpa().mwMeasurementXml();
+            MwMeasurementXml measurementXml = mxJpa.findByMleId(tblMle.getId());
+            if (measurementXml != null) {
+                mxJpa.destroy(measurementXml.getId());
+            }
+            
             // We also need to delete entries in the MleSource table for the MLE. This table would store the host
             // name that was used to white list the MLE.
             deleteMleSource(mleName, mleVersion, osName, osVersion, oemName, mleUuid);

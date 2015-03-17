@@ -15,7 +15,8 @@ import java.io.File;
  * @author jbuhacoff
  */
 public class Folders {
-
+    private static final String DEFAULT_APPLICATION_ID = "mtwilson";
+    
     private static String application;
     private static String configuration;
     private static String features;
@@ -83,13 +84,21 @@ public class Folders {
      * @return path to home directory, even if it does not exist
      */
     private static String locateApplicationFolder() {
+        String applicationId = System.getProperty("mtwilson.application.id", DEFAULT_APPLICATION_ID);
+        
+        // check if there's a specific system property for our application home directory
+        String path = System.getProperty(applicationId+".home");
+        if( path != null ) {
+            return path;
+        }
+        
         // get value of environment variable MTWILSON_HOME, or KMS_HOME, etc.
-        String path = Environment.get("HOME");
+        path = Environment.get("HOME");
         if (path != null) {
             return path;
         }
 
-        String applicationId = System.getProperty("mtwilson.application.id", "mtwilson");
+        
 
         // if we're running as a non-root user whose
         // home directory includes the application id, for example /home/mtwilson
@@ -121,8 +130,16 @@ public class Folders {
     }
 
     private static String locateConfigurationFolder() {
+        String applicationId = System.getProperty("mtwilson.application.id", DEFAULT_APPLICATION_ID);
+
+        // check if there's a specific system property for our application log directory
+        String path = System.getProperty(applicationId+".configuration");
+        if( path != null ) {
+            return path;
+        }
+        
         // new mtwilson 3.0 setting, environment variable like MTWILSON_CONFIGURATION
-        String path = Environment.get("CONFIGURATION");
+        path = Environment.get("CONFIGURATION");
         if (path != null) {
             return path;
         }
@@ -140,8 +157,16 @@ public class Folders {
     }
 
     private static String locateFeaturesFolder() {
+        String applicationId = System.getProperty("mtwilson.application.id", DEFAULT_APPLICATION_ID);
+
+        // check if there's a specific system property for our application log directory
+        String path = System.getProperty(applicationId+".features");
+        if( path != null ) {
+            return path;
+        }
+        
         // new mtwilson 3.0 setting, environment variable like MTWILSON_FEATURES
-        String path = Environment.get("FEATURES");
+        path = Environment.get("FEATURES");
         if (path != null) {
             return path;
         }
@@ -152,13 +177,21 @@ public class Folders {
     }
     
     private static String locateLogFolder() {
+        String applicationId = System.getProperty("mtwilson.application.id", DEFAULT_APPLICATION_ID);
+
+        // check if there's a specific system property for our application log directory
+        String path = System.getProperty(applicationId+".logs");
+        if( path != null ) {
+            return path;
+        }
+        
         // get value of environment variable MTWILSON_LOGS, or KMS_LOGS, etc.
-        String path = Environment.get("LOGS");
+        path = Environment.get("LOGS");
         if (path != null) {
             return path;
         }
 
-        String applicationId = System.getProperty("mtwilson.application.id", "mtwilson");
+        
 
         // with no *_LOGS environment variable and no matching log directory,
         // use default platform-specific locations
@@ -182,8 +215,16 @@ public class Folders {
     }
 
     private static String locateRepositoryFolder() {
+        String applicationId = System.getProperty("mtwilson.application.id", DEFAULT_APPLICATION_ID);
+
+        // check if there's a specific system property for our application log directory
+        String path = System.getProperty(applicationId+".repository");
+        if( path != null ) {
+            return path;
+        }
+        
         // new mtwilson 3.0 setting, environment variable like MTWILSON_REPOSITORY
-        String path = Environment.get("REPOSITORY");
+        path = Environment.get("REPOSITORY");
         if (path != null) {
             return path;
         }

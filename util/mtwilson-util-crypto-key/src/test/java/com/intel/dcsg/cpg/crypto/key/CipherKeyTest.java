@@ -4,10 +4,8 @@
  */
 package com.intel.dcsg.cpg.crypto.key;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.io.Attributes;
 import com.intel.mtwilson.util.crypto.key2.CipherKey;
 import java.io.IOException;
 import java.util.Date;

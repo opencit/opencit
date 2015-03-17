@@ -4,16 +4,11 @@
  */
 package com.intel.mtwilson.configuration.jaxrs;
 
-import com.intel.dcsg.cpg.io.Attributes;
-
 /**
  * Represents a single configuration setting which is a (name,value) pair.
- * It extends Attributes so that metadata can be added later, for example
- * validation information, without breaking the API, but can be confirmed
- * into fields at a later time.
  * @author jbuhacoff
  */
-public class Setting extends Attributes {
+public class Setting {
     private String name;
     private String value;
 

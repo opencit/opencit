@@ -118,15 +118,15 @@ public class JaxrsClientBuilder {
         log.debug("Configuring client authentication");
         // X509 authorization 
         SimpleKeystore keystore = null;
-        String keystorePath = configuration.get("mtwilson.api.keystore");
-        String keystorePassword = configuration.get("mtwilson.api.keystore.password"); 
+        String keystorePath = configuration.get("login.x509.keystore.file",configuration.get("mtwilson.api.keystore"));
+        String keystorePassword = configuration.get("login.x509.keystore.password",configuration.get("mtwilson.api.keystore.password")); 
         if ( keystorePath != null && keystorePassword != null) {
             log.debug("Loading keystore from path {}", keystorePath);
             FileResource resource = new FileResource(new File(keystorePath));
             keystore = new SimpleKeystore(resource, keystorePassword);
         }
-        String keyAlias = configuration.get("mtwilson.api.key.alias");
-        String keyPassword = configuration.get("mtwilson.api.key.password");
+        String keyAlias = configuration.get("login.x509.key.alias",configuration.get("mtwilson.api.key.alias"));
+        String keyPassword = configuration.get("login.x509.key.password",configuration.get("mtwilson.api.key.password"));
         if (keystore != null && keyAlias != null && keyPassword != null) {
             log.debug("Registering X509 credentials for {}", keyAlias);
             log.debug("Loading key {} from keystore {}", keyAlias, keystorePath);
@@ -134,16 +134,16 @@ public class JaxrsClientBuilder {
             log.debug(credential.getPublicKey().toString());
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
-        // HMAC authorization
-        String clientId = configuration.get("mtwilson.api.clientId");
-        String secretKey =  configuration.get("mtwilson.api.secretKey") ;
+        // HMAC authorization (note this is NOT the same as HTTP DIGEST from RFC 2617, that would be login.digest.username and login.digest.password which are not currently implemented)
+        String clientId = configuration.get("login.hmac.username",configuration.get("mtwilson.api.clientId"));
+        String secretKey =  configuration.get("login.hmac.password", configuration.get("mtwilson.api.secretKey"));
         if (clientId != null && secretKey != null) {
             log.debug("Registering HMAC credentials for {}", clientId);
             clientConfig.register(new HmacAuthorizationFilter(clientId, secretKey));
         }
         // BASIC authorization will only be registered if configuration is present but also the feature itself will only add an Authorization header if there isn't already one present
-        String username = configuration.get("mtwilson.api.username");
-        String password = configuration.get("mtwilson.api.password");
+        String username = configuration.get("login.basic.username",configuration.get("mtwilson.api.username"));
+        String password = configuration.get("login.basic.password", configuration.get("mtwilson.api.password"));
         if (username != null && password != null) {
             log.debug("Registering BASIC credentials for {}", username);
 //            clientConfig.register( new BasicPasswordAuthorizationFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
@@ -158,7 +158,7 @@ public class JaxrsClientBuilder {
     private void url() throws MalformedURLException {
         if (url == null) {
             if (configuration != null) {
-                url = new URL(configuration.get("mtwilson.api.url", configuration.get("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
+                url = new URL(configuration.get("endpoint.url", configuration.get("mtwilson.api.url", configuration.get("mtwilson.api.baseurl")))); // example: "http://localhost:8080/v2";
             }
         }
     }

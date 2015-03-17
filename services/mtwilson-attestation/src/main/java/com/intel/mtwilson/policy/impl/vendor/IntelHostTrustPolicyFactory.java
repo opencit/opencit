@@ -66,7 +66,13 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
         if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
             Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host);
             rules.addAll(pcrEventLogRules);
-        }
+            
+            // Add rules to verify the meaurement log which would contain modules for attesting application/data
+            Set<Rule> xmlMeasurementLogRules = reader.loadXmlMeasurementLogRuleForVmm(vmm, host);
+            rules.addAll(xmlMeasurementLogRules);
+            
+        }        
+
         return rules;    
     }
 

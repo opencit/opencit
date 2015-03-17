@@ -10,10 +10,10 @@ import com.intel.dcsg.cpg.validation.Fault;
  *
  * @author jbuhacoff
  */
-public class MissingEnvironmentVariable extends Fault {
+public class ConfigurationKeyNotSet extends Fault {
     private String name;
 
-    public MissingEnvironmentVariable(String name) {
+    public ConfigurationKeyNotSet(String name) {
         super(name);
         this.name = name;
     }
