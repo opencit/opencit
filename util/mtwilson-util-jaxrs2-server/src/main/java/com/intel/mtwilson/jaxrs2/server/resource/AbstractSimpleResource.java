@@ -27,12 +27,16 @@ import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * Reference: https://jersey.java.net/documentation/latest/user-guide.html
@@ -130,7 +134,7 @@ public abstract class AbstractSimpleResource<T extends AbstractDocument, C exten
      * @return
      */
     @POST
-    public T createOne(@BeanParam L locator, T item) {
+    public T createOne(@BeanParam L locator, T item, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
         try { log.debug("createOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         locator.copyTo(item);
         ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
@@ -138,6 +142,7 @@ public abstract class AbstractSimpleResource<T extends AbstractDocument, C exten
             item.setId(new UUID());
         }
         getRepository().create(item);
+        httpServletResponse.setStatus(Status.CREATED.getStatusCode());
         return item;
     }
 
@@ -146,13 +151,14 @@ public abstract class AbstractSimpleResource<T extends AbstractDocument, C exten
     // we have a void return type
     @Path("/{id}")
     @DELETE
-    public void deleteOne(@BeanParam L locator) {
+    public void deleteOne(@BeanParam L locator, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
         try { log.debug("deleteOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("deleteOne: cannot serialize locator: {}", e.getMessage()); }
         T item = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         getRepository().delete(locator);
+        httpServletResponse.setStatus(Status.NO_CONTENT.getStatusCode());
         /*
         T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
@@ -197,7 +203,7 @@ public abstract class AbstractSimpleResource<T extends AbstractDocument, C exten
      */
     @Path("/{id}")
     @GET
-    public T retrieveOne(@BeanParam L locator) {
+    public T retrieveOne(@BeanParam L locator, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
         try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("retrieveOne: cannot serialize locator: {}", e.getMessage()); }
         /*
         T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
@@ -213,7 +219,9 @@ public abstract class AbstractSimpleResource<T extends AbstractDocument, C exten
 * */
         T existing = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (existing == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND); 
+            httpServletResponse.setStatus(Status.NOT_FOUND.getStatusCode());
+            return null;
+//            throw new WebApplicationException(Response.Status.NOT_FOUND); 
         }
         return existing;
     }
