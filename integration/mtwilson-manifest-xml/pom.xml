@@ -32,6 +32,9 @@
                             <schemaIncludes>
                                 <include>jaxb/mtwilson-manifest-xml/*.xsd</include>
                             </schemaIncludes>
+                            <bindingIncludes>
+                                <include>jaxb/mtwilson-manifest-xml/*.xjb</include>
+                            </bindingIncludes>
                             <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-manifest-xml.episode</episodeFile>
                             <generatePackage>com.intel.mtwilson.manifest.xml</generatePackage>
                         </configuration>
