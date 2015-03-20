@@ -234,7 +234,7 @@ case "$1" in
   show)
         read_property_from_file "${2}" "${package_config_filename}"
         ;;
-  #uninstall)
+  uninstall)
   #      datestr=`date +%Y-%m-%d.%H%M`
   #      webservice_uninstall "${webservice_application_name}"
   #      mkdir -p "${intel_conf_dir}"
@@ -244,8 +244,8 @@ case "$1" in
   #      if [[ "${package_dir}" == /opt/intel/* ]]; then
   #        rm -rf "${package_dir}"
   #      fi
-  #rm /usr/local/bin/${script_name}
-  #      ;;
+        rm /usr/local/bin/${script_name} 2>/dev/null
+        ;;
   help)
         echo "Usage: ${script_name} {setup}"
         ;;

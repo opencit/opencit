@@ -178,7 +178,7 @@ setup_interactive_install() {
     fi
   elif using_postgres; then
     if [ -n "$psql" ]; then
-      echo "inside psql: $psql"
+      #echo "inside psql: $psql"
       postgres_configure_connection "${package_config_filename}" mountwilson.as.db
       postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
       postgres_create_database
@@ -311,7 +311,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-  rm /usr/local/bin/${script_name}
+        rm /usr/local/bin/${script_name} 2>/dev/null
         ;;
   saml-createkey)
         create_saml_key

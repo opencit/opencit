@@ -230,7 +230,7 @@ else
 #    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
     echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
     echo '#mtwilson.global.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  /etc/intel/cloudsecurity/mtwilson.properties
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
+    #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
 fi
@@ -740,25 +740,25 @@ fi
 if [[ -n "opt_attservice"  && -f "$attestation_service" ]]; then
   echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
-  echo "mtwilson service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "mtwilson service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_mangservice" && -f "$management_service"  ]]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
-  echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Management Service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_wlmservice" && -f "$whitelist_service" ]]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
-  echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Whitelist Service installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 if [[ -n "$opt_mtwportal" && "$mtw_portal" ]]; then
-  echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
+  echo "Installing Mtw Combined Portal..." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
-  echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Mtw Combined Portal installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 ##############################################################################################################################################################################
@@ -850,9 +850,9 @@ chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
 
 
 if [ ! -z "$opt_logrotate" ]; then
-  echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
+  echo "Installing Log Rotate..." | tee -a  $INSTALL_LOG_FILE
   ./$logrotate_installer
-  echo "Log Rotate installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Log Rotate installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 mkdir -p /etc/logrotate.d
@@ -884,7 +884,7 @@ fi
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
   ./$monit_installer  >> $INSTALL_LOG_FILE 
-  echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "Monit installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 mkdir -p /etc/monit/conf.d

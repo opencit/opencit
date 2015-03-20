@@ -2206,9 +2206,9 @@ glassfish_install() {
     if [ -d "glassfish4" ]; then
       if [ -d "/usr/share/glassfish4" ]; then
         echo "Glassfish already installed at /usr/share/glassfish4"
-        export GLASSFISH_HOME="/usr/share/glassfish4"
+        export GLASSFISH_HOME="/usr/share/glassfish4/glassfish"
       else
-        mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4"
+        mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4/glassfish"
       fi
     fi
     # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
@@ -2505,6 +2505,7 @@ glassfish_create_ssl_cert() {
   local keystore="${GF_CONFIG_PATH}/keystore.jks"
   local cacerts="${GF_CONFIG_PATH}/cacerts.jks"
   local configDir="/opt/mtwilson/configuration"
+  local mtwilsonPropertiesFile="${configDir}/mtwilson.properties"
   local keytool="${JAVA_HOME}/bin/keytool"
   local mtwilson=$(which mtwilson 2>/dev/null)
   local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
@@ -2537,17 +2538,23 @@ glassfish_create_ssl_cert() {
 
   if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     if [ -z "$has_cert" ]; then
-      echo "Updating Glassfish master password..."
-      #change glassfish master password which is the keystore password
-      glassfish_stop >/dev/null
+      if [ -z "$MTW_TLS_KEYSTORE_PASS" ]; then MTW_TLS_KEYSTORE_PASS=$(generate_password 32); fi
+      glassfishTlsKeystorePassword=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+      glassfishTlsKeystorePassword=${glassfishTlsKeystorePassword:-"changeit"}
+      if [ "$glassfishTlsKeystorePassword" != "$MTW_TLS_KEYSTORE_PASS" ]; then  # "OLD" != "NEW"
+        echo "Updating Glassfish master password..."
+        #change glassfish master password which is the keystore password
+        glassfish_stop >/dev/null
       
-      mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup"
-      touch "${GF_CONFIG_PATH}/master.passwd"
-      echo "AS_ADMIN_MASTERPASSWORD=changeit" > "${GF_CONFIG_PATH}/master.passwd"
-      echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
-      $glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
-      rm "${GF_CONFIG_PATH}/master.passwd"
-      glassfish_start >/dev/null
+        mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup" 2>/dev/null
+        touch "${GF_CONFIG_PATH}/master.passwd"
+        echo "AS_ADMIN_MASTERPASSWORD=$glassfishTlsKeystorePassword" > "${GF_CONFIG_PATH}/master.passwd"
+        echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
+        $glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
+        rm "${GF_CONFIG_PATH}/master.passwd"
+        glassfish_start >/dev/null
+        update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$MTW_TLS_KEYSTORE_PASS"
+      fi
     fi
     
     echo "Creating SSL Certificate for ${serverName}..."
@@ -2924,6 +2931,7 @@ tomcat_create_ssl_cert() {
   local keystore="${TOMCAT_HOME}/ssl/.keystore"
   local tomcatServerXml="${TOMCAT_HOME}/conf/server.xml"
   local configDir="/opt/mtwilson/configuration"
+  local mtwilsonPropertiesFile="${configDir}/mtwilson.properties"
   local keytool="${JAVA_HOME}/bin/keytool"
   local mtwilson=$(which mtwilson 2>/dev/null)
   local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
@@ -2956,10 +2964,16 @@ tomcat_create_ssl_cert() {
 
   if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     if [ -z "$has_cert" ]; then
-      echo "Updating keystore password in Tomcat server.xml..."
-      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$MTW_TLS_KEYSTORE_PASS"'\" \/>/g' "$tomcatServerXml"
-      echo "Restarting Tomcat as a new SSL certificate was generated..."
-      tomcat_restart >/dev/null
+      if [ -z "$MTW_TLS_KEYSTORE_PASS" ]; then MTW_TLS_KEYSTORE_PASS=$(generate_password 32); fi
+      tomcatTlsKeystorePassword=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+      tomcatTlsKeystorePassword=${tomcatTlsKeystorePassword:-"changeit"}
+      if [ "$tomcatTlsKeystorePassword" != "$MTW_TLS_KEYSTORE_PASS" ]; then  # "OLD" != "NEW"
+        echo "Updating keystore password in Tomcat server.xml..."
+        sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$MTW_TLS_KEYSTORE_PASS"'\" \/>/g' "$tomcatServerXml"
+        echo "Restarting Tomcat as a new SSL certificate was generated..."
+        tomcat_restart >/dev/null
+        update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$MTW_TLS_KEYSTORE_PASS"
+      fi
     fi
     
     echo "Creating SSL Certificate for ${serverName}..."
@@ -3440,9 +3454,9 @@ webservice_running() {
   if using_glassfish; then
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
+      WEBSERVICE_DEPLOYED=$($glassfish list-applications | grep "${webservice_application_name} " | awk '{ print $1 }')
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`$glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
+        WEBSERVICE_RUNNING=$($glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled)
       fi
     fi
   elif using_tomcat; then
@@ -3450,9 +3464,9 @@ webservice_running() {
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
     if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager 2>&1 >/dev/null; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}"`
+      WEBSERVICE_DEPLOYED=$(wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}:" | sed -e 's/:/\n/g' | grep "^${webservice_application_name}$")
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
+        WEBSERVICE_RUNNING=$(wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}:" | sed -e 's/:/\n/g' | grep "running")
       fi
     fi
   fi
@@ -3622,6 +3636,7 @@ webservice_uninstall() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
+      glassfish_detect
       $glassfish undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
@@ -3640,7 +3655,7 @@ webservice_require(){
   if using_glassfish; then
     glassfish_require
   elif using_tomcat; then
-      tomcat_require
+    tomcat_require
   fi
 }
 

@@ -28,7 +28,7 @@ load_defaults 2>&1 >/dev/null
 msctl=`which msctl 2>/dev/null`
 if [ -f "$msctl" ]; then
   echo "Uninstalling previous version..."
-  $msctl uninstall
+  $msctl uninstall 2>/dev/null
 fi
 
 # detect the packages we have to install
