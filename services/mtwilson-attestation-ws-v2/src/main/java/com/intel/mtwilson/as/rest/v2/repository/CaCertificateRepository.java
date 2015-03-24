@@ -58,7 +58,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
         String id = locator.id;
         if ("root".equals(id)) {
             try {
-                String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
+                String certFile = My.configuration().getRootCaCertificateFile().getAbsolutePath(); //MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
                 caCert = readCaCert(certFile);
             } 
             catch (FileNotFoundException e) {
@@ -75,7 +75,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }
         } else if ("saml".equals(id)) {
             try {
-                String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); 
+                String certFile = My.configuration().getSamlCertificateFile().getAbsolutePath(); //MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); 
                 caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
@@ -92,7 +92,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }      
         } else if ("privacy".equals(id) || "aik".equals(id)) {
             try {
-                String certFile = My.configuration().getPrivacyCaIdentityCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
+                String certFile = My.configuration().getPrivacyCaIdentityCacertsFile().getAbsolutePath(); //MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
                 caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
@@ -109,7 +109,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             }
         } else if ("endorsement".equals(id) || "ek".equals(id)) {
             try {
-                String certFile = My.configuration().getPrivacyCaEndorsementCacertsFile().getAbsolutePath();//MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
+                String certFile = My.configuration().getPrivacyCaEndorsementCacertsFile().getAbsolutePath(); //MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
                 caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
@@ -128,7 +128,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
             
         } else if ("tls".equals(id)) {
             try {
-                String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
+                String certFile = My.configuration().getTlsCertificateFile().getAbsolutePath(); //MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
                 caCert = readCaCert(certFile);
             }
             catch (FileNotFoundException e) {
