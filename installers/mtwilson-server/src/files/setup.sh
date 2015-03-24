@@ -775,8 +775,8 @@ update_property_in_file "mtwilson.atag.mtwilson.baseurl" $CONFIG_DIR/mtwilson.pr
 prompt_with_default MTWILSON_TAG_ADMIN_USERNAME "Mt Wilson Asset Tag Admin User: " ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin}
 prompt_with_default_password MTWILSON_TAG_ADMIN_PASSWORD "Mt Wilson Asset Tag Admin Password: " $MTWILSON_TAG_ADMIN_PASSWORD
 
-MTWILSON_TAG_API_USERNAME=tagservice
-MTWILSON_TAG_API_PASSWORD=$(generate_password 16)
+MTWILSON_TAG_API_USERNAME=${MTWILSON_TAG_API_USERNAME:-"tagservice"}
+MTWILSON_TAG_API_PASSWORD=${MTWILSON_TAG_API_PASSWORD:-$(generate_password 16)}
 update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_USERNAME"
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 

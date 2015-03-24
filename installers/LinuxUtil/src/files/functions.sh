@@ -3890,6 +3890,8 @@ load_conf() {
       export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TAG_API_USERNAME=`echo $temp | awk -F'mtwilson.tag.api.username=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TAG_API_PASSWORD=`echo $temp | awk -F'mtwilson.tag.api.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
       export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host "$mtw_props_path"`
@@ -3902,6 +3904,8 @@ load_conf() {
       export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
       export CONF_MTW_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
       export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
+      export CONF_MTWILSON_TAG_API_USERNAME=`read_property_from_file mtwilson.tag.api.username "$mtw_props_path"`
+      export CONF_MTWILSON_TAG_API_PASSWORD=`read_property_from_file mtwilson.tag.api.password "$mtw_props_path"`
     fi
     echo_success "Done"
   fi
@@ -4051,6 +4055,8 @@ load_defaults() {
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
   export DEFAULT_TRUSTAGENT_KEYSTORE_PASS=""
+  export DEFAULT_MTWILSON_TAG_API_USERNAME="tagservice"
+  export DEFAULT_MTWILSON_TAG_API_PASSWORD=$(generate_password 16)
   
   export MTWILSON_SERVER=${MTWILSON_SERVER:-${CONF_MTWILSON_SERVER:-$DEFAULT_MTWILSON_SERVER}}
   export DATABASE_HOSTNAME=${DATABASE_HOSTNAME:-${CONF_DATABASE_HOSTNAME:-$DEFAULT_DATABASE_HOSTNAME}}
@@ -4077,7 +4083,8 @@ load_defaults() {
   export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
-  export TRUSTAGENT_KEYSTORE_PASS=${TRUSTAGENT_KEYSTORE_PASS:-${CONF_TRUSTAGENT_KEYSTORE_PASS:-$DEFAULT_TRUSTAGENT_KEYSTORE_PASS}}
+  export MTWILSON_TAG_API_USERNAME=${MTWILSON_TAG_API_USERNAME:-${CONF_MTWILSON_TAG_API_USERNAME:-$DEFAULT_MTWILSON_TAG_API_USERNAME}}
+  export MTWILSON_TAG_API_PASSWORD=${MTWILSON_TAG_API_PASSWORD:-${CONF_MTWILSON_TAG_API_PASSWORD:-$DEFAULT_MTWILSON_TAG_API_PASSWORD}}
 
   if using_mysql; then
     export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}
