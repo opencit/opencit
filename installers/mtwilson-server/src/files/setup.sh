@@ -826,7 +826,7 @@ call_tag_setupcommand setup-manager initialize-db --force
 call_tag_setupcommand tag-init-database
 call_tag_setupcommand tag-create-ca-key "CN=assetTagService"
 call_tag_setupcommand tag-export-file cacerts | grep -v ":" >> $CONFIG_DIR/tag-cacerts.pem
-call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_API_BASEURL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
+call_tag_setupcommand tag-create-mtwilson-client --url="$MTWILSON_TAG_URL" --username="$MTWILSON_TAG_API_USERNAME" --password="$MTWILSON_TAG_API_PASSWORD"
 if [ -n "$MTWILSON_TAG_ADMIN_PASSWORD" ]; then
   export MTWILSON_TAG_ADMIN_PASSWORD
   call_tag_setupcommand login-password ${MTWILSON_TAG_ADMIN_USERNAME:-tagadmin} env:MTWILSON_TAG_ADMIN_PASSWORD --permissions tag_certificates:create tag_certificates:deploy tag_certificates:import tag_certificates:search tpm_passwords:retrieve hosts:search
