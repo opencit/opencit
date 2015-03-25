@@ -73,6 +73,7 @@ public class ConfigurationFactory {
 
                     if (Pem.isPem(content)) {
                         // 3. read encrypted configuration
+                // password environment variable name like MTWILSON_PASSWORD, TRUSTAGENT_PASSWORD, KMS_PASSWORD, etc.
                         String password = Environment.get(PASSWORD);
     //                    ByteArrayResource resource = new ByteArrayResource(content.getBytes(Charset.forName("UTF-8")));
                         provider = new EncryptedConfigurationProvider(new FileResource(file), password);
@@ -85,6 +86,7 @@ public class ConfigurationFactory {
             }
             else {
                 // create new configuration; if a password variable is set, assume the configuration should be encrypted
+                // password environment variable name like MTWILSON_PASSWORD, TRUSTAGENT_PASSWORD, KMS_PASSWORD, etc.
                 String password = Environment.get(PASSWORD);
                 if( password == null ) {
                     provider = new EmptyConfigurationProvider(new ResourceConfigurationProvider(new FileResource(file)));

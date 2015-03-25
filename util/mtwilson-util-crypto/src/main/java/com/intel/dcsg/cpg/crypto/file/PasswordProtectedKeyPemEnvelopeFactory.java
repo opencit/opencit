@@ -6,6 +6,7 @@ package com.intel.dcsg.cpg.crypto.file;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.PasswordHash;
+import com.intel.dcsg.cpg.io.pem.Pem;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -25,6 +26,8 @@ import javax.crypto.spec.PBEParameterSpec;
  * 
  * This class uses the algorithm PBEWithMD5AndDES which is expected to be present
  * on every Java platform, even though its weak.
+ * 
+ * Stronger algorithms like  PBEWithHmacSHA1AndDESede  (found in pkcs5 1.0) may not be available on all platforms.
  * 
  * NoSuchAlgorithmException: PBEWithHmacSHA1AndDESede/CBC/PKCS5Padding SecretKeyFactory not available
  * NoSuchAlgorithmException: PBEWithHmacSHA1AndDESede SecretKeyFactory not available  ;  this is defined in PKCS#5 v2.0
@@ -47,10 +50,20 @@ import javax.crypto.spec.PBEParameterSpec;
  * SecretKey key = Aes128.generateKey();
  * PasswordKeyEnvelope keyEnvelope = factory.seal(key);
  * 
- * @since 0.1
+ * Compatibility note: earlier version of this class in 0.2 was called 
+ * PasswordKeyEnvelopeFactory
+ * 
+ * See also:  
+ * http://www.openssl.org/docs/apps/cms.html
+ * http://etutorials.org/Programming/secure+programming/Chapter+7.+Public+Key+Cryptography/7.17+Representing+Keys+and+Certificates+in+Plaintext+PEM+Encoding/
+ * http://docs.oracle.com/javase/6/docs/technotes/guides/security/StandardNames.html 
+ * 
+ * XXX TODO look into support for PBKDF2WithHmacSHA1 ... according to Java docs (see Standard Names ref above) it's only available as a parameter to SecretKeyFactory 
+ * 
+ * @since 0.3
  * @author jbuhacoff
  */
-public class PasswordKeyEnvelopeFactory {
+public class PasswordProtectedKeyPemEnvelopeFactory {
 //    public static final String KEYGEN_ALGORITHM = "PBEWithMD5AndDES"; // "PBEWithHmacSHA1AndDESede"; // password-based encryption
     public static final String DEFAULT_ALGORITHM = "PBEWithMD5AndDES/CBC/PKCS5Padding"; // "PBEWithHmacSHA1AndDESede/CBC/PKCS5Padding"; // password-based encryption
     public static final int SALT_LENGTH_BYTES = 8; // bytes
@@ -67,7 +80,7 @@ public class PasswordKeyEnvelopeFactory {
      * @param certificate public key certificate of the recipient to which envelopes will be addressed
      * @throws CryptographyException with NoSuchAlgorithmException as the root cause
      */
-    public PasswordKeyEnvelopeFactory(String password) {
+    public PasswordProtectedKeyPemEnvelopeFactory(String password) {
         this.password = password;
     }
     
@@ -94,7 +107,7 @@ public class PasswordKeyEnvelopeFactory {
      * @return
      * @throws CryptographyException with one of the following as the cause: NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
      */
-    public PasswordKeyEnvelope seal(Key secretKey) throws CryptographyException {
+    public PemKeyEncryption seal(Key secretKey) throws CryptographyException {
         try {
             if( secretKeyFactory == null ) {
                 setAlgorithm(DEFAULT_ALGORITHM);
@@ -111,11 +124,11 @@ public class PasswordKeyEnvelopeFactory {
             byte[] encryptedKey = cipher.wrap(secretKey); // IllegalBlockSizeException, BadPaddingException
             // create a digest of the password with the salt so the password can be confirmed when loading the file later
             PasswordHash passwordHash = new PasswordHash(password, salt);
-            PasswordKeyEnvelope keyEnvelope = new PasswordKeyEnvelope();
-            keyEnvelope.setContent(encryptedKey);
+            Pem pem = new Pem(KeyEnvelope.PEM_BANNER, encryptedKey);
+            KeyEnvelope keyEnvelope = new KeyEnvelope(pem);
             keyEnvelope.setContentAlgorithm(secretKey.getAlgorithm()); // expected to be "AES" (for secret key) or "RSA" (for private key)
-            keyEnvelope.setEnvelopeKeyId(passwordHash.toString()); // a string like  salt-base64 ":" password-hash-base64
-            keyEnvelope.setEnvelopeAlgorithm(algorithm);
+            keyEnvelope.setEncryptionKeyId(passwordHash.toString()); // a string like  salt-base64 ":" password-hash-base64
+            keyEnvelope.setEncryptionAlgorithm(algorithm);
             return keyEnvelope;
         }
         catch(Exception e) {
@@ -131,8 +144,8 @@ public class PasswordKeyEnvelopeFactory {
      * @return
      * @throws CryptographyException with one of the following as the cause: CertificateEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
      */
-    public static PasswordKeyEnvelope sealKeyWithPassword(Key secretKey, String password) throws CryptographyException {
-        PasswordKeyEnvelopeFactory factory = new PasswordKeyEnvelopeFactory(password);
+    public static PemKeyEncryption sealKeyWithPassword(Key secretKey, String password) throws CryptographyException {
+        PasswordProtectedKeyPemEnvelopeFactory factory = new PasswordProtectedKeyPemEnvelopeFactory(password);
         return factory.seal(secretKey);
     }
 }

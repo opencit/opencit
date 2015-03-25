@@ -7,13 +7,15 @@ package com.intel.dcsg.cpg.configuration;
 import java.util.Iterator;
 
 /**
- *
+ * Adapter for using a Configuration instance where a Commons Configuration 
+ * instance is required.
+ * 
  * @author jbuhacoff
  */
-public class CommonsConfigurationDecorator extends org.apache.commons.configuration.AbstractConfiguration {
+public class CommonsConfigurationAdapter extends org.apache.commons.configuration.AbstractConfiguration {
     private Configuration configuration;
 
-    public CommonsConfigurationDecorator(Configuration configuration) {
+    public CommonsConfigurationAdapter(Configuration configuration) {
         super();
         this.configuration = configuration;
     }

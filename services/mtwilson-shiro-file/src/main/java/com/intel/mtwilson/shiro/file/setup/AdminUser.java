@@ -6,7 +6,6 @@ package com.intel.mtwilson.shiro.file.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.Platform;
-import com.intel.mtwilson.Environment;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
@@ -18,6 +17,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
+ * @deprecated this setup task should not be used; instead the administrator should run the "password" command provided by mtwilson-shiro-file to create an admin username and password after installation
  * @author jbuhacoff
  */
 public class AdminUser extends LocalSetupTask {
@@ -28,10 +28,15 @@ public class AdminUser extends LocalSetupTask {
     private boolean isNewPassword = false;
     
     private String getUsername() {
-        return Environment.get("ADMIN_USERNAME", "admin");
+        // gets environment variable MTWILSON_ADMIN_USERNAME, TRUSTAGENT_ADMIN_USERNAME, KMS_ADMIN_USERNAME, etc.
+//        return Environment.get("ADMIN_USERNAME", "admin"); // avoid use of Environment outside bootstrap code
+        // setup tasks configuration includes all-caps environment, so admin.username here will also be translated to ADMIN_USERNAME and MTWILSON_ADMIN_USERNAME 
+        return getConfiguration().get("admin.username", "admin");
     }
     private String getPassword() {
-        String existing = Environment.get("ADMIN_PASSWORD");
+        // gets environment variable MTWILSON_ADMIN_PASSWORD, TRUSTAGENT_ADMIN_PASSWORD, KMS_ADMIN_PASSWORD, etc.
+//        String existing = Environment.get("ADMIN_PASSWORD");// avoid use of Environment outside bootstrap code
+        String existing = getConfiguration().get("admin.password");
         if( existing != null ) {
             return existing;
         }

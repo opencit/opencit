@@ -6,7 +6,7 @@ package com.intel.dcsg.cpg.io.pem;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -19,6 +19,33 @@ import org.slf4j.LoggerFactory;
  * A utility class to read and write PEM-format files.
  * 
  * Automatically base64-encodes and base64-decodes the content.  
+ * 
+ * 
+ * General behavior for a structure that serializes to a PEM-like format with a
+ * banner, headers, and content.
+ *
+ * This is an example of a PEM format file of an RSA private key. Notice it has
+ * http/smtp-like headers, an empty line, and then base64-encoded-chunked
+ * content.
+ * 
+ * <pre>
+ * -----BEGIN RSA PRIVATE KEY-----
+ * Proc-Type: 4,ENCRYPTED
+ * DEK-Info: DES-EDE3-CBC,F2D4E6438DBD4EA8
+ *
+ * LjKQ2r1Yt9foxbHdLKZeClqZuzN7PoEmy+b+dKq9qibaH4pRcwATuWt4/Jzl6y85
+ * NHM6CM4bOV1MHkyD01tFsT4kJ0GwRPg4tKAiTNjE4Yrz9V3rESiQKridtXMOToEp
+ * Mj2nSvVKRSNEeG33GNIYUeMfSSc3oTmZVOlHNp9f8LEYWNmIjfzlHExvgJaPrixX
+ * QiPGJ6K05kV5FJWRPET9vI+kyouAm6DBcyAhmR80NYRvaBbXGM/MxBgQ7koFVaI5
+ * zoJ/NBdEIMdHNUh0h11GQCXAQXOSL6Fx2hRdcicm6j1CPd3AFrTt9EATmd4Hj+D4
+ * 91jDYXElALfdSbiO0A9Mz6USUepTXwlfVV/cbBpLRz5Rqnyg2EwI2tZRU+E+Cusb
+ * /b6hcuWyzva895YMUCSyDaLgSsIqRWmXxQV1W2bAgRbs8jD8VF+G9w==
+ * -----END RSA PRIVATE KEY-----
+ * </pre>
+ *
+ * See also:
+ * http://etutorials.org/Programming/secure+programming/Chapter+7.+Public+Key+Cryptography/7.17+Representing+Keys+and+Certificates+in+Plaintext+PEM+Encoding/
+ *
  * 
  * @author jbuhacoff
  */
@@ -33,42 +60,79 @@ public class Pem {
     private static final String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+): (?:([^\"].+)|\"([^\"]+)\")"; // value can be plain, or enclosed in double quotes
     private static final Pattern headerAttributeNameEmptyPairPattern = Pattern.compile(headerAttributeNameEmptyPair);
     private static final Pattern headerAttributeNameValuePairPattern = Pattern.compile(headerAttributeNameValuePair);
-    private String contentType;
-    private HashMap<String,String> headers = new HashMap<>();
+    private String banner;
+    private Map<String,String> headers; 
     private byte[] content;
     
-    protected Pem() { } // used by the static valueOf() method
+// used by the static valueOf() method
+    protected Pem() {
+        this.banner = null;
+        this.content = null;
+        this.headers =  new LinkedHashMap<>(); // linked hash map preserves insertion order when iterating
+    } 
 
     /**
      * 
-     * @param contentType for the banner, for example "PUBLIC KEY" or "CERTIFICATE"
+     * @param banner for example "PUBLIC KEY" or "CERTIFICATE"
      * @param content binary content, for example publicKey.getEncoded() or certificate.getEncoded(); it will be automatically base64-encoded by Pem.toString()
      */
-    public Pem(String contentType, byte[] content) {
-        this.contentType = contentType;
+    public Pem(String banner, byte[] content) {
+        this.banner = banner;
         this.content = content;
+        this.headers =  new LinkedHashMap<>(); // linked hash map preserves insertion order when iterating
     }
     
     /**
      * 
-     * @param contentType for the banner, for example "PUBLIC KEY" or "CERTIFICATE"
+     * @param banner for the banner, for example "PUBLIC KEY" or "CERTIFICATE"
      * @param content binary content, for example publicKey.getEncoded() or certificate.getEncoded(); it will be automatically base64-encoded by Pem.toString()
-     * @param headers name-value pairs to appear between the begin banner and the base64-encoded content
+     * @param headers name-value pairs to appear between the begin banner and the base64-encoded content; will be copied so original map will not be modified
      */
-    public Pem(String contentType, byte[] content, Map<String,String> headers) {
-        this.contentType = contentType;
+    public Pem(String banner, byte[] content, Map<String,String> headers) {
+        this.banner = banner;
         this.content = content;
-        if( headers != null ) {
-            this.headers.putAll(headers);
-        }
+        this.headers = headers;
     }
     
-    public String getTagStart() { return "-----BEGIN "+contentType+"-----"; }
-    public String getTagEnd() { return "-----END "+contentType+"-----"; }
+    /** 
+     * Copy constructor, changes to the new instance content or headers 
+     * will not be reflected in
+     * the original instance
+     * @param original 
+     */
+    public Pem(Pem original) {
+        this.banner = original.banner;
+        this.content = new byte[original.content.length];
+        System.arraycopy(original.content, 0, this.content, 0, original.content.length);
+        this.headers =  new LinkedHashMap<>(); // linked hash map preserves insertion order when iterating
+        this.headers.putAll(original.headers);
+    }
+    
+    public String getTagStart() { return "-----BEGIN "+banner+"-----"; }
+    public String getTagEnd() { return "-----END "+banner+"-----"; }
     
     public byte[] getContent() { return content; }
-    public String getContentType() { return contentType; }
+    public String getBanner() { return banner; }
     public Map<String,String> getHeaders() { return headers; }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+    
+    // convenience methods, instead of  getHeaders().get(name) write the more concise getHeader(name)
+    
+    public String getHeader(String headerName) { return headers.get(headerName); }
+    public void setHeader(String headerName, String headerValue) { headers.put(headerName, headerValue); }
+    public void removeHeader(String headerName) { headers.remove(headerName); }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public void setBanner(String contentType) {
+        this.banner = contentType;
+    }
+    
     
     /**
      * The headers, if present, are sorted alphabetically by header name.  This is done so that if the file needs
@@ -84,8 +148,10 @@ public class Pem {
             ArrayList<String> sortedAttrNames = new ArrayList<>(attrNames);
             Collections.sort(sortedAttrNames);
             for(String attrName : sortedAttrNames) {
-                header.append(String.format("%s: %s", attrName, headers.get(attrName)));
-                header.append(PEM_NEWLINE);
+                if( headers.get(attrName) != null ) {
+                    header.append(String.format("%s: %s", attrName, headers.get(attrName)));
+                    header.append(PEM_NEWLINE);
+                }
             }
             header.append(PEM_NEWLINE); // blank line separates headers from body
         }
@@ -132,14 +198,14 @@ public class Pem {
         // first, identify the content type of the input using the tags
         Matcher tagMatcher = contentTagStartPattern.matcher(input);
         if( tagMatcher.find() ) {
-            output.contentType = tagMatcher.group(1);
+            output.banner = tagMatcher.group(1);
 //            log.debug("PEM content type according to tag: {}", output.contentType);
         }
         else {
              throw new IllegalArgumentException("Input is not in PEM format");
         }
         // second, there must be a matching end-tag for the start-tag
-        if( !input.contains(output.getTagEnd()) ) { throw new IllegalArgumentException("PEM input with content type '"+output.contentType+"' does not have an end tag"); }
+        if( !input.contains(output.getTagEnd()) ) { throw new IllegalArgumentException("PEM input with content type '"+output.banner+"' does not have an end tag"); }
         // third, separate the header from the body
         String content = input.replace(output.getTagStart(), "").replace(output.getTagEnd(), "").replace(PEM_NEWLINE, "\n").trim(); // the trim is to eliminate newlines that may be around the begin/end tokens
         StringBuilder encodedContent = new StringBuilder();
@@ -169,7 +235,7 @@ public class Pem {
                     if( m2.matches() ) {
                         String attributeName = m2.group(1);
 //                        log.debug("attr name: {} with empty value", attributeName);
-                        output.headers.put(attributeName, null);        // XXX using null to indicate the attribute was in the file but had no value... consider using empty string instead or not registering it at all
+                        output.headers.put(attributeName, "");
                     }
                     else {
                         // the line isn't in header format so assume that it's the start of content

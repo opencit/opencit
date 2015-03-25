@@ -29,6 +29,7 @@ public class ExportConfig extends InteractiveCommand {
             password = getExistingPassword("the Server Configuration File", "env-password");
         }
         else {
+            // gets environment variable MTWILSON_PASSWORD, TRUSTAGENT_PASSWORD, KMS_PASSWORD, etc.
             password = Environment.get("PASSWORD");
             if( password == null ) {
                 throw new IllegalArgumentException("Usage: ImportConfig <outfile|--out=outfile|--stdout> [--env-password=PASSWORD_VAR]");

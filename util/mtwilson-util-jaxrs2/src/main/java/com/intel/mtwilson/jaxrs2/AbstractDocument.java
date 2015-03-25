@@ -15,7 +15,7 @@ import com.intel.dcsg.cpg.io.UUID;
  * such as creating a new UUID when needed, and always having a way to reference
  * a specific document that is likely to be unique (especially if the context
  * is restricted). 
- * This abstract class also extends Attributes so that new attributes can be
+ * This abstract class also contains an Attributes field so that new attributes can be
  * passed through existing code without breaking things. For example if a new
  * backend feature is added which must be enabled by passing a new option,
  * subclasses of AbstractDocument could accept that new option as input without

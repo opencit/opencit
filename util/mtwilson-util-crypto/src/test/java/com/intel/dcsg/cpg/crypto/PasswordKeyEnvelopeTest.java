@@ -6,9 +6,11 @@ package com.intel.dcsg.cpg.crypto;
 
 import com.intel.dcsg.cpg.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.file.PasswordKeyEnvelope;
-import com.intel.dcsg.cpg.crypto.file.PasswordKeyEnvelopeFactory;
-import com.intel.dcsg.cpg.crypto.file.PasswordKeyEnvelopeRecipient;
+import com.intel.dcsg.cpg.crypto.file.PasswordProtectedKeyPemEnvelopeFactory;
+import com.intel.dcsg.cpg.crypto.file.PasswordProtectedKeyPemEnvelopeOpener;
+import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
+import com.intel.dcsg.cpg.crypto.file.PemKeyEncryptionUtil;
+import com.intel.dcsg.cpg.io.pem.Pem;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -54,9 +56,9 @@ BVXEednbBCISCi85E21ORa0cZsLnLfcU
     public void testWritePasswordKeyEnvelopeFormat() throws CryptographyException {
         String password = generatePassword(8);
         SecretKey secretKey = Aes128.generateKey();
-        PasswordKeyEnvelopeFactory factory = new PasswordKeyEnvelopeFactory(password);
-        PasswordKeyEnvelope envelope = factory.seal(secretKey);
-        String output = envelope.toPem();
+        PasswordProtectedKeyPemEnvelopeFactory factory = new PasswordProtectedKeyPemEnvelopeFactory(password);
+        PemKeyEncryption envelope = factory.seal(secretKey);
+        String output = envelope.toString();
         System.out.println("Password: "+password);
         System.out.println(output);
     }
@@ -71,11 +73,11 @@ BVXEednbBCISCi85E21ORa0cZsLnLfcU
 "\n" +
 "BVXEednbBCISCi85E21ORa0cZsLnLfcU\n" +
 "-----END SECRET KEY-----\n";
-        PasswordKeyEnvelope envelope = PasswordKeyEnvelope.fromPem(pem);
-        assertEquals("bkaz4lbv/y0=:etpZPPlmwEilwbNxzBHRCd+FyWQMw1akygtgIPent6w=", envelope.getEnvelopeKeyId());
-        assertEquals("PBEWithMD5AndDES", envelope.getEnvelopeAlgorithm());
+        PemKeyEncryption envelope = PemKeyEncryptionUtil.getEnvelope(Pem.valueOf(pem));
+        assertEquals("bkaz4lbv/y0=:etpZPPlmwEilwbNxzBHRCd+FyWQMw1akygtgIPent6w=", envelope.getEncryptionKeyId());
+        assertEquals("PBEWithMD5AndDES", envelope.getEncryptionAlgorithm());
         assertEquals("AES", envelope.getContentAlgorithm());
-        assertEquals("BVXEednbBCISCi85E21ORa0cZsLnLfcU", Base64.encodeBase64String(envelope.getContent()));
+        assertEquals("BVXEednbBCISCi85E21ORa0cZsLnLfcU", Base64.encodeBase64String(envelope.getDocument().getContent()));
     }
     
     @Test
@@ -85,14 +87,14 @@ BVXEednbBCISCi85E21ORa0cZsLnLfcU
         // create the AES key that will be wrapped
         SecretKey secretKey = Aes128.generateKey();
         // seal the secret key
-        PasswordKeyEnvelopeFactory factory = new PasswordKeyEnvelopeFactory(password);
-        PasswordKeyEnvelope envelope = factory.seal(secretKey);
+        PasswordProtectedKeyPemEnvelopeFactory factory = new PasswordProtectedKeyPemEnvelopeFactory(password);
+        PemKeyEncryption envelope = factory.seal(secretKey);
         log.debug("content algorithm: {}", envelope.getContentAlgorithm());
-        log.debug("envelope algorithm: {}", envelope.getEnvelopeAlgorithm());
-        log.debug("envelope key id: {}", envelope.getEnvelopeKeyId());
-        log.debug("envelope pem:\n{}\n", envelope.toPem());
+        log.debug("envelope algorithm: {}", envelope.getEncryptionAlgorithm());
+        log.debug("envelope key id: {}", envelope.getEncryptionKeyId());
+        log.debug("envelope pem:\n{}\n", envelope.getDocument().toString());
         // unseal the secret key
-        PasswordKeyEnvelopeRecipient recipient = new PasswordKeyEnvelopeRecipient(password);
+        PasswordProtectedKeyPemEnvelopeOpener recipient = new PasswordProtectedKeyPemEnvelopeOpener(password);
         Key unwrappedKey = recipient.unseal(envelope);
         // check that we got the same key back
         assertEquals(secretKey.getAlgorithm(), unwrappedKey.getAlgorithm());
@@ -108,10 +110,10 @@ BVXEednbBCISCi85E21ORa0cZsLnLfcU
         // create the AES key that will be wrapped
         SecretKey secretKey = Aes128.generateKey();
         // seal the secret key
-        PasswordKeyEnvelopeFactory factory = new PasswordKeyEnvelopeFactory(password1);
-        PasswordKeyEnvelope envelope = factory.seal(secretKey);
+        PasswordProtectedKeyPemEnvelopeFactory factory = new PasswordProtectedKeyPemEnvelopeFactory(password1);
+        PemKeyEncryption envelope = factory.seal(secretKey);
         // try to unseal the secret key with the wrong password
-        PasswordKeyEnvelopeRecipient recipient = new PasswordKeyEnvelopeRecipient(password2);
+        PasswordProtectedKeyPemEnvelopeOpener recipient = new PasswordProtectedKeyPemEnvelopeOpener(password2);
         Key unwrappedKey = recipient.unseal(envelope); // throws CryptographyException: IllegalArgumentException: PasswordKeyEnvelope created with salted-hash-of-password1 cannot be unsealed with private key corresponding to salted-hash-of-password2
     }
 }
