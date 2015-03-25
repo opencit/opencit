@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>mtwilson-postgresql</artifactId>
-
+  <groupId>com.intel.mtwilson.database</groupId>
   <packaging>jar</packaging>
   <name>Postgres Support</name>
   <description>SQL and Java code to support PostgresQL storage</description>
