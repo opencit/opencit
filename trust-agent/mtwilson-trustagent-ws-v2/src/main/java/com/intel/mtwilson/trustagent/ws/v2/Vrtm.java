@@ -39,6 +39,7 @@ import java.io.IOException;
 @V2
 @Path("/vrtm")
 public class Vrtm {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Vrtm.class);
     
     @POST
     @Path("/reports")
@@ -47,10 +48,9 @@ public class Vrtm {
     public VMAttestationResponse getVMAttesationReport(VMAttestationRequest vmAttestationRequest) throws TAException, IOException {
         
         String vmInstanceId = vmAttestationRequest.getVmInstanceId();
-        
         VMAttestationResponse vmAttestationResponse = new VMAttestationResponse();
         
-        //read vrtm
+        //Format read vrtm request 
         String xmlRPCBlob=  "<?xml version='1.0'?>" 
                             + "<methodCall>"
                             + "<methodName>get_verification_status</methodName>"
@@ -64,27 +64,15 @@ public class Vrtm {
         TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.IS_VM_VERIFIED);
 		
         // first replace the %s of xmlRPCBlob by VMUUID, rpcore accept all method input arguments in base64 format
-        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary(("vmuuid").getBytes()));
-        System.out.println(base64InputArgument);
+        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary((vmInstanceId).getBytes()));
+        log.debug("Sending {}", base64InputArgument);
         tcBuffer.setRPCPayload(base64InputArgument.getBytes());
 	
-        System.out.println("send");
+        // create instance of RPClient
+        RPClient rpcInstance = new RPClient("127.0.0.1", 16005);
+        TCBuffer resultTcb = rpcInstance.send(tcBuffer);    // send tcBuffer to rpcore 
+        rpcInstance.close();   // close RPClient
 
-        // create instance of RPClient, One instance of RPClient for App life time is sufficient 
-        // to do processing 
-        TCBuffer expResult = null;
-        RPClient instance = new RPClient("127.0.0.1", 16005);
-        // send tcBuffer to rpcore 
-        TCBuffer result = instance.send(tcBuffer);
-        
-        // process response
-        System.out.println("rpid = " + result.getRpId());
-        System.out.println("RPC Call Index =" + result.getRPCCallIndex());
-        System.out.println("RPC Payload Size = " + result.getRPCPayloadSize());
-        System.out.println("RPC Call Status = " + result.getRPCCallStatus());
-        System.out.println("RPC Original RP ID = " + result.getOriginalRpId());
-        System.out.println("RPC Payload = " + result.getRPCPayload());
-        
         /*
         Sample Output:
          <?xml version='1.0'?>
@@ -99,9 +87,23 @@ public class Vrtm {
 	decode MTAwMA== to get actual RP id 	
         */
         
-        // close RPClient at the end of application
-        instance.close();
+        // process response
+        log.debug("rpid = {}" + resultTcb.getRpId());
+        log.debug("RPC Call Index = {}" + resultTcb.getRPCCallIndex());
+        log.debug("RPC Payload Size = {}" + resultTcb.getRPCPayloadSize());
+        log.debug("RPC Call Status = {}" + resultTcb.getRPCCallStatus());
+        log.debug("RPC Original RP ID = {}" + resultTcb.getOriginalRpId());
+        log.debug("RPC Payload = {}" + resultTcb.getRPCPayload());
         
+        /* check payload and parse the return xml to get the response value
+        if (resultTcb.getRPCPayloadSize() == 0) {
+            
+        }
+        else {
+            
+        }
+        */
+
         //set report
         vmAttestationResponse.setVmInstanceId(vmInstanceId);
         vmAttestationResponse.setTrustStatus(true);
