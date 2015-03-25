@@ -2499,7 +2499,6 @@ glassfish_create_ssl_cert() {
   local serverName="${1}"
   serverName=$(echo "$serverName" | sed -e 's/ //g' | sed -e 's/,$//')
 
-  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local domain_found=$($glassfish list-domains | head -n 1 | awk '{ print $1 }')
   local GF_CONFIG_PATH="${GLASSFISH_HOME}/domains/${domain_found}/config"
   local keystore="${GF_CONFIG_PATH}/keystore.jks"
@@ -2509,6 +2508,11 @@ glassfish_create_ssl_cert() {
   local keytool="${JAVA_HOME}/bin/keytool"
   local mtwilson=$(which mtwilson 2>/dev/null)
   local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
+
+  if [ -z "$MTW_TLS_KEYSTORE_PASS" ] || [ "$MTW_TLS_KEYSTORE_PASS" == "changeit" ]; then MTW_TLS_KEYSTORE_PASS=$(generate_password 32); fi
+  keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+  keystorePasswordOld=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+  keystorePasswordOld=${keystorePasswordOld:-"changeit"}
 
   # Create an array of host ips and dns names from csv list passed into function
   OIFS="$IFS"
@@ -2533,28 +2537,31 @@ glassfish_create_ssl_cert() {
   cert_sans=$(echo "$cert_sans" | sed -e 's/,$//')
   cert_cns='CN='$(echo "$serverName" | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g')
 
-  # Check if there is already a certificate for this serverName in the Glassfish keystore
-  has_cert=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
-
+  # fix for if old version of mtwilson was saving incorrect password; reverts current password to "changeit"
+  has_incorrect_password=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+  if [ -n "$has_incorrect_password" ]; then
+    keystorePasswordOld="changeit"
+    has_incorrect_password=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+    if [ -n "$has_incorrect_password" ]; then
+      echo_failure "Current SSL keystore password is incorrect"
+      exit -1
+    fi
+  fi
+  
   if [ "${GLASSFISH_CREATE_SSL_CERT:-yes}" == "yes" ]; then
-    if [ -z "$has_cert" ]; then
-      if [ -z "$MTW_TLS_KEYSTORE_PASS" ]; then MTW_TLS_KEYSTORE_PASS=$(generate_password 32); fi
-      glassfishTlsKeystorePassword=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
-      glassfishTlsKeystorePassword=${glassfishTlsKeystorePassword:-"changeit"}
-      if [ "$glassfishTlsKeystorePassword" != "$MTW_TLS_KEYSTORE_PASS" ]; then  # "OLD" != "NEW"
-        echo "Updating Glassfish master password..."
-        #change glassfish master password which is the keystore password
-        glassfish_stop >/dev/null
-      
-        mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup" 2>/dev/null
-        touch "${GF_CONFIG_PATH}/master.passwd"
-        echo "AS_ADMIN_MASTERPASSWORD=$glassfishTlsKeystorePassword" > "${GF_CONFIG_PATH}/master.passwd"
-        echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
-        $glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
-        rm "${GF_CONFIG_PATH}/master.passwd"
-        glassfish_start >/dev/null
-        update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$MTW_TLS_KEYSTORE_PASS"
-      fi
+    if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
+      echo "Updating Glassfish master password..."
+      #change glassfish master password which is the keystore password
+      glassfish_stop >/dev/null
+      glassfishMaster=$(echo "$glassfish" | sed -e 's/--user=.*\b//g' | sed -e 's/--passwordfile=.*\b//g')
+      mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup" 2>/dev/null
+      touch "${GF_CONFIG_PATH}/master.passwd"
+      echo "AS_ADMIN_MASTERPASSWORD=$keystorePasswordOld" > "${GF_CONFIG_PATH}/master.passwd"
+      echo "AS_ADMIN_NEWMASTERPASSWORD=$keystorePassword" >> "${GF_CONFIG_PATH}/master.passwd"
+      $glassfishMaster change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
+      rm "${GF_CONFIG_PATH}/master.passwd"
+      glassfish_start >/dev/null
+      update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
     fi
     
     echo "Creating SSL Certificate for ${serverName}..."
@@ -2567,11 +2574,9 @@ glassfish_create_ssl_cert() {
     # Update keystore.jks
     $keytool -genkeypair -alias s1as -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
     $keytool -genkeypair -alias glassfish-instance -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
-    
-    if [ -z "$has_cert" ]; then
-      echo "Restarting Glassfish as a new SSL certificate was generated..."
-      glassfish_restart >/dev/null
-    fi
+
+    echo "Restarting Glassfish as a new SSL certificate was generated..."
+    glassfish_restart >/dev/null
   fi
 
   has_cert=$($keytool -list -v -alias s1as -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
@@ -2927,7 +2932,6 @@ tomcat_create_ssl_cert() {
   local serverName="${1}"
   serverName=$(echo $serverName | sed -e 's/ //g' | sed -e 's/,$//')
 
-  local keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
   local keystore="${TOMCAT_HOME}/ssl/.keystore"
   local tomcatServerXml="${TOMCAT_HOME}/conf/server.xml"
   local configDir="/opt/mtwilson/configuration"
@@ -2935,6 +2939,11 @@ tomcat_create_ssl_cert() {
   local keytool="${JAVA_HOME}/bin/keytool"
   local mtwilson=$(which mtwilson 2>/dev/null)
   local tmpHost=$(echo "$serverName" | awk -F ',' '{ print $1 }' | sed -e 's/ //g')
+
+  if [ -z "$MTW_TLS_KEYSTORE_PASS" ] || [ "$MTW_TLS_KEYSTORE_PASS" == "changeit" ]; then MTW_TLS_KEYSTORE_PASS=$(generate_password 32); fi
+  keystorePassword="$MTW_TLS_KEYSTORE_PASS"   #changeit
+  keystorePasswordOld=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
+  keystorePasswordOld=${keystorePasswordOld:-"changeit"}
 
   # Create an array of host ips and dns names from csv list passed into function
   OIFS="$IFS"
@@ -2959,21 +2968,25 @@ tomcat_create_ssl_cert() {
   cert_sans=$(echo $cert_sans | sed -e 's/,$//')
   
   mkdir -p ${TOMCAT_HOME}/ssl
-  # Check if there is already a certificate for this serverName in the Tomcat keystore
-  has_cert=$($keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+
+  # fix for if old version of mtwilson was saving incorrect password; reverts current password to "changeit"
+  has_incorrect_password=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+  if [ -n "$has_incorrect_password" ]; then
+    keystorePasswordOld="changeit"
+    has_incorrect_password=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePasswordOld" 2>&1 | grep "password was incorrect")
+    if [ -n "$has_incorrect_password" ]; then
+      echo_failure "Current SSL keystore password is incorrect"
+      exit -1
+    fi
+  fi
 
   if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
-    if [ -z "$has_cert" ]; then
-      if [ -z "$MTW_TLS_KEYSTORE_PASS" ]; then MTW_TLS_KEYSTORE_PASS=$(generate_password 32); fi
-      tomcatTlsKeystorePassword=$(read_property_from_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}")
-      tomcatTlsKeystorePassword=${tomcatTlsKeystorePassword:-"changeit"}
-      if [ "$tomcatTlsKeystorePassword" != "$MTW_TLS_KEYSTORE_PASS" ]; then  # "OLD" != "NEW"
-        echo "Updating keystore password in Tomcat server.xml..."
-        sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$MTW_TLS_KEYSTORE_PASS"'\" \/>/g' "$tomcatServerXml"
-        echo "Restarting Tomcat as a new SSL certificate was generated..."
-        tomcat_restart >/dev/null
-        update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$MTW_TLS_KEYSTORE_PASS"
-      fi
+    if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
+      echo "Updating keystore password in Tomcat server.xml..."
+      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
+      echo "Restarting Tomcat as a new SSL certificate was generated..."
+      tomcat_restart >/dev/null
+      update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
     fi
     
     echo "Creating SSL Certificate for ${serverName}..."
@@ -2981,14 +2994,13 @@ tomcat_create_ssl_cert() {
     $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
 
     # Update keystore.jks
-    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
-    if [ -z "$has_cert" ]; then
-      echo "Restarting Tomcat as a new SSL certificate was generated..."
-      tomcat_restart >/dev/null
-    fi
+    $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
+    
+    echo "Restarting Tomcat as a new SSL certificate was generated..."
+    tomcat_restart >/dev/null
   fi
   
-  has_cert=$($keytool -list -v -alias tomcat -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "$tmpHost")
+  has_cert=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
   if [ -n "$has_cert" ]; then
     $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
