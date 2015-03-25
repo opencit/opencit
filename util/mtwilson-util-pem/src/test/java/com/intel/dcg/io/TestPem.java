@@ -87,7 +87,7 @@ attr1: value1
 "QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=\n"+
 "-----END RANDOM DATA-----";
         Pem pem = Pem.valueOf(input);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem.getHeaders().isEmpty());
     }
@@ -102,7 +102,7 @@ attr1: value1
 "QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=\n"+
 "-----END RANDOM DATA-----";
         Pem pem = Pem.valueOf(input);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", Base64.encodeBase64String(pem.getContent()));
         assertEquals(2,pem.getHeaders().size());
         assertTrue(pem.getHeaders().containsKey("attr1"));
@@ -122,7 +122,7 @@ attr1: value1
 "QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=\n"+
 "-----END RANDOM DATA-----";
         Pem pem = Pem.valueOf(input);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", Base64.encodeBase64String(pem.getContent()));
         assertEquals(2,pem.getHeaders().size());
         assertTrue(pem.getHeaders().containsKey("attr1"));

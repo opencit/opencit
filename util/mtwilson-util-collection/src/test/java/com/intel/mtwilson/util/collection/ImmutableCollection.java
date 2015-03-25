@@ -2,8 +2,9 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.collection;
+package com.intel.mtwilson.util.collection;
 
+import com.intel.mtwilson.collection.ReadonlyIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -38,7 +39,7 @@ public class ImmutableCollection<T> implements Collection<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return new ImmutableIterator(delegate.iterator());
+        return new ReadonlyIterator(delegate.iterator());
     }
     
 }

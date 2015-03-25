@@ -37,34 +37,34 @@ public class Scanner {
     public void setExcludePackages(List<String> excludePackages) {
         this.excludePackages = excludePackages;
     }
-    
+
     private void process(Class<?> clazz) {
         // ignore interfaces and abstract classes because they cannot be instantiated and therefore cannot be extensions themselves
-        if( clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()) ) {
+        if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
             return;
         }
         if (includePackages == null || startsWithAny(clazz.getName(), toPackagePrefixes(includePackages))) {
             if (excludePackages == null || !startsWithAny(clazz.getName(), toPackagePrefixes(excludePackages))) {
-        
-        for (int i = 0; i < registrars.length; i++) {
-            Registrar registrar = registrars[i];
-            log.debug("Processing {} with registrar {}", clazz.getName(), registrar.getClass().getName());
-            try {
-                if (registrar.accept(clazz)) {
-                    log.debug("Auto-registered {} with {}", clazz.getName(), registrar.getClass().getName());
+
+                for (int i = 0; i < registrars.length; i++) {
+                    Registrar registrar = registrars[i];
+                    log.debug("Processing {} with registrar {}", clazz.getName(), registrar.getClass().getName());
+                    try {
+                        if (registrar.accept(clazz)) {
+                            log.debug("Auto-registered {} with {}", clazz.getName(), registrar.getClass().getName());
+                        }
+                    } catch (RuntimeException e) { // could be ClassNotFoundException or NoClassDefFoundError
+                        log.debug("Cannot evaluate class {}: {}", clazz.getName(), e.getClass().getName());
+                        if (throwExceptions) {
+                            throw e;
+                        }
+                    } catch (Error e) {
+                        log.debug("Cannot evaluate class {}: {}", clazz.getName(), e.getClass().getName());
+                        if (throwErrors) {
+                            throw e;
+                        }
+                    }
                 }
-            } catch (RuntimeException e) { // could be ClassNotFoundException or NoClassDefFoundError
-                log.debug("Cannot evaluate class {}: {}", clazz.getName(), e.getClass().getName());
-                if (throwExceptions) {
-                    throw e;
-                }
-            } catch (Error e) {
-                log.debug("Cannot evaluate class {}: {}", clazz.getName(), e.getClass().getName());
-                if (throwErrors) {
-                    throw e;
-                }
-            }
-        }
             }
         }
     }
@@ -111,7 +111,7 @@ public class Scanner {
     public void setThrowErrors(boolean throwErrors) {
         this.throwErrors = throwErrors;
     }
-    
+
     private boolean startsWithAny(String test, List<String> prefixes) {
         for (String prefix : prefixes) {
             if (test.startsWith(prefix)) {
@@ -120,16 +120,15 @@ public class Scanner {
         }
         return false;
     }
-    
+
     // the prefixes are like "java", "javax", "com.intel", etc.
     // we return the same prefixes with a "." at the end so they become
     // "java.", "javax.", "com.intel.", etc. 
     private List<String> toPackagePrefixes(List<String> prefixes) {
         ArrayList<String> packagePrefixes = new ArrayList<>();
-        for(String prefix : prefixes) {
-            packagePrefixes.add(prefix+".");
+        for (String prefix : prefixes) {
+            packagePrefixes.add(prefix + ".");
         }
         return packagePrefixes;
     }
-    
 }

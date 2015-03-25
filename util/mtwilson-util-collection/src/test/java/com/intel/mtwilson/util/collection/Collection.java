@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.collection;
+package com.intel.mtwilson.util.collection;
 
 /**
  * A minimalist, read-only Collection interface 

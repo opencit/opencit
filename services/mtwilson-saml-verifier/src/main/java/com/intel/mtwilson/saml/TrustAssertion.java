@@ -110,6 +110,7 @@ public class TrustAssertion {
                 throw new IllegalArgumentException("Cannot verify XML signature");
             }
         } catch (Exception e) {
+            log.error("Cannot verify trust assertion", e);
             isValid = false;
             error = e;
             assertion = null;

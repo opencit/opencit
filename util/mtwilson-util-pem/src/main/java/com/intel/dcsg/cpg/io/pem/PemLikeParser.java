@@ -6,6 +6,7 @@ package com.intel.dcsg.cpg.io.pem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -144,7 +145,7 @@ public class PemLikeParser {
     
     private static class ContentInfo {
         StringBuilder body = new StringBuilder();
-        HashMap<String,String> headers = new HashMap<>();
+        LinkedHashMap<String,String> headers = new LinkedHashMap<>(); // linked hash map  preserves insertion order
     }
     
     

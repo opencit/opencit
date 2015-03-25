@@ -6,9 +6,11 @@ package com.intel.dcsg.cpg.crypto.file;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.Md5Digest;
+import com.intel.dcsg.cpg.io.pem.Pem;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import javax.crypto.BadPaddingException;
@@ -35,13 +37,18 @@ import javax.crypto.NoSuchPaddingException;
  * SecretKey key = Aes128.generateKey();
  * RsaKeyEnvelope keyEnvelope = factory.seal(key);
  * 
- * @since 0.1
+ * Compatibility note: earlier version of this class in 0.2 was called 
+ * RsaKeyEnvelopeFactory
+ * 
+ * @since 0.3
  * @author jbuhacoff
  */
-public class RsaKeyEnvelopeFactory {
+public class RsaPublicKeyProtectedPemKeyEnvelopeFactory {
     public static final String DEFAULT_ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"; // RSA encryption in ECB mode (since we expect to only have one block anyway) with OAEP padding that uses SHA-256 and MGF1
-    private X509Certificate certificate;
-    private String certificateFingerprint; // MD5 of the certificate
+    private PublicKey publicKey;
+    private String publicKeyId;
+//    private X509Certificate certificate;
+//    private String certificateFingerprint; // MD5 of the certificate
     private String algorithm = null;
     
     /**
@@ -49,16 +56,25 @@ public class RsaKeyEnvelopeFactory {
      * @param certificate public key certificate of the recipient to which envelopes will be addressed
      * @throws CryptographyException with CertificateEncodingException as the root cause
      */
-    public RsaKeyEnvelopeFactory(X509Certificate certificate) throws CryptographyException {
+    public RsaPublicKeyProtectedPemKeyEnvelopeFactory(X509Certificate certificate) throws CryptographyException {
         try {
             this.algorithm = DEFAULT_ALGORITHM;
-            this.certificate = certificate;
-            this.certificateFingerprint = Md5Digest.digestOf(certificate.getEncoded()).toString();
+//            this.certificate = certificate;
+//            this.certificateFingerprint = Md5Digest.digestOf(certificate.getEncoded()).toString();
+            this.publicKey = certificate.getPublicKey();
+            this.publicKeyId = Md5Digest.digestOf(certificate.getEncoded()).toString(); // maybe should be sha1 or sha256
         }
         catch(Exception e) {
             throw new CryptographyException(e);
         }
     }
+
+    public RsaPublicKeyProtectedPemKeyEnvelopeFactory(PublicKey publicKey, String publicKeyId) {
+        this.publicKey = publicKey;
+        this.publicKeyId = publicKeyId;
+        this.algorithm = DEFAULT_ALGORITHM; // note that publicKey.getAlgorithm() is "RSA" but the algorithm string we need to provide the cipher is cipher/mode/padding
+    }
+    
     
     /**
      * Set algorithm, cipher mode, and padding.
@@ -80,16 +96,16 @@ public class RsaKeyEnvelopeFactory {
      * @return
      * @throws CryptographyException with one of the following as the cause: NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
      */
-    public RsaKeyEnvelope seal(Key secretKey) throws CryptographyException {
+    public PemKeyEncryption seal(Key secretKey) throws CryptographyException {
         try {
             Cipher cipher = Cipher.getInstance(algorithm); // NoSuchAlgorithmException, NoSuchPaddingException
-            cipher.init(Cipher.WRAP_MODE,certificate); // InvalidKeyException
+            cipher.init(Cipher.WRAP_MODE,publicKey); // InvalidKeyException
             byte[] encryptedKey = cipher.wrap(secretKey); // IllegalBlockSizeException, BadPaddingException
-            RsaKeyEnvelope keyEnvelope = new RsaKeyEnvelope();
-            keyEnvelope.setContent(encryptedKey);
+            Pem pem = new Pem(KeyEnvelope.PEM_BANNER, encryptedKey);
+            KeyEnvelope keyEnvelope = new KeyEnvelope(pem);
             keyEnvelope.setContentAlgorithm(secretKey.getAlgorithm()); // expected to be "AES"
-            keyEnvelope.setEnvelopeKeyId(certificateFingerprint);
-            keyEnvelope.setEnvelopeAlgorithm(algorithm);
+            keyEnvelope.setEncryptionKeyId(publicKeyId);
+            keyEnvelope.setEncryptionAlgorithm(algorithm);
             return keyEnvelope;
         }
         catch(Exception e) {
@@ -105,8 +121,8 @@ public class RsaKeyEnvelopeFactory {
      * @return
      * @throws CryptographyException with one of the following as the cause: CertificateEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
      */
-    public static RsaKeyEnvelope sealKeyWithCertificate(Key secretKey, X509Certificate certificate) throws CryptographyException {
-        RsaKeyEnvelopeFactory factory = new RsaKeyEnvelopeFactory(certificate);
+    public static PemKeyEncryption sealKeyWithCertificate(Key secretKey, X509Certificate certificate) throws CryptographyException {
+        RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(certificate);
         return factory.seal(secretKey);
     }
 }
