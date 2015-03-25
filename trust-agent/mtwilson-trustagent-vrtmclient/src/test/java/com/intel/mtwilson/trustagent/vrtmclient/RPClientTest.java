@@ -56,7 +56,7 @@ public class RPClientTest {
         TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.IS_VM_VERIFIED);
 		
         // first replace the %s of xmlRPCBlob by VMUUID, rpcore accept all method input arguments in base64 format
-        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary(("vmuuid").getBytes()));
+        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary(("6eb62228-00e2-4da0-ac88-d4239a78aca2").getBytes()));
         System.out.println(base64InputArgument);
         tcBuffer.setRPCPayload(base64InputArgument.getBytes());
 	
@@ -65,7 +65,7 @@ public class RPClientTest {
         // create instance of RPClient, One instance of RPClient for App life time is sufficient 
         // to do processing 
         TCBuffer expResult = null;
-        RPClient instance = new RPClient("10.1.68.253", 16005);
+        RPClient instance = new RPClient("10.1.70.40", 16005);
         // send tcBuffer to rpcore 
         TCBuffer result = instance.send(tcBuffer);
         
