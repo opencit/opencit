@@ -38,18 +38,22 @@ public class ClasspathResourceResolver extends ClasspathResolver /*implements LS
     protected String pathFromPackageName(String packageName) {
         return "/"+packageName.replace(".","/");
     }
+    // the path is like "/saml-schema-assertion-2.0.xsd"
     protected String pathFromFilename(File file) {
             return prefix+"/"+file.getName();
     }
+    // the path is like "/saml-schema-assertion-2.0.xsd"
     protected String pathFromFilename(String filename) {
             return prefix+"/"+filename;
     }
+    // the path is like "/security/saml/v2.0/saml-schema-assertion-2.0.xsd"
     protected String pathFromURL(URL url) {
         String path = url.getPath(); // url path is either empty or always includes leading slash
         if( path == null || path.isEmpty() ) { path = "/"; }
         if( path.startsWith("/")) { return prefix+path; }
         return prefix+"/"+path;
     }
+    // the path is like "/docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd"
     protected String pathFromURLWithDomain(URL url) {
         return prefix+"/"+url.getHost()+url.getPath(); // url path always includes leading slash
     }
@@ -118,11 +122,6 @@ public class ClasspathResourceResolver extends ClasspathResolver /*implements LS
                 String path = pathFromURLWithDomain(url); // the path is like "/docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd"
                 log.debug("tried to resolve href {} pathFromURLWithDomain {}", href, path);
                 InputStream in = getResourceAsStream(path);
-                if( in == null ) {
-                    // try again without the domain name
-                    path = pathFromURL(url); // the path is like "/security/saml/v2.0/saml-schema-assertion-2.0.xsd"
-                    in = getResourceAsStream(path);
-                }
                 if( in == null ) {
                     // try again with just the filename instead of full path from url
                     path = pathFromFilename(new File(url.getPath())); // the path is like "/saml-schema-assertion-2.0.xsd"
