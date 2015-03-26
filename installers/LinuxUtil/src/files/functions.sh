@@ -2982,7 +2982,8 @@ tomcat_create_ssl_cert() {
 
   if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
-      echo "Updating keystore password in Tomcat server.xml..."
+      echo "Changing keystore password and updating in Tomcat server.xml..."
+      $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
       sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
       echo "Restarting Tomcat as a new SSL certificate was generated..."
       tomcat_restart >/dev/null
@@ -2991,7 +2992,7 @@ tomcat_create_ssl_cert() {
     
     echo "Creating SSL Certificate for ${serverName}..."
     # Delete public insecure certs within keystore.jks and cacerts.jks
-    $keytool -delete -alias tomcat -keystore $keystore -storepass $keystorePassword 2>&1 >/dev/null
+    $keytool -delete -alias tomcat -keystore "$keystore" -storepass "$keystorePassword" 2>&1 >/dev/null
 
     # Update keystore.jks
     $keytool -genkeypair -alias tomcat -dname "$cert_cns, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san="$cert_sans" -keyalg RSA -keysize 2048 -validity 3650 -keystore "$keystore" -keypass "$keystorePassword" -storepass "$keystorePassword"
@@ -3002,7 +3003,7 @@ tomcat_create_ssl_cert() {
   
   has_cert=$($keytool -list -v -alias tomcat -keystore "$keystore" -storepass "$keystorePassword" | grep "^Owner:" | grep "$tmpHost")
   if [ -n "$has_cert" ]; then
-    $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass $keystorePassword 
+    $keytool -export -alias tomcat -file "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -keystore $keystore -storepass "$keystorePassword"
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" -inform der -out "$configDir/ssl.crt.pem" -outform pem
     cp "${TOMCAT_HOME}/ssl/ssl.${tmpHost}.crt" "$configDir/ssl.crt"
     cp "$keystore" "$configDir/mtwilson-tls.jks"
