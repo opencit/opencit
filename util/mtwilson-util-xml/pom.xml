@@ -37,5 +37,14 @@
             <optional>true</optional>
         </dependency>
         
+        
+        <!-- required to use ClasspathResourceResolver because it uses IOUtils to load resources -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+                
   </dependencies>  
 </project>
