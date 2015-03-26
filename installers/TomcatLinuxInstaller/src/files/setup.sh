@@ -45,12 +45,12 @@ fi
 echo "Editing tomcat-users.xml in $TOMCAT_CONF..."
 
 cd $TOMCAT_CONF
-userExists=`grep "username=\"$WEBSERVICE_USERNAME\"" tomcat-users.xml`
+userExists=`grep "username=\"$WEBSERVICE_MANAGER_USERNAME\"" tomcat-users.xml`
 mv tomcat-users.xml tomcat-users.xml.old
 if [ -z "$userExists" ]; then
-  sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+  sed 's/<\/tomcat-users>/\n  <role rolename="manager-gui"\/>\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_MANAGER_USERNAME'" password="'$WEBSERVICE_MANAGER_PASSWORD'" roles="manager,manager-gui,manager-script"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
 else
-  sed -i 's/.*username="'$WEBSERVICE_USERNAME'".*/  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager,manager-gui,manager-script"\/>/g' tomcat-users.xml.old
+  sed -i 's/.*username="'$WEBSERVICE_MANAGER_USERNAME'".*/  <user username="'$WEBSERVICE_MANAGER_USERNAME'" password="'$WEBSERVICE_MANAGER_PASSWORD'" roles="manager,manager-gui,manager-script"\/>/g' tomcat-users.xml.old
   cp tomcat-users.xml.old tomcat-users.xml
 fi
 rm  -f tomcat-users.xml.old

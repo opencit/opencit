@@ -459,8 +459,8 @@ wait_until_file_exists() {
 
 # Usage example:   if using_glassfish; then echo "Using glassfish"; fi
 using_glassfish() {
-  if [[ -n "$WEBSERVER_VENDOR" ]]; then
-    if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
+  if [[ -n "$WEBSERVICE_VENDOR" ]]; then
+    if [[ "${WEBSERVICE_VENDOR}" == "glassfish" ]]; then
       return 0
     else
       return 1
@@ -476,8 +476,8 @@ using_glassfish() {
   fi
 }
 using_tomcat() {
-  if [[ -n "$WEBSERVER_VENDOR" ]]; then
-    if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then
+  if [[ -n "$WEBSERVICE_VENDOR" ]]; then
+    if [[ "${WEBSERVICE_VENDOR}" == "tomcat" ]]; then
       return 0
     else
       return 1
@@ -2264,15 +2264,15 @@ glassfish_install() {
 glassfish_admin_user() {  
   #echo "You must choose an administrator username and password for Glassfish"
   echo "The Glassfish control panel is at https://${MTWILSON_SERVER:-127.0.0.1}:4848"
-  #prompt_with_default AS_ADMIN_USER "Glassfish admin username:" ${WEBSERVICE_USERNAME}
-  #prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:" ${WEBSERVICE_PASSWORD}
+  #prompt_with_default AS_ADMIN_USER "Glassfish admin username:" ${WEBSERVICE_MANAGER_USERNAME}
+  #prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:" ${WEBSERVICE_MANAGER_PASSWORD}
 
   expect=`which expect`  
   glassfish_detect
 
   GF_CONFIG_PATH="$GLASSFISH_HOME/config"
-  export AS_ADMIN_USER=$WEBSERVICE_USERNAME
-  export AS_ADMIN_PASSWORD=$WEBSERVICE_PASSWORD
+  export AS_ADMIN_USER=$WEBSERVICE_MANAGER_USERNAME
+  export AS_ADMIN_PASSWORD=$WEBSERVICE_MANAGER_PASSWORD
   export AS_ADMIN_PASSWORD_OLD=`cat $GF_CONFIG_PATH/admin.passwd 2>/dev/null | head -n 1 | cut -d'=' -f2`
   export AS_ADMIN_PASSWORDFILE=$GF_CONFIG_PATH/admin.passwd
   
@@ -2297,11 +2297,11 @@ glassfish_admin_user() {
   
 #(
 #$expect << EOD
-#spawn $glassfish --user=$WEBSERVICE_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
+#spawn $glassfish --user=$WEBSERVICE_MANAGER_USERNAME --passwordfile=$GF_CONFIG_PATH/admin.passwd.old change-admin-password
 #expect "Enter the new admin password>"
-#send "$WEBSERVICE_PASSWORD\r"
+#send "$WEBSERVICE_MANAGER_PASSWORD\r"
 #expect "Enter the new admin password again>"
-#send "$WEBSERVICE_PASSWORD\r"
+#send "$WEBSERVICE_MANAGER_PASSWORD\r"
 #interact
 #expect eof
 #EOD
@@ -3034,12 +3034,12 @@ tomcat_init_manager() {
   TOMCAT_MANAGER_USER=""
   TOMCAT_MANAGER_PASS=""
   TOMCAT_MANAGER_PORT=""
-  if [ -z "$WEBSERVICE_USERNAME" ]; then WEBSERVICE_USERNAME=admin; fi
+  if [ -z "$WEBSERVICE_MANAGER_USERNAME" ]; then WEBSERVICE_MANAGER_USERNAME=admin; fi
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
   TOMCAT_MANAGER_USER=`read_property_from_file tomcat.admin.username "${config_file}"`
   TOMCAT_MANAGER_PASS=`read_property_from_file tomcat.admin.password "${config_file}"`
   if [[ -z "$TOMCAT_MANAGER_USER" ]]; then
-    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_USERNAME\"" $TOMCAT_HOME/conf/tomcat-users.xml | head -n 1`
+    tomcat_manager_xml=`grep "username=\"$WEBSERVICE_MANAGER_USERNAME\"" $TOMCAT_HOME/conf/tomcat-users.xml | head -n 1`
     
     OIFS="$IFS"
     IFS=' '
@@ -3723,14 +3723,14 @@ The supported servers are g=Glassfish | t=Tomcat"
       WEBSERVER_CHOICE=
     else
       if [ "$WEBSERVER_CHOICE" = 't' ]; then 
-        export WEBSERVER_VENDOR="tomcat"
+        export WEBSERVICE_VENDOR="tomcat"
       else
-        export WEBSERVER_VENDOR="glassfish"
+        export WEBSERVICE_VENDOR="glassfish"
       fi
       break
     fi
   done
-  echo "Web Server Choice: $WEBSERVER_VENDOR" >> $INSTALL_LOG_FILE
+  echo "Web Server Choice: $WEBSERVICE_VENDOR" >> $INSTALL_LOG_FILE
 }
 # parameters:
 # 1. path to properties file
@@ -3899,12 +3899,19 @@ load_conf() {
       export CONF_DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTWILSON_TAG_API_USERNAME=`echo $temp | awk -F'mtwilson.tag.api.username=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_MTWILSON_TAG_API_PASSWORD=`echo $temp | awk -F'mtwilson.tag.api.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_WEBSERVICE_VENDOR=$(echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}')
+      if [ "CONF_WEBSERVICE_VENDOR == glassfish" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(echo $temp | awk -F'glassfish.admin.username=' '{print $2}' | awk -F' ' '{print $1}')
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(echo $temp | awk -F'glassfish.admin.password=' '{print $2}' | awk -F' ' '{print $1}')
+      elif [ "CONF_WEBSERVICE_VENDOR == tomcat" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(echo $temp | awk -F'tomcat.admin.username=' '{print $2}' | awk -F' ' '{print $1}')
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(echo $temp | awk -F'tomcat.admin.password=' '{print $2}' | awk -F' ' '{print $1}')
+      fi
     else
       echo -n "file [$mtw_props_path]....."
       export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host "$mtw_props_path"`
@@ -3913,12 +3920,19 @@ load_conf() {
       export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password "$mtw_props_path"`
       export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
-      export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
       export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
       export CONF_MTW_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
       export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
       export CONF_MTWILSON_TAG_API_USERNAME=`read_property_from_file mtwilson.tag.api.username "$mtw_props_path"`
       export CONF_MTWILSON_TAG_API_PASSWORD=`read_property_from_file mtwilson.tag.api.password "$mtw_props_path"`
+      export CONF_WEBSERVICE_VENDOR=$(read_property_from_file mtwilson.webserver.vendor "$mtw_props_path")
+      if [ "CONF_WEBSERVICE_VENDOR == glassfish" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(read_property_from_file glassfish.admin.username "$mtw_props_path")
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(read_property_from_file glassfish.admin.password "$mtw_props_path")
+      elif [ "CONF_WEBSERVICE_VENDOR == tomcat" ]; then
+        export CONF_WEBSERVICE_MANAGER_USERNAME=$(read_property_from_file tomcat.admin.username "$mtw_props_path")
+        export CONF_WEBSERVICE_MANAGER_PASSWORD=$(read_property_from_file tomcat.admin.password "$mtw_props_path")
+      fi
     fi
     echo_success "Done"
   fi
@@ -4049,7 +4063,9 @@ load_defaults() {
   export DEFAULT_DATABASE_PASSWORD=""
   export DEFAULT_DATABASE_PORTNUM=""
   export DEFAULT_DATABASE_DRIVER=""
-  export DEFAULT_WEBSERVER_VENDOR=""
+  export DEFAULT_WEBSERVICE_VENDOR=""
+  export DEFAULT_WEBSERVICE_MANAGER_USERNAME="admin"
+  export DEFAULT_WEBSERVICE_MANAGER_PASSWORD=$(generate_password 16)
   export DEFAULT_DATABASE_VENDOR=""
   export DEFAULT_PRIVACYCA_SERVER=""
   export DEFAULT_SAML_KEYSTORE_FILE="SAML.jks"
@@ -4078,8 +4094,10 @@ load_defaults() {
   export DATABASE_PASSWORD=${DATABASE_PASSWORD:-${CONF_DATABASE_PASSWORD:-$DEFAULT_DATABASE_PASSWORD}}
   export DATABASE_PORTNUM=${DATABASE_PORTNUM:-${CONF_DATABASE_PORTNUM:-$DEFAULT_DATABASE_PORTNUM}}
   export DATABASE_DRIVER=${DATABASE_DRIVER:-${CONF_DATABASE_DRIVER:-$DEFAULT_DATABASE_DRIVER}}
-  export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-${CONF_WEBSERVER_VENDOR:-$DEFAULT_WEBSERVER_VENDOR}}
   export DATABASE_VENDOR=${DATABASE_VENDOR:-${CONF_DATABASE_VENDOR:-$DEFAULT_DATABASE_VENDOR}}
+  export WEBSERVICE_VENDOR=${WEBSERVICE_VENDOR:-${CONF_WEBSERVICE_VENDOR:-$DEFAULT_WEBSERVICE_VENDOR}}
+  export WEBSERVICE_MANAGER_USERNAME=${WEBSERVICE_MANAGER_USERNAME:-${CONF_WEBSERVICE_MANAGER_USERNAME:-$DEFAULT_WEBSERVICE_MANAGER_USERNAME}}
+  export WEBSERVICE_MANAGER_PASSWORD=${WEBSERVICE_MANAGER_PASSWORD:-${CONF_WEBSERVICE_MANAGER_PASSWORD:-$DEFAULT_WEBSERVICE_MANAGER_PASSWORD}}
   export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
   export SAML_KEYSTORE_FILE=${SAML_KEYSTORE_FILE:-${CONF_SAML_KEYSTORE_FILE:-$DEFAULT_SAML_KEYSTORE_FILE}}
   export SAML_KEYSTORE_PASSWORD=${SAML_KEYSTORE_PASSWORD:-${CONF_SAML_KEYSTORE_PASSWORD:-$DEFAULT_SAML_KEYSTORE_PASSWORD}}

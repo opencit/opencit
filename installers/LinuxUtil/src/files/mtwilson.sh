@@ -47,7 +47,7 @@ if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 #export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+#export WEBSERVICE_VENDOR=${WEBSERVICE_VENDOR:-glassfish}
 
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
@@ -247,7 +247,7 @@ setup_env() {
     #the actuall veriable for postgres commands is psql
     echo "psql=$psql"
   fi
-  echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
+  echo "WEBSERVICE_VENDOR=$WEBSERVICE_VENDOR"
   echo "DATABASE_VENDOR=$DATABASE_VENDOR"
   if using_glassfish; then
     glassfish_detect > /dev/null

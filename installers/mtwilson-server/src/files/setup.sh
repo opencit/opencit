@@ -31,9 +31,9 @@ export LOG_COPYTRUNCATE=copytruncate
 export LOG_SIZE=100M
 export LOG_OLD=7
 export AUTO_UPDATE_ON_UNTRUST=false
-#export WEBSERVICE_USERNAME=mtwilsonAdmin
-export WEBSERVICE_USERNAME=admin
-export WEBSERVICE_PASSWORD=`generate_password 16`
+#export WEBSERVICE_MANAGER_USERNAME=mtwilsonAdmin
+#export WEBSERVICE_MANAGER_USERNAME=admin
+#export WEBSERVICE_MANAGER_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 date > $INSTALL_LOG_FILE
 
@@ -127,17 +127,17 @@ fi
 #echo "Supported web servers are:"
 #echo "tomcat"
 #echo "glassfish"
-#prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
-#if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
-#  WEBSERVER_VENDOR=tomcat
-#  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
+#prompt_with_default WEBSERVICE_VENDOR "Web App Server:" ${WEBSERVICE_VENDOR:-glassfish}
+#if [ "$WEBSERVICE_VENDOR" != "tomcat" ] && [ "$WEBSERVICE_VENDOR" != "glassfish" ]; then
+#  WEBSERVICE_VENDOR=tomcat
+#  echo_warning "Unrecognized selection. Using $WEBSERVICE_VENDOR"
 #fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 if [ ! -z "$opt_glassfish" ]; then
-  WEBSERVER_VENDOR=glassfish
+  WEBSERVICE_VENDOR=glassfish
 elif [ ! -z "$opt_tomcat" ]; then
-  WEBSERVER_VENDOR=tomcat
+  WEBSERVICE_VENDOR=tomcat
 fi
 
 if [ ! -z "$opt_postgres" ]; then
@@ -147,7 +147,7 @@ elif [ ! -z "$opt_mysql" ]; then
 fi
 
 #export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
+#export WEBSERVICE_VENDOR=${WEBSERVICE_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
@@ -1002,14 +1002,14 @@ echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
-  update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
-  update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+  update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_MANAGER_USERNAME"
+  update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_MANAGER_PASSWORD"
   glassfish_admin_user
   glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
-  update_property_in_file "tomcat.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
-  update_property_in_file "tomcat.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+  update_property_in_file "tomcat.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_MANAGER_USERNAME"
+  update_property_in_file "tomcat.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_MANAGER_PASSWORD"
   tomcat_restart
 fi
 
