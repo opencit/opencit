@@ -3926,10 +3926,10 @@ load_conf() {
       export CONF_MTWILSON_TAG_API_USERNAME=`read_property_from_file mtwilson.tag.api.username "$mtw_props_path"`
       export CONF_MTWILSON_TAG_API_PASSWORD=`read_property_from_file mtwilson.tag.api.password "$mtw_props_path"`
       export CONF_WEBSERVICE_VENDOR=$(read_property_from_file mtwilson.webserver.vendor "$mtw_props_path")
-      if [ "CONF_WEBSERVICE_VENDOR == glassfish" ]; then
+      if [ "$CONF_WEBSERVICE_VENDOR" == "glassfish" ]; then
         export CONF_WEBSERVICE_MANAGER_USERNAME=$(read_property_from_file glassfish.admin.username "$mtw_props_path")
         export CONF_WEBSERVICE_MANAGER_PASSWORD=$(read_property_from_file glassfish.admin.password "$mtw_props_path")
-      elif [ "CONF_WEBSERVICE_VENDOR == tomcat" ]; then
+      elif [ "$CONF_WEBSERVICE_VENDOR" == "tomcat" ]; then
         export CONF_WEBSERVICE_MANAGER_USERNAME=$(read_property_from_file tomcat.admin.username "$mtw_props_path")
         export CONF_WEBSERVICE_MANAGER_PASSWORD=$(read_property_from_file tomcat.admin.password "$mtw_props_path")
       fi
