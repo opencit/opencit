@@ -18,10 +18,10 @@ public class EnvironmentTest {
     
     @Test
     public void testFilesystem() {
-        System.setProperty("mtwilson.environment.prefix", "mtwilson");
+        System.setProperty("mtwilson.environment.prefix", "MTWILSON_");
         
-        log.debug("JAVA_HOME = {}", Environment.get("JAVA_HOME"));
-        log.debug("MTWILSON_HOME = {}", Environment.get("MTWILSON_HOME"));
+        log.debug("JAVA_HOME = {}", System.getenv("JAVA_HOME"));
+        log.debug("MTWILSON_HOME = {}", System.getenv("MTWILSON_HOME"));
         log.debug("HOME = {}", Environment.get("HOME"));
         
         for(String key : Environment.keys()) {

@@ -31,7 +31,7 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(1, list.size());
         Pem pem = list.get(0);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", new String(pem.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem.getHeaders().isEmpty());
     }
@@ -47,7 +47,7 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(1, list.size());
         Pem pem = list.get(0);
-        assertEquals("HEADER DATA", pem.getContentType());
+        assertEquals("HEADER DATA", pem.getBanner());
         assertTrue(new String(pem.getContent()).isEmpty());
         assertEquals("Value1", pem.getHeaders().get("Attr1"));
         assertEquals("Value2", pem.getHeaders().get("Attr2"));
@@ -68,7 +68,7 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(1, list.size());
         Pem pem = list.get(0);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", new String(pem.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertEquals(2,pem.getHeaders().size());
         assertTrue(pem.getHeaders().containsKey("attr1"));
@@ -90,7 +90,7 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(1, list.size());
         Pem pem = list.get(0);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", new String(pem.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertEquals(2,pem.getHeaders().size());
         assertTrue(pem.getHeaders().containsKey("attr1"));
@@ -114,7 +114,7 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(1, list.size());
         Pem pem = list.get(0);
-        assertEquals("RANDOM DATA", pem.getContentType());
+        assertEquals("RANDOM DATA", pem.getBanner());
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=", new String(pem.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertEquals(2,pem.getHeaders().size());
         for(String headerName : pem.getHeaders().keySet()) {
@@ -142,15 +142,15 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(3, list.size());
         Pem pem1 = list.get(0);
-        assertEquals("RANDOM DATA", pem1.getContentType());
+        assertEquals("RANDOM DATA", pem1.getBanner());
         assertEquals("document 1", new String(pem1.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem1.getHeaders().isEmpty());
         Pem pem2 = list.get(1);
-        assertEquals("RANDOM DATA", pem2.getContentType());
+        assertEquals("RANDOM DATA", pem2.getBanner());
         assertEquals("document 2", new String(pem2.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem2.getHeaders().isEmpty());
         Pem pem3 = list.get(2);
-        assertEquals("RANDOM DATA", pem3.getContentType());
+        assertEquals("RANDOM DATA", pem3.getBanner());
         assertEquals("document 3", new String(pem3.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem3.getHeaders().isEmpty());
         
@@ -176,15 +176,15 @@ public class TestPemLikeParser {
         List<Pem> list = PemLikeParser.parse(input);
         assertEquals(3, list.size());
         Pem pem1 = list.get(0);
-        assertEquals("RANDOM DATA", pem1.getContentType());
+        assertEquals("RANDOM DATA", pem1.getBanner());
         assertEquals("document 1", new String(pem1.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem1.getHeaders().isEmpty());
         Pem pem2 = list.get(1);
-        assertEquals("RANDOM DATA", pem2.getContentType());
+        assertEquals("RANDOM DATA", pem2.getBanner());
         assertEquals("document 2", new String(pem2.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem2.getHeaders().isEmpty());
         Pem pem3 = list.get(2);
-        assertEquals("RANDOM DATA", pem3.getContentType());
+        assertEquals("RANDOM DATA", pem3.getBanner());
         assertEquals("document 3", new String(pem3.getContent())); // Base64.encodeBase64String(pem.getContent()));
         assertTrue(pem3.getHeaders().isEmpty());
         
