@@ -4,7 +4,16 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.as.controller.TblHostsJpaController;
+import com.intel.mtwilson.as.data.TblHosts;
 
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestation;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationCollection;
@@ -13,8 +22,17 @@ import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationLocator;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.v2.vm.attestation.repository.VMAttestationRepository;
 import com.intel.mtwilson.jaxrs2.NoLinks;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
+import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import java.io.IOException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -41,6 +59,52 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
     @Override
     protected VMAttestationRepository getRepository() {
         return repository;
+    }
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces(CryptoMediaType.APPLICATION_SAML)    
+    @SuppressWarnings("empty-statement")
+    public String createSamlAssertion(VMAttestation item) {
+        String nonce;
+        log.debug("Creating new SAML assertion for host {}.", item.getHostName());
+        
+        try { 
+            log.debug("createSamlAssertion: {}", mapper.writeValueAsString(item)); 
+        } catch(JsonProcessingException e) { 
+            log.debug("createSamlAssertion: cannot serialize selector: {}", e.getMessage()); 
+        }
+
+        ValidationUtil.validate(item); 
+        String samlAssertion;
+        
+        try {
+            if (item.getHostName() != null && !item.getHostName().isEmpty() && 
+                    item.getVmInstanceId() != null && !item.getVmInstanceId().isEmpty()) {
+
+                TblHostsJpaController jpaController = My.jpa().mwHosts();
+                TblHosts obj = jpaController.findByName(item.getHostName());
+                if (obj != null) {
+                    HostAgentFactory factory = new HostAgentFactory();
+                    HostAgent agent = factory.getHostAgent(obj);
+                    nonce = new UUID().toString(); // Generate a new Nonce
+                    
+                    VMAttestationRequest requestObj = new VMAttestationRequest();
+                    requestObj.setVmInstanceId(item.getVmInstanceId());
+                    requestObj.setNonce(nonce);
+                    
+                    String vmAttestationReport = agent.getVMAttestationReport(requestObj);
+                    
+                    // Create the VMQuoteResponse object using JAXB and extract the contents of the XML for further processing.
+                }
+                
+            }
+        } catch (IOException | CryptographyException ex) {
+            log.error("Error during generation of host saml assertion.", ex);
+            throw new RepositoryCreateException(ex);
+        }        
+        
+        return null;
     }
     
 /*    @GET
@@ -92,36 +156,6 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
             log.error("Error during retrieval of host attestation status from cache.", ex);
             throw new RepositorySearchException(ex, criteria);
         }        
-    }
-
-    @POST
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
-    @Produces(CryptoMediaType.APPLICATION_SAML)    
-    @SuppressWarnings("empty-statement")
-    public String createSamlAssertion(HostAttestation item) {
-        log.debug("Creating new SAML assertion for host {}.", item.getHostUuid());
-        HostAttestationLocator locator = new HostAttestationLocator();
-        locator.id = item.getId();
-        
-        try { log.debug("createSamlAssertion: {}", mapper.writeValueAsString(item)); } catch(JsonProcessingException e) { log.debug("createSamlAssertion: cannot serialize selector: {}", e.getMessage()); }
-        ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        String samlAssertion;
-        
-        try {
-            TblHosts obj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
-            if (obj == null) {
-                log.error("Host specified with id {} is not valid.", item.getHostUuid());
-                throw new RepositoryInvalidInputException();
-            }
-            
-            samlAssertion = new HostTrustBO().getTrustWithSaml(obj, obj.getName(), true);
-            
-        } catch (Exception ex) {
-            log.error("Error during generation of host saml assertion.", ex);
-            throw new RepositoryCreateException(ex, locator);
-        }        
-        
-        return samlAssertion;
     }*/
     
 }

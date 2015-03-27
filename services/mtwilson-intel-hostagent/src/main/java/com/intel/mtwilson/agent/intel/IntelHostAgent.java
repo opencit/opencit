@@ -14,6 +14,7 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import java.io.IOException;
 import java.security.PublicKey;
@@ -216,7 +217,12 @@ public class IntelHostAgent implements HostAgent {
     
 
     @Override
-    public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {
+    public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getVMAttestationReport(VMAttestationRequest obj) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

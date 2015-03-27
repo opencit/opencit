@@ -42,10 +42,10 @@ public class Vrtm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Vrtm.class);
     
     @POST
-    @Path("/reports")
+    @Path("/status")
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public VMAttestationResponse getVMAttesationReport(VMAttestationRequest vmAttestationRequest) throws TAException, IOException {
+    public VMAttestationResponse getVMAttestationStatus(VMAttestationRequest vmAttestationRequest) throws TAException, IOException {
         
         String vmInstanceId = vmAttestationRequest.getVmInstanceId();
         VMAttestationResponse vmAttestationResponse = new VMAttestationResponse();
@@ -111,4 +111,18 @@ public class Vrtm {
         return vmAttestationResponse;
 
     }
+	
+    @POST
+    @Path("/report")
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    @Consumes({MediaType.APPLICATION_XML})
+    public String getVMAttestationReport(VMAttestationRequest vmAttestationRequest) throws TAException {
+        
+        String vmInstanceId = vmAttestationRequest.getVmInstanceId();
+
+        // Build the XML here.
+        
+        return null;
+
+    }	
 }
