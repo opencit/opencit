@@ -2985,6 +2985,7 @@ tomcat_create_ssl_cert() {
       echo "Changing keystore password and updating in Tomcat server.xml..."
       $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
       sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
+      sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
       echo "Restarting Tomcat as a new SSL certificate was generated..."
       tomcat_restart >/dev/null
       update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
