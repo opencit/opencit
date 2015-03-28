@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.vmquote;
 
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.xml.XML;
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -35,6 +36,9 @@ public class VMQuote {
 //    private HashMap<String,String> assertionMap;
     private boolean isValid;
     private Exception error;
+    private Element documentElement;
+    private com.intel.mtwilson.vmquote.xml.VMQuoteResponse vmQuoteResponse;
+    private JAXB jaxb = new JAXB();
 
     /**
      * Trusted SAML-signing certificates in the keystore must be marked for this
@@ -57,7 +61,11 @@ public class VMQuote {
      */
     public VMQuote(String xml) {
         try {
-            Element document = readXml(xml);
+            documentElement = readXml(xml);
+            vmQuoteResponse = jaxb.convert(documentElement, com.intel.mtwilson.vmquote.xml.VMQuoteResponse.class);
+            
+            // TODO: validate signatures
+            
         } catch (Exception e) {
             log.error("Cannot verify trust assertion", e);
             isValid = false;
