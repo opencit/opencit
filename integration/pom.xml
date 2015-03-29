@@ -43,6 +43,7 @@
     <module>mtwilson-measurement-xml</module>
     <module>mtwilson-trustpolicy-xml</module>
     <module>mtwilson-manifest-xml</module>
+	<module>mtwilson-vmquote-xml</module>
   </modules>
 
 

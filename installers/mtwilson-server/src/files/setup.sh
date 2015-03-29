@@ -35,8 +35,16 @@ export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 date > $INSTALL_LOG_FILE
 
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+if [ -f /root/mtwilson.env ]; then
+  . /root/mtwilson.env
+  env_file_exports=$(cat /root/mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+  eval export $env_file_exports
+fi
+if [ -f mtwilson.env ]; then
+  . mtwilson.env
+  env_file_exports=$(cat mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+  eval export $env_file_exports
+fi
 
 export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
 
