@@ -25,7 +25,9 @@ public class EnvironmentConfiguration extends AbstractConfiguration {
 
     @Override
     public String get(String key) {
-        return System.getenv(key);
+        String value = System.getenv(key);
+        //log.debug("get key {} -> value {}", key, value);
+        return value;
     }
 
     @Override

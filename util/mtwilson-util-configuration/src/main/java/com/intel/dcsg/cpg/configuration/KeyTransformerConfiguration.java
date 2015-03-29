@@ -20,6 +20,7 @@ import java.util.Set;
  * @author jbuhacoff
  */
 public class KeyTransformerConfiguration extends AbstractConfiguration implements Configuration {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KeyTransformerConfiguration.class);
     protected Configuration configuration;
     protected Transformer<String> transformer;
     
@@ -41,7 +42,10 @@ public class KeyTransformerConfiguration extends AbstractConfiguration implement
     
     @Override
     public String get(String key) {
-        return configuration.get(transformer.transform(key));
+        String key2 = transformer.transform(key);
+        String value = configuration.get(key2);
+        //log.debug("get key {} transformed {} -> value {}", key, key2, value);
+        return value;
     }
     
     @Override
