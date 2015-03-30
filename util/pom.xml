@@ -50,6 +50,7 @@
     <module>mtwilson-util-net</module>
 	<module>mtwilson-util-objectpool</module>
 	<module>mtwilson-util-patch</module>
+	<module>mtwilson-util-pem</module>
 	<module>mtwilson-util-performance</module>
 	<module>mtwilson-util-pipe</module>
     <module>mtwilson-util-rfc822</module>

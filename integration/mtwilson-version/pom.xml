@@ -22,6 +22,44 @@
 
     <build>
         <plugins>
+            
+        <!-- the git commit plugin makes available the following properties:
+     branch
+     commit.id
+     commit.id.abbrev
+     commit.id.describe
+     build.user.name
+     build.user.email
+     build.time
+     commit.user.name
+     commit.user.email
+     commit.message.full
+     commit.message.short
+     commit.time
+     remote.origin.url
+        -->
+        <!--
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <executions>
+                <execution>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>revision</goal>
+                    </goals>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <skipPoms>false</skipPoms>
+                        <prefix>git</prefix>
+                        <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                        <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        -->
+            
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>templating-maven-plugin</artifactId>
