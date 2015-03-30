@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
-import com.intel.mtwilson.agent.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
@@ -40,13 +39,12 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
-import com.intel.dcsg.cpg.xml.JAXB;
-import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Inet4Address;
@@ -200,10 +198,10 @@ public class TAHelper {
             
             // encrypt DAA challenge secret using AIK public key so only TPM can read it
             CommandUtil.runCommand(String.format("aikchallenge %s %s %s %s",
-                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
-                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
-                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
-                    CommandUtil.doubleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
 
             // send DAA challenge to Trust Agent and validate the response
             try(FileInputStream in = new FileInputStream(new File(getDaaChallengeFileName(sessionId)))) {
@@ -746,10 +744,10 @@ public class TAHelper {
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s",
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
