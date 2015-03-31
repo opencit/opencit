@@ -23,6 +23,9 @@ import com.intel.mtwilson.trustagent.vrtmclient.TCBuffer;
 import com.intel.mtwilson.trustagent.vrtmclient.Factory;
 import com.intel.mtwilson.trustagent.vrtmclient.RPCCall;
 import com.intel.mtwilson.trustagent.vrtmclient.RPClient;
+import com.intel.mtwilson.trustagent.vrtmclient.xml.MethodResponse;
+import com.intel.mtwilson.trustagent.vrtmclient.xml.Param;
+import com.intel.mtwilson.trustagent.vrtmclient.xml.Value;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -51,78 +54,11 @@ public class Vrtm {
     public VMAttestationResponse getVMAttestationStatus(VMAttestationRequest vmAttestationRequest) throws TAException, IOException {
         
         String vmInstanceId = vmAttestationRequest.getVmInstanceId();
-        VMAttestationResponse vmAttestationResponse = new VMAttestationResponse();
-        boolean vmstatus = false;  //initialize to false
-        
-        log.debug("Received vm attestation status request");
+        VMAttestationResponse vmAttestationResponse = new VMAttestationResponse();        
 
-        //Format read vrtm request 
-        String xmlRPCBlob=  "<?xml version='1.0'?>" 
-                            + "<methodCall>"
-                            + "<methodName>get_verification_status</methodName>"
-                            + 	"<params>"
-                            +		"<param>"
-                            +			"<value><string>%s</string></value>"
-                            +		"</param>"
-                            +	"</params>"
-                            + "</methodCall>";
-
-        TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.IS_VM_VERIFIED);
-		
-        // first replace the %s of xmlRPCBlob by VMUUID, rpcore accept all method input arguments in base64 format
-        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary((vmInstanceId).getBytes()));
-        log.debug("Sending {}", base64InputArgument);
-        tcBuffer.setRPCPayload(base64InputArgument.getBytes());
-	
-        // create instance of RPClient
-        RPClient rpcInstance = new RPClient("127.0.0.1", 16005);
-        TCBuffer resultTcb = rpcInstance.send(tcBuffer);    // send tcBuffer to rpcore 
+        RPClient rpcInstance = new RPClient("127.0.0.1", 16005); // create instance of RPClient
+        boolean vmstatus = rpcInstance.getVmStatus(vmInstanceId);    // send tcBuffer to rpcore 
         rpcInstance.close();   // close RPClient
-
-        /*
-        Sample Output:
-         <?xml version='1.0'?>
-            <methodResponse>
-                <params>
-                    <param>
-                        <value><string>MTAwMA==</string></value>
-                    </param>
-                </params>
-            </methodResponse>
-			
-	decode MTAwMA== to get actual RP id 	
-        */
-        // define  the java class represenging xml response from vrtm since it is a simple return
-        @JacksonXmlRootElement(localName="methodResponse")
-        class MethodResponse {
-            public Params params;
-            
-            class Params {
-                public Param param;
-                
-                class Param {
-                    public Value value;
-                    
-                    class Value {
-                        String string;                        
-                    }
-                }
-            }
-        }
-        
-        if (resultTcb.getRPCPayloadSize() != 0) {
-            String xml = resultTcb.getRPCPayload();
-            log.debug("Method response: {}", xml);
-
-            XmlMapper mapper = new XmlMapper();
-            mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
-            MethodResponse response = mapper.readValue(xml, MethodResponse.class);
-            String retValue = response.params.param.value.string;
-        
-            log.debug("vrtm Return value: {}", retValue);  
-            if (retValue.equals("1"))
-                vmstatus = true;
-        } 
         
         //set report
         vmAttestationResponse.setVmInstanceId(vmInstanceId);
