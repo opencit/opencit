@@ -7,6 +7,7 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,9 +37,9 @@ public class ChallengeResponseDaaCmd implements ICommand {
             }
             // prepare response to challenge
             CommandUtil.runCommand(String.format("aikrespond %s %s %s",
-                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
-                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDaaChallengeFileName()),
-                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDaaResponseFileName()))); // safe; no arguments involved in this command line
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDaaChallengeFileName()),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDaaResponseFileName()))); // safe; no arguments involved in this command line
             log.info( "Created response for DAA challenge");
 
             // read response and delete the response file

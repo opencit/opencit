@@ -10,14 +10,12 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.BufferedReader;
 import java.io.File;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -56,7 +54,7 @@ public class GenerateModulesCmd implements ICommand {
         long startTime = System.currentTimeMillis();
         String outputPath = String.format("%s.%s", context.getMeasureLogXmlFile().getAbsolutePath(), RandomUtil.randomHexString(16));
         log.info("Module output file: {}", String.format("OUTFILE=%s", outputPath));
-        CommandUtil.runCommand(CommandUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()), new String[] { String.format("OUTFILE=%s", outputPath) });
+        CommandUtil.runCommand(EscapeUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()), new String[] { String.format("OUTFILE=%s", outputPath) });
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
@@ -72,7 +70,7 @@ public class GenerateModulesCmd implements ICommand {
             throw new TAException(ErrorCode.BAD_REQUEST, "Cannot read module log");
         }
         
-//        CommandUtil.runCommand(String.format("rm -fr %s", CommandUtil.doubleQuoteEscapeShellArgument(outfile)));
+//        CommandUtil.runCommand(String.format("rm -fr %s", EscapeUtil.doubleQuoteEscapeShellArgument(outfile)));
         
     }
 
