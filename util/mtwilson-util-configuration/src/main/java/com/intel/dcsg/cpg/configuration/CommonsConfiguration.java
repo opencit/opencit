@@ -14,7 +14,7 @@ import java.util.Set;
  * Properties instance, and MapConfiguration backed by a Map instance.
  * 
  * For the reverse, which is a Commons Configuration interface wrapping
- * our own Configuration instance, use CommonsConfigurationDecorator.
+ * our own Configuration instance, use CommonsConfigurationAdapter.
  * 
  * @author jbuhacoff
  */

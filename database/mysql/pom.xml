@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>mtwilson-mysql</artifactId>
-
+  <groupId>com.intel.mtwilson.database</groupId>
   <packaging>jar</packaging>
   <name>MySQL Support</name>
   <description>

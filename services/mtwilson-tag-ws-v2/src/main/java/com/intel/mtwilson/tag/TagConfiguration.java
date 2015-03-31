@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.tag;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfigurationDecorator;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.configuration.Configuration;
 
 
@@ -47,7 +47,7 @@ public class TagConfiguration {
     private org.apache.commons.configuration.Configuration conf;
     
     public TagConfiguration(Configuration configuration) {
-        conf = new CommonsConfigurationDecorator(configuration);
+        conf = new CommonsConfigurationAdapter(configuration);
     }
     public TagConfiguration(org.apache.commons.configuration.Configuration configuration) {
         conf = configuration;

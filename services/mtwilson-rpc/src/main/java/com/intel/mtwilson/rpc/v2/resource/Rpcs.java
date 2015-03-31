@@ -17,6 +17,7 @@ import com.thoughtworks.xstream.XStream;
 import java.nio.charset.Charset;
 //import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -64,14 +65,14 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
     @Override
     @Path("/{id}")
     @DELETE
-    public void deleteOne(@BeanParam RpcLocator locator) {
+    public void deleteOne(@BeanParam RpcLocator locator, @Context HttpServletRequest request, @Context HttpServletResponse response) {
         log.debug("Rpcs deleteOne");
         boolean isRunning = false;
         if (isRunning) {
             throw new WebApplicationException(Response.Status.CONFLICT);
         }
         // now remove from database
-        super.deleteOne(locator);
+        super.deleteOne(locator, request, response);
     }
     
     @Path("/{id}/input")

@@ -67,6 +67,7 @@ public class PasswordVaultFactory {
         if( keystorePassword.isEmpty() ) {
             String keyProvider = configuration.get(PASSWORD_VAULT_KEY_PROVIDER_PROPERTY, "environment");
             if( keyProvider.equalsIgnoreCase("environment") ) {
+            // gets environment variable MTWILSON_PASSWORD, TRUSTAGENT_PASSWORD, KMS_PASSWORD, etc.
                 keystorePassword = new Password(Environment.get("PASSWORD", "").toCharArray());
             }
         }

@@ -32,7 +32,6 @@
 		-->
 		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-root" resultproperty="mavenExitInstallPom">
 			<arg value="-DskipTests=true"/>
-			<arg value="clean"/>
 			<arg value="install"/>
 		</exec>
 		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
@@ -40,7 +39,6 @@
 		</fail>
 		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-java" resultproperty="mavenExitInstallJavaPom">
 			<arg value="-DskipTests=true"/>
-			<arg value="clean"/>
 			<arg value="install"/>
 		</exec>
 		<fail message="Failed to install top level java pom.xml file" status="${mavenExitInstallJavaPom}">
@@ -64,6 +62,13 @@
 		</exec>
 		<fail message="Failed to clean project" status="${mavenExitClean}">
 			<condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
+		</fail>
+		<!-- the packages -->
+		<exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitCleanPackages">
+			<arg value="clean"/>
+		</exec>
+		<fail message="Cannot clean project packages" status="${mavenExitCleanPackages}">
+			<condition><not><equals arg1="${mavenExitCleanPackages}" arg2="0"/></not></condition>
 		</fail>
 	</target>
 	

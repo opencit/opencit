@@ -28,6 +28,7 @@ public class ImportConfig extends InteractiveCommand {
             password = getNewPassword("the Server Configuration File", "env-password");
         }
         else {
+            // gets environment variable MTWILSON_PASSWORD, TRUSTAGENT_PASSWORD, KMS_PASSWORD, etc.
             password = Environment.get("PASSWORD");
             if( password == null ) {
                 throw new IllegalArgumentException("Usage: ImportConfig <infile|--in=infile|--stdin> [--env-password=PASSWORD_VAR]");

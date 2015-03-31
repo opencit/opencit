@@ -15,6 +15,7 @@ import java.io.File;
 public class FoldersV1 {
     
     public static String application() {
+        // gets environment variable MTWILSON_HOME, TRUSTAGENT_HOME, KMS_HOME, etc.
         String path = Environment.get("HOME");
         if( path != null ) { return null; }
         
