@@ -4,6 +4,9 @@
  */
 package com.intel.mtwilson.trustagent.ws.v2;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.hostinfo.HostInfoCmd;
@@ -49,7 +52,10 @@ public class Vrtm {
         
         String vmInstanceId = vmAttestationRequest.getVmInstanceId();
         VMAttestationResponse vmAttestationResponse = new VMAttestationResponse();
+        boolean vmstatus = false;  //initialize to false
         
+        log.debug("Received vm attestation status request");
+
         //Format read vrtm request 
         String xmlRPCBlob=  "<?xml version='1.0'?>" 
                             + "<methodCall>"
@@ -86,27 +92,41 @@ public class Vrtm {
 			
 	decode MTAwMA== to get actual RP id 	
         */
-        
-        // process response
-        log.debug("rpid = {}" + resultTcb.getRpId());
-        log.debug("RPC Call Index = {}" + resultTcb.getRPCCallIndex());
-        log.debug("RPC Payload Size = {}" + resultTcb.getRPCPayloadSize());
-        log.debug("RPC Call Status = {}" + resultTcb.getRPCCallStatus());
-        log.debug("RPC Original RP ID = {}" + resultTcb.getOriginalRpId());
-        log.debug("RPC Payload = {}" + resultTcb.getRPCPayload());
-        
-        /* check payload and parse the return xml to get the response value
-        if (resultTcb.getRPCPayloadSize() == 0) {
+        // define  the java class represenging xml response from vrtm since it is a simple return
+        @JacksonXmlRootElement(localName="methodResponse")
+        class MethodResponse {
+            public Params params;
             
+            class Params {
+                public Param param;
+                
+                class Param {
+                    public Value value;
+                    
+                    class Value {
+                        String string;                        
+                    }
+                }
+            }
         }
-        else {
-            
-        }
-        */
+        
+        if (resultTcb.getRPCPayloadSize() != 0) {
+            String xml = resultTcb.getRPCPayload();
+            log.debug("Method response: {}", xml);
 
+            XmlMapper mapper = new XmlMapper();
+            mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+            MethodResponse response = mapper.readValue(xml, MethodResponse.class);
+            String retValue = response.params.param.value.string;
+        
+            log.debug("vrtm Return value: {}", retValue);  
+            if (retValue.equals("1"))
+                vmstatus = true;
+        } 
+        
         //set report
         vmAttestationResponse.setVmInstanceId(vmInstanceId);
-        vmAttestationResponse.setTrustStatus(true);
+        vmAttestationResponse.setTrustStatus(vmstatus);
         
         return vmAttestationResponse;
 
