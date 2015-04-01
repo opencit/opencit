@@ -5,7 +5,13 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
 
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="mtwilson:trustdirector:policy:1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" 
+           targetNamespace="mtwilson:trustdirector:policy:1.1" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+ <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
+        schemaLocation="xmldsig-core-schema.xsd"/>
+     
   <xs:element name="TrustPolicy">
     <xs:complexType>
       <xs:sequence>
@@ -114,7 +120,8 @@ and open the template in the editor.
               <xs:attribute type="xs:string" name="DigestAlg"/>
             </xs:complexType>
         </xs:element>
-        <xs:element name="Signature" maxOccurs="unbounded" minOccurs="0">
+        <xs:element ref="ds:Signature" minOccurs="0"/>
+        <!-- <xs:element name="Signature" maxOccurs="unbounded" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="SignedInfo">
@@ -190,7 +197,7 @@ and open the template in the editor.
             </xs:element>
           </xs:sequence>
         </xs:complexType>
-      </xs:element>
+      </xs:element> -->
       </xs:sequence>
     </xs:complexType>
   </xs:element>
