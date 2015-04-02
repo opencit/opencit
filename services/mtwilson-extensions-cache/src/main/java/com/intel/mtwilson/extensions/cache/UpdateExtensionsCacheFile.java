@@ -170,6 +170,7 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
             log.debug("Using FileNameContains filter with keywords: {}", fileIncludeFilterContains);
             String[] containsKeywords = StringUtils.split(fileIncludeFilterContains, ", ");
             fileIncludeFilter = new FileNameContains(containsKeywords);
+            getConfiguration().set("mtwilson.extensions.fileIncludeFilter.contains", fileIncludeFilterContains); // set it again in configuration to ensure it gets saved in the config file during initial setup
         }
     }
 
