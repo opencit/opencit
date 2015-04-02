@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="mtwilson" default="build" basedir=".">
+<project name="mtwilson" default="all" basedir=".">
 	<description>
 	Run "ant ready" to ensure you have all pre-requisites to build
 	Run "ant" or "ant build" to build the entire project
@@ -92,5 +92,6 @@
 		</exec>
 	</target>
 
+	<target name="all" depends="ready,clean,build,packages"></target>
 	
 </project>
