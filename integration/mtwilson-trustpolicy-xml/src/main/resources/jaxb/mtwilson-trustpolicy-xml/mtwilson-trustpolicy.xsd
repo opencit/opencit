@@ -5,7 +5,11 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
 
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="mtwilson:trustdirector:policy:1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema attributeFormDefault="unqualified" 
+           elementFormDefault="qualified" 
+           targetNamespace="mtwilson:trustdirector:policy:1.1" 
+           xmlns="mtwilson:trustdirector:policy:1.1"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="TrustPolicy">
     <xs:complexType>
       <xs:sequence>
@@ -90,26 +94,10 @@ and open the template in the editor.
         <xs:element name="Whitelist">
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="Dir" maxOccurs="unbounded" minOccurs="0">
-                    <xs:complexType>
-                      <xs:simpleContent>
-                        <xs:extension base="xs:string">
-                          <xs:attribute type="xs:string" name="Path" use="required"/>
-                          <xs:attribute type="xs:string" name="Include" use="required"/>
-                          <xs:attribute type="xs:string" name="Exclude" use="required"/>                      
-                        </xs:extension>
-                      </xs:simpleContent>
-                    </xs:complexType>
-                </xs:element> 
-                <xs:element name="File" maxOccurs="unbounded" minOccurs="0">
-                  <xs:complexType>
-                    <xs:simpleContent>
-                      <xs:extension base="xs:string">
-                        <xs:attribute type="xs:string" name="Path" use="optional"/>
-                      </xs:extension>
-                    </xs:simpleContent>
-                  </xs:complexType>
-                </xs:element>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="File" type="fileMeasurementType"/>
+                    <xs:element name="Dir" type="directoryMeasurementType"/>
+                </xs:choice>
               </xs:sequence>
               <xs:attribute type="xs:string" name="DigestAlg"/>
             </xs:complexType>
@@ -194,4 +182,27 @@ and open the template in the editor.
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  
+  <xs:complexType name="measurementType" abstract="true">
+        <xs:simpleContent>
+        <xs:extension base="xs:string">
+            <xs:attribute type="xs:string" name="Path" use="required"/>
+        </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="fileMeasurementType">
+        <xs:simpleContent>
+            <xs:extension base="measurementType"/>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="directoryMeasurementType">
+        <xs:simpleContent>
+            <xs:extension base="measurementType">
+                <xs:attribute type="xs:string" name="Include" use="optional"/>
+                <xs:attribute type="xs:string" name="Exclude" use="optional"/>                      
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
 </xs:schema>
