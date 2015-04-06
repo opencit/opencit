@@ -280,7 +280,7 @@ public class TrustagentConfiguration {
     
     public byte[] getBindingKeySecret() {
         try {
-            return Hex.decodeHex(getAikSecretHex().toCharArray());
+            return Hex.decodeHex(getBindingKeySecretHex().toCharArray());
         }catch(DecoderException e) {
             throw new IllegalArgumentException("Invalid Binding Key secret", e);
         }
@@ -318,7 +318,7 @@ public class TrustagentConfiguration {
     
     public byte[] getSigningKeySecret() {
         try {
-            return Hex.decodeHex(getAikSecretHex().toCharArray());
+            return Hex.decodeHex(getSigningKeySecretHex().toCharArray());
         }catch(DecoderException e) {
             throw new IllegalArgumentException("Invalid Signing Key secret", e);
         }
