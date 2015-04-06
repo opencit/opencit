@@ -18,6 +18,7 @@ import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,8 +49,9 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
     
     private File cacheFile;
     private List<File> jarFiles;
-    private List<String> includePackages;
-    private List<String> excludePackages;
+    private List<String> includePackages = null;
+    private List<String> excludePackages = null;
+    private FileFilter fileIncludeFilter = null;
     
     private String getCacheFilePath() {
         return Folders.configuration() + File.separator + "extensions.cache";
@@ -89,7 +91,9 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
             for(String entry : entries) {
                 File file = new File(entry);
                 if( file.isFile() ) {
-                    jarFiles.add(file);
+                    if( fileIncludeFilter == null || fileIncludeFilter.accept(file) ) {
+                        jarFiles.add(file);
+                    }
                 }
             }
         }
@@ -121,6 +125,20 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
     public List<String> getExcludePackages() {
         return excludePackages;
     }
+
+    public void setFileIncludeFilter(FileFilter fileIncludeFilter) {
+        this.fileIncludeFilter = fileIncludeFilter;
+    }
+
+    /**
+     * Filter used to limit which jar files are scanned. If the filter
+     * is null, then all jar files in the classpath are scanned. 
+     * If the filter is set, then only files accepted by the filter are scanned.
+     * @return 
+     */
+    public FileFilter getFileIncludeFilter() {
+        return fileIncludeFilter;
+    }
     
     
     
@@ -132,6 +150,28 @@ public class UpdateExtensionsCacheFile extends LocalSetupTask {
         // it's ok if the file itself doesn't exist yet, but the configuration folder it's supposed to be in should exist
         File configurationFolder = extensionsCacheFile.getParentFile();
         checkFileExists("Configuration folder", configurationFolder.getAbsolutePath());
+        
+        // option to load any FileFilter instance by class name (must have no-arg constructor) -  specifically not using extensions here since they might not be loaded if it's the first time around.
+        String fileIncludeFilterClassName = getConfiguration().get("mtwilson.extensions.fileIncludeFilter.class");
+        if( fileIncludeFilterClassName != null ) {
+            try {
+                log.debug("Loading file include filter class: {}", fileIncludeFilterClassName);
+                Class fileIncludeFilterClass = Class.forName(fileIncludeFilterClassName);
+                fileIncludeFilter = (FileFilter)fileIncludeFilterClass.newInstance();
+            }
+            catch(ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                log.error("Cannot load file include filter: {}", fileIncludeFilterClassName, e);
+            }
+        }
+        
+        // option to use our built-in keyword filter, which simply looks for the filename to contain any one of a number of keywords
+        String fileIncludeFilterContains = getConfiguration().get("mtwilson.extensions.fileIncludeFilter.contains");
+        if( fileIncludeFilterContains != null ) {
+            log.debug("Using FileNameContains filter with keywords: {}", fileIncludeFilterContains);
+            String[] containsKeywords = StringUtils.split(fileIncludeFilterContains, ", ");
+            fileIncludeFilter = new FileNameContains(containsKeywords);
+            getConfiguration().set("mtwilson.extensions.fileIncludeFilter.contains", fileIncludeFilterContains); // set it again in configuration to ensure it gets saved in the config file during initial setup
+        }
     }
 
     @Override

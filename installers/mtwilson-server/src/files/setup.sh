@@ -630,6 +630,12 @@ chmod -R 770 /opt/mtwilson/bin
 mkdir -p /opt/mtwilson/env.d
 #chown -R root /opt/mtwilson/env.d
 
+# use of "mtwilson config" method will be required when mtwilson setup is 
+# revised to use the "mtwilson" command itself for java setup tasks and
+# when the "mtwilson" command automatically switches to the "mtwilson" user
+# because then it won't have access to the environment variables.
+## mtwilson config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson'}" >/dev/null
+export MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS=${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson'}
 call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
