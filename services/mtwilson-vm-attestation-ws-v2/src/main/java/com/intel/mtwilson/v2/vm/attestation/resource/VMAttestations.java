@@ -15,6 +15,11 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 
+import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.vmquote.xml.*;
+
+import com.intel.mtwilson.as.business.trust.HostTrustBO;
+
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestation;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationCollection;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationFilterCriteria;
@@ -28,11 +33,17 @@ import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 
 /**
  *
@@ -66,15 +77,14 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
     @Produces(CryptoMediaType.APPLICATION_SAML)    
     @SuppressWarnings("empty-statement")
     public String createSamlAssertion(VMAttestation item) {
+        if (item.getId() == null) {
+            item.setId(new UUID());
+        }
+        
+        JAXB jaxb = new JAXB();
         String nonce;
         log.debug("Creating new SAML assertion for host {}.", item.getHostName());
         
-        try { 
-            log.debug("createSamlAssertion: {}", mapper.writeValueAsString(item)); 
-        } catch(JsonProcessingException e) { 
-            log.debug("createSamlAssertion: cannot serialize selector: {}", e.getMessage()); 
-        }
-
         ValidationUtil.validate(item); 
         String samlAssertion;
         
@@ -93,9 +103,30 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
                     requestObj.setVmInstanceId(item.getVmInstanceId());
                     requestObj.setNonce(nonce);
                     
+                    try { 
+                        log.debug("Requesting VM Quote response for: {}", mapper.writeValueAsString(requestObj)); 
+                    } catch(JsonProcessingException e) { 
+                        log.debug("Cannot serialize VM Quote request: {}", e.getMessage()); 
+                    }
+
                     String vmAttestationReport = agent.getVMAttestationReport(requestObj);
-                    
-                    // Create the VMQuoteResponse object using JAXB and extract the contents of the XML for further processing.
+                    log.debug("GETTING back the response in MTW. {}", vmAttestationReport);
+                    try {
+                        // Create the VMQuoteResponse object using JAXB and extract the contents of the XML for further processing.
+                        VMQuoteResponse vmQuoteResponse = jaxb.read(vmAttestationReport, VMQuoteResponse.class);
+                        
+                        log.debug("VMQuoteResponse cumulative hash is {} for nonce {}", vmQuoteResponse.getVMQuote().getCumulativeHash(),
+                                vmQuoteResponse.getVMQuote().getNonce());
+                        
+                        Map<String, String> vmAttributes = new HashMap<>();
+                        vmAttributes.put("VM_Trust_Stats", "true");
+                        vmAttributes.put("VM_Instance_Id", vmQuoteResponse.getVMQuote().getVmInstanceId());
+                        vmAttributes.put("VM_Trust_Policy", vmQuoteResponse.getTrustPolicy().getLaunchControlPolicy());
+                        String samlForHostWithVMData = new HostTrustBO().getSamlForHostWithVMData(obj, item.getId().toString(), vmAttributes);
+                        return samlForHostWithVMData;
+                    } catch (IOException | JAXBException | XMLStreamException ex) {
+                        log.error("Error during deserializing the VM Quote response using JAXB. {}", ex.getMessage());
+                    }
                 }
                 
             }

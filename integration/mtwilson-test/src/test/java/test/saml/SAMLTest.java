@@ -195,7 +195,7 @@ adQFeHGfM6SCxnn0LE/9Xa6wT+9pC29/mBtbdxRoHyntdwa6JoFxjni8dCsPP4Tr5NCXuoiTCAgP
                 .build();
         X509AttributeCertificate cert = X509AttributeCertificate.valueOf(attrCertBytes);
         // generate the assertion with trutsed host information and trusted tag certificate
-        SamlAssertion samlAssertion = samlGenerator.generateHostAssertion(host, cert);
+        SamlAssertion samlAssertion = samlGenerator.generateHostAssertion(host, cert, null);
         // verify and print the assertion contents
 //        SamlConfiguration samlConfiguration = new SamlConfiguration(new CommonsConfigurationAdapter(My.configuration().getConfiguration()));
          SimpleKeystore keystore = new SimpleKeystore(My.configuration().getSamlKeystoreFile(), My.configuration().getSamlKeystorePassword());

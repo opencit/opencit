@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.hostinfo.HostInfoCmd;
 import com.intel.mountwilson.trustagent.data.TADataContext;
@@ -26,12 +27,23 @@ import com.intel.mtwilson.trustagent.vrtmclient.RPClient;
 import com.intel.mtwilson.trustagent.vrtmclient.xml.MethodResponse;
 import com.intel.mtwilson.trustagent.vrtmclient.xml.Param;
 import com.intel.mtwilson.trustagent.vrtmclient.xml.Value;
+import com.intel.mtwilson.vmquote.xml.Measurements;
+import com.intel.mtwilson.vmquote.xml.TrustPolicy;
+import com.intel.mtwilson.vmquote.xml.VMQuote;
+import com.intel.mtwilson.vmquote.xml.VMQuoteResponse;
+import java.io.FileInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.core.Context;
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import org.apache.commons.io.IOUtils;
 
 
 /**
@@ -46,6 +58,8 @@ import java.io.IOException;
 @Path("/vrtm")
 public class Vrtm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Vrtm.class);
+    private static final String measurementXMLFileName = "measurement.xml";
+    private static final String trustPolicyFileName = "TrustPolicy.xml";
     
     @POST
     @Path("/status")
@@ -71,14 +85,63 @@ public class Vrtm {
     @POST
     @Path("/report")
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    @Consumes({MediaType.APPLICATION_XML})
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     public String getVMAttestationReport(VMAttestationRequest vmAttestationRequest) throws TAException {
         
-        String vmInstanceId = vmAttestationRequest.getVmInstanceId();
-
-        // Build the XML here.
+        JAXB jaxb = new JAXB();        
+        // Call into the vRTM API and get the path information
+        String instanceFolderPath = "/var/lib/nova/instances/" + vmAttestationRequest.getVmInstanceId() + "/";
         
-        return null;
+        // Build the XML here.
+        VMQuoteResponse vmQuoteResponse = new VMQuoteResponse();
+        
+        // TODO: The below object should be created by reading from the VMQuote.xml file in the instance folder
+        try {
+            VMQuote vmInstanceQuote = new VMQuote();
+            vmInstanceQuote.setCumulativeHash("2284377e7a81243ab4305412669d90ba9253a64a");
+            vmInstanceQuote.setVmInstanceId(vmAttestationRequest.getVmInstanceId());
+            vmInstanceQuote.setDigestAlg("SHA-256");
+            vmInstanceQuote.setNonce(vmAttestationRequest.getNonce());
+            
+            vmQuoteResponse.setVMQuote(vmInstanceQuote);
+            
+        } catch (Exception ex) {
+            log.error("Error reading the vm quote file. {}", ex.getMessage());
+            throw new WebApplicationException(Response.serverError().header("Error", 
+                    String.format("%s. %s", "Error reading the vm quote file.", ex.getMessage())).build());
+        }
+        
+        try (FileInputStream measurementXMLFileStream = new FileInputStream(String.format("%s%s", instanceFolderPath, measurementXMLFileName))) {
+        
+            String measurementXML = IOUtils.toString(measurementXMLFileStream, "UTF-8");
+            Measurements readMeasurements = jaxb.read(measurementXML, Measurements.class);
+            vmQuoteResponse.setMeasurements(readMeasurements);
 
+        } catch (Exception ex) {
+            log.error("Error reading the measurement log. {}", ex.getMessage());
+            throw new WebApplicationException(Response.serverError().header("Error", 
+                    String.format("%s. %s", "Error reading the measurement log.", ex.getMessage())).build());
+        }
+                
+        try (FileInputStream trustPolicyFileStream = new FileInputStream(String.format("%s%s", instanceFolderPath, trustPolicyFileName))) {
+        
+            String trustPolicyXML = IOUtils.toString(trustPolicyFileStream, "UTF-8");
+            TrustPolicy trustPolicy = jaxb.read(trustPolicyXML, TrustPolicy.class);
+            vmQuoteResponse.setTrustPolicy(trustPolicy);
+
+        } catch (Exception ex) {
+            log.error("Error reading the Trust policy. {}", ex.getMessage());
+            throw new WebApplicationException(Response.serverError().header("Error", 
+                    String.format("%s. %s", "Error reading the Trust policy.", ex.getMessage())).build());
+        }
+        
+        try {
+            String quoteResponse = jaxb.write(vmQuoteResponse);
+            return quoteResponse;
+        } catch (JAXBException ex) {
+            log.error("Error serializing the VM quote response. {}", ex.getMessage());
+            throw new WebApplicationException(Response.serverError().header("Error", 
+                    String.format("%s. %s", "Error serializing the VM quote response.", ex.getMessage())).build());
+        }        
     }	
 }

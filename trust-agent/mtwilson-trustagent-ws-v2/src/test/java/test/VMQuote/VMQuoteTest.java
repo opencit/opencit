@@ -25,7 +25,6 @@ public class VMQuoteTest {
     private static final String instanceFolderPath = "c:/temp/vmquotetest/";
     private static final String measurementXMLFileName = "measurement.xml";
     private static final String trustPolicyFileName = "TrustPolicy.xml";
-    private static final String signingKeyPemFileName = "signingkey.pem";
     
     @Test
     public void CreateVMQuoteResponse() throws Exception {
@@ -55,20 +54,7 @@ public class VMQuoteTest {
         } catch (Exception ex) {
             log.error("Error reading the measurement log. {}", ex.getMessage());
         }
-        
-//        try (FileInputStream signingKeyPemFileStream = new FileInputStream(String.format("%s%s", instanceFolderPath, signingKeyPemFileName))) {
-        try {
-            
-            File signingKeyPemFile = new File(String.format("%s%s", instanceFolderPath, signingKeyPemFileName));
-            //String signingKey = IOUtils.toString(signingKeyPemFileStream, "UTF-8");
-            String signingKey = FileUtils.readFileToString(signingKeyPemFile);
-            vmQuoteResponse.setSigningKeyCertificate(signingKey);
-            
-        } catch (Exception ex) {
-            log.error("Error reading the signing key file. {}", ex.getMessage());
-        }
-        
-        
+                
         try (FileInputStream trustPolicyFileStream = new FileInputStream(String.format("%s%s", instanceFolderPath, trustPolicyFileName))) {
         
             String trustPolicyXML = IOUtils.toString(trustPolicyFileStream, "UTF-8");
@@ -85,13 +71,14 @@ public class VMQuoteTest {
     }  
     
     @Test
-    public void verifyVMQuoteResponse() {
+    public void verifyVMQuoteResponse() throws Exception {
         
         JAXB jaxb = new JAXB();
         try {
-            VMQuoteResponse vmQuoteResponse = jaxb.read(FileUtils.readFileToString(new File(instanceFolderPath + "outputForMTW.xml")), VMQuoteResponse.class);
-            log.debug(vmQuoteResponse.getSigningKeyCertificate());
-            log.debug(vmQuoteResponse.getVMQuote().getCumulativeHash());
+            // VMQuoteResponse vmQuoteResponse = jaxb.read(FileUtils.readFileToString(new File(instanceFolderPath + "TrustPolicy.xml")), VMQuoteResponse.class);
+            String trustPolicyXml = FileUtils.readFileToString(new File(instanceFolderPath + "TrustPolicy-201503161031.xml")); //jaxb.write(vmQuoteResponse.getTrustPolicy());
+            boolean valid = ValidateSignature.isValid(trustPolicyXml);
+            log.debug("Signature validation result is {}", valid);
         } catch(IOException | JAXBException | XMLStreamException ex) {
             log.error("Error during deserialization of VM Quote Response. {}", ex.getMessage());
         }

@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -1604,7 +1605,7 @@ public class HostTrustBO {
                 host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
             }
             
-            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate);
+            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate, null);
 
             
             // We will check if the asset-tag was verified successfully for the host. If so, we need to retrieve
@@ -2143,6 +2144,65 @@ public class HostTrustBO {
                     
         return true;
     }
+    
+    /**
+     * This function generates and stores the SAML assertion in the DB. The SAML assertion would also include the VM Metadata such as
+     * VM Instance ID, VM Image ID, Cumulative Hash, VM trust status and VM Trust policy.
+     * @param tblHosts
+     * @param hostId
+     * @param hostAttestationUuid
+     * @param vmMetaData
+     * @return 
+     */
+    public String getSamlForHostWithVMData(TblHosts tblHosts, String hostAttestationUuid, Map<String, String> vmMetaData) {
+        try {
+            
+            TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
+
+            TxtHost host = getHostWithTrust(tblHosts, tblHosts.getName(), tblSamlAssertion);
+            
+            tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
+            tblSamlAssertion.setBiosTrust(host.isBiosTrusted());
+            tblSamlAssertion.setVmmTrust(host.isVmmTrusted());
+
+            // We need to add the Asset tag related data only if the host is provisioned for it. This is done
+            // by verifying in the asset tag certificate table. 
+            X509AttributeCertificate tagCertificate; 
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
+            if (atagCertForHost != null) {
+                log.debug("Host has been provisioned in the system with a TAG.");
+                tagCertificate = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate());
+            } else {
+                log.debug("Host has not been provisioned in the system with a TAG.");
+                tagCertificate = null;
+            }
+
+            if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
+            }
+            
+            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, tagCertificate, vmMetaData);
+
+            tblSamlAssertion.setSaml(samlAssertion.assertion);
+            tblSamlAssertion.setExpiryTs(samlAssertion.expiry_ts);
+            tblSamlAssertion.setCreatedTs(samlAssertion.created_ts);
+                            
+            My.jpa().mwSamlAssertion().create(tblSamlAssertion);
+
+            return samlAssertion.assertion;
+            
+        } catch (ASException e) {
+            if (e.getErrorCode().equals(ErrorCode.AS_HOST_NOT_FOUND)) {
+                throw new WebApplicationException(Status.NOT_FOUND);
+            }
+            throw e;
+        } catch (Exception ex) {
+            log.error("Error during retrieval of host trust status.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
+        }
+    }
+    
     /*
     private void saveModuleManifestLog(PcrModuleManifest pcrModuleManifest, TblTaLog taLog) {
         TblModuleManifestLogJpaController controller = new TblModuleManifestLogJpaController(getEntityManagerFactory());
