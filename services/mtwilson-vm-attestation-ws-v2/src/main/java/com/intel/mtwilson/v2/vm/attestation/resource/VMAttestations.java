@@ -7,6 +7,7 @@ package com.intel.mtwilson.v2.vm.attestation.resource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.rfc822.SignatureException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.My;
@@ -16,7 +17,8 @@ import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 
 import com.intel.dcsg.cpg.xml.JAXB;
-import com.intel.mtwilson.vmquote.xml.*;
+import com.intel.mtwilson.vmquote.xml.TrustPolicy;
+import com.intel.mtwilson.vmquote.xml.Measurements;
 
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 
@@ -31,7 +33,10 @@ import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import com.intel.mtwilson.jaxrs2.server.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
+import com.intel.mtwilson.vmquote.xml.VMQuote;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +48,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+import org.apache.commons.io.IOUtils;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -86,7 +96,6 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
         log.debug("Creating new SAML assertion for host {}.", item.getHostName());
         
         ValidationUtil.validate(item); 
-        String samlAssertion;
         
         try {
             if (item.getHostName() != null && !item.getHostName().isEmpty() && 
@@ -103,38 +112,85 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
                     requestObj.setVmInstanceId(item.getVmInstanceId());
                     requestObj.setNonce(nonce);
                     
-                    try { 
-                        log.debug("Requesting VM Quote response for: {}", mapper.writeValueAsString(requestObj)); 
-                    } catch(JsonProcessingException e) { 
-                        log.debug("Cannot serialize VM Quote request: {}", e.getMessage()); 
-                    }
+                    VMQuoteResponse vmQuoteResponse = agent.getVMAttestationReport(requestObj);
+                    log.debug("Retrieved VM attestation report in MTW.");
+                    
+                    if ((vmQuoteResponse != null) && (vmQuoteResponse.getVmMeasurements().length > 0) &&
+                            (vmQuoteResponse.getVmQuote().length > 0) && (vmQuoteResponse.getVmTrustPolicy().length > 0)) {
+                        try {
 
-                    String vmAttestationReport = agent.getVMAttestationReport(requestObj);
-                    log.debug("GETTING back the response in MTW. {}", vmAttestationReport);
-                    try {
-                        // Create the VMQuoteResponse object using JAXB and extract the contents of the XML for further processing.
-                        VMQuoteResponse vmQuoteResponse = jaxb.read(vmAttestationReport, VMQuoteResponse.class);
-                        
-                        log.debug("VMQuoteResponse cumulative hash is {} for nonce {}", vmQuoteResponse.getVMQuote().getCumulativeHash(),
-                                vmQuoteResponse.getVMQuote().getNonce());
-                        
-                        Map<String, String> vmAttributes = new HashMap<>();
-                        vmAttributes.put("VM_Trust_Stats", "true");
-                        vmAttributes.put("VM_Instance_Id", vmQuoteResponse.getVMQuote().getVmInstanceId());
-                        vmAttributes.put("VM_Trust_Policy", vmQuoteResponse.getTrustPolicy().getLaunchControlPolicy());
-                        String samlForHostWithVMData = new HostTrustBO().getSamlForHostWithVMData(obj, item.getId().toString(), vmAttributes);
-                        return samlForHostWithVMData;
-                    } catch (IOException | JAXBException | XMLStreamException ex) {
-                        log.error("Error during deserializing the VM Quote response using JAXB. {}", ex.getMessage());
+                            String vmQuoteXml = IOUtils.toString(vmQuoteResponse.getVmQuote(), "UTF-8");
+                            String trustPolicyXml = IOUtils.toString(vmQuoteResponse.getVmTrustPolicy(), "UTF-8");
+                            String measurementXml = IOUtils.toString(vmQuoteResponse.getVmMeasurements(), "UTF-8");
+                            
+
+                            // Validate the VMQuote signature and the certificate that was used to sign the VMQuote.
+                            boolean isVMQuoteValid = true; //ValidateSignature.isValid(vmQuoteXml);
+                            
+                            // Validate the TrustPolicy signature and the certificate that was used to sign the TrustPolicy
+                            boolean isTrustPolicyValid = true; //ValidateSignature.isValid(trustPolicyXml);
+                            
+                            // Once we have verified the integrity of the files, we need to ensure that the nonce is matching with what 
+                            // was sent to the call. After the nonce verification, the cumulative hash needs to be verfied with the 
+                            // whitelist in the trust policy.
+                            if (isVMQuoteValid && isTrustPolicyValid) {
+                                
+                                // Deserialize the TrustPolicy and VMQuote into the autogenerated objects
+                                TrustPolicy vmTrustPolicy = jaxb.read(trustPolicyXml, TrustPolicy.class);
+                                VMQuote vmQuote = jaxb.read(vmQuoteXml, VMQuote.class);
+                                
+                                /*
+                                if (nonce == null ? vmQuote.getNonce() != null : !nonce.equals(vmQuote.getNonce())) {
+                                    log.error("Error during verification of the VM Attestation report. Nonce does not match.");
+                                    throw new RepositoryCreateException();
+                                }*/
+                                
+                                boolean isVMTrusted = false;
+                                /*
+                                if (vmQuote.getCumulativeHash() == null ? vmTrustPolicy.getImage().getImageHash().getValue() != null : 
+                                        !vmQuote.getCumulativeHash().equals(vmTrustPolicy.getImage().getImageHash().getValue())) {
+                                    log.error("Hash value of the VM {} does not match the white list value {} specified in the Trust Policy.",
+                                            vmQuote.getCumulativeHash(), vmTrustPolicy.getImage().getImageHash().getValue());
+                                    // TODO: Compare the measurements against the whitelists to see which module failed.
+                                    // We will do this in the next sprint.
+                                } else {
+                                    isVMTrusted = true;
+                                }*/
+
+                                // Create a map of the VM attributes that needs to be added to the SAML assertion.
+                                Map<String, String> vmAttributes = new HashMap<>();
+                                vmAttributes.put("VM_Trust_Status", String.valueOf(isVMTrusted));
+                                vmAttributes.put("VM_Instance_Id", vmQuote.getVmInstanceId());
+                                vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy());
+                                String samlForHostWithVMData = new HostTrustBO().getSamlForHostWithVMData(obj, item.getId().toString(), vmAttributes);
+                                return samlForHostWithVMData;                                
+                            } else {
+                                log.error("Invalid signature specified.");
+                                return null;
+                            }
+                            
+                        } catch (RepositoryCreateException ex) {
+                            throw ex;
+                        } catch (IOException | JAXBException | XMLStreamException ex ){ //| ParserConfigurationException | SAXException | MarshalException | XMLSignatureException ex) {
+                            log.error("Error during validation of the VM attestation report. {}", ex.getMessage());
+                            throw new RepositoryCreateException(ex);
+                        }
                     }
+                } else {
+                    log.error("Host specified {} does not exist in the system. Please verify the input parameters.", item.getHostName());
+                    throw new RepositoryInvalidInputException();
                 }
                 
+            } else {
+                // Since there are some missing or invalid inputs, throw an appropriate exception.
+                throw new RepositoryInvalidInputException();
             }
-        } catch (IOException | CryptographyException ex) {
-            log.error("Error during generation of host saml assertion.", ex);
+        } catch (RepositoryCreateException | RepositoryInvalidInputException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Error during generation of host saml assertion. {} ", ex.getMessage());
             throw new RepositoryCreateException(ex);
-        }        
-        
+        } 
         return null;
     }
     
