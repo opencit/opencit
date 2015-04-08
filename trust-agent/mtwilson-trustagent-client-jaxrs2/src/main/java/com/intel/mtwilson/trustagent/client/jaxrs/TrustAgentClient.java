@@ -120,17 +120,15 @@ public class TrustAgentClient extends MtWilsonClient {
      * @param obj
      * @return 
      */
-    public String getVMAttestationReport(VMAttestationRequest obj) {
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) {
         
         log.debug("target: {}", getTarget().getUri().toString());
-        String vmAttestationReport = getTarget()
+        VMQuoteResponse vmQuoteResponse = getTarget()
                 .path("/vrtm/report")
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
-                .post(Entity.json(obj), String.class);
-        
-        log.debug("VM Attestation report is : {}", vmAttestationReport);
-        
-        return vmAttestationReport;
+                .post(Entity.json(obj), VMQuoteResponse.class);
+                
+        return vmQuoteResponse;
     }
 }

@@ -13,6 +13,7 @@ import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -235,5 +236,5 @@ public interface HostAgent {
     
     VMAttestationResponse getVMAttestationStatus(String vmInstanceId) throws IOException;
     
-    String getVMAttestationReport(VMAttestationRequest obj) throws IOException;
+    VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException;
 }

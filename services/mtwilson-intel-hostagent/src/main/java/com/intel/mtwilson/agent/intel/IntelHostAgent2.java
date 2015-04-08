@@ -18,6 +18,7 @@ import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -245,9 +246,9 @@ public class IntelHostAgent2 implements HostAgent {
     }
 
     @Override
-    public String getVMAttestationReport(VMAttestationRequest obj) throws IOException {
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
         try {
-            String vmAttestationReport = client.getVMAttestationReport(obj);
+            VMQuoteResponse vmAttestationReport = client.getVMAttestationReport(obj);
             log.debug("VM Attestation report is {}", vmAttestationReport);
             return vmAttestationReport;
         }
