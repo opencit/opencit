@@ -6,7 +6,6 @@ package test.VMQuote;
 
 import com.intel.dcsg.cpg.xml.JAXB;
 import org.junit.Test;
-import com.intel.mtwilson.vmquote.xml.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,7 +23,59 @@ public class VMQuoteTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VMQuoteTest.class);
     private static final String instanceFolderPath = "c:/temp/vmquotetest/";
     private static final String measurementXMLFileName = "measurement.xml";
-    private static final String trustPolicyFileName = "TrustPolicy.xml";
+    private static final String trustPolicyFileName = "TrustPolicy-201503161031.xml";
+    
+    
+    @Test
+    public void CreateVMQuote() throws Exception {
+
+        com.intel.mtwilson.trustagent.model.VMQuoteResponse vmQuoteResponse = new com.intel.mtwilson.trustagent.model.VMQuoteResponse();
+        vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
+        vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
+
+        String trustPolicyXML = IOUtils.toString(vmQuoteResponse.getVmTrustPolicy(), "UTF-8");
+        boolean valid = ValidateSignature.isValid(trustPolicyXML);
+        log.debug("Validation result is {}.", valid);
+    }
+    
+    /*
+    @Test
+    public void CreateVMQuoteSimpleResponse() throws Exception {
+    
+        JAXB jaxb = new JAXB();
+        VMQuoteSimple simpleResponse = new VMQuoteSimple();
+        
+        try (FileInputStream measurementXMLFileStream = new FileInputStream(String.format("%s%s", instanceFolderPath, measurementXMLFileName))) {
+        
+            String measurementXML = IOUtils.toString(measurementXMLFileStream);
+            simpleResponse.setMeasurementLog(measurementXML);
+
+        } catch (Exception ex) {
+            log.error("Error reading the measurement log. {}", ex.getMessage());
+        }
+                
+        try (FileInputStream trustPolicyFileStream = new FileInputStream(String.format("%s%s", instanceFolderPath, trustPolicyFileName))) {
+        
+            String trustPolicyXML = IOUtils.toString(trustPolicyFileStream);
+            simpleResponse.setTrustPolicy(trustPolicyXML);
+
+        } catch (Exception ex) {
+            log.error("Error reading the measurement log. {}", ex.getMessage());
+        }
+
+        String quoteResponse = jaxb.write(simpleResponse);
+        VMQuoteSimple ret = jaxb.read(quoteResponse, VMQuoteSimple.class);
+        log.debug("Testing {}", ret.getTrustPolicy().toString());
+        
+        boolean valid = ValidateSignature.isValid(ret.getTrustPolicy().toString());
+        log.debug("Signature validation result is {}", valid);
+        
+        FileUtils.write(new File(instanceFolderPath + "outputForMTWSimple.xml"), quoteResponse);
+        log.debug(quoteResponse);        
+        
+    }*/
+    
+    /*
     
     @Test
     public void CreateVMQuoteResponse() throws Exception {
@@ -75,13 +126,22 @@ public class VMQuoteTest {
         
         JAXB jaxb = new JAXB();
         try {
-            // VMQuoteResponse vmQuoteResponse = jaxb.read(FileUtils.readFileToString(new File(instanceFolderPath + "TrustPolicy.xml")), VMQuoteResponse.class);
+            CreateVMQuoteSimpleResponse();
+            VMQuoteResponse vmQuoteResponse = jaxb.read(FileUtils.readFileToString(new File(instanceFolderPath + "TrustPolicy.xml")), VMQuoteResponse.class);
             String trustPolicyXml = FileUtils.readFileToString(new File(instanceFolderPath + "TrustPolicy-201503161031.xml")); //jaxb.write(vmQuoteResponse.getTrustPolicy());
+            
+            String testXML = jaxb.write(jaxb.read(trustPolicyXml, TrustPolicy.class));
+            FileUtils.write(new File(instanceFolderPath + "outputTest.xml"), testXML);
+            
             boolean valid = ValidateSignature.isValid(trustPolicyXml);
             log.debug("Signature validation result is {}", valid);
+
+            valid = ValidateSignature.isValid(testXML);
+            log.debug("Signature validation result is {}", valid);
+            
         } catch(IOException | JAXBException | XMLStreamException ex) {
             log.error("Error during deserialization of VM Quote Response. {}", ex.getMessage());
         }
         
-    }
+    }*/
 }

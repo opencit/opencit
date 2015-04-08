@@ -17,6 +17,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import com.intel.mtwilson.trustagent.model.HostInfo;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
@@ -27,10 +28,7 @@ import com.intel.mtwilson.trustagent.vrtmclient.RPClient;
 import com.intel.mtwilson.trustagent.vrtmclient.xml.MethodResponse;
 import com.intel.mtwilson.trustagent.vrtmclient.xml.Param;
 import com.intel.mtwilson.trustagent.vrtmclient.xml.Value;
-import com.intel.mtwilson.vmquote.xml.Measurements;
-import com.intel.mtwilson.vmquote.xml.TrustPolicy;
-import com.intel.mtwilson.vmquote.xml.VMQuote;
-import com.intel.mtwilson.vmquote.xml.VMQuoteResponse;
+import java.io.File;
 import java.io.FileInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -43,6 +41,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 
@@ -83,6 +82,29 @@ public class Vrtm {
     }
 	
     @POST
+    @Path("/report")
+    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest vmAttestationRequest) {
+        try {
+            // Call into the vRTM API and get the path information
+            String instanceFolderPath = "/var/lib/nova/instances/" + vmAttestationRequest.getVmInstanceId() + "/";
+            
+            VMQuoteResponse vmQuoteResponse = new VMQuoteResponse();
+            vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
+            vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
+            vmQuoteResponse.setVmQuote(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
+            
+            return vmQuoteResponse;
+            
+        } catch (IOException ex) {
+            log.error("Error during reading of VM quote information. {}", ex.getMessage());
+        }
+
+        return null;
+    }	
+
+/*    @POST
     @Path("/report")
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
@@ -144,4 +166,6 @@ public class Vrtm {
                     String.format("%s. %s", "Error serializing the VM quote response.", ex.getMessage())).build());
         }        
     }	
+*/    
+
 }
