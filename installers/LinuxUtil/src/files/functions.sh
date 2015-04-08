@@ -43,7 +43,7 @@ DEFAULT_TOMCAT_API_PORT="8443"
 DEFAULT_GLASSFISH_API_PORT="8181"
 #DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT
 
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 
 ### FUNCTION LIBRARY: echo and export environment variables
 
