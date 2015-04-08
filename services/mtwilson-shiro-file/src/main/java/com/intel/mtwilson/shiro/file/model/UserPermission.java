@@ -31,6 +31,13 @@ public class UserPermission {
     }
     
 
+    /**
+     * The permission text must be in the form  "domain:action:instance"
+     * or "domain:action" or "domain"
+     * 
+     * @param text
+     * @return 
+     */
     public static UserPermission parse(String text) {
         String[] parts = text.split(":");
         if( parts.length == 3 ) {
@@ -42,6 +49,6 @@ public class UserPermission {
         if( parts.length == 1 ) {
             return new UserPermission(parts[0], null, null);
         }
-        throw new IllegalArgumentException("Invalid permission format"); // must be in the form  domain:action:instance or domain:action or domain
+        throw new PermissionFormatException(text); 
     }
 }
