@@ -16,6 +16,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class VMAttestationRequest {
 
     private String vm_instance_id;
+    private String nonce;
     
     public VMAttestationRequest() {
         this.vm_instance_id = null;
@@ -31,6 +32,14 @@ public class VMAttestationRequest {
 
     public String getVmInstanceId() {
         return vm_instance_id;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
     }
 
     

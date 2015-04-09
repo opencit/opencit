@@ -65,6 +65,11 @@
     -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-vmquote-xml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -155,6 +160,12 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-trustpolicy-xml</artifactId>
             <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation</artifactId>
+            <version>3.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>  

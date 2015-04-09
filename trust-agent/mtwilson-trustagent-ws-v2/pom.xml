@@ -24,7 +24,6 @@
         </plugins>
     </build>
     <dependencies>
-	
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-privacyca-niarl</artifactId>
@@ -33,6 +32,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-vrtmclient</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

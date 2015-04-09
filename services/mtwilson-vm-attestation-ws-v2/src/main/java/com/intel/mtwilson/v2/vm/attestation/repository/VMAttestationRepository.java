@@ -41,7 +41,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                 if (obj != null) {
                     HostAgentFactory factory = new HostAgentFactory();
                     HostAgent agent = factory.getHostAgent(obj);
-                    VMAttestationResponse vmAttestationReport = agent.getVMAttestationReport(criteria.vmInstanceId);
+                    VMAttestationResponse vmAttestationReport = agent.getVMAttestationStatus(criteria.vmInstanceId);
                     objCollection.getVMAttestations().add(convert(vmAttestationReport, criteria));
                 }
                 

@@ -92,16 +92,43 @@ public class TrustAgentClient extends MtWilsonClient {
     }
 
     
-    public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {        
+    /**
+     * This API retrieves the VM attestation status. It would just return either true or false.
+     * @param vmInstanceId
+     * @return 
+     */
+    public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) {        
         VMAttestationRequest vmAttestationRequest = new VMAttestationRequest();
         vmAttestationRequest.setVmInstanceId(vmInstanceId);
         log.debug("target: {}", getTarget().getUri().toString());
 
         VMAttestationResponse vmAttestationResponse = getTarget()
-                .path("/vrtm/reports")
+                .path("/vrtm/status")
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
                 .post(Entity.json(vmAttestationRequest), VMAttestationResponse.class);
         return vmAttestationResponse;
+    }
+    
+    
+    /**
+     * This API retrieves the complete VM attestation report including the following:
+     * - Signed VM Quote having the nonce, vm instance id, and cumulative hash
+     * - Signed Trust Policy
+     * - Signing key certificate
+     * - Measurement log.
+     * @param obj
+     * @return 
+     */
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) {
+        
+        log.debug("target: {}", getTarget().getUri().toString());
+        VMQuoteResponse vmQuoteResponse = getTarget()
+                .path("/vrtm/report")
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(obj), VMQuoteResponse.class);
+                
+        return vmQuoteResponse;
     }
 }
