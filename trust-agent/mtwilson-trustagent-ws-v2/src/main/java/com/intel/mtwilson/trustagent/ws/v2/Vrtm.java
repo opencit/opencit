@@ -4,45 +4,20 @@
  */
 package com.intel.mtwilson.trustagent.ws.v2;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.common.TAException;
-import com.intel.mountwilson.trustagent.commands.hostinfo.HostInfoCmd;
-import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
-import com.intel.mtwilson.trustagent.model.HostInfo;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
-import com.intel.mtwilson.trustagent.vrtmclient.TCBuffer;
-import com.intel.mtwilson.trustagent.vrtmclient.Factory;
-import com.intel.mtwilson.trustagent.vrtmclient.RPCCall;
 import com.intel.mtwilson.trustagent.vrtmclient.RPClient;
-import com.intel.mtwilson.trustagent.vrtmclient.xml.MethodResponse;
-import com.intel.mtwilson.trustagent.vrtmclient.xml.Param;
-import com.intel.mtwilson.trustagent.vrtmclient.xml.Value;
 import java.io.File;
-import java.io.FileInputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
-import javax.ws.rs.core.Context;
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 
 /**
@@ -58,7 +33,8 @@ import org.apache.commons.io.IOUtils;
 public class Vrtm {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Vrtm.class);
     private static final String measurementXMLFileName = "measurement.xml";
-    private static final String trustPolicyFileName = "TrustPolicy.xml";
+    private static final String trustPolicyFileName = "trustpolicy.xml";
+    private static final String vmQuoteFileName = "signed_report.xml";
     
     @POST
     @Path("/status")
@@ -93,8 +69,8 @@ public class Vrtm {
             VMQuoteResponse vmQuoteResponse = new VMQuoteResponse();
             vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
             vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
-            vmQuoteResponse.setVmQuote(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
-            
+            vmQuoteResponse.setVmQuote(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, vmQuoteFileName))));
+            vmQuoteResponse.setVmQuoteType(VMQuoteResponse.QuoteType.SPRINT7);
             return vmQuoteResponse;
             
         } catch (IOException ex) {

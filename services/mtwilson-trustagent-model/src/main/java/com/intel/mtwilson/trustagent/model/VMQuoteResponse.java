@@ -16,7 +16,10 @@ public class VMQuoteResponse {
     private byte[] vmQuote;
     private byte[] vmTrustPolicy;
     private byte[] vmMeasurements;
-
+    private QuoteType vmQuoteType;
+    
+    public enum QuoteType { X509_ATTR_CERT, XML_DSIG, SPRINT7}
+    
     public byte[] getVmQuote() {
         return vmQuote;
     }
@@ -40,5 +43,13 @@ public class VMQuoteResponse {
     public void setVmMeasurements(byte[] vmMeasurements) {
         this.vmMeasurements = vmMeasurements;
     }
-    
+
+    public QuoteType getVmQuoteType() {
+        return vmQuoteType;
+    }
+
+    public void setVmQuoteType(QuoteType vmQuoteType) {
+        this.vmQuoteType = vmQuoteType;
+    }
+        
 }
