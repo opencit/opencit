@@ -16,7 +16,9 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -231,10 +233,23 @@ public class IntelHostAgent2 implements HostAgent {
     
 
     @Override
-    public VMAttestationResponse getVMAttestationReport(String vmInstanceId) {
+    public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) {
         try {
-            VMAttestationResponse vmAttestationReport = client.getVMAttestationReport(vmInstanceId);
+            VMAttestationResponse vmAttestationReport = client.getVMAttestationStatus(vmInstanceId);
             log.debug("VM Attestation result is {}", vmAttestationReport.isTrustStatus());
+            return vmAttestationReport;
+        }
+        catch(Exception e) {
+            log.error("Cannot retrieve VM attestation report: {}", e.toString(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
+        try {
+            VMQuoteResponse vmAttestationReport = client.getVMAttestationReport(obj);
+            log.debug("VM Attestation report is {}", vmAttestationReport);
             return vmAttestationReport;
         }
         catch(Exception e) {

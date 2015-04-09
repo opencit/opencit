@@ -43,9 +43,6 @@ Copyright 2015 Intel Corporation. All rights reserved.
 
                 <!-- Schema definition for VM Quote (Assuming XML Signature option) -->			
                 <element ref="tavmq:VMQuote" minOccurs="0" />
-
-                <!-- Schema definition for Signing Key Certificate. It will be base64 encoded string -->	
-                <element name="SigningKeyCertificate" type="string"/>
             
                 <!-- Schema definition for Measurement log -->	
                 <element ref="tdm:Measurements" minOccurs="0"/>							
