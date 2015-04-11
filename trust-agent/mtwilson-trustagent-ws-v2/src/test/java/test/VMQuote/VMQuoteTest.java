@@ -33,9 +33,9 @@ public class VMQuoteTest {
         vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
         vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
 
-        String trustPolicyXML = IOUtils.toString(vmQuoteResponse.getVmTrustPolicy(), "UTF-8");
-        boolean valid = ValidateSignature.isValid(trustPolicyXML);
-        log.debug("Validation result is {}.", valid);
+//        String trustPolicyXML = IOUtils.toString(vmQuoteResponse.getVmTrustPolicy(), "UTF-8");
+//        boolean valid = ValidateSignature.isValid(trustPolicyXML);
+//        log.debug("Validation result is {}.", valid);
     }
     
     /*
