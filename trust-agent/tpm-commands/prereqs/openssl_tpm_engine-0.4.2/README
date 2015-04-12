@@ -1,0 +1,115 @@
+
+ README for the OpenSSL 0.9.8 TPM engine
+
+ Author: Kent Yoder <kyoder@users.sf.net>
+ Report bugs: trousers-users@lists.sf.net
+
+
+ABOUT
+
+  This package contains 2 sets of code, a command-line utility used to
+generate a TSS key blob and write it to disk and an OpenSSL engine which
+interfaces with the TSS API.
+
+BUILDING
+
+ Requirements: OpenSSL 0.9.8
+
+ By default, the build will assume that you have a custom openssl installed
+in /usr/local/ssl.
+
+ $ configure [--enable-debug] [--with-openssl=/path/to/custom/openssl]
+ $ make
+ # make install
+
+RUNNING
+
+create_tpm_key
+
+        create_tpm_key: create a TPM key and write it to disk
+        usage: create_tpm_key [options] <filename>
+
+        Options:
+                -e|--enc-scheme encryption scheme to use [PKCSV15] or OAEP
+                -q|--sig-scheme signature scheme to use [DER] or SHA1
+                -s|--key-size   key size in bits [2048]
+                -a|--auth       require a password for the key [NO]
+                -p|--popup      use TSS GUI popup dialogs to get the password
+				for the key [NO] (implies --auth)
+
+  Key type:  The TPM key type of the key created will be legacy, so that it can
+be used for both signing and encryption.
+
+  Padding schemes:  Choosing the encryption and signature schemes
+at key creation time is mandatory because of the structure of a TPM key blob.
+Once a key is created by the TPM, the encryption and signature schemes are set
+in store and cannot be changed without corrupting the key (making it unloadable
+into a TPM). Here are the trade-offs:
+
+* PKCSV15 encryption scheme - all encrypted data will be padded using the
+    PKCSv1.5 padding algorithm. OAEP padding is considered more secure, but
+    many legacy apps will require PKCSv1.5 (most notably openssl). PKCSV15
+    padding will also allow a slightly larger chunk of data to be encrypted in
+    one operation.
+  OAEP encryption scheme - all encrypted data will be padded using the OAEP
+    padding algorithm.
+
+* DER signature scheme - assumes data to be signed is DER encoded (although
+    this is not required). Will allow signatures to be made of arbitrary
+    size, up to the size the padding will allow.
+  SHA1 signature scheme - assumes *all* data to be signed is a SHA1 hash.
+    This restricts the data size to be signed to 20 bytes, always.
+
+  * default
+
+  Key sizes: Default=2048 bits. Other valid sizes are 512 and 1024 bits.
+
+  Key auth: Default=none. if -a is specified, you will be prompted on the
+command line using OpenSSL for a passphrase. This passphrase is SHA1 hashed
+by the TSS and used as the key's password. At key load time, you'll be
+prompted for the passphrase again by OpenSSL. If -p is specified, you'll get
+a GUI  prompt for password.
+  In order to make the TPM engine prompt you for your password, add the
+following code to your app:
+
+  To set the SRK password explicitly in your code, do:
+
+  ENGINE_ctrl_cmd(e, "PIN", 0, SRK_password, NULL, 0);
+
+  The default secret mode is TSS_SECRET_MODE_PLAIN, so the above code will
+always work with a plaintext SRK secret.  If you have the hash of your secret,
+do this:
+
+  ENGINE_ctrl_cmd(e, "SECRET_MODE", TSS_SECRET_MODE_SHA1, NULL, NULL, 0);
+  ENGINE_ctrl_cmd(e, "PIN", 0, SRK_password_hash, NULL, 0);
+
+  To force the TSS to popup a dialog prompting you for your SRK password:
+
+  ENGINE_ctrl_cmd(e, "SECRET_MODE", TSS_SECRET_MODE_POPUP, NULL, NULL, 0);
+
+
+OpenSSL TPM engine
+
+  Included in this package is a sample openssl.cnf file, which can be used
+to turn on use of the TPM engine in apps where OpenSSL config support is
+compiled in.
+
+
+USE CASES
+
+  If there's a use case for the TPM engine that you'd like to see it support,
+please drop a line to trousers-users@lists.sf.net.
+
+USES
+
+Create a self-signed cert using the TPM engine:
+
+1. Generate a TPM key and write it to a file:
+ $ create_tpm_key <keyfilename>
+
+2. Make the openssl certificate request:
+ $ openssl req -keyform engine -engine tpm -key <keyfilename> -new -x509 -days 365 -out <certfilename>
+
+3. Test using openssl:
+ $ openssl s_server -cert <certfilename> -www -accept 4433 -keyform engine -engine tpm -key <keyfilename>
+ $ konqueror https://localhost:4433
