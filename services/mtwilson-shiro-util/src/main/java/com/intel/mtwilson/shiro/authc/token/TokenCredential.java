@@ -5,6 +5,7 @@
 package com.intel.mtwilson.shiro.authc.token;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Represents the registered token value with expiration date and usage
@@ -75,4 +76,5 @@ public class TokenCredential {
         if( used == null ) { used = 0; }
         used++;
     }
+
 }
