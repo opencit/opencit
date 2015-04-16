@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tag.model.x509;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -42,10 +43,12 @@ public class UTF8NameValueSequence extends ASN1Encodable {
         this.values = (DERSequence) DERSequence.getInstance(sequence.getObjectAt(1)).getDERObject(); //new DERSequence(sequence.getObjectAt(1));
     }
 
+    @JsonIgnore
     public DERUTF8String getNameDER() {
         return name;
     }
 
+    @JsonIgnore
     public DERSequence getValuesDER() {
         return values;
     }

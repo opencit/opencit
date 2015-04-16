@@ -68,12 +68,16 @@ if using_mysql; then
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.wlmp.db
       mysql_create_database
+      # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
+      #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
     fi
   elif using_postgres; then
     if [ -n "$psql" ]; then
       postgres_configure_connection "${package_config_filename}" mountwilson.wlmp.db
       postgres_create_database
+      # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
+      #       if this line stops working, revise to "mtwilson setup init-database postgresql"
       mtwilson setup InitDatabase postgresql
     else
       echo "psql not defined"

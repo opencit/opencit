@@ -25,7 +25,8 @@ public class TpmQuoteResponse {
     @JsonDeserialize(using=X509CertificateDeserializer.class)
     public X509Certificate aik;
     public byte[] quote;
-    public String eventLog; // base64-encoded xml .... 
+    public String eventLog; // base64-encoded xml ....
+    public String tcbMeasurement;
     
     /**
         String responseXML =

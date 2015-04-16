@@ -5,12 +5,12 @@
 package com.intel.dcsg.cpg.crypto;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.file.RsaKeyEnvelope;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.Aes128;
-import com.intel.dcsg.cpg.crypto.file.RsaKeyEnvelopeFactory;
-import com.intel.dcsg.cpg.crypto.file.RsaKeyEnvelopeRecipient;
+import com.intel.dcsg.cpg.crypto.file.PemKeyEncryption;
+import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeFactory;
+import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import java.security.Key;
 import java.security.KeyPair;
@@ -35,10 +35,10 @@ public class RsaKeyEnvelopeTest {
         // create the AES key that will be wrapped
         SecretKey secretKey = Aes128.generateKey();
         // seal the secret key
-        RsaKeyEnvelopeFactory factory = new RsaKeyEnvelopeFactory(certificate);
-        RsaKeyEnvelope envelope = factory.seal(secretKey);
+        RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(certificate);
+        PemKeyEncryption envelope = factory.seal(secretKey);
         // unseal the secret key
-        RsaKeyEnvelopeRecipient recipient = new RsaKeyEnvelopeRecipient(rsa);
+        RsaPublicKeyProtectedPemKeyEnvelopeOpener recipient = new RsaPublicKeyProtectedPemKeyEnvelopeOpener(rsa);
         Key unwrappedKey = recipient.unseal(envelope);
         // check that we got the same key back
         assertEquals(secretKey.getAlgorithm(), unwrappedKey.getAlgorithm());
@@ -58,10 +58,10 @@ public class RsaKeyEnvelopeTest {
         // create the AES key that will be wrapped
         SecretKey secretKey = Aes128.generateKey();
         // seal the secret key
-        RsaKeyEnvelopeFactory factory = new RsaKeyEnvelopeFactory(certificate1);
-        RsaKeyEnvelope envelope = factory.seal(secretKey);
+        RsaPublicKeyProtectedPemKeyEnvelopeFactory factory = new RsaPublicKeyProtectedPemKeyEnvelopeFactory(certificate1);
+        PemKeyEncryption envelope = factory.seal(secretKey);
         // try to unseal the secret key with the wrong private key
-        RsaKeyEnvelopeRecipient recipient = new RsaKeyEnvelopeRecipient(rsa2);
+        RsaPublicKeyProtectedPemKeyEnvelopeOpener recipient = new RsaPublicKeyProtectedPemKeyEnvelopeOpener(rsa2);
         Key unwrappedKey = recipient.unseal(envelope); // throws CryptographyException: IllegalArgumentException: RsaKeyEnvelope created with md5-hash-of-rsa1-certificate cannot be unsealed with private key corresponding to md5-hash-of-rsa2-certificate
     }
 }

@@ -73,7 +73,8 @@ public:
 				MODE_GET_RAND,
 				MODE_SIGN,
 				MODE_CREATE_EK,
-				MODE_QUOTE2};
+				MODE_QUOTE2,
+				MODE_CERTIFY_KEY};};
 
 	bool		b_debug,
 				b_log,
@@ -126,6 +127,7 @@ public:
 	void		decrypt();
 	void		create_ek();
 	void		quote2();
+	void		certify_key();    
 };
 
 #endif

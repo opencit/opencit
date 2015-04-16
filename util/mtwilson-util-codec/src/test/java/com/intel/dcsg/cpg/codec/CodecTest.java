@@ -9,7 +9,9 @@ import com.intel.mtwilson.codec.Base64Codec;
 import com.intel.mtwilson.codec.ByteArrayCodec;
 import com.intel.mtwilson.codec.HexCodec;
 import com.intel.mtwilson.codec.HexUtil;
+import com.intel.mtwilson.codec.JacksonCodec;
 import com.intel.mtwilson.codec.XStreamCodec;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -22,7 +24,7 @@ public class CodecTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CodecTest.class);
     
     @Test
-    public void testCodec() {
+    public void testXstreamCodec() {
         HashMap<String,Object> map = new HashMap<>();
         map.put("foo", "bar");
         map.put("max", Integer.MAX_VALUE);
@@ -38,9 +40,78 @@ public class CodecTest {
         log.debug("max: {}", map2.get("max"));
     }
 
+    @Test
+    public void testJacksonCodec() {
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("foo", "bar");
+        map.put("max", Integer.MAX_VALUE);
+        JacksonCodec codec = new JacksonCodec();
+        byte[] encodedBytes = codec.encode(map);
+        log.debug("encoded object: {}", new String(encodedBytes));
+        Base64Codec base64 = new Base64Codec();
+        String encodedString = base64.encode(encodedBytes);
+        log.debug("encoded: {}", encodedString);
+        byte[] decodedBytes = base64.decode(encodedString);
+        Object decodedObject = codec.decode(decodedBytes);
+        HashMap<String,Object> map2 = (HashMap<String,Object>)decodedObject;
+        log.debug("foo: {}", map2.get("foo"));
+        log.debug("max: {}", map2.get("max"));
+    }
+    
+    @Test
+    public void testJacksonCodecUnknownProperties() {
+        Animal dog = new Animal("sparky", "dog", "alice");
+        Fruit apple = new Fruit("apple", "red");
+        JacksonCodec codec = new JacksonCodec();
+        log.debug("animal: {}", new String(codec.encode(dog), Charset.forName("UTF-8"))); // animal: {"@class":"com.intel.dcsg.cpg.codec.CodecTest$Animal","name":"sparky","species":"dog","ownerName":"alice"}
+        log.debug("fruit: {}", new String(codec.encode(apple), Charset.forName("UTF-8"))); // fruit: {"@class":"com.intel.dcsg.cpg.codec.CodecTest$Fruit","name":"apple","color":"red"}
+        
+        MarketFruit soldApple = new MarketFruit("corner market", "apple", "red");
+        
+        Fruit soldApple2 = (Fruit)codec.decode(codec.encode(soldApple)); // what it actually returns is a MarketFruit class, we just cast it to Fruit which is legal
+        log.debug("soldApple2: {}", new String(codec.encode(soldApple2), Charset.forName("UTF-8")));// soldApple2: {"@class":"com.intel.dcsg.cpg.codec.CodecTest$MarketFruit","name":"apple","color":"red","marketName":"corner market"}
+//        MarketFruit apple2 = (MarketFruit)codec.decode(codec.encode(apple)); // other way wouldn't work,  you can't cast Fruit to MarketFruit
+//        log.debug("apple2: {}", new String(codec.encode(apple2), Charset.forName("UTF-8")));
+        
+    }
+    
+    public static class Animal {
+        public String name;
+        public String species;
+        public String ownerName;
+
+        public Animal() {
+        }
+
+        
+        public Animal(String name, String species, String ownerName) {
+            this.name = name;
+            this.species = species;
+            this.ownerName = ownerName;
+        }
+        
+        
+    }
+    public static class MarketFruit extends Fruit {
+        public String marketName;
+
+        public MarketFruit() {
+        }
+
+        public MarketFruit(String marketName, String name, String color) {
+            super(name, color);
+            this.marketName = marketName;
+        }
+        
+        
+    }
+    
     public static class Fruit {
-        String name;
-        String color;
+        public String name;
+        public String color;
+
+        public Fruit() {
+        }
 
         public Fruit(String name, String color) {
             this.name = name;

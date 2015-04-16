@@ -2,7 +2,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mtwilson-jersey2-util</artifactId>
     <packaging>jar</packaging>
-    <name>mtwilson-jersey2-util</name>
 
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
@@ -37,13 +36,14 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>

@@ -157,6 +157,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
         }
     }
     
+    @Deprecated
     private static <C> Object createInstanceWithContext(Class<?> serviceImplementation, C context) {
         if( context == null ) { throw new NullPointerException(); }
         Constructor constructor = ReflectionUtil.getOneArgConstructor(serviceImplementation, context.getClass());
@@ -174,6 +175,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
     }
 
     // returns an instance of the given implementation class cast to the given interface, or null if it could not be created or cast
+    @Deprecated
     private static <T,C> T create(Class<T> returnType, Class<?> serviceImplementation, C context) {
         Object instance;
         if( context == null ) {
@@ -202,6 +204,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
     }
     */
     
+    @Deprecated
     private static <T,C> T createFirst(Class<T> returnType, List<Class<?>> serviceImplementations, C context) {
         for(Class<?> item : serviceImplementations) {
             T instance = create(returnType, item, context);
@@ -225,6 +228,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
     }
     */
     
+    @Deprecated
     private static <T,C> List<T> createAll(Class<T> returnType, List<Class<?>> serviceImplementations, C context) {
         ArrayList<T> instances = new ArrayList<>();
         for(Class<?> item : serviceImplementations) {
@@ -260,6 +264,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
 
     
     
+    @Deprecated
     private static <T,C> T createPreferred(Class<T> returnType, List<Class<?>> serviceImplementations, List<String> preferenceOrder, C context) {
         for(String preference : preferenceOrder) {
             log.debug("Looking for implementation with preference {}", preference);
@@ -279,6 +284,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
     }
 
     
+    @Deprecated
     private static <T,C> T find(Class<T> returnType, Class<?> serviceInterface, C context) {
         String serviceName = serviceInterface.getName();
         List<Class<?>> serviceImplementations = whiteboard.get(serviceName);
@@ -295,6 +301,7 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
         log.debug("There are {} preferences for service {}", preferenceOrder.size(), serviceName);
         return createPreferred(returnType, serviceImplementations, preferenceOrder, context);
     }
+    @Deprecated
     private static <T, C> List<T> findAll(Class<T> returnType, Class<?> serviceInterface, C context) {
         String serviceName = serviceInterface.getName();
         List<Class<?>> serviceImplementations = whiteboard.get(serviceName);
@@ -303,6 +310,21 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
             serviceImplementations = ListUtils.EMPTY_LIST;
         }
         return createAll(returnType, serviceImplementations, context);
+    }
+
+    private static List<String> findAll(Class<?> serviceInterface) {
+        String serviceName = serviceInterface.getName();
+        List<Class<?>> serviceImplementations = whiteboard.get(serviceName);
+        if (serviceImplementations == null || serviceImplementations.isEmpty()) {
+            log.debug("No registered implementations for {}", serviceName);
+            serviceImplementations = ListUtils.EMPTY_LIST;
+        }
+        //return createAll(returnType, serviceImplementations, context);
+        ArrayList<String> classNames = new ArrayList<>();
+        for(Class<?> clazz : serviceImplementations) {
+            classNames.add(clazz.getName());
+        }
+        return classNames;
     }
     
     public static Map<String,List<String>> getPreferences() {
@@ -315,13 +337,25 @@ public class WhiteboardExtensionProvider implements ExtensionProvider {
     @Override
     public void reload() {
 //        throw new UnsupportedOperationException("Not supported yet.");
+        /**
+         * Because the whiteboard is passive, and any component can register
+         * extensions on the whiteboard, what we need here is a mechanism
+         * for those other components to opt-in and register themselves
+         * as well in a separate list of Runnables maybe that we can call
+         * on reload in order to do whatever they do again and re-register
+         * all the extensions (in case there's a change - because reload
+         * would be triggered by a feature/extensions manager probably or
+         * manually by the user after adding/removing/upgrading somthing)
+         */
     }
 
     @Override
     public Iterator<String> find(Class<?> extension) {
-        Collection<?> all = findAll(extension, extension, null);
-        ServiceLoaderExtensionProvider.ClassNameIterator it = new ServiceLoaderExtensionProvider.ClassNameIterator(all.iterator());
-        return it;
+//        Collection<?> all = findAll(extension, extension, null);
+        Collection<String> all = findAll(extension);
+        log.debug("find extension {} returning {} items", extension.getName(), all.size());
+//        ServiceLoaderExtensionProvider.ClassNameIterator it = new ServiceLoaderExtensionProvider.ClassNameIterator(all.iterator());
+        return all.iterator();
     }
 
     @Override

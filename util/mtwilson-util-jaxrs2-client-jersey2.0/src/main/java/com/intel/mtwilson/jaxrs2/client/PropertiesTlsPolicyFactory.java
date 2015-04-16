@@ -52,15 +52,15 @@ public class PropertiesTlsPolicyFactory {
 
     public static TlsPolicy createTlsPolicy(Configuration configuration) {
         // TODO: load tls policy using configuration... per-host policy, digest, insecure, shared policy from database...
-        String certificateKeystoreFile = configuration.getString("mtwilson.api.tls.policy.certificate.keystore.file");
-        String certificateKeystorePassword = configuration.getString("mtwilson.api.tls.policy.certificate.keystore.password");
-        String certificateDigestSha256 = configuration.getString("mtwilson.api.tls.policy.certificate.sha256");
-        String certificateDigestSha1 = configuration.getString("mtwilson.api.tls.policy.certificate.sha1");
-        String publicKeyKeystoreFile = configuration.getString("mtwilson.api.tls.policy.publickey.keystore.file");
-        String publicKeyKeystorePassword = configuration.getString("mtwilson.api.tls.policy.publickey.keystore.password");
-        String publicKeyDigestSha256 = configuration.getString("mtwilson.api.tls.policy.publickey.sha256");
-        String publicKeyDigestSha1 = configuration.getString("mtwilson.api.tls.policy.publickey.sha1");
-        String insecure = configuration.getString("mtwilson.api.tls.policy.insecure");
+        String certificateKeystoreFile = configuration.get("mtwilson.api.tls.policy.certificate.keystore.file", null);
+        String certificateKeystorePassword = configuration.get("mtwilson.api.tls.policy.certificate.keystore.password", null);
+        String certificateDigestSha256 = configuration.get("mtwilson.api.tls.policy.certificate.sha256", null);
+        String certificateDigestSha1 = configuration.get("mtwilson.api.tls.policy.certificate.sha1", null);
+        String publicKeyKeystoreFile = configuration.get("mtwilson.api.tls.policy.publickey.keystore.file", null);
+        String publicKeyKeystorePassword = configuration.get("mtwilson.api.tls.policy.publickey.keystore.password", null);
+        String publicKeyDigestSha256 = configuration.get("mtwilson.api.tls.policy.publickey.sha256", null);
+        String publicKeyDigestSha1 = configuration.get("mtwilson.api.tls.policy.publickey.sha1", null);
+        String insecure = configuration.get("mtwilson.api.tls.policy.insecure", null);
         TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
         tlsPolicyDescriptor.setMeta(new HashMap<String, String>());
         tlsPolicyDescriptor.setData(new ArrayList<String>());

@@ -6,7 +6,6 @@ package test.shiro;
 
 import com.intel.mtwilson.shiro.setup.CreateAdminUser;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import java.io.File;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import java.io.FileInputStream;
@@ -21,7 +20,7 @@ public class CreateAdminUserTest {
     @Test
     public void testCreateAdminUser() throws Exception {
         CreateAdminUser task = new CreateAdminUser();
-        File propertiesFile = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath()+File.separator+"mtwilson.properties");
+        File propertiesFile = My.configuration().getConfigurationFile(); //new File(Folde()+File.separator+"mtwilson.properties");
         Properties properties = new Properties();
         try(FileInputStream in = new FileInputStream(propertiesFile)) {
             properties.load(in);

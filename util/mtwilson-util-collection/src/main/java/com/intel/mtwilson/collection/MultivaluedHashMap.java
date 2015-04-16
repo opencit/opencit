@@ -28,36 +28,81 @@ import java.util.Set;
 public class MultivaluedHashMap<K,V> {
     private Map<K,List<V>> map = new HashMap<>();
     
+    /**
+     * Creates or replaces the multi-value for the given key.
+     * 
+     * @param k
+     * @param v 
+     */
     public void put(K k, V v) {
         ArrayList<V> list = new ArrayList<>();
         list.add(v);
         map.put(k, list);        
     }
     
-    public void putAll(K k, List<V> vs) {
-        map.put(k, vs);
+    /**
+     * Creates or replaces the multi-value for the given key.
+     * 
+     * Creates a shallow copy of the values so modifying the MultivaluedHashMap later
+     * will not affect the provided list (but if the values are objects and they are
+     * modified they will be affected)
+     * 
+     * @param k
+     * @param vs 
+     */
+    public void put(K k, List<V> vs) {
+        ArrayList<V> list = new ArrayList<>();
+        list.addAll(vs);
+        map.put(k, list);
     }
     
-    public void putAll(K k, V... vs) {
+    /**
+     * Creates or replaces the multi-value for the given key.
+     * 
+     * Creates a shallow copy of the values so modifying the MultivaluedHashMap later
+     * will not affect the provided list (but if the values are objects and they are
+     * modified they will be affected)
+     * 
+     * @param k
+     * @param vs 
+     */
+    public void put(K k, V... vs) {
         ArrayList<V> list = new ArrayList<>();
         Collections.addAll(list, vs);
         map.put(k, list);
     }
     
-    public void putAll(MultivaluedHashMap<K,V> other) {
-        for(K k : other.keySet()) {
-            List<V> list = other.getAll(k);
-            putAll(k, list);
+    /**
+     * Creates or replaces the multi-values for all given keys
+     * 
+     * @param other 
+     */
+    public void put(MultivaluedHashMap<K,V> other) {
+        for(K k : other.keys()) {
+            List<V> list = other.get(k);
+            put(k, list);
         }
     }
     
-    public void putAll(Map<K,V> other) {
+    /**
+     * Creates or replaces the multi-values for all given keys
+     * 
+     * @param other 
+     */
+    public void put(Map<K,V> other) {
         for(K k : other.keySet()) {
             V item = other.get(k);
             put(k,item);
         }
     }
     
+    /**
+     * Adds a value to an existing multi-value or creates a new multi-value
+     * for the given key.
+     * 
+     * @param k
+     * @param v 
+     */
     public void add(K k, V v) {
         List<V> list = map.get(k);
         if( list == null ) {
@@ -67,7 +112,15 @@ public class MultivaluedHashMap<K,V> {
         map.put(k, list);
     }
     
-    public void addAll(K k, List<V> vs) {
+    /**
+     * Adds all provided values to an existing multi-value or creates a new multi-value
+     * for the given key.
+     * 
+     * 
+     * @param k
+     * @param vs 
+     */
+    public void add(K k, List<V> vs) {
         List<V> list = map.get(k);
         if( list == null ) {
             list = new ArrayList<>();
@@ -76,7 +129,14 @@ public class MultivaluedHashMap<K,V> {
         map.put(k, list);
     }
 
-    public void addAll(K k, V... vs) {
+    /**
+     * Adds all provided values to an existing multi-value or creates a new multi-value
+     * for the given key.
+     * 
+     * @param k
+     * @param vs 
+     */
+    public void add(K k, V... vs) {
         List<V> list = map.get(k);
         if( list == null ) {
             list = new ArrayList<>();
@@ -85,16 +145,28 @@ public class MultivaluedHashMap<K,V> {
         map.put(k, list);
     }
     
-    public void addAll(MultivaluedHashMap<K,V> other) {
-        for(K k : other.keySet()) {
-            List<V> list = other.getAll(k);
+    /**
+     * Adds all provided values to corresponding existing multi-values or creates new multi-values
+     * for the given keys.
+     * 
+     * @param other 
+     */
+    public void add(MultivaluedHashMap<K,V> other) {
+        for(K k : other.keys()) {
+            List<V> list = other.get(k);
             if( list != null ) {
-                addAll(k, list);
+                add(k, list);
             }
         }
     }
 
-    public void addAll(Map<K,V> other) {
+    /**
+     * Adds all provided values to corresponding existing multi-values or creates new multi-values
+     * for the given keys.
+     * 
+     * @param other 
+     */
+    public void add(Map<K,V> other) {
         for(K k : other.keySet()) {
             V item = other.get(k);
             add(k,item);
@@ -106,7 +178,7 @@ public class MultivaluedHashMap<K,V> {
      * @param k
      * @return the value for k, or the first value for k if there is more than one
      */
-    public V get(K k) {
+    public V getFirst(K k) {
         List<V> list = map.get(k);
         if( list == null || list.isEmpty() ) { return null; }
         return list.get(0);
@@ -117,7 +189,7 @@ public class MultivaluedHashMap<K,V> {
      * @param k
      * @return all values for key k or null if there are no values; never an empty collection
      */
-    public List<V> getAll(K k) {
+    public List<V> get(K k) {
         List<V> list = map.get(k);
         if( list == null || list.isEmpty() ) { return null; }
         return list;
@@ -137,7 +209,7 @@ public class MultivaluedHashMap<K,V> {
      * @param k
      * @param vs 
      */
-    public void removeAll(K k, List<V> vs) {
+    public void remove(K k, List<V> vs) {
         List<V> list = map.get(k);
         if( list == null || list.isEmpty() ) { return; }
         list.removeAll(vs);
@@ -150,7 +222,7 @@ public class MultivaluedHashMap<K,V> {
      * @param k
      * @param vs 
      */
-    public void removeAll(K k, V... vs) {
+    public void remove(K k, V... vs) {
         List<V> list = map.get(k);
         if( list == null || list.isEmpty() ) { return; }
         for(V item : vs) {
@@ -187,7 +259,7 @@ public class MultivaluedHashMap<K,V> {
         return false;
     }
     
-    public Set<K> keySet() {
+    public Set<K> keys() {
         return map.keySet();
     }
     

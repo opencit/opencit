@@ -25,6 +25,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.asn1.DEROctetString;
 import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.BasicConstraintsExtension;
@@ -42,8 +44,6 @@ import sun.security.x509.GeneralName;
 import sun.security.x509.GeneralNames;
 import sun.security.x509.IPAddressName;
 import sun.security.x509.KeyUsageExtension;
-import sun.security.x509.OIDMap;
-import sun.security.x509.PKIXExtensions;
 import sun.security.x509.SubjectAlternativeNameExtension;
 import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
@@ -315,6 +315,37 @@ public class X509Builder extends BuilderModel {
         return this;
     }
     
+    public X509Builder noncriticalExtension(String oid, byte[] value) {
+        try {
+            v3();
+//            X509CertificateExtension extension = new X509CertificateExtension(oid, false, value);
+            if( certificateExtensions == null ) { certificateExtensions = new CertificateExtensions(); }
+//            certificateExtensions.set(extension.getId(), /*extension*/ new sun.security.x509.Extension(new ObjectIdentifier(extension.getId()), extension.isCritical(), extension.getDEREncoded()));
+            DEROctetString octetString = new DEROctetString(value);
+            certificateExtensions.set(oid, new sun.security.x509.Extension(new ObjectIdentifier(oid), false, octetString.getDEREncoded()));
+            info.set(X509CertInfo.EXTENSIONS, certificateExtensions);
+        }
+        catch(IOException | CertificateException e) {
+            fault(e, "noncriticalExtension(%s,%s)", oid, Base64.encodeBase64String(value));
+        }
+        return this;
+    }
+    
+    public X509Builder criticalExtension(String oid, byte[] value) {
+        try {
+            v3();
+//            Extension extension = new X509CertificateExtension(oid, true, value);
+            if( certificateExtensions == null ) { certificateExtensions = new CertificateExtensions(); }
+            DEROctetString octetString = new DEROctetString(value);
+            certificateExtensions.set(oid, new sun.security.x509.Extension(new ObjectIdentifier(oid), true, octetString.getDEREncoded()));
+//            certificateExtensions.set(extension.getId(), extension);
+            info.set(X509CertInfo.EXTENSIONS, certificateExtensions);
+        }
+        catch(IOException | CertificateException e) {
+            fault(e, "criticalExtension(%s,%s)", oid, Base64.encodeBase64String(value));
+        }
+        return this;
+    }
     
     public X509Builder ipAlternativeName(String ip) {
         try {

@@ -28,7 +28,7 @@ import java.util.Set;
  * the hash when saving the file again - and possibly with a different
  * password!
  * 
- * 
+ * <pre>
 -----BEGIN ENCRYPTED DATA-----
 EnvelopeKeyId: bkaz4lbv/y0=:etpZPPlmwEilwbNxzBHRCd+FyWQMw1akygtgIPent6w=
 EnvelopeAlgorithm: PBEWithMD5AndDES/CBC/PKCS5Padding
@@ -41,25 +41,26 @@ zoJ/NBdEIMdHNUh0h11GQCXAQXOSL6Fx2hRdcicm6j1CPd3AFrTt9EATmd4Hj+D4
 91jDYXElALfdSbiO0A9Mz6USUepTXwlfVV/cbBpLRz5Rqnyg2EwI2tZRU+E+Cusb
 /b6hcuWyzva895YMUCSyDaLgSsIqRWmXxQV1W2bAgRbs8jD8VF+G9w==
 -----END ENCRYPTED DATA-----
+ * </pre>
  * 
  * @since 0.1
  * @author jbuhacoff
  */
 public class DataEnvelope {
     private byte[] content;                 // the encrypted data
-    private final String ENVELOPE_KEY_ID = "EnvelopeKeyId";           // arbitrary key id so recipient knows which key to use to unwrap; for example an email address or hex representation of MD5, SHA1, or SHA256 fingerprint of the public key
-    private final String ENVELOPE_ALGORITHM = "EnvelopeAlgorithm";       // defined by RsaKeyEnvelopeFactory; for example RSA/ECB/OAEPWithSHA-256AndMGF1Padding
+    private final String ENVELOPE_KEY_ID_HEADER = "EnvelopeKeyId";           // arbitrary key id so recipient knows which key to use to unwrap; for example an email address or hex representation of MD5, SHA1, or SHA256 fingerprint of the public key
+    private final String ENVELOPE_ALGORITHM_HEADER = "EnvelopeAlgorithm";       // defined by RsaKeyEnvelopeFactory; for example RSA/ECB/OAEPWithSHA-256AndMGF1Padding
     private HashMap<String,String> headers = new HashMap<String,String>(); // optional;  users can set other headers to send along with the envelope (for writing additional information on it, such as the identifier of the enveloped key, which we don't care about here)
     
     public void setContent(byte[] content) { this.content = content; }
-    public void setEnvelopeKeyId(String envelopeKeyId) { this.headers.put(ENVELOPE_KEY_ID, envelopeKeyId); }
-    public void setEnvelopeAlgorithm(String envelopeAlgorithm) { this.headers.put(ENVELOPE_ALGORITHM, envelopeAlgorithm); }
+    public void setEnvelopeKeyId(String envelopeKeyId) { this.headers.put(ENVELOPE_KEY_ID_HEADER, envelopeKeyId); }
+    public void setEnvelopeAlgorithm(String envelopeAlgorithm) { this.headers.put(ENVELOPE_ALGORITHM_HEADER, envelopeAlgorithm); }
     public void setHeader(String name, String value) { this.headers.put(name, value); } // optional
     public void removeHeader(String name) { this.headers.remove(name); } // optional
     
     public byte[] getContent() { return content; }
-    public String getEnvelopeKeyId() { return this.headers.get(ENVELOPE_KEY_ID); }
-    public String getEnvelopeAlgorithm() { return this.headers.get(ENVELOPE_ALGORITHM); }
+    public String getEnvelopeKeyId() { return this.headers.get(ENVELOPE_KEY_ID_HEADER); }
+    public String getEnvelopeAlgorithm() { return this.headers.get(ENVELOPE_ALGORITHM_HEADER); }
     public String getHeader(String name) { return this.headers.get(name); } // optional
     public Set<String> listHeaders() { return Collections.unmodifiableSet(this.headers.keySet()); } // optional
     

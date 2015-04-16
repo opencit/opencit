@@ -8,9 +8,10 @@
   <name>Mount Wilson Trust Agent</name>
 
     <parent>
-	<groupId>com.intel.mtwilson</groupId>
-	<artifactId>mtwilson</artifactId>
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-java</artifactId>
 	<version>3.0-SNAPSHOT</version>
+        <relativePath/>
     </parent>
   
 
@@ -24,6 +25,7 @@
     <module>mtwilson-trustagent-console</module>
     <module>mtwilson-trustagent-privacyca-niarl</module>
 	<module>mtwilson-trustagent-tpm-tools</module>
+    <module>mtwilson-trustagent-vrtmclient</module>
   </modules>
 
 

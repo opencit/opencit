@@ -35,10 +35,10 @@ public class V2TrustAgentClientTest {
     
     @BeforeClass
     public static void createClient() throws Exception {
-        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.171:1443/v2"), new InsecureTlsPolicy());
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.104:1443/v2"), new InsecureTlsPolicy());
         Properties properties = new Properties();
-        properties.setProperty("mtwilson.api.username", "mtwilson");
-        properties.setProperty("mtwilson.api.password", "");
+        properties.setProperty("mtwilson.api.username", "admin");
+        properties.setProperty("mtwilson.api.password", "7ZM1it2gBYE_");
         properties.setProperty("org.glassfish.jersey.filter.LoggingFilter.printEntity", "true");
         client = new TrustAgentClient(properties, tlsConnection);
     }
@@ -96,5 +96,14 @@ public class V2TrustAgentClientTest {
         PerformanceInfo performanceInfo = PerformanceUtil.measureMultipleConcurrentTasks(2000, task1, task2);
         ObjectMapper mapper = new ObjectMapper();
         log.debug("performance: {}", mapper.writeValueAsString(performanceInfo));
+    }
+
+    @Test
+    public void testVMAttestationRequest() throws Exception {
+        VMAttestationResponse vmAttestationResponse = client.getVMAttestationStatus("test vm instance id");
+        ObjectMapper mapper = new ObjectMapper();
+//        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+        log.debug(mapper.writeValueAsString(vmAttestationResponse));
+        
     }
 }

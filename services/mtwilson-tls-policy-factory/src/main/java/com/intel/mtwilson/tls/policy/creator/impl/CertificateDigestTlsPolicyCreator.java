@@ -51,6 +51,9 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
             if( tlsPolicyDescriptor.getData() == null || tlsPolicyDescriptor.getData().isEmpty()  ) {
                 throw new IllegalArgumentException("TLS policy descriptor does not contain any certificate digests");
             }
+            log.debug("getCertificateDigestRepository policyType: {}", tlsPolicyDescriptor.getPolicyType());
+            log.debug("getCertificateDigestRepository policyType: {}", tlsPolicyDescriptor.getMeta().get("digestEncoding"));
+            log.debug("getCertificateDigestRepository policyType: {}", tlsPolicyDescriptor.getMeta().get("digestAlgorithm"));
             ByteArrayCodec codec;
             CertificateDigestMetadata meta = getCertificateDigestMetadata(tlsPolicyDescriptor);
             if( meta.digestEncoding == null ) {
@@ -103,7 +106,7 @@ public class CertificateDigestTlsPolicyCreator implements TlsPolicyCreator{
      * @param tlsPolicyDescriptor
      * @return an instance of CertificateDigestMetadata, but some fields may be null if they were not included in the descriptor's meta section
      */
-    public static CertificateDigestMetadata getCertificateDigestMetadata(TlsPolicyDescriptor tlsPolicyDescriptor) {
+     public static CertificateDigestMetadata getCertificateDigestMetadata(TlsPolicyDescriptor tlsPolicyDescriptor) {
         CertificateDigestMetadata metadata = new CertificateDigestMetadata();
         if( tlsPolicyDescriptor.getMeta() == null ) {
             return metadata;

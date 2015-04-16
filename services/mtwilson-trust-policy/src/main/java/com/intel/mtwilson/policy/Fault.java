@@ -4,6 +4,12 @@
  */
 package com.intel.mtwilson.policy;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * This class strongly resembles an Exception object but it is used differently.
  * 
@@ -20,11 +26,21 @@ package com.intel.mtwilson.policy;
  * @since 1.1
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, property="fault_name")
 public class Fault {
     private final String description;
     private final Throwable cause;
     
-    public Fault(String description) {
+    // for desearializing jackson
+    public Fault() {
+        this.cause = null;
+        this.description = null;
+    }
+    
+    @JsonCreator
+    public Fault(@JsonProperty("description") String description) {
         this.cause = null;
         this.description = description;
     }
@@ -44,6 +60,9 @@ public class Fault {
         this.description = String.format(format, args);
     }
     
+    public String getDescription() {
+        return description;
+    }
     
     @Override
     public String toString() {

@@ -17,7 +17,7 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
@@ -89,8 +89,8 @@ public class CitrixClient {
         //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
 
         // check mtwilson 2.0 configuration first
-        String binPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //.getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data";
         log.debug("binpath = {}", binPath);
         log.debug("varpath = {}", varPath);
         File bin = new File(binPath);
@@ -98,7 +98,7 @@ public class CitrixClient {
         if (bin.exists() && var.exists()) {
             aikverifyhomeBin = binPath;
             aikverifyhomeData = varPath;
-            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
+            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl.sh" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
             aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
         } else {
             // mtwilson 1.2 configuration

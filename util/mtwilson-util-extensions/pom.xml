@@ -114,18 +114,31 @@ They will be created in target/site/apidocs
             <version>2.2.1</version>
             <optional>true</optional>
         </dependency>
-        
+
+        <!-- for ChainedIterator -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-collection</artifactId>
+        </dependency>
+                
         <!-- for Filter -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-pipe</artifactId>
         </dependency>
         
-       <!-- for DirectoryFilter -->
-    <dependency>
+        <!-- for CamelCaseToHyphenated in PluginRegistryFactory -->
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-io</artifactId>
+            <artifactId>mtwilson-util-text-transform</artifactId>
         </dependency>
+
+        <!-- for Observer -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-performance</artifactId>
+        </dependency>
+                
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -154,6 +167,17 @@ They will be created in target/site/apidocs
             <scope>test</scope>
         </dependency>
 -->
+    <!-- required to use AttributeEqualsFilter in mtwilson-util-pipe -->
+    <dependency>
+		<groupId>commons-beanutils</groupId>
+		<artifactId>commons-beanutils</artifactId>
+    </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>
@@ -170,10 +194,6 @@ They will be created in target/site/apidocs
             <artifactId>logback-classic</artifactId>
 			<optional>true</optional>
         </dependency>        
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
 
     </dependencies>  
     

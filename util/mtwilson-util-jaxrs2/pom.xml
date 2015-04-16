@@ -38,7 +38,7 @@
 
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-ext</artifactId>
+            <artifactId>mtwilson-repository-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -48,6 +48,13 @@
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         
+        <!-- Fault -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-validation</artifactId>
+        </dependency>
+
+                
         <!-- jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -81,6 +88,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-xml-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jackson</artifactId>
         </dependency>
 
 

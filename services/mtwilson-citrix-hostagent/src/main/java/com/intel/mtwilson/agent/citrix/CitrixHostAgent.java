@@ -17,6 +17,9 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.TpmQuote;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import com.xensource.xenapi.Types;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -296,5 +299,19 @@ BwIDAQAB
             log.error("Unexpected error while setting asset tag", e);
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+	@Override
+    public X509Certificate getBindingKeyCertificate() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -51,7 +51,6 @@ public class PBECryptoCodec implements CryptoCodec {
             log.debug("key length {}", protection.getKeyLengthBits());
 //            SecretKey dek = createSecretKey(salt); // throws InvalidKeySpecException, NoSuchAlgorithmException
             SecretKey dek = secretKeyGenerator.generateSecretKey(password, salt, protection);
-            log.debug("secret key: {}", dek.getEncoded());
             // and use the key to encrypt the message
             AlgorithmParameterSpec dekParams = new PBEParameterSpec(salt, protection.getIterations()); // need to define the algorithm parameter specs because the cipher receives the Key interface which is generic... so it doesn't know about the parameters that are embedded in it
 //            Cipher cipher = Cipher.getInstance(algorithm); // throws NoSuchAlgorithmException, NoSuchPaddingException ; envelopeAlgorithm like "PBEWithHmacSHA1AndDESede/CBC/PKCS5Padding" 

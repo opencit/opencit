@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.crypto.SamlUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.xml.ClasspathResourceResolver;
+import com.intel.mtwilson.xml.XML;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * This class extracts trust information from a SAML assertion.
@@ -110,6 +112,7 @@ public class TrustAssertion {
                 throw new IllegalArgumentException("Cannot verify XML signature");
             }
         } catch (Exception e) {
+            log.error("Cannot verify trust assertion", e);
             isValid = false;
             error = e;
             assertion = null;
@@ -260,6 +263,15 @@ public class TrustAssertion {
             PublicKey publicKey = RsaUtil.decodePemPublicKey(pem);
             return publicKey;
         }
+        
+        public X509Certificate getBindingKeyCertificate() throws CertificateException {
+            String pem = assertionMap.get("Binding_Key_Certificate");
+            if (pem == null || pem.isEmpty()) {
+                return null;
+            }
+            X509Certificate cert = X509Util.decodePemCertificate(pem);
+            return cert;
+        }        
 
         public boolean isHostTrusted() {
             String trusted = assertionMap.get("Trusted");
@@ -282,29 +294,17 @@ public class TrustAssertion {
         }
     }
 
-    private Element readXml(String xml) throws ParserConfigurationException, SAXException, IOException {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        schemaFactory.setResourceResolver(new ClasspathResourceResolver());
-        try (InputStream samlSchemaProtocolStream = getClass().getResourceAsStream("/saml-schema-protocol-2.0.xsd");
-                InputStream samlSchemaAssertionStream = getClass().getResourceAsStream("/saml-schema-assertion-2.0.xsd");
-                InputStream xencSchemaStream = getClass().getResourceAsStream("/xenc-schema.xsd");
-                InputStream xmldigCoreSchemaStream = getClass().getResourceAsStream("/xmldsig-core-schema.xsd")) {
-            Source samlSchemaProtocol = new StreamSource(samlSchemaProtocolStream); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-protocol-2.0.xsd
-            Source samlSchemaAssertion = new StreamSource(samlSchemaAssertionStream); // http://docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd
-            Source xencSchema = new StreamSource(xencSchemaStream); // http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd
-            Source xmldsigCoreSchema = new StreamSource(xmldigCoreSchemaStream); // http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd
-            Schema schema = schemaFactory.newSchema(new Source[]{samlSchemaProtocol, samlSchemaAssertion, xencSchema, xmldsigCoreSchema});
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            factory.setExpandEntityReferences(false); // bug #1038 prevent XXE
-            factory.setXIncludeAware(false); // bug #1038 prevent XXE
-            factory.setSchema(schema); // fix for javax.xml.crypto.dsig.XMLSignatureException: javax.xml.crypto.URIReferenceException: com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException: Cannot resolve element with ID HostTrustAssertion
-            DocumentBuilder builder = factory.newDocumentBuilder(); // ParserConfigurationException
-            try (ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes())) {
-                Element document = builder.parse(in).getDocumentElement(); // SAXException, IOException
-                return document;
-            }
-        }
+    /**
+     * See also {@code XML.parseDocumentElement} in mtwilson-util-xml
+     */
+    private Element readXml(String xmlDocument) throws ParserConfigurationException, SAXException, IOException {
+        XML xml = new XML();
+        xml.setSchemaPackageName("xsd");
+        xml.addSchemaLocation("http://docs.oasis-open.org/security/saml/v2.0/saml-schema-protocol-2.0.xsd");
+        xml.addSchemaLocation("http://docs.oasis-open.org/security/saml/v2.0/saml-schema-assertion-2.0.xsd");
+        xml.addSchemaLocation("http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd");
+        xml.addSchemaLocation("http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd");
+        return xml.parseDocumentElement(xmlDocument);
     }
 
     private Assertion readAssertion(Element document) throws UnmarshallingException {

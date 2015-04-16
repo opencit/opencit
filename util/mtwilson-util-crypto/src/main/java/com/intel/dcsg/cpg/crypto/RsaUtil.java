@@ -247,7 +247,7 @@ public class RsaUtil {
     public static PublicKey decodePemPublicKey(String text) throws CryptographyException {
         List<Pem> list = PemLikeParser.parse(text);
         for(Pem pem : list) {
-            if( "PUBLIC KEY".equals(pem.getContentType()) ) {
+            if( "PUBLIC KEY".equals(pem.getBanner()) ) {
 //                byte[] der = Base64.decodeBase64(pem.getContent());
                 byte[] der = pem.getContent();
                 return decodeDerPublicKey(der);
@@ -268,7 +268,7 @@ public class RsaUtil {
         List<Pem> pems = PemLikeParser.parse(text);
         ArrayList<PublicKey> publicKeys = new ArrayList<>();
         for(Pem pem : pems) {
-            if( "PUBLIC KEY".equals(pem.getContentType()) ) { 
+            if( "PUBLIC KEY".equals(pem.getBanner()) ) { 
                 byte[] content = Base64.decodeBase64(pem.getContent());
                 publicKeys.add(decodeDerPublicKey(content));
             }
@@ -316,7 +316,7 @@ public class RsaUtil {
     public static PrivateKey decodePemPrivateKey(String text) throws CryptographyException {
         List<Pem> list = PemLikeParser.parse(text);
         for(Pem pem : list) {
-            if( "PRIVATE KEY".equals(pem.getContentType()) ) {
+            if( "PRIVATE KEY".equals(pem.getBanner()) ) {
                 byte[] der = pem.getContent();
                 return decodeDerPrivateKey(der);
             }

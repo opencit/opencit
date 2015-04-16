@@ -36,7 +36,7 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>mtwilson-launcher-ext</artifactId>
+      <artifactId>mtwilson-launcher-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -70,7 +70,13 @@
       <artifactId>mtwilson-console</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-extensions-cache</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+        
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-attestation</artifactId>
@@ -94,6 +100,11 @@
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-attestation-ws-v2</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-vm-attestation-ws-v2</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -171,7 +182,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jackson</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -181,6 +191,11 @@
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-jersey2-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-jersey2-util-v1</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -293,11 +308,6 @@
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-version-ws-v2</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-vm-attestation-ws-v2</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

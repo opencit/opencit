@@ -3,12 +3,10 @@ package com.intel.mountwilson.as.helper;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.i18n.ErrorCode;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +18,7 @@ import org.apache.commons.lang.StringUtils;
 public class CommandUtil {
 
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class);
-    private static final Pattern singleQuoteShellSpecialCharacters = Pattern.compile("[*?#~=%\\[]");
-    private static final Pattern anySingleQuoteShellSpecialCharacters = Pattern.compile("(.*?)" + singleQuoteShellSpecialCharacters.pattern() + "(.*?)");
-    private static final Pattern doubleQuoteShellSpecialCharacters = Pattern.compile("[$`*@\\\\]");
-    private static final Pattern anyDoubleQuoteShellSpecialCharacters = Pattern.compile("(.*?)" + doubleQuoteShellSpecialCharacters.pattern() + "(.*?)");
-
+    
     public static List<String> runCommand(String commandLine, boolean readResult, String commandAlias) {
         List<String> result = new ArrayList<String> ();
 
@@ -117,58 +111,4 @@ public class CommandUtil {
         return fileContents;
     }
     */
-    
-    // This function returns true if the string input contains bash/shell single quote special characters
-    public static boolean containsSingleQuoteShellSpecialCharacters(String input) {
-        return anySingleQuoteShellSpecialCharacters.matcher(input).matches();
-    }
-    
-    // This function returns true if the string input contains bash/shell double quote special characters
-    public static boolean containsDoubleQuoteShellSpecialCharacters(String input) {
-        return anyDoubleQuoteShellSpecialCharacters.matcher(input).matches();
-    }
-    
-    // This function will escape special characters in an argument being passed to the bash/shell command line
-    public static String singleQuoteEscapeShellArgument(String input) {
-        return "\'" + input.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "\'";
-    }
-    
-    // This function will escape special characters in an option being passed to the bash/shell command line
-    public static String singleQuoteEscapeShellOption(String input) {
-        if (input.contains("=")) {
-            String[] option = input.split("=", 2);
-            String parameter = option[0];
-            String value = option[1];
-            return parameter + "=\'" + value.replaceAll(singleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "\'";
-        } else {
-            return singleQuoteEscapeShellArgument(input);
-        }
-    }
-    
-    // Overload for supplying both the parameter and argument value
-    public static String singleQuoteEscapeShellOption(String parameterName, String argumentValue) {
-        return String.format("%s=%s", singleQuoteEscapeShellArgument(parameterName), singleQuoteEscapeShellArgument(argumentValue));
-    }
-    
-    // This function will escape special characters in an argument being passed to the bash/shell command line
-    public static String doubleQuoteEscapeShellArgument(String input) {
-        return input.replaceAll(doubleQuoteShellSpecialCharacters.pattern(), "\\\\$0");
-    }
-    
-    // This function will escape special characters in an option being passed to the bash/shell command line
-    public static String doubleQuoteEscapeShellOption(String input) {
-        if (input.contains("=")) {
-            String[] option = input.split("=", 2);
-            String parameter = option[0];
-            String value = option[1];
-            return parameter + "=\'" + value.replaceAll(doubleQuoteShellSpecialCharacters.pattern(), "\\\\$0") + "\'";
-        } else {
-            return doubleQuoteEscapeShellArgument(input);
-        }
-    }
-    
-    // Overload for supplying both the parameter and argument value
-    public static String doubleQuoteEscapeShellOption(String parameterName, String argumentValue) {
-        return String.format("%s=%s", doubleQuoteEscapeShellArgument(parameterName), doubleQuoteEscapeShellArgument(argumentValue));
-    }
 }

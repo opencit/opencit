@@ -1,0 +1,4 @@
+# the update-extensions-cache-file command must be available via the 
+# service extension loader so that it can be used to initialize that
+# cache file with all available commands and other plugins
+com.intel.mtwilson.extensions.cache.UpdateExtensionsCacheFile

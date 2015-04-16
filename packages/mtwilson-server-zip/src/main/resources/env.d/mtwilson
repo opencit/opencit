@@ -1,7 +1,13 @@
 # Environment variables in this file are used when running mtwilson.
 
 MTWILSON_HOME=/opt/mtwilson
-MTWILSON_CONF=/opt/mtwilson/configuration
+
+# These are defaults:
+#MTWILSON_FS_CONFIGURATION=/opt/mtwilson/configuration
+#MTWILSON_FS_FEATURES=/opt/mtwilson/features
+#MTWILSON_FS_REPOSITORY=/opt/mtwilson/repository
+
+# TODO: instead of this top-level directory, classpath should be created by listing /opt/mtwilson/features/*/java/*.jar
 MTWILSON_JAVA=/opt/mtwilson/java
 
 MTWILSON_LOGFILE=/var/log/mtwilson/mtwilson.log
@@ -11,5 +17,4 @@ MTWILSON_PIDFILE=/var/run/mtwilson.pid
 #-Djavax.net.ssl.trustStore=$intel_conf_dir/mtwilson.jks -Djavax.net.ssl.keyStore=$intel_conf_dir/mtwilson.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true
 
 #JAVA_OPTS="-Dfs.root=$MTWILSON_HOME -Dfs.conf=$MTWILSON_CONF -Dlogback.configurationFile=$MTWILSON_CONF/logback.xml"
-JAVA_OPTS="-Dfs.name=mtwilson -Dfs.home=$MTWILSON_HOME -Dfs.conf=$MTWILSON_CONF -Dlogback.configurationFile=$MTWILSON_CONF/logback.xml"
-
+JAVA_OPTS="-Dmtwilson.home=$MTWILSON_HOME -Dlogback.configurationFile=$MTWILSON_CONF/logback.xml"

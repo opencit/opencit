@@ -154,8 +154,11 @@ public class MwClientUtil {
             log.debug("cannot display keystore: "+e.toString());
         }
         
+        if( !properties.containsKey("mtwilson.api.url") && !properties.containsKey("mtwilson.api.baseurl") ) {
+            properties.setProperty("mtwilson.api.url", server.toExternalForm());
+        }
+        
         try {
-            
             RegisterUsers client = new RegisterUsers(properties);//My.configuration().getClientProperties());
             
             RegisterUserWithCertificate rpcUserWithCert = new RegisterUserWithCertificate();            

@@ -16,6 +16,9 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
+import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -214,5 +217,44 @@ public class IntelHostAgent2 implements HostAgent {
         log.debug("calling trustAgentClient with " + tag.toHexString() + " | " +  hm.get("Host_UUID"));
         //trustAgentClient.setAssetTag(tag.toHexString(), hm.get("Host_UUID"));
         client.writeTag(tag.toByteArray(), UUID.valueOf(hm.get("Host_UUID")));
+    }
+    
+    @Override
+    public X509Certificate getBindingKeyCertificate() {
+        try {
+            X509Certificate bindingKeyCert = client.getBindingKeyCertificate();
+            return bindingKeyCert;
+        }
+        catch(Exception e) {
+            log.error("Cannot retrieve Binding key certificate: {}", e.toString(), e);
+            throw e;
+        }
+    }
+    
+
+    @Override
+    public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) {
+        try {
+            VMAttestationResponse vmAttestationReport = client.getVMAttestationStatus(vmInstanceId);
+            log.debug("VM Attestation result is {}", vmAttestationReport.isTrustStatus());
+            return vmAttestationReport;
+        }
+        catch(Exception e) {
+            log.error("Cannot retrieve VM attestation report: {}", e.toString(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) throws IOException {
+        try {
+            VMQuoteResponse vmAttestationReport = client.getVMAttestationReport(obj);
+            log.debug("VM Attestation report is {}", vmAttestationReport);
+            return vmAttestationReport;
+        }
+        catch(Exception e) {
+            log.error("Cannot retrieve VM attestation report: {}", e.toString(), e);
+            throw e;
+        }
     }
 }

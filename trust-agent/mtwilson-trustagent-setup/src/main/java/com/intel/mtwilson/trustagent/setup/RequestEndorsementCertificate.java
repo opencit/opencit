@@ -308,7 +308,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
     
     private void endorseTpmWithMtWilson() throws Exception {
         ProvisionTPM provisioner = new ProvisionTPM();
-        provisioner.configure(config.getConfiguration());
+        provisioner.configure(getConfiguration());
         provisioner.run();
     }
 }

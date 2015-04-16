@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy.rule;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
@@ -40,8 +42,13 @@ import java.util.List;
  * 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogIntegrity extends BaseRule {
     private PcrIndex pcrIndex;
+    
+    protected PcrEventLogIntegrity() { } // for desearializing jackson
+    
     public PcrEventLogIntegrity(PcrIndex pcrIndex) {
         this.pcrIndex = pcrIndex;
     }

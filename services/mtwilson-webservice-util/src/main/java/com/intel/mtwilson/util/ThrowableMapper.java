@@ -40,20 +40,31 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
     public Response toResponse(Throwable exception) {
         log.debug("ThrowableMapper toResponse", exception);
         Locale locale = Util.getAcceptableLocale(headers.getAcceptableLanguages(), My.configuration().getAvailableLocales());
-
+        log.debug("ThrowableMapper locale: {}", locale.getDisplayName()); // example: English (United States)
+        
         String localizedMessage;
         if( exception instanceof MWException ) {
+            log.debug("ThrowableMapper exception is a subclass of MWException");
             MWException mwe = (MWException)exception;
             mwe.setLocale(locale); // localizes output of getErrorMessage() below
             localizedMessage = mwe.getErrorMessage(); 
         }        
         else {
+            log.debug("ThrowableMapper exception is NOT a subclass of MWException");
             localizedMessage = getLocalizedErrorMessage(exception, locale);
+            log.debug("ThrowableMapper getLocalizedErrorMessage return ok");
         }
+        
+        log.debug("ThrowableMapper localizedMessage: {}", localizedMessage);
         
         int status = 400; // assume bad request unless we find out otherwise
         if( exception instanceof WebApplicationException ) {
+            log.debug("ThrowableMapper exception is a subclass of WebApplicationException");
             status = ((WebApplicationException)exception).getResponse().getStatus();
+            log.debug("WebApplicationException: {} ({})", exception.getClass().getName(), status);
+        }
+        else {
+            log.debug("ThrowableMapper exception is NOT a subclass of WebApplicationException");
         }
         
 //        ResponseBuilder responseBuilder = Response.status(status).header("Error", localizedMessage);

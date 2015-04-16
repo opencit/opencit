@@ -6,7 +6,7 @@ package api.as;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientInfo;
@@ -40,7 +40,7 @@ public class MSSearchTest {
     
     @BeforeClass
     public static void setup() throws IOException, ClientException  {
-        config = ConfigurationUtil.fromResource("/mtwilson-0.5.2.properties");
+        config = CommonsConfigurationUtil.fromResource("/mtwilson-0.5.2.properties");
         c = new ApiClient(config);
     }
     

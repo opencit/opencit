@@ -102,7 +102,7 @@ public class HostInfoCmd implements ICommand {
      */
     private void getBiosAndVersion() throws TAException, IOException {
         CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
-        List<String> resultList = Arrays.asList(result.getStdout().split("\r\n"));
+        List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
                 if (data.trim().startsWith("#")) // ignore the comments
@@ -114,7 +114,7 @@ public class HostInfoCmd implements ICommand {
         log.debug("Bios OEM: " + context.getBiosOem());
 
         CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
-        resultList = Arrays.asList(result2.getStdout().split("\r\n"));
+        resultList = Arrays.asList(result2.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
                 if (data.trim().startsWith("#")) // ignore the comments
@@ -209,13 +209,21 @@ public class HostInfoCmd implements ICommand {
      * @throws TAexception
      * @throws IOException
      */
-      public void getHostUUID() throws TAException, IOException {
-          CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
-          String hostUUID = result.getStdout();
-          // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
-          
-          context.setHostUUID(trim(hostUUID));
-          log.info("Context set with host UUID info: " + context.getHostUUID());
-          
-      }
+    public void getHostUUID() throws TAException, IOException {
+        CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
+        // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
+        List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
+        if (resultList != null && resultList.size() > 0) {
+            for (String data : resultList) {
+                if (data.trim().startsWith("#")) { // ignore the comments
+                    continue;
+                }
+                context.setHostUUID(data.trim());
+                break;
+            }
+        }
+
+        log.info("Context set with host UUID info: " + context.getHostUUID());
+
+    }
 }

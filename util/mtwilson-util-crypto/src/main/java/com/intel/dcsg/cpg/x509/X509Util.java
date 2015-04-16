@@ -132,7 +132,7 @@ public class X509Util {
     public static X509Certificate decodePemCertificate(String text) throws CertificateException {
         List<Pem> list = PemLikeParser.parse(text);
         for(Pem pem : list) {
-            if( "CERTIFICATE".equals(pem.getContentType()) ) {
+            if( "CERTIFICATE".equals(pem.getBanner()) ) {
                 return decodeDerCertificate(pem.getContent());
             }
         }
@@ -155,7 +155,7 @@ public class X509Util {
         List<Pem> pems = PemLikeParser.parse(text);
         ArrayList<X509Certificate> certs = new ArrayList<>();
         for(Pem pem : pems) {
-            if( "CERTIFICATE".equals(pem.getContentType()) ) {
+            if( "CERTIFICATE".equals(pem.getBanner()) ) {
 //                log.debug("Certificate content: {}", pem.getContent());
 //                byte[] content = Base64.decodeBase64(pem.getContent());
                 certs.add(decodeDerCertificate(pem.getContent()));

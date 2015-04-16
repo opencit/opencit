@@ -4,19 +4,19 @@
  */
 package com.intel.mountwilson.trustagent.commands;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.BufferedReader;
+import java.io.File;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 
@@ -52,15 +52,26 @@ public class GenerateModulesCmd implements ICommand {
     private void getXmlFromMeasureLog() throws TAException, IOException {
         log.debug("About to run the command: " + context.getMeasureLogLaunchScript());
         long startTime = System.currentTimeMillis();
-        CommandUtil.runCommand(CommandUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()));
+        String outputPath = String.format("%s.%s", context.getMeasureLogXmlFile().getAbsolutePath(), RandomUtil.randomHexString(16));
+        log.info("Module output file: {}", String.format("OUTFILE=%s", outputPath));
+        CommandUtil.runCommand(EscapeUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogLaunchScript().getAbsolutePath()), new String[] { String.format("OUTFILE=%s", outputPath) });
         long endTime = System.currentTimeMillis();
         log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
-        String content = FileUtils.readFileToString(context.getMeasureLogXmlFile());
+        File outputFile = new File(outputPath);
+        if( outputFile.exists() ) {
+        String content = FileUtils.readFileToString(outputFile);
         log.debug("Content of the XML file before getting modules: " + content);
         
         getModulesFromMeasureLogXml(content);
-        CommandUtil.runCommand(String.format("rm -fr %s", CommandUtil.doubleQuoteEscapeShellArgument(context.getMeasureLogXmlFile().getAbsolutePath())));
+        outputFile.delete();
+        }
+        else {
+            throw new TAException(ErrorCode.BAD_REQUEST, "Cannot read module log");
+        }
+        
+//        CommandUtil.runCommand(String.format("rm -fr %s", EscapeUtil.doubleQuoteEscapeShellArgument(outfile)));
+        
     }
 
     /**

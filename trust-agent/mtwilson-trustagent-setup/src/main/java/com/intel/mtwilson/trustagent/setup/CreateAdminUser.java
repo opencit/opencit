@@ -6,7 +6,7 @@ package com.intel.mtwilson.trustagent.setup;
 
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.io.Platform;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.shiro.file.LoginDAO;
@@ -18,7 +18,14 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 /**
- *
+ * NOTE: this task is deprecated by mtwilson-shiro-setup/mtwilson-shiro-file including a similar
+ * task but without specific permissions, so an admin can either set the
+ * username and passowrd in environment variables or just create the username
+ * automatically with this task and add application-specific permissions using
+ * a command immediately after.
+ * 
+ * Trust agent admin user permissions:  tpm:provision, tpm:quote, host:info, aik:create
+ * 
  * @author jbuhacoff
  */
 public class CreateAdminUser extends LocalSetupTask {
@@ -85,12 +92,12 @@ public class CreateAdminUser extends LocalSetupTask {
         }
         if( isNewPassword ) {
             // save the password to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
-            File privateDir = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "private");
+            File privateDir = new File(Folders.configuration() + File.separator + "private");
+            if( !privateDir.exists() ) { privateDir.mkdirs(); }
             if( Platform.isUnix() ) {
                 Runtime.getRuntime().exec("chmod 700 "+privateDir.getAbsolutePath());
             }
             File passwordFile = privateDir.toPath().resolve("password.txt").toFile();
-            if( !privateDir.exists() ) { privateDir.mkdirs(); }
             FileUtils.writeStringToFile(passwordFile, ""); // first create an empty file so we can set permissions before writing the password to it
             if( Platform.isUnix() ) {
                 Runtime.getRuntime().exec("chmod 600 "+passwordFile.getAbsolutePath());

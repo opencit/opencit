@@ -39,6 +39,7 @@ public class TxtHost {
     private String aikPublicKey;  // may be null
     private String aikSha1;  // may be null
     private TlsPolicyChoice tlsPolicyChoice; // may be null; since mtwilson 2.0
+    private String bindingKeyCertificate; // may be null;
 
     public TxtHost(TxtHostRecord host, HostTrustStatus trustStatus) {
         this(host);
@@ -78,6 +79,7 @@ public class TxtHost {
         aikPublicKey = host.AIK_PublicKey; // may be null
         aikSha1 = host.AIK_SHA1; // may be null
         tlsPolicyChoice = host.tlsPolicyChoice;
+        bindingKeyCertificate = null;
         
 //        tlsPolicyId = (host.tlsPolicyChoice == null ? null : host.tlsPolicyChoice.getTlsPolicyId());
         // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory
@@ -202,4 +204,12 @@ public class TxtHost {
     public TlsPolicyChoice getTlsPolicyChoice() {
         return tlsPolicyChoice;
     }
+    
+    public String getBindingKeyCertificate() {
+        return bindingKeyCertificate;
+    }
+
+    public void setBindingKeyCertificate(String bindingKeyCertificate) {
+        this.bindingKeyCertificate = bindingKeyCertificate;
+    }    
 }

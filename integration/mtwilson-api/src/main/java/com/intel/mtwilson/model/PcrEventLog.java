@@ -1,5 +1,7 @@
 package com.intel.mtwilson.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.ArrayList;
@@ -25,15 +27,18 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class PcrEventLog extends ObjectModel {
     private final PcrIndex pcrIndex;
-    private final List<Measurement> eventLog;
+    private final List<Measurement> eventLog = new ArrayList<>();
 
     public PcrEventLog(PcrIndex pcrIndex) {
         this.pcrIndex = pcrIndex;
-        this.eventLog = new ArrayList<>();
     }
-    public PcrEventLog(PcrIndex pcrIndex, List<Measurement> moduleManifest) {
+    
+    @JsonCreator
+    public PcrEventLog(@JsonProperty("pcr_index") PcrIndex pcrIndex, @JsonProperty("event_log") List<Measurement> moduleManifest) {
         this.pcrIndex = pcrIndex;
-        this.eventLog = moduleManifest;
+        if( moduleManifest != null ) {
+            this.eventLog.addAll(moduleManifest);
+        }
     }
     
     public PcrIndex getPcrIndex() { return pcrIndex; }

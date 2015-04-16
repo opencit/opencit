@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * //Subclasses must implement validate() from ObjectModel, note any faults
- * //such as missing or invalid options.
  * Subclasses must implement execute() from Command.
  * Any errors encountered inside execute() should be thrown as exceptions.
  * @author jbuhacoff

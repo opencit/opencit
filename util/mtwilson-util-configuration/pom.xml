@@ -2,10 +2,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mtwilson-util-configuration</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>mtwilson-util-configuration</name>
-    <description>Read-only Configuration and Read-write MutableConfiguration objects</description>
+    <description>A simple configuration API with support for layered and read-only configurations</description>
     <parent>
         <groupId>com.intel.mtwilson.util</groupId>
         <artifactId>mtwilson-util</artifactId>
@@ -19,31 +19,26 @@
             <scope>test</scope>
         </dependency>
         
+        <!-- for optional classes KeyTransformerConfiguration, AllCapsConfiguration, CommonsKeyTransformerConfiguration -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-pipe</artifactId>
+            <optional>true</optional>
         </dependency>
+        
+        <!-- for optional classes KeyTransformerConfiguration, AllCapsConfiguration, CommonsKeyTransformerConfiguration, CommonsValveConfiguration -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-text-transform</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-codec</artifactId>
-        </dependency>
-        
-        <!-- needed only if you use the XStreamCodec in conjunction with PropertiesConfiguration -->
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
             <optional>true</optional>
         </dependency>
+    
+        <!-- for optional classes supporting commons-configuration: CommonsConfiguration, CommonsConfigurationDecorator, CommonsKeyTransformerConfiguration, CommonsValveConfiguration -->
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- end xstream codec and propertiesconfiguration dependencies -->
     
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -55,13 +50,6 @@
             <optional>true</optional>
         </dependency>        
 
-        <!-- for the optional commons-configuration adapter -->
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- end optional commons-configuration dependency -->
 
     </dependencies>  
 </project>

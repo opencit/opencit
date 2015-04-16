@@ -11,8 +11,6 @@ import com.intel.mtwilson.My;
 import java.io.IOException;
 import org.junit.Test;
 import org.restlet.resource.ClientResource;
-import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignature;
-import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignatureInput;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import com.intel.mtwilson.rpc.v2.model.Rpc;

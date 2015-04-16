@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.business;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.api.*;
@@ -31,10 +32,15 @@ import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.controller.MwMeasurementXmlJpaController;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.MwMeasurementXml;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.rest.v2.model.WhitelistConfigurationData;
+import static com.intel.mtwilson.datatypes.HostWhiteListTarget.VMM_GLOBAL;
+import static com.intel.mtwilson.datatypes.HostWhiteListTarget.VMM_HOST;
+import static com.intel.mtwilson.datatypes.HostWhiteListTarget.VMM_OEM;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -88,6 +94,7 @@ public class HostBO {
         private String attestationReport;
         private boolean isError = false;
         private String errorMessage = "";
+        private String measurementXmlLog;
         
         public HostAttReport(HostAgent agent, String requiredPCRs) {
             this.agent = agent;
@@ -102,10 +109,12 @@ public class HostBO {
             try {
                 long threadStart = System.currentTimeMillis();
                  attestationReport = agent.getHostAttestationReport(requiredPCRs);
+                 measurementXmlLog = agent.getPcrManifest().getMeasurementXml();
                  log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
             } catch (Throwable te) {
                 isError = true;
                 attestationReport = null;
+                measurementXmlLog = null;
                 log.debug("Unexpected error while retrieving attestation report." , te);
                 errorMessage = te.getClass().getSimpleName();
             }
@@ -117,6 +126,10 @@ public class HostBO {
 
         public String getResult() {
             return attestationReport;
+        }
+        
+        public String getMeasurementXmlLog() {
+            return measurementXmlLog;
         }
         
         public String getErrorMessage() {
@@ -868,6 +881,15 @@ public class HostBO {
 
                 log.debug("TIMETAKEN: for uploading to DB: {}", (System.currentTimeMillis() - configWLStart));
                 
+                // For hosts that have support for attesting application and data on OS, we would get this measurementXml from the host.
+                // We will store it as it in the mw_measurementXml table and use it during attestation for verification.                
+                String measurementXmlLog = hostAttReportObj.getMeasurementXmlLog();
+                if (measurementXmlLog == null || measurementXmlLog.isEmpty())
+                    log.info("ConfigureWhiteListFromCustomData: No measurement xml log found on the host.");
+                else {
+                    configureMeasurementXmlLog(hostConfigObj, measurementXmlLog);
+                    log.debug("ConfigureWhiteListFromCustomData: Found the following measurement xml log on the host. {}");
+                }
                 // Register host only if required.
                 /*if (hostConfigObj.isRegisterHost() == true) {
                     com.intel.mtwilson.as.business.HostBO hostbo = new com.intel.mtwilson.as.business.HostBO();
@@ -1230,6 +1252,64 @@ public class HostBO {
             throw me;
         } catch (Exception ex) {
             log.error("Error during OS - VMM MLE configuration. ", ex);
+            throw new MSException(ErrorCode.MS_VMM_MLE_ERROR, ex.getClass().getSimpleName());
+        }        
+    }
+
+    /**
+     * Configures the measurement xml log for the host if it exists. During host attestation even this log would be verified.
+     * This log had additional applications/data that we want to extend the chain of trust to.
+     * 
+     * Sample format of the log would like:
+     * <Measurements xmlns="mtwilson:trustdirector:measurements:1.1" DigestAlg="sha256">
+     *      <Dir Path="/boot">296fae22949de5e16c75e0fef135e6346b0e125768d72f7f30e25662e9b114a3</Dir>
+     *      <File Path="/boot/grub/stage1">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</File>
+     *      <File Path="/boot/grub/e2fs_stage1_5">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</File>
+     *      <File Path="/boot/grub/stage2">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</File>
+     *      <File Path="/boot/grub/menu.lst">0a1cfafd98f3f87dc079d41b9fe1391dcac8a41badf2d845648f95fe0edcd6c4</File>
+     *      <File Path="/boot/initrd.img-3.0.0-12-virtual">683972bff3c4d3d69f25504a2ca0a046772e21ebba4c67e4b857f4061e3cb143</File>
+     *      <File Path="/boot/config-3.0.0-12-virtual">2be73211f10b30c5d2705058d4d4991d0108b3b787578145a7e8dfb740b7c232</File>
+     *      <File Path="/boot/vmlinuz-3.0.0-12-virtual">fd844dea53352d5165a056bbb0f1af5af195600545de601c824decd5a30d3c49</File>
+     *      <Dir Path="/path/to/directory" Include="^include.regex.here$" Exclude="^exclude.regex.here$">da39a3ee5e6b4b0d3255bfef95601890afd80709</Dir>
+     * </Measurements>
+     * @param hostConfigObj
+     * @param measurementXmlLog 
+     */
+    private void configureMeasurementXmlLog(HostConfigData hostConfigObj, String measurementXmlLog) {
+        try {
+            if (measurementXmlLog != null && !measurementXmlLog.isEmpty()) {
+                MwMeasurementXmlJpaController mxJpa = My.jpa().mwMeasurementXml(); 
+                TblMleJpaController mleJpa = My.jpa().mwMle(); 
+
+                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+
+                TblMle tblMleObj = mleJpa.findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                if (tblMleObj == null) {
+                    log.error("Cannot find the MLE with name {} and version {} for updating the measurement xml log.", hostObj.VMM_Name, hostObj.VMM_Version);
+                    throw new MSException(ErrorCode.MS_VMM_MLE_NOT_FOUND);
+                } 
+                
+                MwMeasurementXml measurementXml = mxJpa.findByMleId(tblMleObj.getId());
+                if (measurementXml == null) {
+                    measurementXml = new MwMeasurementXml();
+                    measurementXml.setId(new UUID().toString());
+                    measurementXml.setMleId(tblMleObj);
+                    measurementXml.setContent(measurementXmlLog);
+
+                    mxJpa.create(measurementXml);            
+                    log.debug("Succesfully added the measurement xml log for Mle {}", tblMleObj.getName());
+                    
+                } else {                    
+                    measurementXml.setContent(measurementXmlLog);
+                    mxJpa.edit(measurementXml);
+                    log.debug("Succesfully updated the measurement xml log for Mle {}", tblMleObj.getName());
+                }
+            }
+        } catch (MSException me) {
+            log.error("Error during measurement xml log configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+        } catch (Exception ex) {
+            log.error("Error during measurement xml log configuration. ", ex);
             throw new MSException(ErrorCode.MS_VMM_MLE_ERROR, ex.getClass().getSimpleName());
         }        
     }
@@ -1616,7 +1696,7 @@ public class HostBO {
             privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
             //IOUtils.closeQuietly(privacyCaIn);
-            log.debug("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
+            log.info("Added {} certificates from PrivacyCA.list.pem", privacyCaCerts.size());
         } catch(IOException | CertificateException e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file

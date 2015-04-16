@@ -26,7 +26,7 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-repository-ext</artifactId>
+            <artifactId>mtwilson-repository-api</artifactId>
             <version>${project.version}</version>        
         </dependency>
         <dependency>
@@ -41,13 +41,12 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-launcher-ext</artifactId>
+            <artifactId>mtwilson-launcher-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-collection</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <!-- required for javax.ws.rs.QueryParam in RpcFilterCriteria and javax.ws.rs.Path in Rpcs resource -->
         <dependency>

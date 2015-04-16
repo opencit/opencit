@@ -8,7 +8,6 @@ import com.intel.mtwilson.jaxrs2.feature.JacksonFeature;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import org.glassfish.jersey.server.ResourceConfig;
-import java.util.Set;
 
 /**
  * See also:

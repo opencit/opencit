@@ -65,11 +65,11 @@ public class ConfigureDatabase extends LocalSetupTask {
         else {
             log.debug("Database URL: {}", databaseUrl);
         }
-        getConfiguration().setString("mtwilson.db.host", databaseHost);
-        getConfiguration().setString("mtwilson.db.port", databasePort);
-        getConfiguration().setString("mtwilson.db.driver", databaseDriver);
-        getConfiguration().setString("mtwilson.db.username", databaseUsername);
-        getConfiguration().setString("mtwilson.db.password", databasePassword);
+        getConfiguration().set("mtwilson.db.host", databaseHost);
+        getConfiguration().set("mtwilson.db.port", databasePort);
+        getConfiguration().set("mtwilson.db.driver", databaseDriver);
+        getConfiguration().set("mtwilson.db.username", databaseUsername);
+        getConfiguration().set("mtwilson.db.password", databasePassword);
 //        getConfiguration().setString("mtwilson.db.url", databaseUrl);
     }
 

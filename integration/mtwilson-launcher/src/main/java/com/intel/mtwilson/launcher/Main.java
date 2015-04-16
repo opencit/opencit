@@ -4,14 +4,8 @@
  */
 package com.intel.mtwilson.launcher;
 
-import com.intel.dcsg.cpg.io.Platform;
-import com.intel.dcsg.cpg.performance.AlarmClock;
-import com.intel.dcsg.cpg.module.Container;
-import com.intel.dcsg.cpg.module.Module;
-import com.intel.mtwilson.MyConfiguration;
+import com.intel.mtwilson.Folders;
 import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The purpose of the launcher is to provide a deployment-specific environment for the
@@ -33,8 +27,7 @@ public class Main {
     
     public static void main(String[] args) {
         try {
-        MyConfiguration conf = new MyConfiguration();
-        String mtwilsonHomePath = conf.getMtWilsonHome();
+        String mtwilsonHomePath = Folders.application(); //home.getPath();
         
         // make sure MTWILSON_HOME exists
         File mtwilsonHome = new File(mtwilsonHomePath);

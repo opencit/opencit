@@ -14,6 +14,8 @@ import javax.ws.rs.Path;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 
 /**
+ * Configures Mt Wilson 2.x APIs
+ * 
  * See also:
  * https://jersey.java.net/apidocs/2.5/jersey/org/glassfish/jersey/server/ResourceConfig.html (especially about what can be configured from our constructor here like providers and setting the class loader)
  * 

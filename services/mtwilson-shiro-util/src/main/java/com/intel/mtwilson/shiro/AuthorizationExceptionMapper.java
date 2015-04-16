@@ -8,6 +8,7 @@ package com.intel.mtwilson.shiro;
 //import com.intel.mtwilson.datatypes.ErrorCode;
 //import com.intel.mtwilson.util.ErrorResponse;
 //import javax.ws.rs.core.MediaType;
+//import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
+
+//@V2
 @Provider
 //@Component
 public class AuthorizationExceptionMapper implements ExceptionMapper<ShiroException> {

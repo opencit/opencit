@@ -4,7 +4,7 @@
  */
 package test.extensions;
 
-import com.intel.mtwilson.setup.tasks.UpdateExtensionsCacheFile;
+import com.intel.mtwilson.extensions.cache.UpdateExtensionsCacheFile;
 import org.junit.Test;
 
 /**

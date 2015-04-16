@@ -46,7 +46,7 @@ public class RemoteIntegrationTest {
 
     @BeforeClass
     public static void loadProperties() throws Exception {
-        String filename = My.filesystem().getConfigurationPath() + File.separator + "test.properties";
+        String filename = My.configuration().getDirectoryPath() + File.separator + "test.properties";
         File file = new File(filename);
         try (FileInputStream in = new FileInputStream(file)) {
             testProperties.load(in);

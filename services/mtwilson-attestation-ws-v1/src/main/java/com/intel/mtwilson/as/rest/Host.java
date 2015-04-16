@@ -125,6 +125,7 @@ public class Host {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
             if( aikId.isValid() ) {
+                log.debug("getSamlByAik calling getTrustWithSamlByAik for aik {} force_verify {}", aikFingerprint, forceVerify);
                 return ASComponentFactory.getHostTrustBO().getTrustWithSamlByAik(aikId, forceVerify);
             }
             throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");

@@ -452,4 +452,20 @@ public class TblHostsJpaController implements Serializable {
         return hostList;      
     }
     
+    public TblHosts findHostById(Integer id) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblHosts.findById");
+            query.setParameter("id", id);
+
+            TblHosts tblHosts = (TblHosts) query.getSingleResult();
+            return tblHosts;
+
+        } catch(NoResultException e){
+        	log.error(String.format("Host information with ID [{}] not found in the DB.", id));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }
 }

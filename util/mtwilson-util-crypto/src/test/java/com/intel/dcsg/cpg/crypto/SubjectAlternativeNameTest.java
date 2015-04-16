@@ -40,12 +40,14 @@ import sun.security.x509.X500Name;
  * @author jbuhacoff
  */
 public class SubjectAlternativeNameTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SubjectAlternativeNameTest.class);
+    
     @Test
     public void testExtractSubjectAlternativeName() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, CryptographyException {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate rsa = RsaUtil.generateX509Certificate("Test Cert", "ip:1.2.3.4", keypair, 30);
         String alternativeName = X509Util.ipAddressAlternativeName(rsa);
-        System.out.println(alternativeName);
+        log.debug("alternativeName: {}", alternativeName);
     }
     
     @Test
@@ -53,7 +55,7 @@ public class SubjectAlternativeNameTest {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate rsa = RsaUtil.generateX509Certificate("Test Cert", keypair, 30);
         String alternativeName = X509Util.ipAddressAlternativeName(rsa);
-        System.out.println(alternativeName); // should be null
+        log.debug("alternativeName: {}", alternativeName); // should be null
     }
     
     @Test
@@ -117,7 +119,7 @@ public class SubjectAlternativeNameTest {
         FileOutputStream out = new FileOutputStream(new File(filename));
         IOUtils.copy(new ByteArrayInputStream(certificate.getEncoded()), out);
         out.close();
-        System.out.println("writeCert("+filename+")");        
+        log.debug("writeCert filename: {}", filename);        
     }
 
     /**
@@ -129,16 +131,16 @@ public class SubjectAlternativeNameTest {
         FileOutputStream out = new FileOutputStream(new File(filename));
         IOUtils.copy(new ByteArrayInputStream(text.getBytes("UTF-8")), out);
         out.close();
-        System.out.println("writeString("+filename+")");        
+        log.debug("writeString filename: {}",filename);        
     }
     
     @Test
     public void testCommonNameFromLdapName() {
         DN dn = new DN("CN=abc,OU=def,O=ghi,C=US");
-        System.out.println(dn.get("CN")); 
+        log.debug("CN1: {}", dn.get("CN")); 
         assertEquals("abc", dn.get("CN"));
         DN dn2 = new DN("CN=ABC,CN=abc,OU=def,O=ghi,C=US");
-        System.out.println(dn2.get("CN"));
+        log.debug("CN2: {}", dn2.get("CN"));
         assertEquals("ABC", dn2.get("CN")); // retrieves only the first one
     }
     
@@ -181,20 +183,19 @@ public class SubjectAlternativeNameTest {
                                     .build();
 //        works
         
-        System.out.println("builder isValid() = "+x509.isValid()); 
+        log.debug("builder isValid() = {}",x509.isValid()); 
         for(Fault f :  x509.getFaults()) {
-            System.out.println("Fault: "+f.toString()+(f.getCause()==null?"":" ["+f.getCause().toString()+"]"));
-            if( f.getCause() != null ) { f.getCause().printStackTrace(); }
+            log.error(String.format("%s: %s", f.getClass().getName(), f.toString()));
         }
         if( cert == null ) { 
-            System.out.println("certificate is null"); 
+            log.error("certificate is null"); 
         }
         else {
             String outFilename = System.getProperty("user.home")+File.separator+"test.crt";
             FileOutputStream out = new FileOutputStream(new File(outFilename));
             IOUtils.copy(new ByteArrayInputStream(cert.getEncoded()), out);
             out.close();
-            System.out.println("success, saved ccertificate in "+outFilename);
+            log.error("success, saved certificate in {}",outFilename);
         }
     }
     
@@ -220,6 +221,6 @@ public class SubjectAlternativeNameTest {
         SimpleKeystore keystore = new SimpleKeystore(keystoreFile, "changeit"); 
         keystore.addKeyPairX509(keypair.getPrivate(), cert, "s1as", "changeit");
         keystore.save();
-        System.out.println("success, saved ccertificate in "+outFilename);
+        log.debug("success, saved certificate in {}", outFilename);
     }    
 }

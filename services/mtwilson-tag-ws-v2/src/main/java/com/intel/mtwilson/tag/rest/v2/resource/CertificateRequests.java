@@ -70,8 +70,8 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Override
     @POST
     @RequiresPermissions("tag_certificate_requests:create")         
-    public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest certificateRequest) {
-        certificateRequest = super.createOne(locator, certificateRequest);
+    public CertificateRequest createOne(@BeanParam CertificateRequestLocator locator, CertificateRequest certificateRequest,  @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
+        certificateRequest = super.createOne(locator, certificateRequest, httpServletRequest, httpServletResponse);
         certificateRequest.getLinks().put("status", String.format("/tag-certificate-requests/%s", certificateRequest.getId().toString()));
         certificateRequest.getLinks().put("certificate", String.format("/tag-certificates?certificateRequestIdEqualTo=%s", certificateRequest.getId().toString()));
         certificateRequest.getLinks().put("content", String.format("/tag-certificate-requests/%s/content", certificateRequest.getId().toString()));
@@ -97,8 +97,8 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Produces({MediaType.APPLICATION_JSON, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
     @GET
     @RequiresPermissions("tag_certificate_requests:retrieve")         
-    public String retrieveOneSelectionJson(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
-        CertificateRequest certificateRequest = super.retrieveOne(locator);
+    public String retrieveOneSelectionJson(@BeanParam CertificateRequestLocator locator, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException {
+        CertificateRequest certificateRequest = super.retrieveOne(locator, request, response);
         SelectionsType selection = getSelection(certificateRequest);
         response.addHeader("Link", String.format("</tag-certificate-requests/%s>; rel=status", certificateRequest.getId().toString()));
         return Util.toJson(selection);
@@ -108,8 +108,8 @@ public class CertificateRequests extends AbstractJsonapiResource<CertificateRequ
     @Produces({MediaType.APPLICATION_XML})
     @GET
     @RequiresPermissions("tag_certificate_requests:retrieve")         
-    public String retrieveOneSelectionXml(@BeanParam CertificateRequestLocator locator, @Context HttpServletResponse response) throws IOException {
-        CertificateRequest certificateRequest = super.retrieveOne(locator);
+    public String retrieveOneSelectionXml(@BeanParam CertificateRequestLocator locator,@Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException {
+        CertificateRequest certificateRequest = super.retrieveOne(locator, request, response);
         SelectionsType selection = getSelection(certificateRequest);
         response.addHeader("Link", String.format("</tag-certificate-requests/%s>; rel=status", certificateRequest.getId().toString()));
         return Util.toXml(selection);

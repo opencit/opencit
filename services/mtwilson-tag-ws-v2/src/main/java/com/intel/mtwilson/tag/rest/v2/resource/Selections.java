@@ -5,8 +5,8 @@
 package com.intel.mtwilson.tag.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tag.model.Selection;
 import com.intel.mtwilson.tag.model.SelectionCollection;
 import com.intel.mtwilson.tag.model.SelectionFilterCriteria;
@@ -30,10 +30,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -70,8 +73,8 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @GET
     @RequiresPermissions("tag_selections:retrieve")         
     @Produces({DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})   
-    public Selection retrieveOne(@BeanParam SelectionLocator locator) {
-        return super.retrieveOne(locator); 
+    public Selection retrieveOne(@BeanParam SelectionLocator locator, @Context HttpServletRequest request, @Context HttpServletResponse response) {
+        return super.retrieveOne(locator, request, response); 
     }
         
     
@@ -79,8 +82,8 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @GET
     @Produces({MediaType.APPLICATION_JSON})   
     @RequiresPermissions("tag_selections:retrieve")         
-    public String retrieveOneJson(@BeanParam SelectionLocator locator) throws SQLException, IOException {
-        Selection obj = super.retrieveOne(locator); 
+    public String retrieveOneJson(@BeanParam SelectionLocator locator, @Context HttpServletRequest request, @Context HttpServletResponse response) throws SQLException, IOException {
+        Selection obj = super.retrieveOne(locator, request, response); 
         SelectionsType selectionsType = getSelectionData(obj);
         String jsonStr = Util.toJson(selectionsType);        
         log.debug("Generated tag selection json: {}", jsonStr);
@@ -92,8 +95,8 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @GET
     @Produces({MediaType.APPLICATION_XML})   
     @RequiresPermissions("tag_selections:retrieve")         
-    public String retrieveOneXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
-        Selection obj = super.retrieveOne(locator); //To change body of generated methods, choose Tools | Templates.
+    public String retrieveOneXml(@BeanParam SelectionLocator locator, @Context HttpServletRequest request, @Context HttpServletResponse response) throws SQLException, IOException {
+        Selection obj = super.retrieveOne(locator, request, response); //To change body of generated methods, choose Tools | Templates.
 //        if( obj == null ) {
 //            return null;
 //        }
@@ -139,17 +142,17 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
     @Path("/{id}")
     @Produces(CryptoMediaType.MESSAGE_RFC822)   
     @RequiresPermissions("tag_selections:retrieve")         
-    public String retrieveOneEncryptedXml(@BeanParam SelectionLocator locator) throws SQLException, IOException {
-        String xml = retrieveOneXml(locator);
+    public String retrieveOneEncryptedXml(@BeanParam SelectionLocator locator, @Context HttpServletRequest request, @Context HttpServletResponse response) throws SQLException, IOException {
+        String xml = retrieveOneXml(locator, request, response);
         TagConfiguration configuration = new TagConfiguration(My.configuration().getConfiguration());
         UUID uuid = new UUID();
-        String plaintextFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".xml";
-        String encryptedFilePath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getVarPath() + File.separator + uuid.toString() + ".enc";
+        String plaintextFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".xml";
+        String encryptedFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".enc";
         File plaintextFile = new File(plaintextFilePath);
         try(FileOutputStream out = new FileOutputStream(plaintextFile)) {
             IOUtils.write(xml, out);
         }
-        String tagCmdPath = MyFilesystem.getApplicationFilesystem().getFeatureFilesystem("tag").getBinPath();
+        String tagCmdPath = Folders.application() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -p PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 

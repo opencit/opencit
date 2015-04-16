@@ -152,7 +152,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
         String certFile = path;
         CaCertificate caCert = new CaCertificate();
         if( certFile != null && !file.isAbsolute()) {
-            certFile = My.filesystem().getConfigurationPath() + File.separator + certFile;
+            certFile = My.configuration().getDirectoryPath() + File.separator + certFile;
         }
         if (certFile != null) {
             if (certFile.endsWith(".pem")) {
@@ -181,7 +181,7 @@ public class CaCertificateRepository implements DocumentRepository<CaCertificate
         CaCertificateCollection collection = new CaCertificateCollection();
         String certFile = path;
         if( certFile != null && !file.isAbsolute()) {
-            certFile = My.filesystem().getConfigurationPath() + File.separator + certFile;
+            certFile = My.configuration().getDirectoryPath() + File.separator + certFile;
         }
         log.debug("CA file: {}", certFile);
         if (certFile != null) {

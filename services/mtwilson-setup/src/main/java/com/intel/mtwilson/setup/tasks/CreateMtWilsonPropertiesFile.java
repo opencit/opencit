@@ -22,7 +22,7 @@ public class CreateMtWilsonPropertiesFile extends LocalSetupTask {
 
     @Override
     protected void configure() throws Exception {
-        mtwilsonConf = My.filesystem().getConfigurationPath(); //My.configuration().getMtWilsonConf();
+        mtwilsonConf = My.configuration().getDirectoryPath(); //My.filesystem().getConfigurationPath(); //My.configuration().getMtWilsonConf();
         if (mtwilsonConf == null) {
             configuration("MTWILSON_CONF is not configured");
         }

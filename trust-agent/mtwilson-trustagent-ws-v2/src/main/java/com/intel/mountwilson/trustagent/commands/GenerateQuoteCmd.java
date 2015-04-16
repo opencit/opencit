@@ -10,6 +10,7 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +60,10 @@ public class GenerateQuoteCmd implements ICommand {
         
         String commandLine = String.format("aikquote -p %s -c %s %s %s %s",
                 identityAuthKey,
-                CommandUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()),
-                CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
+                EscapeUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()),
+                EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
                 selectedPcrs,
-                CommandUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
+                EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
         
 
         try {

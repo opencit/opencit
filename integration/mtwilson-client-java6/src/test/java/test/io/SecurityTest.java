@@ -18,7 +18,7 @@ import com.intel.mtwilson.i18n.ErrorCode;
 import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
@@ -70,7 +70,7 @@ public class SecurityTest {
     
     @Test
     public void testSaveSslCertificate() throws IOException, KeyManagementException, CryptographyException  {
-        Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
+        Configuration config = CommonsConfigurationUtil.fromResource("/localhost-0.5.2.properties");
 //        ApiClient api = new ApiClient(config);
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         TlsUtil.addSslCertificatesToKeystore(keystore, new URL(config.getString("mtwilson.api.baseurl")));
@@ -94,7 +94,7 @@ public class SecurityTest {
     
     @Test
     public void testUnregisteredClient() throws IOException, NoSuchAlgorithmException, CryptographyException, CertificateEncodingException, KeyManagementException, ClientException, ApiException, SignatureException  {
-        Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
+        Configuration config = CommonsConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         // create a new keypair to ensure it's not registered
         KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
         X509Certificate certificate = RsaUtil.generateX509Certificate("CN=unregistered", keypair, 1);
@@ -108,7 +108,7 @@ public class SecurityTest {
     
     @Test
     public void testInvalidAuthorizationHeader() throws IOException, KeyManagementException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ApiException, SignatureException, com.intel.dcsg.cpg.crypto.CryptographyException {
-        Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
+        Configuration config = CommonsConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         // use the keystore just because it already has the server ssl cert
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));

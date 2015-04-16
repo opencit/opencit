@@ -4,23 +4,13 @@
  */
 package com.intel.mtwilson.launcher;
 
-import com.intel.dcsg.cpg.classpath.FileURLClassLoader;
-import com.intel.dcsg.cpg.classpath.JarClassIterator;
-import com.intel.dcsg.cpg.classpath.MultiJarFileClassLoader;
-import com.intel.dcsg.cpg.extensions.ExtensionUtil;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.dcsg.cpg.extensions.Scanner;
-import com.intel.dcsg.cpg.io.file.FilenameContainsFilter;
-import com.intel.dcsg.cpg.io.file.FilenameEndsWithFilter;
-import com.intel.dcsg.cpg.performance.CountingIterator;
-import com.intel.mtwilson.collection.ArrayIterator;
-import com.intel.mtwilson.My;
+import com.intel.mtwilson.Folders;
 import java.io.FileInputStream;
-import com.intel.mtwilson.MyFilesystem;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -45,11 +35,17 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
      */
     public ExtensionCacheLauncher() {
         // look for java extension cache file
-        String cachePath = MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
-        log.debug("Extension cache: {}", cachePath);
+        //Subfolder configuration = new Subfolder("configuration", new Home());
+        String cachePath = Folders.configuration() + File.separator + "extensions.cache"; //MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "extensions.cache";
+        log.debug("default extension cache file: {}", cachePath);
         cacheFile = new File(cachePath);
         registrars = new Registrar[] { new ImplementationRegistrar() } ;        
         log.debug("thread context class loader: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
+    }
+
+    public void setCacheFile(File cacheFile) {
+        this.cacheFile = cacheFile;
+        log.debug("set extension cache file: {}", cacheFile.getAbsolutePath());
     }
 
 
@@ -78,7 +74,6 @@ public class ExtensionCacheLauncher extends ExtensionLauncher implements Runnabl
         }
         catch(IOException e) {
             log.error("Cannot load extension cache file", e);
-            return;
         }
         
     }

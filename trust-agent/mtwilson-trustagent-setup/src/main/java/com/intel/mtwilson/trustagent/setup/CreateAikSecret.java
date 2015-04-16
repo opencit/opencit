@@ -32,7 +32,7 @@ public class CreateAikSecret extends AbstractSetupTask {
     protected void execute() throws Exception {
         String aikSecretHex = RandomUtil.randomHexString(20);
         log.info("Generated random AIK secret"); 
-        getConfiguration().setString(TrustagentConfiguration.AIK_SECRET, aikSecretHex);
+        getConfiguration().set(TrustagentConfiguration.AIK_SECRET, aikSecretHex);
     }
     
 }

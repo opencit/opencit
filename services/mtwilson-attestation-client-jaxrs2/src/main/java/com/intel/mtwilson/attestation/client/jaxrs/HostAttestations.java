@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
@@ -101,12 +102,19 @@ public class HostAttestations extends MtWilsonClient {
      */    
     public HostAttestation createHostAttestation(HostAttestation obj) {
         log.debug("target: {}", getTarget().getUri().toString());
-        Object newObj = getTarget().path("host-attestations").request(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
-        return (HostAttestation) newObj;
+//        Object o = getTarget().path("host-attestations").request(MediaType.APPLICATION_JSON).post(Entity.json(obj), Object.class);
+//        ObjectMapper mapper = new ObjectMapper();
+//        try { log.debug("serializing host-attestations return object: {}", mapper.writeValueAsString(o)); } catch (Exception ex) {log.debug("test?");}
+        
+        HostAttestation result = getTarget().path("host-attestations").request(MediaType.APPLICATION_JSON).post(Entity.json(obj), HostAttestation.class);
+        return result;
     }
 
     /**
-     * Forces a complete attestation cycle for the host whose UUID is specified. The accept content type header should be set to "Accept: application/samlassertion+xml".
+     * Forces a complete attestation cycle for the specified host. 
+     * The host can be specified by UUID, AIK Certificate SHA-1, 
+     * AIK Public Key SHA-1, or HostName.
+     * The accept content type header should be set to "Accept: application/samlassertion+xml".
      * @param obj HostAttestation object with the UUID of the host for which the attestation has to be done. 
      * @return String having the SAML assertion that was just created. 
      * @since Mt.Wilson 2.0

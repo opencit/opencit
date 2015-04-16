@@ -80,6 +80,8 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
             throw new AuthenticationException("Invalid token");
         }
 
+        httpResponse.addHeader("Cache-Control", "no-cache");
+        
         // check if we should generate a new token for the user to use in next request, like if this one is about to expire.  but we still use the current token for authentication, not the new one.
         // automatically issue a new token if the curent token is almost expired
         if (tokenValidator.expiresSoon(validatedToken.getTimestamp())) {
@@ -101,15 +103,16 @@ public class EncryptedTokenAuthenticationFilter extends AuthenticatingFilter {
                 log.debug("processRequestToken: DEBUGGING ONLY    NEW TOKEN: {}", existingToken);
                 
                 httpResponse.addHeader("Authorization-Token", refreshToken);
+                return new EncryptedTokenAuthenticationToken(new Username(tokenContent.username), refreshToken, httpRequest.getRemoteHost());
         }
         else {
+            XStream xs = new XStream();
+            EncryptedTokenContent existingToken = (EncryptedTokenContent)xs.fromXML(new String(validatedToken.getContent(), Charset.forName("UTF-8")));
                 httpResponse.addHeader("Authorization-Token", encryptedToken);
+                return new EncryptedTokenAuthenticationToken(new Username(existingToken.username), httpRequest.getHeader("Authorization-Token"), httpRequest.getRemoteHost());
             
         }
 
-        httpResponse.addHeader("Cache-Control", "no-cache");
-        
-        return new EncryptedTokenAuthenticationToken(new Username("foo username"), httpRequest.getHeader("Authorization-Token"), httpRequest.getRemoteHost());
     }
 
     @Override

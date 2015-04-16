@@ -6,10 +6,11 @@ package com.intel.mtwilson.client;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import java.io.IOException;
 import org.apache.commons.configuration.Configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.mtwilson.My;
 //import org.codehaus.jackson.map.ObjectMapper;
 
 /**
@@ -28,7 +29,7 @@ public abstract class AbstractCommand implements Command {
     }
 
     private ApiClient createClient() throws ClientException, IOException {
-        Configuration conf = ConfigurationUtil.getConfiguration(); // tries jvm properties, environment variables, then mtwilson.properties;  you can set location of mtwilson.properties with -Dmtwilson.home=/path/to/dir
+        Configuration conf = My.configuration().getConfiguration(); //CommonsConfigurationUtil.getConfiguration(); // tries jvm properties, environment variables, then mtwilson.properties;  you can set location of mtwilson.properties with -Dmtwilson.home=/path/to/dir
         return new ApiClient(conf);
     }
     

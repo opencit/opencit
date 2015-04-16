@@ -1,0 +1,124 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>mtwilson-server-javadoc</artifactId>
+  <groupId>com.intel.mtwilson.packages</groupId>
+  <packaging>jar</packaging>
+  <description>Javadocs for Mt Wilson Server</description>
+  <!-- you need to install graphviz for the uml diagrams to work.  ubuntu: apt-get install graphviz   others: http://www.graphviz.org -->
+  <!--
+    <parent>
+		<groupId>com.intel.mtwilson.maven</groupId>
+		<artifactId>mtwilson-dist-feature</artifactId>
+		<version>3.0-SNAPSHOT</version>
+		<relativePath />
+    </parent>
+	-->
+	<parent>
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-java</artifactId>
+		<version>3.0-SNAPSHOT</version>
+		<relativePath />
+	</parent>
+	
+  <dependencies>
+    <dependency>
+      <groupId>com.intel.mtwilson.packages</groupId>
+      <artifactId>mtwilson-server-zip</artifactId>
+      <version>${project.version}</version>
+	  <type>pom</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+	<plugins>
+		<plugin>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<version>2.10.1</version>
+            <!--
+            <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>
+            -->
+			<executions>
+				<!-- this execution produces a jar that includes mtwilson server javadocs -->
+				<execution>
+					<id>all-javadoc-jar</id>
+					<phase>package</phase>
+					<goals>
+						<goal>jar</goal>
+						<goal>resource-bundle</goal>
+					</goals>
+					<configuration>
+						<!-- this turns on dependency-driven aggregation, 
+						so we can have one javadoc distribution that includes any maven dependencies we need -->
+						<includeDependencySources>true</includeDependencySources>
+						<includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+						<dependencySourceIncludes>
+							<dependencySourceInclude>com.intel.mtwilson.features:*</dependencySourceInclude>
+							<dependencySourceInclude>com.intel.mtwilson.integration:*</dependencySourceInclude>
+							<dependencySourceInclude>com.intel.mtwilson.plugins:*</dependencySourceInclude>
+							<dependencySourceInclude>com.intel.mtwilson.services:*</dependencySourceInclude>
+							<dependencySourceInclude>com.intel.mtwilson.util:*</dependencySourceInclude>
+                            <!-- note: leaving out the portal code to prevent confusion with the mtwilson server -->
+						</dependencySourceIncludes>
+						<dependencySourceExcludes>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-attestation-client-jaxrs2</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-tag-client-jaxrs2</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-user-management-client-jaxrs2</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-tls-policy-client-jaxrs2</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-tag-model</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-tls-policy-model</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-user-management-model</dependencySourceExclude>
+							<dependencySourceExclude>com.intel.mtwilson.services:mtwilson-attestation-model</dependencySourceExclude>
+						</dependencySourceExcludes>
+                        <!-- class diagrams by graphviz and umlgraph -->
+                        <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+                        <docletArtifact>
+                            <groupId>org.umlgraph</groupId>
+                            <artifactId>umlgraph</artifactId>
+                            <version>5.6.6</version>
+                        </docletArtifact>
+                        <additionalparam>-views</additionalparam>
+                        <useStandardDocletOptions>true</useStandardDocletOptions>
+					</configuration>
+				</execution>
+				<!-- this execution produces a jar that includes only portal javadocs -->
+                <!--
+				<execution>
+					<id>portal-javadoc-jar</id>
+					<phase>package</phase>
+					<goals>
+						<goal>jar</goal>
+						<goal>resource-bundle</goal>
+					</goals>
+					<configuration>
+						<includeDependencySources>true</includeDependencySources>
+						<includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+						<dependencySourceIncludes>
+							<dependencySourceInclude>com.intel.mtwilson.portals:*</dependencySourceInclude>
+						</dependencySourceIncludes>
+					</configuration>
+				</execution>
+                -->
+				<!-- this execution produces a jar that includes only util javadocs -->
+                <!--
+				<execution>
+					<id>util-javadoc-jar</id>
+					<phase>package</phase>
+					<goals>
+						<goal>jar</goal>
+						<goal>resource-bundle</goal>
+					</goals>
+					<configuration>
+						<includeDependencySources>true</includeDependencySources>
+						<includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+						<dependencySourceIncludes>
+							<dependencySourceInclude>com.intel.mtwilson.util:*</dependencySourceInclude>
+						</dependencySourceIncludes>
+					</configuration>
+				</execution>
+                -->
+			</executions>
+		</plugin>
+	</plugins>
+  </build>
+</project>

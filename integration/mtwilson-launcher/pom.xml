@@ -15,19 +15,39 @@
     <dependencies>
 
         <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-launcher-api</artifactId>
+		<version>${project.version}</version>            
+        </dependency>
+
+        <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-configuration</artifactId>
+		<version>${project.version}</version>            
+        </dependency>
+
+        <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-classpath</artifactId>
         </dependency>
         <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-console</artifactId>
+        </dependency>
+        <dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-extensions</artifactId>
         </dependency>
-        
         <dependency>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>mtwilson-launcher-ext</artifactId>
-		<version>${project.version}</version>            
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-extensions-cache</artifactId>
+        <version>3.0-SNAPSHOT</version>
         </dependency>
+        
         <!-- for Filter -->
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -36,25 +56,30 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-collection</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tree</artifactId>
         </dependency>
         
+        <!-- for ModuleDirectoryLauncher , MavenDirectoryLauncher, and MavenLauncher -->
         <dependency>
 		<groupId>com.intel.mtwilson.util</groupId>
 		<artifactId>mtwilson-util-module</artifactId>
-		<version>0.2-SNAPSHOT</version>            
+		<version>0.2-SNAPSHOT</version>
+        <optional>true</optional>  
         </dependency>
 
 
+        <!-- TODO the launcher shouldn't need this, remove in favor of new Filesystem class -->
+        <!--
         <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-my</artifactId>
 		<version>${project.version}</version>            
+        <optional>true</optional>  
         </dependency>
+        -->
             
             <!-- for use of AlarmClock for eventloop and for progress monitor -->
         <dependency>
@@ -69,7 +94,7 @@
 
 <!--
         <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
+f            <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
             <version>0.1.4-SNAPSHOT</version>
         </dependency>

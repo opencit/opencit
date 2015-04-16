@@ -5,7 +5,7 @@
 package api.as;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.ClientException;
@@ -28,7 +28,7 @@ public class WLMTest {
     private static ApiClient c;
     @BeforeClass
     public static void setup() throws IOException, ClientException  {
-        c = new ApiClient(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
+        c = new ApiClient(CommonsConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
     }
     
     @Test

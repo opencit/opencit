@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.tag;
 
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.mtwilson.configuration.AbstractConfiguration;
 
 
 /**
@@ -31,7 +31,7 @@ mtwilson.atag.mtwilson.baseurl=https://10.1.71.234:8181/mtwilson/v1   ;  REMOVE 
  * 
  * @author jbuhacoff
  */
-public class TagConfiguration extends AbstractConfiguration {
+public class TagConfiguration {
 //    public static final String TAG_KEYSTORE_FILE = "tag.keystore.file";
 //    public static final String TAG_KEYSTORE_PASSWORD = "tag.keystore.password";
 //    public static final String TAG_KEY_ALIAS = "tag.key.alias";
@@ -44,41 +44,41 @@ public class TagConfiguration extends AbstractConfiguration {
     public static final String TAG_PROVISION_XML_ENCRYPTION_PASSWORD = "tag.provision.xml.encryption.password"; 
     public static final String TAG_PROVISION_XML_ENCRYPTION_REQUIRED = "tag.provision.xml.encryption.required";
     
+    private org.apache.commons.configuration.Configuration conf;
+    
     public TagConfiguration(Configuration configuration) {
-        super();
-        configure(configuration);
+        conf = new CommonsConfigurationAdapter(configuration);
     }
     public TagConfiguration(org.apache.commons.configuration.Configuration configuration) {
-        super();
-        setConfiguration(configuration);
+        conf = configuration;
     }
     
     public boolean isTagProvisionAutoImport() {
-        return getConfiguration().getBoolean(TAG_AUTO_IMPORT_TO_MTWILSON, true);
+        return conf.getBoolean(TAG_AUTO_IMPORT_TO_MTWILSON, true);
     }
     
     public boolean isTagProvisionExternal() {
-        return getConfiguration().getBoolean(TAG_PROVISION_EXTERNAL_CA, false);
+        return conf.getBoolean(TAG_PROVISION_EXTERNAL_CA, false);
     }
     
     public int getTagValiditySeconds() {
-        return getConfiguration().getInteger(TAG_VALIDITY_SECONDS, 60 * 60 * 24 * 365); // default one year
+        return conf.getInteger(TAG_VALIDITY_SECONDS, 60 * 60 * 24 * 365); // default one year
     }
 
     public String getTagIssuer() {
-        return getConfiguration().getString(TAG_ISSUER, "CN=mtwilson-tag-ca");
+        return conf.getString(TAG_ISSUER, "CN=mtwilson-tag-ca");
     }
 
     public String getTagProvisionSelectionDefault() {
-        return getConfiguration().getString(TAG_PROVISION_SELECTION_DEFAULT);  // intentionally not setting a default value; if there is no value set then a default selection will not be used.
+        return conf.getString(TAG_PROVISION_SELECTION_DEFAULT);  // intentionally not setting a default value; if there is no value set then a default selection will not be used.
     }
     
     public String getTagProvisionXmlEncryptionPassword() {
-        return getConfiguration().getString(TAG_PROVISION_XML_ENCRYPTION_PASSWORD);  // intentionally not setting a default value; setup must generate a random password
+        return conf.getString(TAG_PROVISION_XML_ENCRYPTION_PASSWORD);  // intentionally not setting a default value; setup must generate a random password
     }
 
     public boolean isTagProvisionXmlEncryptionRequired() {
-        return getConfiguration().getBoolean(TAG_PROVISION_XML_ENCRYPTION_REQUIRED, false);
+        return conf.getBoolean(TAG_PROVISION_XML_ENCRYPTION_REQUIRED, false);
     }
     
 }

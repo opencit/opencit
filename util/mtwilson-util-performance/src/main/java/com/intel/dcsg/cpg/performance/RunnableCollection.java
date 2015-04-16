@@ -18,7 +18,7 @@ public class RunnableCollection implements Runnable, Progress {
     protected Collection<Runnable> tasks = null;
     protected long completed = 0; // completed steps not including the current executing task
     protected long max = 0;
-    protected ArrayList<Throwable> errors = new ArrayList<Throwable>();
+    protected ArrayList<Throwable> errors = new ArrayList<>();
 
     public RunnableCollection(Collection<Runnable> tasks) {
         this.tasks = tasks;

@@ -4,6 +4,8 @@
  */
 package com.intel.dcsg.cpg.validation;
 
+import com.intel.mtwilson.util.validation.faults.Invalid;
+import com.intel.mtwilson.util.validation.faults.Thrown;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -21,7 +23,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @since 1.1
  * @author jbuhacoff
  */
-public abstract class ObjectModel implements Model {
+public abstract class ObjectModel implements Model, Faults {
     private transient Integer lastHashCode = null;
     private transient ArrayList<Fault> faults = null;
     
@@ -40,15 +42,15 @@ public abstract class ObjectModel implements Model {
     }
     
     protected final void fault(Throwable e, String description) {
-        faults.add(new Fault(e, description));
+        faults.add(new Thrown(e, description));
     }
     
     protected final void fault(Throwable e, String format, Object... args) {
-        faults.add(new Fault(e, format, args));
+        faults.add(new Thrown(e, format, args));
     }
 
     protected final void fault(Model m, String format, Object... args) {
-        faults.add(new Fault(m, format, args));
+        faults.add(new Invalid(m, format, args));
     }
     
     /**

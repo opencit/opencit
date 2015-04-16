@@ -17,6 +17,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
+import org.w3c.dom.Node;
 
 /**
  * Reading XML example:
@@ -37,6 +38,7 @@ import javax.xml.transform.stream.StreamSource;
 public class JAXB {
 
     private ClassLoader jaxbClassLoader = null;
+    private Charset charset = Charset.forName("UTF-8");
 
     public ClassLoader getJaxbClassLoader() {
         return jaxbClassLoader;
@@ -55,6 +57,32 @@ public class JAXB {
         jaxbClassLoader = classLoader;
     }
 
+    public Charset getCharset() {
+        return charset;
+    }
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
+    }
+    
+    
+
+    protected JAXBContext getContextForType(Class valueType) throws JAXBException {
+        JAXBContext jc;
+        if (jaxbClassLoader != null) {
+            jc = JAXBContext.newInstance(valueType.getPackage().getName(), jaxbClassLoader);
+        } else {
+            jc = JAXBContext.newInstance(valueType.getPackage().getName());
+        }
+        return jc;
+    }
+    protected JAXBContext getContextForObject(JAXBElement value) throws JAXBException {
+        return getContextForType(value.getValue().getClass());
+    }
+    protected JAXBContext getContextForObject(Object value) throws JAXBException {
+        return getContextForType(value.getClass());
+    }
+    
     /**
      * Does not allow XML External Entity (XXE) injection CWE-611
      * http://cwe.mitre.org/data/definitions/611.html
@@ -67,12 +95,7 @@ public class JAXB {
      * @throws JAXBException
      */
     public <T> T read(String document, Class<T> valueType) throws IOException, JAXBException, XMLStreamException {
-        JAXBContext jc;
-        if (jaxbClassLoader != null) {
-            jc = JAXBContext.newInstance(valueType.getPackage().getName(), jaxbClassLoader);
-        } else {
-            jc = JAXBContext.newInstance(valueType.getPackage().getName());
-        }
+        JAXBContext jc = getContextForType(valueType);
         // CWE-611 restrict XML external entity references
         XMLInputFactory xif = XMLInputFactory.newFactory();
         xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false); // if true allows sender to include external files via entity declaration in the DTD, which is a security vulnerability
@@ -84,25 +107,20 @@ public class JAXB {
         return doc.getValue();
     }
     
+    public <T> T convert(Node fromDocument, Class<T> toValueType) throws JAXBException {
+        JAXBContext jc = getContextForType(toValueType);
+        Unmarshaller u = jc.createUnmarshaller();
+        JAXBElement<T> element = u.unmarshal(fromDocument, toValueType);
+        return element.getValue();
+    }
+    
     public String write(Object value) throws JAXBException {
-        String jaxbPackage;
-        if( value instanceof JAXBElement ) {
-            jaxbPackage = ((JAXBElement)value).getValue().getClass().getPackage().getName();
-        }
-        else {
-            jaxbPackage = value.getClass().getPackage().getName();
-        }
-        JAXBContext jc;
-        if (jaxbClassLoader != null) {
-            jc = JAXBContext.newInstance(jaxbPackage, jaxbClassLoader);
-        } else {
-            jc = JAXBContext.newInstance(jaxbPackage);
-        }
+        JAXBContext jc = getContextForObject(value);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Marshaller m = jc.createMarshaller();
-        m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        m.setProperty(Marshaller.JAXB_ENCODING, charset.name());
         m.marshal(value, out);
         byte[] xml = out.toByteArray();
-        return new String(xml, Charset.forName("UTF-8"));
+        return new String(xml, charset);
     }
 }

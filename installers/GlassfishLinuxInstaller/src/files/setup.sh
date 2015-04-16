@@ -19,9 +19,9 @@ glassfish_install $GLASSFISH_PACKAGE
 #cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
 #cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
 #cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
-cp jackson-annotations.jar ${GLASSFISH_HOME}/modules/
-cp jackson-core.jar ${GLASSFISH_HOME}/modules/
-cp jackson-databind.jar ${GLASSFISH_HOME}/modules/
+cp jackson-annotations.jar ${GLASSFISH_HOME}/glassfish/modules/
+cp jackson-core.jar ${GLASSFISH_HOME}/glassfish/modules/
+cp jackson-databind.jar ${GLASSFISH_HOME}/glassfish/modules/
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
@@ -35,12 +35,22 @@ cp jackson-databind.jar ${GLASSFISH_HOME}/modules/
 # can use it:
 mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* 2>/dev/null | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
-  cp $mysqlconnector_files ${GLASSFISH_HOME}/modules/
+  cp $mysqlconnector_files ${GLASSFISH_HOME}/glassfish/modules/
 fi
 
-cp *.jar ${GLASSFISH_HOME}/modules/
+cp *.jar ${GLASSFISH_HOME}/glassfish/modules/
 
 glassfish_stop
+
+#change glassfish master password which is the keystore password
+GF_CONFIG_PATH="${GLASSFISH_HOME}/glassfish/domains/domain1/config"
+mv "${GF_CONFIG_PATH}/domain-passwords" "${GF_CONFIG_PATH}/domain-passwords_bkup"
+touch "${GF_CONFIG_PATH}/master.passwd"
+echo "AS_ADMIN_MASTERPASSWORD=changeit" > "${GF_CONFIG_PATH}/master.passwd"
+echo "AS_ADMIN_NEWMASTERPASSWORD=$MTW_TLS_KEYSTORE_PASS" >> "${GF_CONFIG_PATH}/master.passwd"
+$glassfish change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" domain1
+rm "${GF_CONFIG_PATH}/master.passwd"
+
 glassfish_start
 
 echo

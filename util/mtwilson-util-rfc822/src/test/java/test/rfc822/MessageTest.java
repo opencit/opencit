@@ -120,9 +120,9 @@ attr1: value1
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=\n", new String(message.getContent(), "UTF-8"));
         assertEquals(2,message.getHeaderMap().size());
         assertTrue(message.getHeaderMap().containsKey("attr1"));
-        assertEquals("value1", message.getHeaderMap().get("attr1"));
+        assertEquals("value1", message.getHeaderMap().getFirst("attr1"));
         assertTrue(message.getHeaderMap().containsKey("attr2"));
-        assertEquals("value2", message.getHeaderMap().get("attr2"));
+        assertEquals("value2", message.getHeaderMap().getFirst("attr2"));
     }
     
 
@@ -137,10 +137,10 @@ attr1: value1
         assertEquals("QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=\n", new String(message.getContent(), "UTF-8"));
         assertEquals(2,message.getHeaderMap().size());
         assertTrue(message.getHeaderMap().containsKey("attr1"));
-        assertEquals("value1", message.getHeaderMap().get("attr1"));
+        assertEquals("value1", message.getHeaderMap().getFirst("attr1"));
         assertTrue(message.getHeaderMap().containsKey("attr2"));
-        assertEquals("",message.getHeaderMap().get("attr2"));
-        assertNull("",message.getHeaderMap().get("attr-missing"));
+        assertEquals("",message.getHeaderMap().getFirst("attr2"));
+        assertNull("",message.getHeaderMap().getFirst("attr-missing"));
     }
 
     @Test

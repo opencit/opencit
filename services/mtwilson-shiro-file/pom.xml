@@ -28,6 +28,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto-password</artifactId>
         </dependency>
@@ -48,6 +53,17 @@
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto-key</artifactId>
         </dependency>
+        
+        
+        <!-- for setup tasks -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup-ext</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

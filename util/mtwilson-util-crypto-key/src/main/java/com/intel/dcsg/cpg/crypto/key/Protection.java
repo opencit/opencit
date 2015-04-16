@@ -123,7 +123,7 @@ public class Protection /*implements Copyable*/ {
             // generate one block of random plaintext to encrypt
             byte[] plaintext = random.nextBytes(getBlockSizeBytes());
             byte[] ciphertext = testCipher.doFinal(plaintext);
-            if( ciphertext == null ) { return false; } // should never happen, an exception would be thrown by the cipher instead
+            assert ciphertext != null; // any error would have already been thrown by the cipher so if we get here the doFinal call must have succeeded and ciphertext wouldn't be null
             return true;
         }
         catch(NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {

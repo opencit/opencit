@@ -39,6 +39,14 @@
             <scope>test</scope>
         </dependency>
 		
+        
+    <!-- used by AttributeEqualsFilter -->
+    <dependency>
+		<groupId>commons-beanutils</groupId>
+		<artifactId>commons-beanutils</artifactId>
+        <optional>true</optional>
+    </dependency>
+        
     </dependencies>
     <properties />
 </project>

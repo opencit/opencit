@@ -12,7 +12,7 @@ import com.intel.mtwilson.text.transform.PascalCaseNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.launcher.ExtensionCacheLauncher;
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ExtensionDirectoryLauncher;
 import com.intel.mtwilson.setup.ConfigurationException;
 import com.intel.mtwilson.setup.SetupException;
@@ -49,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
  * the tasks,  use the --noexec option.
  * 
  * @author jbuhacoff
+ * @deprecated use {@code Setup} instead
  */
 public class SetupManager implements Command {
 
@@ -110,7 +111,7 @@ public class SetupManager implements Command {
 
 
     protected File getConfigurationFile() {
-        File file = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "mtwilson.properties");
+        File file = My.configuration().getConfigurationFile(); //new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "mtwilson.properties");
         return file;
     }
 

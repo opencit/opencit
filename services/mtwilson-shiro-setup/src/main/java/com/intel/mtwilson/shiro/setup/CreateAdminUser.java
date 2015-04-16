@@ -20,7 +20,6 @@ import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Platform;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.crypto.password.PasswordUtil;
 import com.intel.mtwilson.setup.DatabaseSetupTask;
 import com.intel.mtwilson.shiro.jdbi.LoginDAO;
@@ -32,6 +31,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
@@ -219,7 +219,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
         if (user == null) {
             user = new User();
             user.setId(new UUID());
-            user.setComment("automatically created by setup");
+            user.setComment("");
 //            user.setEnabled(true);
 //            user.setStatus(Status.APPROVED);
             user.setUsername(username);
@@ -252,7 +252,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             userLoginPassword.setPasswordHash(PasswordUtil.hash(password.getBytes(), userLoginPassword));
             userLoginPassword.setEnabled(true);
             userLoginPassword.setStatus(Status.APPROVED);
-            userLoginPassword.setComment("automatically created by setup");            
+//            userLoginPassword.setComment("automatically created by setup");  // now it needs to be a list of roles           
             loginDAO.insertUserLoginPassword(userLoginPassword.getId(), userLoginPassword.getUserId(), userLoginPassword.getPasswordHash(), 
                     userLoginPassword.getSalt(), userLoginPassword.getIterations(), userLoginPassword.getAlgorithm(), userLoginPassword.getExpires(), 
                     userLoginPassword.isEnabled(), userLoginPassword.getStatus(), userLoginPassword.getComment());
@@ -392,7 +392,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
             userLoginCertificate = new UserLoginCertificate();
             userLoginCertificate.setId(new UUID());
             userLoginCertificate.setCertificate(certificate.getEncoded());
-            userLoginCertificate.setComment("automatically created by setup");
+//            userLoginCertificate.setComment("automatically created by setup"); // now it needs to be a list of roles
             userLoginCertificate.setEnabled(true);
             userLoginCertificate.setExpires(certificate.getNotAfter());
             userLoginCertificate.setSha1Hash(Sha1Digest.digestOf(certificate.getEncoded()).toByteArray());
@@ -460,7 +460,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
 
     private void storeAdminPassword() throws IOException {
         // save the password to a file so the admin user can read it ; because it shouldn't be stored in the permanent configuration
-        File privateDir = new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "private");
+        File privateDir = new File(Folders.configuration() + File.separator + "private");
         if (!privateDir.exists()) {
             privateDir.mkdirs();
         }
@@ -492,13 +492,13 @@ public class CreateAdminUser extends DatabaseSetupTask {
         return null;
     }
     private X509Certificate getTlsCertificate() throws KeyManagementException, KeyStoreException  {
-        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), "changeit");   //My.configuration().getTlsKeystorePassword());
+        SimpleKeystore tlsKeystore = new SimpleKeystore(My.configuration().getTlsKeystoreFile(), My.configuration().getTlsKeystorePassword());   //"changeit");
         for (String alias : tlsKeystore.aliases()) {
             log.debug("TLS Keystore alias: {}", alias);
             // make sure it has a SAML private key and certificate inside
             try {
                 if ("tomcat".equals(alias) || "s1as".equals(alias)) {
-                    RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, "changeit");   //My.configuration().getTlsKeystorePassword());
+                    RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, My.configuration().getTlsKeystorePassword());   //"changeit");
                     log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
                     return credential.getCertificate();
                 } else {

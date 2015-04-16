@@ -21,7 +21,7 @@ import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.mtwilson.security.http.*;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import java.io.File;
@@ -108,7 +108,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @throws IOException if there was a problem reading the specified file
      */
     public ApiClient(File configurationFile) throws ClientException, IOException {
-        this(ConfigurationUtil.fromPropertiesFile(configurationFile));
+        this(CommonsConfigurationUtil.fromPropertiesFile(configurationFile));
         log.debug("Initialized with configuration file: "+configurationFile.getAbsolutePath());
     }
     

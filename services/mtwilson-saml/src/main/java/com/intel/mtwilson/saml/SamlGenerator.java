@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.saml;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfigurationAdapter;
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.tag.model.x509.*;
 import com.intel.mtwilson.datatypes.TxtHost;
@@ -23,7 +23,6 @@ import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.joda.time.DateTime;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
@@ -76,7 +75,7 @@ public class SamlGenerator {
      * @throws ConfigurationException 
      */
     public SamlGenerator(Resource keystoreResource, org.apache.commons.configuration.Configuration configuration) throws ConfigurationException {
-        this(new CommonsConfigurationAdapter(configuration));
+        this(new CommonsConfiguration(configuration));
     }
     
     /**
@@ -101,8 +100,8 @@ public class SamlGenerator {
         } catch (ClassNotFoundException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | IllegalAccessException | InstantiationException | IOException | CertificateException ex) {
             log.error("Cannot load SAML signature generator: "+ex.getMessage(), ex);
         }
-        setIssuer(configuration.getString("saml.issuer", "AttestationService"));
-        setValiditySeconds(configuration.getInteger("saml.validity.seconds", 3600));
+        setIssuer(configuration.get("saml.issuer", "AttestationService"));
+        setValiditySeconds(Integer.valueOf(configuration.get("saml.validity.seconds", "3600")));
     }
     
     
@@ -137,9 +136,9 @@ public class SamlGenerator {
      * @return @SamlAssertion
      * @throws MarshallingException 
      */
-    public SamlAssertion generateHostAssertion(TxtHost host, X509AttributeCertificate tagCertificate) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
+    public SamlAssertion generateHostAssertion(TxtHost host, X509AttributeCertificate tagCertificate, Map<String, String> vmMetaData) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
         samlAssertion = new SamlAssertion();
-        Assertion assertion = createAssertion(host, tagCertificate);
+        Assertion assertion = createAssertion(host, tagCertificate, vmMetaData);
 
         AssertionMarshaller marshaller = new AssertionMarshaller();
         Element plaintextElement = marshaller.marshall(assertion);
@@ -374,7 +373,7 @@ public class SamlGenerator {
 	}
 	*/
 //        private final String DEFAULT_OID = "2.5.4.789.1";
-        private AttributeStatement createHostAttributes(TxtHost host, X509AttributeCertificate tagCertificate) throws ConfigurationException {
+        private AttributeStatement createHostAttributes(TxtHost host, X509AttributeCertificate tagCertificate, Map<String, String> vmMetaData) throws ConfigurationException {
             // Builder Attributes
             SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
             AttributeStatement attrStatement = (AttributeStatement) attrStatementBuilder.buildObject();
@@ -441,6 +440,16 @@ public class SamlGenerator {
                 attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
             }
             
+            if (host.getBindingKeyCertificate() != null && !host.getBindingKeyCertificate().isEmpty()) {
+                attrStatement.getAttributes().add(createStringAttribute("Binding_Key_Certificate", host.getBindingKeyCertificate()));                
+            }
+            
+            if (vmMetaData != null && !vmMetaData.isEmpty()) {
+                for (Map.Entry<String, String> entry : vmMetaData.entrySet()) {
+                    attrStatement.getAttributes().add(createStringAttribute(entry.getKey(), entry.getValue()));
+                }
+            }
+            
             return attrStatement;
             
         }
@@ -463,7 +472,7 @@ public class SamlGenerator {
          * @param host
          * @return 
          */
-        private Assertion createAssertion(TxtHost host, X509AttributeCertificate tagCertificate) throws ConfigurationException, UnknownHostException {
+        private Assertion createAssertion(TxtHost host, X509AttributeCertificate tagCertificate, Map<String, String> vmMetaData) throws ConfigurationException, UnknownHostException {
             // Create the assertion
             SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
             Assertion assertion = (Assertion) assertionBuilder.buildObject();
@@ -473,7 +482,7 @@ public class SamlGenerator {
             assertion.setIssueInstant(now);
             assertion.setVersion(SAMLVersion.VERSION_20);
             assertion.setSubject(createSubject(host));
-            assertion.getAttributeStatements().add(createHostAttributes(host, tagCertificate));
+            assertion.getAttributeStatements().add(createHostAttributes(host, tagCertificate, vmMetaData));
 
             return assertion;
         }
@@ -500,7 +509,7 @@ public class SamlGenerator {
             assertion.setVersion(SAMLVersion.VERSION_20);
 //            assertion.setSubject(createSubject(host));
             for(TxtHostWithAssetTag host : hosts) {
-                assertion.getAttributeStatements().add(createHostAttributes(host.getHost(), host.getTagCertificate()));            
+                assertion.getAttributeStatements().add(createHostAttributes(host.getHost(), host.getTagCertificate(), null));            
             }
 
             return assertion;

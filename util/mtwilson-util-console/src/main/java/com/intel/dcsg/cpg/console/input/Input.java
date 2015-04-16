@@ -174,14 +174,13 @@ public class Input {
         for(int i=0; i<level; i++) { spaces.append("  "); } // each level is indented two spaces from the previous level
         String indentation = spaces.toString(); 
         System.err.println(String.format("%s- %s", indentation, f.toString()));
-        if( f.getCause() != null ) {
-            System.err.println(String.format("%s  Caused by: %s", indentation, f.getCause().toString()));
-        }
-        if( f.getMore() != null && f.getMore().length > 0 ) {
+//        if( f.getCause() != null ) {
+//            System.err.println(String.format("%s  Caused by: %s", indentation, f.getCause().toString()));
+//        }
+        if( !f.getFaults().isEmpty() ) {
             System.err.println(String.format("%s  Related errors:", indentation));
-            Fault[] more = f.getMore();
-            for(int i=0; i<more.length; i++) {
-                printFault(more[i], level+1);
+            for(Fault related : f.getFaults()) {
+                printFault(related, level+1);
             }
         }
     }

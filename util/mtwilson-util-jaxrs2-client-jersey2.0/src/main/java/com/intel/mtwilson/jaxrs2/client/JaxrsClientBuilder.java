@@ -114,30 +114,38 @@ public class JaxrsClientBuilder {
         }
         // X509 authorization 
         SimpleKeystore keystore = null;
-        if (configuration.getString("mtwilson.api.keystore") != null && configuration.getString("mtwilson.api.keystore.password") != null) {
-            FileResource resource = new FileResource(new File(configuration.getString("mtwilson.api.keystore")));
-            keystore = new SimpleKeystore(resource, configuration.getString("mtwilson.api.keystore.password"));
+        String keystorePath = configuration.get("mtwilson.api.keystore", null);
+        String keystorePassword = configuration.get("mtwilson.api.keystore.password", null); 
+        if ( keystore != null && keystorePassword != null) {
+            FileResource resource = new FileResource(new File(keystorePath));
+            keystore = new SimpleKeystore(resource, keystorePassword);
         }
-        if (keystore != null && configuration.getString("mtwilson.api.key.alias") != null && configuration.getString("mtwilson.api.key.password") != null) {
-            log.debug("Registering X509 credentials for {}", configuration.getString("mtwilson.api.key.alias"));
-            log.debug("Loading key {} from keystore {}", configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.keystore"));
-            RsaCredentialX509 credential = keystore.getRsaCredentialX509(configuration.getString("mtwilson.api.key.alias"), configuration.getString("mtwilson.api.key.password"));
+        String keyAlias = configuration.get("mtwilson.api.key.alias", null);
+        String keyPassword = configuration.get("mtwilson.api.key.password", null);
+        if (keystore != null && keyAlias != null && keyPassword != null) {
+            log.debug("Registering X509 credentials for {}", keyAlias);
+            log.debug("Loading key {} from keystore {}", keyAlias, keystorePath);
+            RsaCredentialX509 credential = keystore.getRsaCredentialX509(keyAlias, keyPassword);
             log.debug(credential.getPublicKey().toString());
             clientConfig.register(new X509AuthorizationFilter(credential));
         }
         // HMAC authorization
-        if (configuration.getString("mtwilson.api.clientId") != null && configuration.getString("mtwilson.api.secretKey") != null) {
-            log.debug("Registering HMAC credentials for {}", configuration.getString("mtwilson.api.clientId"));
-            clientConfig.register(new HmacAuthorizationFilter(configuration.getString("mtwilson.api.clientId"), configuration.getString("mtwilson.api.secretKey")));
+        String clientId = configuration.get("mtwilson.api.clientId", null);
+        String secretKey =  configuration.get("mtwilson.api.secretKey", null) ;
+        if (clientId != null && secretKey != null) {
+            log.debug("Registering HMAC credentials for {}", clientId);
+            clientConfig.register(new HmacAuthorizationFilter(clientId, secretKey));
         }
         // BASIC authorization will only be registered if configuration is present but also the feature itself will only add an Authorization header if there isn't already one present
-        if (configuration.getString("mtwilson.api.username") != null && configuration.getString("mtwilson.api.password") != null) {
-            log.debug("Registering BASIC credentials for {}", configuration.getString("mtwilson.api.username"));
+        String username = configuration.get("mtwilson.api.username", null);
+        String password = configuration.get("mtwilson.api.password", null);
+        if (username != null && password != null) {
+            log.debug("Registering BASIC credentials for {}", username);
 //            clientConfig.register( new BasicPasswordAuthorizationFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password")));
 //            HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"));
 //            clientConfig.register(feature);
 
-            clientConfig.register(new HttpBasicAuthFilter(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"))); // jersey 2.4.1
+            clientConfig.register(new HttpBasicAuthFilter(username, password)); // jersey 2.4.1
 //            clientConfig.register(HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"))); // jersey 2.10.1
         }
     }
@@ -145,7 +153,7 @@ public class JaxrsClientBuilder {
     private void url() throws MalformedURLException {
         if (url == null) {
             if (configuration != null) {
-                url = new URL(configuration.getString("mtwilson.api.url", configuration.getString("mtwilson.api.baseurl"))); // example: "http://localhost:8080/v2";
+                url = new URL(configuration.get("mtwilson.api.url", configuration.get("mtwilson.api.baseurl", null))); // example: "http://localhost:8080/v2";
             }
         }
     }
@@ -205,7 +213,7 @@ public class JaxrsClientBuilder {
 //                    .hostnameVerifier(TlsPolicyManager.getInstance().getHostnameVerifier())
                     .hostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier())
                     .build();
-            if (configuration != null && configuration.getBoolean("org.glassfish.jersey.filter.LoggingFilter.printEntity", true)) {
+            if (configuration != null && Boolean.valueOf(configuration.get("org.glassfish.jersey.filter.LoggingFilter.printEntity", "true"))) {
                 client.register(new LoggingFilter(Logger.getLogger("org.glassfish.jersey.filter.LoggingFilter"), true));
             } else {
                 client.register(new LoggingFilter());

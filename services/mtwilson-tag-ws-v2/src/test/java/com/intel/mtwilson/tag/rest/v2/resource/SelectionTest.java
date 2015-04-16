@@ -19,12 +19,13 @@ public class SelectionTest {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionTest.class);
         
+    /*
     @Test
     public void testRetrieveSelectionAsXml() throws Exception {
         Selections repo = new Selections();
         SelectionLocator locator = new SelectionLocator();
         locator.id = UUID.valueOf("00ba0a0f-a545-4f9c-b2af-215471b81dc4");
-        String retrieveOneXml = repo.retrieveOneXml(locator);
+        String retrieveOneXml = repo.retrieveOneXml(locator, request, response);
         System.out.println(retrieveOneXml);
     }
     
@@ -33,9 +34,10 @@ public class SelectionTest {
         Selections repo = new Selections();
         SelectionLocator locator = new SelectionLocator();
         locator.id = UUID.valueOf("00ba0a0f-a545-4f9c-b2af-215471b81dc4");
-        String retrieveOneJson = repo.retrieveOneJson(locator);
+        String retrieveOneJson = repo.retrieveOneJson(locator, request, response);
         System.out.println(retrieveOneJson);
     }
+    */
 
     @Test
     public void testCreateSelection() throws Exception{

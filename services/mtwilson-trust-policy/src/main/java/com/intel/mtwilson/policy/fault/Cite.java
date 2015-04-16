@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy.fault;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.policy.Fault;
 import com.intel.mtwilson.policy.RuleResult;
 
@@ -19,8 +21,13 @@ import com.intel.mtwilson.policy.RuleResult;
  * 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Cite extends Fault {
     private RuleResult report;
+    
+    public Cite() { } // for desearializing jackson
+    
     public Cite(RuleResult report) {
 //        super(report.getPolicyName()); 
         super("%s: %s with %d faults", report.getRuleName(), report.isTrusted() ? "trusted" : "not trusted", report.getFaults().size());

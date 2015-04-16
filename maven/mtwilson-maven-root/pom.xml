@@ -1,0 +1,960 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-root</artifactId>
+  <version>3.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <description>
+    Mt Wilson is a middleware solution that enables data centers to attest
+      to the trust of hypervisors and operating systems on multiple devices
+      including Servers, Clients, Network and Storage components.  
+      The primary purpose of this attestation is for Trust Verification, Remediation, Reporting, 
+      and Compliance in a Data Center and Cloud environments. Whether it is public 
+      cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
+      used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
+      assess and provide an Assurance that the security components on the devices are 
+      protecting the assets executing or stored on the devices. 
+  </description>
+    
+  <url>http://cloudsecurityportal.intel.com/mtwilson</url>
+  
+    <organization>
+        <name>Intel Corporation</name>
+        <url>http://cscenter.intel.com/portal/</url>
+    </organization>
+
+  <scm>
+    <connection>scm:svn:svn://10.1.71.117/mountwilson-0.5.4/trunk</connection>
+    <developerConnection>scm:svn:svn://10.1.71.117/mountwilson-0.5.4/trunk</developerConnection>
+    <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/repository</url>
+  </scm>
+  
+<licenses>
+  <license>
+    <name>Copyright 2012 Intel Corporation. All rights reserved.</name>
+    <!-- fill this in when we have a URL for the mt wilson license <url>http://intel.com</url> -->
+    <distribution>manual</distribution>
+    <comments>Currently Mt Wilson is available only by agreement.</comments>
+  </license>
+</licenses>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
+    <mtwilson.release>1.0.0-SNAPSHOT</mtwilson.release> <!-- mtwilson.release is the official release number that should be reported by the applications and shown on the installer filename -->
+    <jersey-version>1.9-ea04</jersey-version>
+    <maven.build.timestamp.format>yyyyMMdd.HHmm</maven.build.timestamp.format>
+  </properties>
+
+  <distributionManagement>
+      <repository>
+	  <id>cloudsecurity-maven-repository</id>
+	  <url>dav:http://cloudsecurityportal.intel.com/maven</url>
+          <name>Maven Repository in Cloud Security Portal at Intel</name>
+      </repository>
+      <site>
+          <id>cloudsecurity-website</id>
+          <url>dav:http://cloudsecurityportal.intel.com/mtwilson/${project.version}</url>
+          <name>Documentation Site in Cloud Security Portal at Intel</name>
+      </site>
+  </distributionManagement>
+
+    <issueManagement>
+        <system>Redmine</system>
+        <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/issues</url>
+    </issueManagement>
+
+<!--
+  <reporting>    
+    <plugins>  
+      <plugin>      
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <inherited>true</inherited>          
+      </plugin>
+      <plugin> 
+        <groupId>org.codehaus.mojo</groupId> 
+        <artifactId>surefire-report-maven-plugin</artifactId> 
+        <version>2.0-beta-1</version>
+        <inherited>true</inherited>
+      </plugin>       
+    </plugins>      
+  </reporting>  
+  -->
+    <repositories>
+	<!-- for sharing cpg repo internally and for net.sourceforge:vijava:5.5 -->
+	<repository>
+		<id>cloudsecurityportal.intel.com</id>
+		<name>Cloud Security - Intel Architecture Systems Integration</name>
+		<url>http://cloudsecurityportal.intel.com/maven</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>false</enabled>
+                </snapshots>
+        </repository>
+<!--	<repository>
+		<id>cpg-x</id>
+		<name>Cloud Platform Group</name>
+		<url>http://10.1.71.63/maven/repository</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>false</enabled>
+                </snapshots>
+        </repository>-->
+        <repository>
+            <id>maven-central</id>
+            <name>Maven Central Repository</name>
+            <url>http://central.maven.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+		
+	<repository>
+		<id>glassfish.java.net</id>
+		<name>GlassFish Maven Repository</name>
+		<url>http://download.java.net/maven/glassfish</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>false</enabled>
+                </snapshots>
+        </repository>
+	        <!--
+	<repository>
+		<id>java.net</id>
+		<name>java.net Maven Repository</name>
+		<url>https://maven-repository.dev.java.net/nonav/repository</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>false</enabled>
+                </snapshots>
+	</repository>
+	-->
+	<repository>
+		<id>apache</id>
+		<name>apache repository</name>
+		<url>http://repository.apache.org/snapshots</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>false</enabled>
+                </snapshots>
+	</repository>
+   <repository>
+	   <id>EclipseLink Repo</id>
+	   <name>EclipseLink Repository</name>
+	   <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
+                <snapshots>
+                  <enabled>false</enabled>
+                </snapshots>
+   </repository>
+  <repository>
+    <id>Sonatype-public</id>
+    <name>SnakeYAML repository</name>
+    <url>http://oss.sonatype.org/content/groups/public/</url>
+  </repository>
+        <!-- for org.opensaml:xmltooling:1.4.1 -->
+<repository>
+    <id>sonatype-releases</id>
+    <url>https://oss.sonatype.org/content/repositories/releases/</url>
+<snapshots>
+        <enabled>false</enabled>
+    </snapshots>
+	</repository>
+  <repository>
+    <id>Restlet-public</id>
+    <name>Restlet maven repository</name>
+    <url>http://maven.restlet.org/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+  </repository>
+
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>m2.java.net</id>
+            <name>Java.net Maven 2 Repository</name>
+            <url>http://download.java.net/maven/2</url>
+            <layout>default</layout>
+        </pluginRepository>  
+    </pluginRepositories>
+    
+  <build>
+	<plugins>
+                
+        <!-- the git commit plugin makes available the following properties:
+     branch
+     commit.id
+     commit.id.abbrev
+     commit.id.describe
+     build.user.name
+     build.user.email
+     build.time
+     commit.user.name
+     commit.user.email
+     commit.message.full
+     commit.message.short
+     commit.time
+     remote.origin.url
+        -->
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <executions>
+                <execution>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>revision</goal>
+                    </goals>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <skipPoms>false</skipPoms>
+                        <prefix>git</prefix>
+                        <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                        <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        
+        <!--
+		<plugin>
+		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+		    <artifactId>svn-revision-number-maven-plugin</artifactId>
+		    <executions>
+			<execution>
+                            <phase>initialize</phase>
+			    <goals>
+				<goal>revision</goal>
+			    </goals>
+			</execution>
+		    </executions>
+		</plugin>
+        -->
+        
+				
+	</plugins>
+
+	<extensions>
+	    <extension>
+		<groupId>org.apache.maven.wagon</groupId>
+		<artifactId>wagon-webdav-jackrabbit</artifactId>
+		<version>2.2</version>
+	    </extension>
+	</extensions>
+        
+        <pluginManagement>
+            <plugins>
+                
+                
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+            </plugin>
+                
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>2.5</version>
+                    </plugin>
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.1.9</version>
+        </plugin>
+                                
+		<!-- begin SVN revision plugin (makes available properties like svn.revision) -->
+        <!--
+		<plugin>
+		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+		    <artifactId>svn-revision-number-maven-plugin</artifactId>
+		    <version>1.13</version>	
+		    <configuration>
+			<entries>
+			    <entry>
+				<prefix>svn</prefix>
+			    </entry>
+			</entries>
+		    </configuration>
+		</plugin>
+        -->
+                
+      
+	<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-dependency-plugin</artifactId>
+	    <version>2.4</version>
+        </plugin>
+              
+    <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+    </plugin>
+    
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.5</version>
+        </plugin>
+
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      
+        <plugin>
+          <groupId>org.apache.tomcat.maven</groupId>
+          <artifactId>tomcat6-maven-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.tomcat.maven</groupId>
+          <artifactId>tomcat7-maven-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>      
+			<plugin>
+                <groupId>org.glassfish.maven.plugin</groupId>
+                <artifactId>maven-glassfish-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+
+            </plugins>     
+        </pluginManagement>
+
+        
+  </build>
+  
+  
+    <dependencyManagement>
+    
+	
+	
+	
+        <dependencies>
+    <dependency>
+    	<groupId>mysql</groupId>
+    	<artifactId>mysql-connector-java</artifactId>
+    	<version>5.1.22</version>
+    </dependency>
+    
+    <!--
+    We cannot use 9.1-jdbc4 because of this error: java.sql.SQLFeatureNotSupportedException: Method org.postgresql.jdbc4.Jdbc4Statement.setQueryTimeout(int) is not yet implemented.
+    In previous postgres release this of course was also not implemented but they silently ignored it, whereas in 9.1 they throw an exception
+    Therefore the most recent versions we can use are  8.2-511.jdbc3 or 8.2-507.jdbc4  , until org.postgresql.jdbc4.Jdbc4Statement.setQueryTimeout(int) is implemenetd. in a future version.
+    From Postgres changelog:
+===
+Version 8.3-603 (2008-01-31):
+...
+Throw an exception if people try to use setQueryTimeout with a non-zero value as it is not implemented. Committed by jurka.
+...
+===    
+    -->
+    <!--
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+        </dependency>
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901-1.jdbc4</version>
+        </dependency>
+        -->
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901-1.jdbc4</version>
+        </dependency>
+
+    <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>        
+    
+    <dependency>
+		<groupId>commons-beanutils</groupId>
+		<artifactId>commons-beanutils</artifactId>
+		<version>1.9.2</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.9</version>
+    </dependency>
+	<dependency>
+		<groupId>commons-collections</groupId>
+		<artifactId>commons-collections</artifactId>
+		<version>3.2.1</version>
+	</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.9</version>
+        </dependency>
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>1.9</version>
+            </dependency>      
+    <dependency>
+		<groupId>commons-digester</groupId>
+		<artifactId>commons-digester</artifactId>
+		<version>2.1</version>
+    </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.2</version>
+        </dependency>
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-io</artifactId>
+		<version>1.3.2</version>
+	</dependency>
+	<dependency>
+		<groupId>commons-io</groupId>
+		<artifactId>commons-io</artifactId>
+		<version>2.4</version>
+	</dependency>
+    <dependency>
+		<groupId>commons-jxpath</groupId>
+		<artifactId>commons-jxpath</artifactId>
+		<version>1.3</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.6</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.1</version>
+    </dependency>    
+    <dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-math3</artifactId>
+		<version>3.2</version>
+	</dependency>
+    <dependency>
+		<groupId>commons-net</groupId>
+		<artifactId>commons-net</artifactId>
+		<version>3.1</version>
+	</dependency>
+    <dependency>
+        <groupId>commons-pool</groupId>
+        <artifactId>commons-pool</artifactId>
+        <version>1.6</version>
+    </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.49</version>
+        </dependency>        
+
+        		
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-archive</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-authz-token</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-classpath</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-codec</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-collection</artifactId>
+            <version>0.3-SNAPSHOT</version>
+        </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-configuration</artifactId>
+        <version>0.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-console</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-crypto</artifactId>
+		<version>0.3-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-crypto-key</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto-password</artifactId>
+		<version>0.1-SNAPSHOT</version>
+        </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-dbcp</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-exec</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-extensions</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-http</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-i18n</artifactId>
+		<version>3.0-SNAPSHOT</version>
+        </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-io</artifactId>
+		<version>0.3-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jackson</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-jdbc</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-jpa</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-locale</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-net</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-objectpool</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-pem</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.util</groupId>
+        <artifactId>mtwilson-util-performance</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-pipe</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-rfc822</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-shiro</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tls-policy</artifactId>
+            <version>0.3-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-text-transform</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-tpm12</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-tree</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+	<dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+		<artifactId>mtwilson-util-validation</artifactId>
+		<version>0.3-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+
+	
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+		
+        <!-- begin httpclient  -->
+   
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.jvnet.hk2</groupId>
+            <artifactId>hk2-locator</artifactId>
+            <version>2.1.96</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.servlet</artifactId>
+            <version>3.1.1</version>
+        </dependency>
+        <!-- was 2.2.0 -->
+        <!--
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+            <version>2.3.0-b09</version> 
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-utils</artifactId>
+            <version>2.3.0-b09</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-api</artifactId>
+            <version>2.2.0</version> 
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2</groupId>
+            <artifactId>hk2-utils</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        
+        <!-- jersey -->
+        
+        <!-- 
+        version 2.5.1 causes errors like this:
+com.fasterxml.jackson.databind.JsonMappingException: Incompatible types: declared root type ([collection type; class java.util.List, contains [simple type, class com.intel.mtwilson.datatypes.TxtHostRecord]]) vs com.intel.mtwilson.datatypes.ErrorResponse
+
+reference : https://java.net/jira/browse/JERSEY-2325
+
+
+            -->
+        
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-client</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-common</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-server</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet-core</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-multipart</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>2.4.1</version>
+            </dependency>
+        
+        
+            <!--  AttributeConverter interface and @Convert annotation are since javaee 7,  also javax.ws.rs.core.MultivaluedMap.addAll is since java7 -->
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-api</artifactId>
+                <version>7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-web-api</artifactId>
+                <version>7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>eclipselink</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>javax.persistence</artifactId>
+                <version>2.1.0</version>
+            </dependency>
+        
+        
+            <!-- jackson 1.x -->
+            <!--    
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-jaxrs</artifactId>
+                <version>1.9.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>1.9.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+                <version>1.9.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-xc</artifactId>
+                <version>1.9.13</version>
+            </dependency>
+            -->
+            <!-- jackson 2.x, updated from version 2.3.2 to version 2.5.1 -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-xml-provider</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+              <groupId>com.fasterxml.jackson.dataformat</groupId>
+              <artifactId>jackson-dataformat-csv</artifactId>
+              <version>2.5.1</version>
+            </dependency>
+    
+            <!-- other -->
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.3</version>
+            </dependency>                        
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
+    
+    
+        </dependencies>
+    </dependencyManagement>  
+    
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- begin website plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <version>3.1</version>
+                        <configuration>
+                            <reportPlugins>
+                                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                                    <version>2.5.1</version>
+                                    <configuration>
+                                        <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                                        <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                                    </configuration>
+                                    <reports>
+                                        <report>dependencies</report>
+                                        <report>dependency-info</report>
+                                        <report>help</report>
+                                        <report>index</report>
+                                        <report>license</report>
+                                        <report>issue-tracking</report>
+                                        <report>summary</report>
+                                    </reports>
+                                </plugin>
+                                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-javadoc-plugin</artifactId>
+                                    <version>2.8.1</version>
+                                    <configuration>
+                                        <show>public</show>
+                                        <docfilessubdirs>true</docfilessubdirs>
+                                        <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
+                                        <includeDependencySources>true</includeDependencySources>
+                                        <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
+                                        <dependencySourceIncludes>
+                                            <!--
+                                            <dependencySourceInclude>com.intel.mtwilson.integration:*</dependencySourceInclude>
+                                            <dependencySourceInclude>com.intel.mtwilson.common:*</dependencySourceInclude>
+                                            -->
+                                            <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
+                                            <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
+                                        </dependencySourceIncludes>
+                                        <!-- the following dependencies are always excluded because source is not available and that causes the javadoc plugin to fail -->
+                                        <dependencySourceExcludes>
+                                            <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
+                                            <dependencySourceExclude>org.apache.santuario:xmlsec</dependencySourceExclude>
+                                            <dependencySourceExclude>org.jacorb:jacorb</dependencySourceExclude>
+                                            <dependencySourceExclude>org.jacorb:jacorb-idl</dependencySourceExclude>
+                                            <dependencySourceExclude>avalon-framework:avalon-framework</dependencySourceExclude>
+                                            <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
+                                            <dependencySourceExclude>classworlds:classworlds</dependencySourceExclude>
+                                            <dependencySourceExclude>velocity:velocity</dependencySourceExclude>
+                                            <dependencySourceExclude>commons-logging:commons-logging-api</dependencySourceExclude>
+                                            <dependencySourceExcldue>logkit:logkit</dependencySourceExcldue>
+                                        </dependencySourceExcludes>
+                                    </configuration>
+                                    <!--
+                                    <dependencies>
+                                        <dependency>
+                                            <groupId>com.intel</groupId>
+                                            <artifactId>maven-intel-skin</artifactId>
+                                            <version>0.1-SNAPSHOT</version>
+                                        </dependency>
+                                    </dependencies>
+                                    -->
+                                </plugin>           
+                                <!-- http://emma.sourceforge.net/maven-emma-plugin/index.html -->
+                                <!-- note this is NOT the same as emma-maven-plugin below... this one has a report goal, the other one doesn't -->
+                                <!--
+                                <plugin>
+                                    <groupId>emma</groupId>
+                                    <artifactId>maven-emma-plugin</artifactId> 
+                                    <version>0.5</version>
+                                </plugin>     
+                                -->
+                            </reportPlugins>
+                        </configuration>  
+                    </plugin>
+                    <!-- end website plugin -->                    
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
+

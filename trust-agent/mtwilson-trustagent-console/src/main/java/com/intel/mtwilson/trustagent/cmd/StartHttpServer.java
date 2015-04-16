@@ -5,8 +5,9 @@
 package com.intel.mtwilson.trustagent.cmd;
 
 import com.intel.dcsg.cpg.console.Command;
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import java.io.File;
 import java.security.Security;
 import org.apache.commons.configuration.Configuration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -85,7 +86,7 @@ public class StartHttpServer implements Command {
 //        webAppContext.setContextPath("/webapp");
 //        webAppContext.setResourceBase("src/main/webapp");       
 //        webAppContext.setClassLoader(getClass().getClassLoader());
-        webAppContext.setResourceBase(MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getHypertextPath());
+        webAppContext.setResourceBase(Folders.application() + File.separator + "hypertext");
         return webAppContext;
     }
     

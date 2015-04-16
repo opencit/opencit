@@ -10,12 +10,14 @@
   <description>mtwilson-util</description>
 
 	<parent>
-		<groupId>com.intel.mtwilson</groupId>
-		<artifactId>mtwilson</artifactId>
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-java</artifactId>
 		<version>3.0-SNAPSHOT</version>
+        <relativePath/>
 	</parent>
   
   <modules>
+    <module>mtwilson-util-archive</module>
     <module>mtwilson-util-authz-token</module>
     <module>mtwilson-util-classpath</module>
 	<module>mtwilson-util-codec</module>
@@ -42,19 +44,21 @@
 	<module>mtwilson-util-jooq</module>
     <module>mtwilson-util-jpa</module>
     <module>mtwilson-util-locale</module>
-	<module>mtwilson-util-logback</module>
-	<module>mtwilson-util-patch</module>
-	<module>mtwilson-util-pipe</module>
-	<module>mtwilson-util-text-transform</module>
-	<module>mtwilson-util-tree</module>
-    <module>mtwilson-util-module-annotations</module>
+	<module>mtwilson-util-logback</module>	
     <module>mtwilson-util-module</module>
+    <module>mtwilson-util-module-annotations</module>
     <module>mtwilson-util-net</module>
 	<module>mtwilson-util-objectpool</module>
+	<module>mtwilson-util-patch</module>
+	<module>mtwilson-util-pem</module>
 	<module>mtwilson-util-performance</module>
+	<module>mtwilson-util-pipe</module>
     <module>mtwilson-util-rfc822</module>
     <module>mtwilson-util-shiro</module>
+	<module>mtwilson-util-text-transform</module>
     <module>mtwilson-util-tls-policy</module>
+	<module>mtwilson-util-tpm12</module>
+	<module>mtwilson-util-tree</module>
 	<module>mtwilson-util-validation</module>
     <module>mtwilson-util-xml</module>
   </modules>

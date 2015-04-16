@@ -80,11 +80,18 @@ public class LoginDAO  {
         return users.get(username);
     }
     
+    public List<String> listUsernames() {
+        ArrayList<String> list = new ArrayList<>();
+        list.addAll(users.keySet());
+        return list;
+    }
+    
     public void deleteUserByName(String username) throws IOException {
         if( !users.containsKey(username)) {
             throw new IllegalArgumentException("User does not exist");
         }
         users.remove(username);
+        permissions.remove(username);
         save();
     }
     
@@ -160,7 +167,10 @@ public class LoginDAO  {
         }
         // load permissions
         List<String> permissionLines = FileUtils.readLines(permissionFile);
+        int lineNumber = 0;
         for(String line : permissionLines) {
+            lineNumber++;
+            try {
             KeyValuePair userPermission = KeyValuePair.parse(line);
             String user = userPermission.getKey();
             CommaSeparatedValues permissionList = CommaSeparatedValues.parse(userPermission.getValue());
@@ -169,6 +179,9 @@ public class LoginDAO  {
                 list.add(UserPermission.parse(item));
             }
             permissions.put(user,list);
+            } catch (Exception e) {
+                log.error("Cannot parse line {} of {}: {}", lineNumber, permissionFile, e.getMessage());
+            }
         }
     }
 

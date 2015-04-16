@@ -13,9 +13,9 @@
   </description>
   
 	<parent>
-		<groupId>com.intel.mtwilson</groupId>
-		<artifactId>mtwilson</artifactId>
-		<version>3.0-SNAPSHOT</version>
+  <groupId>com.intel.mtwilson.maven</groupId>
+  <artifactId>mtwilson-maven-java</artifactId>
+  <version>3.0-SNAPSHOT</version>
 		<relativePath />
 	</parent>
   

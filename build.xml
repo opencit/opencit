@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="mtwilson" default="build" basedir=".">
+<project name="mtwilson" default="all" basedir=".">
 	<description>
 	Run "ant ready" to ensure you have all pre-requisites to build
 	Run "ant" or "ant build" to build the entire project
-	Run "ant dist" to also build javadocs and other packaging
-	Run "ant post" to publish the files to a shared server
+	Run "ant ready build packages" to clean build and generate packages
+	Run "ant build packages" to rebuild only and generate packages
+	Run "ant packages" to generate packages (requires prior build)
 	</description>
 	
 	<target name="info">
@@ -22,13 +23,26 @@
 	
 	<target name="ready" depends="init">
 		<!-- the root pom -->
+		<!--
 		<exec executable="${cmd.maven}" resultproperty="mavenExitInstallPom">
 			<arg value="-DskipTests=true"/>
 			<arg value="-N"/>
 			<arg value="install"/>
 		</exec>
+		-->
+		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-root" resultproperty="mavenExitInstallPom">
+			<arg value="-DskipTests=true"/>
+			<arg value="install"/>
+		</exec>
 		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
 			<condition><not><equals arg1="${mavenExitInstallPom}" arg2="0"/></not></condition>
+		</fail>
+		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-java" resultproperty="mavenExitInstallJavaPom">
+			<arg value="-DskipTests=true"/>
+			<arg value="install"/>
+		</exec>
+		<fail message="Failed to install top level java pom.xml file" status="${mavenExitInstallJavaPom}">
+			<condition><not><equals arg1="${mavenExitInstallJavaPom}" arg2="0"/></not></condition>
 		</fail>
 		<!-- the maven archetypes depend on root pom -->
 		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallParents">
@@ -38,6 +52,9 @@
 		<fail message="Failed to install parent pom.xml files" status="${mavenExitInstallParents}">
 			<condition><not><equals arg1="${mavenExitInstallParents}" arg2="0"/></not></condition>
 		</fail>
+	</target>
+	
+	<target name="clean" depends="init">
 		<!-- clean all projects -->
 		<exec executable="${cmd.maven}" resultproperty="mavenExitClean">
 			<arg value="-DskipTests=true"/>
@@ -45,6 +62,13 @@
 		</exec>
 		<fail message="Failed to clean project" status="${mavenExitClean}">
 			<condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
+		</fail>
+		<!-- the packages -->
+		<exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitCleanPackages">
+			<arg value="clean"/>
+		</exec>
+		<fail message="Cannot clean project packages" status="${mavenExitCleanPackages}">
+			<condition><not><equals arg1="${mavenExitCleanPackages}" arg2="0"/></not></condition>
 		</fail>
 	</target>
 	
@@ -59,25 +83,15 @@
 		</fail>
 	</target>
 
-	<target name="dist" depends="init">
+	<target name="packages" depends="init">
 		<!-- the root pom and all projects -->
-		<exec executable="${cmd.maven}">
+		<exec executable="${cmd.maven}" dir="packages">
 			<arg value="-DskipTests=true"/>
 			<arg value="clean"/>
 			<arg value="install"/>
 		</exec>
 	</target>
 
-	<target name="post" depends="init">
-		<!-- the root pom and all projects -->
-		<!-- TODO: this needs to be refined so only 
-			 the mtwilson-server, trust-director,
-			 trust-agent, etc. deliverables are shared...
-			 not every single artifact -->
-		<exec executable="${cmd.maven}">
-			<arg value="-DskipTests=true"/>
-			<arg value="deploy"/>
-		</exec>
-	</target>
+	<target name="all" depends="ready,clean,build,packages"></target>
 	
 </project>

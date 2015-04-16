@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
-import com.intel.mtwilson.agent.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
@@ -40,12 +39,12 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
-import static com.intel.mountwilson.as.helper.CommandUtil.singleQuoteEscapeShellArgument;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.Inet4Address;
@@ -56,12 +55,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import javax.xml.bind.PropertyException;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,12 +101,13 @@ public class TAHelper {
 //	private EntityManagerFactory entityManagerFactory;
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
-
-    public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
+    private String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
+    
+    public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
         // check mtwilson 2.0 configuration first
-        String binPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
-        String varPath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data"; //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
         File bin = new File(binPath);
         File var = new File(varPath);
         if (bin.exists() && var.exists()) {
@@ -196,10 +198,10 @@ public class TAHelper {
             
             // encrypt DAA challenge secret using AIK public key so only TPM can read it
             CommandUtil.runCommand(String.format("aikchallenge %s %s %s %s",
-                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
-                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
-                    CommandUtil.doubleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
-                    CommandUtil.doubleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getDaaSecretFileName(sessionId)),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getDaaAikProofFileName(sessionId)),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getDaaChallengeFileName(sessionId)),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(getRSAPubkeyFileName(sessionId))), false, "Aik Challenge");
 
             // send DAA challenge to Trust Agent and validate the response
             try(FileInputStream in = new FileInputStream(new File(getDaaChallengeFileName(sessionId)))) {
@@ -352,6 +354,10 @@ public class TAHelper {
 
         log.debug("created RSA key file for session id: " + sessionId);
 
+        // Verify if there is TCBMeasurement Data. This data would be available if we are extending the root of trust to applications and data on the OS
+        String tcbMeasurementString = clientRequestType.getTcbMeasurement();
+        log.debug("TCB Measurement XML is {}", tcbMeasurementString);
+        
         log.debug("Event log: {}", clientRequestType.getEventLog()); // issue #879
         byte[] eventLogBytes = Base64.decodeBase64(clientRequestType.getEventLog());// issue #879
         log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
@@ -370,6 +376,9 @@ public class TAHelper {
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             log.info("Got PCR map");
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
+            
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -381,6 +390,9 @@ public class TAHelper {
         } else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
+            
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -453,6 +465,10 @@ public class TAHelper {
 
         log.debug("created RSA key file for session id: " + sessionId);
 
+        // Verify if there is TCBMeasurement Data. This data would be available if we are extending the root of trust to applications and data on the OS
+        String tcbMeasurementString = tpmQuoteResponse.tcbMeasurement;
+        log.debug("TCB Measurement XML is {}", tcbMeasurementString);
+
         log.debug("Event log: {}", tpmQuoteResponse.eventLog); // issue #879
         byte[] eventLogBytes = Base64.decodeBase64(tpmQuoteResponse.eventLog);// issue #879
         log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
@@ -462,6 +478,8 @@ public class TAHelper {
 
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
             log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
@@ -474,6 +492,9 @@ public class TAHelper {
         } else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
+            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty())
+                pcrManifest.setMeasurementXml(tcbMeasurementString);
+            
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             if (deleteTemporaryFiles) {
                 q.delete();
@@ -548,8 +569,12 @@ public class TAHelper {
                     xtw.writeAttribute("PackageName", "");
                     xtw.writeAttribute("PackageVendor", "");
                     xtw.writeAttribute("PackageVersion", "");
-                    // since there will be only 2 modules for PCR 19, which changes across hosts, we will consider them as host specific ones
-                    xtw.writeAttribute("UseHostSpecificDigest", "true");
+                    if (ArrayUtils.contains(openSourceHostSpecificModules, eventLog.getLabel())) {
+                        // For Xen, these modules would be vmlinuz and initrd and for KVM it would just be initrd.
+                        xtw.writeAttribute("UseHostSpecificDigest", "true");
+                    } else {
+                        xtw.writeAttribute("UseHostSpecificDigest", "false");
+                    }
                     xtw.writeEndElement();
                 }
             }
@@ -719,10 +744,10 @@ public class TAHelper {
         PcrManifest pcrManifest = new PcrManifest();
         log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s",
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
-                CommandUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyCmd),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getNonceFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)),
+                EscapeUtil.doubleQuoteEscapeShellArgument(aikverifyhomeData + File.separator + getQuoteFileName(sessionId)));
 
         log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
@@ -810,8 +835,10 @@ public class TAHelper {
                     }
                     reader.next();
                 }
-            } catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+            } catch (FactoryConfigurationError | XMLStreamException | NumberFormatException ex) {
+                // bug #2171 we need to throw an exception to prevent the host from being registered with an error manifest
+                //log.error(ex.getMessage(), ex); 
+                throw new IllegalStateException("Invalid measurement log", ex);
             }
         }
 

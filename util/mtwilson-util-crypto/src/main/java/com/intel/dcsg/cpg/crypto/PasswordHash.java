@@ -18,7 +18,9 @@ import org.apache.commons.codec.binary.Base64;
  * user via a password. For example:
  * 
  * String password_utf8 = inputUserPassword();
- * String 
+ * String salt_base64 = getUserSaltBase64();
+ * PasswordHash passwordHash = new PasswordHash(password_utf8, salt_base64);
+ * Arrays.equals(recordedHashBase64, passwordHash.getHashBase64())
  * 
  * This should not be used where the password is really a 
  * secret key. For such applications, either verify the password first with this

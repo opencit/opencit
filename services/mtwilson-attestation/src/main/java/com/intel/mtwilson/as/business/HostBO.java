@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -75,6 +76,7 @@ public class HostBO {
 
 	private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
 	public static final PcrIndex LOCATION_PCR = PcrIndex.PCR22;
+        private static final String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
         private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
@@ -218,6 +220,9 @@ public class HostBO {
                         // for all hosts (used to be just vmware, but no reason right now to make it vmware-specific...), if pcr 22 happens to match our location database, populate the location field in the host record
                             tblHosts.setLocation( getLocation(pcrManifest) );
                         
+                        // Add the binding key certificate if available. This certificate can be used by 
+                        // any 3rd party component to encrypt data that should be decrypted only on this host.
+                        setBindingKeyCertificate(tblHosts, agent);
                         
                         //Bug: 597, 594 & 583. Here we were trying to get the length of the TlsKeystore without checking if it is NULL or not. 
                         // If in case it is NULL, it would throw NullPointerException                        
@@ -509,6 +514,10 @@ public class HostBO {
                         tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
                         tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
 
+                        // Add the binding key certificate if available. This certificate can be used by 
+                        // any 3rd party component to encrypt data that should be decrypted only on this host.
+                        setBindingKeyCertificate(tblHosts, agent);
+                        
                 storePrivateTlsPolicy(tblHosts); // will create a new private policy, or update an existing one, or delete an existing private policy (if host now has a shared policy)
                         
 			My.jpa().mwHosts().edit(tblHosts);
@@ -876,7 +885,8 @@ public class HostBO {
                             //					tblHostSpecificManifest.setHostID(tblHosts.getId());
                             tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
                             tblHostSpecificManifests.add(tblHostSpecificManifest);
-                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
+                        } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null
+                                && ArrayUtils.contains(openSourceHostSpecificModules, m.getInfo().get("ComponentName"))) {
 
                             log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
                                     "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
@@ -964,8 +974,17 @@ public class HostBO {
                 TblHosts tblHosts = My.jpa().mwHosts().findByName(hostName.toString());
                 return tblHosts;
         }
+        
+        /**
+         * 
+         * @param aik must be the SHA-1 digest of the  AIK PUBLIC KEY (not certificate)
+         * @return
+         * @throws CryptographyException
+         * @throws IOException 
+         */
 	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException, IOException { // datatype.Hostname
-		TblHosts tblHosts = My.jpa().mwHosts().findByAikSha1(aik.toString());
+        log.debug("getHostByAik calling findByAikPublicKeySha1 for aik {}", aik.toString());
+		TblHosts tblHosts = My.jpa().mwHosts().findByAikPublicKeySha1(aik.toString());
 		return tblHosts;
 	}
 
@@ -1215,4 +1234,27 @@ public class HostBO {
             log.info("Error during asset tag unmapping for the host {}. Details: {}.", name, ex.getMessage());
         }
     }
+    
+    /**
+     * Retrieves the binding key certificate from the host if available. This binding key certificate
+     * can be used by any component to encrypt the data that only the host should be able to decrypt.
+     * @param tblHosts
+     * @param agent 
+     */
+    private void setBindingKeyCertificate(TblHosts tblHosts, HostAgent agent) {
+        
+        tblHosts.setBindingKeyCertificate("");
+        
+        try {            
+            log.debug("About to update the binding key certificate for host: {}", tblHosts.getName());
+            X509Certificate cert = agent.getBindingKeyCertificate();
+            String bindingKeyCertificate = X509Util.encodePemCertificate(cert);
+            tblHosts.setBindingKeyCertificate(bindingKeyCertificate);
+            log.debug("Updated the host: {} with binding key certificate: {}", tblHosts.getName(), bindingKeyCertificate);
+        } catch (UnsupportedOperationException ex) {
+        } catch (Exception ex) {
+            log.error("Error during retrieval of the binding key certificate from the host {}.", tblHosts.getName());
+        }        
+    }
+    
 }

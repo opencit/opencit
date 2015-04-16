@@ -20,9 +20,11 @@ public class HostAttestation extends Document {
     private String hostUuid;
     private String hostName;
     private String aikSha1;
+    private String aikPublicKeySha1;
     private String challenge;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
+    private String saml;
 
     public String getHostUuid() {
         return hostUuid;
@@ -48,6 +50,14 @@ public class HostAttestation extends Document {
         this.aikSha1 = aikSha1;
     }
 
+    public String getAikPublicKeySha1() {
+        return aikPublicKeySha1;
+    }
+
+    public void setAikPublicKeySha1(String aikPublicKeySha1) {
+        this.aikPublicKeySha1 = aikPublicKeySha1;
+    }
+    
     public String getChallenge() {
         return challenge;
     }
@@ -72,5 +82,11 @@ public class HostAttestation extends Document {
         this.hostTrustResponse = hostTrustResponse;
     }
     
+    public String getSaml() {
+        return saml;
+    }
     
+    public void setSaml(String saml) {
+        this.saml = saml;
+    }
 }

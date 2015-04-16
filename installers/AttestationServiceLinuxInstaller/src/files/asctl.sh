@@ -20,8 +20,8 @@ webservice_application_name=mtwilson
 #java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
-if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+if [ -f "/usr/local/share/mtwilson/util/functions" ]; then . "/usr/local/share/mtwilson/util/functions"; else echo "Missing file: /usr/local/share/mtwilson/util/functions"; exit 1; fi
+if [ -f "/usr/local/share/mtwilson/util/version" ]; then . "/usr/local/share/mtwilson/util/version"; else echo_warning "Missing file: /usr/local/share/mtwilson/util/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null
@@ -105,6 +105,7 @@ create_data_encryption_key() {
 #  else
 #    echo "Creating data encryption key"
 #####  this is now also called from "mtwilson setup"
+    # NOTE: if this line stops working, revise to "mtwilson encrypt-database"
     mtwilson setup EncryptDatabase
 #  fi
 }
@@ -174,6 +175,8 @@ setup_interactive_install() {
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
       mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
       mysql_create_database
+      # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
+      #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
     fi
   elif using_postgres; then
@@ -182,6 +185,8 @@ setup_interactive_install() {
       postgres_configure_connection "${package_config_filename}" mountwilson.as.db
       postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
       postgres_create_database
+      # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
+      #       if this line stops working, revise to "mtwilson setup init-database postgresql"
       mtwilson setup InitDatabase postgresql
     else
       echo "psql not defined"

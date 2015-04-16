@@ -74,6 +74,11 @@ This error message indicates you need a jersey implementation like org.glassfish
             <artifactId>mtwilson-jersey2-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>mtwilson-jersey2-util-v1</artifactId>
+      <version>${project.version}</version>
+    </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

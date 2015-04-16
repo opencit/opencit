@@ -8,6 +8,7 @@ import java.security.cert.X509Certificate;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 /*
  * Copyright (C) 2014 Intel Corporation
@@ -39,6 +40,7 @@ public class MultihostSamlTest {
         String saml = getSaml();
         X509Certificate cert = getSamlCertificate();
         TrustAssertion trustAssertion = new TrustAssertion(new X509Certificate[] { cert }, saml);
+        if( trustAssertion.isValid() ) {
         Set<String> hostnames = trustAssertion.getHosts();
         for(String hostname : hostnames) {
             log.debug("hostname: {}", hostname);
@@ -52,6 +54,10 @@ public class MultihostSamlTest {
             for(String attributeName : attributeNames) {
                 log.debug("attribute {} = {}", attributeName, hostTrustAssertion.getStringAttribute(attributeName));
             }
+        }
+        }
+        else {
+            fail();
         }
     }
 }

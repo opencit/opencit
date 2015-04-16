@@ -5,12 +5,11 @@
 package com.intel.dcsg.cpg.configuration;
 
 import com.intel.mtwilson.pipe.Transformer;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.util.Set;
 
 /**
  * This class is a decorator that can wrap any existing Configuration 
- * instance to tranform names of keys before they are passed to that
+ * instance to transform names of keys before they are passed to that
  * instance. For example if the application uses key names like 
  * java.style.properties it can automatically transform them to 
  * SHELL_STYLE_VARIABLES by using the KeyTransformerConfiguration with
@@ -20,123 +19,44 @@ import java.math.BigInteger;
  * 
  * @author jbuhacoff
  */
-public class KeyTransformerConfiguration implements Configuration {
+public class KeyTransformerConfiguration extends AbstractConfiguration implements Configuration {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(KeyTransformerConfiguration.class);
     protected Configuration configuration;
     protected Transformer<String> transformer;
     
     public KeyTransformerConfiguration(Transformer<String> transformer, Configuration configuration) {
+        super();
         this.transformer = transformer;
         this.configuration = configuration;
     }
+
+    /**
+     * Note that returned keys are not transformed, they are in original form.
+     * 
+     * @return 
+     */
+    @Override
+    public Set<String> keys() {
+        return configuration.keys();
+    }
     
     @Override
-    public Boolean getBoolean(String key) {
-        return configuration.getBoolean(transformer.transform(key));
+    public String get(String key) {
+        String key2 = transformer.transform(key);
+        String value = configuration.get(key2);
+        //log.debug("get key {} transformed {} -> value {}", key, key2, value);
+        return value;
+    }
+    
+    @Override
+    public void set(String key, String value) {
+        configuration.set(transformer.transform(key), value);
     }
 
     @Override
-    public Boolean getBoolean(String key, Boolean defaultValue) {
-        return configuration.getBoolean(transformer.transform(key), defaultValue);
+    public boolean isEditable() {
+        return configuration.isEditable();
     }
 
-    @Override
-    public Byte getByte(String key) {
-        return configuration.getByte(transformer.transform(key));
-    }
-
-    @Override
-    public Byte getByte(String key, Byte defaultValue) {
-        return configuration.getByte(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public Short getShort(String key) {
-        return configuration.getShort(transformer.transform(key));
-    }
-
-    @Override
-    public Short getShort(String key, Short defaultValue) {
-        return configuration.getShort(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public Integer getInteger(String key) {
-        return configuration.getInteger(transformer.transform(key));
-    }
-
-    @Override
-    public Integer getInteger(String key, Integer defaultValue) {
-        return configuration.getInteger(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public Long getLong(String key) {
-        return configuration.getLong(transformer.transform(key));
-    }
-
-    @Override
-    public Long getLong(String key, Long defaultValue) {
-        return configuration.getLong(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public BigInteger getBigInteger(String key) {
-        return configuration.getBigInteger(transformer.transform(key));
-    }
-
-    @Override
-    public BigInteger getBigInteger(String key, BigInteger defaultValue) {
-        return configuration.getBigInteger(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public Float getFloat(String key) {
-        return configuration.getFloat(transformer.transform(key));
-    }
-
-    @Override
-    public Float getFloat(String key, Float defaultValue) {
-        return configuration.getFloat(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public Double getDouble(String key) {
-        return configuration.getDouble(transformer.transform(key));
-    }
-
-    @Override
-    public Double getDouble(String key, Double defaultValue) {
-        return configuration.getDouble(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(String key) {
-        return configuration.getBigDecimal(transformer.transform(key));
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(String key, BigDecimal defaultValue) {
-        return configuration.getBigDecimal(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public String getString(String key) {
-        return configuration.getString(transformer.transform(key));
-    }
-
-    @Override
-    public String getString(String key, String defaultValue) {
-        return configuration.getString(transformer.transform(key), defaultValue);
-    }
-
-    @Override
-    public <T> T getObject(Class<T> objectClass, String key) {
-        return configuration.getObject(objectClass, transformer.transform(key));
-    }
-
-    @Override
-    public <T> T getObject(Class<T> objectClass, String key, T defaultValue) {
-        return configuration.getObject(objectClass, transformer.transform(key), defaultValue);
-    }
     
 }

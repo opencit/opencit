@@ -1,144 +1,58 @@
 /*
- * Copyright (C) 2013 Intel Corporation
+ * Copyright (C) 2014 Intel Corporation
  * All rights reserved.
  */
 package com.intel.dcsg.cpg.configuration;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.util.Iterator;
 
 /**
- * The commons-configuration dependency is optional so if you use this class you need to include commons-configuration
- * in your classpath or declare it as a dependency.
+ * Adapter for using a Configuration instance where a Commons Configuration 
+ * instance is required.
  * 
  * @author jbuhacoff
  */
-public class CommonsConfigurationAdapter implements Configuration {
-    protected org.apache.commons.configuration.Configuration cc;
-    protected ObjectPropertyCodec objectCodec;
-    
-    public CommonsConfigurationAdapter(org.apache.commons.configuration.Configuration cc) {
-        if( cc == null ) { throw new NullPointerException(); }
-        this.cc = cc;
-        this.objectCodec = new XStreamPropertyCodec(); // default; can override with setObjectCodec(...)
-    }
-    
-    public void setObjectCodec(ObjectPropertyCodec objectCodec) {
-        this.objectCodec = objectCodec;
-    }
+public class CommonsConfigurationAdapter extends org.apache.commons.configuration.AbstractConfiguration {
+    private Configuration configuration;
 
-    public ObjectPropertyCodec getObjectCodec() {
-        return objectCodec;
-    }
-    
-    @Override
-    public Boolean getBoolean(String key) {
-        return cc.getBoolean(key);
+    public CommonsConfigurationAdapter(Configuration configuration) {
+        super();
+        this.configuration = configuration;
     }
 
     @Override
-    public Boolean getBoolean(String key, Boolean defaultValue) {
-        return cc.getBoolean(key, defaultValue);
+    protected void addPropertyDirect(String key, Object value) {
+        if( value == null ) {
+            configuration.set(key, null);
+        }
+        else if( value instanceof String ) {
+            configuration.set(key, (String)value);
+        }
+        else {
+            configuration.set(key, String.valueOf(value));
+        }
     }
 
     @Override
-    public Byte getByte(String key) {
-        return cc.getByte(key);
+    public boolean isEmpty() {
+        return configuration.keys().isEmpty();
     }
 
     @Override
-    public Byte getByte(String key, Byte defaultValue) {
-        return cc.getByte(key, defaultValue);
+    public boolean containsKey(String key) {
+        return configuration.keys().contains(key);
     }
 
     @Override
-    public Short getShort(String key) {
-        return cc.getShort(key);
+    public Object getProperty(String key) {
+        return configuration.get(key, null);
     }
 
     @Override
-    public Short getShort(String key, Short defaultValue) {
-        return cc.getShort(key, defaultValue);
-    }
-
-    @Override
-    public Integer getInteger(String key) {
-        return cc.getInt(key);
-    }
-
-    @Override
-    public Integer getInteger(String key, Integer defaultValue) {
-        return cc.getInteger(key, defaultValue);
-    }
-
-    @Override
-    public Long getLong(String key) {
-        return cc.getLong(key);
-    }
-
-    @Override
-    public Long getLong(String key, Long defaultValue) {
-        return cc.getLong(key, defaultValue);
-    }
-
-    @Override
-    public BigInteger getBigInteger(String key) {
-        return cc.getBigInteger(key);
-    }
-
-    @Override
-    public BigInteger getBigInteger(String key, BigInteger defaultValue) {
-        return cc.getBigInteger(key, defaultValue);
-    }
-
-    @Override
-    public Float getFloat(String key) {
-        return cc.getFloat(key);
-    }
-
-    @Override
-    public Float getFloat(String key, Float defaultValue) {
-        return cc.getFloat(key, defaultValue);
-    }
-
-    @Override
-    public Double getDouble(String key) {
-        return cc.getDouble(key);
-    }
-
-    @Override
-    public Double getDouble(String key, Double defaultValue) {
-        return cc.getDouble(key, defaultValue);
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(String key) {
-        return cc.getBigDecimal(key);
-    }
-
-    @Override
-    public BigDecimal getBigDecimal(String key, BigDecimal defaultValue) {
-        return cc.getBigDecimal(key, defaultValue);
-    }
-
-    @Override
-    public String getString(String key) {
-        return cc.getString(key);
-    }
-
-    @Override
-    public String getString(String key, String defaultValue) {
-        return cc.getString(key, defaultValue);
-    }
-
-    @Override
-    public <T> T getObject(Class<T> objectClass, String key) {
-        return (T)objectCodec.decode(cc.getString(key));
+    public Iterator<String> getKeys() {
+        return configuration.keys().iterator();
     }
     
-    @Override
-    public <T> T getObject(Class<T> objectClass, String key, T defaultValue) {
-        return cc.containsKey(key) && !cc.getString(key).isEmpty() ? getObject(objectClass, key) : defaultValue;
-    }
+
     
 }

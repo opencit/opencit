@@ -8,8 +8,8 @@ import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.MyFilesystem;
 import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.ms.data.MwPortalUser;
@@ -46,7 +46,7 @@ public class CertificateLoginTest2 {
      */
     @BeforeClass
     public static void getUserKeystore() throws Exception {
-        password = FileUtils.readFileToString(new File(MyFilesystem.getApplicationFilesystem().getConfigurationPath() + File.separator + "private" + File.separator + "password.txt"));
+        password = FileUtils.readFileToString(new File(Folders.configuration() + File.separator + "private" + File.separator + "password.txt"));
         MwPortalUser user = My.jpa().mwPortalUser().findMwPortalUserByUserName(username);
         keystoreBytes = user.getKeystore();
         keystore = new SimpleKeystore(new ByteArrayResource(keystoreBytes), password);

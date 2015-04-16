@@ -23,12 +23,18 @@ import com.intel.dcsg.cpg.tls.policy.impl.*;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.model.XmlMeasurementLog;
+import java.io.FileInputStream;
 //import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import org.apache.commons.io.IOUtils;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,10 +69,10 @@ public class TestIntelHostAgent {
     private static String connection = "intel:https://10.1.71.112:9999";
     private static HostAgent agent;
     
-    @BeforeClass
-    public static void createHostAgent() throws Exception {
-        agent = getAgent();
-    }
+//    @BeforeClass
+//    public static void createHostAgent() throws Exception {
+//        agent = getAgent();
+//    }
     
     public static HostAgent getAgent() throws Exception {
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
@@ -203,4 +209,39 @@ AIK Certificate: null
         log.debug("AIK Certificate: {}", hostDetails.AIK_Certificate);
         log.debug("Processor Info:{}", hostDetails.Processor_Info);
     }
+    
+    @Test
+    public void TcbMeasurementJaxbMtwilsonUtilXml() {
+        try {
+            FileInputStream in = new FileInputStream("C:\\Development\\dcg_security-mtwilson-3dot0\\services\\mtwilson-trustagent-model\\src\\test\\resources\\measurement.xml");
+            String tcbMeasurementString = IOUtils.toString(in);
+            log.info("XML string: {}", tcbMeasurementString);
+
+            XmlMeasurementLog xmLog = new XmlMeasurementLog(PcrIndex.PCR19, tcbMeasurementString);
+            log.debug(xmLog.toString());
+            
+//            if (tcbMeasurementString != null && !tcbMeasurementString.isEmpty()) {
+//
+//                JAXB measurementLogJaxb = new JAXB();
+//                com.intel.mtwilson.measurement.xml.Measurements measurementLog = measurementLogJaxb.read(tcbMeasurementString, com.intel.mtwilson.measurement.xml.Measurements.class);
+//                                
+//                if (measurementLog.getMeasurements().size() > 0) {
+//                    for (com.intel.mtwilson.measurement.xml.MeasurementType measurementLogEntry : measurementLog.getMeasurements()) {
+//                        if (measurementLogEntry.getClass().equals(com.intel.mtwilson.measurement.xml.DirectoryMeasurementType.class)) {
+//                            com.intel.mtwilson.measurement.xml.DirectoryMeasurementType dirEntry = (com.intel.mtwilson.measurement.xml.DirectoryMeasurementType) measurementLogEntry;
+//                            log.debug("Directory details {} - {} - {} - {}", dirEntry.getPath(), dirEntry.getValue(), dirEntry.getExclude(), dirEntry.getInclude());
+//                        } else {
+//                            log.debug("File details {} - {}", measurementLogEntry.getPath(), measurementLogEntry.getValue());
+//                        }                            
+//                    }
+//                }
+//            }
+            
+        } catch (IOException e) {
+            log.warn("IOException: {}", e); //e.getMessage());
+        } catch (Exception e) {
+            log.warn("Exception: {}", e); //e.getMessage());
+        }
+    }
+    
 }

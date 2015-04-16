@@ -49,7 +49,7 @@ public class TermProgressObserver implements Observer<Progress> {
         if( current == null || max == null || max == 0 ) {
             return "";
         }
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         long length = current*20/max;
         for(long i=0; i<length-1; i++) {
             str.append("=");

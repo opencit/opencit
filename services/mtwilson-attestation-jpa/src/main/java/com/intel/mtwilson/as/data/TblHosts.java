@@ -134,6 +134,9 @@ public class TblHosts implements Serializable {
     private String vmm_mle_uuid_hex;
     @Column(name = "hardware_uuid")
     private String hardware_uuid;
+    @Lob
+    @Column(name = "binding_key_certificate")
+    private String bindingKeyCertificate;
 
     public TblHosts() {
     }
@@ -505,4 +508,13 @@ public class TblHosts implements Serializable {
     public void setHardwareUuid(String uuid) {
         this.hardware_uuid = uuid;
     }
+
+    public String getBindingKeyCertificate() {
+        return bindingKeyCertificate;
+    }
+
+    public void setBindingKeyCertificate(String bindingKeyCertificate) {
+        this.bindingKeyCertificate = bindingKeyCertificate;
+    }
+    
 }

@@ -4,9 +4,7 @@
  */
 package com.intel.mtwilson.trustagent.ws.v2;
 
-import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.net.IPv4Address;
-import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.BuildQuoteXMLCmd;
 import com.intel.mountwilson.trustagent.commands.CreateNonceFileCmd;
@@ -14,13 +12,11 @@ import com.intel.mountwilson.trustagent.commands.GenerateModulesCmd;
 import com.intel.mountwilson.trustagent.commands.GenerateQuoteCmd;
 import com.intel.mountwilson.trustagent.commands.ReadIdentityCmd;
 import com.intel.mountwilson.trustagent.data.TADataContext;
-import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mountwilson.common.CommandUtil;
-import com.intel.mountwilson.common.ErrorCode;
+import com.intel.mountwilson.trustagent.commands.RetrieveTcbMeasurement;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
-import com.intel.mtwilson.trustagent.TrustagentRepository;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,19 +24,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.TpmQuoteRequest;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
-import java.io.File;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -107,6 +97,7 @@ public class Tpm {
 
             // Get the module information
             new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
+            new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
             
@@ -114,7 +105,7 @@ public class Tpm {
             TpmQuoteResponse response = context.getTpmQuoteResponse();
             // delete temporary session directory
             CommandUtil.runCommand(String.format("rm -rf %s",
-                    CommandUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
             return response;
     }
     

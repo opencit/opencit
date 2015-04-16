@@ -14,3 +14,6 @@ derby.log
 /services/asset-tag-service/src/main/resources/html5/nbproject/private/retriever
 /services/asset-tag-service/derby
 /portals/mtwilson-portal/src/main/webapp/tag/nbproject/private/
+/nb-configuration.xml
+~*
+*.tmp

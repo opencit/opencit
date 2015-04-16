@@ -4,13 +4,13 @@
  */
 package com.intel.mtwilson.trustagent.client.jaxrs;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
+import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
 import com.intel.mtwilson.trustagent.model.*;
-import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import javax.ws.rs.client.Entity;
@@ -81,4 +81,54 @@ public class TrustAgentClient extends MtWilsonClient {
         return tpmQuoteResponse;
     }
 
+    public X509Certificate getBindingKeyCertificate() {
+        log.debug("target: {}", getTarget().getUri().toString());
+        X509Certificate aik = getTarget()
+                .path("/binding-key-certificate")
+                .request()
+                .accept(CryptoMediaType.APPLICATION_PKIX_CERT)
+                .get(X509Certificate.class);
+        return aik;
+    }
+
+    
+    /**
+     * This API retrieves the VM attestation status. It would just return either true or false.
+     * @param vmInstanceId
+     * @return 
+     */
+    public VMAttestationResponse getVMAttestationStatus(String vmInstanceId) {        
+        VMAttestationRequest vmAttestationRequest = new VMAttestationRequest();
+        vmAttestationRequest.setVmInstanceId(vmInstanceId);
+        log.debug("target: {}", getTarget().getUri().toString());
+
+        VMAttestationResponse vmAttestationResponse = getTarget()
+                .path("/vrtm/status")
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(vmAttestationRequest), VMAttestationResponse.class);
+        return vmAttestationResponse;
+    }
+    
+    
+    /**
+     * This API retrieves the complete VM attestation report including the following:
+     * - Signed VM Quote having the nonce, vm instance id, and cumulative hash
+     * - Signed Trust Policy
+     * - Signing key certificate
+     * - Measurement log.
+     * @param obj
+     * @return 
+     */
+    public VMQuoteResponse getVMAttestationReport(VMAttestationRequest obj) {
+        
+        log.debug("target: {}", getTarget().getUri().toString());
+        VMQuoteResponse vmQuoteResponse = getTarget()
+                .path("/vrtm/report")
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(obj), VMQuoteResponse.class);
+                
+        return vmQuoteResponse;
+    }
 }

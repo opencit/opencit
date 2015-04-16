@@ -358,14 +358,11 @@ public class ConfigureRemote implements Command {
         }
         indentation = indentationBuilder.toString();
         System.err.println(String.format("%s- %s", indentation, f.toString()));
-        if( f.getCause() != null ) {
-            System.err.println(String.format("%s  Caused by: %s", indentation, f.getCause().toString()));
-        }
-        if( f.getMore() != null && f.getMore().length > 0 ) {
+        if( !f.getFaults().isEmpty() ) {
             System.err.println(String.format("%s  Related errors:", indentation));
-            Fault[] more = f.getMore();
-            for(int i=0; i<more.length; i++) {
-                printFault(more[i], level+1);
+            int size = f.getFaults().size();
+            for(int i=0; i<size; i++) {
+                printFault(f.getFaults().get(i), level+1);
             }
         }
     }
@@ -582,7 +579,7 @@ public class ConfigureRemote implements Command {
             if( certificate == null ) {
                 System.err.println("Cannot generate certificate:");
                 for(Fault f : x509.getFaults()) {
-                    System.err.println(String.format("- %s%s", f.toString(), f.getCause()==null?"":" ["+f.getCause().toString()+"]"));
+                    System.err.println(String.format("- %s: %s", f.getClass().getName(), f.toString()));
                 }
                 return;
             }

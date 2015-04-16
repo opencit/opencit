@@ -4,10 +4,13 @@
  */
 package com.intel.mtwilson.setup;
 
-import com.intel.dcsg.cpg.configuration.MutableConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.Model;
+import com.intel.mtwilson.setup.faults.ConfigurationFault;
+import com.intel.mtwilson.setup.faults.ValidationFault;
+import com.intel.mtwilson.util.validation.faults.Thrown;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +20,11 @@ import java.util.List;
  * to run a setup task with an alternative provided configuration and it would
  * be counter-intuitive for configuration to come from somewhere else.
  * Subclasses can write generated configuration properties back to the
- * MutableConfiguration object obtained from getConfiguration() and the
+ * Configuration object obtained from getConfiguration() and the
  * application is responsible for saving that into mtwilson.properties after
  * running the setup tasks.
  * It is expected that an application running multiple setup tasks in a 
- * sequence will initialize them all with the same MutableConfiguration 
+ * sequence will initialize them all with the same Configuration 
  * instance so each step can build on previous steps.
  * 
  * Generated properties that should not be saved into configuration but instead
@@ -45,7 +48,7 @@ public abstract class AbstractSetupTask implements SetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractSetupTask.class);
 
 //    private transient Integer lastHashCode = null;
-    private transient MutableConfiguration configuration = new PropertiesConfiguration();
+    private transient Configuration configuration = new PropertiesConfiguration();
     private transient ArrayList<Fault> configurationFaults = new ArrayList<>();
     private transient ArrayList<Fault> validationFaults = new ArrayList<>();
 
@@ -62,7 +65,7 @@ public abstract class AbstractSetupTask implements SetupTask {
      * user input. 
      * 
      * Typically the configure() method will store the configuration in either
-     * private member variables for transient settings or into the provided MutableConfiguration
+     * private member variables for transient settings or into the provided Configuration
      * object itself for persistent settings. Those member variables and
      * saved configuration can then be accessed from validate() and execute().
      * 
@@ -94,11 +97,11 @@ public abstract class AbstractSetupTask implements SetupTask {
     abstract protected void execute() throws Exception;
 
     @Override
-    public void setConfiguration(MutableConfiguration configuration) {
+    public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public MutableConfiguration getConfiguration() {
+    public Configuration getConfiguration() {
         return configuration;
     }
     
@@ -163,47 +166,40 @@ public abstract class AbstractSetupTask implements SetupTask {
     }
 
     protected final void configuration(String description) {
-        configurationFaults.add(new Fault(description));
+        configurationFaults.add(new ConfigurationFault(description));
     }
     
     protected final void configuration(String format, Object... args) {
-        configurationFaults.add(new Fault(format, args));
+        configurationFaults.add(new ConfigurationFault(format, args));
     }
     
     protected final void configuration(Throwable e, String description) {
-        configurationFaults.add(new Fault(e, description));
-    }
-    
-    protected final void configuration(Throwable e, String format, Object... args) {
-        configurationFaults.add(new Fault(e, format, args));
-    }
-    
-    protected final void configuration(Model m, String format, Object... args) {
-        configurationFaults.add(new Fault(m, format, args));
+        configurationFaults.add(new Thrown(e, description));
     }
 
+    protected final void configuration(Throwable e, String format, Object... args) {
+        configurationFaults.add(new Thrown(e, format, args));
+    }
+   
+    
     protected final void validation(Fault fault) {
         validationFaults.add(fault);
     }
 
     protected final void validation(String description) {
-        validationFaults.add(new Fault(description));
+        validationFaults.add(new ValidationFault(description));
     }
     
     protected final void validation(String format, Object... args) {
-        validationFaults.add(new Fault(format, args));
+        validationFaults.add(new ValidationFault(format, args));
     }
     
     protected final void validation(Throwable e, String description) {
-        validationFaults.add(new Fault(e, description));
+        validationFaults.add(new Thrown(e, description));
     }
     
     protected final void validation(Throwable e, String format, Object... args) {
-        validationFaults.add(new Fault(e, format, args));
-    }
-    
-    protected final void validation(Model m, String format, Object... args) {
-        validationFaults.add(new Fault(m, format, args));
+        validationFaults.add(new Thrown(e, format, args));
     }
     
     // convenience methods

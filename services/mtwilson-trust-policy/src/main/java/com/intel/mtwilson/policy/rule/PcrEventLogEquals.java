@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.policy.rule;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.policy.BaseRule;
@@ -28,10 +30,14 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jbuhacoff
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogEquals extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
-
     private PcrEventLog expected;
+
+    protected PcrEventLogEquals() { } // for desearializing jackson
+    
     public PcrEventLogEquals(PcrEventLog expected) {
         this.expected = expected;
     }

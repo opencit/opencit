@@ -7,9 +7,9 @@ package com.intel.mtwilson;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.api.MtWilson;
-import com.intel.mtwilson.fs.ApplicationFilesystem;
 import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.util.Aes128DataCipher;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import org.apache.commons.codec.binary.Base64;
@@ -36,6 +36,7 @@ public class My {
     private static MyJpa jpa = null;
     private static MyEnvironment env = null;
 //    private static MyLocale locale = null;
+    private static MyRepository repository = null;
 
     public static void initDataEncryptionKey() throws IOException {
         initDataEncryptionKey(My.configuration().getDataEncryptionKeyBase64());
@@ -113,7 +114,12 @@ public class My {
     }
     */
     
-    public static ApplicationFilesystem filesystem() {
-        return MyFilesystem.getApplicationFilesystem();
+    
+    public static MyRepository repository() throws IOException {
+        if( repository == null ) {
+            repository = new MyRepository(new File(Folders.application()));
+        }
+        return repository;
     }
+    
 }

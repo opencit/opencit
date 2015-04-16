@@ -32,11 +32,15 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-hostagent-ext</artifactId>
             <version>${project.version}</version>
-        </dependency>                
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-exec</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${project.version}</version>        
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
@@ -65,6 +69,10 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-i18n</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -99,6 +107,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-measurement-xml</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

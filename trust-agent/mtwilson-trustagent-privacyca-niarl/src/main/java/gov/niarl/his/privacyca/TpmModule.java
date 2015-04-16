@@ -13,7 +13,7 @@
 
 package gov.niarl.his.privacyca;
 
-import com.intel.mtwilson.MyFilesystem;
+import com.intel.mtwilson.Folders;
 import gov.niarl.his.privacyca.TpmUtils.TpmBytestreamResouceException;
 import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
 
@@ -144,7 +144,7 @@ public class TpmModule {
 		final String new_TROUSERS_MODE = "TrousersMode";
 		final String DEBUG_MODE = "DebugMode";
 		FileInputStream PropertyFile = null;
-		final String newTpmModuleExePath = MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath(); // "./exe";
+		final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
 		final String newExeName = "NIARL_TPM_Module";
 		String newTrousersMode = "False";
 		String debugMode = "False";
@@ -882,4 +882,41 @@ public class TpmModule {
 		if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModule.sign returned nonzero error", result.getReturnCode());
 		return TpmUtils.hexStringToByteArray(result.getResult(0));
 	}
+        
+	   public static HashMap<String, byte[]> certifyKey(String keyType, byte[] keyAuth, int keyIndex, byte[] aikAuth, int aikIndex)
+            throws IOException,
+            TpmModuleException,
+            TpmBytestreamResouceException,
+            TpmUnsignedConversionException {
+        /*
+         * Create Key (sign or bind)
+         * NIARL_TPM_Module -mode 8 -key_type <"sign" | "bind"> -key_auth <40 char hex blob> -key_index <integer index>
+         * return: <modulus> <key blob>
+         */
+        if (!(keyType.equals("sign") || keyType.equals("bind"))) {
+            throw new TpmModuleException("TpmModule.createKey: key type parameter must be \"sign\" or \"bind\".");
+        }
+        String argument = "-key_type " + keyType + " -ckey_auth " + TpmUtils.byteArrayToHexString(keyAuth) + " -ckey_index "
+                + keyIndex + " -aik_auth " + TpmUtils.byteArrayToHexString(aikAuth) + " -aik_index " + aikIndex;
+        log.debug(argument);
+        commandLineResult result = executeVer2Command(25, argument, 4, false);
+        if (result.getReturnCode() != 0) {
+            throw new TpmModuleException("TpmModule.certifyKey returned nonzero error", result.getReturnCode());
+        } else {
+            log.debug("Call to certifyKey was successful");
+        }
+        
+        log.debug("Modulus output: {}", result.getResult(0));
+        log.debug("Blob output: {}", result.getResult(1));
+        log.debug("Certify key signature: {}", result.getResult(2));
+        log.debug("Certify key data: {}", result.getResult(3));
+
+        HashMap<String, byte[]> results = new HashMap<String, byte[]>();
+        results.put("keymod", TpmUtils.hexStringToByteArray(result.getResult(0)));
+        results.put("keyblob", TpmUtils.hexStringToByteArray(result.getResult(1)));
+        results.put("keysig", TpmUtils.hexStringToByteArray(result.getResult(2)));
+        results.put("keydata", TpmUtils.hexStringToByteArray(result.getResult(3)));
+        return results;
+    }
+        
 }

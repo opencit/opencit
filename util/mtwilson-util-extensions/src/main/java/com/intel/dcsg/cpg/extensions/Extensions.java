@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -125,14 +126,32 @@ public class Extensions {
         }
     }
 
+    /**
+     * Providers are in priority order, so if multiple providers return the
+     * SAME IMPLEMENTATION class name of an extension interface, 
+     * only the first provider's implementation will be
+     * used. 
+     * @param extension
+     * @return 
+     */
     private static List<Extension> list(Class<?> extension) {
-        ArrayList<Extension> list = new ArrayList<>();
+        HashMap<String,Extension> unique = new HashMap<>(); // implementation class name -> extension descriptor
+        ArrayList<Extension> list = new ArrayList<>(); // we use the map to prevent duplicates but the list stores the results in order: in provider order and then in the order returned by each provider
         for (ExtensionProvider provider : providers) {
+            log.debug("Looking for extension {} in provider {}", extension.getName(), provider.getClass().getName());
             Iterator<String> implementationNamesIterator = provider.find(extension);
             while (implementationNamesIterator.hasNext()) {
                 String name = implementationNamesIterator.next();
-                list.add(new Extension(provider, name));
-                log.debug("Extension {} implementation {} provider {}", extension.getName(), name, provider.getClass().getName());
+                Extension alreadyListed = unique.get(name);
+                if( alreadyListed == null ) {
+                    Extension e = new Extension(provider, name);
+                    unique.put(name, e);
+                    list.add(e);
+                    log.debug("Extension {} implementation {} provider {}", extension.getName(), name, provider.getClass().getName());
+                }
+                else {
+                    log.debug("Extension {} ignoring implementation {} from provider {} because already registered from provider {}", extension.getName(), name, provider.getClass().getName(), alreadyListed.provider.getClass().getName());
+                }
             }
         }
         return list;
@@ -201,8 +220,102 @@ public class Extensions {
     }
 
     // never returns null - but may return an empty set if no matches were found
-    public static <T> List<T> findAll(Class<T> serviceInterface) {
-        return findAll(serviceInterface, null);
+    public static <T> List<T> findAll(Class<T> extension) {
+        log.debug("findAll extension {}", extension.getName());
+        ArrayList<T> result = new ArrayList<>();
+        List<Extension> list = list(extension);
+        for (Extension item : list) {
+            try {
+                Class<?> clazz = Class.forName(item.name);
+                Constructor constructor = ReflectionUtil.getNoArgConstructor(clazz);
+                Object instance = constructor.newInstance();
+                T implementation = (T)instance;
+                result.add(implementation);
+            } catch (InstantiationException | InvocationTargetException | IllegalAccessException | ClassNotFoundException | ClassCastException e) {
+                log.debug("Cannot instantiate implementation class {}", item.name, e);
+                continue;
+            }
+
+        }
+        return result;
+    }
+    
+    public static interface Factory<T> {
+        /**
+         * Example content of create using a no-arg constructor:
+         * <pre>
+                Constructor constructor = ReflectionUtil.getNoArgConstructor(clazz);
+                Object instance = constructor.newInstance();
+                T implementation = (T)instance;
+         * </pre>
+         * 
+         * @param clazz
+         * @return
+         * @throws ReflectiveOperationException
+         * @throws ClassCastException 
+         */
+        T create(Class<?> clazz) throws ReflectiveOperationException, ClassCastException;
+    }
+    
+    public static class NoArgFactory<T> implements Factory<T> {
+
+        @Override
+        public T create(Class<?> clazz) throws ReflectiveOperationException, ClassCastException {
+            Constructor constructor = ReflectionUtil.getNoArgConstructor(clazz);
+            Object instance = constructor.newInstance();
+            T implementation = (T)instance;
+            return implementation;
+        }        
+    }
+    
+    public static class OneArgFactory<T> implements Factory<T> {
+        private Object arg;
+        public OneArgFactory(Object arg) {
+            this.arg = arg;
+        }
+        
+        @Override
+        public T create(Class<?> clazz) throws ReflectiveOperationException, ClassCastException {
+            Constructor constructor = ReflectionUtil.getOneArgConstructor(clazz, arg.getClass());
+            Object instance = constructor.newInstance(arg);
+            T implementation = (T) instance;
+            return implementation;
+        }        
+    }
+    
+    public static class OneArgFilter implements Filter<Class<?>> {
+        private Object arg;
+
+        public OneArgFilter(Object arg) {
+            this.arg = arg;
+        }
+        
+        @Override
+        public boolean accept(Class<?> item) {
+            Constructor constructor = ReflectionUtil.getOneArgConstructor(item, arg.getClass());
+            return constructor != null;
+        }
+        
+    }
+    
+    public static <T> List<T> findAll(Class<T> extension, Filter<Class<?>> filter, Factory<T> factory) {
+        log.debug("findAll extension {} filter {} factory {}", extension.getName(), filter.getClass().getName(), factory.getClass().getName());
+        ArrayList<T> result = new ArrayList<>();
+        List<Extension> list = list(extension);
+        for (Extension item : list) {
+            try {
+                log.debug("findAll trying {} from provider {}", item.name, item.provider.getClass().getName());
+                Class<?> clazz = Class.forName(item.name);
+                if( filter.accept(clazz)) {
+                    result.add(factory.create(clazz));
+                }
+            } catch (ReflectiveOperationException | ClassCastException e) {
+                log.debug("Cannot instantiate implementation class {}", item.name, e);
+                continue;
+            }
+
+        }
+        return result;
     }
 
     public static List<Object> findAllAnnotated(Class<? extends Annotation> annotationInterface) {
@@ -214,6 +327,7 @@ public class Extensions {
      return findAll(serviceName, null);
      }
      */
+    @Deprecated
     public static <T, C> T find(Class<T> serviceInterface, C context) {
 //        return find(serviceInterface, serviceInterface, context);
 //        throw new UnsupportedOperationException();
@@ -223,6 +337,7 @@ public class Extensions {
         return first;
     }
 
+    @Deprecated
     public static <T, C> T require(Class<T> serviceInterface, C context) {
         T instance = find(serviceInterface, context);
         if (instance == null) {
@@ -231,6 +346,7 @@ public class Extensions {
         return instance;
     }
 
+    @Deprecated
     public static <C> Object findAnnotated(Class<? extends Annotation> annotationInterface, C context) {
 //        return find(Object.class, annotationInterface, context);
 //        throw new UnsupportedOperationException();
@@ -240,6 +356,7 @@ public class Extensions {
         return first;
     }
 
+    @Deprecated
     public static <C> Object requireAnnotated(Class<? extends Annotation> annotationInterface, C context) {
         Object instance = findAnnotated(annotationInterface, context);
         if (instance == null) {
@@ -265,9 +382,11 @@ public class Extensions {
      return createPreferred(serviceName, serviceImplementations, preferenceOrder, context);
      }
      */
+    @Deprecated
     public static <T, C> List<T> findAll(Class<T> extension, C context) {
 //        return findAll(serviceInterface, serviceInterface, context);
 //        throw new UnsupportedOperationException();
+        log.debug("Extensions findAll interface {} context {}", extension.getName(), (context==null?"null":context.getClass().getName()));
         ArrayList<T> result = new ArrayList<>();
         List<Extension> list = list(extension);
         for (Extension item : list) {
@@ -310,6 +429,7 @@ public class Extensions {
         return result;
     }
 
+    @Deprecated
     public static <C> List<Object> findAllAnnotated(Class<? extends Annotation> annotation, C context) {
 //        return findAll(Object.class, annotationInterface, context);
 //        throw new UnsupportedOperationException();

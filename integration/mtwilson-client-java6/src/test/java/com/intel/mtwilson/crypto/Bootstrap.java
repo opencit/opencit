@@ -10,7 +10,7 @@ import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.configuration.CommonsConfigurationUtil;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.datatypes.*;
 import java.io.*;
@@ -48,7 +48,7 @@ public class Bootstrap {
         
         String env = "/mtwilson-0.5.2.properties";   // choose your environment (properties file under src/test/env)
 //        String env = "/localhost-0.5.2.properties";   // choose your environment (properties file under src/test/env)
-        config = ConfigurationUtil.fromResource(env);
+        config = CommonsConfigurationUtil.fromResource(env);
         log.debug("mtwilson.api.baseurl={}",config.getString("mtwilson.api.baseurl"));
         log.debug("mtwilson.api.keystore={}",config.getString("mtwilson.api.keystore"));
     }

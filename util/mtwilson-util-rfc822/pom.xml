@@ -29,13 +29,11 @@
     <dependency>
 	  <groupId>com.intel.mtwilson.util</groupId>
 	  <artifactId>mtwilson-util-io</artifactId>
-	  <version>0.2.1-SNAPSHOT</version>
     </dependency>
 
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-collection</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
 
     <!-- to support rfc822 message handling -->

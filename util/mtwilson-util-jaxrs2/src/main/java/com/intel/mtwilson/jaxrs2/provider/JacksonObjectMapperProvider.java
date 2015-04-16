@@ -14,6 +14,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.intel.mtwilson.jackson.bouncycastle.BouncyCastleModule;
+import com.intel.mtwilson.jackson.validation.ValidationModule;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -50,7 +53,7 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         return defaultObjectMapper;
     }
  
-    public ObjectMapper createDefaultMapper() {
+    public static ObjectMapper createDefaultMapper() {
         log.debug("JacksonObjectMapperProvider createDefaultMapper");
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -59,6 +62,8 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.registerModule(new BouncyCastleModule());  // this is a good spot for an extension point
+        mapper.registerModule(new ValidationModule());  // this is a good spot for an extension point
         return mapper;
     }
  

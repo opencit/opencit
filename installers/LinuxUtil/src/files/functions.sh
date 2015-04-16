@@ -43,7 +43,7 @@ DEFAULT_TOMCAT_API_PORT="8443"
 DEFAULT_GLASSFISH_API_PORT="8181"
 #DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT
 
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 
 ### FUNCTION LIBRARY: echo and export environment variables
 
@@ -490,6 +490,27 @@ using_tomcat() {
     fi
   fi
 }
+# currently jetty is indicated either by WEBSERVER_VENDOR=jetty or by
+# absence of both tomcat and glassfish. there's not an independent
+# function for jetty_detect.
+using_jetty() {
+  if [[ -n "$WEBSERVER_VENDOR" ]]; then
+    if [[ "${WEBSERVER_VENDOR}" == "jetty" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    glassfish_detect 2>&1 > /dev/null
+    tomcat_detect 2>&1 > /dev/null
+    if [ -z "$GLASSFISH_HOME" ] && [ -z "$TOMCAT_HOME" ]; then
+      return 0
+    else
+      return 1
+    fi
+  fi
+}
+
 using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
 using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
  
@@ -1012,8 +1033,9 @@ mysql_server_detect() {
   if [[ -n "$mysqld" && -f "$mysqld" ]]; then
     return 0
   fi
-  if [[ -f /sbin/service && -f /etc/init.d/mysqld ]]; then
-    mysqld="service mysqld"
+  mysql_installed=$(which mysql 2>/dev/null)
+  if [ -n "$mysql_installed" ]; then
+    mysqld="service mysql"
     echo "Found mysql server: $mysqld"
     return 0
   fi
@@ -1567,9 +1589,11 @@ postgres_server_detect() {
   POSTGRES_SERVER_VERSION_SHORT="$best_version_short"
 
   echo "server version $POSTGRES_SERVER_VERSION" >> $INSTALL_LOG_FILE
-  if [[ -f /etc/init.d/postgresql ]]; then
-    postgres_com=/etc/init.d/postgresql
+  postgresql_installed=$(which psql 2>/dev/null)
+  if [ -n "$postgresql_installed" ]; then
+    postgres_com="service postgresql"
   fi
+
   postgres_pghb_conf=`find / -name pg_hba.conf 2>/dev/null | grep $best_version_short | head -n 1`
   postgres_conf=`find / -name postgresql.conf 2>/dev/null | grep $best_version_short | head -n 1`
   # if we run into a system where postgresql is organized differently we may need to check if these don't exist and try looking without the version number
@@ -1803,7 +1827,7 @@ postgres_install_scripts() {
 postgres_running() {  
   POSTGRES_SERVER_RUNNING=''
   if [ -n "$postgres_com" ]; then
-    local is_running=`$postgres_com status | grep running`
+    local is_running=`$postgres_com status | grep online`
     if [ -n "$is_running" ]; then
       POSTGRES_SERVER_RUNNING=yes
     fi
@@ -2204,6 +2228,8 @@ glassfish_install() {
         mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4"
       fi
     fi
+
+
     # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
     if [ -f "/etc/hosts" ]; then
         local hostname=`hostname`
@@ -2417,7 +2443,7 @@ glassfish_uninstall() {
 # - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
 glassfish_sslcert_report() {
   local alias="${1:-s1as}"
-  local keystorePassword=changeit
+  local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
@@ -2517,7 +2543,8 @@ glassfish_create_ssl_cert() {
     cert_cns=`echo $cert_cns | sed -e 's/,$//'`
     cert_sans=`echo $cert_sans | sed -e 's/,$//'`
     cert_cns='CN='`echo $serverName | sed -e 's/ //g' | sed -e 's/,$//' | sed -e 's/,/, CN=/g'`
-    local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
+
+    local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
     local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
     local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
     local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
@@ -2921,7 +2948,7 @@ tomcat_create_ssl_cert() {
     cert_cns=`echo $cert_cns | sed -e 's/,$//'`
     cert_sans=`echo $cert_sans | sed -e 's/,$//'`
 
-    local keystorePassword=changeit   #"$mtwilson_tls_keystore_password"
+    local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
     local keystore=${TOMCAT_HOME}/ssl/.keystore
     local configDir="/opt/mtwilson/configuration"
     local keytool=${JAVA_HOME}/bin/keytool
@@ -2968,7 +2995,7 @@ tomcat_env_report(){
 # - certificate alias to report on (default is tomcat, the tomcat default ssl cert alias)
 tomcat_sslcert_report() {
   local alias="${1:-tomcat}"
-  local keystorePassword=changeit
+  local keystorePassword="${MTWILSON_TLS_KEYSTORE_PASSWORD:-$MTW_TLS_KEYSTORE_PASS}"
   local keystore=${TOMCAT_HOME}/ssl/.keystore
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }
@@ -3030,6 +3057,76 @@ tomcat_init_manager() {
   fi
 }
 
+### FUNCTION LIBRARY: jetty
+
+
+jetty_running() {  
+  JETTY_RUNNING=''
+  if [ -n "$MTWILSON_HOME" ]; then
+    JETTY_PID=`ps gauwxx | grep java | grep -v grep | grep "$MTWILSON_HOME" | awk '{ print $2 }'`
+    echo JETTY_PID: $JETTY_PID >> $INSTALL_LOG_FILE
+    if [ -n "$JETTY_PID" ]; then
+      JETTY_RUNNING=yes
+      echo JETTY_RUNNING: $JETTY_RUNNING >> $INSTALL_LOG_FILE
+      return 0
+    fi
+  fi
+  return 1
+}
+
+jetty_running_report() {
+  echo -n "Checking Mt Wilson process... "
+  if jetty_running; then
+    echo_success "Running (pid $JETTY_PID)"
+  else
+    echo_failure "Not running"
+  fi
+}
+jetty_start() {
+  jetty_require 2>&1 > /dev/null
+  if jetty_running; then
+    echo_warning "Jetty already running [PID: $JETTY_PID]"
+  elif [ -n "$jetty" ]; then
+    echo -n "Waiting for Mt Wilson services to startup..."
+    # default is /opt/mtwilson/java
+    local java_lib_dir=${MTWILSON_JAVA_DIR:-$DEFAULT_MTWILSON_JAVA_DIR}
+    if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+    local mtwilson_jars=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
+    mainclass=com.intel.mtwilson.launcher.console.Main
+    local jvm_memory=2048m
+    local jvm_maxperm=512m
+    { $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$mtwilson_jars" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" ; } 2> /var/log/mtwilson.log
+    return $?
+  fi
+}
+
+jetty_shutdown() {
+  if jetty_running; then
+    if [ -n "$JETTY_PID" ]; then
+      kill -9 $JETTY_PID
+    fi
+  fi
+}
+jetty_stop() {
+  if ! jetty_running; then
+    echo_warning "Mt Wilson already stopped"
+  else
+    echo -n "Waiting for Mt Wilson services to shutdown..."
+    while jetty_running; do
+      jetty_shutdown 2>&1 > /dev/null
+      sleep 3
+    done
+    echo_success " Done"
+  fi
+}
+jetty_restart() {
+  jetty_stop
+  jetty_start
+  jetty_running_report
+}
+jetty_start_report() {
+  action_condition TOMCAT_RUNNING "Starting Mt Wilson" "jetty_start > /dev/null; jetty_running;"
+}
 
 ### FUNCTION LIBRARY: java
 
@@ -3762,10 +3859,10 @@ call_tag_setupcommand() {
   local java_lib_dir=${setupconsole_dir:-$DEFAULT_MTWILSON_JAVA_DIR}
   if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.dcsg.cpg.console.Main
+  mainclass=com.intel.mtwilson.launcher.console.Main
   local jvm_memory=2048m
   local jvm_maxperm=512m
-  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
   return $?
 }
 
@@ -3848,9 +3945,9 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_DEFAULT_TLS_POLICY_ID=`echo $temp | awk -F'mtwilson.default.tls.policy.id=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TLS_POLICY_ALLOW=`echo $temp | awk -F'mtwilson.tls.policy.allow=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTWILSON_TLS_KEYSTORE_PASSWORD=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
       export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host "$mtw_props_path"`
@@ -3860,9 +3957,9 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
       export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
       export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
-      export CONF_MTW_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
-      export CONF_MTW_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
-      export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
+      export CONF_MTWILSON_DEFAULT_TLS_POLICY_ID=`read_property_from_file mtwilson.default.tls.policy.id "$mtw_props_path"`
+      export CONF_MTWILSON_TLS_POLICY_ALLOW=`read_property_from_file mtwilson.tls.policy.allow "$mtw_props_path"`
+      export CONF_MTWILSON_TLS_KEYSTORE_PASSWORD=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
   fi
@@ -4006,9 +4103,9 @@ load_defaults() {
   export DEFAULT_API_KEY_ALIAS=""
   export DEFAULT_API_KEY_PASS=""
   export DEFAULT_CONFIGURED_API_BASEURL=""
-  export DEFAULT_MTW_DEFAULT_TLS_POLICY_ID=""
-  export DEFAULT_MTW_TLS_POLICY_ALLOW=""
-  export DEFAULT_MTW_TLS_KEYSTORE_PASS=""
+  export DEFAULT_MTWILSON_DEFAULT_TLS_POLICY_ID=""
+  export DEFAULT_MTWILSON_TLS_POLICY_ALLOW=""
+  export DEFAULT_MTWILSON_TLS_KEYSTORE_PASSWORD=""
   export DEFAULT_TDBP_KEYSTORE_DIR=""
   export DEFAULT_ENDORSEMENT_P12_PASS=""
   export DEFAULT_TRUSTAGENT_KEYSTORE_PASS=""
@@ -4033,9 +4130,9 @@ load_defaults() {
   export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
   export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
   export CONFIGURED_API_BASEURL=${CONFIGURED_API_BASEURL:-${CONF_CONFIGURED_API_BASEURL:-$DEFAULT_CONFIGURED_API_BASEURL}}
-  export MTW_DEFAULT_TLS_POLICY_ID=${MTW_DEFAULT_TLS_POLICY_ID:-${CONF_MTW_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_ID}}
-  export MTW_TLS_POLICY_ALLOW=${MTW_TLS_POLICY_ALLOW:-${CONF_MTW_TLS_POLICY_ALLOW:-$DEFAULT_MTW_TLS_POLICY_ALLOW}}
-  export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
+  export MTWILSON_DEFAULT_TLS_POLICY_ID=${MTWILSON_DEFAULT_TLS_POLICY_ID:-${CONF_MTWILSON_DEFAULT_TLS_POLICY_ID:-$DEFAULT_MTWILSON_DEFAULT_TLS_POLICY_ID}}
+  export MTWILSON_TLS_POLICY_ALLOW=${MTWILSON_TLS_POLICY_ALLOW:-${CONF_MTWILSON_TLS_POLICY_ALLOW:-$DEFAULT_MTWILSON_TLS_POLICY_ALLOW}}
+  export MTWILSON_TLS_KEYSTORE_PASSWORD=${MTWILSON_TLS_KEYSTORE_PASSWORD:-${CONF_MTWILSON_TLS_KEYSTORE_PASSWORD:-$DEFAULT_MTWILSON_TLS_KEYSTORE_PASSWORD}}
   export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
   export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
   export TRUSTAGENT_KEYSTORE_PASS=${TRUSTAGENT_KEYSTORE_PASS:-${CONF_TRUSTAGENT_KEYSTORE_PASS:-$DEFAULT_TRUSTAGENT_KEYSTORE_PASS}}

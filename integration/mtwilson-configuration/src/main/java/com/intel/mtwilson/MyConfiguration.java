@@ -6,10 +6,10 @@ package com.intel.mtwilson;
 
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
-import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
 import com.intel.dcsg.cpg.io.ExistingFileResource;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -87,7 +87,7 @@ public class MyConfiguration {
     private Preferences prefs = Preferences.userRoot().node(getClass().getName());
 //    private Properties conf = new Properties();
     private Configuration conf = null;
-    private HashMap<String, String> keySourceMap = new HashMap<String, String>();
+    private HashMap<String, String> keySourceMap = new HashMap<>();
 
     // look in default locations
     public MyConfiguration() {
@@ -328,12 +328,12 @@ public class MyConfiguration {
      */
     public final String getDirectoryPath() {
 //        return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
-        return getDirectory().getAbsolutePath();
+        return Folders.configuration(); //getDirectory().getAbsolutePath();
     }
 
     public final File getDirectory() {
 //        return new File(getDirectoryPath());
-        return new File(getMtWilsonConf()); // use MTWILSON_CONF instead of java preferences, so admin can set it before running setup
+        return new File(Folders.configuration()); //new File(getMtWilsonConf()); // use MTWILSON_CONF instead of java preferences, so admin can set it before running setup
     }
     /* /// this one is a bad idea because the configuration can come from several places, and the config file is not the top priority source,
      * // so providing this could create a situation where someone think that by writing to this config file they can affect the configuration
@@ -352,7 +352,7 @@ public class MyConfiguration {
      */
     public List<File> listConfigurationFiles() {
         // prepare a list of files to be loaded, in order
-        ArrayList<File> files = new ArrayList<File>();
+        ArrayList<File> files = new ArrayList<>();
 
 
         // fourth priority: if there is a custom configuration directory defined by a system property, load configuration from there
@@ -401,6 +401,16 @@ public class MyConfiguration {
         }
         return files;
     }
+    
+    /**
+     * 
+     * @return File representing the configuration file mtwilson.properties in the folder returned by @{code getConfiguration()}
+     */
+    public File getConfigurationFile() {
+        return ConfigurationFactory.getConfigurationFile();
+    }
+    
+    
 
     public Configuration getConfiguration() {
         return conf;
@@ -699,6 +709,10 @@ public class MyConfiguration {
     public String getSamlKeystorePassword() {
         return conf.getString("saml.key.password"); // bug #733 
     }
+    
+    public String getSamlKeyAlias() {
+        return conf.getString("saml.key.alias"); 
+    }
 
     ///////////////////////// tls policy  //////////////////////////////////
     public String getGlobalTlsPolicyId() {
@@ -793,6 +807,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson on Linux or value of MTWILSON_HOME
      */
     public String getMtWilsonHome() {
+        /*
         String mtwilsonHome = System.getenv("MTWILSON_HOME");
         log.debug("MTWILSON_HOME={}", mtwilsonHome);
         if (mtwilsonHome == null) {
@@ -801,7 +816,7 @@ public class MyConfiguration {
                 log.debug("MTWILSON_HOME={} (Linux default)", mtwilsonHome);
             }
             if (Platform.isWindows()) {
-                mtwilsonHome = /*System.getenv("ProgramFiles")*/ "C:" + File.separator + "mtwilson"; // applications in Program Files need administrator permission to write to their folders 
+                mtwilsonHome = "C:" + File.separator + "mtwilson"; // applications in Program Files need administrator permission to write to their folders 
                 log.debug("MTWILSON_HOME={} (Windows default)", mtwilsonHome);
             }
         }
@@ -809,6 +824,8 @@ public class MyConfiguration {
             throw new IllegalStateException("MTWILSON_HOME environment variable must be defined");
         }
         return mtwilsonHome;
+        */
+        return Folders.application();
     }
 
     /**
@@ -816,6 +833,7 @@ public class MyConfiguration {
      * @return /etc/mtwilson on Linux or value of MTWILSON_CONF
      */
     public String getMtWilsonConf() {
+        /*
         String mtwilsonConf = System.getenv("MTWILSON_CONF");
         log.debug("MTWILSON_CONF={}", mtwilsonConf);
         if (mtwilsonConf == null) {
@@ -833,6 +851,8 @@ public class MyConfiguration {
             throw new IllegalStateException("MTWILSON_CONF environment variable must be defined");
         }
         return mtwilsonConf;
+        */
+        return Folders.configuration();
     }
 
     /**
@@ -859,9 +879,11 @@ public class MyConfiguration {
     public String getMtWilsonJava() {
         String mtwilsonJava = System.getenv("MTWILSON_JAVA");
         log.debug("MTWILSON_JAVA={}", mtwilsonJava);
+        /*
         if (mtwilsonJava == null) {
             mtwilsonJava = conf.getString("mtwilson.fs.java");
         }
+        */
         if (mtwilsonJava == null) {
             mtwilsonJava = getMtWilsonHome() + File.separator + "java";
         }

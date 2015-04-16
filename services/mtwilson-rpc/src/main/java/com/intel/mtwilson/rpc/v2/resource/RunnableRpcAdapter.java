@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.patch.PatchException;
 import com.intel.mtwilson.patch.PatchUtil;
+import com.intel.mtwilson.rpc.faults.InvalidRpcInput;
+import com.intel.mtwilson.rpc.faults.RpcFailed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +71,7 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
         }
         catch(Exception e) {
             log.error("Error while setting task input: {}", e.getMessage());
-            faults.add(new Fault(e, "Error while preparing task")); 
+            faults.add(new InvalidRpcInput(e));  // "Error while preparing task"
         }
     }
     // this method is called to invoke the rpc
@@ -80,7 +82,7 @@ public class RunnableRpcAdapter implements RpcAdapter<Object,Object> {
         }
         catch(Exception e) {
             log.error("Error while executing task: {}", e.getMessage());
-            faults.add(new Fault(e, "Error while executing task")); 
+            faults.add(new RpcFailed(e));  // "Error while executing task"
         }
     }
     // this method is called to get the output from the rpc,

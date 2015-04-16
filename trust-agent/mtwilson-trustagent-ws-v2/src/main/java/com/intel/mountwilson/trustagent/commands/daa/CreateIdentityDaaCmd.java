@@ -7,6 +7,7 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +33,14 @@ public class CreateIdentityDaaCmd implements ICommand {
 //            log.log(Level.INFO, "Created AIK Blob and AIK Certificate");
             
             // extract the EK
-            String ekCertFileName = CommandUtil.doubleQuoteEscapeShellArgument(context.getEKCertFileName());
+            String ekCertFileName = EscapeUtil.doubleQuoteEscapeShellArgument(context.getEKCertFileName());
             CommandUtil.runCommand(String.format("getcert %s", ekCertFileName)); // safe; no arguments involved in this command line
             log.info( "Extracted EK Certificate");
 	
             // prepare the AIK for the DAA challenge
             CommandUtil.runCommand(String.format("aikpublish %s %s", ekCertFileName,
-                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikCertFileName()),
-                    CommandUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()))); // safe; no arguments involved in this command line
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikCertFileName()),
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()))); // safe; no arguments involved in this command line
             log.info( "Created AIK Blob and AIK Certificate for DAA");
 
             // read the AIK certificate

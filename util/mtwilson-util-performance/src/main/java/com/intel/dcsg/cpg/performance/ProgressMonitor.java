@@ -50,7 +50,7 @@ public class ProgressMonitor {
     }
     
     public void start() {
-        monitor = new Monitor<Progress>(new ProgressValue(task), observer);
+        monitor = new Monitor<>(new ProgressValue(task), observer);
         monitor.start();
     }
     

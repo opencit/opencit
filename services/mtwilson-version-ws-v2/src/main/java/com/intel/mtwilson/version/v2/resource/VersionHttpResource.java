@@ -24,12 +24,13 @@ import javax.ws.rs.core.MediaType;
 @Path("/version")
 public class VersionHttpResource {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VersionHttpResource.class);
+    private static final Version version = new Version();
     
     @GET
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,DataMediaType.APPLICATION_YAML,DataMediaType.TEXT_YAML})
     public Version queryVersion(@Context final HttpServletResponse response) {
         log.debug("retrieve version");
-        return new Version();
+        return version;
     }
     
 }
