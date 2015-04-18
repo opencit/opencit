@@ -6,12 +6,14 @@ package com.intel.mtwilson.shiro.file;
 
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.shiro.Username;
+import com.intel.mtwilson.shiro.UsernameWithPermissions;
 import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
 import com.intel.mtwilson.shiro.file.model.UserPassword;
 import com.intel.mtwilson.shiro.file.model.UserPermission;
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.shiro.authc.AccountException;
 import org.apache.shiro.authc.AuthenticationException;
@@ -94,6 +96,7 @@ public class FilePasswordRealm extends AuthorizingRealm {
             throw new AccountException("Username must be provided");
         }
         log.debug("doGetAuthenticationInfo for username {}", username);
+        UsernameWithPermissions usernameWithPermissions;
         UserPassword userLoginPassword;
         try {
             LoginDAO dao = new LoginDAO(new File(userFilePath), new File(permissionFilePath));
@@ -101,13 +104,20 @@ public class FilePasswordRealm extends AuthorizingRealm {
             if (userLoginPassword == null) {
                 return null;
             }
+            List<UserPermission> userPermissions = dao.getPermissions(username);
+            HashSet<String> stringPermissions = new HashSet<>();
+            for(UserPermission p : userPermissions) {
+                stringPermissions.add(p.toString());
+            }
+            usernameWithPermissions = new UsernameWithPermissions(userLoginPassword.getUsername(), stringPermissions);
+            
         } catch (Exception e) {
             log.debug("doGetAuthenticationInfo error", e);
             throw new AuthenticationException("Internal server error", e); 
         }
         log.debug("doGetAuthenticationInfo found user {}", userLoginPassword.getUsername());
         SimplePrincipalCollection principals = new SimplePrincipalCollection();
-        principals.add(new Username(username), getName());
+        principals.add(usernameWithPermissions, getName());
 
         PasswordAuthenticationInfo info = new PasswordAuthenticationInfo();
         info.setPrincipals(principals);

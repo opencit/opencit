@@ -7,6 +7,7 @@ package com.intel.mtwilson.shiro.jdbi;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.shiro.UserId;
 import com.intel.mtwilson.shiro.Username;
+import com.intel.mtwilson.shiro.UsernameWithPermissions;
 import com.intel.mtwilson.shiro.authc.password.HashedPassword;
 import com.intel.mtwilson.shiro.authc.password.LoginPasswordId;
 import com.intel.mtwilson.shiro.authc.password.PasswordAuthenticationInfo;
@@ -99,10 +100,30 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         log.debug("doGetAuthenticationInfo for username {}", username);
         UserLoginPassword userLoginPassword;
         User user;
+        UsernameWithPermissions usernameWithPermissions = null;
         try (LoginDAO dao = MyJdbi.authz()) {
             userLoginPassword = dao.findUserLoginPasswordByUsernameEnabled(username, true);
             if( userLoginPassword != null && userLoginPassword.isEnabled() ) {
                 user = dao.findUserById(userLoginPassword.getUserId());
+                
+                // now get the permissions and associate with the username
+                HashSet<String> stringPermissions = new HashSet<>();
+                List<Role> roles = dao.findRolesByUserLoginPasswordId(userLoginPassword.getId());
+                if (!roles.isEmpty()) {
+                    HashSet<String> roleIds = new HashSet<>();
+                    for(Role role : roles) {
+                        roleIds.add(role.getId().toString());
+                    }
+                    List<RolePermission> permissions = dao.findRolePermissionsByPasswordRoleIds(roleIds);
+                    for (RolePermission permission : permissions) {
+                        log.debug("doGetAuthorizationInfo found permission: {} {} {}", permission.getPermitDomain(), permission.getPermitAction(), permission.getPermitSelection());
+                        stringPermissions.add(String.format("%s:%s:%s", permission.getPermitDomain(), permission.getPermitAction(), permission.getPermitSelection()));
+                    }
+                }
+                
+                usernameWithPermissions = new UsernameWithPermissions(user.getUsername(), stringPermissions);
+                
+                
             } else {
                 user = null;
             }
@@ -117,7 +138,10 @@ public class JdbcPasswordRealm extends AuthorizingRealm {
         log.debug("doGetAuthenticationInfo found user login password id {}", userLoginPassword.getId());
         SimplePrincipalCollection principals = new SimplePrincipalCollection();
         principals.add(new UserId(userLoginPassword.getUserId()), getName());
-        principals.add(new Username(username), getName());
+//        principals.add(new Username(username), getName());
+        if( usernameWithPermissions != null ) {
+            principals.add(usernameWithPermissions, getName());
+        }
         principals.add(new LoginPasswordId(user.getUsername(), userLoginPassword.getUserId(), userLoginPassword.getId()), getName());
 
         //HashedPassword hashedPassword = new HashedPassword();
