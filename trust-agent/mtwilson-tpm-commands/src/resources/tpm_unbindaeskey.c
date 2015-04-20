@@ -224,11 +224,16 @@ int main(int argc, char **argv) {
 	/* decrypt the secret key */
 	CATCH_TSS_ERROR( Tspi_Data_Unbind(hEncdata, hKey, &lengthPlaintextOutput, &plaintextOutput) );
 
-	/* write the decrypted key */
-	CATCH_NULL( filePlaintextOutput = fopen(filenamePlaintextOutput, "wb") );
-	CATCH_ERROR( fwrite(plaintextOutput, 1, lengthPlaintextOutput, filePlaintextOutput) != lengthPlaintextOutput );
-	fclose(filePlaintextOutput);
-	filePlaintextOutput = NULL;
+	/* write the decrypted key to the output file or stdout*/
+	if( strlen(filenamePlaintextOutput) > 0 ) {
+		CATCH_NULL( filePlaintextOutput = fopen(filenamePlaintextOutput, "wb") );
+		CATCH_ERROR( fwrite(plaintextOutput, 1, lengthPlaintextOutput, filePlaintextOutput) != lengthPlaintextOutput );
+		fclose(filePlaintextOutput);
+		filePlaintextOutput = NULL;
+	}
+	else {
+		CATCH_ERROR( fwrite(plaintextOutput, 1, lengthPlaintextOutput, stdout) != lengthPlaintextOutput );
+	}
 	
 	exitCode = 0;
 	
