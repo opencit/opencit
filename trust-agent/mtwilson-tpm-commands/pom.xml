@@ -114,6 +114,8 @@
                                             <fileset dir="${project.build.directory}">
                                                 <include name="tpm_bindaeskey"/>
                                                 <include name="tpm_unbindaeskey"/>
+                                                <include name="tpm_signdata"/>
+                                                <include name="tpm_createkey"/>
                                             </fileset>
                                         </zip>
                                     </target>
