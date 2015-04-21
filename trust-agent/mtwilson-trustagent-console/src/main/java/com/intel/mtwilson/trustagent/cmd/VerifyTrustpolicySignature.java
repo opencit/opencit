@@ -21,8 +21,8 @@ import org.apache.commons.configuration.Configuration;
  *
  * @author rksavino
  */
-public class TrustPolicyMtwilsonSignatureVerification implements Command {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustPolicyMtwilsonSignatureVerification.class);
+public class VerifyTrustpolicySignature implements Command {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VerifyTrustpolicySignature.class);
     private static final String SAML_CERTIFICATE_ALIAS = "saml (ca)";
     private TrustagentConfiguration configuration;
     private Configuration options;
