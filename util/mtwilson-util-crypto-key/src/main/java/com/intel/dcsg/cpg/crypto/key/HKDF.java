@@ -136,11 +136,10 @@ public class HKDF {
         int r = length % macLength; // the remainder is the number of bytes we need from the last block T(N), for example if maclength=32 and length=42, then r=10 
         byte[] okm = new byte[length];
         byte[] T = new byte[0];
-        for (int i = 1; i <= N; i++) {
+        for (byte i = 1; i <= N; i++) {
             mac.update(T);
             mac.update(info);
-            byte counter = (byte) (i & 0xff); // converts i to a single byte, starting with 0x01, then 0x02
-            mac.update(counter);
+            mac.update(i); // if i were an int, we'd have to convert with (byte) (i & 0xff) to achieve 0x01, 0x02, etc.
             T = mac.doFinal();
             System.arraycopy(T, 0, okm, (i - 1) * macLength, (i < N ? macLength : r));
         }
