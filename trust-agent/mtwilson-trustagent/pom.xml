@@ -155,6 +155,13 @@
             <version>${project.version}</version>
         </dependency>
 			
+		<dependency>
+			<groupId>com.intel.mtwilson.trustagent</groupId>
+			<artifactId>mtwilson-tpm-commands</artifactId>
+			<version>${project.version}</version>
+			<type>zip</type>
+		</dependency>
+		
     </dependencies>
 
 </project>
