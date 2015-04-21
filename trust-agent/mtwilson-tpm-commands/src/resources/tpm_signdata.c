@@ -262,11 +262,16 @@ int main(int argc, char **argv) {
 	/* perform the signature */
 	CATCH_TSS_ERROR( Tspi_Hash_Sign(hHash, hKey, &lengthSignatureData, &signatureData) );
 
-	/* write the signature data to the output file */
-	CATCH_NULL( fileOutput = fopen(filenameOutput, "wb") );
-	CATCH_ERROR( fwrite(signatureData, 1, lengthSignatureData, fileOutput) != lengthSignatureData );
-	fclose(fileOutput);
-	fileOutput = NULL;
+	/* write the signature data to the output file or stdout */
+	if( strlen(filenameOutput) > 0 ) {
+		CATCH_NULL( fileOutput = fopen(filenameOutput, "wb") );
+		CATCH_ERROR( fwrite(signatureData, 1, lengthSignatureData, fileOutput) != lengthSignatureData );
+		fclose(fileOutput);
+		fileOutput = NULL;
+	}
+	else {
+		CATCH_ERROR( fwrite(signatureData, 1, lengthSignatureData, stdout) != lengthSignatureData );
+	}
 	
 	CATCH_TSS_ERROR( Tspi_Context_FreeMemory( hContext, signatureData ) );
 	
