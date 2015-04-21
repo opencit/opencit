@@ -50,6 +50,10 @@
             <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
