@@ -4,12 +4,10 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.crypto.rfc822.SignatureException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
@@ -18,9 +16,9 @@ import com.intel.mtwilson.as.data.TblHosts;
 
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.vmquote.xml.TrustPolicy;
-import com.intel.mtwilson.vmquote.xml.Measurements;
 
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
 
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestation;
 import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationCollection;
@@ -36,24 +34,20 @@ import com.intel.mtwilson.repository.RepositoryCreateException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
-import com.intel.mtwilson.vmquote.xml.VMQuote;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.dsig.XMLSignatureException;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.IOUtils;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -87,12 +81,11 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
     @Produces(CryptoMediaType.APPLICATION_SAML)    
     @SuppressWarnings("empty-statement")
     public String createSamlAssertion(VMAttestation item) {
-        if (item.getId() == null) {
-            item.setId(new UUID());
-        }
-        
-        JAXB jaxb = new JAXB();
         String nonce;
+        JAXB jaxb = new JAXB();
+        
+        if (item.getId() == null) { item.setId(new UUID()); }
+        
         log.debug("Creating new SAML assertion for host {}.", item.getHostName());
         
         ValidationUtil.validate(item); 
@@ -115,78 +108,106 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
                     VMQuoteResponse vmQuoteResponse = agent.getVMAttestationReport(requestObj);
                     log.debug("Retrieved VM attestation report in MTW.");
                     
-                    if ((vmQuoteResponse != null) && (vmQuoteResponse.getVmMeasurements().length > 0) &&
-                            (vmQuoteResponse.getVmQuote().length > 0) && (vmQuoteResponse.getVmTrustPolicy().length > 0)) {
-                        try {
+                    if (vmQuoteResponse == null) {
+                        String errorInfo = "Error retrieving the attestation report for the specified VM.";
+                        log.error(errorInfo);
+                        throw new RepositoryCreateException(errorInfo);
+                    }
+                    
+                    if (vmQuoteResponse.getVmQuote() == null || vmQuoteResponse.getVmQuote().length == 0) {
+                        String errorInfo = "VM Quote received has null value. Please verify the input parameters.";
+                        log.error(errorInfo);
+                        throw new RepositoryCreateException(errorInfo);                        
+                    }
+                    
+                    if (vmQuoteResponse.getVmTrustPolicy() == null || vmQuoteResponse.getVmTrustPolicy().length == 0) {
+                        String errorInfo = "VM Quote received does not have an associated Trust Policy. VM Quote cannot be validated.";
+                        log.error(errorInfo);
+                        throw new RepositoryCreateException(errorInfo);                        
+                    }
 
-                            String vmQuoteXml = IOUtils.toString(vmQuoteResponse.getVmQuote(), "UTF-8");
-                            String trustPolicyXml = IOUtils.toString(vmQuoteResponse.getVmTrustPolicy(), "UTF-8");
-                            String measurementXml = IOUtils.toString(vmQuoteResponse.getVmMeasurements(), "UTF-8");
-                            
-                            boolean isVMQuoteValid = false;
-                            boolean isTrustPolicyValid = false;
-                            
-                            switch(vmQuoteResponse.getVmQuoteType()) {
-                                
-                                case SPRINT7:
-                                    // In Sprint7 since we are not getting a signed quote, we are not going to verify anything.
-                                    isVMQuoteValid = true;
-                                    
-                                    // Validate the TrustPolicy signature and the certificate that was used to sign the TrustPolicy
-                                    isTrustPolicyValid = true; //ValidateSignature.isValid(trustPolicyXml);
-                                    
-                                    // Once we have verified the integrity of the files, we need to ensure that the nonce is matching with what 
-                                    // was sent to the call. After the nonce verification, the cumulative hash needs to be verfied with the 
-                                    // whitelist in the trust policy.
-                                    if (isVMQuoteValid && isTrustPolicyValid) {
+                    if (vmQuoteResponse.getVmMeasurements() == null || vmQuoteResponse.getVmMeasurements().length == 0) {
+                        String errorInfo = "VM Quote received does not have an associated measurement log. Individual modules cannot be verified.";
+                        log.error(errorInfo);
+                        throw new RepositoryCreateException(errorInfo);                        
+                    }
 
-                                        // Deserialize the TrustPolicy and VMQuote into the autogenerated objects
-                                        TrustPolicy vmTrustPolicy = jaxb.read(trustPolicyXml, TrustPolicy.class);
-                                        VMQuote vmQuote = jaxb.read(vmQuoteXml, VMQuote.class);
+                    try {
 
-                                        /*
-                                        if (nonce == null ? vmQuote.getNonce() != null : !nonce.equals(vmQuote.getNonce())) {
-                                            log.error("Error during verification of the VM Attestation report. Nonce does not match.");
-                                            throw new RepositoryCreateException();
-                                        }*/
+                        String vmQuoteXml = IOUtils.toString(vmQuoteResponse.getVmQuote(), "UTF-8");
+                        String trustPolicyXml = IOUtils.toString(vmQuoteResponse.getVmTrustPolicy(), "UTF-8");
+                        String measurementXml = IOUtils.toString(vmQuoteResponse.getVmMeasurements(), "UTF-8");
 
-                                        boolean isVMTrusted = false;
-                                        /*
-                                        if (vmQuote.getCumulativeHash() == null ? vmTrustPolicy.getImage().getImageHash().getValue() != null : 
-                                                !vmQuote.getCumulativeHash().equals(vmTrustPolicy.getImage().getImageHash().getValue())) {
-                                            log.error("Hash value of the VM {} does not match the white list value {} specified in the Trust Policy.",
-                                                    vmQuote.getCumulativeHash(), vmTrustPolicy.getImage().getImageHash().getValue());
-                                            // TODO: Compare the measurements against the whitelists to see which module failed.
-                                            // We will do this in the next sprint.
-                                        } else {
-                                            isVMTrusted = true;
-                                        }*/
+                        log.debug("VMQuote : {} , TrustPolicy : {}, Measurements : {}", vmQuoteXml, trustPolicyXml, measurementXml);
 
-                                        // Create a map of the VM attributes that needs to be added to the SAML assertion.
-                                        Map<String, String> vmAttributes = new HashMap<>();
-                                        vmAttributes.put("VM_Trust_Status", String.valueOf(isVMTrusted));
-                                        vmAttributes.put("VM_Instance_Id", vmQuote.getVmInstanceId());
-                                        vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy());
-                                        String samlForHostWithVMData = new HostTrustBO().getSamlForHostWithVMData(obj, item.getId().toString(), vmAttributes);
-                                        return samlForHostWithVMData;                                
-                                    } else {
-                                        log.error("Invalid signature specified.");
-                                        return null;
+                        boolean isVMQuoteValid = false;
+                        boolean isTrustPolicyValid = false;
+
+                        switch(vmQuoteResponse.getVmQuoteType()) {
+
+                            case SPRINT7:
+                                // In Sprint7 since we are not getting a signed quote, we are not going to verify anything.
+                                isVMQuoteValid = true;
+
+                                // Validate the TrustPolicy signature and the certificate that was used to sign the TrustPolicy
+                                log.debug("createSamlAssertion: About to validate the trust policy.");
+                                //isTrustPolicyValid = ValidateSignature.isValid(trustPolicyXml);
+                                isTrustPolicyValid = XmlDsigVerify.isValid(trustPolicyXml, getSamlCertificate());
+                                log.debug("createSamlAssertion: Validation result of TrustPolicy is {}", isTrustPolicyValid);
+
+                                // Once we have verified the integrity of the files, we need to ensure that the nonce is matching with what 
+                                // was sent to the call. After the nonce verification, the cumulative hash needs to be verfied with the 
+                                // whitelist in the trust policy.
+                                if (isVMQuoteValid && isTrustPolicyValid) {
+
+                                    // Deserialize the TrustPolicy and VMQuote into the autogenerated objects
+                                    TrustPolicy vmTrustPolicy = jaxb.read(trustPolicyXml, TrustPolicy.class);
+                                    String cumulativeHashFromQuote = vmQuoteXml.substring((vmQuoteXml.indexOf("<cumulative_hash>")+"<cumulative_hash>".length()), vmQuoteXml.indexOf("</cumulative_hash>"));
+                                    String vmInstanceIdFromQuote = vmQuoteXml.substring((vmQuoteXml.indexOf("<vm_instance_id>")+"<vm_instance_id>".length()), vmQuoteXml.indexOf("</vm_instance_id>"));
+                                    String nonceFromQuote = vmQuoteXml.substring((vmQuoteXml.indexOf("<nonce>")+"<nonce>".length()), vmQuoteXml.indexOf("</nonce>"));
+
+
+                                    if (nonce == null ? nonceFromQuote != null : !nonce.equals(nonceFromQuote)) {
+                                        log.error("Error during verification of the VM Attestation report. Nonce sent {} does not match the nonce in report {}.", nonce, nonceFromQuote);
+                                        throw new RepositoryCreateException();
                                     }
-                                case X509_ATTR_CERT:
-                                    break;
-                                case XML_DSIG:
-                                    break;
-                                default:
-                                    break;
-                            }
-                                                        
-                        } catch (RepositoryCreateException ex) {
-                            throw ex;
-                        } catch (IOException | JAXBException | XMLStreamException ex ){ //| ParserConfigurationException | SAXException | MarshalException | XMLSignatureException ex) {
-                            log.error("Error during validation of the VM attestation report. {}", ex.getMessage());
-                            throw new RepositoryCreateException(ex);
+
+                                    boolean isVMTrusted = false;
+
+                                    if (cumulativeHashFromQuote == null ? vmTrustPolicy.getImage().getImageHash().getValue() != null : 
+                                            !cumulativeHashFromQuote.equals(vmTrustPolicy.getImage().getImageHash().getValue())) {
+                                        log.error("Hash value of the VM {} does not match the white list value {} specified in the Trust Policy.",
+                                                cumulativeHashFromQuote, vmTrustPolicy.getImage().getImageHash().getValue());
+                                        // TODO: Compare the measurements against the whitelists to see which module failed.
+                                        // We will do this in the next sprint.
+                                    } else {
+                                        isVMTrusted = true;
+                                    }
+
+                                    // Create a map of the VM attributes that needs to be added to the SAML assertion.
+                                    Map<String, String> vmAttributes = new HashMap<>();
+                                    vmAttributes.put("VM_Trust_Status", String.valueOf(isVMTrusted));
+                                    vmAttributes.put("VM_Instance_Id", vmInstanceIdFromQuote);
+                                    vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy());
+                                    String samlForHostWithVMData = new HostTrustBO().getSamlForHostWithVMData(obj, item.getId().toString(), vmAttributes);
+                                    return samlForHostWithVMData;                                
+                                } else {
+                                    log.error("Invalid signature specified.");
+                                    return null;
+                                }
+                            case X509_ATTR_CERT:
+                                break;
+                            case XML_DSIG:
+                                break;
+                            default:
+                                break;
                         }
+
+                    } catch (RepositoryCreateException ex) {
+                        throw ex;
+                    } catch (IOException | JAXBException | XMLStreamException ex ){ //| ParserConfigurationException | SAXException | MarshalException | XMLSignatureException ex) {
+                        log.error("Error during validation of the VM attestation report. {}", ex.getMessage());
+                        throw new RepositoryCreateException(ex);
                     }
                 } else {
                     log.error("Host specified {} does not exist in the system. Please verify the input parameters.", item.getHostName());
@@ -205,6 +226,24 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
         } 
         return null;
     }
+    
+    private static X509Certificate getSamlCertificate() {
+        X509Certificate samlCert = null;        
+        byte[] samlPemBytes;
+        try (FileInputStream samlPemFile = new FileInputStream(My.configuration().getSamlCertificateFile())) {
+
+            samlPemBytes = IOUtils.toByteArray(samlPemFile);
+            samlCert = X509Util.decodePemCertificate(new String(samlPemBytes));
+            log.debug("Successfully retrieved the SAML certificate for verification. {}", samlCert.getIssuerX500Principal().getName());
+
+            
+        } catch (IOException | CertificateException ex) {
+            log.error("Error during verification of the certificate that signed the data. {}", ex.getMessage());
+        } 
+                
+        return samlCert;
+    }
+
     
 /*    @GET
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
