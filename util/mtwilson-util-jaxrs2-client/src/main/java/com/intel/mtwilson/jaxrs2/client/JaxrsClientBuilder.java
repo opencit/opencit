@@ -28,6 +28,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.filter.LoggingFilter;
 import com.intel.mtwilson.jaxrs2.feature.JacksonFeature;
+import com.intel.mtwilson.security.http.jaxrs.TokenAuthorizationFilter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -152,6 +153,13 @@ public class JaxrsClientBuilder {
 
             clientConfig.register(new HttpBasicAuthFilter(username, password)); // jersey 2.4.1
 //            clientConfig.register(HttpAuthenticationFeature.basic(configuration.getString("mtwilson.api.username"), configuration.getString("mtwilson.api.password"))); // jersey 2.10.1
+        }
+        
+        // TOKEN authorization is used as part of CSRF protection for the portal
+        String tokenValue = configuration.get("login.token.value");
+        if( tokenValue != null ) {
+            log.debug("Registering TOKEN value {}", tokenValue);
+            clientConfig.register(new TokenAuthorizationFilter(tokenValue));
         }
     }
 
