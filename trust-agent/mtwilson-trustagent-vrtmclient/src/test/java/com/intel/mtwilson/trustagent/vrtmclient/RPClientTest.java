@@ -93,6 +93,7 @@ public class RPClientTest {
         RPClient client = new RPClient("10.1.71.68", 16005);
         String vmAttestationReportPath = client.getVMAttestationReportPath(vmInstanceId, nonce);
         System.out.println(vmAttestationReportPath);
+        client.close();
         
     }
     

@@ -63,8 +63,14 @@ public class Vrtm {
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest vmAttestationRequest) {
         try {
+            
+            String vmInstanceId = vmAttestationRequest.getVmInstanceId();
+            String nonce = vmAttestationRequest.getNonce();
+            
             // Call into the vRTM API and get the path information
-            String instanceFolderPath = "/var/lib/nova/instances/" + vmAttestationRequest.getVmInstanceId() + "/";
+            RPClient rpcInstance = new RPClient("127.0.0.1", 16005);
+            String instanceFolderPath = rpcInstance.getVMAttestationReportPath(vmInstanceId, nonce);
+            rpcInstance.close();
             
             VMQuoteResponse vmQuoteResponse = new VMQuoteResponse();
             vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
