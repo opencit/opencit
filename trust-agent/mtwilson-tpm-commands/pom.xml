@@ -99,6 +99,7 @@
                                                 <include name="**/*.sh"/>
                                                 <include name="**/*.bin"/>
                                                 <include name="**/*.pl"/>
+                                                <include name="**/config"/>
                                                 <include name="**/configure"/>
                                             </fileset>
                                         </chmod>
