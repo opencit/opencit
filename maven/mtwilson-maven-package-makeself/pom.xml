@@ -1,0 +1,173 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <artifactId>mtwilson-maven-package-makeself</artifactId>
+    <groupId>com.intel.mtwilson.maven</groupId>
+    <packaging>pom</packaging>
+    <description>Describes how to create an application self-extracting file</description>
+
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-maven-root</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+
+    <properties>
+        <!-- package poms that inherit can override this; it's the folder name to unextract (when using keep option) and .bin will be appended for the installer filename -->
+        <makeself.name>${project.artifactId}-${project.version}</makeself.name>
+    </properties>
+
+    <profiles>
+        <profile>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+
+            <build>
+                <!-- NOTE: the order of plugins listed here is important because
+                when multiple plugins have the same phase, maven 3.0.3 and later
+                executes them in the order listed in the pom.  so first we create
+                the jar, then we copy all resources in to the feature directory,
+                then we create the zip file. -->
+        
+                <plugins>
+            
+            
+                    <!-- copy all dependencies (non-transitive) to the resources folder for later packaging -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/${makeself.name}</outputDirectory>
+                                    <excludeTransitive>true</excludeTransitive>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                    <!-- copy the setup script and any other locally defined resources for packaging -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.7</version>
+                        <executions>
+                            <execution>
+                                <id>copy-application-directories</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/${makeself.name}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-cli</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- temporary directory for creating packages -->
+                                        <mkdir dir="/tmp/makeself"/>
+                                        <chmod perm="700" dir="/tmp/makeself"/>
+                                
+                                        <!-- package directory contains everything that should be included in the installer -->
+                                        <mkdir dir="${project.build.directory}/${makeself.name}"/>
+                                        <chmod perm="700">
+                                            <fileset dir="${project.build.directory}/${makeself.name}">
+                                                <include name="**/*.sh"/>
+                                                <include name="**/*.bin"/>
+                                                <include name="**/*.pl"/>
+                                            </fileset>
+                                        </chmod>
+                                        <exec executable="makeself" dir="${project.build.directory}" resultproperty="mavenExitMakeself">
+                                            <!-- providing the environment variable TMPDIR tells makeself where to put temporary files when extracting at install time; we keep them in user's home directory to prevent world reading and possibly writing in /tmp; problem is ~ is interpreted literally here and if we use ${user.home} it will be interpolated now and won't work during install -->
+                                            <!-- <env key="TMPDIR" value="${user.home}/.tmp"/> -->
+                                            <arg value="--follow"/>
+                                            <arg value="--nocomp"/>
+                                            <!-- <arg value=" - - n o t e m p "/>  makeself needs an option to clean up the non-/tmp dir so disabling until we have that -->
+                                            <arg value="${project.build.directory}/${makeself.name}"/>
+                                            <arg value="${project.build.directory}/${makeself.name}.bin"/>
+                                            <arg value="${makeself.name}"/>
+                                            <arg value="bash"/>
+                                            <arg value="setup.sh"/>
+                                        </exec>
+
+                                    
+                                        <fail message="Cannot build self-extracting installer" status="${mavenExitMakeself}">
+                                            <condition>
+                                                <not>
+                                                    <equals arg1="${mavenExitMakeself}" arg2="0"/>
+                                                </not>
+                                            </condition>
+                                        </fail>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant</artifactId>
+                                <version>1.8.4</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b3</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>	    
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>                      
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/${makeself.name}.bin</file>
+                                            <type>bin</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+        		
+            </build>
+        </profile>
+    </profiles>
+
+</project>
