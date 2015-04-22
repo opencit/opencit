@@ -72,6 +72,13 @@ public class Vrtm {
             String instanceFolderPath = rpcInstance.getVMAttestationReportPath(vmInstanceId, nonce);
             rpcInstance.close();
             
+            if (instanceFolderPath == null || instanceFolderPath.isEmpty()) {
+                String errorInfo = "Error during retrieval of the instance path. Please verify the input parameters.";
+                log.error (errorInfo);
+                return null;
+                //throw new WebApplicationException(Response.serverError().header("Error", errorInfo).build());
+            }
+                
             VMQuoteResponse vmQuoteResponse = new VMQuoteResponse();
             vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
             vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
@@ -81,8 +88,8 @@ public class Vrtm {
             
         } catch (IOException ex) {
             log.error("Error during reading of VM quote information. {}", ex.getMessage());
+            //throw new WebApplicationException(ex);
         }
-
         return null;
     }	
 
