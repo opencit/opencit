@@ -25,6 +25,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-vmquote-xml</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-privacyca-niarl</artifactId>
             <version>${project.version}</version>
