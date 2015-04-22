@@ -10,6 +10,8 @@ public class Factory {
 				return new TCBuffer(rpId, RPAPIIndex.VM2RP_GETVMMETA, 0, rpId);
 			case IS_VM_VERIFIED:
 				return new TCBuffer(rpId, RPAPIIndex.VM2RP_ISVMVERIFIED, 0, rpId);
+                        case GET_VM_ATTESTATION_REPORT_PATH:
+                            return new TCBuffer(rpId, RPAPIIndex.VM2RP_GET_VM_ATTESTATION_REPORT_PATH, 0, rpId);
 		}
 		return null;
 	}

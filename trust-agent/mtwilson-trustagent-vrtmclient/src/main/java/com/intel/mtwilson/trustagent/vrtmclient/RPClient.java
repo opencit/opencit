@@ -124,4 +124,45 @@ public class RPClient {
             
             return retStatus;
         }
+        
+        public String getVMAttestationReportPath(String vmInstanceId, String nonce) throws IOException {
+            
+            //Format xml request payload 
+            String xmlRPCBlob=  "<?xml version='1.0'?>" 
+                            + "<methodCall>"
+                            + "<methodName>get_verification_status</methodName>"
+                            + 	"<params>"
+                            +		"<param>"
+                            +			"<value><string>%s</string></value>"
+                            +		"</param>"
+                            +		"<param>"
+                            +			"<value><string>%s</string></value>"
+                            +		"</param>"
+                            +	"</params>"
+                            + "</methodCall>";
+            String base64InputArgument = String.format(xmlRPCBlob, vmInstanceId, nonce);
+            log.debug("Sending {}", base64InputArgument);
+
+            TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.GET_VM_ATTESTATION_REPORT_PATH);	// Formuate tcbuffer structure
+            tcBuffer.setRPCPayload(base64InputArgument.getBytes());
+            
+            TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
+
+            if (resultTcb.getRPCPayloadSize() != 0) {
+                String xml = resultTcb.getRPCPayload();
+                log.debug("Method response: {}", xml);
+
+                XmlMapper mapper = new XmlMapper();
+                MethodResponse response = mapper.readValue(xml, MethodResponse.class);
+                Param param[] = response.getParams();
+                Value value = param[0].getValue();
+                byte[] retBytes = DatatypeConverter.parseBase64Binary(value.getString());
+                String retValue = new String(retBytes, "UTF-8");
+
+                log.debug("vrtm return value: {}", retValue);  
+                return retValue;
+            } else {
+                return null;
+            }                            
+        }
 }
