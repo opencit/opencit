@@ -5,11 +5,6 @@ TROUSERS=trousers-0.3.13
 OPENSSL_TPM_ENGINE=openssl_tpm_engine-0.4.2
 TPM_TOOLS=tpm-tools-1.3.8
 HEX2BIN=hex2bin-master
-OPENSSL=$(find . -type d -name "openssl-*" | head -n1)
-TROUSERS=$(find . -type d -name "trousers*" | head -n1)
-OPENSSL_TPM_ENGINE=$(find . -type d -name "openssl_tpm_engine*" | head -n1)
-TPM_TOOLS=$(find . -type d -name "tpm-tools*" | head -n1)
-HEX2BIN=$(find . -type d -name "hex2bin*" | head -n1)
 
 install_openssl() {
   OPENSSL_FILE=`find ${OPENSSL}*gz`

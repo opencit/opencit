@@ -61,7 +61,13 @@
                     <version>1.7.0_51</version>
                     <type>bin</type>
                     <classifier>linux-x64</classifier>
-                </dependency>	
+                </dependency>
+                <dependency>
+                    <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
+                    <artifactId>tbootxm-linux-makeself</artifactId>
+                    <version>0.1-SNAPSHOT</version>
+                    <type>bin</type>
+                </dependency>
             </dependencies>
             
             <build>
@@ -104,6 +110,13 @@
                                             <classifier>linux-x64</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>jdk-1.7.0_51-linux-x64.bin</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
+                                            <artifactId>tbootxm-linux-makeself</artifactId>
+                                            <version>0.1-SNAPSHOT</version>
+                                            <type>bin</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
