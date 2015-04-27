@@ -26,7 +26,6 @@
     <module>mtwilson-trustagent-privacyca-niarl</module>
     <module>mtwilson-trustagent-tpm-tools</module>
     <module>mtwilson-trustagent-vrtmclient</module>
-    <module>mtwilson-tpm-commands</module>
   </modules>
 
 
