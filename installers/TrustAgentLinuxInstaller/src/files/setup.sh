@@ -191,6 +191,34 @@ if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
 fi
 
+#tpm_bindaeskey
+tpmbindaeskey=`which tpm_bindaeskey 2>/dev/null`
+if [ -n "$tpmbindaeskey" ]; then
+  rm -f "$tpmbindaeskey"
+fi
+ln -s "${package_dir}/bin/tpm_bindaeskey" /usr/local/bin/tpm_bindaeskey
+
+#tpm_unbindaeskey
+tpmunbindaeskey=`which tpm_unbindaeskey 2>/dev/null`
+if [ -n "$tpmunbindaeskey" ]; then
+  rm -f "$tpmunbindaeskey"
+fi
+ln -s "${package_dir}/bin/tpm_unbindaeskey" /usr/local/bin/tpm_unbindaeskey
+
+#tpm_createkey
+tpmcreatekey=`which tpm_createkey 2>/dev/null`
+if [ -n "$tpmcreatekey" ]; then
+  rm -f "$tpmcreatekey"
+fi
+ln -s "${package_dir}/bin/tpm_createkey" /usr/local/bin/tpm_createkey
+
+#tpm_signdata
+tpmsigndata=`which tpm_signdata 2>/dev/null`
+if [ -n "$tpmsigndata" ]; then
+  rm -f "$tpmsigndata"
+fi
+ln -s "${package_dir}/bin/tpm_signdata" /usr/local/bin/tpm_signdata
+
 hex2bin_install() {
   return_dir=`pwd`
   cd hex2bin

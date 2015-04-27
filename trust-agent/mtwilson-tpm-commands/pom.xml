@@ -77,7 +77,7 @@
                                 <configuration>
                                     <target>
                                         <!-- extract all zip/tar/gz files -->
-                                        <untar dest="${project.build.directory}" compression="gzip">
+                                        <!--<untar dest="${project.build.directory}" compression="gzip">
                                             <fileset dir="${project.build.directory}">
                                                 <include name="**/*.tar.gz"/>
                                             </fileset>
@@ -86,7 +86,7 @@
                                             <fileset dir="${project.build.directory}">
                                                 <include name="**/*.zip"/>
                                             </fileset>
-                                        </unzip>
+                                        </unzip>-->
                                         
                                         <!-- gcc compile task -->
 <!--                                        <cc>
@@ -115,8 +115,8 @@
                                             <fileset dir="${project.build.directory}">
                                                 <include name="tpm_bindaeskey"/>
                                                 <include name="tpm_unbindaeskey"/>
-                                                <include name="tpm_signdata"/>
                                                 <include name="tpm_createkey"/>
+                                                <include name="tpm_signdata"/>
                                             </fileset>
                                         </zip>
                                     </target>
