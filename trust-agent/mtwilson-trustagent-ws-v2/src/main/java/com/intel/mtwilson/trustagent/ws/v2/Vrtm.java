@@ -83,7 +83,7 @@ public class Vrtm {
             vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
             vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
             vmQuoteResponse.setVmQuote(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, vmQuoteFileName))));
-            vmQuoteResponse.setVmQuoteType(VMQuoteResponse.QuoteType.SPRINT7);
+            vmQuoteResponse.setVmQuoteType(VMQuoteResponse.QuoteType.XML_DSIG);
             return vmQuoteResponse;
             
         } catch (IOException ex) {

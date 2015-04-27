@@ -64,6 +64,11 @@
     </dependency>
     -->
         <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-privacyca-niarl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-vmquote-xml</artifactId>
             <version>${project.version}</version>
