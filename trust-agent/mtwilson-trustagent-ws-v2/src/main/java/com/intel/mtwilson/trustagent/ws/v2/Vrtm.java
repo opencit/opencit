@@ -63,20 +63,33 @@ public class Vrtm {
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     public VMQuoteResponse getVMAttestationReport(VMAttestationRequest vmAttestationRequest) {
         try {
-            // Call into the vRTM API and get the path information
-            String instanceFolderPath = "/var/lib/nova/instances/" + vmAttestationRequest.getVmInstanceId() + "/";
             
+            String vmInstanceId = vmAttestationRequest.getVmInstanceId();
+            String nonce = vmAttestationRequest.getNonce();
+            
+            // Call into the vRTM API and get the path information
+            RPClient rpcInstance = new RPClient("127.0.0.1", 16005);
+            String instanceFolderPath = rpcInstance.getVMAttestationReportPath(vmInstanceId, nonce);
+            rpcInstance.close();
+            
+            if (instanceFolderPath == null || instanceFolderPath.isEmpty()) {
+                String errorInfo = "Error during retrieval of the instance path. Please verify the input parameters.";
+                log.error (errorInfo);
+                return null;
+                //throw new WebApplicationException(Response.serverError().header("Error", errorInfo).build());
+            }
+                
             VMQuoteResponse vmQuoteResponse = new VMQuoteResponse();
             vmQuoteResponse.setVmMeasurements(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, measurementXMLFileName))));
             vmQuoteResponse.setVmTrustPolicy(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, trustPolicyFileName))));
             vmQuoteResponse.setVmQuote(FileUtils.readFileToByteArray(new File(String.format("%s%s", instanceFolderPath, vmQuoteFileName))));
-            vmQuoteResponse.setVmQuoteType(VMQuoteResponse.QuoteType.SPRINT7);
+            vmQuoteResponse.setVmQuoteType(VMQuoteResponse.QuoteType.XML_DSIG);
             return vmQuoteResponse;
             
         } catch (IOException ex) {
             log.error("Error during reading of VM quote information. {}", ex.getMessage());
+            //throw new WebApplicationException(ex);
         }
-
         return null;
     }	
 

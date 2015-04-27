@@ -56,7 +56,7 @@ public class RPClientTest {
         TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.IS_VM_VERIFIED);
 		
         // first replace the %s of xmlRPCBlob by VMUUID, rpcore accept all method input arguments in base64 format
-        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary(("6eb62228-00e2-4da0-ac88-d4239a78aca2").getBytes()));
+        String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary(("425d20e9-0132-48d7-a3d6-563775968efe").getBytes()));
         System.out.println(base64InputArgument);
         tcBuffer.setRPCPayload(base64InputArgument.getBytes());
 	
@@ -65,7 +65,7 @@ public class RPClientTest {
         // create instance of RPClient, One instance of RPClient for App life time is sufficient 
         // to do processing 
         TCBuffer expResult = null;
-        RPClient instance = new RPClient("10.1.70.40", 16005);
+        RPClient instance = new RPClient("10.1.71.68", 16005);
         // send tcBuffer to rpcore 
         TCBuffer result = instance.send(tcBuffer);
         
@@ -76,7 +76,7 @@ public class RPClientTest {
         System.out.println("RPC Call Status = " + result.getRPCCallStatus());
         System.out.println("RPC Original RP ID = " + result.getOriginalRpId());
         System.out.println("RPC Payload = " + result.getRPCPayload());
-		
+        
         // close RPClient at the end of application
         instance.close();
         
@@ -84,6 +84,20 @@ public class RPClientTest {
         // TODO review the generated test code and remove the default call to fail.
     }
 
+    @Test
+    public void getVMAttestationReportPath2() throws Exception {
+    
+        String nonce = "2629d276-d7c7-4cd4-bc7d-c43628770020";
+        String vmInstanceId = "39cd2294-f6da-4ffe-b83e-d4f975e83adf";
+        
+        RPClient client = new RPClient("10.1.71.68", 16005);
+        String vmAttestationReportPath = client.getVMAttestationReportPath(vmInstanceId, nonce);
+        System.out.println(vmAttestationReportPath);
+        client.close();
+        
+    }
+    
+    
     /**
      * Test of close method, of class RPClient.
      */
