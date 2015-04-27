@@ -46,11 +46,12 @@ date > $logfile
 # Automatic install steps:
 # 1. Install prereqs
 # 2. Backup old files
-# 3. Create directory structure
-# 4. Install Mt Wilson Linux utilities (and use them in this script)
-# 5. Install JDK
-# 6. Compile TPM commands
-# 7. Install Trust Agent files
+# 3. Install Measurement Agent
+# 4. Create directory structure
+# 5. Install Mt Wilson Linux utilities (and use them in this script)
+# 6. Install JDK
+# 7. Compile TPM commands
+# 8. Install Trust Agent files
 
 ##### install prereqs
 auto_install "TrustAgent requirements" "APPLICATION"
@@ -82,7 +83,15 @@ if [ -f "$existing_tagent" ]; then
   $existing_tagent stop
 fi
 
-
+### INSTALL MEASUREMENT AGENT
+echo "Installing measurement agent..."
+TBOOTXM_PACKAGE=`ls -1 tbootxm-linux-makeself-*.bin 2>/dev/null | tail -n 1`
+if [ -z "$TBOOTXM_PACKAGE" ]; then
+  echo_failure "Failed to find measurement agent installer package"
+  exit -1
+fi
+./$TBOOTXM_PACKAGE
+if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
 
 ##### create directory structure
 
@@ -191,6 +200,34 @@ if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
 fi
 
+#tpm_bindaeskey
+tpmbindaeskey=`which tpm_bindaeskey 2>/dev/null`
+if [ -n "$tpmbindaeskey" ]; then
+  rm -f "$tpmbindaeskey"
+fi
+ln -s "${package_dir}/bin/tpm_bindaeskey" /usr/local/bin/tpm_bindaeskey
+
+#tpm_unbindaeskey
+tpmunbindaeskey=`which tpm_unbindaeskey 2>/dev/null`
+if [ -n "$tpmunbindaeskey" ]; then
+  rm -f "$tpmunbindaeskey"
+fi
+ln -s "${package_dir}/bin/tpm_unbindaeskey" /usr/local/bin/tpm_unbindaeskey
+
+#tpm_createkey
+tpmcreatekey=`which tpm_createkey 2>/dev/null`
+if [ -n "$tpmcreatekey" ]; then
+  rm -f "$tpmcreatekey"
+fi
+ln -s "${package_dir}/bin/tpm_createkey" /usr/local/bin/tpm_createkey
+
+#tpm_signdata
+tpmsigndata=`which tpm_signdata 2>/dev/null`
+if [ -n "$tpmsigndata" ]; then
+  rm -f "$tpmsigndata"
+fi
+ln -s "${package_dir}/bin/tpm_signdata" /usr/local/bin/tpm_signdata
+
 hex2bin_install() {
   return_dir=`pwd`
   cd hex2bin
@@ -243,12 +280,13 @@ fix_libcrypto() {
   local libdir=`dirname $has_libcrypto`
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
+  local has_usrlib_symlink=`find /usr/lib -name libcrypto.so`
   if [ -n "$has_libcrypto" ]; then
     if [ -z "$has_libdir_symlink" ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
     fi
-    if [ -z "$has_usrbin_symlink" ]; then
+    if [ -z "$has_usrbin_symlink" ] && [ -z "$has_usrlib_symlink" ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
     fi
@@ -413,6 +451,7 @@ mkdir -p /etc/monit/conf.d
 cp ta.monit /etc/monit/conf.d/ta.monit
 
 if [ -f /etc/monit/monitrc ]; then
+  mkdir -p /etc/monit.bak
   cp /etc/monit/monitrc /etc/monit.bak/monitrc.$backupdate
 fi
 # backup_file /etc/monit/monitrc
