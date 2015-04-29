@@ -158,6 +158,7 @@ trustagent_uninstall() {
     cp -r /opt/trustagent/configuration/* /var/backup/trustagent.configuration.$datestr
 	rm /usr/local/bin/tagent
     rm -rf /opt/trustagent
+    rm -rf /opt/tbootxm
 }
 
 # stops monit and removes its configuration
