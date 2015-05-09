@@ -172,30 +172,55 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 
 #tpm_nvinfo
 tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
+if [ -z "$tpmnvinfo" ]; then
+  echo_failure "Cannot find tpm_nvinfo"
+  echo_failure "tpm-tools must be installed"
+  exit -1
+fi
 if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
   ln -s "$tpmnvinfo" "${package_dir}/bin"
 fi
 
 #tpm_nvrelease
 tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
+if [ -z "$tpmnvrelease" ]; then
+  echo_failure "Cannot find tpm_nvrelease"
+  echo_failure "tpm-tools must be installed"
+  exit -1
+fi
 if [[ ! -h "${package_dir}/bin/tpm_nvrelease" ]]; then
   ln -s "$tpmnvrelease" "${package_dir}/bin"
 fi
 
 #tpm_nvwrite
 tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
+if [ -z "$tpmnvwrite" ]; then
+  echo_failure "Cannot find tpm_nvwrite"
+  echo_failure "tpm-tools must be installed"
+  exit -1
+fi
 if [[ ! -h "${package_dir}/bin/tpm_nvwrite" ]]; then
   ln -s "$tpmnvwrite" "${package_dir}/bin"
 fi
 
 #tpm_nvread
 tpmnvread=`which tpm_nvread 2>/dev/null`
+if [ -z "$tpmnvread" ]; then
+  echo_failure "Cannot find tpm_nvread"
+  echo_failure "tpm-tools must be installed"
+  exit -1
+fi
 if [[ ! -h "${package_dir}/bin/tpm_nvread" ]]; then
   ln -s "$tpmnvread" "${package_dir}/bin"
 fi
 
 #tpm_nvdefine
 tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
+if [ -z "$tpmnvdefine" ]; then
+  echo_failure "Cannot find tpm_nvdefine"
+  echo_failure "tpm-tools must be installed"
+  exit -1
+fi
 if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
   ln -s "$tpmnvdefine" "${package_dir}/bin"
 fi
