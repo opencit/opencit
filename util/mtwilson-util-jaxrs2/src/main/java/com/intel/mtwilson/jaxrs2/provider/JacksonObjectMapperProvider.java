@@ -12,6 +12,7 @@ import javax.ws.rs.ext.Provider;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.intel.mtwilson.jackson.bouncycastle.BouncyCastleModule;
@@ -62,6 +63,7 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         mapper.registerModule(new BouncyCastleModule());  // this is a good spot for an extension point
         mapper.registerModule(new ValidationModule());  // this is a good spot for an extension point
         return mapper;
