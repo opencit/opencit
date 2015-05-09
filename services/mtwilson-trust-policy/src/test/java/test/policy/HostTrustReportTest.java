@@ -30,6 +30,20 @@ import static org.junit.Assert.*;
  * @author jbuhacoff
  */
 public class HostTrustReportTest {
+    
+    @Test
+    public void computeHistory() {
+
+        Sha1Digest result1 = Sha1Digest.ZERO;
+        
+        result1 = result1.extend(Sha1Digest.valueOf("d2f867d36c99b9c8e9b0de45a73351b06628aeb7"));
+        System.out.println(result1.toString());
+        result1 = result1.extend(Sha1Digest.valueOf("e209744ec7e2cd40aed641f5172d6c0afa3619e7".getBytes()));
+        
+        System.out.println(result1.toString());
+        
+    }
+    
     /**
      * Output:
 Check: PcrMatchesConstant: PCR 0, aabbccddeeaabbccddeeaabbccddeeaabbccddee
