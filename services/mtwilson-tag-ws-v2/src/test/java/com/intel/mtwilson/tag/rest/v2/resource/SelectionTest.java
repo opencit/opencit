@@ -6,7 +6,10 @@ package com.intel.mtwilson.tag.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.tag.model.*;
+import com.intel.mtwilson.tag.Util;
+import com.intel.mtwilson.tag.selection.xml.*;
 import com.intel.mtwilson.tag.rest.v2.repository.SelectionRepository;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -19,6 +22,11 @@ public class SelectionTest {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SelectionTest.class);
         
+    @Test
+    public void testSerializeSelectionXmlWithUtil() throws IOException {
+        SelectionsType selectionsType = new SelectionsType();
+        log.debug("selectionsType: {}", Util.toXml(selectionsType));
+    }
     /*
     @Test
     public void testRetrieveSelectionAsXml() throws Exception {

@@ -34,6 +34,9 @@
                             <schemaIncludes>
                                 <include>jaxb/mtwilson-tag-selection/*.xsd</include>
                             </schemaIncludes>
+                            <bindingIncludes>
+                                <include>jaxb/mtwilson-tag-selection/*.xjb</include>
+                            </bindingIncludes>
                             <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-tag-selection.episode</episodeFile>
                             <generatePackage>com.intel.mtwilson.tag.selection.xml</generatePackage>
                         </configuration>
@@ -46,6 +49,21 @@
                     <forceRegenerate>true</forceRegenerate>
                     <generateDirectory>${project.build.directory}/generated-sources/xjc</generateDirectory>
                     <verbose>true</verbose>
+                    <args>
+                        <arg>-Xannotate</arg>
+                    </args>  
+                    <plugins>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb2_commons</groupId>
+                            <artifactId>jaxb2-basics</artifactId>
+                            <version>0.9.4</version>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.jvnet.jaxb2_commons</groupId>
+                            <artifactId>jaxb2-basics-annotate</artifactId>
+                            <version>1.0.1</version>
+                        </plugin>
+                    </plugins>
                 </configuration>
             </plugin>
             

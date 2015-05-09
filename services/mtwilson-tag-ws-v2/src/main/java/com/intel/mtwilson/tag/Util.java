@@ -55,20 +55,7 @@ public class Util {
     
     public static String toXml(SelectionsType selections) throws IOException {
         try {
-//            return jaxb.write(selections);
-/*
-java.io.IOException: javax.xml.bind.MarshalException
- - with linked exception:
-[com.sun.istack.SAXException2: unable to marshal type "com.intel.mtwilson.tag.selection.xml.SelectionsType" as an element because it is missing an @XmlRootElement annotation]
- * 
- */            
-            return jaxb.write(jaxbObjectFactory.createSelections(selections));
-/*
-java.io.IOException: javax.xml.bind.JAXBException: Provider com.sun.xml.bind.v2.ContextFactory could not be instantiated: javax.xml.bind.JAXBException: "javax.xml.bind" doesnt contain ObjectFactory.class or jaxb.index
- - with linked exception:
-[javax.xml.bind.JAXBException: "javax.xml.bind" doesnt contain ObjectFactory.class or jaxb.index]
- * 
- */            
+            return jaxb.write(selections);
         }
         catch(JAXBException e) {
             throw new IOException(e);
