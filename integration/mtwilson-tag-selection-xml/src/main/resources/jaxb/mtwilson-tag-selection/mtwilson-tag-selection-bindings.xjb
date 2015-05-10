@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<jxb:bindings version="1.0" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:annox="http://annox.dev.java.net" jxb:extensionBindingPrefixes="xjc annox">
+    <jxb:bindings>
+      <jxb:bindings schemaLocation="mtwilson-tag-selection.xsd" node="/xs:schema/xs:complexType[@name='selectionsType']">
+		  <annox:annotate>
+			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="SelectionsType" namespace="urn:mtwilson-tag-selection"/>
+		  </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+</jxb:bindings>

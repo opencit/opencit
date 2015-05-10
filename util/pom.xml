@@ -1,66 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.intel.mtwilson.util</groupId>
     <artifactId>mtwilson-util</artifactId>
     <packaging>pom</packaging>
 
-  <name>Mt Wilson Utility Projects</name>
-  <description>mtwilson-util</description>
+    <description>Mt Wilson Utility Projects are reusable components</description>
 
-	<parent>
-  <groupId>com.intel.mtwilson.maven</groupId>
-  <artifactId>mtwilson-maven-java</artifactId>
-		<version>3.0-SNAPSHOT</version>
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-maven-java</artifactId>
+        <version>3.0-SNAPSHOT</version>
         <relativePath/>
-	</parent>
+    </parent>
   
-  <modules>
-    <module>mtwilson-util-archive</module>
-    <module>mtwilson-util-authz-token</module>
-    <module>mtwilson-util-classpath</module>
-	<module>mtwilson-util-codec</module>
-	<module>mtwilson-util-collection</module>
-	<module>mtwilson-util-configuration</module>
-	<module>mtwilson-util-console</module>
-    <module>mtwilson-util-crypto</module>
-    <module>mtwilson-util-crypto-key</module>
-	<module>mtwilson-util-crypto-password</module>
-	<module>mtwilson-util-dbcp</module>
-	<module>mtwilson-util-exec</module>
-	<module>mtwilson-util-extensions</module>
-    <module>mtwilson-util-http</module>
-	<module>mtwilson-util-i18n</module>
-    <module>mtwilson-util-io</module>
-	<module>mtwilson-util-jackson</module>
-	<module>mtwilson-util-jaxrs2</module>
-	<module>mtwilson-util-jaxrs2-client</module>
-	<module>mtwilson-util-jaxrs2-client-jersey2.0</module>
-	<module>mtwilson-util-jaxrs2-server</module>
-    <module>mtwilson-util-jdbc</module>
-    <module>mtwilson-util-jdbi</module>
-	<module>mtwilson-util-jetty9</module>
-	<module>mtwilson-util-jooq</module>
-    <module>mtwilson-util-jpa</module>
-    <module>mtwilson-util-locale</module>
-	<module>mtwilson-util-logback</module>	
-    <module>mtwilson-util-module</module>
-    <module>mtwilson-util-module-annotations</module>
-    <module>mtwilson-util-net</module>
-	<module>mtwilson-util-objectpool</module>
-	<module>mtwilson-util-patch</module>
-	<module>mtwilson-util-pem</module>
-	<module>mtwilson-util-performance</module>
-	<module>mtwilson-util-pipe</module>
-    <module>mtwilson-util-rfc822</module>
-    <module>mtwilson-util-shiro</module>
-	<module>mtwilson-util-text-transform</module>
-    <module>mtwilson-util-tls-policy</module>
-	<module>mtwilson-util-tpm12</module>
-	<module>mtwilson-util-tree</module>
-	<module>mtwilson-util-validation</module>
-    <module>mtwilson-util-xml</module>
-  </modules>
+    <modules>
+        <module>mtwilson-util-archive</module>
+        <module>mtwilson-util-authz-token</module>
+        <module>mtwilson-util-classpath</module>
+        <module>mtwilson-util-codec</module>
+        <module>mtwilson-util-collection</module>
+        <module>mtwilson-util-configuration</module>
+        <module>mtwilson-util-console</module>
+        <module>mtwilson-util-crypto</module>
+        <module>mtwilson-util-crypto-key</module>
+        <module>mtwilson-util-crypto-password</module>
+        <module>mtwilson-util-dbcp</module>
+        <module>mtwilson-util-exec</module>
+        <module>mtwilson-util-extensions</module>
+        <module>mtwilson-util-http</module>
+        <module>mtwilson-util-i18n</module>
+        <module>mtwilson-util-io</module>
+        <module>mtwilson-util-jackson</module>
+        <module>mtwilson-util-jaxrs2</module>
+        <module>mtwilson-util-jaxrs2-client</module>
+        <module>mtwilson-util-jaxrs2-client-jersey2.0</module>
+        <module>mtwilson-util-jaxrs2-server</module>
+        <module>mtwilson-util-jdbc</module>
+        <module>mtwilson-util-jdbi</module>
+        <module>mtwilson-util-jetty9</module>
+        <module>mtwilson-util-jooq</module>
+        <module>mtwilson-util-jpa</module>
+        <module>mtwilson-util-locale</module>
+        <module>mtwilson-util-logback</module>	
+        <module>mtwilson-util-module</module>
+        <module>mtwilson-util-module-annotations</module>
+        <module>mtwilson-util-net</module>
+        <module>mtwilson-util-objectpool</module>
+        <module>mtwilson-util-patch</module>
+        <module>mtwilson-util-pem</module>
+        <module>mtwilson-util-performance</module>
+        <module>mtwilson-util-pipe</module>
+        <module>mtwilson-util-rfc822</module>
+        <module>mtwilson-util-shiro</module>
+        <module>mtwilson-util-text-transform</module>
+        <module>mtwilson-util-tls-policy</module>
+        <module>mtwilson-util-tpm12</module>
+        <module>mtwilson-util-tree</module>
+        <module>mtwilson-util-validation</module>
+        <module>mtwilson-util-xml</module>
+    </modules>
 
 </project>

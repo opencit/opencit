@@ -5,7 +5,7 @@
     <artifactId>mtwilson-integration</artifactId>
     <packaging>pom</packaging>
 
-    <name>Mt Wilson Integration Projects</name>
+    <description>Mt Wilson Integration Projects include utilities and interfaces necessary to integrate Mt Wilson into various environments</description>
 
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>

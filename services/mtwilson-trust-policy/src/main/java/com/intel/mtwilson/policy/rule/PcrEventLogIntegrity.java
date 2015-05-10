@@ -23,6 +23,8 @@ import com.intel.mtwilson.policy.fault.PcrManifestMissing;
 import com.intel.mtwilson.policy.fault.PcrValueMismatch;
 import com.intel.mtwilson.policy.fault.PcrValueMissing;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The PcrMatchesConstant policy enforces that a specific PCR contains a specific 
@@ -45,6 +47,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PcrEventLogIntegrity extends BaseRule {
+    private Logger log = LoggerFactory.getLogger(getClass());
     private PcrIndex pcrIndex;
     
     protected PcrEventLogIntegrity() { } // for desearializing jackson
@@ -75,6 +78,7 @@ public class PcrEventLogIntegrity extends BaseRule {
                     List<Measurement> measurements = eventLog.getEventLog();
                     if( measurements != null ) {
                         Sha1Digest expectedValue = computeHistory(measurements); // calculate expected' based on history
+                        log.debug("PcrEventLogIntegrity: About to compare {} with {}.", actualValue.getValue().toString(), expectedValue.toString());
                         // make sure the expected pcr value matches the actual pcr value
                         if( !expectedValue.equals(actualValue.getValue()) ) {
                             report.fault(new PcrValueMismatch(pcrIndex, expectedValue, actualValue.getValue()) );
@@ -90,7 +94,9 @@ public class PcrEventLogIntegrity extends BaseRule {
         // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match
         Sha1Digest result = Sha1Digest.ZERO;
         for(Measurement m : list) {
+            log.debug("computeHistory: About to extend {} with {}.", result.toString(), m.getValue().toString());
             result = result.extend(m.getValue());
+            log.debug("computeHistory: Result of extension is {}.", result.toString());
         }
         return result;
     }

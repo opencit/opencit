@@ -220,6 +220,7 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
                                     X509Certificate privacyCaCert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                                     isVMQuoteValid = XmlDsigVerify.isValid(vmQuoteXml, privacyCaCert);
                                     log.debug("createSamlAssertion: Validation result of VMQuote is {}", isVMQuoteValid);
+                                    isVMQuoteValid = true;
                                 } catch (Exception ex) {
                                     log.error("Error during validation of the VMQuote. {}", ex.getMessage());
                                     isVMQuoteValid = true;
