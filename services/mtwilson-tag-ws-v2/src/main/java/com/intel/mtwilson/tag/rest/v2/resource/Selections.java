@@ -149,10 +149,14 @@ public class Selections extends AbstractJsonapiResource<Selection, SelectionColl
         String plaintextFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".xml";
         String encryptedFilePath = Folders.repository("tag") + File.separator + uuid.toString() + ".enc";
         File plaintextFile = new File(plaintextFilePath);
+        File tagDirectory = new File(plaintextFile.getParentFile().getAbsolutePath());
+        if (!tagDirectory.exists())
+            tagDirectory.mkdirs();
+        
         try(FileOutputStream out = new FileOutputStream(plaintextFile)) {
             IOUtils.write(xml, out);
         }
-        String tagCmdPath = Folders.application() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
+        String tagCmdPath = Folders.features() + File.separator + "tag" + File.separator + "bin"; //.getBinPath();
         log.debug("Tag command path: {}", tagCmdPath);
         Process process = Runtime.getRuntime().exec(tagCmdPath+File.separator+"encrypt.sh -p PASSWORD --nopbkdf2 "+ encryptedFilePath+" "+plaintextFilePath, new String[] { "PASSWORD="+configuration.getTagProvisionXmlEncryptionPassword() });
         try { 
