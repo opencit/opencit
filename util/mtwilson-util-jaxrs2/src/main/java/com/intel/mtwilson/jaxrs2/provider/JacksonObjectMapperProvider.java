@@ -7,19 +7,16 @@ package com.intel.mtwilson.jaxrs2.provider;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-//import org.codehaus.jackson.map.ObjectMapper;
-//import org.codehaus.jackson.map.SerializationConfig.Feature;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.intel.mtwilson.jackson.bouncycastle.BouncyCastleModule;
-import com.intel.mtwilson.jackson.validation.ValidationModule;
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
+import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
-//import com.intel.mtwilson.jackson.v2api.V2Module;
+import java.util.List;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -65,9 +62,14 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        mapper.registerModule(new BouncyCastleModule());  // this is a good spot for an extension point
-        mapper.registerModule(new ValidationModule());  // this is a good spot for an extension point
-        //mapper.registerModule(new V2Module());  // this is a good spot for an extension point
+        
+        List<Module> jacksonModules = Extensions.findAll(Module.class);
+        for(Module module : jacksonModules) {
+            mapper.registerModule(module); // for example com.intel.mtwilson.jackson.bouncycastle.BouncyCastleModule, com.intel.mtwilson.jackson.validation.ValidationModule, com.intel.mtwilson.jackson.v2api.V2Module
+        }
+//        mapper.registerModule(new BouncyCastleModule());  // this is a good spot for an extension point
+//        mapper.registerModule(new ValidationModule());  // this is a good spot for an extension point
+//        mapper.registerModule(new V2Module());  // this is a good spot for an extension point
         return mapper;
     }
  
