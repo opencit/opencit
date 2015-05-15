@@ -19,7 +19,7 @@ import com.intel.mtwilson.jackson.bouncycastle.BouncyCastleModule;
 import com.intel.mtwilson.jackson.validation.ValidationModule;
 import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import com.intel.mtwilson.jaxrs2.mediatype.DataMediaType;
-import com.intel.mtwilson.jackson.v2api.V2Module;
+//import com.intel.mtwilson.jackson.v2api.V2Module;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -67,7 +67,7 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
         mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         mapper.registerModule(new BouncyCastleModule());  // this is a good spot for an extension point
         mapper.registerModule(new ValidationModule());  // this is a good spot for an extension point
-        mapper.registerModule(new V2Module());  // this is a good spot for an extension point
+        //mapper.registerModule(new V2Module());  // this is a good spot for an extension point
         return mapper;
     }
  
