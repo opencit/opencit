@@ -88,6 +88,12 @@
             <artifactId>mtwilson-util-validation</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-api</artifactId>
+            <version>${mtwilson.version}</version>
+            <optional>true</optional>
+        </dependency>
 
 		</dependencies>  
     
