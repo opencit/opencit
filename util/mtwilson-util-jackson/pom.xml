@@ -88,7 +88,6 @@
             <artifactId>mtwilson-util-validation</artifactId>
             <optional>true</optional>
         </dependency>
-
 		</dependencies>  
     
 </project>

@@ -6,12 +6,17 @@ package test.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.extensions.Extensions;
 import org.junit.Test;
 import java.util.ArrayList;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import java.util.List;
-
+import org.junit.BeforeClass;
+import com.fasterxml.jackson.databind.Module;
+import com.intel.mtwilson.jackson.bouncycastle.BouncyCastleModule;
+import com.intel.mtwilson.jackson.validation.ValidationModule;
+import com.intel.mtwilson.jackson.v2api.V2Module;
 /**
  *
  * @author jbuhacoff
@@ -19,6 +24,14 @@ import java.util.List;
 public class JsonFaultTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JsonFaultTest.class);
 
+    @BeforeClass
+    public static void registerJacksonModules() {
+        Extensions.register(Module.class, BouncyCastleModule.class);
+        Extensions.register(Module.class, ValidationModule.class);
+        Extensions.register(Module.class, V2Module.class);
+        
+    }
+    
     public static class Bean  {
         public String getName() { return "testbean"; }
         public List<Fault> getFaults() {
