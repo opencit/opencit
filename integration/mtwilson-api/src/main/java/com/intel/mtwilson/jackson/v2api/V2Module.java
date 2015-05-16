@@ -25,6 +25,7 @@ import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import com.intel.mtwilson.datatypes.PCRWhiteList;
 import com.intel.mtwilson.datatypes.PcrLogReport;
 import com.intel.mtwilson.datatypes.PollHostsOutput;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 
 /**
@@ -61,7 +62,7 @@ public class V2Module extends Module {
         sc.setMixInAnnotations(ModuleWhiteList.class, ModuleWhiteListMixIn.class);
         sc.setMixInAnnotations(PCRWhiteList.class, PCRWhiteListMixIn.class);
         sc.setMixInAnnotations(PcrLogReport.class, PcrLogReportMixIn.class);
-        sc.setMixInAnnotations(PollHostsOutput.class, PollHostsOutputMixIn.class);
+        sc.setMixInAnnotations(TxtHostRecord.class, TxtHostRecordMixIn.class);
         sc.setMixInAnnotations(TxtHostRecordList.class, TxtHostRecordListMixIn.class);
     }
 }
