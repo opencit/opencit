@@ -99,7 +99,7 @@ if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -
 # packages to install must be in current directory
 #JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
-JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+JAVA_PACKAGE=`ls -1 jdk-* jre-* java-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
 groupadd trustagent >> $logfile  2>&1
