@@ -16,3 +16,12 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # SCRIPT EXECUTION
 java_install $JAVA_PACKAGE
 
+if [ -f "/usr/local/bin/java" ]; then
+  rm -f "/usr/local/bin/java"
+fi
+ln -s "$JAVA_HOME/bin/java" "/usr/local/bin/java"
+
+if [ -f "/usr/local/bin/keytool" ]; then
+  rm -f "/usr/local/bin/keytool"
+fi
+ln -s "$JAVA_HOME/bin/keytool" "/usr/local/bin/keytool"
