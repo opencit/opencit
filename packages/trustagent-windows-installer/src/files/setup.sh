@@ -4,9 +4,9 @@
 # *** TABS will cause errors in some linux distributions
 
 # SCRIPT CONFIGURATION:
-intel_conf_dir=/etc/intel/cloudsecurity
 package_name=trustagent
-package_dir=/opt/intel/cloudsecurity/${package_name}
+package_dir=/opt/trustagent
+intel_conf_dir=/opt/trustagent/configuration
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=/root/${package_name}.env
 package_version_filename=/opt/trustagent/env.d/trustagent.version
@@ -14,16 +14,9 @@ ASSET_TAG_SETUP="y"
 
 logfile=/var/log/trustagent/install.log
 
-#java_required_version=1.7.0_51
-# commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip"
-# commented out from apt packages: libcurl4-openssl-dev 
+# Dependency libraries
 APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip"
-# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
-APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip"
-# SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
-APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel"
-# other packages in suse:  libopenssl0_9_8 
+
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
@@ -83,18 +76,7 @@ if [ -f "$existing_tagent" ]; then
   $existing_tagent stop
 fi
 
-### INSTALL MEASUREMENT AGENT
-echo "Installing measurement agent..."
-TBOOTXM_PACKAGE=`ls -1 tbootxm-linux-makeself-*.bin 2>/dev/null | tail -n 1`
-if [ -z "$TBOOTXM_PACKAGE" ]; then
-  echo_failure "Failed to find measurement agent installer package"
-  exit -1
-fi
-./$TBOOTXM_PACKAGE
-if [ $? -ne 0 ]; then echo_failure "Failed to install measurement agent"; exit -1; fi
-
 ##### create directory structure
-
 
 # packages to install must be in current directory
 #JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
@@ -108,15 +90,9 @@ useradd -d /opt/trustagent -r -s /bin/false -g trustagent trustagent >> $logfile
 mkdir -p /opt/trustagent
 unzip -DD -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
 mkdir -p /opt/trustagent/var
-chown -R trustagent:trustagent /opt/trustagent
-chown -R root /opt/trustagent/bin
-chown -R root /opt/trustagent/java
-chown -R root /opt/trustagent/configuration
 mkdir -p /var/log/trustagent
-chown trustagent:trustagent /var/log/trustagent
-chmod -R 755 /opt/trustagent/bin
 mkdir -p /opt/trustagent/env.d
-chown -R root /opt/trustagent/env.d
+
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
 # copy it to our new env.d folder so it will be available to tagent on startup
@@ -127,30 +103,7 @@ elif [ -n "$VIRSH_DEFAULT_CONNECT_URI" ]; then
 fi
 
 # Migrate any old data to the new locations  (should be rewritten in java)
-v1_aik=/etc/intel/cloudsecurity/cert
-v2_aik=/opt/trustagent/configuration
-v1_conf=/etc/intel/cloudsecurity
-v2_conf=/opt/trustagent/configuration
-if [ -d "$v1_aik" ]; then
-  cp $v1_aik/aikblob.dat $v2_aik/aik.blob
-  cp $v1_aik/aikcert.pem $v2_aik/aik.pem
-fi
-if [ -d "$v1_conf" ]; then
-  # find the existing tpm owner and aik secrets
-  TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${v1_conf}/hisprovisioner.properties`
-  HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${v1_conf}/hisprovisioner.properties`
-  TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${v1_conf}/trustagent.properties`
-  HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${v1_conf}/trustagent.properties`
-  if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
-    export TPM_OWNER_SECRET=$TpmOwnerAuth_121
-  elif [ -n "$TpmOwnerAuth_122" ]; then
-    export TPM_OWNER_SECRET=$TpmOwnerAuth_122
-  fi
-  if [ -z "$HisIdentityAuth_122" ] && [ -n "$HisIdentityAuth_121" ]; then
-    export AIK_SECRET=$HisIdentityAuth_121
-  elif [ -n "$HisIdentityAuth_122" ]; then
-    export AIK_SECRET=$HisIdentityAuth_122
-  fi
+
 
   # now copy the keystore and the keystore password
   KeystorePassword_122=`read_property_from_file trustagent.keystore.password ${v1_conf}/trustagent.properties`
@@ -160,15 +113,6 @@ if [ -d "$v1_conf" ]; then
       cp $v1_conf/trustagent.jks $v2_conf
     fi
   fi
-fi
-
-# Redefine the variables to the new locations
-
-intel_conf_dir=/opt/trustagent/configuration
-package_dir=/opt/trustagent
-package_config_filename=${intel_conf_dir}/${package_name}.properties
-
-
 
 #tpm_nvinfo
 tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
