@@ -29,7 +29,7 @@ TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
 TRUSTAGENT_CONF=${TRUSTAGENT_CONF:-/opt/trustagent/configuration}
 TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-/opt/trustagent/java}
 TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
-TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
+TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env}
 TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
 TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
 TRUSTAGENT_HTTP_LOG_FILE=/var/log/trustagent/http.log
@@ -54,8 +54,13 @@ if [ -d $TRUSTAGENT_ENV ]; then
 fi
 
 # load linux utility
-if [ -f "$TRUSTAGENT_HOME/linux-util/functions" ]; then
-  . $TRUSTAGENT_HOME/linux-util/functions
+if [ -f "$TRUSTAGENT_BIN/functions" ]; then
+  . $TRUSTAGENT_BIN/functions
+fi
+
+if [ -z "$JAVA_CMD" ]; then
+  echo_failure "Cannot find java binary from values in $TRUSTAGENT_ENV"
+  exit -1
 fi
 
 ###################################################################################################
@@ -80,7 +85,7 @@ trustagent_setup() {
   elif [ "$tasklist" == "--force" ]; then
     tasklist="$TRUSTAGENT_SETUP_TASKS --force"
   fi
-  java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main setup configure-from-environment $tasklist
+  "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main setup configure-from-environment $tasklist
   return $?
 }
 
@@ -104,7 +109,7 @@ trustagent_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd /opt/trustagent
-      java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main start-http-server >>$TRUSTAGENT_HTTP_LOG_FILE 2>&1 &
+      "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main start-http-server >>$TRUSTAGENT_HTTP_LOG_FILE 2>&1 &
       echo $! > $TRUSTAGENT_PID_FILE
     )
     if trustagent_is_running; then
@@ -258,7 +263,7 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
-      java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $*
+      "$JAVA_CMD" $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $*
     fi
     ;;
 esac

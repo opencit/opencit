@@ -54,13 +54,20 @@
                     <artifactId>mtwilson-linux-util</artifactId>
                     <version>${project.version}</version>
                     <type>sh</type>
-                </dependency>	
-                <dependency>
+                </dependency>
+                <!-- Bug #4244: replaced oracle downloaded bin installer for jdk 1.7 with mtwilson build java installer bin to support fedora -->				
+                <!--<dependency>
                     <groupId>com.oracle</groupId>
                     <artifactId>jdk</artifactId>
                     <version>1.7.0_51</version>
                     <type>bin</type>
                     <classifier>linux-x64</classifier>
+                </dependency>-->
+                <dependency>
+                    <groupId>com.intel.mtwilson.linux</groupId>
+                    <artifactId>java</artifactId>
+                    <version>1.7.0_51</version>
+                    <type>bin</type>
                 </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
@@ -102,7 +109,8 @@
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>functions</destFileName>
                                         </artifactItem>
-                                        <artifactItem>
+                                        <!-- Bug #4244: replaced oracle downloaded bin installer for jdk 1.7 with mtwilson build java installer bin to support fedora -->
+                                        <!--<artifactItem>
                                             <groupId>com.oracle</groupId>
                                             <artifactId>jdk</artifactId>
                                             <version>1.7.0_51</version>
@@ -110,6 +118,14 @@
                                             <classifier>linux-x64</classifier>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>jdk-1.7.0_51-linux-x64.bin</destFileName>
+                                        </artifactItem>-->
+                                        <artifactItem>
+                                            <groupId>com.intel.mtwilson.linux</groupId>
+                                            <artifactId>java</artifactId>
+                                            <version>1.7.0_51</version>
+                                            <type>bin</type>
+                                            <outputDirectory>${makeself.directory}</outputDirectory>
+                                            <destFileName>java-1.7.0_51.bin</destFileName>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.tbootxm.packages</groupId>

@@ -15,4 +15,3 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 
 # SCRIPT EXECUTION
 java_install $JAVA_PACKAGE
-
