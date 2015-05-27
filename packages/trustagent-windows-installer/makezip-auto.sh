@@ -1,5 +1,5 @@
 #!/bin/bash
-# makebin-auto.sh - creates a self-extracting installer
+# makezip-auto.sh - create a zip archive
 # how it works:
 # 1. in the maven pom.xml, you add a maven-dependency-plugin to copy into the target folder ${project.build.directory} all the artifacts to install
 # 2. in the maven pom.xml, you add a exec-maven-plugin to run this script
@@ -33,4 +33,5 @@ if [ -z "$makezip" ]; then
 fi
 
 export TMPDIR=~/.tmp
-$makezip -r "$targetDir/${projectNameVersion}.zip" "$workspace"
+cd $targetDir
+$makezip -r "${projectNameVersion}.zip" "${projectNameVersion}"
