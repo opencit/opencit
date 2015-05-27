@@ -200,7 +200,7 @@ elif [ -n "$VIRSH_DEFAULT_CONNECT_URI" ]; then
   echo "export VIRSH_DEFAULT_CONNECT_URI=$VIRSH_DEFAULT_CONNECT_URI" > $TRUSTAGENT_ENV/trustagent-virsh
 fi
 
-cp version $TRUSTAGENT_ENV/trustagent-version
+cp version $TRUSTAGENT_CONFIGURATION/trustagent.version
 
 # store the auto-exported environment variables in env file
 # to make them available after the script uses sudo to switch users;
@@ -281,7 +281,7 @@ fi
 # delete existing java files, to prevent a situation where the installer copies
 # a newer file but the older file is also there
 if [ -d $TRUSTAGENT_HOME/java ]; then
-  rm $TRUSTAGENT_HOME/java/*.jar
+  rm $TRUSTAGENT_HOME/java/*.jar 2>/dev/null
 fi
 
 # extract trustagent  (trustagent-zip-0.1-SNAPSHOT.zip)
