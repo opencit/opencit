@@ -54,8 +54,8 @@ if [ -d $TRUSTAGENT_ENV ]; then
 fi
 
 # load linux utility
-if [ -f "$TRUSTAGENT_HOME/linux-util/functions" ]; then
-  . $TRUSTAGENT_HOME/linux-util/functions
+if [ -f "$TRUSTAGENT_BIN/functions" ]; then
+  . $TRUSTAGENT_BIN/functions
 fi
 
 if [ -z "$JAVA_CMD" ]; then
