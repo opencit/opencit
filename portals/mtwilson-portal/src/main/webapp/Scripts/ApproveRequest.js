@@ -121,7 +121,10 @@ function fnGetRequestVOForApprovalOrReject() {
 }
 
 function approveSelectedRequestSuccess(responseJSON) {
-	alert($("#alert_request_approved").text());
+        if(responseJSON.result == false)
+            alert(responseJSON.message);
+        else
+            alert($("#alert_request_approved").text());
 	getApproveRequestPage();
 }
 

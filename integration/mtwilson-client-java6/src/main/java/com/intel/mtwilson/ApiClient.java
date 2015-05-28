@@ -505,8 +505,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         log.trace("Content: {}", response.content);
         if( response.httpStatusCode == HttpStatus.SC_OK ) {
             return response.content;
-        }
-        else {
+        } else if (response.httpStatusCode == HttpStatus.SC_NO_CONTENT) {
+            return new byte[0];
+        } else {
             throw error(response);
         }
     }
@@ -1281,16 +1282,21 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
 
     @Override
     public boolean updateApiClient(ApiClientUpdateRequest apiClient) throws IOException, ApiException, SignatureException {
-        httpPut(msurl("/apiclient"), toJSON(apiClient));
-        return true; 
+        String result = text(httpPut(msurl("/apiclient"), toJSON(apiClient)));
+        log.debug("updateApiClient: result is {}.", result);
+        return "OK".equals(result); 
     }
 
     @Override
     public boolean deleteApiClient(byte[] fingerprint) throws IOException, ApiException, SignatureException {
 //        String fingerprintBase64 = new String(Base64.encodeBase64(fingerprint));
         String fingerprintHex = new String(Hex.encodeHex(fingerprint));
-        httpDelete(msurl(String.format("/apiclient?fingerprint=%s", fingerprintHex)));
-        return true;
+        String result = text(httpDelete(msurl(String.format("/apiclient?fingerprint=%s", fingerprintHex))));
+        log.debug("deleteApiClient: result is {}.", result);
+        if (result.isEmpty()) 
+            return true;
+        else 
+            return false;        
     }
 
     @Override
