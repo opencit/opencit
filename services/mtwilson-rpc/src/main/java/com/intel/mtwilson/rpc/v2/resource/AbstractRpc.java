@@ -57,7 +57,7 @@ public class AbstractRpc {
         Object inputObject;
         // convert the client's input into our internal format
         try {
-            String inputAccept = RpcUtil.getPreferredTypeFromAccept(request.getHeader(HttpHeaders.ACCEPT));
+            String inputAccept = RpcUtil.getPreferredTypeFromAccept(request.getHeader(HttpHeaders.CONTENT_TYPE));
             log.debug("Client prefers content type: {}", inputAccept);
             MediaType inputMediaType = MediaType.valueOf(inputAccept);
 
