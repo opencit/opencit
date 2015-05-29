@@ -2780,11 +2780,11 @@ tomcat_install() {
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
       local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
       if [ -d "$tomcat_folder" ]; then
-        if [ -d "/usr/share/$tomcat_folder" ]; then
-          echo "Tomcat already installed at /usr/share/$tomcat_folder"
-          export TOMCAT_HOME="/usr/share/$tomcat_folder"
+        if [ -d "/opt/mtwilson/$tomcat_folder" ]; then
+          echo "Tomcat already installed at /opt/mtwilson/$tomcat_folder"
+          export TOMCAT_HOME="/opt/mtwilson/$tomcat_folder"
         else
-          mv $tomcat_folder /usr/share && export TOMCAT_HOME="/usr/share/$tomcat_folder"
+          mv $tomcat_folder /opt/mtwilson && export TOMCAT_HOME="/opt/mtwilson/$tomcat_folder"
         fi
       fi
       tomcat_detect
