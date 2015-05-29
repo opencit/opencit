@@ -1293,10 +1293,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         String fingerprintHex = new String(Hex.encodeHex(fingerprint));
         String result = text(httpDelete(msurl(String.format("/apiclient?fingerprint=%s", fingerprintHex))));
         log.debug("deleteApiClient: result is {}.", result);
-        if (result.isEmpty()) 
-            return true;
-        else 
-            return false;        
+        return result.isEmpty();        
     }
 
     @Override
