@@ -14,7 +14,27 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+$MTW_HOME=/opt/mtwilson
+export MTW_USERNAME=mtw
+
+#if [ -z "$MTW_USERNAME" ]; then
+#  kms_load_env $KMS_HOME/env.d/mtw-username
+#fi
+
+###################################################################################################
+
+# if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
+# we make an exception for the uninstall command, which may require root access to delete users and certain directories
+if [ -n "$MTW_USERNAME" ] && [ "$MTW_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "uninstall" ]; then
+  sudo -u $MTW_USERNAME MTW_USERNAME=$MTW_USERNAME MTW_HOME=$MTW_HOME MTW_SUDO=true mtwilson $*
+  exit $?
+fi
+
+###################################################################################################
+
+
 # SCRIPT CONFIGURATION:
+#share_dir=/opt/mtwilson/share/scripts
 share_dir=/usr/local/share/mtwilson/util
 apiclient_dir=/usr/local/share/mtwilson/apiclient
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
@@ -22,13 +42,25 @@ setupconsole_dir=/opt/mtwilson/java
 apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
+pid_dir=/var/run/mtwilson
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
-#java_required_version=1.7.0_51
-MTWILSON_PID_FILE=/var/run/mtwilson.pid
-MTWILSON_PID_WAIT_FILE=/var/run/mtwilson.pid.wait
-
+#java_required_version=1.7.0_51    
+if [ -d $pid_dir ] && [ -w $pid_dir ]; then
+    MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
+    MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+else
+   #TODO: Check the mtwilson.env before creating a dir in $MTWILSON_HOME
+   #create a directory in MTWILSON_HOME/var/run/
+    if [ ! -d $MTW_HOME/var/run ]; then
+	    mkdir -p $MTW_HOME/var/run
+	    MTWILSON_PID_FILE=$MTW_HOME/var/run/mtwilson.pid
+        MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+    fi
+fi
+		
+      
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
 if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
