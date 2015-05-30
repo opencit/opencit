@@ -311,7 +311,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-        rm /usr/local/bin/${script_name} 2>/dev/null
+        rm /opt/mtwilson/bin/${script_name} 2>/dev/null
         ;;
   saml-createkey)
         create_saml_key

@@ -567,7 +567,15 @@ if [ $currentUser == "root" ]; then
         fi
       fi
     fi
+else
+ if using_mysql; then
+  echo "mysql"
+  #TODO
+ elif using_postgres; then
+  postgres_detect
+ fi
 fi
+
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
