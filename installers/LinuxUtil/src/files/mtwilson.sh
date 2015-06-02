@@ -47,19 +47,24 @@ pid_dir=/var/run/mtwilson
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51    
-if [ -d $pid_dir ] && [ -w $pid_dir ]; then
-    MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
-    MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
-else
-   #TODO: Check the mtwilson.env before creating a dir in $MTWILSON_HOME
-   #create a directory in MTWILSON_HOME/var/run/
-    if [ ! -d $MTW_HOME/var/run ]; then
-	    mkdir -p $MTW_HOME/var/run
-	    MTWILSON_PID_FILE=$MTW_HOME/var/run/mtwilson.pid
+
+if [ -z $MTWILSON_PID_FILE ]; then
+    if [ -d $pid_dir ] && [ -w $pid_dir ]; then
+        MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
         MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
-    fi
-fi
-		
+	elif [ -f ./mtwilson.env ]; then
+	      #Look up in the mtwilson.env file
+   	      MTWILSON_PID_FILE=$(cat ~/mtwilson.env | grep -E 'MTWILSON_PID_FILE' | cut -d = -f 2)
+	      MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	else
+        #create a directory in MTWILSON_HOME/var/run/
+        if [ ! -d $MTW_HOME/var/run ]; then
+	        mkdir -p $MTW_HOME/var/run
+	        MTWILSON_PID_FILE=$MTW_HOME/var/run/mtwilson.pid
+            MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+        fi
+	fi
+fi		
       
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi

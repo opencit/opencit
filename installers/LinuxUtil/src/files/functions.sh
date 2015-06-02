@@ -891,7 +891,7 @@ hostaddress() {
 ssh_fingerprints() {
   local has_ssh_keygen=`which ssh-keygen 2>/dev/null`
   if [ -z "$has_ssh_keygen" ]; then echo_warning "missing program: ssh-keygen"; return; fi
-  local ssh_pubkeys=`find /etc -name ssh_host_*.pub`
+  local ssh_pubkeys=`find /etc -name ssh_host_*.pub 2>/dev/null`
   for file in $ssh_pubkeys
   do
     local keybits=`ssh-keygen -lf "$file" | awk '{ print $1 }'`
@@ -2470,7 +2470,7 @@ glassfish_create_ssl_cert_prompt() {
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       glassfish_require
-      DEFAULT_GLASSFISH_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      DEFAULT_GLASSFISH_SSL_CERT_CN=`/sbin/ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
       prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_GLASSFISH_SSL_CERT_CN:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     fi
