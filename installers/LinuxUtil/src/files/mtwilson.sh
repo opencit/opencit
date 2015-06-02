@@ -15,7 +15,7 @@
 # *** TABS will cause errors in some linux distributions
 
 # SCRIPT CONFIGURATION:
-share_dir=/usr/local/share/mtwilson/util
+#share_dir=/usr/local/share/mtwilson/util
 apiclient_dir=/usr/local/share/mtwilson/apiclient
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 setupconsole_dir=/opt/mtwilson/java
@@ -30,8 +30,8 @@ MTWILSON_PID_FILE=/var/run/mtwilson.pid
 MTWILSON_PID_WAIT_FILE=/var/run/mtwilson.pid.wait
 
 # FUNCTION LIBRARY and VERSION INFORMATION
-if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
-if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
+if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
+if [ -f /opt/mtwilson/configuration/version ]; then  . /opt/mtwilson/configuration/version; else  echo_warning "Missing file: /opt/mtwilson/configuration/version"; fi
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf runs ExportConfig and if that same command is passed in from 'mtwilson setup', it won't work

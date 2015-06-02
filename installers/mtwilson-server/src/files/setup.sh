@@ -5,11 +5,15 @@
 
 # equivalent to env_dir in mtwilson.sh
 MTWILSON_ENV_DIR=/opt/mtwilson/env.d
-
+MTWILSON_HOME=/opt/mtwilson
+MTWILSON_LOG=$MTWILSON_HOME/log
 currentUser=`whoami`
 
 if [ ! -d $MTWILSON_ENV_DIR ]; then
   mkdir -p $MTWILSON_ENV_DIR
+fi
+if [ ! d $MTWILSON_LOG ]; then
+  mkdir -p $MTWILSON_LOG
 fi
 
 rm -rf /opt/mtwilson/java 2>/dev/null
@@ -37,6 +41,27 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
+
+# determine if we are installing as root or non-root
+if [ "$(whoami)" == "root" ]; then
+  # create a mtwilson user if there isn't already one created
+  MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
+  if ! getent passwd $MTWILSON_USERNAME 2>&1 >/dev/null; then
+    useradd --comment "Mt Wilson mtwilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
+    usermod --lock $MTWILSON_USERNAME
+    # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $MTWILSON_USERNAME"
+  fi
+else
+  # already running as mtwilson user
+  MTWILSON_USERNAME=$(whoami)
+  echo_warning "Running as $MTWILSON_USERNAME; if installation fails try again as root"
+  if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
+    export MTWILSON_HOME=$(cd ~ && pwd)
+  fi
+fi
+#Review: Do we really need to export MTWILSON_USERNAME?
+export MTWILSON_USERNAME=$MTWILSON_USERNAME
+echo "export MTWILSON_USERNAME=$MTWILSON_USERNAME" >> $MTWILSON_ENV_DIR/mtwilson-username
 
 mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
 as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"

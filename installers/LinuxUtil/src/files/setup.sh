@@ -4,11 +4,13 @@
 # *** TABS will cause errors in some linux distributions
 
 mkdir -p /opt/mtwilson/share/scripts
+mkdir -p /opt/mtwilson/configuration
 mkdir -p /opt/mtwilson/bin
+
 #chmod 700 /usr/local/share/mtwilson/util
 #functions.sh neeeds to be sourced from mtwilson.sh
 cp functions.sh /opt/mtwilson/share/scripts/functions
-cp version /opt/mtwilson/bin/version
+cp version /opt/mtwilson/configuration/version
 cp mtwilson.sh /opt/mtwilson/bin/mtwilson
 chmod +x /opt/mtwilson/bin/mtwilson
 
