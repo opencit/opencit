@@ -3657,11 +3657,8 @@ webservice_install() {
 
 webservice_uninstall() {
   local webservice_application_name="$1"
-  echo "0000"
   webservice_running "${webservice_application_name}"
-  echo "1"
   webservice_require
-  echo "2"
   local WAR_NAME="${webservice_application_name}.war"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then

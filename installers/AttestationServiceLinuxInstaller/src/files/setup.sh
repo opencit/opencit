@@ -119,7 +119,7 @@ fi
 
 #change user if root "CODE REVIEW"
 if [ `whoami` == "root" ]; then
- chown -R $MTWILSON_OWNER "${package_var_dir}"
+ chown -R $MTWILSON_USERNAME "${package_var_dir}"
  chmod -R 700 "${package_var_dir}"
  chmod -R 600 "${package_var_dir}/data"
 

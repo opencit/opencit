@@ -16,7 +16,9 @@ chmod +x /opt/mtwilson/bin/mtwilson
 
 #If user is root then create mtwilson symlink to /usr/local/bin otherwise export path '$MTWILSON_HOME/bin'
 if [ `whoami` == "root" ]; then
- mkdir -p /usr/local/bin
+ if [ ! -d /usr/local/bin ]; then
+   mkdir -p /usr/local/bin
+ fi
  #Remove symbolic link if already exist
  rm /usr/local/bin/mtwilson
  ln -s /opt/mtwilson/bin/mtwilson /usr/local/bin/mtwilson
