@@ -72,11 +72,11 @@ fi
 
 
 # copy control script to /usr/local/bin and finish setup
-mkdir -p /usr/local/bin
-cp wlmctl.sh /usr/local/bin/wlmctl
-chmod +x /usr/local/bin/wlmctl
-/usr/local/bin/wlmctl setup
-#register_startup_script /usr/local/bin/wlmctl wlmctl
+mkdir -p /opt/mtwilson/bin
+cp wlmctl.sh /opt/mtwilson/bin/wlmctl
+chmod +x /opt/mtwilson/bin/wlmctl
+/opt/mtwilson/bin/wlmctl setup
+#register_startup_script /opt/mtwilson/bin/wlmctl wlmctl
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

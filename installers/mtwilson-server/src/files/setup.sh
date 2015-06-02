@@ -207,16 +207,22 @@ fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
-
 echo "Installing packages: $LIST"
 if [ $currentUser == "root" ]; then 
- APICLIENT_YUM_PACKAGES="zip unzip openssl"
- APICLIENT_APT_PACKAGES="zip unzip openssl"
- APICLIENT_YAST_PACKAGES="zip unzip openssl"
- APICLIENT_ZYPPER_PACKAGES="zip unzip openssl"
+ APICLIENT_YUM_PACKAGES="zip unzip openssl authbind"
+ APICLIENT_APT_PACKAGES="zip unzip openssl authbind"
+ APICLIENT_YAST_PACKAGES="zip unzip openssl authbind"
+ APICLIENT_ZYPPER_PACKAGES="zip unzip openssl authbind"
  auto_install "Installer requirements" "APICLIENT"
 else
  echo "Assuming that packages zip, unzip and openssl are installed already"
+fi
+
+# setup authbind to allow non-root mtwilson to listen on ports 80 and 443
+if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+  touch /etc/authbind/byport/80 /etc/authbind/byport/443
+  chmod 500 /etc/authbind/byport/80 /etc/authbind/byport/443
+  chown $MTWILSON_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
 fi
 
 # api client: ensure destination exists and clean it before copying
@@ -1047,6 +1053,3 @@ echo "Log file for install is located at $INSTALL_LOG_FILE"
 if [ -n "$INSTALLED_MARKER_FILE" ]; then
  touch $INSTALLED_MARKER_FILE
 fi
-
-
-
