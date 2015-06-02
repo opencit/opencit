@@ -5,15 +5,15 @@
 
 # equivalent to env_dir in mtwilson.sh
 MTWILSON_ENV_DIR=/opt/mtwilson/env.d
-
+MTWILSON_HOME=/opt/mtwilson
+MTWILSON_LOG=$MTWILSON_HOME/log
 currentUser=`whoami`
-if [ ! $currentUser == "root" ]; then
- echo_failure "You must be root user to install Mt Wilson."
- exit -1
-fi
 
 if [ ! -d $MTWILSON_ENV_DIR ]; then
   mkdir -p $MTWILSON_ENV_DIR
+fi
+if [ ! d $MTWILSON_LOG ]; then
+  mkdir -p $MTWILSON_LOG
 fi
 
 rm -rf /opt/mtwilson/java 2>/dev/null
@@ -41,6 +41,27 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
+
+# determine if we are installing as root or non-root
+if [ "$(whoami)" == "root" ]; then
+  # create a mtwilson user if there isn't already one created
+  MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
+  if ! getent passwd $MTWILSON_USERNAME 2>&1 >/dev/null; then
+    useradd --comment "Mt Wilson mtwilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
+    usermod --lock $MTWILSON_USERNAME
+    # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $MTWILSON_USERNAME"
+  fi
+else
+  # already running as mtwilson user
+  MTWILSON_USERNAME=$(whoami)
+  echo_warning "Running as $MTWILSON_USERNAME; if installation fails try again as root"
+  if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
+    export MTWILSON_HOME=$(cd ~ && pwd)
+  fi
+fi
+#Review: Do we really need to export MTWILSON_USERNAME?
+export MTWILSON_USERNAME=$MTWILSON_USERNAME
+echo "export MTWILSON_USERNAME=$MTWILSON_USERNAME" >> $MTWILSON_ENV_DIR/mtwilson-username
 
 mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
 as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
@@ -188,13 +209,15 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 
 echo "Installing packages: $LIST"
-
-APICLIENT_YUM_PACKAGES="zip unzip openssl"
-APICLIENT_APT_PACKAGES="zip unzip openssl"
-APICLIENT_YAST_PACKAGES="zip unzip openssl"
-APICLIENT_ZYPPER_PACKAGES="zip unzip openssl"
-auto_install "Installer requirements" "APICLIENT"
-
+if [ $currentUser == "root" ]; then 
+ APICLIENT_YUM_PACKAGES="zip unzip openssl"
+ APICLIENT_APT_PACKAGES="zip unzip openssl"
+ APICLIENT_YAST_PACKAGES="zip unzip openssl"
+ APICLIENT_ZYPPER_PACKAGES="zip unzip openssl"
+ auto_install "Installer requirements" "APICLIENT"
+else
+ echo "Assuming that packages zip, unzip and openssl are installed already"
+fi
 
 # api client: ensure destination exists and clean it before copying
 #mkdir -p /usr/local/share/mtwilson/apiclient/java
@@ -208,8 +231,7 @@ auto_install "Installer requirements" "APICLIENT"
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
-chmod 600 /etc/intel/cloudsecurity/*.properties 2>/dev/null
-if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
+chmod 666 /etc/intel/cloudsecurity/*.properties 2>/dev/nullif [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
   default_mtwilson_tls_policy_id="$MTW_DEFAULT_TLS_POLICY_ID"   #`read_property_from_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ "$default_mtwilson_tls_policy_id" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_id" == "TRUST_FIRST_CERTIFICATE" ]; then
     #update_property_in_file "mtwilson.default.tls.policy.id" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
@@ -224,7 +246,7 @@ if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
   #fi
 else
     touch /etc/intel/cloudsecurity/mtwilson.properties
-    chmod 600 /etc/intel/cloudsecurity/mtwilson.properties
+    chmod 666 /etc/intel/cloudsecurity/mtwilson.properties
     export mtwilson_tls_keystore_password=`generate_password 32`
     export MTW_TLS_KEYSTORE_PASS="$mtwilson_tls_keystore_password"
 #    update_property_in_file "mtwilson.tls.policy.allow" /etc/intel/cloudsecurity/mtwilson.properties "certificate,certificate-digest"
@@ -294,14 +316,14 @@ update_property_in_file "dbcp.validation.on.return" /etc/intel/cloudsecurity/mtw
 
 
 # copy default logging settings to /etc
-chmod 600 logback.xml
+chmod 666 logback.xml
 cp logback.xml /etc/intel/cloudsecurity
-chmod 600 logback-stderr.xml
+chmod 666 logback-stderr.xml
 cp logback-stderr.xml /etc/intel/cloudsecurity
 
 # copy shiro.ini api security file
 if [ ! -f /etc/intel/cloudsecurity/shiro.ini ]; then
-  chmod 600 shiro.ini shiro-localhost.ini
+  chmod 666 shiro.ini shiro-localhost.ini
   cp shiro.ini shiro-localhost.ini /etc/intel/cloudsecurity
 fi
 
@@ -332,7 +354,7 @@ fi
 
 # copy extensions.cache file
 if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 600 extensions.cache
+  chmod 666 extensions.cache
   cp extensions.cache /opt/mtwilson/configuration
 fi
 
@@ -442,133 +464,141 @@ echo
 if [[ -z "$opt_postgres" && -z "$opt_mysql" ]]; then
  echo_warning "Relying on an existing database installation"
 fi
+if [ $currentUser == "root" ]; then
+    if using_mysql; then
+      mysql_userinput_connection_properties
+      export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
 
-if using_mysql; then
-  mysql_userinput_connection_properties
-  export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
-
-  # Install MySQL server (if user selected localhost)
-  if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
-  if [ ! -z "$opt_mysql" ]; then
-      # Place mysql server install code here
-    echo "Installing mysql server..."
-    aptget_detect; dpkg_detect;
-    if [[ -n "$aptget" ]]; then
-      echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
-      echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
-    fi 
-    mysql_server_install 
-    mysql_start >> $INSTALL_LOG_FILE
-      echo "Installation of mysql server complete..."
-    # End mysql server install code here
-  else
-    echo_warning "Using existing mysql install"
-  fi
-  fi
-  # mysql client install here
-  echo "Installing mysql client..."
-  mysql_install  
-  echo "Installation of mysql client complete..."
-  # mysql client end 
-  
-  if [ -z "$SKIP_DATABASE_INIT" ]; then
-    # mysql db init here
-    if ! mysql_create_database; then
-      mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
-      mysqladmin -u "$MYSQL_USERNAME" password "$MYSQL_PASSWORD"
-      mysql_create_database
-    fi
-    # mysql db init end
-  else
-    echo_warning "Skipping init of database"
-  fi 
-  
-  export is_mysql_available mysql_connection_error
-  if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
-  
-elif using_postgres; then
-  postgres_installed=1
-  # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
-  if [ -d "/etc/apt" ]; then
-    mkdir -p /etc/apt/trusted.gpg.d
-    chmod 755 /etc/apt/trusted.gpg.d
-    cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
-    POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
-    add_postgresql_install_packages "POSTGRES_SERVER"
-  fi
-
-  postgres_userinput_connection_properties
-  touch ~/.pgpass
-  chmod 0600 ~/.pgpass
-  export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-  if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
-    PGPASS_HOSTNAME=localhost
-  else
-    PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
-  fi
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
-  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
-
-  if [ ! -z "$opt_postgres" ]; then
-    # postgres server install 
-
-    # Install Postgres server (if user selected localhost)
-    if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
-      echo "Installing postgres server..."
-      # when we install postgres server on ubuntu it prompts us for root pw
-      # we preset it so we can send all output to the log
-      aptget_detect; dpkg_detect; yum_detect;
-      if [[ -n "$aptget" ]]; then
-       echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
+      # Install MySQL server (if user selected localhost)
+      if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
+      if [ ! -z "$opt_mysql" ]; then
+          # Place mysql server install code here
+        echo "Installing mysql server..."
+        aptget_detect; dpkg_detect;
+        if [[ -n "$aptget" ]]; then
+          echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
+          echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
+        fi 
+        mysql_server_install 
+        mysql_start >> $INSTALL_LOG_FILE
+          echo "Installation of mysql server complete..."
+        # End mysql server install code here
+      else
+        echo_warning "Using existing mysql install"
       fi
-      postgres_installed=0 #postgres is being installed
-      # don't need to restart postgres server unless the install script says we need to (by returning zero)
-      if postgres_server_install; then
-        postgres_restart >> $INSTALL_LOG_FILE
-        sleep 10
       fi
-      # postgres server end
-    fi 
-    # postgres client install here
-      echo "Installing postgres client..."
-      postgres_install
-      # do not need to restart postgres server after installing the client.
-      #postgres_restart >> $INSTALL_LOG_FILE
-      #sleep 10
-      echo "Installation of postgres client complete..." 
-      # postgres client install end
-  else
-    echo_warning "Relying on an existing Postgres installation"
-  fi 
- 
- if [ -z "$SKIP_DATABASE_INIT" ]; then
-    # postgres db init here
-  postgres_create_database
-    #postgres_restart >> $INSTALL_LOG_FILE
-    #sleep 10
-    #export is_postgres_available postgres_connection_error
-    if [ -z "$is_postgres_available" ]; then 
-      echo_warning "Run 'mtwilson setup' after a database is available"; 
-    fi
-  # postgress db init end
-  else
-    echo_warning "Skipping init of database"
-  fi
-  if [ $postgres_installed -eq 0 ]; then
-    postgres_server_detect
-    has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
-    if [ -n "$has_local_peer" ]; then
-      echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
-      sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
-    fi
-    #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
-    if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
-      if [ -f /root/.pgpass ]; then
-        echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
-        rm /root/.pgpass
+      # mysql client install here
+      echo "Installing mysql client..."
+      mysql_install  
+      echo "Installation of mysql client complete..."
+      # mysql client end 
+      
+      if [ -z "$SKIP_DATABASE_INIT" ]; then
+        # mysql db init here
+        if ! mysql_create_database; then
+          mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
+          mysqladmin -u "$MYSQL_USERNAME" password "$MYSQL_PASSWORD"
+          mysql_create_database
+        fi
+        # mysql db init end
+      else
+        echo_warning "Skipping init of database"
+      fi 
+      
+      export is_mysql_available mysql_connection_error
+      if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
+      
+    elif using_postgres; then
+      postgres_installed=1
+      # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
+      if [ -d "/etc/apt" ]; then
+        mkdir -p /etc/apt/trusted.gpg.d
+        chmod 755 /etc/apt/trusted.gpg.d
+        cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+        POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
+        add_postgresql_install_packages "POSTGRES_SERVER"
+      fi
+
+      postgres_userinput_connection_properties
+      touch ~/.pgpass
+      chmod 0600 ~/.pgpass
+      export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+      if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
+        PGPASS_HOSTNAME=localhost
+      else
+        PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
+      fi
+      echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
+      echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+
+      if [ ! -z "$opt_postgres" ]; then
+        # postgres server install 
+
+        # Install Postgres server (if user selected localhost)
+        if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
+          echo "Installing postgres server..."
+          # when we install postgres server on ubuntu it prompts us for root pw
+          # we preset it so we can send all output to the log
+          aptget_detect; dpkg_detect; yum_detect;
+          if [[ -n "$aptget" ]]; then
+           echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
+          fi
+          postgres_installed=0 #postgres is being installed
+          # don't need to restart postgres server unless the install script says we need to (by returning zero)
+          if postgres_server_install; then
+            postgres_restart >> $INSTALL_LOG_FILE
+            sleep 10
+          fi
+          # postgres server end
+        fi 
+        # postgres client install here
+          echo "Installing postgres client..."
+          postgres_install
+          # do not need to restart postgres server after installing the client.
+          #postgres_restart >> $INSTALL_LOG_FILE
+          #sleep 10
+          echo "Installation of postgres client complete..." 
+          # postgres client install end
+      else
+        echo_warning "Relying on an existing Postgres installation"
+      fi 
+     
+     if [ -z "$SKIP_DATABASE_INIT" ]; then
+        # postgres db init here
+      postgres_create_database
+        #postgres_restart >> $INSTALL_LOG_FILE
+        #sleep 10
+        #export is_postgres_available postgres_connection_error
+        if [ -z "$is_postgres_available" ]; then 
+          echo_warning "Run 'mtwilson setup' after a database is available"; 
+        fi
+      # postgress db init end
+      else
+        echo_warning "Skipping init of database"
+      fi
+      if [ $postgres_installed -eq 0 ]; then
+        postgres_server_detect
+        has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
+        if [ -n "$has_local_peer" ]; then
+          echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
+          sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
+        fi
+        #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
+        if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
+          if [ -f /root/.pgpass ]; then
+            echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
+            rm /root/.pgpass
+          fi
+        fi
       fi
     fi
-  fi
+else
+ if using_mysql; then
+  echo "mysql"
+  #TODO
+ elif using_postgres; then
+  postgres_detect
+ fi
 fi
 
 # Attestation service auto-configuration
@@ -646,7 +676,7 @@ if using_glassfish; then
         exit 1
       fi
     fi
-	
+    
     echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
     # glassfish install here
     ./$glassfish_installer  >> $INSTALL_LOG_FILE
@@ -859,25 +889,25 @@ mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
  echo "/usr/share/glassfish4/glassfish/domains/domain1/logs/server.log {
-	missingok
-	notifempty
-	rotate $LOG_OLD
-	size $LOG_SIZE
-	$LOG_ROTATION_PERIOD
-	$LOG_COMPRESS
-	$LOG_DELAYCOMPRESS
-	$LOG_COPYTRUNCATE
+    missingok
+    notifempty
+    rotate $LOG_OLD
+    size $LOG_SIZE
+    $LOG_ROTATION_PERIOD
+    $LOG_COMPRESS
+    $LOG_DELAYCOMPRESS
+    $LOG_COPYTRUNCATE
 }
 
 /usr/share/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
-	notifempty
-	rotate $LOG_OLD
-	size $LOG_SIZE
-	$LOG_ROTATION_PERIOD
-	$LOG_COMPRESS
-	$LOG_DELAYCOMPRESS
-	$LOG_COPYTRUNCATE
+    notifempty
+    rotate $LOG_OLD
+    size $LOG_SIZE
+    $LOG_ROTATION_PERIOD
+    $LOG_COMPRESS
+    $LOG_DELAYCOMPRESS
+    $LOG_COPYTRUNCATE
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
 

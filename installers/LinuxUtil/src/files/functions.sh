@@ -2780,11 +2780,11 @@ tomcat_install() {
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
       local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
       if [ -d "$tomcat_folder" ]; then
-        if [ -d "/usr/share/$tomcat_folder" ]; then
-          echo "Tomcat already installed at /usr/share/$tomcat_folder"
-          export TOMCAT_HOME="/usr/share/$tomcat_folder"
+        if [ -d "/opt/mtwilson/$tomcat_folder" ]; then
+          echo "Tomcat already installed at /opt/mtwilson/$tomcat_folder"
+          export TOMCAT_HOME="/opt/mtwilson/$tomcat_folder"
         else
-          mv $tomcat_folder /usr/share && export TOMCAT_HOME="/usr/share/$tomcat_folder"
+          mv $tomcat_folder /opt/mtwilson && export TOMCAT_HOME="/opt/mtwilson/$tomcat_folder"
         fi
       fi
       tomcat_detect
@@ -2812,16 +2812,29 @@ tomcat_install() {
 # Optional arguments:  one or more directories for tomcat user to own
 tomcat_permissions() {
   local chown_locations="$@"
-  local username=${TOMCAT_USERNAME:-tomcat}
+  local username=${MTWILSON_USERNAME:-mtwilson}
+  echo "Username from function file is $username"
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then
-    useradd -c "tomcat" -d "${TOMCAT_HOME:-/var}" -r -s /bin/bash "$username"
+    if [ "$(whoami)" == "root" ]; then
+      useradd -c "tomcat" -d "${TOMCAT_HOME:-/var}" -r -s /bin/bash "$username"
+	else
+	  echo_failure "User $username does not exists"
+	  return 1
+	fi
   fi
   local file
   for file in $chown_locations
   do
     if [[ -n "$file" && -e "$file" ]]; then
-      chown -R "${username}:${username}" "$file"
+      if [ "$(whoami)" == "root" ]; then
+	    chown -R "${username}:${username}" "$file"
+	  else
+	    owner=`stat -c '%U' $file`
+	    if [ $owner != ${username} ]
+		  echo_failure "Tomcat is not owned by $username"
+		  return 1
+		fi
     fi
   done
 }
@@ -3336,7 +3349,7 @@ java_install() {
     do
       #echo "$f"
       if [ -d "$f" ]; then
-        mv "$f" /usr/share
+        mv "$f" /opt/mtwilson
       fi
     done
     java_detect  >> $INSTALL_LOG_FILE
@@ -3806,7 +3819,7 @@ call_setupcommand() {
   if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> $MTWILSON_HOME/log/mtwilson.log
   return $?
 }
 
@@ -3818,7 +3831,7 @@ call_tag_setupcommand() {
   mainclass=com.intel.dcsg.cpg.console.Main
   local jvm_memory=2048m
   local jvm_maxperm=512m
-  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /var/log/mtwilson.log
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> $MTWILSON_HOME/log/mtwilson.log
   return $?
 }
 
