@@ -1740,8 +1740,8 @@ if postgres_server_detect ; then
       if [ "$(whoami)" == "root" ]; then
         local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
         local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
-        sudo -u postgres psql postgres -c "${create_user_sql}"
-        sudo -u postgres psql postgres -c "${superuser_sql}"
+        sudo -u postgres psql postgres -c "${create_user_sql}" 1>/dev/null
+        sudo -u postgres psql postgres -c "${superuser_sql}" 1>/dev/null
       else
         echo_failure "You must make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
         return 1
@@ -3021,7 +3021,8 @@ tomcat_create_ssl_cert() {
     if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
       echo "Changing keystore password and updating in Tomcat server.xml..."
       $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
-      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"\/usr\/share\/apache-tomcat-7.0.34\/ssl\/.keystore\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
+      keystoreSedEscaped=$(sed_escape $keystore)
+      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystoreSedEscaped"'\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
       sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
       echo "Restarting Tomcat as a new SSL certificate was generated..."
       tomcat_restart >/dev/null
