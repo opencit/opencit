@@ -1744,7 +1744,7 @@ if postgres_server_detect ; then
         sudo -u postgres psql postgres -c "${superuser_sql}"
       else
         echo_failure "You must make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
-        return -1
+        return 1
       fi
     fi
 
@@ -1752,52 +1752,52 @@ if postgres_server_detect ; then
     local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
     psql postgres -c "${create_sql}" 1>/dev/null
     psql postgres -c "${grant_sql}" 1>/dev/null
+  fi
 
-    postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
-    if [ -z "$postgres_pghb_conf_has_entry" ]; then
-      if [ "$(whoami)" == "root" ]; then
-        if [ -n "$postgres_pghb_conf" ]; then 
-          has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
-          if [ -z "$has_host" ]; then
-            echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
-          fi
-        else
-          echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
+  postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
+  if [ -z "$postgres_pghb_conf_has_entry" ]; then
+    if [ "$(whoami)" == "root" ]; then
+      if [ -n "$postgres_pghb_conf" ]; then 
+        has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
+        if [ -z "$has_host" ]; then
+          echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
         fi
       else
-        echo_failure "You must be root to alter $postgres_pghb_conf"
-        return -1
+        echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
       fi
-    fi
-
-    postgres_conf_has_entry=$(cat $postgres_conf | grep '^listen_addresses' | grep '127.0.0.1')
-    if [ -z "$postgres_conf_has_entry" ]; then
-      if [ "$(whoami)" == "root" ]; then
-        if [ -n "$postgres_conf" ]; then
-          has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
-          if [ -z "$has_listen_addresses" ]; then
-            echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
-          fi
-        else
-          echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
-        fi
-      else
-        echo_failure "You must be root to alter make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
-        return -1
-      fi
-    fi
-	
-    postgres_restart >> $INSTALL_LOG_FILE
-    sleep 10
-    postgres_test_connection
-
-    if [ -z "$is_postgres_available" ]; then
-      echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
-      echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
-      echo "${create_sql}" >> $INSTALL_LOG_FILE
-      echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+    else
+      echo_failure "You must be root to alter $postgres_pghb_conf"
       return 1
     fi
+  fi
+
+  postgres_conf_has_entry=$(cat $postgres_conf | grep '^listen_addresses' | grep '127.0.0.1')
+  if [ -z "$postgres_conf_has_entry" ]; then
+    if [ "$(whoami)" == "root" ]; then
+      if [ -n "$postgres_conf" ]; then
+        has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
+        if [ -z "$has_listen_addresses" ]; then
+          echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
+        fi
+      else
+        echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
+      fi
+    else
+      echo_failure "You must be root to alter make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
+      return 1
+    fi
+  fi
+
+  postgres_restart >> $INSTALL_LOG_FILE
+  sleep 10
+  postgres_test_connection
+
+  if [ -z "$is_postgres_available" ]; then
+    echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
+    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
+    echo "${create_sql}" >> $INSTALL_LOG_FILE
+    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+    return 1
   fi
 fi
 }
