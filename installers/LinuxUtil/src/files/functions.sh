@@ -3021,8 +3021,7 @@ tomcat_create_ssl_cert() {
     if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
       echo "Changing keystore password and updating in Tomcat server.xml..."
       $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
-      keystoreSedEscaped=$(sed_escape $keystore)
-      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystoreSedEscaped"'\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
+      sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
       sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
       echo "Restarting Tomcat as a new SSL certificate was generated..."
       tomcat_restart >/dev/null
