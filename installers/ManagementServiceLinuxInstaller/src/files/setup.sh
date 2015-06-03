@@ -80,7 +80,7 @@ mkdir -p /opt/mtwilson/bin
 cp msctl.sh /opt/mtwilson/bin/msctl
 chmod +x /opt/mtwilson/bin/msctl
 /opt/mtwilson/bin/msctl setup
-register_startup_script /opt/mtwilson/bin/msctl msctl >> $INSTALL_LOG_FILE
+#register_startup_script /opt/mtwilson/bin/msctl msctl >> $INSTALL_LOG_FILE
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

@@ -20,7 +20,7 @@ if [ `whoami` == "root" ]; then
    mkdir -p /usr/local/bin
  fi
  #Remove symbolic link if already exist
- rm /usr/local/bin/mtwilson
+ rm -f /usr/local/bin/mtwilson
  ln -s /opt/mtwilson/bin/mtwilson /usr/local/bin/mtwilson
 else
  export PATH=/opt/mtwilson/bin:$PATH

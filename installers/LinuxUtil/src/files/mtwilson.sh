@@ -319,13 +319,13 @@ case "$1" in
           glassfish_stop
           #glassfish_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
-            rm $MTWILSON_PID_FILE
+            rm -f $MTWILSON_PID_FILE
           fi
         elif using_tomcat; then
           tomcat_stop
           #tomcat_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
-            rm $MTWILSON_PID_FILE
+            rm -f $MTWILSON_PID_FILE
           fi
         fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
@@ -540,7 +540,11 @@ case "$1" in
         rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
-        remove_startup_script "mtwilson"
+        if [ "$(whoami)" == "root" ]; then
+          remove_startup_script "mtwilson"
+        else
+          echo_warning "You must be root to remove mtwilson startup script"
+        fi
         # configuration files
         echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         rm -rf /etc/intel/cloudsecurity

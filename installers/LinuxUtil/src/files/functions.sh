@@ -2559,7 +2559,7 @@ glassfish_create_ssl_cert() {
       echo "AS_ADMIN_MASTERPASSWORD=$keystorePasswordOld" > "${GF_CONFIG_PATH}/master.passwd"
       echo "AS_ADMIN_NEWMASTERPASSWORD=$keystorePassword" >> "${GF_CONFIG_PATH}/master.passwd"
       $glassfishMaster change-master-password --savemasterpassword=true --passwordfile="${GF_CONFIG_PATH}/master.passwd" "${domain_found}"
-      rm "${GF_CONFIG_PATH}/master.passwd"
+      rm -f "${GF_CONFIG_PATH}/master.passwd"
       glassfish_start >/dev/null
       update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
     fi
@@ -2813,28 +2813,24 @@ tomcat_install() {
 tomcat_permissions() {
   local chown_locations="$@"
   local username=${MTWILSON_USERNAME:-mtwilson}
-  echo "Username from function file is $username"
   local user_exists=`cat /etc/passwd | grep "^${username}"`
-  if [ -z "$user_exists" ]; then
-    if [ "$(whoami)" == "root" ]; then
-      useradd -c "tomcat" -d "${TOMCAT_HOME:-/var}" -r -s /bin/bash "$username"
-	else
-	  echo_failure "User $username does not exists"
-	  return 1
-	fi
+  if [ -z "$user_exists" ]; then    
+	echo_failure "User $username does not exists"
+	return 1	
   fi
   local file
   for file in $chown_locations
   do
     if [[ -n "$file" && -e "$file" ]]; then
-      if [ "$(whoami)" == "root" ]; then
-	    chown -R "${username}:${username}" "$file"
-	  else
-	    owner=`stat -c '%U' $file`
-	    if [ $owner != ${username} ]
+      owner=`stat -c '%U' $file`
+      if [ $owner != ${username} ]; then
+        if [ "$(whoami)" == "root" ]; then
+	      chown -R "${username}:${username}" "$file"
+        else
 		  echo_failure "Tomcat is not owned by $username"
 		  return 1
 		fi
+	  fi
     fi
   done
 }
@@ -3819,7 +3815,7 @@ call_setupcommand() {
   if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> $MTWILSON_HOME/log/mtwilson.log
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/log/mtwilson.log
   return $?
 }
 
@@ -3831,7 +3827,7 @@ call_tag_setupcommand() {
   mainclass=com.intel.dcsg.cpg.console.Main
   local jvm_memory=2048m
   local jvm_maxperm=512m
-  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> $MTWILSON_HOME/log/mtwilson.log
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/log/mtwilson.log
   return $?
 }
 

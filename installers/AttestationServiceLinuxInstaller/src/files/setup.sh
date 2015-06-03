@@ -83,17 +83,15 @@ mkdir -p /opt/mtwilson/bin
 cp asctl.sh /opt/mtwilson/bin/asctl
 chmod +x /opt/mtwilson/bin/asctl
 /opt/mtwilson/bin/asctl setup
-if [ `whoami` == "root" ]; then
- #Code review shall we remove /usr/local/bin/asctl before creating symlink?
- ln -s /opt/mtwilson/bin/asctl /usr/local/bin/asctl
-fi
-#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
+
+aikqverify_install_prereq() {
+  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
+  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
+  auto_install "Developer tools" "DEVELOPER"   
+}
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
 compile_aikqverify() {
-  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
-  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
-  auto_install "Developer tools" "DEVELOPER" 
   AIKQVERIFY_OK=''
   cd /var/opt/intel/aikverifyhome/bin
   make  2>&1 > /dev/null
@@ -104,6 +102,13 @@ compile_aikqverify() {
     AIKQVERIFY_OK=yes
   fi
 }
+
+if [ `whoami` == "root" ]; then
+ #Code review shall we remove /usr/local/bin/asctl before creating symlink?
+ ln -s /opt/mtwilson/bin/asctl /usr/local/bin/asctl
+ aikqverify_install_prereq
+fi
+#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
 
 mkdir -p ${package_var_dir}/bin
 mkdir -p ${package_var_dir}/data

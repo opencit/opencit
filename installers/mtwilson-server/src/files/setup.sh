@@ -12,7 +12,7 @@ currentUser=`whoami`
 if [ ! -d $MTWILSON_ENV_DIR ]; then
   mkdir -p $MTWILSON_ENV_DIR
 fi
-if [ ! d $MTWILSON_LOG ]; then
+if [ ! -d $MTWILSON_LOG ]; then
   mkdir -p $MTWILSON_LOG
 fi
 
@@ -914,7 +914,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
     $LOG_COMPRESS
     $LOG_DELAYCOMPRESS
     $LOG_COPYTRUNCATE
-}" > /etc/logrotate.d/mtwilson.logrotate
+}" > /opt/mtwilson/log/mtwilson.logrotate
 fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
@@ -1016,14 +1016,24 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
-#Register mtwilson as a startup script, remove previous service startup scripts if they exist
-register_startup_script /usr/local/bin/mtwilson mtwilson >> $INSTALL_LOG_FILE
-remove_startup_script "asctl" >> $INSTALL_LOG_FILE
-remove_startup_script "msctl" >> $INSTALL_LOG_FILE
-remove_startup_script "mtwilson-portal" >> $INSTALL_LOG_FILE
-remove_startup_script "tdctl" >> $INSTALL_LOG_FILE
-remove_startup_script "wlmctl" >> $INSTALL_LOG_FILE
+#Register mtwilson as a startup script
+if [ ! $(/sbin/initctl list | grep mtwilson) ]; then
+  if [ "$(whoami)" == "root" ]; then
+    register_startup_script /usr/local/bin/mtwilson mtwilson
+  else
+    echo_warning "You must be root to register mtwilson startup script"
+  fi
+fi
 
+
+if [ "$(whoami)" == "root" ]; then     
+ #remove previous service startup scripts if they exist
+ remove_startup_script "asctl" 2>&1 >> $INSTALL_LOG_FILE
+ remove_startup_script "msctl" 2>&1 >> $INSTALL_LOG_FILE
+ remove_startup_script "mtwilson-portal" 2>&1 >> $INSTALL_LOG_FILE
+ remove_startup_script "tdctl" 2>&1 >> $INSTALL_LOG_FILE
+ remove_startup_script "wlmctl" 2>&1 >> $INSTALL_LOG_FILE
+fi
 #Save variables to properties file
 #if using_mysql; then   
 #  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
