@@ -853,15 +853,19 @@ my_service_install() {
 # Output:
 #   The output of "ifconfig" will be scanned for any non-loopback address and all results will be echoed
 hostaddress_list() {
-  # if you want to exclude certain categories, such as 192.168, add this after the 127.0.0.1 exclusion:  grep -v "^192.168." 
-  ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | grep -v "127.0.0.1"
+  # if you want to exclude certain categories, such as 192.168, add this after the 127.0.0.1 exclusion:  grep -v "^192.168."
+  ifconfig=$(which ifconfig 2>/dev/null)
+  ifconfig=${ifconfig:-"/sbin/ifconfig"}
+  "$ifconfig" | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | grep -v "127.0.0.1"
 }
 
 # Echo all the localhost's addresses including loopback IP address
 # Parameters: none
 # output:  10.1.71.56,127.0.0.1
 hostaddress_list_csv() {
-  ifconfig | grep -E "^\s*inet addr:" | awk '{ print $2 }' | awk -F : '{ print $2 }' | paste -d',' -s
+  ifconfig=$(which ifconfig 2>/dev/null)
+  ifconfig=${ifconfig:-"/sbin/ifconfig"}
+  "$ifconfig" | grep -E "^\s*inet addr:" | awk '{ print $2 }' | awk -F : '{ print $2 }' | paste -d',' -s
 }
 
 
@@ -1726,54 +1730,74 @@ if postgres_server_detect ; then
 	
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
-    #echo_success "Database [${POSTGRES_DATABASE}] already exists"
-    echo_success "Database [${POSTGRES_DATABASE}] already exists"   >> $INSTALL_LOG_FILE
+    echo_success "Database [${POSTGRES_DATABASE}] already exists"
     return 0
   else
     echo "Creating database..."
-    echo "Creating database..."    >> $INSTALL_LOG_FILE
-    local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
-    sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
-    sudo -u postgres psql postgres -c "${superuser_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+    local detect_superuser="select rolcreatedb from pg_authid where rolname = '$POSTGRES_USERNAME'"
+    user_is_superuser=$(psql postgres -c "$detect_superuser" 2>&1 | grep "(1 row)")
+    if [ -z "$user_is_superuser" ]; then
+      if [ "$(whoami)" == "root" ]; then
+        local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
+        local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
+        sudo -u postgres psql postgres -c "${create_user_sql}"
+        sudo -u postgres psql postgres -c "${superuser_sql}"
+      else
+        echo_failure "You must make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
+        return 1
+      fi
+    fi
+
     local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
     local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
-    sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    postgres_connection_error=`cat /tmp/intel.postgres.err`
-    echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
-    sudo -u postgres psql postgres -c "${grant_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    postgres_connection_error=`cat /tmp/intel.postgres.err`
-    echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
+    psql postgres -c "${create_sql}" 1>/dev/null
+    psql postgres -c "${grant_sql}" 1>/dev/null
+  fi
 
-    if [ -n "$postgres_pghb_conf" ]; then 
-      has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
-      if [ -z "$has_host" ]; then
-        echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
+  postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
+  if [ -z "$postgres_pghb_conf_has_entry" ]; then
+    if [ "$(whoami)" == "root" ]; then
+      if [ -n "$postgres_pghb_conf" ]; then 
+        has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
+        if [ -z "$has_host" ]; then
+          echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
+        fi
+      else
+        echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
       fi
     else
-      echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
-    fi
-	
-    if [ -n "$postgres_conf" ]; then
-      has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
-      if [ -z "$has_listen_addresses" ]; then
-         echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
-      fi
-    else
-      echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
-    fi
-	
-    postgres_restart >> $INSTALL_LOG_FILE
-    sleep 10
-    postgres_test_connection
-
-    if [ -z "$is_postgres_available" ]; then
-      echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
-      echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
-      echo "${create_sql}" >> $INSTALL_LOG_FILE
-      echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+      echo_failure "You must be root to alter $postgres_pghb_conf"
       return 1
     fi
+  fi
+
+  postgres_conf_has_entry=$(cat $postgres_conf | grep '^listen_addresses' | grep '127.0.0.1')
+  if [ -z "$postgres_conf_has_entry" ]; then
+    if [ "$(whoami)" == "root" ]; then
+      if [ -n "$postgres_conf" ]; then
+        has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
+        if [ -z "$has_listen_addresses" ]; then
+          echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
+        fi
+      else
+        echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
+      fi
+    else
+      echo_failure "You must be root to alter make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
+      return 1
+    fi
+  fi
+
+  postgres_restart >> $INSTALL_LOG_FILE
+  sleep 10
+  postgres_test_connection
+
+  if [ -z "$is_postgres_available" ]; then
+    echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
+    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
+    echo "${create_sql}" >> $INSTALL_LOG_FILE
+    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+    return 1
   fi
 fi
 }
@@ -2461,6 +2485,8 @@ glassfish_delete_domain() {
 }
 
 glassfish_create_ssl_cert_prompt() {
+    ifconfig=$(which ifconfig 2>/dev/null)
+    ifconfig=${ifconfig:-"/sbin/ifconfig"}
     #echo_warning "This feature has been disabled: glassfish_create_ssl_cert_prompt"
     #return
     # SSL Certificate setup
@@ -2470,7 +2496,7 @@ glassfish_create_ssl_cert_prompt() {
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       glassfish_require
-      DEFAULT_GLASSFISH_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      DEFAULT_GLASSFISH_SSL_CERT_CN=`"$ifconfig" | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
       prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_GLASSFISH_SSL_CERT_CN:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     fi
@@ -2922,12 +2948,14 @@ tomcat_uninstall() {
 }
 
 tomcat_create_ssl_cert_prompt() {
+    ifconfig=$(which ifconfig 2>/dev/null)
+    ifconfig=${ifconfig:-"/sbin/ifconfig"}
     prompt_yes_no TOMCAT_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Tomcat?"
     echo
     if [ "${TOMCAT_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
       tomcat_require
-      DEFAULT_TOMCAT_SSL_CERT_CN=`ifconfig | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
+      DEFAULT_TOMCAT_SSL_CERT_CN=`"$ifconfig" | grep "inet addr" | awk '{ print $2 }' | awk -F : '{ print $2 }' | sed -e ':a;N;$!ba;s/\n/,/g'`
       prompt_with_default TOMCAT_SSL_CERT_CN "Domain name[s] for SSL Certificate:" ${DEFAULT_TOMCAT_SSL_CERT_CN:-127.0.0.1}
       tomcat_create_ssl_cert "${TOMCAT_SSL_CERT_CN}"
     fi
@@ -4199,12 +4227,12 @@ change_db_pass() {
     echo ""
     if [ $? -ne 0 ]; then echo_failure "Issue building postgres or expect command."; exit; fi
     # Edit postgres password file if it exists
-    if [ -f /root/.pgpass ]; then
+    if [ -f ~/.pgpass ]; then
       echo -n "Updating database password value in .pgpass file...."
-      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' /root/.pgpass
-      #temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
+      sed -i 's/\(.*\):\(.*\)/\1:'"$new_db_pass"'/' ~/.pgpass
+      #temp=`cat ~/.pgpass | cut -f1,2,3,4 -d":"`
       #temp="$temp:$new_db_pass"
-      #echo $temp > /root/.pgpass;
+      #echo $temp > ~/.pgpass;
     fi
     echo_success "Done"
   fi
