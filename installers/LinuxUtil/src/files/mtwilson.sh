@@ -79,14 +79,14 @@ if [ -z $MTWILSON_PID_FILE ]; then
 	#      MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
 	else
         #create a directory in MTWILSON_HOME/var/run/
-        if [ ! -d $MTW_HOME/var/run ]; then
-	        mkdir -p $MTW_HOME/var/run
-	    fi
-	        MTWILSON_PID_FILE=$MTW_HOME/var/run/mtwilson.pid
+        if [ ! -d $MTWILSON_HOME/var/run ]; then
+	        mkdir -p $MTWILSON_HOME/var/run
+         fi
+            MTWILSON_PID_FILE=$MTWILSON_HOME/var/run/mtwilson.pid
             MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
 	fi
 fi		
-      
+
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
 if [ -f /opt/mtwilson/configuration/version ]; then  . /opt/mtwilson/configuration/version; else  echo_warning "Missing file: /opt/mtwilson/configuration/version"; fi
@@ -216,7 +216,7 @@ Detected the following options on this server:"
   elif using_postgres; then
     postgres_userinput_connection_properties
     export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]; then
+    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
       PGPASS_HOSTNAME=localhost
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
