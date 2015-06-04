@@ -119,6 +119,11 @@ mtwilson_backup_repository() {
 mtwilson_backup_configuration
 mtwilson_backup_repository
 
+if [[ -L "$MTWILSON_CONFIGURATION" && -d "$MTWILSON_CONFIGURATION" ]]; then
+  rm -f "$MTWILSON_CONFIGURATION"
+fi
+ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
+
 # create application directories (chown will be repeated near end of this script, after setup)
 for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA; do
   mkdir -p $directory
