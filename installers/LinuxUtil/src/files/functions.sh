@@ -3898,7 +3898,7 @@ set_config_db_properties() {
 # Caller can set setupconsole_dir to the directory where jars are found; default provided by DEFAULT_MTWILSON_JAVA_DIR
 # Caller can set conf_dir to the directory where logback-stderr.xml is found; default provided by DEFAULT_MTWILSON_CONF_DIR
 call_setupcommand() {
-  if [ -f "/opt/mtwilson/log/mtwilson.log" ]; then
+  if [ ! -f "/opt/mtwilson/log/mtwilson.log" ]; then
     mkdir -p "/opt/mtwilson/log"
     touch "/opt/mtwilson/log/mtwilson.log"
   fi

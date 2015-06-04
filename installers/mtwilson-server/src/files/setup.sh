@@ -894,7 +894,7 @@ fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
-  ./$monit_installer  >> $INSTALL_LOG_FILE
+  ./$monit_installer  #>> $INSTALL_LOG_FILE
   #echo "Monit installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
