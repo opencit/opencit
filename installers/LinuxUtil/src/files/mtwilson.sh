@@ -557,6 +557,7 @@ case "$1" in
             # only remove the config files we added to conf.d, not anything else
             echo "Removing mtwilson monit config files"
             rm -fr /etc/monit/conf.d/*.mtwilson
+            rm -fr /opt/mtwilson/monit/conf.d/*.mtwilson
             echo "Restarting monit after removing configs"
             service monit stop &> /dev/null
             service monit start &> /dev/null

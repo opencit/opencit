@@ -894,17 +894,17 @@ fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
-  ./$monit_installer  >> $INSTALL_LOG_FILE 
-  echo "Monit installed" | tee -a  $INSTALL_LOG_FILE
+  ./$monit_installer  >> $INSTALL_LOG_FILE
+  #echo "Monit installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
-mkdir -p /etc/monit/conf.d
+mkdir -p /opt/mtwilson/monit/conf.d
 
 # create the monit rc files
 
 #glassfish.mtwilson
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
+  if [ ! -a /opt/mtwilson/monit/conf.d/glassfish.mtwilson ]; then
     echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
       check file gf_installed with path "/usr/share/glassfish4/bin/asadmin"
       group gf_server
@@ -919,13 +919,13 @@ if [ -z "$NO_GLASSFISH_MONIT" ]; then
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
       if 3 restarts within 10 cycles then timeout
-      depends on gf_installed" > /etc/monit/conf.d/glassfish.mtwilson
+      depends on gf_installed" > /opt/mtwilson/monit/conf.d/glassfish.mtwilson
   fi
 fi
 
 #tomcat.mtwilson
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
+  if [ ! -a /opt/mtwilson/monit/conf.d/tomcat.mtwilson ]; then
     echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
       check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
       group tc_server
@@ -940,12 +940,12 @@ if [ -z "$NO_TOMCAT_MONIT" ]; then
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
       if 3 restarts within 10 cycles then timeout
-      depends on tc_installed" > /etc/monit/conf.d/tomcat.mtwilson
+      depends on tc_installed" > /opt/mtwilson/monit/conf.d/tomcat.mtwilson
   fi
 fi
 
 if [ -z "$NO_POSTGRES_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
+  if [ ! -a /opt/mtwilson/monit/conf.d/postgres.mtwilson ]; then 
     echo "check process postgres matching \"postgresql\"
       group pg-db
       start program = \"/usr/sbin/service postgresql start\"
@@ -958,12 +958,12 @@ if [ -z "$NO_POSTGRES_MONIT" ]; then
   
       check file pg_bin with path \"/usr/bin/psql\"
       group pg-db
-      if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
+      if does not exist then unmonitor" > /opt/mtwilson/monit/conf.d/postgres.mtwilson
   fi
 fi
 
 if [ -z "$NO_MYSQL_MONIT" ]; then 
-  if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+  if [ ! -a /opt/mtwilson/monit/conf.d/mysql.mtwilson ]; then 
     echo "check process mysql matching \"mysql\"
       group mysql_db
       start program = \"/usr/sbin/service mysql start\"
@@ -979,7 +979,7 @@ if [ -z "$NO_MYSQL_MONIT" ]; then
 
       check file mysql_rc with path /etc/init.d/mysql
       group mysql_db
-      if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
+      if does not exist then unmonitor" > /opt/mtwilson/monit/conf.d/mysql.mtwilson
   fi
 fi
 
