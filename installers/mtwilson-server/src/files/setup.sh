@@ -73,6 +73,23 @@ else
   if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
     export MTWILSON_HOME=$(cd ~ && pwd)
   fi
+  
+fi
+
+#If user is non root make sure all prereq directories are created and owned by nonroot user
+if [ "$(whoami)" != "root" ]; then
+  if [ ! -d $MTWILSON_HOME ] || [ "${owner=`stat -c '%U' $MTWILSON_HOME`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "$MTWILSON_HOME is not owned by $MTWILSON_USERNAME. Please update manually."
+   exit
+  fi
+  if [ ! -d /opt/intel ] || [ "${owner=`stat -c '%U' /opt/intel`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/opt/intel is not owned by $MTWILSON_USERNAME. Please update manually."
+   exit
+  fi
+  if [ ! -d /etc/intel ] || [ "${owner=`stat -c '%U' /etc/intel`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "/etc/intel is not owned by $MTWILSON_USERNAME. Please update manually."
+   exit
+  fi
 fi
 
 # if an existing mtwilson is already running, stop it while we install
