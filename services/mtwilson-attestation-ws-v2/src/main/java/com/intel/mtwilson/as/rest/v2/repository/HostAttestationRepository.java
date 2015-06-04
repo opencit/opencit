@@ -30,7 +30,9 @@ import com.intel.mtwilson.repository.RepositoryInvalidInputException;
 import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import java.util.Date;
 import java.util.List;
@@ -74,10 +76,53 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                 }
                 
                 if (tblHosts != null) {
-                    List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().findListByHostAndExpiry(tblHosts.getName());
-                    if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
-                        for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
-                            hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));
+                    if (criteria.numberOfDays == 0 && criteria.fromDate == null) {
+                        log.debug("HostAttestation:Search - No additional criteria are specified. Retrieving the default valid SAML assertions.");
+                        List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().findListByHostAndExpiry(tblHosts.getName());
+                        if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
+                            for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
+                                hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));
+                            }
+                        }
+                    } else {
+                        log.debug("HostAttestation:Search - Additional criteria are specified.");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        Calendar cal = Calendar.getInstance();
+                        Date toDate, fromDate;
+                        
+                        if (criteria.numberOfDays != 0) {
+                            log.debug("HostAttestation:Search - Number of days criteria is specified with value {}.", criteria.numberOfDays);
+                            // calculate from and to dates
+                            toDate = new Date(); // Get the current date and time
+                            cal.setTime(toDate);
+                            toDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+
+                            cal.add(Calendar.HOUR, -(criteria.numberOfDays * 24)); // To get the fromDate, we substract the number of days fromm the current date.
+                            fromDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                        } else {
+                            if (criteria.fromDate != null && !criteria.fromDate.isEmpty() && criteria.toDate != null && !criteria.toDate.isEmpty()) {
+                                log.debug("HostAttestation:Search - Dates are specified for the search criteria with values {} - {}.", criteria.fromDate, criteria.toDate);
+                                fromDate = new Date(criteria.fromDate);
+                                cal.setTime(fromDate); // This would set the time to ex:2015-05-30 00:00:00
+                                fromDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                            
+                                toDate = new Date(criteria.toDate);
+                                cal.setTime(toDate);
+                                // Need to ensure that we retrieve the results for the entire day. Ex:2013-06-03 23:59:59
+                                cal.add(Calendar.SECOND, (24*60*60-1));                                 
+                                toDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                            } else {
+                                String errorMsg = "HostAttestation:Search - Invalid options specified for attestation search.";
+                                log.error(errorMsg);
+                                throw new Exception(errorMsg);
+                            }
+                        }
+                        log.debug("HostAttestation:Search - Calculated the date values {} - {}.", dateFormat.format(fromDate), dateFormat.format(toDate));
+                        List<TblSamlAssertion> tblSamlAssertionList = My.jpa().mwSamlAssertion().getListByDate(tblHosts.getName(), fromDate, toDate);
+                        if (tblSamlAssertionList != null && !tblSamlAssertionList.isEmpty()) {
+                            for (TblSamlAssertion tblSamlAssertion : tblSamlAssertionList) {
+                                hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));
+                            }
                         }
                     }
                 }
