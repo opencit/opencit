@@ -806,7 +806,7 @@ update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.propert
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
 if [ ! -z "$opt_portals" ]; then
-  MTWILSON_TAG_HTML5_DIR_TEMP=`find /usr/share/ -name tag`
+  MTWILSON_TAG_HTML5_DIR_TEMP=`find /opt/mtwilson/ -name tag`
   prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
   if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
 fi
