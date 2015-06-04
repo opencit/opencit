@@ -108,6 +108,64 @@ sed_escape() {
  echo $(echo $1 | sed -e 's/[()&#%$+]/\\&/g' -e 's/[/]/\\&/g')
 }
 
+# FUNCTION LIBRARY: This function returns either rhel fedora ubuntu suse
+function getFlavour()
+{
+    flavour=""
+    grep -c -i ubuntu /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="ubuntu"
+    fi
+    grep -c -i "red hat" /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="rhel"
+    fi
+    grep -c -i fedora /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="fedora"
+    fi
+    grep -c -i suse /etc/*-release > /dev/null
+    if [ $? -eq 0 ] ; then
+            flavour="suse"
+    fi
+    if [ "$flavour" == "" ] ; then
+            echo "Unsupported linux flavor, Supported versions are ubuntu, rhel, fedora"
+            exit
+    else
+            echo $flavour
+    fi
+}
+
+function getUserProfileFile()
+{
+    flavor=$(getFlavour)
+    case $flavor in
+    "ubuntu" )
+        file=~/.profile ;;
+    "rhel" )
+        file=~/.bash_profile ;;
+    "fedora" )
+        file=~/.bash_profile ;;
+    "suse" )
+        file=~/.bash_profile ;;    
+    esac
+	if [ ! -f $file ]; then
+	   touch $file
+	fi
+	echo $file
+}
+
+function appendToUserProfileFile()
+{
+    file=$(getUserProfileFile)
+	if grep -q  "$1" $file
+	then
+	   echo "$1 Already there in user profile"
+	else
+       echo "$1" >> $file
+    fi
+}
+
 ### FUNCTION LIBRARY: terminal display functions
 
 # move to column 60:    term_cursor_movex $TERM_STATUS_COLUMN
