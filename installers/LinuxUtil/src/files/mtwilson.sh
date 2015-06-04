@@ -34,8 +34,7 @@ fi
 
 
 # SCRIPT CONFIGURATION:
-#share_dir=/opt/mtwilson/share/scripts
-share_dir=/usr/local/share/mtwilson/util
+#share_dir=/usr/local/share/mtwilson/util
 apiclient_dir=/usr/local/share/mtwilson/apiclient
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 setupconsole_dir=/opt/mtwilson/java
@@ -67,8 +66,8 @@ if [ -z $MTWILSON_PID_FILE ]; then
 fi		
       
 # FUNCTION LIBRARY and VERSION INFORMATION
-if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
-if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
+if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
+if [ -f /opt/mtwilson/configuration/version ]; then  . /opt/mtwilson/configuration/version; else  echo_warning "Missing file: /opt/mtwilson/configuration/version"; fi
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf runs ExportConfig and if that same command is passed in from 'mtwilson setup', it won't work
@@ -200,9 +199,9 @@ Detected the following options on this server:"
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
     fi
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $HOME/.pgpass
-    chmod 0600 $HOME/.pgpass
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
   fi
 
   # Attestation service auto-configuration
@@ -356,13 +355,13 @@ case "$1" in
           glassfish_stop
           #glassfish_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
-            rm $MTWILSON_PID_FILE
+            rm -f $MTWILSON_PID_FILE
           fi
         elif using_tomcat; then
           tomcat_stop
           #tomcat_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
-            rm $MTWILSON_PID_FILE
+            rm -f $MTWILSON_PID_FILE
           fi
         fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
@@ -577,7 +576,11 @@ case "$1" in
         rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
-        remove_startup_script "mtwilson"
+        if [ "$(whoami)" == "root" ]; then
+          remove_startup_script "mtwilson"
+        else
+          echo_warning "You must be root to remove mtwilson startup script"
+        fi
         # configuration files
         echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         rm -rf /etc/intel/cloudsecurity
@@ -590,6 +593,7 @@ case "$1" in
             # only remove the config files we added to conf.d, not anything else
             echo "Removing mtwilson monit config files"
             rm -fr /etc/monit/conf.d/*.mtwilson
+            rm -fr /opt/mtwilson/monit/conf.d/*.mtwilson
             echo "Restarting monit after removing configs"
             service monit stop &> /dev/null
             service monit start &> /dev/null

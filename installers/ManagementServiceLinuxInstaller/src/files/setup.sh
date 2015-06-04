@@ -76,11 +76,11 @@ $mtwilson erase-users --user="$username" > /dev/null 2>&1
 
 
 # copy control script to /usr/local/bin and finish setup
-mkdir -p /usr/local/bin
-cp msctl.sh /usr/local/bin/msctl
-chmod +x /usr/local/bin/msctl
-/usr/local/bin/msctl setup
-register_startup_script /usr/local/bin/msctl msctl >> $INSTALL_LOG_FILE
+mkdir -p /opt/mtwilson/bin
+cp msctl.sh /opt/mtwilson/bin/msctl
+chmod +x /opt/mtwilson/bin/msctl
+/opt/mtwilson/bin/msctl setup
+#register_startup_script /opt/mtwilson/bin/msctl msctl >> $INSTALL_LOG_FILE
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
