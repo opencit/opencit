@@ -4,4 +4,4 @@
 set daemon 60
 # Set path to log file
 set logfile /var/log/monit.log
-include /etc/monit/conf.d/*
+include /opt/mtwilson/monit/conf.d/*
