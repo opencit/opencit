@@ -229,4 +229,30 @@ public class TblSamlAssertionJpaController implements Serializable {
 
         return tblSamlAssertion;
     }
+    
+    /**
+     * Retrieves the list of SAML assertions for the specified host between the durations specified.
+     * @param host
+     * @param fromDate
+     * @param toDate
+     * @return 
+     */
+    public List<TblSamlAssertion> getListByDate(String host, Date fromDate, Date toDate) {
+        List<TblSamlAssertion> tblSamlAssertionList = null;
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblSamlAssertion.findByRangeOfCreatedTs");
+            query.setParameter("hostName", host);
+            query.setParameter("fromCreatedTs", fromDate);
+            query.setParameter("toCreatedTs", toDate);
+
+            tblSamlAssertionList = query.getResultList();
+        } finally {
+                em.close();
+        }
+
+        return tblSamlAssertionList;
+        
+    }
+
 }

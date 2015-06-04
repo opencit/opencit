@@ -3082,7 +3082,7 @@ tomcat_create_ssl_cert() {
       fi
       sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
       sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
-      echo "Restarting Tomcat as a new SSL certificate was generated..."
+      echo "Restarting Tomcat as a new Tomcat keystore password was set..."
       tomcat_restart >/dev/null
       update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
     fi
