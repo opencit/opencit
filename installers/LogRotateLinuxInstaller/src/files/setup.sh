@@ -15,6 +15,9 @@ logRotate_clear() {
 logRotate_detect() {
   local logrotaterc=`ls -1 /etc/logrotate.conf 2>/dev/null | tail -n 1`
   logrotate=`which logrotate 2>/dev/null`
+  if [ -z "$logrotate" ] && [ -f "/usr/sbin/logrotate" ]; then
+    logrotate="/usr/sbin/logrotate"
+  fi
 }
 
 logRotate_install() {
@@ -27,7 +30,7 @@ logRotate_install() {
     if [ $? -ne 0 ]; then echo_failure "Failed to install logrotate"; exit -1; fi
   fi
   logRotate_clear; logRotate_detect;
-    if [[ -z "$logrotate" ]]; then
+    if [ -z "$logrotate" ]; then
       echo_failure "logrotate is not installed"
     else
       echo  "logrotate installed in $logrotate"
