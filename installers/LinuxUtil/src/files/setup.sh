@@ -2,6 +2,7 @@
 # WARNING:
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
+if [ -f functions.sh ]; then . functions.sh; else echo "Missing file: functions.sh"; exit 1; fi
 
 mkdir -p /opt/mtwilson/share/scripts
 mkdir -p /opt/mtwilson/configuration

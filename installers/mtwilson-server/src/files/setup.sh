@@ -863,7 +863,7 @@ chmod 755 /opt/mtwilson/features/tag/bin/decrypt.sh
 if [ ! -z "$opt_logrotate" ]; then
   echo "Installing Log Rotate..." | tee -a  $INSTALL_LOG_FILE
   ./$logrotate_installer
-  echo "Log Rotate installed" | tee -a  $INSTALL_LOG_FILE
+  #echo "Log Rotate installed" | tee -a  $INSTALL_LOG_FILE
 fi
 
 mkdir -p /etc/logrotate.d
