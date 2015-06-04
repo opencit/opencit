@@ -14,7 +14,7 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-$MTW_HOME=/opt/mtwilson
+MTW_HOME=/opt/mtwilson
 export MTW_USERNAME=mtw
 
 #if [ -z "$MTW_USERNAME" ]; then
@@ -47,22 +47,22 @@ pid_dir=/var/run/mtwilson
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51    
-
+MTWILSON_PID_FILE=""
 if [ -z $MTWILSON_PID_FILE ]; then
     if [ -d $pid_dir ] && [ -w $pid_dir ]; then
         MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
         MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
-	elif [ -f ./mtwilson.env ]; then
+	#elif [ -f ./mtwilson.env ]; then
 	      #Look up in the mtwilson.env file
-   	      MTWILSON_PID_FILE=$(cat ~/mtwilson.env | grep -E 'MTWILSON_PID_FILE' | cut -d = -f 2)
-	      MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+   	#      MTWILSON_PID_FILE=$(cat ~/mtwilson.env | grep -E 'MTWILSON_PID_FILE' | cut -d = -f 2)
+	#      MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
 	else
         #create a directory in MTWILSON_HOME/var/run/
         if [ ! -d $MTW_HOME/var/run ]; then
 	        mkdir -p $MTW_HOME/var/run
+	    fi
 	        MTWILSON_PID_FILE=$MTW_HOME/var/run/mtwilson.pid
             MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
-        fi
 	fi
 fi		
       

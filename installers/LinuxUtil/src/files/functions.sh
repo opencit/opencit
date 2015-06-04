@@ -4309,7 +4309,11 @@ key_backup() {
   if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
 
   configDir="/opt/mtwilson/configuration"
-  keyBackupDir="/var/mtwilson/key-backup"
+  if [ -w "/var/" ]; then
+     keyBackupDir="/var/mtwilson/key-backup"
+  else
+     keyBackupDir="/opt/mtwilson/var/mtwilson/key-backup"
+  fi
   datestr=`date +%Y-%m-%d.%H%M%S`
   keyBackupFile="$keyBackupDir/mtwilson-keys_$datestr.enc"
   mkdir -p "$keyBackupDir" 2>/dev/null
