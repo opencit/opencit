@@ -22,12 +22,15 @@ logRotate_install() {
   LOGROTATE_APT_PACKAGES="logrotate"
   LOGROTATE_YAST_PACKAGES=""
   LOGROTATE_ZYPPER_PACKAGES="logrotate"
-  auto_install "Log Rotate" "LOGROTATE"
+  if [ "$(whoami)" == "root" ]; then
+    auto_install "Log Rotate" "LOGROTATE"
+    if [ $? -ne 0 ]; then echo_failure "Failed to install logrotate"; exit -1; fi
+  fi
   logRotate_clear; logRotate_detect;
     if [[ -z "$logrotate" ]]; then
-      echo_failure "Unable to auto-install Log Rotate"     
+      echo_failure "logrotate is not installed"
     else
-      echo  "Log Rotate installed in $logrotate"
+      echo  "logrotate installed in $logrotate"
     fi
 }
 
