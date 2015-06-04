@@ -24,5 +24,5 @@ if [ `whoami` == "root" ]; then
  rm -f /usr/local/bin/mtwilson
  ln -s /opt/mtwilson/bin/mtwilson /usr/local/bin/mtwilson
 else
- appendToUserProfileFile "export PATH=$MTWILSON_HOME/bin:$PATH"
+ appendToUserProfileFile "export PATH=$MTWILSON_HOME/bin:\$PATH"
 fi

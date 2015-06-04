@@ -79,15 +79,15 @@ fi
 #If user is non root make sure all prereq directories are created and owned by nonroot user
 if [ "$(whoami)" != "root" ]; then
   if [ ! -d $MTWILSON_HOME ] || [ "${owner=`stat -c '%U' $MTWILSON_HOME`}" != "$MTWILSON_USERNAME" ]; then
-   echo_failure "$MTWILSON_HOME is not owed by $MTWILSON_USERNAME. Please update manually."
+   echo_failure "$MTWILSON_HOME is not owned by $MTWILSON_USERNAME. Please update manually."
    exit
   fi
   if [ ! -d /opt/intel ] || [ "${owner=`stat -c '%U' /opt/intel`}" != "$MTWILSON_USERNAME" ]; then
-   echo_failure "/opt/intel is not owed by $MTWILSON_USERNAME. Please update manually."
+   echo_failure "/opt/intel is not owned by $MTWILSON_USERNAME. Please update manually."
    exit
   fi
   if [ ! -d /etc/intel ] || [ "${owner=`stat -c '%U' /etc/intel`}" != "$MTWILSON_USERNAME" ]; then
-   echo_failure "/etc/intel is not owed by $MTWILSON_USERNAME. Please update manually."
+   echo_failure "/etc/intel is not owned by $MTWILSON_USERNAME. Please update manually."
    exit
   fi
 fi
