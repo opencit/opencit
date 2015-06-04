@@ -7,6 +7,7 @@ package com.intel.mtwilson.as.rest.v2.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
@@ -96,20 +97,18 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                             toDate = new Date(); // Get the current date and time
                             cal.setTime(toDate);
                             toDate = dateFormat.parse(dateFormat.format(cal.getTime()));
-
-                            cal.add(Calendar.HOUR, -(criteria.numberOfDays * 24)); // To get the fromDate, we substract the number of days fromm the current date.
+                            // To get the fromDate, we substract the number of days fromm the current date.
+                            cal.add(Calendar.DATE, -(criteria.numberOfDays)); 
                             fromDate = dateFormat.parse(dateFormat.format(cal.getTime()));
                         } else {
                             if (criteria.fromDate != null && !criteria.fromDate.isEmpty() && criteria.toDate != null && !criteria.toDate.isEmpty()) {
                                 log.debug("HostAttestation:Search - Dates are specified for the search criteria with values {} - {}.", criteria.fromDate, criteria.toDate);
-                                fromDate = new Date(criteria.fromDate);
-                                cal.setTime(fromDate); // This would set the time to ex:2015-05-30 00:00:00
+                                Iso8601Date fromIso8601Date = Iso8601Date.valueOf(criteria.fromDate);
+                                cal.setTime(fromIso8601Date); // This would set the time to ex:2015-05-30 00:00:00
                                 fromDate = dateFormat.parse(dateFormat.format(cal.getTime()));
                             
-                                toDate = new Date(criteria.toDate);
-                                cal.setTime(toDate);
-                                // Need to ensure that we retrieve the results for the entire day. Ex:2013-06-03 23:59:59
-                                cal.add(Calendar.SECOND, (24*60*60-1));                                 
+                                Iso8601Date toIso8601Date = Iso8601Date.valueOf(criteria.toDate);
+                                cal.setTime(toIso8601Date);
                                 toDate = dateFormat.parse(dateFormat.format(cal.getTime()));
                             } else {
                                 String errorMsg = "HostAttestation:Search - Invalid options specified for attestation search.";
