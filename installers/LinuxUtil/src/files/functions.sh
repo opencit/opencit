@@ -1812,9 +1812,10 @@ if postgres_server_detect ; then
     psql postgres -c "${grant_sql}" 1>/dev/null
   fi
 
-  postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
-  if [ -z "$postgres_pghb_conf_has_entry" ]; then
-    if [ "$(whoami)" == "root" ]; then
+  if [ "$(whoami)" == "root" ]; then
+    postgres_pghb_conf_has_entry=$(cat $postgres_pghb_conf | grep '^host[ ]*all[ ]*all[ ]*127.0.0.1/32[ ]*password')
+    if [ -z "$postgres_pghb_conf_has_entry" ]; then
+    
       if [ -n "$postgres_pghb_conf" ]; then 
         has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
         if [ -z "$has_host" ]; then
@@ -1823,10 +1824,9 @@ if postgres_server_detect ; then
       else
         echo "warning: pg_hba.conf not found" >> $INSTALL_LOG_FILE
       fi
-    else
-      echo_failure "You must be root to alter $postgres_pghb_conf"
-      return 1
     fi
+  else
+    echo_warning "Following line must be in $postgres_pghb_conf: host  all  all  127.0.0.1/32  password"
   fi
 
   postgres_conf_has_entry=$(cat $postgres_conf | grep '^listen_addresses' | grep '127.0.0.1')
@@ -1841,8 +1841,7 @@ if postgres_server_detect ; then
         echo "warning: postgresql.conf not found" >> $INSTALL_LOG_FILE
       fi
     else
-      echo_failure "You must be root to alter make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
-      return 1
+      echo_warning "Following line must be in $postgres_conf: listen_addresses='127.0.0.1'"
     fi
   fi
 
@@ -3078,9 +3077,10 @@ tomcat_create_ssl_cert() {
   if [ "${TOMCAT_CREATE_SSL_CERT:-yes}" == "yes" ]; then
     if [ "$keystorePasswordOld" != "$keystorePassword" ]; then  # "OLD" != "NEW"
       echo "Changing keystore password and updating in Tomcat server.xml..."
-      $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
-      keystoreSedEscaped=$(sed_escape $keystore)
-      sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystoreSedEscaped"'\" keystorePass=\"'"$keystorePassword"'\" \/>/g' "$tomcatServerXml"
+      if [ -f "$keystore" ]; then
+        $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
+      fi
+      sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
       sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
       echo "Restarting Tomcat as a new SSL certificate was generated..."
       tomcat_restart >/dev/null
