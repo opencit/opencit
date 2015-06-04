@@ -14,19 +14,41 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-MTW_HOME=/opt/mtwilson
-export MTW_USERNAME=mtw
+#MTW_HOME=/opt/mtwilson
+#export MTW_USERNAME=mtwilson
 
-#if [ -z "$MTW_USERNAME" ]; then
-#  kms_load_env $KMS_HOME/env.d/mtw-username
-#fi
+
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
+
+# the env directory is not configurable; it is defined as KMS_HOME/env and the
+# administrator may use a symlink if necessary to place it anywhere else
+export MTWILSON_ENV=$MTWILSON_HOME/env.d
+
+mtw_load_env() {
+  local env_files="$@"
+  local env_file_exports
+  for env_file in $env_files; do
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+      . $env_file
+      env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+      if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+    fi
+  done  
+}
+
+if [ -z "$MTWILSON_USERNAME" ]; then
+  mtw_load_env $MTWILSON_HOME/env.d/mtwilson-username
+fi
+
 
 ###################################################################################################
 
 # if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
-if [ -n "$MTW_USERNAME" ] && [ "$MTW_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$KMS_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $MTW_USERNAME MTW_USERNAME=$MTW_USERNAME MTW_HOME=$MTW_HOME MTW_SUDO=true mtwilson $*
+if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
+  sudo -u $MTWILSON_USERNAME MTWILSON_USERNAME=$MTWILSON_USERNAME MTWILSON_HOME=$MTWILSON_HOME MTWILSON_SUDO=true mtwilson $*
   exit $?
 fi
 
