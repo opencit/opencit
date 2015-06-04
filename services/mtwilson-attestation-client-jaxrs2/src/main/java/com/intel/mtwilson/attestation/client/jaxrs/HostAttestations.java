@@ -252,6 +252,16 @@ public class HostAttestations extends MtWilsonClient {
      * @param criteria HostAttestationFilterCriteria object that specifies the search criteria.
      * The possible search options include host attestation id (id), host UUID(host_id), host AIK (aik) and host name(nameEqualTo). By
      * default the last 10 attestation results would be returned back. The user can change this by additionally specifying the limit criteria (limit=5).
+     * 
+     * Along with specifying the Host UUID or Host AIK or Host Name, the user can additionally specify the below criteria to retrieve the attestations.
+     * - numberOfDays - Specifies the number of days back from the current date for which the attestations are needed. Ex:nameEqualTo=192.168.0.2&numberOfDays=5
+     * - fromDate & toDate - Specifies the date range for which the attestations are needed. Currently the following ISO 8601 date formats are supported
+     *     -- date+time. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T00:00Z&toDate=2015-06-05T00:00Z
+     *     -- date+time+zone. Ex: nameEqualTo=192.168.0.2&fromDate=2015-04-05T12:30-02:00&toDate=2015-06-05T12:30-02:00
+     * 
+     * Note that when the fromDate and toDate options are specified, the output includes the attestations from the fromDate upto the toDate but not including the
+     * attestations from the toDate.
+     * 
      * @return HostAttestationCollection object with a list of attestations for the hosts that match the filter criteria. 
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions host_attestations:search
