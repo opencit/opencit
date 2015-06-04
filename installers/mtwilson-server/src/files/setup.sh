@@ -8,7 +8,7 @@
 # and it is not saved or used by the app script
 export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
 MTWILSON_LAYOUT=${MTWILSON_LAYOUT:-home}
-
+export PATH=$MTWILSON_HOME/bin:$PATH
 #define defaults so that they can be overwriten 
 #if the value appears in mtwilson.env
 export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
@@ -1063,4 +1063,7 @@ fi
 echo "Log file for install is located at $INSTALL_LOG_FILE"
 if [ -n "$INSTALLED_MARKER_FILE" ]; then
  touch $INSTALLED_MARKER_FILE
+fi
+if [ "$(whoami)" != "root" ]; then 
+  echo_warning "Please relogin to use mtwilson utilities"
 fi
