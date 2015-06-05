@@ -211,6 +211,7 @@ setup() {
   MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
   MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
   GLASSFISH_SSL_CERT_CN=${GLASSFISH_SSL_CERT_CN:-"$MTWILSON_SERVER"}
+  TOMCAT_SSL_CERT_CN=${TOMCAT_SSL_CERT_CN:-"$MTWILSON_SERVER"}
   
   # Prompt for installation settings
   echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
