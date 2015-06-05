@@ -208,7 +208,11 @@ such as https://${MTWILSON_SERVER:-127.0.0.1}.
 Detected the following options on this server:"
   IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
   prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
+  prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
+  prompt_with_default_password MC_FIRST_PASSWORD
   export MTWILSON_SERVER
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
   echo
   if using_mysql; then
     mysql_userinput_connection_properties
