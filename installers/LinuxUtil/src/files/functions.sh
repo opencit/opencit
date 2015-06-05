@@ -878,6 +878,27 @@ auto_install() {
   fi
 }
 
+# echo the package names but don't do anything
+auto_install_preview() {
+  local component=${1}
+  local cprefix=${2}
+  local yum_packages=$(eval "echo \$${cprefix}_YUM_PACKAGES")
+  local apt_packages=$(eval "echo \$${cprefix}_APT_PACKAGES")
+  local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
+  local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  if [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+        echo zypper install $zypper_packages
+  elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+        echo yast -i $yast_packages
+  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+        echo yum -y install $yum_packages
+  elif [[ -n "$aptget" && -n "$apt_packages" ]]; then
+        echo apt-get -y install $apt_packages
+  fi
+}
+
 # this was used in setup.sh when we installed complete rpm or deb packages via the self-extracting installer.
 # not currently used, but will be used again when we return to rpm and deb package descriptors
 # in conjunction with the self-extracting installer 
