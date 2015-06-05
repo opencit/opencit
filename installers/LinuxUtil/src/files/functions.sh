@@ -2808,39 +2808,46 @@ tomcat_detect() {
       fi
 
   # start with TOMCAT_HOME if it is already configured
-  if [[ -n "$TOMCAT_HOME" ]]; then
-    if [[ -z "$tomcat_bin" ]]; then
-      tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
-    fi
-    if [[ -z "$tomcat" ]]; then
-      if [[ -n "$java" ]]; then    
-        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-        tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
-      else
-        tomcat="$tomcat_bin"
-      fi
-    fi
-    if [ -z "$TOMCAT_CONF" ]; then
-      if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
-        export TOMCAT_CONF="$TOMCAT_HOME/conf"
-      else
-        # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
-        # reset the "tomcat" variable to force a new detection below
-        tomcat=""
-      fi
-    fi
-    if [[ -n "$tomcat" ]]; then
-      #TOMCAT_VERSION=`tomcat_version`
-      tomcat_version
-      if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
-        return 0
-      fi
-    fi
+  if [ "$(whoami)" == "root" ]; then
+   if [[ -n "$TOMCAT_HOME" ]]; then
+     if [[ -z "$tomcat_bin" ]]; then
+       tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
+     fi
+     if [[ -z "$tomcat" ]]; then
+       if [[ -n "$java" ]]; then    
+         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+         tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
+       else
+         tomcat="$tomcat_bin"
+       fi
+     fi
+     if [ -z "$TOMCAT_CONF" ]; then
+       if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
+         export TOMCAT_CONF="$TOMCAT_HOME/conf"
+       else
+         # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
+         # reset the "tomcat" variable to force a new detection below
+         tomcat=""
+       fi
+     fi
+     if [[ -n "$tomcat" ]]; then
+       #TOMCAT_VERSION=`tomcat_version`
+       tomcat_version
+       if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+         return 0
+       fi
+     fi
+   fi
+   searchdir=/
+  else
+  #TODO update it to $MTWILSON_HOME
+   searchdir=/opt/mtwilson
   fi
+  
   #echo "tomcat variable is $tomcat"
   #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
-  TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
+  TOMCAT_CANDIDATES=`find $searchdir -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES
@@ -3287,17 +3294,24 @@ java_version_report() {
 java_detect() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   # start with JAVA_HOME if it is already configured
-  if [[ -n "$JAVA_HOME" ]]; then
-    if [[ -z "$java" ]]; then
-      java=${JAVA_HOME}/bin/java
-    fi
-    JAVA_VERSION=`java_version`
-    if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-      return 0
-    fi
+  if [ "$(whoami)" == "root" ]; then
+   if [[ -n "$JAVA_HOME" ]]; then
+     if [[ -z "$java" ]]; then
+       java=${JAVA_HOME}/bin/java
+     fi
+     JAVA_VERSION=`java_version`
+     if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+       return 0
+     fi
+   fi
+   searchdir=/
+  else
+  #TODO update it to $MTWILSON_HOME
+   searchdir=/opt/mtwilson
   fi
+  
 
-    JAVA_JDK_CANDIDATES=`find / -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
+    JAVA_JDK_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
     for c in $JAVA_JDK_CANDIDATES
     do
         local java_bindir=`dirname $c`
@@ -3314,7 +3328,7 @@ java_detect() {
     
     echo "Cannot find JDK"
 
-    JAVA_JRE_CANDIDATES=`find / -name java 2>/dev/null | grep jre | grep bin/java`
+    JAVA_JRE_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep jre | grep bin/java`
     for c in $JAVA_JRE_CANDIDATES
     do
         java_bindir=`dirname $c`
@@ -3331,7 +3345,7 @@ java_detect() {
 
     echo "Cannot find JRE"
 
-    JAVA_BIN_CANDIDATES=`find / -name java 2>/dev/null | grep bin/java`
+    JAVA_BIN_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep bin/java`
     for c in $JAVA_BIN_CANDIDATES
     do
         java_bindir=`dirname $c`
