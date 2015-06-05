@@ -6,7 +6,8 @@
 # default settings
 # note the layout setting is used only by this script
 # and it is not saved or used by the app script
-export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
+#Hardcoded MTWILSON_HOME for now need to update later
+export MTWILSON_HOME=/opt/mtwilson
 MTWILSON_LAYOUT=${MTWILSON_LAYOUT:-home}
 export PATH=$MTWILSON_HOME/bin:$PATH
 #define defaults so that they can be overwriten 
