@@ -15,7 +15,7 @@ set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
 set TRUSTAGENT_JAVA=%TRUSTAGENT_HOME%\java
 set TRUSTAGENT_BIN=%TRUSTAGENT_HOME%\bin
-set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env.d
+set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
 set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
 set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_VAR%\log\http.log
@@ -29,6 +29,18 @@ set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=
 REM set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user %TRUSTAGENT_TPM_TASKS% %TRUSTAGENT_AUTHORIZE_TASKS% %TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS%
 set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file
 
+:: # load environment variables (these may override the defaults set above)
+if exist %TRUSTAGENT_ENV%\NUL (
+::  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
+::  for env_file in $TRUSTAGENT_ENV_FILES; do
+::    . $env_file
+::  done
+  for /f  "delims=" %%a in ('dir "%TRUSTAGENT_ENV%" /b') do (
+  echo. %%a
+  cd "%TRUSTAGENT_ENV%"
+  call %%a
+  echo. %TEST_TA%
+)
 
 REM # not including configure-from-environment because we are running it always before the user-chosen tasks
 REM # not including register-tpm-password because we are prompting for it in the setup.sh
@@ -51,13 +63,6 @@ REM echo %CLASSPATH%
 
 echo. %JAVA_HOME%
 
-REM patch java.security file
-if exist %JAVA_HOME%\jre\lib\security\java.security (
-  echo "Replacing java.security file, existing file will be backed up"
-  copy "%JAVA_HOME%\jre\lib\security\java.security" "%JAVA_HOME%\jre\lib\security\java.security.old"
-  copy "%TRUSTAGENT_HOME%\java.security" "%JAVA_HOME%\jre\lib\security\java.security"
-)
-
 REM Before running any tagent commands update the extensions cache file 
 REM java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment update-extensions-cache-file --force
 
@@ -65,8 +70,6 @@ REM create a trustagent username "mtwilson" with no password and all privileges
 REM which allows mtwilson to access it until mtwilson UI is updated to allow
 REM entering username and password for accessing the trust agent
 REM /usr/local/bin/tagent password mtwilson --nopass *:*
-
-echo. %1
 
 if "%1"=="start" (
   call:trustagent_start BBBB
@@ -76,6 +79,15 @@ if "%1"=="start" (
   call:trustagent_setup
 ) ELSE IF "%1"=="authorize" (
   call:trustagent_authorize
+) ELSE IF "%1"=="help" (
+  call:print_help
+) ELSE (
+  IF "%*"=="" (
+    call:print_help
+  ) ELSE (
+    echo. "%*"
+    java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main "%*"
+  )
 )
 GOTO:EOF
 
@@ -131,6 +143,16 @@ GOTO:EOF
   REM done
   REM export_vars $authorize_vars
   call:trustagent_setup --force %TRUSTAGENT_AUTHORIZE_TASKS%
+GOTO:EOF
+
+:print_help
+    REM echo. "Usage: $0 start|stop|authorize|start-http-server|version"
+    echo. "Usage: $0 start|stop|authorize|start-http-server|version"
+    echo. "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
+    echo. "Available setup tasks:"
+    echo. configure-from-environment
+    echo. %TRUSTAGENT_SETUP_TASKS%
+    echo. register-tpm-password
 GOTO:EOF
 
 endlocal
