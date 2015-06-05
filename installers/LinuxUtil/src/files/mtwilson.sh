@@ -14,6 +14,47 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+#MTW_HOME=/opt/mtwilson
+#export MTW_USERNAME=mtwilson
+
+
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
+
+# the env directory is not configurable; it is defined as KMS_HOME/env and the
+# administrator may use a symlink if necessary to place it anywhere else
+export MTWILSON_ENV=$MTWILSON_HOME/env.d
+
+mtw_load_env() {
+  local env_files="$@"
+  local env_file_exports
+  for env_file in $env_files; do
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+      . $env_file
+      env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+      if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+    fi
+  done  
+}
+
+if [ -z "$MTWILSON_USERNAME" ]; then
+  mtw_load_env $MTWILSON_HOME/env.d/mtwilson-username
+fi
+
+
+###################################################################################################
+
+# if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
+# we make an exception for the uninstall command, which may require root access to delete users and certain directories
+if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
+  sudo -u $MTWILSON_USERNAME MTWILSON_USERNAME=$MTWILSON_USERNAME MTWILSON_HOME=$MTWILSON_HOME MTWILSON_SUDO=true mtwilson $*
+  exit $?
+fi
+
+###################################################################################################
+
+
 # SCRIPT CONFIGURATION:
 #share_dir=/usr/local/share/mtwilson/util
 apiclient_dir=/usr/local/share/mtwilson/apiclient
@@ -22,12 +63,29 @@ setupconsole_dir=/opt/mtwilson/java
 apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
+pid_dir=/var/run/mtwilson
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
-#java_required_version=1.7.0_51
-MTWILSON_PID_FILE=/var/run/mtwilson.pid
-MTWILSON_PID_WAIT_FILE=/var/run/mtwilson.pid.wait
+#java_required_version=1.7.0_51    
+MTWILSON_PID_FILE=""
+if [ -z $MTWILSON_PID_FILE ]; then
+    if [ -d $pid_dir ] && [ -w $pid_dir ]; then
+        MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
+        MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	#elif [ -f ./mtwilson.env ]; then
+	      #Look up in the mtwilson.env file
+   	#      MTWILSON_PID_FILE=$(cat ~/mtwilson.env | grep -E 'MTWILSON_PID_FILE' | cut -d = -f 2)
+	#      MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	else
+        #create a directory in MTWILSON_HOME/var/run/
+        if [ ! -d $MTWILSON_HOME/var/run ]; then
+	        mkdir -p $MTWILSON_HOME/var/run
+         fi
+            MTWILSON_PID_FILE=$MTWILSON_HOME/var/run/mtwilson.pid
+            MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	fi
+fi		
 
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
@@ -158,7 +216,7 @@ Detected the following options on this server:"
   elif using_postgres; then
     postgres_userinput_connection_properties
     export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]; then
+    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
       PGPASS_HOSTNAME=localhost
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"

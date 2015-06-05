@@ -953,7 +953,7 @@ hostaddress() {
 ssh_fingerprints() {
   local has_ssh_keygen=`which ssh-keygen 2>/dev/null`
   if [ -z "$has_ssh_keygen" ]; then echo_warning "missing program: ssh-keygen"; return; fi
-  local ssh_pubkeys=`find /etc -name ssh_host_*.pub`
+  local ssh_pubkeys=`find /etc -name ssh_host_*.pub 2>/dev/null`
   for file in $ssh_pubkeys
   do
     local keybits=`ssh-keygen -lf "$file" | awk '{ print $1 }'`
@@ -3082,7 +3082,7 @@ tomcat_create_ssl_cert() {
       fi
       sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
       sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
-      echo "Restarting Tomcat as a new SSL certificate was generated..."
+      echo "Restarting Tomcat as a new Tomcat keystore password was set..."
       tomcat_restart >/dev/null
       update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"
     fi
@@ -4409,7 +4409,11 @@ key_backup() {
   if [ -z "$MTWILSON_PASSWORD" ]; then echo_failure "Encryption password cannot be null."; return 3; fi
 
   configDir="/opt/mtwilson/configuration"
-  keyBackupDir="/var/mtwilson/key-backup"
+  if [ -w "/var/" ]; then
+     keyBackupDir="/var/mtwilson/key-backup"
+  else
+     keyBackupDir="/opt/mtwilson/var/mtwilson/key-backup"
+  fi
   datestr=`date +%Y-%m-%d.%H%M%S`
   keyBackupFile="$keyBackupDir/mtwilson-keys_$datestr.enc"
   mkdir -p "$keyBackupDir" 2>/dev/null
