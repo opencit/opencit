@@ -53,6 +53,16 @@ if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoa
 fi
 
 ###################################################################################################
+if [ -d $MTWILSON_ENV ]; then
+   mtw_load_env $(ls -l $MTWILSON_ENV/*)
+fi
+
+# default directory layout follows the 'home' style
+export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-${MTWILSON_CONF:-$MTWILSON_HOME/configuration}}
+export MTWILSON_JAVA=${MTWILSON_JAVA:-$MTWILSON_HOME/java}
+export MTWILSON_BIN=${MTWILSON_BIN:-$MTWILSON_HOME/bin}
+export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-$MTWILSON_HOME/repository}
+export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
 
 
 # SCRIPT CONFIGURATION:
@@ -200,7 +210,8 @@ setup() {
   # Gather default configuration
   MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
   MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
-
+  GLASSFISH_SSL_CERT_CN=${GLASSFISH_SSL_CERT_CN:-"$MTWILSON_SERVER"}
+  
   # Prompt for installation settings
   echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
 This address will be used in the server SSL certificate and in all Mt Wilson URLs,
@@ -230,14 +241,14 @@ Detected the following options on this server:"
   export PRIVACYCA_SERVER=${MTWILSON_SERVER}
 
   if using_glassfish; then
-    if [ -n "${MTWILSON_SERVER}" ]; then
-      glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+    if [ -n "${GLASSFISH_SSL_CERT_CN}" ]; then
+      glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     else
       glassfish_create_ssl_cert_prompt
     fi
   elif using_tomcat; then
-    if [ -n "${MTWILSON_SERVER}" ]; then
-      tomcat_create_ssl_cert "${MTWILSON_SERVER}"
+    if [ -n "${GLASSFISH_SSL_CERT_CN}" ]; then
+      tomcat_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     else
       tomcat_create_ssl_cert_prompt
     fi
@@ -508,7 +519,7 @@ case "$1" in
           # new setup commands invoked via "mtwilson setup-manager <command>" which is handled by the *) case at the bottom of this script
           call_setupcommand $@
         else
-          if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+          #if [ -f $MTWILSON_HOME/mtwilson.env ]; then  . $MTWILSON_HOME/mtwilson.env; fi
           setup
         fi
         ;;
