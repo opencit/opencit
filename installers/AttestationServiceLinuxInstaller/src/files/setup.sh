@@ -39,7 +39,7 @@ WAR_PACKAGE_JETTY=`ls -1 mtwilson-jetty.war 2>/dev/null | tail -n 1`
 # copy application files to /opt
 mkdir -p "${package_dir}"
 #mkdir -p "${package_dir}"/database
-chmod 700 "${package_dir}"
+chmod 777 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
 
@@ -51,13 +51,13 @@ elif using_tomcat; then
 fi
 
 #cp sql/*.sql "${package_dir}"/database/
-chmod 600 "${package_name}.properties"
+chmod 666 "${package_name}.properties"
 cp "${package_name}.properties" "${package_dir}/${package_name}.properties.example"
 cp "audit-handler.properties" "${package_dir}/audit-handler.properties.example"
 
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
-chmod 700 "${intel_conf_dir}"
+chmod 777 "${intel_conf_dir}"
 if [ -f "${package_config_filename}" ]; then
   echo_warning "Configuration file ${package_name}.properties already exists"  >> $INSTALL_LOG_FILE
 else
@@ -78,18 +78,20 @@ fi
 #glassfish_install $GLASSFISH_PACKAGE
 
 
-# copy control script to /usr/local/bin and finish setup
-mkdir -p /usr/local/bin
-cp asctl.sh /usr/local/bin/asctl
-chmod +x /usr/local/bin/asctl
-/usr/local/bin/asctl setup
-#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
+# copy control script to $MTWILSON_HOME/bin and finish setup
+mkdir -p /opt/mtwilson/bin
+cp asctl.sh /opt/mtwilson/bin/asctl
+chmod +x /opt/mtwilson/bin/asctl
+/opt/mtwilson/bin/asctl setup
+
+aikqverify_install_prereq() {
+  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
+  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
+  auto_install "Developer tools" "DEVELOPER"   
+}
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
 compile_aikqverify() {
-  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
-  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
-  auto_install "Developer tools" "DEVELOPER" 
   AIKQVERIFY_OK=''
   cd /var/opt/intel/aikverifyhome/bin
   make  2>&1 > /dev/null
@@ -100,6 +102,13 @@ compile_aikqverify() {
     AIKQVERIFY_OK=yes
   fi
 }
+
+if [ `whoami` == "root" ]; then
+ #Code review shall we remove /usr/local/bin/asctl before creating symlink?
+ ln -s /opt/mtwilson/bin/asctl /usr/local/bin/asctl
+ aikqverify_install_prereq
+fi
+#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
 
 mkdir -p ${package_var_dir}/bin
 mkdir -p ${package_var_dir}/data
@@ -113,19 +122,21 @@ else
   echo "Compile FAILED" >> $INSTALL_LOG_FILE
 fi
 
-chown -R $MTWILSON_OWNER "${package_var_dir}"
-chmod -R 700 "${package_var_dir}"
-chmod -R 600 "${package_var_dir}/data"
+#change user if root "CODE REVIEW"
+if [ `whoami` == "root" ]; then
+ chown -R $MTWILSON_USERNAME "${package_var_dir}"
+ chmod -R 700 "${package_var_dir}"
+ chmod -R 600 "${package_var_dir}/data"
 
-if using_glassfish; then
-  glassfish_permissions "${intel_conf_dir}"
-  glassfish_permissions "${package_dir}"
-  #glassfish_permissions "${package_var_dir}"
-  #glassfish_permissions "${package_var_bin_dir}"
-elif using_tomcat; then
-  tomcat_permissions "${intel_conf_dir}"
-  tomcat_permissions "${package_dir}"
-  #tomcat_permissions "${package_var_dir}"
-  #tomcat_permissions "${package_var_bin_dir}" 
+ if using_glassfish; then
+   glassfish_permissions "${intel_conf_dir}"
+   glassfish_permissions "${package_dir}"
+   #glassfish_permissions "${package_var_dir}"
+   #glassfish_permissions "${package_var_bin_dir}"
+ elif using_tomcat; then
+   tomcat_permissions "${intel_conf_dir}"
+   tomcat_permissions "${package_dir}"
+   #tomcat_permissions "${package_var_dir}"
+   #tomcat_permissions "${package_var_bin_dir}" 
+ fi
 fi
-

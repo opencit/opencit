@@ -244,7 +244,7 @@ case "$1" in
   #      if [[ "${package_dir}" == /opt/intel/* ]]; then
   #        rm -rf "${package_dir}"
   #      fi
-        rm /usr/local/bin/${script_name} 2>/dev/null
+        rm -f /usr/local/bin/${script_name} 2>/dev/null
         ;;
   help)
         echo "Usage: ${script_name} {setup}"

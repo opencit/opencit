@@ -25,32 +25,57 @@ DAEMON=/opt/trustagent/bin/$NAME
 #Set environment specific variables here 
 ###################################################################################################
 
-TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
-TRUSTAGENT_CONF=${TRUSTAGENT_CONF:-/opt/trustagent/configuration}
-TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-/opt/trustagent/java}
-TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-/opt/trustagent/bin}
-TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-/opt/trustagent/env.d}
-TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-/opt/trustagent/var}
-TRUSTAGENT_PID_FILE=/var/run/trustagent.pid
-TRUSTAGENT_HTTP_LOG_FILE=/var/log/trustagent/http.log
-TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
-TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
-TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair create-admin-user take-ownership"
-TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin-user $TRUSTAGENT_TPM_TASKS $TRUSTAGENT_AUTHORIZE_TASKS"
-# not including configure-from-environment because we are running it always before the user-chosen tasks
-# not including register-tpm-password because we are prompting for it in the setup.sh
-JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONF/logback.xml -Dfs.name=trustagent"
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
+
+# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env.d and the
+# administrator may use a symlink if necessary to place it anywhere else
+export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
+
+trustagent_load_env() {
+  local env_files="$@"
+  local env_file_exports
+  for env_file in $env_files; do
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+      . $env_file
+      env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+      if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+    fi
+  done  
+}
+
+if [ -z "$TRUSTAGENT_USERNAME" ]; then
+  trustagent_load_env $TRUSTAGENT_HOME/env/trustagent-username
+fi
 
 ###################################################################################################
 
-# load environment variables (these may override the defaults set above)
-if [ -d $TRUSTAGENT_ENV ]; then
-  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
-  for env_file in $TRUSTAGENT_ENV_FILES; do
-    . $env_file
-  done
+# if non-root execution is specified, and we are currently root, start over; the TRUSTAGENT_SUDO variable limits this to one attempt
+# we make an exception for the uninstall command, which may require root access to delete users and certain directories
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$TRUSTAGENT_SUDO" ] && [ "$1" != "uninstall" ]; then
+  sudo -u $TRUSTAGENT_USERNAME TRUSTAGENT_USERNAME=$TRUSTAGENT_USERNAME TRUSTAGENT_HOME=$TRUSTAGENT_HOME TRUSTAGENT_PASSWORD=$TRUSTAGENT_PASSWORD TRUSTAGENT_SUDO=true $TRUSTAGENT_BIN/tagent $*
+  exit $?
 fi
+
+###################################################################################################
+
+# load environment variables; these may override the defaults set above and 
+# also note that trustagent-username file is loaded twice, once before sudo and once
+# here after sudo.
+if [ -d $TRUSTAGENT_ENV ]; then
+  trustagent_load_env $(ls -1 $TRUSTAGENT_ENV/*)
+fi
+
+# default directory layout follows the 'home' style
+TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-${TRUSTAGENT_CONF:-$TRUSTAGENT_HOME/configuration}}
+TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
+TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
+TRUSTAGENT_ENV=${TRUSTAGENT_ENV:-$TRUSTAGENT_HOME/env.d}
+TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
+TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
+
+###################################################################################################
 
 # load linux utility
 if [ -f "$TRUSTAGENT_HOME/linux-util/functions" ]; then
@@ -58,6 +83,29 @@ if [ -f "$TRUSTAGENT_HOME/linux-util/functions" ]; then
 fi
 
 ###################################################################################################
+
+# all other variables with defaults
+TRUSTAGENT_PID_FILE=$TRUSTAGENT_HOME/trustagent.pid
+TRUSTAGENT_HTTP_LOG_FILE=$TRUSTAGENT_LOGS/http.log
+TRUSTAGENT_AUTHORIZE_TASKS="download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate request-endorsement-certificate request-aik-certificate"
+TRUSTAGENT_TPM_TASKS="create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership"
+TRUSTAGENT_START_TASKS="create-keystore-password create-tls-keypair create-admin-user take-ownership"
+TRUSTAGENT_SETUP_TASKS="create-keystore-password create-tls-keypair create-admin-user $TRUSTAGENT_TPM_TASKS $TRUSTAGENT_AUTHORIZE_TASKS"
+# not including configure-from-environment because we are running it always before the user-chosen tasks
+# not including register-tpm-password because we are prompting for it in the setup.sh
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
+JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONFIGURATION/logback.xml -Dfs.name=trustagent"
+
+###################################################################################################
+
+# java command
+if [ -z "$JAVA_CMD" ]; then
+  if [ -n "$JAVA_HOME" ]; then
+    JAVA_CMD=$JAVA_HOME/bin/java
+  else
+    JAVA_CMD=`which java`
+  fi
+fi
 
 # generated variables
 JARS=$(ls -1 $TRUSTAGENT_JAVA/*.jar)
@@ -70,6 +118,13 @@ export CLASSPATH
 
 ###################################################################################################
 
+# run a trustagent command
+trustagent_run() {
+  local args="$*"
+  $JAVA_CMD $JAVA_OPTS com.intel.dcsg.cpg.console.Main $args
+  return $?
+}
+
 # arguments are optional, if provided they are the names of the tasks to run, in order
 trustagent_setup() {
   export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
@@ -79,7 +134,7 @@ trustagent_setup() {
   elif [ "$tasklist" == "--force" ]; then
     tasklist="$TRUSTAGENT_SETUP_TASKS --force"
   fi
-  java $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup configure-from-environment $tasklist
+  $JAVA_CMD $JAVA_OPTS com.intel.dcsg.cpg.console.Main setup configure-from-environment $tasklist
   return $?
 }
 
@@ -98,6 +153,20 @@ trustagent_authorize() {
 }
 
 trustagent_start() {
+
+    # check if we're already running - don't start a second instance
+    if trustagent_is_running; then
+        echo "Trust Agent is running"
+        return 0
+    fi
+
+    # check if we need to use authbind or if we can start java directly
+    prog="$JAVA_CMD"
+    if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
+      prog="authbind $JAVA_CMD"
+      JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+    fi
+
     # the subshell allows the java process to have a reasonable current working
     # directory without affecting the user's working directory. 
     # the last background process pid $! must be stored from the subshell.
@@ -150,13 +219,18 @@ trustagent_stop() {
   fi
 }
 
-# backs up the configuration directory and removes all trustagent files
+# backs up the configuration directory and removes all trustagent files,
+# except for configuration files which are saved and restored
 trustagent_uninstall() {
     datestr=`date +%Y-%m-%d.%H%M`
-    mkdir -p /var/backup/trustagent.configuration.$datestr
-    cp -r /opt/trustagent/configuration/* /var/backup/trustagent.configuration.$datestr
-	rm /usr/local/bin/tagent
-    rm -rf /opt/trustagent
+    mkdir -p /tmp/trustagent.configuration.$datestr
+    cp -r /opt/trustagent/configuration/* /tmp/trustagent.configuration.$datestr
+	rm -f /usr/local/bin/tagent
+    if [ -n "$TRUSTAGENT_HOME" ] && [ -d "$TRUSTAGENT_HOME" ]; then
+      rm -rf $TRUSTAGENT_HOME/*
+    fi
+    mkdir -p $TRUSTAGENT_CONFIGURATION
+    cp -r /tmp/trustagent.configuration.$datestr/* $TRUSTAGENT_CONFIGURATION/
 }
 
 # stops monit and removes its configuration
@@ -256,7 +330,7 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
-      java $JAVA_OPTS com.intel.dcsg.cpg.console.Main $*
+      trustagent_run $*
     fi
     ;;
 esac
