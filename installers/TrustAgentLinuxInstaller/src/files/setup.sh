@@ -6,7 +6,7 @@
 # default settings
 export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
 
-# the env directory is not configurable; it is defined as KMS_HOME/env and the
+# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env and the
 # administrator may use a symlink if necessary to place it anywhere else
 export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
 
@@ -107,12 +107,12 @@ date > $logfile
 
 # store directory layout in env file
 echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-layout
-echo "TRUSTAGENT_HOME=$TRUSTAGENT_HOME" >> $TRUSTAGENT_ENV/kms-layout
-echo "TRUSTAGENT_CONFIGURATION=$TRUSTAGENT_CONFIGURATION" >> $TRUSTAGENT_ENV/kms-layout
-echo "TRUSTAGENT_JAVA=$TRUSTAGENT_JAVA" >> $TRUSTAGENT_ENV/kms-layout
-echo "TRUSTAGENT_BIN=$TRUSTAGENT_BIN" >> $TRUSTAGENT_ENV/kms-layout
-echo "TRUSTAGENT_REPOSITORY=$TRUSTAGENT_REPOSITORY" >> $TRUSTAGENT_ENV/kms-layout
-echo "TRUSTAGENT_LOGS=$TRUSTAGENT_LOGS" >> $TRUSTAGENT_ENV/kms-layout
+echo "TRUSTAGENT_HOME=$TRUSTAGENT_HOME" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_CONFIGURATION=$TRUSTAGENT_CONFIGURATION" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_JAVA=$TRUSTAGENT_JAVA" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_BIN=$TRUSTAGENT_BIN" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_REPOSITORY=$TRUSTAGENT_REPOSITORY" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_LOGS=$TRUSTAGENT_LOGS" >> $TRUSTAGENT_ENV/trustagent-layout
 
 # store trustagent username in env file
 echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-username
