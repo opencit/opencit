@@ -144,13 +144,13 @@ logfile=$TRUSTAGENT_LOGS/install.log
 
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip"
+APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip authbind"
 # commented out from apt packages: libcurl4-openssl-dev 
-APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip"
+APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip authbind"
 # commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
-APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip"
+APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip authbind"
 # SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
-APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel"
+APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel authbind"
 # other packages in suse:  libopenssl0_9_8 
 
 
@@ -181,6 +181,16 @@ JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
 unzip -DD -o $ZIP_PACKAGE -d $TRUSTAGENT_HOME >> $logfile  2>&1
+
+# update logback.xml with configured trustagent log directory
+if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
+  sed -e "s|<file>.*/trustagent.log</file>|<file>$TRUSTAGENT_LOGS/trustagent.log</file>|" $TRUSTAGENT_CONFIGURATION/logback.xml > $TRUSTAGENT_CONFIGURATION/logback.xml.edited
+  if [ $? -eq 0 ]; then
+    mv $TRUSTAGENT_CONFIGURATION/logback.xml.edited $TRUSTAGENT_CONFIGURATION/logback.xml
+  fi
+else
+  echo_warning "Logback configuration not found: $TRUSTAGENT_CONFIGURATION/logback.xml"
+fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
 # copy it to our new env.d folder so it will be available to tagent on startup
@@ -228,6 +238,15 @@ fi
 
 # Redefine the variables to the new locations
 package_config_filename=$TRUSTAGENT_CONFIGURATION/trustagent.properties
+
+
+# setup authbind to allow non-root trustagent to listen on port 1443
+mkdir -p /etc/authbind/byport
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+  touch /etc/authbind/byport/1443
+  chmod 500 /etc/authbind/byport/1443
+  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+fi
 
 
 #tpm_nvinfo
@@ -286,7 +305,9 @@ chmod +x $TRUSTAGENT_BIN/*
 
 # in 2.0.6, java home is now under trustagent home by default
 JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
-java_install $JAVA_PACKAGE
+mkdir -p $JAVA_HOME
+#java_install $JAVA_PACKAGE
+java_install_in_home $JAVA_PACKAGE
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -310,11 +331,11 @@ fix_libcrypto() {
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
   if [ -n "$has_libcrypto" ]; then
-    if [ -z "$has_libdir_symlink" ]; then
+    if [ -z "$has_libdir_symlink" ] && [ ! -h $libdir/libcrypto.so ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
     fi
-    if [ -z "$has_usrbin_symlink" ]; then
+    if [ -z "$has_usrbin_symlink" ] && [ ! -h /usr/lib/libcrypto.so ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
     fi

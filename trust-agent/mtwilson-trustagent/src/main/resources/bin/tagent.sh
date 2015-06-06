@@ -45,8 +45,11 @@ trustagent_load_env() {
   done  
 }
 
-if [ -z "$TRUSTAGENT_USERNAME" ]; then
-  trustagent_load_env $TRUSTAGENT_HOME/env/trustagent-username
+# load environment variables; these override any existing environment variables.
+# the idea is that if someone wants to override these, they must have write
+# access to the environment files that we load here. 
+if [ -d $TRUSTAGENT_ENV ]; then
+  trustagent_load_env $(ls -1 $TRUSTAGENT_ENV/*)
 fi
 
 ###################################################################################################
@@ -54,18 +57,13 @@ fi
 # if non-root execution is specified, and we are currently root, start over; the TRUSTAGENT_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$TRUSTAGENT_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $TRUSTAGENT_USERNAME TRUSTAGENT_USERNAME=$TRUSTAGENT_USERNAME TRUSTAGENT_HOME=$TRUSTAGENT_HOME TRUSTAGENT_PASSWORD=$TRUSTAGENT_PASSWORD TRUSTAGENT_SUDO=true $TRUSTAGENT_BIN/tagent $*
+  export TRUSTAGENT_SUDO=true
+  sudo -u $TRUSTAGENT_USERNAME -E $TRUSTAGENT_BIN/tagent $*
   exit $?
 fi
 
 ###################################################################################################
 
-# load environment variables; these may override the defaults set above and 
-# also note that trustagent-username file is loaded twice, once before sudo and once
-# here after sudo.
-if [ -d $TRUSTAGENT_ENV ]; then
-  trustagent_load_env $(ls -1 $TRUSTAGENT_ENV/*)
-fi
 
 # default directory layout follows the 'home' style
 TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-${TRUSTAGENT_CONF:-$TRUSTAGENT_HOME/configuration}}

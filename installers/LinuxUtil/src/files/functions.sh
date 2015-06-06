@@ -3481,6 +3481,67 @@ java_install() {
   fi
 }
 
+# the JAVA_HOME variable must be set as the destination to which we will
+# install java;  if java is already there we skip installation - upgrade
+# is not supported by this function
+java_install_in_home() {
+  local java_package=$1
+  # validate inputs
+  if [ -z "$java_package" ]; then
+    echo_failure "Cannot install Java: missing package name"
+    return 2
+  elif [ ! -f "$java_package" ]; then
+    echo_failure "Cannot install Java: missing file: $java_package"
+    return 3
+  elif [ -z "$JAVA_HOME" ]; then
+    echo_failure "Cannot install Java: variable JAVA_HOME not set"
+    return 4
+  elif [ -d "$JAVA_HOME" ] && [ ! -w "$JAVA_HOME" ]; then
+    echo_failure "Cannot install Java: directory $JAVA_HOME not writable"
+    return 5
+  elif [ -d "$JAVA_HOME" ] && [ $(ls -1 $JAVA_HOME | wc -l) -gt 0 ]; then
+    echo_warning "Java already installed at $JAVA_HOME"
+    return 6
+  fi
+
+  mkdir -p $JAVA_HOME
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot install Java: parent directory $(dirname $JAVA_HOME) not writable"
+    return 7
+  fi
+
+  # unpack the java archive
+    is_targz=`echo $java_package | grep ".tar.gz$"`
+    is_gzip=`echo $java_package | grep ".gz$"`
+    is_bin=`echo $java_package | grep ".bin$"`
+    javaname=`echo $java_package | awk -F . '{ print $1 }'`
+    if [ -n "$is_targz" ]; then
+      tar xzvf $java_package 2>&1 >> $INSTALL_LOG_FILE
+    elif [ -n "$is_gzip" ]; then
+      gunzip $java_package 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
+      chmod +x $javaname
+      ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
+    elif [ -n "$is_bin" ]; then
+      chmod +x $java_package
+      ./$java_package | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"  
+    fi
+    # java gets unpacked in current directory but they cleverly
+    # named the folder differently than the archive, so search for it:
+    local java_unpacked=`ls -1d jdk* jre* 2>/dev/null`
+    for f in $java_unpacked
+    do
+      if [ -d "$f" ]; then
+        mv "$f" $(dirname $JAVA_HOME)
+        echo "Installed Java in $JAVA_HOME"
+        java_bindir=$JAVA_HOME/bin
+        java=$java_bindir/java
+        return 0
+      fi
+    done
+    echo_failure "Cannot install Java: error after unpacking"
+    return 1
+}
+
 java_keystore_cert_report() {
   local keystore="${1:-keystore.jks}"
   local keystorePassword="${2:-changeit}"
