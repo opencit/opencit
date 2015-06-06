@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mtwilson" default="all" basedir=".">
+	<description>
+	Run "ant ready" to ensure you have all pre-requisites to build
+	Run "ant" or "ant build" to build the entire project
+	Run "ant ready build packages" to clean build and generate packages
+	Run "ant build packages" to rebuild only and generate packages
+	Run "ant packages" to generate packages (requires prior build)
+
+
+NOTE: maintain this for 2.x but 3.x it has its own copy already so always prefer the 3.x version when merging into 3.x
+
+	</description>
+	
+	<target name="info">
+		<echoproperties/>
+	</target>
+	
+	<target name="init">
+		<condition property="cmd.maven" value="mvn.bat">
+			<os family="windows"/>
+		</condition>
+		<condition property="cmd.maven" value="mvn">
+			<os family="unix"/>
+		</condition>
+	</target>
+	
+	<target name="ready" depends="init">
+		<!-- the root pom -->
+		<exec executable="${cmd.maven}" resultproperty="mavenExitInstallPom">
+			<arg value="-DskipTests=true"/>
+			<arg value="-N"/>
+			<arg value="install"/>
+		</exec>
+		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
+			<condition><not><equals arg1="${mavenExitInstallPom}" arg2="0"/></not></condition>
+		</fail>
+		<!-- the maven archetypes depend on root pom -->
+		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallParents">
+			<arg value="-DskipTests=true"/>
+			<arg value="install"/>
+		</exec>
+		<fail message="Failed to install parent pom.xml files" status="${mavenExitInstallParents}">
+			<condition><not><equals arg1="${mavenExitInstallParents}" arg2="0"/></not></condition>
+		</fail>
+	</target>
+	
+	<target name="clean" depends="init">
+		<!-- clean all projects including installer packages -->
+		<exec executable="${cmd.maven}" resultproperty="mavenExitClean">
+			<arg value="-DskipTests=true"/>
+			<arg value="clean"/>
+		</exec>
+		<fail message="Failed to clean project" status="${mavenExitClean}">
+			<condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
+		</fail>
+	</target>
+	
+	<target name="build" depends="init">
+		<!-- the root pom and all projects -->
+		<exec executable="${cmd.maven}" resultproperty="mavenExitInstall">
+			<arg value="-DskipTests=true"/>
+			<arg value="install"/>
+		</exec>
+		<fail message="Failed to build maven project" status="${mavenExitInstall}">
+			<condition><not><equals arg1="${mavenExitInstall}" arg2="0"/></not></condition>
+		</fail>
+	</target>
+
+	<target name="packages" depends="init">
+		<!-- the root pom and all projects -->
+		<exec executable="${cmd.maven}" dir="installers">
+			<arg value="-DskipTests=true"/>
+			<arg value="clean"/>
+			<arg value="install"/>
+		</exec>
+	</target>
+
+	<target name="all" depends="ready,clean,build,packages"></target>
+	
+</project>

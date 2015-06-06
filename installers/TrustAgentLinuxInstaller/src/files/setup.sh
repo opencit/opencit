@@ -3,41 +3,156 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-# SCRIPT CONFIGURATION:
-intel_conf_dir=/etc/intel/cloudsecurity
-package_name=trustagent
-package_dir=/opt/intel/cloudsecurity/${package_name}
-package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_env_filename=/root/${package_name}.env
-package_version_filename=/opt/trustagent/env.d/trustagent.version
-ASSET_TAG_SETUP="y"
+# default settings
+export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
 
-logfile=/var/log/trustagent/install.log
+# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env and the
+# administrator may use a symlink if necessary to place it anywhere else
+export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
 
-#java_required_version=1.7.0_51
-# commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip"
-# commented out from apt packages: libcurl4-openssl-dev 
-APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip"
-# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
-APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip"
-# SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
-APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel"
-# other packages in suse:  libopenssl0_9_8 
+# load application environment variables if already defined
+if [ -d $TRUSTAGENT_ENV ]; then
+  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
+  for env_file in $TRUSTAGENT_ENV_FILES; do
+    . $env_file
+    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+  done
+fi
+
+# load installer environment file, if present
+if [ -f ~/trustagent.env ]; then
+  echo "Loading environment variables from $(cd ~ && pwd)/trustagent.env"
+  . ~/trustagent.env
+  env_file_exports=$(cat ~/trustagent.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+  if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+else
+  echo "No environment file"
+fi
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
-if [ -f ~/trustagent.env ]; then  . ~/trustagent.env; fi
 
-# this is a list of all the variables we expect to find in trustagent.env
-TRUSTAGENT_ENV_VARS="MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USERNAME MTWILSON_API_PASSWORD TPM_OWNER_SECRET TPM_SRK_SECRET AIK_SECRET AIK_INDEX TPM_QUOTE_IPV4 TRUSTAGENT_HTTP_TLS_PORT TRUSTAGENT_TLS_CERT_DN TRUSTAGENT_TLS_CERT_IP TRUSTAGENT_TLS_CERT_DNS TRUSTAGENT_KEYSTORE_PASSWORD DAA_ENABLED TRUSTAGENT_PASSWORD JAVA_REQUIRED_VERSION HARDWARE_UUID"
+# determine if we are installing as root or non-root
+if [ "$(whoami)" == "root" ]; then
+  # create a trustagent user if there isn't already one created
+  TRUSTAGENT_USERNAME=${TRUSTAGENT_USERNAME:-trustagent}
+  if ! getent passwd $TRUSTAGENT_USERNAME 2>&1 >/dev/null; then
+    useradd --comment "Mt Wilson Trust Agent" --home $TRUSTAGENT_HOME --system --shell /bin/false $TRUSTAGENT_USERNAME
+    usermod --lock $TRUSTAGENT_USERNAME
+    # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $TRUSTAGENT_USERNAME"
+  fi
+else
+  # already running as trustagent user
+  TRUSTAGENT_USERNAME=$(whoami)
+  echo_warning "Running as $TRUSTAGENT_USERNAME; if installation fails try again as root"
+  if [ ! -w "$TRUSTAGENT_HOME" ] && [ ! -w $(dirname $TRUSTAGENT_HOME) ]; then
+    TRUSTAGENT_HOME=$(cd ~ && pwd)
+  fi
+fi
 
-export_vars $TRUSTAGENT_ENV_VARS
+# define location variables but do not export them yet
+TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
+TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
+TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
+TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
+TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
+TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
+TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
-# before we start, clear the install log
-mkdir -p $(dirname $logfile)
+# note that the env dir is not configurable; it is defined as "env.d" under home
+TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
+
+# if there's a monit configuration for trustagent, remove it to prevent
+# monit from trying to restart trustagent while we are setting up
+if [ "$(whoami)" == "root" ] && [ -f /etc/monit/conf.d/ta.monit ]; then
+  datestr=`date +%Y%m%d.%H%M`
+  backupdir=$TRUSTAGENT_BACKUP/monit.configuration.$datestr
+  mkdir -p $backupdir
+  mv /etc/monit/conf.d/ta.monit $backupdir
+  service monit restart
+fi
+
+# if trustagent is already installed, stop it while we upgrade/reinstall
+existing_tagent=`which tagent 2>/dev/null`
+if [ -f "$existing_tagent" ]; then
+  $existing_tagent stop
+fi
+
+# now export the new settings to ensure they're available to subcommands
+export TRUSTAGENT_CONFIGURATION TRUSTAGENT_REPOSITORY TRUSTAGENT_VAR TRUSTAGENT_LOGS TRUSTAGENT_BIN TRUSTAGENT_JAVA TRUSTAGENT_BACKUP TRUSTAGENT_ENV
+
+
+trustagent_backup_configuration() {
+  if [ -n "$TRUSTAGENT_CONFIGURATION" ] && [ -d "$TRUSTAGENT_CONFIGURATION" ]; then
+    datestr=`date +%Y%m%d.%H%M`
+    backupdir=$TRUSTAGENT_BACKUP/trustagent.configuration.$datestr
+    cp -r $TRUSTAGENT_CONFIGURATION $backupdir
+  fi
+}
+
+# backup current configuration, if present
+trustagent_backup_configuration
+
+# create application directories (chown will be repeated near end of this script, after setup)
+for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
+  mkdir -p $directory
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+  chmod 700 $directory
+done
+
+# before we start, clear the install log (directory must already exist; created above)
 date > $logfile
+
+# store directory layout in env file
+echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_HOME=$TRUSTAGENT_HOME" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_CONFIGURATION=$TRUSTAGENT_CONFIGURATION" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_JAVA=$TRUSTAGENT_JAVA" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_BIN=$TRUSTAGENT_BIN" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_REPOSITORY=$TRUSTAGENT_REPOSITORY" >> $TRUSTAGENT_ENV/trustagent-layout
+echo "TRUSTAGENT_LOGS=$TRUSTAGENT_LOGS" >> $TRUSTAGENT_ENV/trustagent-layout
+
+# store trustagent username in env file
+echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-username
+echo "TRUSTAGENT_USERNAME=$TRUSTAGENT_USERNAME" >> $TRUSTAGENT_ENV/trustagent-username
+
+# store log level in env file, if it's set
+if [ -n "$TRUSTAGENT_LOG_LEVEL" ]; then
+  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-logging
+  echo "TRUSTAGENT_LOG_LEVEL=$TRUSTAGENT_LOG_LEVEL" >> $TRUSTAGENT_ENV/trustagent-logging
+fi
+
+# store the auto-exported environment variables in temporary env file
+# to make them available after the script uses sudo to switch users;
+# we delete that file later
+echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-setup
+for env_file_var_name in $env_file_exports
+do
+  eval env_file_var_value="\$$env_file_var_name"
+  echo "export $env_file_var_name=$env_file_var_value" >> $TRUSTAGENT_ENV/trustagent-setup
+done
+
+
+# ORIGINAL SCRIPT CONFIGURATION:
+TRUSTAGENT_V_1_2_HOME=/opt/intel/cloudsecurity/trustagent
+TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
+package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
+ASSET_TAG_SETUP="y"
+logfile=$TRUSTAGENT_LOGS/install.log
+
+#java_required_version=1.7.0_51
+# commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
+APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip authbind"
+# commented out from apt packages: libcurl4-openssl-dev 
+APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip authbind"
+# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
+APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip authbind"
+# SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
+APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel authbind"
+# other packages in suse:  libopenssl0_9_8 
+
 
 # Automatic install steps:
 # 1. Install prereqs
@@ -48,37 +163,13 @@ date > $logfile
 # 6. Compile TPM commands
 # 7. Install Trust Agent files
 
-##### install prereqs
-auto_install "TrustAgent requirements" "APPLICATION"
-
-##### backup old files
-
-# backup configuration directory before unzipping our package
-backupdate=`date +%Y-%m-%d.%H%M`
-if [ -d /opt/trustagent/configuration ]; then  
-  cp -r /opt/trustagent/configuration /opt/trustagent/configuration.$backupdate
+##### install prereqs can only be done as root
+if [ "$(whoami)" == "root" ]; then
+  auto_install "TrustAgent requirements" "APPLICATION"
+else
+  echo_warning "Required packages:"
+  auto_install_preview "TrustAgent requirements" "APPLICATION"
 fi
-
-
-##### stop existing trust agent if running
-
-# before we stop the trust agent, remove it from the monit config (if applicable)
-# to prevent monit from trying to restart it while we are setting up.
-if [ -f /etc/monit/conf.d/ta.monit ]; then
-  mkdir -p /etc/monit.bak
-  mv /etc/monit/conf.d/ta.monit /etc/monit.bak/ta.monit.$backupdate
-  service monit restart
-fi
-
-# bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
-# But if trust agent is already installed and running, stop it now (and start the new one later)
-existing_tagent=`which tagent 2>/dev/null`
-if [ -f "$existing_tagent" ]; then
-  echo "Stopping trust agent..."
-  $existing_tagent stop
-fi
-
-
 
 ##### create directory structure
 
@@ -89,35 +180,31 @@ fi
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
-groupadd trustagent >> $logfile  2>&1
-useradd -d /opt/trustagent -r -s /bin/false -g trustagent trustagent >> $logfile  2>&1
+unzip -DD -o $ZIP_PACKAGE -d $TRUSTAGENT_HOME >> $logfile  2>&1
 
-mkdir -p /opt/trustagent
-unzip -DD -o $ZIP_PACKAGE -d /opt/trustagent >> $logfile  2>&1
-mkdir -p /opt/trustagent/var
-chown -R trustagent:trustagent /opt/trustagent
-chown -R root /opt/trustagent/bin
-chown -R root /opt/trustagent/java
-chown -R root /opt/trustagent/configuration
-mkdir -p /var/log/trustagent
-chown trustagent:trustagent /var/log/trustagent
-chmod -R 755 /opt/trustagent/bin
-mkdir -p /opt/trustagent/env.d
-chown -R root /opt/trustagent/env.d
+# update logback.xml with configured trustagent log directory
+if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
+  sed -e "s|<file>.*/trustagent.log</file>|<file>$TRUSTAGENT_LOGS/trustagent.log</file>|" $TRUSTAGENT_CONFIGURATION/logback.xml > $TRUSTAGENT_CONFIGURATION/logback.xml.edited
+  if [ $? -eq 0 ]; then
+    mv $TRUSTAGENT_CONFIGURATION/logback.xml.edited $TRUSTAGENT_CONFIGURATION/logback.xml
+  fi
+else
+  echo_warning "Logback configuration not found: $TRUSTAGENT_CONFIGURATION/logback.xml"
+fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
 # copy it to our new env.d folder so it will be available to tagent on startup
 if [ -n "$LIBVIRT_DEFAULT_URI" ]; then
-  echo "export LIBVIRT_DEFAULT_URI=$LIBVIRT_DEFAULT_URI" > /opt/trustagent/env.d/virsh
+  echo "LIBVIRT_DEFAULT_URI=$LIBVIRT_DEFAULT_URI" > $TRUSTAGENT_ENV/virsh
 elif [ -n "$VIRSH_DEFAULT_CONNECT_URI" ]; then
-  echo "export VIRSH_DEFAULT_CONNECT_URI=$VIRSH_DEFAULT_CONNECT_URI" > /opt/trustagent/env.d/virsh
+  echo "VIRSH_DEFAULT_CONNECT_URI=$VIRSH_DEFAULT_CONNECT_URI" > $TRUSTAGENT_ENV/virsh
 fi
 
 # Migrate any old data to the new locations  (should be rewritten in java)
-v1_aik=/etc/intel/cloudsecurity/cert
-v2_aik=/opt/trustagent/configuration
-v1_conf=/etc/intel/cloudsecurity
-v2_conf=/opt/trustagent/configuration
+v1_aik=$TRUSTAGENT_V_1_2_CONFIGURATION/cert
+v2_aik=$TRUSTAGENT_CONFIGURATION
+v1_conf=$TRUSTAGENT_V_1_2_CONFIGURATION
+v2_conf=$TRUSTAGENT_CONFIGURATION
 if [ -d "$v1_aik" ]; then
   cp $v1_aik/aikblob.dat $v2_aik/aik.blob
   cp $v1_aik/aikcert.pem $v2_aik/aik.pem
@@ -150,73 +237,77 @@ if [ -d "$v1_conf" ]; then
 fi
 
 # Redefine the variables to the new locations
+package_config_filename=$TRUSTAGENT_CONFIGURATION/trustagent.properties
 
-intel_conf_dir=/opt/trustagent/configuration
-package_dir=/opt/trustagent
-package_config_filename=${intel_conf_dir}/${package_name}.properties
 
+# setup authbind to allow non-root trustagent to listen on port 1443
+mkdir -p /etc/authbind/byport
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+  touch /etc/authbind/byport/1443
+  chmod 500 /etc/authbind/byport/1443
+  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+fi
 
 
 #tpm_nvinfo
 tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/tpm_nvinfo" ]]; then
-  ln -s "$tpmnvinfo" "${package_dir}/bin"
+if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvinfo" ]]; then
+  ln -s "$tpmnvinfo" "$TRUSTAGENT_BIN"
 fi
 
 #tpm_nvrelease
 tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/tpm_nvrelease" ]]; then
-  ln -s "$tpmnvrelease" "${package_dir}/bin"
+if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvrelease" ]]; then
+  ln -s "$tpmnvrelease" "$TRUSTAGENT_BIN"
 fi
 
 #tpm_nvwrite
 tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/tpm_nvwrite" ]]; then
-  ln -s "$tpmnvwrite" "${package_dir}/bin"
+if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvwrite" ]]; then
+  ln -s "$tpmnvwrite" "$TRUSTAGENT_BIN"
 fi
 
 #tpm_nvread
 tpmnvread=`which tpm_nvread 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/tpm_nvread" ]]; then
-  ln -s "$tpmnvread" "${package_dir}/bin"
+if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvread" ]]; then
+  ln -s "$tpmnvread" "$TRUSTAGENT_BIN"
 fi
 
 #tpm_nvdefine
 tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/tpm_nvdefine" ]]; then
-  ln -s "$tpmnvdefine" "${package_dir}/bin"
+if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvdefine" ]]; then
+  ln -s "$tpmnvdefine" "$TRUSTAGENT_BIN"
 fi
 
 hex2bin_install() {
   return_dir=`pwd`
   cd hex2bin
-  make && cp hex2bin /usr/local/bin
+  make && cp hex2bin $TRUSTAGENT_BIN
   cd $return_dir
 }
 
 hex2bin_install
 
-hex2bin=`which hex2bin 2>/dev/null`
-if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
-  ln -s "$hex2bin" "${package_dir}/bin"
+mkdir -p "$TRUSTAGENT_HOME"/linux-util
+chmod -R 700 "$TRUSTAGENT_HOME"/linux-util
+cp version "$TRUSTAGENT_HOME"/linux-util
+cp functions "$TRUSTAGENT_HOME"/linux-util
+
+
+# if prior version had control script in /usr/local/bin, delete it
+if [ "$(whoami)" == "root" ] && [ -f tagent ]; then
+  rm tagent
 fi
-
-mkdir -p "${package_dir}"/linux-util
-chmod -R 700 "${package_dir}"/linux-util
-cp version "${package_dir}"/linux-util
-cp functions "${package_dir}"/linux-util
-
-
-# copy control scripts to /usr/local/bin
-mkdir -p /usr/local/bin
-if [ -f /usr/local/bin/tagent ]; then rm /usr/local/bin/tagent; fi
-ln -s /opt/trustagent/bin/tagent.sh /usr/local/bin/tagent
-if [[ ! -h /opt/trustagent/bin/tagent ]]; then
-  ln -s /opt/trustagent/bin/tagent.sh /opt/trustagent/bin/tagent
+if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
+  ln -s $TRUSTAGENT_BIN/tagent.sh $TRUSTAGENT_BIN/tagent
 fi
+chmod +x $TRUSTAGENT_BIN/*
 
-
-java_install $JAVA_PACKAGE
+# in 2.0.6, java home is now under trustagent home by default
+JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
+mkdir -p $JAVA_HOME
+#java_install $JAVA_PACKAGE
+java_install_in_home $JAVA_PACKAGE
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -240,11 +331,11 @@ fix_libcrypto() {
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
   if [ -n "$has_libcrypto" ]; then
-    if [ -z "$has_libdir_symlink" ]; then
+    if [ -z "$has_libdir_symlink" ] && [ ! -h $libdir/libcrypto.so ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
     fi
-    if [ -z "$has_usrbin_symlink" ]; then
+    if [ -z "$has_usrbin_symlink" ] && [ ! -h /usr/lib/libcrypto.so ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
     fi
@@ -257,7 +348,9 @@ fix_libcrypto() {
   fi
 }
 
-fix_libcrypto
+if [ "$(whoami)" == "root" ]; then
+  fix_libcrypto
+fi
 
 return_dir=`pwd`
 
@@ -267,7 +360,7 @@ return_dir=`pwd`
     echo "Installing TPM commands... "
     cd commands-citrix-xen
     chmod 755 aikquote NIARL_TPM_Module openssl.sh
-    cp aikquote NIARL_TPM_Module openssl.sh ${package_dir}/bin
+    cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
     cd ..
   else
     # compile and install tpm commands
@@ -278,18 +371,19 @@ return_dir=`pwd`
     # identity and takeownership commands not needed with NIARL PRIVACY CA
     if [ -e aikquote ]; then
       chmod 755 aikquote
-      cp aikquote ${package_dir}/bin
+      cp aikquote $TRUSTAGENT_HOME/bin
       COMPILE_OK=yes
       echo_success "OK"
     else
       echo_failure "FAILED"
     fi
     chmod 755 aikquote NIARL_TPM_Module openssl.sh
-    cp aikquote NIARL_TPM_Module openssl.sh ${package_dir}/bin
+    cp aikquote NIARL_TPM_Module openssl.sh $TRUSTAGENT_HOME/bin
     cd ..
   fi
   cd ..
   # create trustagent.version file
+  package_version_filename=$TRUSTAGENT_ENV/trustagent.version
   datestr=`date +%Y-%m-%d.%H%M`
   touch $package_version_filename
   chmod 600 $package_version_filename
@@ -299,12 +393,16 @@ return_dir=`pwd`
 
 cd $return_dir
 
-echo "Registering tagent in start up"
-register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1
-# trousers has N=20 startup number, need to lookup and do a N+1
+if [ "$(whoami)" == "root" ]; then
+  echo "Registering tagent in start up"
+  register_startup_script $TRUSTAGENT_BIN/tagent tagent 21 >>$logfile 2>&1
+  # trousers has N=20 startup number, need to lookup and do a N+1
+else
+  echo_warning "Skipping startup script registration"
+fi
 
 fix_existing_aikcert() {
-  local aikdir=${intel_conf_dir}/cert
+  local aikdir=$TRUSTAGENT_CONFIGURATION/cert
   if [ -f $aikdir/aikcert.cer ]; then
     # trust agent aikcert.cer is in broken PEM format... it needs newlines every 76 characters to be correct
     cat $aikdir/aikcert.cer | sed 's/.\{76\}/&\n/g' > $aikdir/aikcert.pem
@@ -399,29 +497,50 @@ monit_src_install() {
   fi
 }
 
-monit_install $MONIT_PACKAGE
+if [ "$(whoami)" == "root" ]; then
+  monit_install $MONIT_PACKAGE
 
+  mkdir -p /etc/monit/conf.d
+  # ta.monit is already backed up at the beginning of setup.sh
+  # not using backup_file /etc/monit/conf.d/ta.monit because we want it in a different folder to prevent monit from reading the new ta.monit AND all the backups and complaining about duplicates
+  cp ta.monit /etc/monit/conf.d/ta.monit
 
+  if [ -f /etc/monit/monitrc ]; then
+    backupdir=$TRUSTAGENT_BACKUP/monitrc.$backupdate
+    mkdir -p $backupdir
+    cp /etc/monit/monitrc $backupdir
+  fi
+  cp monitrc /etc/monit/monitrc
+  chmod 700 /etc/monit/monitrc
 
-mkdir -p /etc/monit/conf.d
-# ta.monit is already backed up at the beginning of setup.sh
-# not using backup_file /etc/monit/conf.d/ta.monit because we want it in a different folder to prevent monit from reading the new ta.monit AND all the backups and complaining about duplicates
-cp ta.monit /etc/monit/conf.d/ta.monit
+  if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+   echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+  fi
 
-if [ -f /etc/monit/monitrc ]; then
-  cp /etc/monit/monitrc /etc/monit.bak/monitrc.$backupdate
+else
+  echo_warning "Skipping monit installation"
 fi
-# backup_file /etc/monit/monitrc
-cp monitrc /etc/monit/monitrc
-chmod 700 /etc/monit/monitrc
 
-if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
- echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+
+# ensure we have our own tagent programs in the path
+export PATH=$TRUSTAGENT_BIN:$PATH
+
+profile_dir=$HOME
+if [ "$(whoami)" == "root" ] && [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ]; then
+  profile_dir=$MTWILSON_HOME
+fi
+if [ -f $profile_dir/.profile ]; then profile_name=$profile_dir/.profile; fi
+if [ -f $profile_dir/.bash_profile ]; then profile_name=$profile_dir/.bash_profile; fi
+
+tagent_path_in_profile=$(grep $TRUSTAGENT_BIN $profile_name)
+if [ -z "$tagent_path_in_profile" ]; then
+  echo "export PATH=$TRUSTAGENT_BIN:\$PATH" >> $profile_name
 fi
 
-
-
-
+tagent_home_in_profile=$(grep TRUSTAGENT_HOME $profile_name)
+if [ -z "$tagent_home_in_profile" ]; then
+  echo "export TRUSTAGENT_HOME=$TRUSTAGENT_HOME" >> $profile_name
+fi
 
 # collect all the localhost ip addresses and make the list available as the
 # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
@@ -438,14 +557,14 @@ fi
 # create a trustagent username "mtwilson" with no password and all privileges
 # which allows mtwilson to access it until mtwilson UI is updated to allow
 # entering username and password for accessing the trust agent
-/usr/local/bin/tagent password mtwilson --nopass *:*
+tagent password mtwilson --nopass *:*
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey)
 # and make sure it's successful before trying to start the trust agent
 # NOTE: only the output from start-http-server is redirected to the logfile;
 #       the stdout from the setup command will be displayed
-/usr/local/bin/tagent setup
-/usr/local/bin/tagent start >>$logfile  2>&1
+tagent setup
+tagent start >>$logfile  2>&1
 
 # optional: register tpm password with mtwilson so pull provisioning can
 #           be accomplished with less reboots (no ownership transfer)
@@ -461,16 +580,18 @@ if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$RE
 	export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
 #	echo "registering $TPM_PASSWORD to $UUID"
 #	wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate --auth-no-challenge --password=$ASSET_TAG_PASSWORD --user=$ASSET_TAG_USERNAME --header="Content-Type: application/json" --post-data='{"id":"'$UUID'","password":"'$TPM_PASSWORD'"}' "$ASSET_TAG_URL/host-tpm-passwords"
-    /usr/local/bin/tagent setup register-tpm-password
+    tagent setup register-tpm-password
 fi
-
 
 # NOTE:  monit should only be restarted AFTER trustagent is up and running
 #        so that it doesn't try to start it before we're done with our setup
 #        tasks.
-/usr/local/bin/tagent status > /dev/null
-if [ $? ]; then
-  service monit restart
-else
-  echo "Trust agent not running; skipping monit restart"
+if [ "$(whoami)" == "root" ]; then
+  tagent status > /dev/null
+  if [ $? ]; then
+    service monit restart
+  else
+    echo "Trust agent not running; skipping monit restart"
+  fi
 fi
+

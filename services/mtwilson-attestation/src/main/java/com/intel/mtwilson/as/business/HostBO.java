@@ -462,38 +462,28 @@ public class HostBO {
                             log.debug("Getting identity.");
                                 setAikForHost(tblHosts, host, agent);
                         }
-                        
-                            if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
-                                log.info("VMM is updated. Update the host specific manifest");
-                                // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
-                                if (pcrManifest == null)
-                                    pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
+                        // Fix for Bug 4241, where the host specific modules were not getting updated during host re-registration.
+                        // Earlier we were updating the host specific modules only when the host was getting mapped to a 
+                        // different VMM MLE. This conditional check has been removed.
+                        log.debug("About to update the host specific manifest");
+                        // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
+                        if (pcrManifest == null)
+                            pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
-                                // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
-                                // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
-                                // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
-//                                HostReport hostReport = new HostReport();
-//                                hostReport.aik = null; 
-//                                hostReport.pcrManifest = pcrManifest;
-//                                hostReport.tpmQuote = null;
-//                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
-//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); 
-                                
-                                // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
-                                // already be updated and the query would not find any values to delete.
-                                deleteHostSpecificManifest(tblHosts);
-                                
-                                // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
-                                // the host specific modules.
-                                if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
-                                    log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
-                                    // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
-                                    tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
-                                } else {
-                                    log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
-                                }
-                            }
+                        // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
+                        // already be updated and the query would not find any values to delete.
+                        deleteHostSpecificManifest(tblHosts);
+
+                        // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
+                        // the host specific modules.
+                        if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                            log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                            // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
+                            tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                        } else {
+                            log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                        }
 
                         log.debug("Saving Host in database");
                         tblHosts.setBiosMleId(biosMleId);

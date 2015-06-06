@@ -106,7 +106,8 @@ public class SetAssetTag implements ICommand{
                 log.error("assetTagHash is not in hex format: {}", assetTagHash);
                 throw new IllegalArgumentException(String.format("assetTagHash is not in hex format: %s", assetTagHash));
             }
-            CommandUtil.runCommand("/usr/local/bin/hex2bin " + assetTagHash + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
+            // hex2bin must be in the PATH, which could be /usr/local/bin or it could be /opt/trustagent/bin ; do not hardcode full path here
+            CommandUtil.runCommand("hex2bin " + assetTagHash + " /tmp/hash");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;

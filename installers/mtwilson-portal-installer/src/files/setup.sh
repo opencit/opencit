@@ -79,10 +79,10 @@ chmod 700 "${package_var_dir}"
 
 # copy control script to /usr/local/bin and finish setup
 chmod +x mtwilson-portal.sh
-mkdir -p /usr/local/bin
-cp mtwilson-portal.sh /usr/local/bin/mtwilson-portal
-/usr/local/bin/mtwilson-portal setup
-#register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
+mkdir -p /opt/mtwilson/bin
+cp mtwilson-portal.sh /opt/mtwilson/bin/mtwilson-portal
+/opt/mtwilson/bin/mtwilson-portal setup
+#register_startup_script /opt/mtwilson/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

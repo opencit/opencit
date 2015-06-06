@@ -14,24 +14,82 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+#MTW_HOME=/opt/mtwilson
+#export MTW_USERNAME=mtwilson
+
+
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
+
+# the env directory is not configurable; it is defined as KMS_HOME/env and the
+# administrator may use a symlink if necessary to place it anywhere else
+export MTWILSON_ENV=$MTWILSON_HOME/env.d
+
+mtw_load_env() {
+  local env_files="$@"
+  local env_file_exports
+  for env_file in $env_files; do
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+      . $env_file
+      env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+      if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+    fi
+  done  
+}
+
+if [ -z "$MTWILSON_USERNAME" ]; then
+  mtw_load_env $MTWILSON_HOME/env.d/mtwilson-username
+fi
+
+
+###################################################################################################
+
+# if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
+# we make an exception for the uninstall command, which may require root access to delete users and certain directories
+if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
+  sudo -u $MTWILSON_USERNAME MTWILSON_USERNAME=$MTWILSON_USERNAME MTWILSON_HOME=$MTWILSON_HOME MTWILSON_SUDO=true mtwilson $*
+  exit $?
+fi
+
+###################################################################################################
+
+
 # SCRIPT CONFIGURATION:
-share_dir=/usr/local/share/mtwilson/util
+#share_dir=/usr/local/share/mtwilson/util
 apiclient_dir=/usr/local/share/mtwilson/apiclient
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 setupconsole_dir=/opt/mtwilson/java
 apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
+pid_dir=/var/run/mtwilson
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
-#java_required_version=1.7.0_51
-MTWILSON_PID_FILE=/var/run/mtwilson.pid
-MTWILSON_PID_WAIT_FILE=/var/run/mtwilson.pid.wait
+#java_required_version=1.7.0_51    
+MTWILSON_PID_FILE=""
+if [ -z $MTWILSON_PID_FILE ]; then
+    if [ -d $pid_dir ] && [ -w $pid_dir ]; then
+        MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
+        MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	#elif [ -f ./mtwilson.env ]; then
+	      #Look up in the mtwilson.env file
+   	#      MTWILSON_PID_FILE=$(cat ~/mtwilson.env | grep -E 'MTWILSON_PID_FILE' | cut -d = -f 2)
+	#      MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	else
+        #create a directory in MTWILSON_HOME/var/run/
+        if [ ! -d $MTWILSON_HOME/var/run ]; then
+	        mkdir -p $MTWILSON_HOME/var/run
+         fi
+            MTWILSON_PID_FILE=$MTWILSON_HOME/var/run/mtwilson.pid
+            MTWILSON_PID_WAIT_FILE=${MTWILSON_PID_FILE}.wait
+	fi
+fi		
 
 # FUNCTION LIBRARY and VERSION INFORMATION
-if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
-if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
+if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
+if [ -f /opt/mtwilson/configuration/version ]; then  . /opt/mtwilson/configuration/version; else  echo_warning "Missing file: /opt/mtwilson/configuration/version"; fi
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf runs ExportConfig and if that same command is passed in from 'mtwilson setup', it won't work
@@ -150,7 +208,11 @@ such as https://${MTWILSON_SERVER:-127.0.0.1}.
 Detected the following options on this server:"
   IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
   prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
+  prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
+  prompt_with_default_password MC_FIRST_PASSWORD
   export MTWILSON_SERVER
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
   echo
   if using_mysql; then
     mysql_userinput_connection_properties
@@ -158,14 +220,14 @@ Detected the following options on this server:"
   elif using_postgres; then
     postgres_userinput_connection_properties
     export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" ]; then
+    if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
       PGPASS_HOSTNAME=localhost
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
     fi
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $HOME/.pgpass
-    chmod 0600 $HOME/.pgpass
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
   fi
 
   # Attestation service auto-configuration
@@ -319,13 +381,13 @@ case "$1" in
           glassfish_stop
           #glassfish_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
-            rm $MTWILSON_PID_FILE
+            rm -f $MTWILSON_PID_FILE
           fi
         elif using_tomcat; then
           tomcat_stop
           #tomcat_shutdown
           if [ -f $MTWILSON_PID_FILE ]; then
-            rm $MTWILSON_PID_FILE
+            rm -f $MTWILSON_PID_FILE
           fi
         fi
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
@@ -540,7 +602,11 @@ case "$1" in
         rm -rf /opt/mtwilson
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
         rm -rf /usr/local/share/mtwilson
-        remove_startup_script "mtwilson"
+        if [ "$(whoami)" == "root" ]; then
+          remove_startup_script "mtwilson"
+        else
+          echo_warning "You must be root to remove mtwilson startup script"
+        fi
         # configuration files
         echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         rm -rf /etc/intel/cloudsecurity
@@ -553,6 +619,7 @@ case "$1" in
             # only remove the config files we added to conf.d, not anything else
             echo "Removing mtwilson monit config files"
             rm -fr /etc/monit/conf.d/*.mtwilson
+            rm -fr /opt/mtwilson/monit/conf.d/*.mtwilson
             echo "Restarting monit after removing configs"
             service monit stop &> /dev/null
             service monit start &> /dev/null
