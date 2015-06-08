@@ -6,6 +6,7 @@
 # application defaults (these are not configurable and used only in this script so no need to export)
 DEFAULT_TRUSTAGENT_HOME=/opt/trustagent
 DEFAULT_TRUSTAGENT_USERNAME=tagent
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 
 # default settings
 export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-$DEFAULT_TRUSTAGENT_HOME}
@@ -319,6 +320,16 @@ JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
 mkdir -p $JAVA_HOME
 #java_install $JAVA_PACKAGE
 java_install_in_home $JAVA_PACKAGE
+if java_ready_report; then
+  # store java location in env file
+  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
+  echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
+  echo "export JAVA_CMD=$java" >> $TRUSTAGENT_ENV/trustagent-java
+  echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $TRUSTAGENT_ENV/trustagent-java
+else
+  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
+  exit 1
+fi
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
