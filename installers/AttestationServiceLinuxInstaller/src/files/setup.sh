@@ -82,6 +82,11 @@ fi
 mkdir -p /opt/mtwilson/bin
 cp asctl.sh /opt/mtwilson/bin/asctl
 chmod +x /opt/mtwilson/bin/asctl
+
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $package_dir
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $intel_conf_dir
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME /opt/mtwilson/bin/
+
 /opt/mtwilson/bin/asctl setup
 
 aikqverify_install_prereq() {
@@ -140,3 +145,5 @@ if [ `whoami` == "root" ]; then
    #tomcat_permissions "${package_var_bin_dir}" 
  fi
 fi
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $intel_conf_dir
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $package_var_dir

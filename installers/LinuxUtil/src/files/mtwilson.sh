@@ -100,7 +100,6 @@ fi
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
 if [ -f /opt/mtwilson/configuration/version ]; then  . /opt/mtwilson/configuration/version; else  echo_warning "Missing file: /opt/mtwilson/configuration/version"; fi
-if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf runs ExportConfig and if that same command is passed in from 'mtwilson setup', it won't work
   load_conf 2>&1 >/dev/null
@@ -111,7 +110,6 @@ if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf run
 fi
 load_defaults 2>&1 >/dev/null
 #if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 #export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}

@@ -144,7 +144,8 @@ fi
 export MTWILSON_BIN=${MTWILSON_BIN:-$MTWILSON_HOME/bin}
 export MTWILSON_JAVA=${MTWILSON_JAVA:-$MTWILSON_HOME/java}
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
-
+export MTWILSON_SHARE=/usr/local/share/mtwilson
+export MTWILSON_OPT_INTEL=/opt/intel 
 # note that the env dir is not configurable; it is defined as "env" under home
 export MTWILSON_ENV=$MTWILSON_HOME/env.d
 
@@ -177,7 +178,7 @@ fi
 ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
 
 # create application directories (chown will be repeated near end of this script, after setup)
-for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES; do
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES $MTWILSON_SHARE $MTWILSON_OPT_INTEL; do
   mkdir -p $directory
   chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
   chmod 700 $directory
