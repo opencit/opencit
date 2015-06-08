@@ -45,27 +45,27 @@ trustagent_load_env() {
   done  
 }
 
-if [ -z "$TRUSTAGENT_USERNAME" ]; then
-  trustagent_load_env $TRUSTAGENT_HOME/env/trustagent-username
+# load environment variables; these override any existing environment variables.
+# the idea is that if someone wants to override these, they must have write
+# access to the environment files that we load here. 
+if [ -d $TRUSTAGENT_ENV ]; then
+  trustagent_load_env $(ls -1 $TRUSTAGENT_ENV/*)
 fi
 
 ###################################################################################################
 
 # if non-root execution is specified, and we are currently root, start over; the TRUSTAGENT_SUDO variable limits this to one attempt
-# we make an exception for the uninstall command, which may require root access to delete users and certain directories
-if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$TRUSTAGENT_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $TRUSTAGENT_USERNAME TRUSTAGENT_USERNAME=$TRUSTAGENT_USERNAME TRUSTAGENT_HOME=$TRUSTAGENT_HOME TRUSTAGENT_PASSWORD=$TRUSTAGENT_PASSWORD TRUSTAGENT_SUDO=true $TRUSTAGENT_BIN/tagent $*
+# we make an exception for the following commands:
+# - 'uninstall' may require root access to delete users and certain directories
+# - 'update-system-info' requires root access to use dmidecode and virsh commands
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$TRUSTAGENT_SUDO" ] && [ "$1" != "uninstall" -a "$1" != "update-system-info" ]; then
+  export TRUSTAGENT_SUDO=true
+  sudo -u $TRUSTAGENT_USERNAME -E $TRUSTAGENT_BIN/tagent $*
   exit $?
 fi
 
 ###################################################################################################
 
-# load environment variables; these may override the defaults set above and 
-# also note that trustagent-username file is loaded twice, once before sudo and once
-# here after sudo.
-if [ -d $TRUSTAGENT_ENV ]; then
-  trustagent_load_env $(ls -1 $TRUSTAGENT_ENV/*)
-fi
 
 # default directory layout follows the 'home' style
 TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-${TRUSTAGENT_CONF:-$TRUSTAGENT_HOME/configuration}}
@@ -78,8 +78,8 @@ TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
 ###################################################################################################
 
 # load linux utility
-if [ -f "$TRUSTAGENT_HOME/linux-util/functions" ]; then
-  . $TRUSTAGENT_HOME/linux-util/functions
+if [ -f "$TRUSTAGENT_HOME/share/scripts/functions.sh" ]; then
+  . $TRUSTAGENT_HOME/share/scripts/functions.sh
 fi
 
 ###################################################################################################
@@ -97,6 +97,9 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONFIGURATION/logback.xml -Dfs.name=trustagent"
 
 ###################################################################################################
+
+# ensure that our commands can be found
+export PATH=$TRUSTAGENT_BIN/bin:$PATH
 
 # java command
 if [ -z "$JAVA_CMD" ]; then
@@ -256,6 +259,62 @@ print_help() {
     echo register-tpm-password
 }
 
+# writes system information into files non-root trustagenta can read 
+# (root access required to run)
+trustagent_update_system_info() {
+  if [ "$(whoami)" == "root" ]; then
+    # user is root, so run the commands and cache the output
+    mkdir -p $TRUSTAGENT_VAR/system-info
+    dmidecode -s bios-vendor > $TRUSTAGENT_VAR/system-info/dmidecode.bios-vendor
+    dmidecode -s bios-version > $TRUSTAGENT_VAR/system-info/dmidecode.bios-version
+    dmidecode -s system-uuid > $TRUSTAGENT_VAR/system-info/dmidecode.system-uuid
+    dmidecode --type processor > $TRUSTAGENT_VAR/system-info/dmidecode.processor
+    lsb_release -a > $TRUSTAGENT_VAR/system-info/lsb_release
+    virsh version > $TRUSTAGENT_VAR/system-info/virsh.version
+  else
+    echo_failure "Must run 'tagent update-system-info' as root"
+  fi
+}
+
+trustagent_system_info_get() {
+  local filename=$1
+  if [ -f "$filename" ]; then
+    cat $filename
+  else
+    echo_failure "File not found: $filename"
+    echo "Run 'tagent update-system-info' as root to fix"
+  fi
+}
+
+# uses only information cached by trustagent_update_system_info 
+# (root access not required)
+trustagent_system_info() {
+    case "$*" in
+      "dmidecode -s bios-vendor")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.bios-vendor
+          ;;
+      "dmidecode -s bios-version")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.bios-version
+          ;;
+      "dmidecode -s system-uuid")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.system-uuid
+          ;;
+      "dmidecode --type processor")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/dmidecode.processor
+          ;;
+      "lsb_release -a")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/lsb_release
+          ;;
+      "virsh version")
+          trustagent_system_info_get $TRUSTAGENT_VAR/system-info/virsh.version
+          ;;
+      *)
+          echo_failure "tagent system-info command not supported: $*"
+          ;;
+    esac
+    return $?
+}
+
 trousers_detect_and_run() {
   trousers=`which tcsd 2>/dev/null`
   if [ -z "$trousers" ]; then
@@ -266,7 +325,7 @@ trousers_detect_and_run() {
     $trousers
   fi
 }
-trousers_detect_and_run
+
 ###################################################################################################
 
 # here we look for specific commands first that we will handle in the
@@ -278,8 +337,7 @@ case "$1" in
     ;;
   start)
     # need to start trousers before we can run tagent
-    #trousers_detect
-    #trousers_detect_and_run
+    trousers_detect_and_run
 
     # run setup before starting trust agent to allow taking ownership again if
     # the tpm has been cleared, or re-initializing the keystore if the server
@@ -293,12 +351,14 @@ case "$1" in
     trustagent_stop
     ;;
   restart)
+    trousers_detect_and_run
     trustagent_stop
     if trustagent_setup $TRUSTAGENT_START_TASKS; then
       trustagent_start
     fi
     ;;
   authorize)
+    trousers_detect_and_run
     if trustagent_authorize; then
       trustagent_stop
       trustagent_start
@@ -312,6 +372,14 @@ case "$1" in
       echo "Trust agent is not running"
       exit 1
     fi
+    ;;
+  update-system-info)
+    shift;
+    trustagent_update_system_info $*
+    ;;
+  system-info)
+    shift;
+    trustagent_system_info $*
     ;;
   setup)
     trousers_detect_and_run
@@ -330,6 +398,7 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
+      trousers_detect_and_run
       trustagent_run $*
     fi
     ;;

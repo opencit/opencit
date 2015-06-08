@@ -2808,39 +2808,46 @@ tomcat_detect() {
       fi
 
   # start with TOMCAT_HOME if it is already configured
-  if [[ -n "$TOMCAT_HOME" ]]; then
-    if [[ -z "$tomcat_bin" ]]; then
-      tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
-    fi
-    if [[ -z "$tomcat" ]]; then
-      if [[ -n "$java" ]]; then    
-        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-        tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
-      else
-        tomcat="$tomcat_bin"
-      fi
-    fi
-    if [ -z "$TOMCAT_CONF" ]; then
-      if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
-        export TOMCAT_CONF="$TOMCAT_HOME/conf"
-      else
-        # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
-        # reset the "tomcat" variable to force a new detection below
-        tomcat=""
-      fi
-    fi
-    if [[ -n "$tomcat" ]]; then
-      #TOMCAT_VERSION=`tomcat_version`
-      tomcat_version
-      if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
-        return 0
-      fi
-    fi
+  if [ "$(whoami)" == "root" ]; then
+   if [[ -n "$TOMCAT_HOME" ]]; then
+     if [[ -z "$tomcat_bin" ]]; then
+       tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
+     fi
+     if [[ -z "$tomcat" ]]; then
+       if [[ -n "$java" ]]; then    
+         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+         tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
+       else
+         tomcat="$tomcat_bin"
+       fi
+     fi
+     if [ -z "$TOMCAT_CONF" ]; then
+       if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
+         export TOMCAT_CONF="$TOMCAT_HOME/conf"
+       else
+         # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
+         # reset the "tomcat" variable to force a new detection below
+         tomcat=""
+       fi
+     fi
+     if [[ -n "$tomcat" ]]; then
+       #TOMCAT_VERSION=`tomcat_version`
+       tomcat_version
+       if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+         return 0
+       fi
+     fi
+   fi
+   searchdir=/
+  else
+  #TODO update it to $MTWILSON_HOME
+   searchdir=/opt/mtwilson
   fi
+  
   #echo "tomcat variable is $tomcat"
   #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
-  TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
+  TOMCAT_CANDIDATES=`find $searchdir -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES
@@ -3287,17 +3294,24 @@ java_version_report() {
 java_detect() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   # start with JAVA_HOME if it is already configured
-  if [[ -n "$JAVA_HOME" ]]; then
-    if [[ -z "$java" ]]; then
-      java=${JAVA_HOME}/bin/java
-    fi
-    JAVA_VERSION=`java_version`
-    if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-      return 0
-    fi
+  if [ "$(whoami)" == "root" ]; then
+   if [[ -n "$JAVA_HOME" ]]; then
+     if [[ -z "$java" ]]; then
+       java=${JAVA_HOME}/bin/java
+     fi
+     JAVA_VERSION=`java_version`
+     if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+       return 0
+     fi
+   fi
+   searchdir=/
+  else
+  #TODO update it to $MTWILSON_HOME
+   searchdir=/opt/mtwilson
   fi
+  
 
-    JAVA_JDK_CANDIDATES=`find / -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
+    JAVA_JDK_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
     for c in $JAVA_JDK_CANDIDATES
     do
         local java_bindir=`dirname $c`
@@ -3314,7 +3328,7 @@ java_detect() {
     
     echo "Cannot find JDK"
 
-    JAVA_JRE_CANDIDATES=`find / -name java 2>/dev/null | grep jre | grep bin/java`
+    JAVA_JRE_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep jre | grep bin/java`
     for c in $JAVA_JRE_CANDIDATES
     do
         java_bindir=`dirname $c`
@@ -3331,7 +3345,7 @@ java_detect() {
 
     echo "Cannot find JRE"
 
-    JAVA_BIN_CANDIDATES=`find / -name java 2>/dev/null | grep bin/java`
+    JAVA_BIN_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep bin/java`
     for c in $JAVA_BIN_CANDIDATES
     do
         java_bindir=`dirname $c`
@@ -3465,6 +3479,67 @@ java_install() {
   else
     echo "Java is already installed"              >> $INSTALL_LOG_FILE
   fi
+}
+
+# the JAVA_HOME variable must be set as the destination to which we will
+# install java;  if java is already there we skip installation - upgrade
+# is not supported by this function
+java_install_in_home() {
+  local java_package=$1
+  # validate inputs
+  if [ -z "$java_package" ]; then
+    echo_failure "Cannot install Java: missing package name"
+    return 2
+  elif [ ! -f "$java_package" ]; then
+    echo_failure "Cannot install Java: missing file: $java_package"
+    return 3
+  elif [ -z "$JAVA_HOME" ]; then
+    echo_failure "Cannot install Java: variable JAVA_HOME not set"
+    return 4
+  elif [ -d "$JAVA_HOME" ] && [ ! -w "$JAVA_HOME" ]; then
+    echo_failure "Cannot install Java: directory $JAVA_HOME not writable"
+    return 5
+  elif [ -d "$JAVA_HOME" ] && [ $(ls -1 $JAVA_HOME | wc -l) -gt 0 ]; then
+    echo_warning "Java already installed at $JAVA_HOME"
+    return 6
+  fi
+
+  mkdir -p $JAVA_HOME
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot install Java: parent directory $(dirname $JAVA_HOME) not writable"
+    return 7
+  fi
+
+  # unpack the java archive
+    is_targz=`echo $java_package | grep "\.tar.gz$"`
+    is_gzip=`echo $java_package | grep "\.gz$"`
+    is_bin=`echo $java_package | grep "\.bin$"`
+    javaname=`echo $java_package | awk -F . '{ print $1 }'`
+    if [ -n "$is_targz" ]; then
+      tar xzvf $java_package 2>&1 >> $INSTALL_LOG_FILE
+    elif [ -n "$is_gzip" ]; then
+      gunzip $java_package 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
+      chmod +x $javaname
+      ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
+    elif [ -n "$is_bin" ]; then
+      chmod +x $java_package
+      ./$java_package | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"  
+    fi
+    # java gets unpacked in current directory but they cleverly
+    # named the folder differently than the archive, so search for it:
+    local java_unpacked=`ls -1d jdk* jre* 2>/dev/null`
+    for f in $java_unpacked
+    do
+      if [ -d "$f" ]; then
+        mv "$f" $(dirname $JAVA_HOME)
+        echo "Installed Java in $JAVA_HOME"
+        java_bindir=$JAVA_HOME/bin
+        java=$java_bindir/java
+        return 0
+      fi
+    done
+    echo_failure "Cannot install Java: error after unpacking"
+    return 1
 }
 
 java_keystore_cert_report() {

@@ -3,8 +3,12 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+# application defaults (these are not configurable and used only in this script so no need to export)
+DEFAULT_TRUSTAGENT_HOME=/opt/trustagent
+DEFAULT_TRUSTAGENT_USERNAME=tagent
+
 # default settings
-export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
+export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-$DEFAULT_TRUSTAGENT_HOME}
 
 # the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env and the
 # administrator may use a symlink if necessary to place it anywhere else
@@ -34,10 +38,18 @@ fi
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
+
+# The version script is automatically generated at build time and looks like this:
+#ARTIFACT=mtwilson-trustagent-installer
+#VERSION=2.0.6
+#BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-2.0.6)"
+
+
+
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
   # create a trustagent user if there isn't already one created
-  TRUSTAGENT_USERNAME=${TRUSTAGENT_USERNAME:-trustagent}
+  TRUSTAGENT_USERNAME=${TRUSTAGENT_USERNAME:-$DEFAULT_TRUSTAGENT_USERNAME}
   if ! getent passwd $TRUSTAGENT_USERNAME 2>&1 >/dev/null; then
     useradd --comment "Mt Wilson Trust Agent" --home $TRUSTAGENT_HOME --system --shell /bin/false $TRUSTAGENT_USERNAME
     usermod --lock $TRUSTAGENT_USERNAME
@@ -103,6 +115,7 @@ for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRU
 done
 
 # before we start, clear the install log (directory must already exist; created above)
+logfile=$TRUSTAGENT_LOGS/install.log
 date > $logfile
 
 # store directory layout in env file
@@ -144,13 +157,13 @@ logfile=$TRUSTAGENT_LOGS/install.log
 
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip"
+APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip authbind"
 # commented out from apt packages: libcurl4-openssl-dev 
-APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip"
+APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip authbind"
 # commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
-APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip"
+APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip authbind"
 # SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
-APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel"
+APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel authbind"
 # other packages in suse:  libopenssl0_9_8 
 
 
@@ -180,7 +193,18 @@ fi
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
-unzip -DD -o $ZIP_PACKAGE -d $TRUSTAGENT_HOME >> $logfile  2>&1
+unzip -DD -o $ZIP_PACKAGE -d "$TRUSTAGENT_HOME" >> $logfile  2>&1
+chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"
+
+# update logback.xml with configured trustagent log directory
+if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
+  sed -e "s|<file>.*/trustagent.log</file>|<file>$TRUSTAGENT_LOGS/trustagent.log</file>|" $TRUSTAGENT_CONFIGURATION/logback.xml > $TRUSTAGENT_CONFIGURATION/logback.xml.edited
+  if [ $? -eq 0 ]; then
+    mv $TRUSTAGENT_CONFIGURATION/logback.xml.edited $TRUSTAGENT_CONFIGURATION/logback.xml
+  fi
+else
+  echo_warning "Logback configuration not found: $TRUSTAGENT_CONFIGURATION/logback.xml"
+fi
 
 # If VIRSH_DEFAULT_CONNECT_URI is defined in environment (likely from ~/.bashrc) 
 # copy it to our new env.d folder so it will be available to tagent on startup
@@ -230,6 +254,15 @@ fi
 package_config_filename=$TRUSTAGENT_CONFIGURATION/trustagent.properties
 
 
+# setup authbind to allow non-root trustagent to listen on port 1443
+mkdir -p /etc/authbind/byport
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+  touch /etc/authbind/byport/1443
+  chmod 500 /etc/authbind/byport/1443
+  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+fi
+
+
 #tpm_nvinfo
 tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
 if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvinfo" ]]; then
@@ -264,16 +297,17 @@ hex2bin_install() {
   return_dir=`pwd`
   cd hex2bin
   make && cp hex2bin $TRUSTAGENT_BIN
+  chmod +x $TRUSTAGENT_BIN/hex2bin
   cd $return_dir
 }
 
 hex2bin_install
 
-mkdir -p "$TRUSTAGENT_HOME"/linux-util
-chmod -R 700 "$TRUSTAGENT_HOME"/linux-util
-cp version "$TRUSTAGENT_HOME"/linux-util
-cp functions "$TRUSTAGENT_HOME"/linux-util
-
+mkdir -p "$TRUSTAGENT_HOME"/share/scripts
+cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
+cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
+chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
+chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"/share/scripts
 
 # if prior version had control script in /usr/local/bin, delete it
 if [ "$(whoami)" == "root" ] && [ -f tagent ]; then
@@ -286,7 +320,9 @@ chmod +x $TRUSTAGENT_BIN/*
 
 # in 2.0.6, java home is now under trustagent home by default
 JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
-java_install $JAVA_PACKAGE
+mkdir -p $JAVA_HOME
+#java_install $JAVA_PACKAGE
+java_install_in_home $JAVA_PACKAGE
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -310,11 +346,11 @@ fix_libcrypto() {
   local has_libdir_symlink=`find $libdir -name libcrypto.so`
   local has_usrbin_symlink=`find /usr/bin -name libcrypto.so`
   if [ -n "$has_libcrypto" ]; then
-    if [ -z "$has_libdir_symlink" ]; then
+    if [ -z "$has_libdir_symlink" ] && [ ! -h $libdir/libcrypto.so ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 $libdir/libcrypto.so
     fi
-    if [ -z "$has_usrbin_symlink" ]; then
+    if [ -z "$has_usrbin_symlink" ] && [ ! -h /usr/lib/libcrypto.so ]; then
       echo "Creating missing symlink for $has_libcrypto"
       ln -s $libdir/libcrypto.so.1.0.0 /usr/lib/libcrypto.so
     fi
@@ -366,6 +402,7 @@ return_dir=`pwd`
   datestr=`date +%Y-%m-%d.%H%M`
   touch $package_version_filename
   chmod 600 $package_version_filename
+  chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $package_version_filename
   echo "# Installed Trust Agent on ${datestr}" > $package_version_filename
   echo "TRUSTAGENT_VERSION=${VERSION}" >> $package_version_filename
   echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
@@ -505,8 +542,8 @@ fi
 export PATH=$TRUSTAGENT_BIN:$PATH
 
 profile_dir=$HOME
-if [ "$(whoami)" == "root" ] && [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ]; then
-  profile_dir=$MTWILSON_HOME
+if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ]; then
+  profile_dir=$TRUSTAGENT_HOME
 fi
 if [ -f $profile_dir/.profile ]; then profile_name=$profile_dir/.profile; fi
 if [ -f $profile_dir/.bash_profile ]; then profile_name=$profile_dir/.bash_profile; fi
@@ -532,6 +569,19 @@ fi
 #if [ -n "$TRUSTAGENT_TLS_CERT_DNS" ]; then
 #  export TRUSTAGENT_TLS_CERT_DNS=$DEFAULT_TRUSTAGENT_TLS_CERT_DNS
 #fi
+
+# Ensure we have given trustagent access to its files
+for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+done
+
+
+if [ "$(whoami)" == "root" ]; then
+  echo "Updating system information"
+  tagent update-system-info
+else
+  echo_warning "Skipping updating system information"
+fi
 
 # create a trustagent username "mtwilson" with no password and all privileges
 # which allows mtwilson to access it until mtwilson UI is updated to allow

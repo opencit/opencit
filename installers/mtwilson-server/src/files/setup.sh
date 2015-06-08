@@ -81,46 +81,46 @@ fi
 if [ "$(whoami)" != "root" ]; then
   if [ ! -d $MTWILSON_HOME ]; then
    echo_failure "$MTWILSON_HOME is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${home=`stat -c '%U' $MTWILSON_HOME`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "$MTWILSON_HOME is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   elif [ ! -d /opt/intel ]; then
    echo_failure "/opt/intel is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${optintel=`stat -c '%U' /opt/intel`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/opt/intel is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   elif [ ! -d /etc/intel ]; then
    echo_failure "/etc/intel is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${etcintel=`stat -c '%U' /etc/intel`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/etc/intel is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   elif [ ! -d /opt/mtwilson ]; then
    echo_failure "/opt/mtwilson is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${optmtw=`stat -c '%U' /opt/mtwilson`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/opt/mtwilson is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   elif [ ! -d /var/opt/intel ]; then
    echo_failure "/var/opt/intel is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${varoptintel=`stat -c '%U' /var/opt/intel`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/var/opt/intel is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   elif [ ! -d /usr/local/share/mtwilson ]; then
    echo_failure "/usr/local/share/mtwilson is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${ulsmtw=`stat -c '%U' /usr/local/share/mtwilson`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/usr/local/share/mtwilson is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   elif [ ! -d /etc/intel/cloudsecurity ]; then
    echo_failure "/etc/intel/cloudsecurity is not available. Please create one and change its owner to $MTWILSON_USERNAME."
-   exit
+   exit 1
   elif [ "${eics=`stat -c '%U' /etc/intel/cloudsecurity`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/etc/intel/cloudsecurity is not owned by $MTWILSON_USERNAME. Please update the owner."
-   exit
+   exit 1
   else 
    echo "Prerequisite check is successful"
   fi
