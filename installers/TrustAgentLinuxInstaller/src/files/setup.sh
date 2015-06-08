@@ -3,8 +3,13 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+# application defaults (these are not configurable and used only in this script so no need to export)
+DEFAULT_TRUSTAGENT_HOME=/opt/trustagent
+DEFAULT_TRUSTAGENT_USERNAME=tagent
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
+
 # default settings
-export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
+export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-$DEFAULT_TRUSTAGENT_HOME}
 
 # the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env and the
 # administrator may use a symlink if necessary to place it anywhere else
@@ -34,10 +39,18 @@ fi
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
+
+# The version script is automatically generated at build time and looks like this:
+#ARTIFACT=mtwilson-trustagent-installer
+#VERSION=2.0.6
+#BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-2.0.6)"
+
+
+
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
   # create a trustagent user if there isn't already one created
-  TRUSTAGENT_USERNAME=${TRUSTAGENT_USERNAME:-trustagent}
+  TRUSTAGENT_USERNAME=${TRUSTAGENT_USERNAME:-$DEFAULT_TRUSTAGENT_USERNAME}
   if ! getent passwd $TRUSTAGENT_USERNAME 2>&1 >/dev/null; then
     useradd --comment "Mt Wilson Trust Agent" --home $TRUSTAGENT_HOME --system --shell /bin/false $TRUSTAGENT_USERNAME
     usermod --lock $TRUSTAGENT_USERNAME
@@ -46,10 +59,17 @@ if [ "$(whoami)" == "root" ]; then
 else
   # already running as trustagent user
   TRUSTAGENT_USERNAME=$(whoami)
-  echo_warning "Running as $TRUSTAGENT_USERNAME; if installation fails try again as root"
   if [ ! -w "$TRUSTAGENT_HOME" ] && [ ! -w $(dirname $TRUSTAGENT_HOME) ]; then
     TRUSTAGENT_HOME=$(cd ~ && pwd)
   fi
+  echo_warning "Installing as $TRUSTAGENT_USERNAME into $TRUSTAGENT_HOME"  
+fi
+
+# ensure the home directory exists or can be created
+mkdir -p $TRUSTAGENT_HOME
+if [ $? -ne 0 ]; then
+  echo_failure "Cannot create directory: $TRUSTAGENT_HOME"
+  exit 1
 fi
 
 # define location variables but do not export them yet
@@ -63,6 +83,19 @@ TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
 # note that the env dir is not configurable; it is defined as "env.d" under home
 TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
+
+
+# ensure we have our own tagent programs in the path
+export PATH=$TRUSTAGENT_BIN:$PATH
+
+profile_dir=$HOME
+if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ]; then
+  profile_dir=$TRUSTAGENT_HOME
+fi
+profile_name=$profile_dir/$(basename $(getUserProfileFile))
+
+appendToUserProfileFile "export PATH=$TRUSTAGENT_BIN:\$PATH" $profile_name
+appendToUserProfileFile "export TRUSTAGENT_HOME=$TRUSTAGENT_HOME" $profile_name
 
 # if there's a monit configuration for trustagent, remove it to prevent
 # monit from trying to restart trustagent while we are setting up
@@ -86,6 +119,12 @@ export TRUSTAGENT_CONFIGURATION TRUSTAGENT_REPOSITORY TRUSTAGENT_VAR TRUSTAGENT_
 
 trustagent_backup_configuration() {
   if [ -n "$TRUSTAGENT_CONFIGURATION" ] && [ -d "$TRUSTAGENT_CONFIGURATION" ]; then
+    mkdir -p $TRUSTAGENT_BACKUP
+    if [ $? -ne 0 ]; then
+      echo_warning "Cannot create backup directory: $TRUSTAGENT_BACKUP"
+      echo_warning "Backup will be stored in /tmp"
+      TRUSTAGENT_BACKUP=/tmp
+    fi
     datestr=`date +%Y%m%d.%H%M`
     backupdir=$TRUSTAGENT_BACKUP/trustagent.configuration.$datestr
     cp -r $TRUSTAGENT_CONFIGURATION $backupdir
@@ -103,6 +142,7 @@ for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRU
 done
 
 # before we start, clear the install log (directory must already exist; created above)
+logfile=$TRUSTAGENT_LOGS/install.log
 date > $logfile
 
 # store directory layout in env file
@@ -131,7 +171,7 @@ echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-setup
 for env_file_var_name in $env_file_exports
 do
   eval env_file_var_value="\$$env_file_var_name"
-  echo "export $env_file_var_name=$env_file_var_value" >> $TRUSTAGENT_ENV/trustagent-setup
+  echo "export $env_file_var_name='$env_file_var_value'" >> $TRUSTAGENT_ENV/trustagent-setup
 done
 
 
@@ -180,7 +220,8 @@ fi
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
-unzip -DD -o $ZIP_PACKAGE -d $TRUSTAGENT_HOME >> $logfile  2>&1
+unzip -DD -o $ZIP_PACKAGE -d "$TRUSTAGENT_HOME" >> $logfile  2>&1
+chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
@@ -283,16 +324,17 @@ hex2bin_install() {
   return_dir=`pwd`
   cd hex2bin
   make && cp hex2bin $TRUSTAGENT_BIN
+  chmod +x $TRUSTAGENT_BIN/hex2bin
   cd $return_dir
 }
 
 hex2bin_install
 
-mkdir -p "$TRUSTAGENT_HOME"/linux-util
-chmod -R 700 "$TRUSTAGENT_HOME"/linux-util
-cp version "$TRUSTAGENT_HOME"/linux-util
-cp functions "$TRUSTAGENT_HOME"/linux-util
-
+mkdir -p "$TRUSTAGENT_HOME"/share/scripts
+cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
+cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
+chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
+chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"/share/scripts
 
 # if prior version had control script in /usr/local/bin, delete it
 if [ "$(whoami)" == "root" ] && [ -f tagent ]; then
@@ -308,6 +350,16 @@ JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
 mkdir -p $JAVA_HOME
 #java_install $JAVA_PACKAGE
 java_install_in_home $JAVA_PACKAGE
+if java_ready_report; then
+  # store java location in env file
+  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
+  echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
+  echo "export JAVA_CMD=$java" >> $TRUSTAGENT_ENV/trustagent-java
+  echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $TRUSTAGENT_ENV/trustagent-java
+else
+  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
+  exit 1
+fi
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -387,6 +439,7 @@ return_dir=`pwd`
   datestr=`date +%Y-%m-%d.%H%M`
   touch $package_version_filename
   chmod 600 $package_version_filename
+  chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $package_version_filename
   echo "# Installed Trust Agent on ${datestr}" > $package_version_filename
   echo "TRUSTAGENT_VERSION=${VERSION}" >> $package_version_filename
   echo "TRUSTAGENT_RELEASE=\"${BUILD}\"" >> $package_version_filename
@@ -522,25 +575,6 @@ else
 fi
 
 
-# ensure we have our own tagent programs in the path
-export PATH=$TRUSTAGENT_BIN:$PATH
-
-profile_dir=$HOME
-if [ "$(whoami)" == "root" ] && [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ]; then
-  profile_dir=$MTWILSON_HOME
-fi
-if [ -f $profile_dir/.profile ]; then profile_name=$profile_dir/.profile; fi
-if [ -f $profile_dir/.bash_profile ]; then profile_name=$profile_dir/.bash_profile; fi
-
-tagent_path_in_profile=$(grep $TRUSTAGENT_BIN $profile_name)
-if [ -z "$tagent_path_in_profile" ]; then
-  echo "export PATH=$TRUSTAGENT_BIN:\$PATH" >> $profile_name
-fi
-
-tagent_home_in_profile=$(grep TRUSTAGENT_HOME $profile_name)
-if [ -z "$tagent_home_in_profile" ]; then
-  echo "export TRUSTAGENT_HOME=$TRUSTAGENT_HOME" >> $profile_name
-fi
 
 # collect all the localhost ip addresses and make the list available as the
 # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
@@ -553,6 +587,19 @@ fi
 #if [ -n "$TRUSTAGENT_TLS_CERT_DNS" ]; then
 #  export TRUSTAGENT_TLS_CERT_DNS=$DEFAULT_TRUSTAGENT_TLS_CERT_DNS
 #fi
+
+# Ensure we have given trustagent access to its files
+for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+done
+
+
+if [ "$(whoami)" == "root" ]; then
+  echo "Updating system information"
+  tagent update-system-info 2>/dev/null
+else
+  echo_warning "Skipping updating system information"
+fi
 
 # create a trustagent username "mtwilson" with no password and all privileges
 # which allows mtwilson to access it until mtwilson UI is updated to allow

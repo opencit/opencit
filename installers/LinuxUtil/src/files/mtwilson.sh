@@ -67,18 +67,18 @@ export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
 
 # SCRIPT CONFIGURATION:
 #share_dir=/usr/local/share/mtwilson/util
-apiclient_dir=/usr/local/share/mtwilson/apiclient
+apiclient_dir=/opt/mtwilson/share/apiclient
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 setupconsole_dir=/opt/mtwilson/java
 apiclient_java=${apiclient_dir}/java
-env_dir=/usr/local/share/mtwilson/env
+env_dir=/opt/mtwilson/share/env
 conf_dir=/etc/intel/cloudsecurity
 pid_dir=/var/run/mtwilson
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51    
-MTWILSON_PID_FILE=""
+MTWILSON_PID_FILE="" 
 if [ -z $MTWILSON_PID_FILE ]; then
     if [ -d $pid_dir ] && [ -w $pid_dir ]; then
         MTWILSON_PID_FILE=$pid_dir/mtwilson.pid
