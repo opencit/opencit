@@ -290,36 +290,6 @@ if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d
 fi
 
 
-#tpm_nvinfo
-tpmnvinfo=`which tpm_nvinfo 2>/dev/null`
-if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvinfo" ]]; then
-  ln -s "$tpmnvinfo" "$TRUSTAGENT_BIN"
-fi
-
-#tpm_nvrelease
-tpmnvrelease=`which tpm_nvrelease 2>/dev/null`
-if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvrelease" ]]; then
-  ln -s "$tpmnvrelease" "$TRUSTAGENT_BIN"
-fi
-
-#tpm_nvwrite
-tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
-if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvwrite" ]]; then
-  ln -s "$tpmnvwrite" "$TRUSTAGENT_BIN"
-fi
-
-#tpm_nvread
-tpmnvread=`which tpm_nvread 2>/dev/null`
-if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvread" ]]; then
-  ln -s "$tpmnvread" "$TRUSTAGENT_BIN"
-fi
-
-#tpm_nvdefine
-tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
-if [[ ! -h "$TRUSTAGENT_HOME/bin/tpm_nvdefine" ]]; then
-  ln -s "$tpmnvdefine" "$TRUSTAGENT_BIN"
-fi
-
 hex2bin_install() {
   return_dir=`pwd`
   cd hex2bin
