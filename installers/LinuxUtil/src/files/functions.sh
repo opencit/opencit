@@ -3511,9 +3511,9 @@ java_install_in_home() {
   fi
 
   # unpack the java archive
-    is_targz=`echo $java_package | grep ".tar.gz$"`
-    is_gzip=`echo $java_package | grep ".gz$"`
-    is_bin=`echo $java_package | grep ".bin$"`
+    is_targz=`echo $java_package | grep "\.tar.gz$"`
+    is_gzip=`echo $java_package | grep "\.gz$"`
+    is_bin=`echo $java_package | grep "\.bin$"`
     javaname=`echo $java_package | awk -F . '{ print $1 }'`
     if [ -n "$is_targz" ]; then
       tar xzvf $java_package 2>&1 >> $INSTALL_LOG_FILE
