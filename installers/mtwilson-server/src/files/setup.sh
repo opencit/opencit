@@ -409,7 +409,7 @@ if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
   export mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"
 else
   touch "$MTWILSON_CONFIGURATION/mtwilson.properties"
-  chmod 666 "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  chmod 600 "$MTWILSON_CONFIGURATION/mtwilson.properties"
   export mtwilson_tls_keystore_password=`generate_password 32`
   export MTW_TLS_KEYSTORE_PASS="$mtwilson_tls_keystore_password"
   echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  "$MTWILSON_CONFIGURATION/mtwilson.properties"
@@ -477,14 +477,14 @@ update_property_in_file "dbcp.validation.on.return" "$MTWILSON_CONFIGURATION/mtw
 
 
 # copy default logging settings to /etc
-chmod 666 logback.xml
+chmod 600 logback.xml
 cp logback.xml "$MTWILSON_CONFIGURATION"
-chmod 666 logback-stderr.xml
+chmod 600 logback-stderr.xml
 cp logback-stderr.xml "$MTWILSON_CONFIGURATION"
 
 # copy shiro.ini api security file
 if [ ! -f "$MTWILSON_CONFIGURATION/shiro.ini" ]; then
-  chmod 666 shiro.ini shiro-localhost.ini
+  chmod 600 shiro.ini shiro-localhost.ini
   cp shiro.ini shiro-localhost.ini "$MTWILSON_CONFIGURATION"
 fi
 
@@ -515,7 +515,7 @@ fi
 
 # copy extensions.cache file
 if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 666 extensions.cache
+  chmod 600 extensions.cache
   cp extensions.cache /opt/mtwilson/configuration
 fi
 
