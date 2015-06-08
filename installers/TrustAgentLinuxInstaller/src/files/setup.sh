@@ -585,7 +585,7 @@ done
 
 if [ "$(whoami)" == "root" ]; then
   echo "Updating system information"
-  tagent update-system-info
+  tagent update-system-info 2>/dev/null
 else
   echo_warning "Skipping updating system information"
 fi

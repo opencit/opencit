@@ -130,7 +130,7 @@ trustagent_run() {
 
 # arguments are optional, if provided they are the names of the tasks to run, in order
 trustagent_setup() {
-  export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+  export HARDWARE_UUID=$(trustagent_system_info "dmidecode -s system-uuid")
   local tasklist="$*"
   if [ -z "$tasklist" ]; then
     tasklist=$TRUSTAGENT_SETUP_TASKS
@@ -142,7 +142,7 @@ trustagent_setup() {
 }
 
 trustagent_authorize() {
-  export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+  export HARDWARE_UUID=$(trustagent_system_info "dmidecode -s system-uuid")
   local authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
   local default_value
   for v in $authorize_vars
@@ -227,13 +227,12 @@ trustagent_stop() {
 trustagent_uninstall() {
     datestr=`date +%Y-%m-%d.%H%M`
     mkdir -p /tmp/trustagent.configuration.$datestr
+    chmod 500 /tmp/trustagent.configuration.$datestr
     cp -r /opt/trustagent/configuration/* /tmp/trustagent.configuration.$datestr
 	rm -f /usr/local/bin/tagent
     if [ -n "$TRUSTAGENT_HOME" ] && [ -d "$TRUSTAGENT_HOME" ]; then
       rm -rf $TRUSTAGENT_HOME/*
     fi
-    mkdir -p $TRUSTAGENT_CONFIGURATION
-    cp -r /tmp/trustagent.configuration.$datestr/* $TRUSTAGENT_CONFIGURATION/
 }
 
 # stops monit and removes its configuration
