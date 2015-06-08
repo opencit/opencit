@@ -58,10 +58,17 @@ if [ "$(whoami)" == "root" ]; then
 else
   # already running as trustagent user
   TRUSTAGENT_USERNAME=$(whoami)
-  echo_warning "Running as $TRUSTAGENT_USERNAME; if installation fails try again as root"
   if [ ! -w "$TRUSTAGENT_HOME" ] && [ ! -w $(dirname $TRUSTAGENT_HOME) ]; then
     TRUSTAGENT_HOME=$(cd ~ && pwd)
   fi
+  echo_warning "Installing as $TRUSTAGENT_USERNAME into $TRUSTAGENT_HOME"  
+fi
+
+# ensure the home directory exists or can be created
+mkdir -p $TRUSTAGENT_HOME
+if [ $? -ne 0 ]; then
+  echo_failure "Cannot create directory: $TRUSTAGENT_HOME"
+  exit 1
 fi
 
 # define location variables but do not export them yet
@@ -75,6 +82,19 @@ TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
 # note that the env dir is not configurable; it is defined as "env.d" under home
 TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
+
+
+# ensure we have our own tagent programs in the path
+export PATH=$TRUSTAGENT_BIN:$PATH
+
+profile_dir=$HOME
+if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ]; then
+  profile_dir=$TRUSTAGENT_HOME
+fi
+profile_name=$profile_dir/$(basename $(getUserProfileFile))
+
+appendToUserProfileFile "export PATH=$TRUSTAGENT_BIN:\$PATH" $profile_name
+appendToUserProfileFile "export TRUSTAGENT_HOME=$TRUSTAGENT_HOME" $profile_name
 
 # if there's a monit configuration for trustagent, remove it to prevent
 # monit from trying to restart trustagent while we are setting up
@@ -98,6 +118,12 @@ export TRUSTAGENT_CONFIGURATION TRUSTAGENT_REPOSITORY TRUSTAGENT_VAR TRUSTAGENT_
 
 trustagent_backup_configuration() {
   if [ -n "$TRUSTAGENT_CONFIGURATION" ] && [ -d "$TRUSTAGENT_CONFIGURATION" ]; then
+    mkdir -p $TRUSTAGENT_BACKUP
+    if [ $? -ne 0 ]; then
+      echo_warning "Cannot create backup directory: $TRUSTAGENT_BACKUP"
+      echo_warning "Backup will be stored in /tmp"
+      TRUSTAGENT_BACKUP=/tmp
+    fi
     datestr=`date +%Y%m%d.%H%M`
     backupdir=$TRUSTAGENT_BACKUP/trustagent.configuration.$datestr
     cp -r $TRUSTAGENT_CONFIGURATION $backupdir
@@ -144,7 +170,7 @@ echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-setup
 for env_file_var_name in $env_file_exports
 do
   eval env_file_var_value="\$$env_file_var_name"
-  echo "export $env_file_var_name=$env_file_var_value" >> $TRUSTAGENT_ENV/trustagent-setup
+  echo "export $env_file_var_name='$env_file_var_value'" >> $TRUSTAGENT_ENV/trustagent-setup
 done
 
 
@@ -538,25 +564,6 @@ else
 fi
 
 
-# ensure we have our own tagent programs in the path
-export PATH=$TRUSTAGENT_BIN:$PATH
-
-profile_dir=$HOME
-if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ]; then
-  profile_dir=$TRUSTAGENT_HOME
-fi
-if [ -f $profile_dir/.profile ]; then profile_name=$profile_dir/.profile; fi
-if [ -f $profile_dir/.bash_profile ]; then profile_name=$profile_dir/.bash_profile; fi
-
-tagent_path_in_profile=$(grep $TRUSTAGENT_BIN $profile_name)
-if [ -z "$tagent_path_in_profile" ]; then
-  echo "export PATH=$TRUSTAGENT_BIN:\$PATH" >> $profile_name
-fi
-
-tagent_home_in_profile=$(grep TRUSTAGENT_HOME $profile_name)
-if [ -z "$tagent_home_in_profile" ]; then
-  echo "export TRUSTAGENT_HOME=$TRUSTAGENT_HOME" >> $profile_name
-fi
 
 # collect all the localhost ip addresses and make the list available as the
 # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable

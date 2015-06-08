@@ -149,20 +149,19 @@ function getUserProfileFile()
     "suse" )
         file=~/.bash_profile ;;    
     esac
-	if [ ! -f $file ]; then
-	   touch $file
-	fi
+	#if [ ! -f $file ]; then
+	#   touch $file
+	#fi
 	echo $file
 }
 
 function appendToUserProfileFile()
 {
     file=$(getUserProfileFile)
-	if grep -q  "$1" $file
-	then
-	   echo "$1 Already there in user profile"
-	else
+    if [ ! -f $file ] || ! grep -q  "$1" $file; then
        echo "$1" >> $file
+	else
+	   echo "$1 Already there in user profile"
     fi
 }
 
