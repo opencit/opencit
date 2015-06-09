@@ -74,6 +74,21 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
 TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
 TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
+# before we start, clear the install log (directory must already exist; created above)
+export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
+mkdir -p $(dirname $INSTALL_LOG_FILE)
+if [ $? -ne 0 ]; then
+  echo_failure "Cannot write to log directory: $(dirname $INSTALL_LOG_FILE)"
+  exit 1
+fi
+date > $INSTALL_LOG_FILE
+if [ $? -ne 0 ]; then
+  echo_failure "Cannot write to log file: $INSTALL_LOG_FILE"
+  exit 1
+fi
+chown $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $INSTALL_LOG_FILE
+logfile=$INSTALL_LOG_FILE
+
 # create application directories (chown will be repeated near end of this script, after setup)
 for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
   # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
@@ -139,9 +154,6 @@ trustagent_backup_configuration() {
 trustagent_backup_configuration
 
 
-# before we start, clear the install log (directory must already exist; created above)
-logfile=$TRUSTAGENT_LOGS/install.log
-date > $logfile
 
 # store directory layout in env file
 echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-layout

@@ -84,6 +84,7 @@ create_saml_key() {
   $keytool -export -alias ${SAML_KEY_ALIAS} -keystore ${SAML_KEYSTORE_FILE}  -storepass ${SAML_KEYSTORE_PASSWORD} -file ${intel_conf_dir}/saml.crt
   openssl x509 -in ${intel_conf_dir}/saml.crt -inform der -out ${intel_conf_dir}/saml.crt.pem -outform pem
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME $SAML_KEYSTORE_FILE ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem 
 
   #saml.issuer=https://localhost:8181
   local saml_issuer=""
