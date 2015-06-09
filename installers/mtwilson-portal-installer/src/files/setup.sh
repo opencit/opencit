@@ -100,7 +100,8 @@ chmod +x mtwilson-portal.sh
 mkdir -p /opt/mtwilson/bin
 cp mtwilson-portal.sh /opt/mtwilson/bin/mtwilson-portal
 
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}
+#while changing owner of ${intel_conf_dir} need to put '/' at the end as ${intel_conf_dir} is sym link
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}/
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
 
 /opt/mtwilson/bin/mtwilson-portal setup

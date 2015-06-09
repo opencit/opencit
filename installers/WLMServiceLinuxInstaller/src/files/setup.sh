@@ -94,7 +94,8 @@ mkdir -p /opt/mtwilson/bin
 cp wlmctl.sh /opt/mtwilson/bin/wlmctl
 chmod +x /opt/mtwilson/bin/wlmctl
 
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}
+#while changing owner of ${intel_conf_dir} need to put '/' at the end as ${intel_conf_dir} is a symbolic link
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}/
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
 
 /opt/mtwilson/bin/wlmctl setup
