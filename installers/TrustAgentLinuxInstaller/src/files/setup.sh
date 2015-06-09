@@ -279,10 +279,16 @@ package_config_filename=$TRUSTAGENT_CONFIGURATION/trustagent.properties
 
 # setup authbind to allow non-root trustagent to listen on port 1443
 mkdir -p /etc/authbind/byport
-if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
-  touch /etc/authbind/byport/1443
-  chmod 500 /etc/authbind/byport/1443
-  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+if [ ! -f /etc/authbind/byport/1443 ]; then
+  if [ "$(whoami)" == "root" ]; then
+    if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+      touch /etc/authbind/byport/1443
+      chmod 500 /etc/authbind/byport/1443
+      chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+    fi
+  else
+    echo_warning "You must be root to setup authbind configuration"
+  fi
 fi
 
 
