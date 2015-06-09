@@ -812,11 +812,11 @@ register_startup_script() {
   
   # try to install it as a startup script
   if [ -d /etc/init.d ]; then
-    local prevdir=`pwd`
-    cd /etc/init.d
-    if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
-    ln -s "${absolute_filename}" "${startup_name}"
-    cd "$prevdir"
+    (
+      cd /etc/init.d
+      if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
+      ln -s "${absolute_filename}" "${startup_name}"
+    )
   fi
 
   # RedHat and SUSE
@@ -3656,7 +3656,6 @@ mtwilson_running_report_wait() {
 
 # parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
-  local path=`pwd`
   local webservice_application_name="$1"
 
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
@@ -3683,7 +3682,6 @@ webservice_running() {
       fi
     fi
   fi
-  cd $path
 }
 webservice_running_report() {
   local webservice_application_name="$1"
