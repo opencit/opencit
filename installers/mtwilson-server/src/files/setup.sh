@@ -409,6 +409,7 @@ if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
 else
   touch "$MTWILSON_CONFIGURATION/mtwilson.properties"
   chmod 600 "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME ${MTWILSON_CONFIGURATION}/mtwilson.properties
   export mtwilson_tls_keystore_password=`generate_password 32`
   export MTW_TLS_KEYSTORE_PASS="$mtwilson_tls_keystore_password"
   echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  "$MTWILSON_CONFIGURATION/mtwilson.properties"
