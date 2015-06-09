@@ -320,6 +320,7 @@ JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
 mkdir -p $JAVA_HOME
 #java_install $JAVA_PACKAGE
 java_install_in_home $JAVA_PACKAGE
+java_detect
 if java_ready_report; then
   # store java location in env file
   echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
