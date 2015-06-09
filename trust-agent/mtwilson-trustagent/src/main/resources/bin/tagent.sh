@@ -315,6 +315,10 @@ trustagent_system_info() {
 }
 
 trousers_detect_and_run() {
+  # non-root users typically don't have /usr/sbin in their path, so append it
+  # here;  does not affect root user who would have /usr/sbin earlier in the PATH,
+  # and also this change only affects our process
+  PATH=$PATH:/usr/sbin
   trousers=`which tcsd 2>/dev/null`
   if [ -z "$trousers" ]; then
     #echo_failure "trousers installation is required for trust agent to run successfully."
