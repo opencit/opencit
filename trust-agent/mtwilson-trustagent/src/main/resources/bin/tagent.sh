@@ -101,6 +101,9 @@ JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONFIGURATION/logback.xml -Df
 # ensure that our commands can be found
 export PATH=$TRUSTAGENT_BIN/bin:$PATH
 
+# ensure that trousers (/usr/sbin) and tpm tools (/usr/local/sbin) are found
+export PATH=$PATH:/usr/sbin:/usr/local/sbin
+
 # java command
 if [ -z "$JAVA_CMD" ]; then
   if [ -n "$JAVA_HOME" ]; then

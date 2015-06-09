@@ -88,6 +88,9 @@ TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
 # ensure we have our own tagent programs in the path
 export PATH=$TRUSTAGENT_BIN:$PATH
 
+# ensure that trousers and tpm tools are in the path
+export PATH=$PATH:/usr/sbin:/usr/local/sbin
+
 profile_dir=$HOME
 if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ]; then
   profile_dir=$TRUSTAGENT_HOME
