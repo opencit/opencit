@@ -3,25 +3,50 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-# default settings
-# note the layout setting is used only by this script
+# default settings; can override by exporting them before running
+# the installer or by including them in mtwilson.env
+export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
+
+export INSTALLED_MARKER_FILE=${INSTALLED_MARKER_FILE:-/var/opt/intel/.mtwilsonInstalled}
+export LOG_ROTATION_PERIOD=${LOG_ROTATION_PERIOD:-daily}
+export LOG_COMPRESS=${LOG_COMPRESS:-compress}
+export LOG_DELAYCOMPRESS=${LOG_DELAYCOMPRESS:-delaycompress}
+export LOG_COPYTRUNCATE=${LOG_COPYTRUNCATE:-copytruncate}
+export LOG_SIZE=${LOG_SIZE:-100M}
+export LOG_OLD=${LOG_OLD:-7}
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
+# the layout setting is used only by this script
 # and it is not saved or used by the app script
-#Hardcoded MTWILSON_HOME for now need to update later
-export MTWILSON_HOME=/opt/mtwilson
 MTWILSON_LAYOUT=${MTWILSON_LAYOUT:-home}
-export PATH=$MTWILSON_HOME/bin:$PATH
-#define defaults so that they can be overwriten 
-#if the value appears in mtwilson.env
-export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
-export LOG_ROTATION_PERIOD=daily
-export LOG_COMPRESS=compress
-export LOG_DELAYCOMPRESS=delaycompress
-export LOG_COPYTRUNCATE=copytruncate
-export LOG_SIZE=100M
-export LOG_OLD=7
-export AUTO_UPDATE_ON_UNTRUST=false
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+
+###########################################################
+
+# ensure we can write to the log file
+touch $INSTALL_LOG_FILE >/dev/null 2>&1
+if [ -f $INSTALL_LOG_FILE ] && [ ! -w $INSTALL_LOG_FILE ]; then
+  echo "Cannot write to install log file: $INSTALL_LOG_FILE"
+  exit 1
+fi
+chown $MTWILSON_USERNAME:$MTWILSON_USERNAME $INSTALL_LOG_FILE
 date > $INSTALL_LOG_FILE
+
+# computed values
+export PATH=$MTWILSON_HOME/bin:$PATH
+
+# define application directory layout
+if [ "$MTWILSON_LAYOUT" == "linux" ]; then
+  export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-/etc/mtwilson}
+  export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-/var/opt/mtwilson}
+  export MTWILSON_LOGS=${MTWILSON_LOGS:-/var/log/mtwilson}
+elif [ "$MTWILSON_LAYOUT" == "home" ]; then
+  export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-$MTWILSON_HOME/configuration}
+  export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-$MTWILSON_HOME/repository}
+  export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
+fi
+export MTWILSON_BIN=${MTWILSON_BIN:-$MTWILSON_HOME/bin}
+export MTWILSON_JAVA=${MTWILSON_JAVA:-$MTWILSON_HOME/java}
+export MTWILSON_BACKUP=${MTWILSON_BACKUP:-$MTWILSON_REPOSITORY/backup}
 
 # the env directory is not configurable; it is defined as MTWILSON_HOME/env.d
 # and the administrator may use a symlink if necessary to place it anywhere else
@@ -47,6 +72,8 @@ else
   echo "No environment file"
 fi
 
+
+
 ## functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
 ## we use the following functions:
 ## java_detect java_ready_report 
@@ -62,7 +89,7 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ "$(whoami)" == "root" ]; then
   # create a mtwilson user if there isn't already one created
   MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
-  if ! getent passwd $MTWILSON_USERNAME 2>&1 >/dev/null; then
+  if ! getent passwd $MTWILSON_USERNAME >/dev/null 2>&1; then
     useradd --comment "Mt Wilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
     usermod --lock $MTWILSON_USERNAME
     # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $MTWILSON_USERNAME"
@@ -74,7 +101,7 @@ else
   if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
     export MTWILSON_HOME=$(cd ~ && pwd)
   fi
-  
+  echo_warning "Installing as $MTWILSON_USERNAME into $MTWILSON_HOME"  
 fi
 
 #If user is non root make sure all prereq directories are created and owned by nonroot user
@@ -121,9 +148,29 @@ if [ "$(whoami)" != "root" ]; then
   elif [ "${eics=`stat -c '%U' /etc/intel/cloudsecurity`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/etc/intel/cloudsecurity is not owned by $MTWILSON_USERNAME. Please update the owner."
    exit 1
+  elif [ ! -d $MTWILSON_HOME ]; then
+   echo_failure "$MTWILSON_HOME is not available. Please create one and change its owner to $MTWILSON_USERNAME."
+   exit 1
+  elif [ "${mtwhome=`stat -c '%U' $MTWILSON_HOME`}" != "$MTWILSON_USERNAME" ]; then
+   echo_failure "$MTWILSON_HOME is not owned by $MTWILSON_USERNAME. Please update the owner."
+   exit 1
   else 
    echo "Prerequisite check is successful"
   fi
+fi
+
+# if monit is running and
+# if there's a monit configuration for mtwilson, remove it to prevent
+# monit from trying to restart mtwilson while we are setting up
+echo "Checking for active Monit service..." >>$INSTALL_LOG_FILE
+service monit status >>$INSTALL_LOG_FILE 2>&1
+if [ $? -eq 0 ] && [ "$(whoami)" == "root" ] && [ -d /etc/monit/conf.d ]; then
+  datestr=`date +%Y%m%d.%H%M`
+  backupdir=$MTWILSON_BACKUP/monit.configuration.$datestr
+  echo "Backing up Monit configuration files to $backupdir" >> $INSTALL_LOG_FILE
+  mkdir -p $backupdir 2>>$INSTALL_LOG_FILE
+  mv /etc/monit/conf.d/*.mtwilson $backupdir 2>>$INSTALL_LOG_FILE
+  service monit restart
 fi
 
 # if an existing mtwilson is already running, stop it while we install
@@ -131,23 +178,45 @@ if which mtwilson; then
   mtwilson stop
 fi
 
-# define application directory layout
-if [ "$MTWILSON_LAYOUT" == "linux" ]; then
-  export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-/etc/mtwilson}
-  export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-/var/opt/mtwilson}
-  export MTWILSON_LOGS=${MTWILSON_LOGS:-/var/log/mtwilson}
-elif [ "$MTWILSON_LAYOUT" == "home" ]; then
-  export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-$MTWILSON_HOME/configuration}
-  export MTWILSON_REPOSITORY=${MTWILSON_REPOSITORY:-$MTWILSON_HOME/repository}
-  export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
+if [ -L /etc/intel/cloudsecurity ] && [ "$(whoami)" == "root" ]; then
+  echo "Deleting existing link: /etc/intel/cloudsecurity"
+  rm /etc/intel/cloudsecurity
 fi
-export MTWILSON_BIN=${MTWILSON_BIN:-$MTWILSON_HOME/bin}
-export MTWILSON_JAVA=${MTWILSON_JAVA:-$MTWILSON_HOME/java}
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
 export MTWILSON_OPT_INTEL=/opt/intel 
-# note that the env dir is not configurable; it is defined as "env" under home
-export MTWILSON_ENV=$MTWILSON_HOME/env.d
+# If configuration is already in /etc/intel/cloudsecurity (upgrade or reinstall)
+# then symlink /opt/mtwilson/configuration -> /etc/intel/cloudsecurity 
+if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/cloudsecurity ] && [ "/etc/intel/cloudsecurity" != "$MTWILSON_CONFIGURATION" ]; then
+  echo "Creating symlink from $MTWILSON_CONFIGURATION to existing configuration in /etc/intel/cloudsecurity"
+  mkdir -p $(dirname $MTWILSON_CONFIGURATION)
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $(dirname $MTWILSON_CONFIGURATION)"
+    exit 1
+  fi
+  ln -s /etc/intel/cloudsecurity $MTWILSON_CONFIGURATION
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create symlink: $MTWILSON_CONFIGURATION -> /etc/intel/cloudsecurity"
+    exit 1
+  fi
+fi
 
+# If configuration is in /opt/mtwilson/configuration and there is no symlink
+# in /etc/intel/cloudsecurity then we create one now
+if [ -d "$MTWILSON_CONFIGURATION" ] && [ ! -L "$MTWILSON_CONFIGURATION" ] && [ "/etc/intel/clousecurity" != "$MTWILSON_CONFIGURATION" ] && [ ! -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/cloudsecurity ]; then
+  ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+fi
+
+# ensure application directories exist (chown will be repeated near end of this script, after setup)
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA; do
+  # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
+  mkdir -p $directory
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $directory"
+    exit 1
+  fi
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
+  chmod 700 $directory
+done
 
 mtwilson_backup_configuration() {
   if [ -n "$MTWILSON_CONFIGURATION" ] && [ -d "$MTWILSON_CONFIGURATION" ]; then
@@ -171,10 +240,10 @@ mtwilson_backup_repository() {
 mtwilson_backup_configuration
 mtwilson_backup_repository
 
-if [[ -L "$MTWILSON_CONFIGURATION" && -d "$MTWILSON_CONFIGURATION" ]]; then
-  rm -f "$MTWILSON_CONFIGURATION"
+if [[ -d "/etc/intel/cloudsecurity" ]]; then
+  rm -rf "/etc/intel/cloudsecurity"
 fi
-ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
+ln -s "$MTWILSON_CONFIGURATION" /etc/intel/cloudsecurity
 
 # create application directories (chown will be repeated near end of this script, after setup)
 for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES  $MTWILSON_OPT_INTEL; do
@@ -209,8 +278,20 @@ echo "# $(date)" > $MTWILSON_ENV/mtwilson-setup
 for env_file_var_name in $env_file_exports
 do
   eval env_file_var_value="\$$env_file_var_name"
+  echo "writing $env_file_var_name to mtwilson-setup with value: $env_file_var_value" >> $INSTALL_LOG_FILE
   echo "export $env_file_var_name=$env_file_var_value" >> $MTWILSON_ENV/mtwilson-setup
 done
+
+profile_dir=$HOME
+if [ "$(whoami)" == "root" ] && [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ]; then
+  profile_dir=$MTWILSON_HOME
+fi
+profile_name=$profile_dir/$(basename $(getUserProfileFile))
+
+echo "Updating profile: $profile_name" >> $INSTALL_LOG_FILE
+appendToUserProfileFile "export PATH=$MTWILSON_BIN:\$PATH" $profile_name
+appendToUserProfileFile "export MTWILSON_HOME=$MTWILSON_HOME" $profile_name
+
 
 mtw_props_path="$MTWILSON_CONFIGURATION/mtwilson.properties"
 as_props_path="$MTWILSON_CONFIGURATION/attestation-service.properties"
@@ -223,6 +304,7 @@ file_paths=("$mtw_props_path" "$as_props_path" "$ms_props_path" "$mp_props_path"
 
 # disable upgrade if properties files are encrypted from a previous installation
 for file in ${file_paths[*]}; do
+  echo "Checking for encrypted configuration file: $file" >> $INSTALL_LOG_FILE
   if [ -f $file ]; then
     if file_encrypted $file; then
       echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
@@ -231,72 +313,31 @@ for file in ${file_paths[*]}; do
   fi
 done
 
+echo "Loading configuration settings and defaults" >> $INSTALL_LOG_FILE
 load_conf
 load_defaults
 
 # mtwilson requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-java_detect 2>&1 >/dev/null 
-if ! java_ready; then
-  # java not installed, check if we have the bundle
-  JAVA_INSTALL_REQ_BUNDLE=`ls -1 java-*.bin 2>/dev/null | head -n 1`
-  JAVA_INSTALL_REQ_TGZ=`ls -1 jdk*.tar.gz 2>/dev/null | head -n 1`
-  if [ -n "$JAVA_INSTALL_REQ_BUNDLE" ]; then
-    chmod +x $JAVA_INSTALL_REQ_BUNDLE
-    ./$JAVA_INSTALL_REQ_BUNDLE
-    java_detect
-  elif [ -n "$JAVA_INSTALL_REQ_TGZ" ]; then
-    tar xzf $JAVA_INSTALL_REQ_TGZ
-    JAVA_INSTALL_REQ_TGZ_UNPACKED=`ls -1d jdk* jre* 2>/dev/null`
-    for f in $JAVA_INSTALL_REQ_TGZ_UNPACKED
-    do
-      #echo "$f"
-      if [ -d "$f" ]; then
-        if [ -d "/usr/share/$f" ]; then
-          echo "Java already installed at /usr/share/$f"
-          export JAVA_HOME="/usr/share/$f"
-        else
-          mv "$f" /usr/share && export JAVA_HOME="/usr/share/$f"
-        fi
-      fi
-    done    
-    java_detect
-  fi
-fi
-if java_ready_report; then
-  # store java location in env file
-  echo "# $(date)" > $MTWILSON_ENV/mtwilson-java
-  echo "export JAVA_HOME=$JAVA_HOME" >> $MTWILSON_ENV/mtwilson-java
-  echo "export JAVA_CMD=$java" >> $MTWILSON_ENV/mtwilson-java
-else
-  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
-  exit 1
-fi
-# Post java install setup and configuration
+# in 2.0.6, java home is now under trustagent home by default
+JAVA_HOME=${JAVA_HOME:-$MTWILSON_HOME/share/jdk1.7.0_51}
+JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+echo "Installing Java ($JAVA_PACKAGE) into $JAVA_HOME..." >> $INSTALL_LOG_FILE
+mkdir -p $JAVA_HOME
+#java_install $JAVA_PACKAGE
+java_install_in_home $JAVA_PACKAGE
+# store java location in env file
+echo "# $(date)" > $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_HOME=$JAVA_HOME" >> $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $MTWILSON_ENV/mtwilson-java
+echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $MTWILSON_ENV/mtwilson-java
+
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
   backup_file "${JAVA_HOME}/jre/lib/security/java.security"
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
-
-# following code causes the current JAVA_HOME value to be appended to
-# whatever PATH is there (if it's not already there), which means that
-# if one time we detect openjdk, and add it, then next time detect oracle jdk,
-# it will always be added after any previously found jdk, so when using
-# that PATH and running "java" it will never start the most recently found jdk
-# unless we actually delete the other ones. 
-#if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
-#  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
-#    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
-#    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
-#  fi
-#  if ! grep -q "JAVA_HOME" /etc/environment; then
-#    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
-#  fi
-#  
-#  . /etc/environment
-#fi
 
 # install prerequisites
 if [ "$(whoami)" == "root" ]; then
@@ -325,8 +366,8 @@ fi
 
 # delete existing java files, to prevent a situation where the installer copies
 # a newer file but the older file is also there
-if [ -d $MTWILSON_HOME/java ]; then
-  rm $MTWILSON_HOME/java/*.jar 2>/dev/null
+if [ -d $MTWILSON_JAVA ]; then
+  rm $MTWILSON_JAVA/*.jar 2>/dev/null
 fi
 
 if [ -z "$INSTALL_PKGS" ]; then
@@ -400,6 +441,7 @@ export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-7.0}
 
 # configure mtwilson TLS policies
+echo "Configuring TLS policies..." >>$INSTALL_LOG_FILE
 if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
   default_mtwilson_tls_policy_id="$MTW_DEFAULT_TLS_POLICY_ID"
   if [ "$default_mtwilson_tls_policy_id" == "INSECURE" ] || [ "$default_mtwilson_tls_policy_id" == "TRUST_FIRST_CERTIFICATE" ]; then
@@ -409,6 +451,7 @@ if [ -f "$MTWILSON_CONFIGURATION/mtwilson.properties" ]; then
 else
   touch "$MTWILSON_CONFIGURATION/mtwilson.properties"
   chmod 600 "$MTWILSON_CONFIGURATION/mtwilson.properties"
+  chown $MTWILSON_USERNAME:$MTWILSON_USRENAME "$MTWILSON_CONFIGURATION/mtwilson.properties"
   export mtwilson_tls_keystore_password=`generate_password 32`
   export MTW_TLS_KEYSTORE_PASS="$mtwilson_tls_keystore_password"
   echo '#mtwilson.default.tls.policy.id=uuid of a shared policy or INSECURE or TRUST_FIRST_CERTIFICATE for Mt Wilson 1.2 behavior' >>  "$MTWILSON_CONFIGURATION/mtwilson.properties"
@@ -459,6 +502,7 @@ else
 #  exit -1
 fi
 
+export AUTO_UPDATE_ON_UNTRUST=${AUTO_UPDATE_ON_UNTRUST:-false}
 update_property_in_file "mtwilson.as.autoUpdateHost" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$AUTO_UPDATE_ON_UNTRUST"
 update_property_in_file "mtwilson.locales" "$MTWILSON_CONFIGURATION/mtwilson.properties" "en-US"
 
@@ -475,18 +519,21 @@ update_property_in_file "dbcp.validation.on.borrow" "$MTWILSON_CONFIGURATION/mtw
 update_property_in_file "dbcp.validation.on.return" "$MTWILSON_CONFIGURATION/mtwilson.properties" "false"
 
 
+echo "Copying logback.xml to $MTWILSON_CONFIGURATION" >> $INSTALL_LOG_FILE
 # copy default logging settings to /etc
-chmod 600 logback.xml
-cp logback.xml "$MTWILSON_CONFIGURATION"
-chmod 600 logback-stderr.xml
-cp logback-stderr.xml "$MTWILSON_CONFIGURATION"
+chmod 600 logback.xml logback-stderr.xml
+chown $MTWILSON_USERNAME:$MTWILSON_USERNAME logback.xml logback-stderr.xml
+cp logback.xml logback-stderr.xml "$MTWILSON_CONFIGURATION"
 
 # copy shiro.ini api security file
 if [ ! -f "$MTWILSON_CONFIGURATION/shiro.ini" ]; then
+  echo "Copying shiro.ini to $MTWILSON_CONFIGURATION" >> $INSTALL_LOG_FILE
   chmod 600 shiro.ini shiro-localhost.ini
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME shiro.ini shiro-localhost.ini
   cp shiro.ini shiro-localhost.ini "$MTWILSON_CONFIGURATION"
 fi
 
+echo "Adding $MTWILSON_SERVER to shiro.ini..." >>$INSTALL_LOG_FILE
 # add MTWILSON_SERVER to shiro trust file
 # use "hostFilter.allow" when using the access-denying filter (any clients not from that list of ip's will be denied)
 # use "iniHostRealm.allow" when using the access-allowing filter (any clients from that list of ip's will be allowed access but clients from other ip's can still try password or x509 authentication) - this is the current default
@@ -505,30 +552,36 @@ sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
  update_property_in_file "mtwilson.api.url" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_API_BASEURL"
 
-echo "Adding symlink for /opt/mtwilson/configuration..."
-# temp symlink -- SAVY added 2014-02-26
-if [[ ! -h "/opt/mtwilson/configuration" ]]; then
-  mkdir -p /opt/mtwilson
-  ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
-fi
-
 # copy extensions.cache file
 if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
   chmod 600 extensions.cache
-  cp extensions.cache /opt/mtwilson/configuration
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME extensions.cache
+  cp extensions.cache $MTWILSON_CONFIGURATION
 fi
 
 # extract mtwilson
 echo "Extracting application..."
 MTWILSON_ZIPFILE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
-unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME
+unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
 
 # copy utilities script file to application folder
+mkdir -p $MTWILSON_HOME/share/scripts
+cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+
+# deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
 cp functions "$MTWILSON_BIN/functions.sh"
 
 # set permissions
+echo "chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME" >> $INSTALL_LOG_FILE
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_HOME
-chmod 755 $MTWILSON_HOME/bin/*
+chmod 755 $MTWILSON_BIN/*
+
+# if /usr/local/bin/mtwilson exists and is not a symlink, then replace it
+# with a symlink to /opt/mtwilson/bin/mtwilson
+if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
+  echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
+  rm /usr/local/bin/mtwilson
+fi
 
 ## link /usr/local/bin/mtwilson -> /opt/mtwilson/bin/mtwilson
 #EXISTING_MTWILSON_COMMAND=`which mtwilson`
@@ -1092,11 +1145,11 @@ fi
 
 if [ "$(whoami)" == "root" ]; then     
   #remove previous service startup scripts if they exist
-  remove_startup_script "asctl" 2>&1 >> $INSTALL_LOG_FILE
-  remove_startup_script "msctl" 2>&1 >> $INSTALL_LOG_FILE
-  remove_startup_script "mtwilson-portal" 2>&1 >> $INSTALL_LOG_FILE
-  remove_startup_script "tdctl" 2>&1 >> $INSTALL_LOG_FILE
-  remove_startup_script "wlmctl" 2>&1 >> $INSTALL_LOG_FILE
+  remove_startup_script "asctl" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "msctl" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "mtwilson-portal" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "tdctl" >>$INSTALL_LOG_FILE 2>&1
+  remove_startup_script "wlmctl" >>$INSTALL_LOG_FILE 2>&1
 fi
 
 # last chance to set permissions

@@ -65,13 +65,6 @@ else
   echo_warning "Installing as $TRUSTAGENT_USERNAME into $TRUSTAGENT_HOME"  
 fi
 
-# ensure the home directory exists or can be created
-mkdir -p $TRUSTAGENT_HOME
-if [ $? -ne 0 ]; then
-  echo_failure "Cannot create directory: $TRUSTAGENT_HOME"
-  exit 1
-fi
-
 # define location variables but do not export them yet
 TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
 TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
@@ -81,12 +74,23 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
 TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
 TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
-# note that the env dir is not configurable; it is defined as "env.d" under home
-TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
-
+# create application directories (chown will be repeated near end of this script, after setup)
+for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
+  # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
+  mkdir -p $directory
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $directory"
+    exit 1
+  fi
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+  chmod 700 $directory
+done
 
 # ensure we have our own tagent programs in the path
 export PATH=$TRUSTAGENT_BIN:$PATH
+
+# ensure that trousers and tpm tools are in the path
+export PATH=$PATH:/usr/sbin:/usr/local/sbin
 
 profile_dir=$HOME
 if [ "$(whoami)" == "root" ] && [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ]; then
@@ -134,12 +138,6 @@ trustagent_backup_configuration() {
 # backup current configuration, if present
 trustagent_backup_configuration
 
-# create application directories (chown will be repeated near end of this script, after setup)
-for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
-  mkdir -p $directory
-  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
-  chmod 700 $directory
-done
 
 # before we start, clear the install log (directory must already exist; created above)
 logfile=$TRUSTAGENT_LOGS/install.log
@@ -180,9 +178,7 @@ TRUSTAGENT_V_1_2_HOME=/opt/intel/cloudsecurity/trustagent
 TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
 package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
-logfile=$TRUSTAGENT_LOGS/install.log
 
-#java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
 APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip authbind"
 # commented out from apt packages: libcurl4-openssl-dev 
@@ -221,7 +217,7 @@ JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
 unzip -DD -o $ZIP_PACKAGE -d "$TRUSTAGENT_HOME" >> $logfile  2>&1
-chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"
+chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME" 2>>$logfile
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
@@ -283,10 +279,16 @@ package_config_filename=$TRUSTAGENT_CONFIGURATION/trustagent.properties
 
 # setup authbind to allow non-root trustagent to listen on port 1443
 mkdir -p /etc/authbind/byport
-if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
-  touch /etc/authbind/byport/1443
-  chmod 500 /etc/authbind/byport/1443
-  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+if [ ! -f /etc/authbind/byport/1443 ]; then
+  if [ "$(whoami)" == "root" ]; then
+    if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+      touch /etc/authbind/byport/1443
+      chmod 500 /etc/authbind/byport/1443
+      chown $TRUSTAGENT_USERNAME /etc/authbind/byport/1443
+    fi
+  else
+    echo_warning "You must be root to setup authbind configuration"
+  fi
 fi
 
 
@@ -320,16 +322,11 @@ JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
 mkdir -p $JAVA_HOME
 #java_install $JAVA_PACKAGE
 java_install_in_home $JAVA_PACKAGE
-if java_ready_report; then
-  # store java location in env file
-  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_CMD=$java" >> $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $TRUSTAGENT_ENV/trustagent-java
-else
-  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
-  exit 1
-fi
+# store java location in env file
+echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
+echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
+echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $TRUSTAGENT_ENV/trustagent-java
+echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $TRUSTAGENT_ENV/trustagent-java
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -560,7 +557,8 @@ fi
 
 # Ensure we have given trustagent access to its files
 for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
-  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+  echo "chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory" >>$logfile
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory 2>>$logfile
 done
 
 
@@ -585,7 +583,8 @@ tagent start >>$logfile  2>&1
 
 # optional: register tpm password with mtwilson so pull provisioning can
 #           be accomplished with less reboots (no ownership transfer)
-prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD}
+#           default is not to register the password.
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD:-no}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$REGISTER_TPM_PASSWORD" == "yes" ]]; then 
 #	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
 	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
@@ -612,3 +611,5 @@ if [ "$(whoami)" == "root" ]; then
   fi
 fi
 
+# remove the temporary setup env file
+rm -f $TRUSTAGENT_ENV/trustagent-setup

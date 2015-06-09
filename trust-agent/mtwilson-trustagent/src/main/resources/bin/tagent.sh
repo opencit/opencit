@@ -101,6 +101,9 @@ JAVA_OPTS="-Dlogback.configurationFile=$TRUSTAGENT_CONFIGURATION/logback.xml -Df
 # ensure that our commands can be found
 export PATH=$TRUSTAGENT_BIN/bin:$PATH
 
+# ensure that trousers (/usr/sbin) and tpm tools (/usr/local/sbin) are found
+export PATH=$PATH:/usr/sbin:/usr/local/sbin
+
 # java command
 if [ -z "$JAVA_CMD" ]; then
   if [ -n "$JAVA_HOME" ]; then
@@ -231,7 +234,7 @@ trustagent_uninstall() {
     cp -r /opt/trustagent/configuration/* /tmp/trustagent.configuration.$datestr
 	rm -f /usr/local/bin/tagent
     if [ -n "$TRUSTAGENT_HOME" ] && [ -d "$TRUSTAGENT_HOME" ]; then
-      rm -rf $TRUSTAGENT_HOME/*
+      rm -rf $TRUSTAGENT_HOME
     fi
 }
 
@@ -315,6 +318,10 @@ trustagent_system_info() {
 }
 
 trousers_detect_and_run() {
+  # non-root users typically don't have /usr/sbin in their path, so append it
+  # here;  does not affect root user who would have /usr/sbin earlier in the PATH,
+  # and also this change only affects our process
+  PATH=$PATH:/usr/sbin
   trousers=`which tcsd 2>/dev/null`
   if [ -z "$trousers" ]; then
     #echo_failure "trousers installation is required for trust agent to run successfully."

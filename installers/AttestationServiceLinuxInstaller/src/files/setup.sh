@@ -42,6 +42,7 @@ mkdir -p "${package_dir}"
 chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "$package_dir"
 
 # select appropriate war file
 if using_glassfish; then
@@ -58,6 +59,7 @@ cp "audit-handler.properties" "${package_dir}/audit-handler.properties.example"
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "$intel_conf_dir"
 if [ -f "${package_config_filename}" ]; then
   echo_warning "Configuration file ${package_name}.properties already exists"  >> $INSTALL_LOG_FILE
 else
@@ -83,8 +85,6 @@ mkdir -p /opt/mtwilson/bin
 cp asctl.sh /opt/mtwilson/bin/asctl
 chmod +x /opt/mtwilson/bin/asctl
 
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $package_dir
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $intel_conf_dir
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME /opt/mtwilson/bin/
 
 /opt/mtwilson/bin/asctl setup
@@ -145,5 +145,3 @@ if [ `whoami` == "root" ]; then
    #tomcat_permissions "${package_var_bin_dir}" 
  fi
 fi
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $intel_conf_dir
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $package_var_dir

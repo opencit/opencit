@@ -300,10 +300,10 @@ all_status() {
 setup_env() {
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
-  java_detect > /dev/null
-  echo "JAVA_HOME=$JAVA_HOME"
-  echo "java_bindir=$java_bindir"
-  echo "java=$java"
+#  java_detect > /dev/null
+#  echo "JAVA_HOME=$JAVA_HOME"
+#  echo "java_bindir=$java_bindir"
+#  echo "java=$java"
   #export JAVA_HOME java_bindir java
   if using_mysql; then
     mysql_detect > /dev/null
@@ -381,7 +381,7 @@ case "$1" in
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
   stop)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         touch $MTWILSON_PID_WAIT_FILE
         if using_glassfish; then
           glassfish_stop
@@ -603,25 +603,34 @@ case "$1" in
         webservice_uninstall ManagementService 2>&1 > /dev/null
         webservice_uninstall WLMService 2>&1 > /dev/null
 
-        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity and /opt/mtwilson..."
-        rm -rf /opt/intel/cloudsecurity
-        rm -rf /opt/mtwilson
-        echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
-        rm -rf /usr/local/share/mtwilson
-        if [ "$(whoami)" == "root" ]; then
-          remove_startup_script "mtwilson"
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity , /etc/intel/cloudsecurity and /opt/mtwilson..."
+        if [ -w "/opt/intel/cloudsecurity" ] && [ -w "/opt/mtwilson" ] && [ "$(whoami)" == "root" ]; then
+            rm -rf /opt/intel/cloudsecurity
+            rm -rf /opt/mtwilson
+            rm -rf /etc/intel/cloudsecurity
+            if [ -d /var/opt/intel ]; then
+                rm -rf /var/opt/intel
+            fi
+            echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
+            # rm -rf /usr/local/share/mtwilson
+            remove_startup_script "mtwilson"
         else
-          echo_warning "You must be root to remove mtwilson startup script"
+          echo_warning "You must be root to remove /opt/intel/cloudsecurity"
+          echo_warning "You must be root to remove /opt/mtwilson"
+          echo_warning "You must be root to remove mtwilson script"
+          echo_warning "You must be root to remove /etc/intel/cloudsecurity"
         fi
         # configuration files
-        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
-        rm -rf /etc/intel/cloudsecurity
+        #echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
+        #rm -rf /etc/intel/cloudsecurity
         # data files
-        echo "Removing Mt Wilson data in /var/opt/intel..."
-        rm -rf /var/opt/intel
         # control scripts
         echo "Removing Mt Wilson control scripts..."
-        echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+		if [ -w "/usr/local/bin/file" ]; then
+            echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+		else
+		    echo_warning "You must be root to remove the /usr/local/bin/mtwilson file"
+		fi
             # only remove the config files we added to conf.d, not anything else
             echo "Removing mtwilson monit config files"
             rm -fr /etc/monit/conf.d/*.mtwilson
