@@ -34,7 +34,7 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
   # create a mtwilson user if there isn't already one created
-  MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
+  export MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
   if ! getent passwd $MTWILSON_USERNAME >/dev/null 2>&1; then
     useradd --comment "Mt Wilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
     usermod --lock $MTWILSON_USERNAME
@@ -42,7 +42,7 @@ if [ "$(whoami)" == "root" ]; then
   fi
 else
   # already running as mtwilson user
-  MTWILSON_USERNAME=$(whoami)
+  export MTWILSON_USERNAME=$(whoami)
   echo_warning "Running as $MTWILSON_USERNAME; if installation fails try again as root"
   if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
     export MTWILSON_HOME=$(cd ~ && pwd)
