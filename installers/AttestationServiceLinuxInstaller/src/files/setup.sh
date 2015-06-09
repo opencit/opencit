@@ -39,7 +39,7 @@ WAR_PACKAGE_JETTY=`ls -1 mtwilson-jetty.war 2>/dev/null | tail -n 1`
 # copy application files to /opt
 mkdir -p "${package_dir}"
 #mkdir -p "${package_dir}"/database
-chmod 777 "${package_dir}"
+chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
 
@@ -51,13 +51,13 @@ elif using_tomcat; then
 fi
 
 #cp sql/*.sql "${package_dir}"/database/
-chmod 666 "${package_name}.properties"
+chmod 600 "${package_name}.properties"
 cp "${package_name}.properties" "${package_dir}/${package_name}.properties.example"
 cp "audit-handler.properties" "${package_dir}/audit-handler.properties.example"
 
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
-chmod 777 "${intel_conf_dir}"
+chmod 700 "${intel_conf_dir}"
 if [ -f "${package_config_filename}" ]; then
   echo_warning "Configuration file ${package_name}.properties already exists"  >> $INSTALL_LOG_FILE
 else
@@ -82,6 +82,10 @@ fi
 mkdir -p /opt/mtwilson/bin
 cp asctl.sh /opt/mtwilson/bin/asctl
 chmod +x /opt/mtwilson/bin/asctl
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME /opt/mtwilson/bin/
+
 /opt/mtwilson/bin/asctl setup
 
 aikqverify_install_prereq() {

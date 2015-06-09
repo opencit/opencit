@@ -45,7 +45,7 @@ DEFAULT_TOMCAT_API_PORT="8443"
 DEFAULT_GLASSFISH_API_PORT="8181"
 #DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT
 
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 
 ### FUNCTION LIBRARY: echo and export environment variables
 
@@ -223,7 +223,8 @@ function validate_path_configuration() {
   fi
   
   if [[ -f "$file_path" ]]; then
-    chmod 600 "${file_path}"
+    echo "validate_path_configuration: chmod 600 $file_path" >>$INSTALL_LOG_FILE
+    chmod 600 "${file_path}" >>$INSTALL_LOG_FILE 2>&1
   fi
   return 0
 }
@@ -655,6 +656,7 @@ backup_file() {
 read_property_from_file() {
   local property="${1}"
   local filename="${2}"
+  echo "Reading $property from $filename..." >>$INSTALL_LOG_FILE
   if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     local found=`cat "$filename" | grep "^$property"`
@@ -674,6 +676,7 @@ update_property_in_file() {
   local value="${3}"
   local encrypted="false"
 
+  echo "Updating $property in $filename to $value..." >>$INSTALL_LOG_FILE
   if ! validate_path_configuration "$filename"; then exit -1; fi
   if [ -f "$filename" ]; then
     # Decrypt if needed
@@ -3500,6 +3503,9 @@ java_install_in_home() {
     return 5
   elif [ -d "$JAVA_HOME" ] && [ $(ls -1 $JAVA_HOME | wc -l) -gt 0 ]; then
     echo_warning "Java already installed at $JAVA_HOME"
+    java_bindir=$JAVA_HOME/bin
+    java=$java_bindir/java
+    JAVA_CMD=$java
     return 6
   fi
 
@@ -3508,6 +3514,7 @@ java_install_in_home() {
     echo_failure "Cannot install Java: parent directory $(dirname $JAVA_HOME) not writable"
     return 7
   fi
+  rmdir $JAVA_HOME
 
   # unpack the java archive
     is_targz=`echo $java_package | grep "\.tar.gz$"`
@@ -3534,6 +3541,7 @@ java_install_in_home() {
         echo "Installed Java in $JAVA_HOME"
         java_bindir=$JAVA_HOME/bin
         java=$java_bindir/java
+        JAVA_CMD=$java
         return 0
       fi
     done
@@ -4019,7 +4027,7 @@ call_tag_setupcommand() {
 
 file_encrypted() {
   local filename="${1}"
-  if [ -n "$filename" ]; then
+  if [ -n "$filename" ] && [ -f "$filename" ]; then
     if grep -q "ENCRYPTED DATA" "$filename"; then
       return 0 #"File encrypted: $filename"
     else

@@ -56,6 +56,7 @@ if [ -f "${package_config_filename}" ]; then
 else
   cp "${package_name}.properties" "${package_config_filename}"
 fi
+chown $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_config_filename}
 
 # Create a random password and update the property file of the management service
 mypassword16=`generate_password 16`

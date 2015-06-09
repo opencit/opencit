@@ -65,13 +65,6 @@ else
   echo_warning "Installing as $TRUSTAGENT_USERNAME into $TRUSTAGENT_HOME"  
 fi
 
-# ensure the home directory exists or can be created
-mkdir -p $TRUSTAGENT_HOME
-if [ $? -ne 0 ]; then
-  echo_failure "Cannot create directory: $TRUSTAGENT_HOME"
-  exit 1
-fi
-
 # define location variables but do not export them yet
 TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
 TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
@@ -81,9 +74,17 @@ TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
 TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
 TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
-# note that the env dir is not configurable; it is defined as "env.d" under home
-TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
-
+# create application directories (chown will be repeated near end of this script, after setup)
+for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
+  # mkdir -p will return 0 if directory exists or is a symlink to an existing directory or directory and parents can be created
+  mkdir -p $directory
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $directory"
+    exit 1
+  fi
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+  chmod 700 $directory
+done
 
 # ensure we have our own tagent programs in the path
 export PATH=$TRUSTAGENT_BIN:$PATH
@@ -137,12 +138,6 @@ trustagent_backup_configuration() {
 # backup current configuration, if present
 trustagent_backup_configuration
 
-# create application directories (chown will be repeated near end of this script, after setup)
-for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
-  mkdir -p $directory
-  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
-  chmod 700 $directory
-done
 
 # before we start, clear the install log (directory must already exist; created above)
 logfile=$TRUSTAGENT_LOGS/install.log
