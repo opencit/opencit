@@ -100,7 +100,6 @@ fi
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f /opt/mtwilson/share/scripts/functions ]; then  . /opt/mtwilson/share/scripts/functions; else echo "Missing file: /opt/mtwilson/share/scripts/functions";   exit 1; fi
 if [ -f /opt/mtwilson/configuration/version ]; then  . /opt/mtwilson/configuration/version; else  echo_warning "Missing file: /opt/mtwilson/configuration/version"; fi
-if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf runs ExportConfig and if that same command is passed in from 'mtwilson setup', it won't work
   load_conf 2>&1 >/dev/null
@@ -111,7 +110,6 @@ if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf run
 fi
 load_defaults 2>&1 >/dev/null
 #if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 #export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
@@ -302,10 +300,10 @@ all_status() {
 setup_env() {
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
-  java_detect > /dev/null
-  echo "JAVA_HOME=$JAVA_HOME"
-  echo "java_bindir=$java_bindir"
-  echo "java=$java"
+#  java_detect > /dev/null
+#  echo "JAVA_HOME=$JAVA_HOME"
+#  echo "java_bindir=$java_bindir"
+#  echo "java=$java"
   #export JAVA_HOME java_bindir java
   if using_mysql; then
     mysql_detect > /dev/null
@@ -383,7 +381,7 @@ case "$1" in
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
   stop)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         touch $MTWILSON_PID_WAIT_FILE
         if using_glassfish; then
           glassfish_stop
@@ -617,11 +615,10 @@ case "$1" in
             # rm -rf /usr/local/share/mtwilson
             remove_startup_script "mtwilson"
         else
-          echo_warning "You must be root to remove /opt/intel/cloudsecurity"
-          echo_warning "You must be root to remove /opt/mtwilson"
-          echo_warning "You must be root to remove mtwilson script"
-          echo_warning "You must be root to remove /etc/intel/cloudsecurity"
+          echo_warning "You must be root to remove directories: /etc/intel/cloudsecurity, /opt/intel/cloudsecurity, /opt/mtwilson"
+          echo_warning "You must be root to remove mtwilson startup script"
         fi
+        rm -rf /opt/mtwilson/* 2>/dev/null  #for non-root user; can't delete $HOME
         # configuration files
         #echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         #rm -rf /etc/intel/cloudsecurity
