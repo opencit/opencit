@@ -174,7 +174,6 @@ mtwilson_backup_repository
 if [[ -L "$MTWILSON_CONFIGURATION" && -d "$MTWILSON_CONFIGURATION" ]]; then
   rm -f "$MTWILSON_CONFIGURATION"
 fi
-ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
 
 # create application directories (chown will be repeated near end of this script, after setup)
 for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES  $MTWILSON_OPT_INTEL; do
@@ -182,6 +181,8 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
   chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
   chmod 700 $directory
 done
+
+ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
 
 # store directory layout in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-layout
@@ -506,12 +507,12 @@ sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
  update_property_in_file "mtwilson.api.url" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_API_BASEURL"
 
-echo "Adding symlink for /opt/mtwilson/configuration..."
+#echo "Adding symlink for /opt/mtwilson/configuration..."
 # temp symlink -- SAVY added 2014-02-26
-if [[ ! -h "/opt/mtwilson/configuration" ]]; then
-  mkdir -p /opt/mtwilson
-  ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
-fi
+#if [[ ! -h "/opt/mtwilson/configuration" ]]; then
+#  mkdir -p /opt/mtwilson
+#  ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
+#fi
 
 # copy extensions.cache file
 if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
