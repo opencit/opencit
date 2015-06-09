@@ -243,7 +243,6 @@ mtwilson_backup_repository
 if [[ -d "/etc/intel/cloudsecurity" ]]; then
   rm -rf "/etc/intel/cloudsecurity"
 fi
-ln -s "$MTWILSON_CONFIGURATION" /etc/intel/cloudsecurity
 
 # create application directories (chown will be repeated near end of this script, after setup)
 for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES  $MTWILSON_OPT_INTEL; do
@@ -251,6 +250,8 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
   chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
   chmod 700 $directory
 done
+
+ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
 
 # store directory layout in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-layout
