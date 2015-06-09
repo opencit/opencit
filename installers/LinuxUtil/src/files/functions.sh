@@ -3503,6 +3503,9 @@ java_install_in_home() {
     return 5
   elif [ -d "$JAVA_HOME" ] && [ $(ls -1 $JAVA_HOME | wc -l) -gt 0 ]; then
     echo_warning "Java already installed at $JAVA_HOME"
+    java_bindir=$JAVA_HOME/bin
+    java=$java_bindir/java
+    JAVA_CMD=$java
     return 6
   fi
 
@@ -3511,6 +3514,7 @@ java_install_in_home() {
     echo_failure "Cannot install Java: parent directory $(dirname $JAVA_HOME) not writable"
     return 7
   fi
+  rmdir $JAVA_HOME
 
   # unpack the java archive
     is_targz=`echo $java_package | grep "\.tar.gz$"`
@@ -3537,6 +3541,7 @@ java_install_in_home() {
         echo "Installed Java in $JAVA_HOME"
         java_bindir=$JAVA_HOME/bin
         java=$java_bindir/java
+        JAVA_CMD=$java
         return 0
       fi
     done

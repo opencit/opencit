@@ -28,6 +28,28 @@ if [ -f $INSTALL_LOG_FILE ] && [ ! -w $INSTALL_LOG_FILE ]; then
   echo "Cannot write to install log file: $INSTALL_LOG_FILE"
   exit 1
 fi
+
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+
+# determine if we are installing as root or non-root
+if [ "$(whoami)" == "root" ]; then
+  # create a mtwilson user if there isn't already one created
+  MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
+  if ! getent passwd $MTWILSON_USERNAME >/dev/null 2>&1; then
+    useradd --comment "Mt Wilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
+    usermod --lock $MTWILSON_USERNAME
+    # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $MTWILSON_USERNAME"
+  fi
+else
+  # already running as mtwilson user
+  MTWILSON_USERNAME=$(whoami)
+  echo_warning "Running as $MTWILSON_USERNAME; if installation fails try again as root"
+  if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
+    export MTWILSON_HOME=$(cd ~ && pwd)
+  fi
+  echo_warning "Installing as $MTWILSON_USERNAME into $MTWILSON_HOME"  
+fi
+
 chown $MTWILSON_USERNAME:$MTWILSON_USERNAME $INSTALL_LOG_FILE
 date > $INSTALL_LOG_FILE
 
@@ -73,36 +95,6 @@ else
 fi
 
 
-
-## functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
-## we use the following functions:
-## java_detect java_ready_report 
-## echo_failure echo_warning
-## register_startup_script
-#UTIL_SCRIPT_FILE=`ls -1 mtwilson-linux-util-*.sh | head -n 1`
-#if [ -n "$UTIL_SCRIPT_FILE" ] && [ -f "$UTIL_SCRIPT_FILE" ]; then
-#  . $UTIL_SCRIPT_FILE
-#fi
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-
-# determine if we are installing as root or non-root
-if [ "$(whoami)" == "root" ]; then
-  # create a mtwilson user if there isn't already one created
-  MTWILSON_USERNAME=${MTWILSON_USERNAME:-mtwilson}
-  if ! getent passwd $MTWILSON_USERNAME >/dev/null 2>&1; then
-    useradd --comment "Mt Wilson" --home $MTWILSON_HOME --system --shell /bin/false $MTWILSON_USERNAME
-    usermod --lock $MTWILSON_USERNAME
-    # note: to assign a shell and allow login you can run "usermod --shell /bin/bash --unlock $MTWILSON_USERNAME"
-  fi
-else
-  # already running as mtwilson user
-  MTWILSON_USERNAME=$(whoami)
-  echo_warning "Running as $MTWILSON_USERNAME; if installation fails try again as root"
-  if [ ! -w "$MTWILSON_HOME" ] && [ ! -w $(dirname $MTWILSON_HOME) ]; then
-    export MTWILSON_HOME=$(cd ~ && pwd)
-  fi
-  echo_warning "Installing as $MTWILSON_USERNAME into $MTWILSON_HOME"  
-fi
 
 #If user is non root make sure all prereq directories are created and owned by nonroot user
 if [ "$(whoami)" != "root" ]; then
@@ -178,32 +170,49 @@ if which mtwilson; then
   mtwilson stop
 fi
 
-if [ -L /etc/intel/cloudsecurity ] && [ "$(whoami)" == "root" ]; then
-  echo "Deleting existing link: /etc/intel/cloudsecurity"
-  rm /etc/intel/cloudsecurity
+# if upgrading as non-root user, admin must grant read/write permission to /etc/intel/clousecurity before running installer
+if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/clousecurity ]; then
+  echo "Prior configuration exists:" >>$INSTALL_LOG_FILE
+  ls -l /etc/intel >>$INSTALL_LOG_FILE
+  if [ -w /etc/intel/cloudsecurity ]; then
+    echo "Migrating configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION" >>$INSTALL_LOG_FILE
+    mkdir -p $MTWILSON_CONFIGURATION
+    cp -r /etc/intel/cloudsecurity/* $MTWILSON_CONFIGURATION
+    chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $MTWILSON_CONFIGURATION
+    rm -rf /etc/intel/cloudsecurity
+    ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+  else
+    echo_failure "Cannot migrate configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
+    exit 1
+  fi
+else
+  mkdir -p $MTWILSON_CONFIGURATION
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot create directory: $MTWILSON_CONFIGURATION"
+    exit 1
+  fi
+  ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+  if [ $? -ne 0 ]; then
+    echo_failure "Cannot link configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
+    exit 1
+  fi
 fi
+
+
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
 export MTWILSON_OPT_INTEL=/opt/intel 
 # If configuration is already in /etc/intel/cloudsecurity (upgrade or reinstall)
 # then symlink /opt/mtwilson/configuration -> /etc/intel/cloudsecurity 
-if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/cloudsecurity ] && [ "/etc/intel/cloudsecurity" != "$MTWILSON_CONFIGURATION" ]; then
-  echo "Creating symlink from $MTWILSON_CONFIGURATION to existing configuration in /etc/intel/cloudsecurity"
-  mkdir -p $(dirname $MTWILSON_CONFIGURATION)
-  if [ $? -ne 0 ]; then
-    echo_failure "Cannot create directory: $(dirname $MTWILSON_CONFIGURATION)"
-    exit 1
-  fi
-  ln -s /etc/intel/cloudsecurity $MTWILSON_CONFIGURATION
-  if [ $? -ne 0 ]; then
-    echo_failure "Cannot create symlink: $MTWILSON_CONFIGURATION -> /etc/intel/cloudsecurity"
-    exit 1
-  fi
-fi
 
 # If configuration is in /opt/mtwilson/configuration and there is no symlink
 # in /etc/intel/cloudsecurity then we create one now
 if [ -d "$MTWILSON_CONFIGURATION" ] && [ ! -L "$MTWILSON_CONFIGURATION" ] && [ "/etc/intel/clousecurity" != "$MTWILSON_CONFIGURATION" ] && [ ! -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/cloudsecurity ]; then
   ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
+fi
+
+# Check for incorrect link and remove it 
+if [ -L "$MTWILSON_CONFIGURATION/cloudsecurity" ]; then
+  rm "$MTWILSON_CONFIGURATION/cloudsecurity"
 fi
 
 # ensure application directories exist (chown will be repeated near end of this script, after setup)
@@ -240,18 +249,12 @@ mtwilson_backup_repository() {
 mtwilson_backup_configuration
 mtwilson_backup_repository
 
-if [[ -d "/etc/intel/cloudsecurity" ]]; then
-  rm -rf "/etc/intel/cloudsecurity"
-fi
-
 # create application directories (chown will be repeated near end of this script, after setup)
 for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_BIN $MTWILSON_JAVA $MTWILSON_SERVICE_PROPERTY_FILES  $MTWILSON_OPT_INTEL; do
   mkdir -p $directory
   chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
   chmod 700 $directory
 done
-
-ln -s "/etc/intel/cloudsecurity" "$MTWILSON_CONFIGURATION"
 
 # store directory layout in env file
 echo "# $(date)" > $MTWILSON_ENV/mtwilson-layout
