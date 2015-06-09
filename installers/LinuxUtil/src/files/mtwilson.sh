@@ -615,11 +615,10 @@ case "$1" in
             # rm -rf /usr/local/share/mtwilson
             remove_startup_script "mtwilson"
         else
-          echo_warning "You must be root to remove /opt/intel/cloudsecurity"
-          echo_warning "You must be root to remove /opt/mtwilson"
-          echo_warning "You must be root to remove mtwilson script"
-          echo_warning "You must be root to remove /etc/intel/cloudsecurity"
+          echo_warning "You must be root to remove directories: /etc/intel/cloudsecurity, /opt/intel/cloudsecurity, /opt/mtwilson"
+          echo_warning "You must be root to remove mtwilson startup script"
         fi
+        rm -rf /opt/mtwilson/* 2>/dev/null  #for non-root user; can't delete $HOME
         # configuration files
         #echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
         #rm -rf /etc/intel/cloudsecurity

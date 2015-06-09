@@ -3,6 +3,26 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
+
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
+echo "ATTESTATION SERVICE setup.sh" >>$INSTALL_LOG_FILE
+
+# this script is only run as part of the larger installation, so
+# the following variables must be defined. exit early if there is
+# a problem.
+if [ -z "$MTWILSON_HOME" ]; then
+  echo_failure "Missing environment variable: MTWILSON_HOME"
+  exit 1
+fi
+if [ -z "$MTWILSON_USERNAME" ]; then
+  echo_failure "Missing environment variable: MTWILSON_USERNAME"
+  exit 1
+fi
+
 # SCRIPT CONFIGURATION:
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=attestation-service
@@ -14,11 +34,7 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
-# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 
 # if there's already a previous version installed, uninstall it
@@ -42,6 +58,7 @@ mkdir -p "${package_dir}"
 chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "${package_dir}"
 
 # select appropriate war file
 if using_glassfish; then
@@ -84,7 +101,6 @@ cp asctl.sh /opt/mtwilson/bin/asctl
 chmod +x /opt/mtwilson/bin/asctl
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
-chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME /opt/mtwilson/bin/
 
 /opt/mtwilson/bin/asctl setup
 
