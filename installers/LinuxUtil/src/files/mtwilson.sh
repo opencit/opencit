@@ -67,8 +67,8 @@ export MTWILSON_LOGS=${MTWILSON_LOGS:-$MTWILSON_HOME/logs}
 
 # SCRIPT CONFIGURATION:
 #share_dir=/usr/local/share/mtwilson/util
-apiclient_dir=/opt/mtwilson/share/apiclient
 #setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+apiclient_dir=/opt/mtwilson/share/apiclient
 setupconsole_dir=/opt/mtwilson/java
 apiclient_java=${apiclient_dir}/java
 env_dir=/opt/mtwilson/share/env
