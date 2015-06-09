@@ -234,7 +234,7 @@ trustagent_uninstall() {
     cp -r /opt/trustagent/configuration/* /tmp/trustagent.configuration.$datestr
 	rm -f /usr/local/bin/tagent
     if [ -n "$TRUSTAGENT_HOME" ] && [ -d "$TRUSTAGENT_HOME" ]; then
-      rm -rf $TRUSTAGENT_HOME/*
+      rm -rf $TRUSTAGENT_HOME
     fi
 }
 

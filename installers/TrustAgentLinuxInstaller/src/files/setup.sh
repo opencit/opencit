@@ -183,9 +183,7 @@ TRUSTAGENT_V_1_2_HOME=/opt/intel/cloudsecurity/trustagent
 TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
 package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
-logfile=$TRUSTAGENT_LOGS/install.log
 
-#java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
 APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip authbind"
 # commented out from apt packages: libcurl4-openssl-dev 
@@ -224,7 +222,7 @@ JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 ZIP_PACKAGE=`ls -1 trustagent*.zip 2>/dev/null | tail -n 1`
 
 unzip -DD -o $ZIP_PACKAGE -d "$TRUSTAGENT_HOME" >> $logfile  2>&1
-chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME"
+chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME "$TRUSTAGENT_HOME" 2>>$logfile
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
@@ -323,17 +321,11 @@ JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
 mkdir -p $JAVA_HOME
 #java_install $JAVA_PACKAGE
 java_install_in_home $JAVA_PACKAGE
-java_detect
-if java_ready_report; then
-  # store java location in env file
-  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_CMD=$java" >> $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $TRUSTAGENT_ENV/trustagent-java
-else
-  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
-  exit 1
-fi
+# store java location in env file
+echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
+echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
+echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $TRUSTAGENT_ENV/trustagent-java
+echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $TRUSTAGENT_ENV/trustagent-java
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
@@ -564,7 +556,8 @@ fi
 
 # Ensure we have given trustagent access to its files
 for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_VAR $TRUSTAGENT_LOGS; do
-  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
+  echo "chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory" >>$logfile
+  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory 2>>$logfile
 done
 
 
@@ -589,7 +582,8 @@ tagent start >>$logfile  2>&1
 
 # optional: register tpm password with mtwilson so pull provisioning can
 #           be accomplished with less reboots (no ownership transfer)
-prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD}
+#           default is not to register the password.
+prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD:-no}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$REGISTER_TPM_PASSWORD" == "yes" ]]; then 
 #	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
 	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
@@ -616,3 +610,5 @@ if [ "$(whoami)" == "root" ]; then
   fi
 fi
 
+# remove the temporary setup env file
+rm -f $TRUSTAGENT_ENV/trustagent-setup
