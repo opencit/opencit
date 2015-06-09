@@ -3,7 +3,7 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-export MTWILSON_HOME=${MTWILSON_HOME:/opt/mtwilson}
+export MTWILSON_HOME=${MTWILSON_HOME:-/opt/mtwilson}
 
 if [ -f functions.sh ]; then . functions.sh; else echo "Missing file: functions.sh"; exit 1; fi
 

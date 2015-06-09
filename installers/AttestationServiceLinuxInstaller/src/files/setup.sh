@@ -39,9 +39,10 @@ WAR_PACKAGE_JETTY=`ls -1 mtwilson-jetty.war 2>/dev/null | tail -n 1`
 # copy application files to /opt
 mkdir -p "${package_dir}"
 #mkdir -p "${package_dir}"/database
-chmod 777 "${package_dir}"
+chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "$package_dir"
 
 # select appropriate war file
 if using_glassfish; then
@@ -57,7 +58,8 @@ cp "audit-handler.properties" "${package_dir}/audit-handler.properties.example"
 
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
-chmod 777 "${intel_conf_dir}"
+chmod 700 "${intel_conf_dir}"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "$intel_conf_dir"
 if [ -f "${package_config_filename}" ]; then
   echo_warning "Configuration file ${package_name}.properties already exists"  >> $INSTALL_LOG_FILE
 else

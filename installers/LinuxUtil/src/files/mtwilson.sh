@@ -302,10 +302,10 @@ all_status() {
 setup_env() {
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
-  java_detect > /dev/null
-  echo "JAVA_HOME=$JAVA_HOME"
-  echo "java_bindir=$java_bindir"
-  echo "java=$java"
+#  java_detect > /dev/null
+#  echo "JAVA_HOME=$JAVA_HOME"
+#  echo "java_bindir=$java_bindir"
+#  echo "java=$java"
   #export JAVA_HOME java_bindir java
   if using_mysql; then
     mysql_detect > /dev/null
@@ -383,7 +383,7 @@ case "$1" in
         if [ -f $MTWILSON_PID_WAIT_FILE ]; then rm $MTWILSON_PID_WAIT_FILE; fi
         ;;
   stop)
-        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
         touch $MTWILSON_PID_WAIT_FILE
         if using_glassfish; then
           glassfish_stop
