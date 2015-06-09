@@ -13,20 +13,11 @@ set trustagent_cmd=%package_dir%\bin\tagent.cmd
 
 set logfile=%package_dir%\log\install.log
 
-echo. %package_name%
-echo. %package_dir%
-echo. %intel_conf_dir%
-echo. %package_config_filename%
-echo. %package_env_filename%
-echo. %package_version_filename%
-echo. %ASSET_TAG_SETUP%
-echo. %logfile%
-echo. %trustagent_cmd%
-
 REM # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+ECHO. ==Configure trust agent version and environment variables==
 cd %package_dir%
-IF EXIST version (
-  echo. "version file found"
+IF EXIST "%package_dir%/version" (
+  echo. "Version file found"
   for /f  "tokens=*" %%a in (version) do (
     set %%a
   )
@@ -34,26 +25,27 @@ IF EXIST version (
   echo. "Missing file: version"
 )
 
-IF EXIST trustagent.env (
-  echo. "trustagent file found"
-  for /f  "tokens=*" %%a in (trustagent.env) do (
-    echo %%a
+ECHO. ==Configure trust agent environment variables from trustagent.env
+IF EXIST "%package_dir%\trustagent.env" (
+  echo. "trustagent.env found"
+  for /f  "USEBACKQ tokens=*" %%a in ("%package_dir%\trustagent.env") do (
+    echo. %%a
     set %%a
   )
 ) ELSE (
   echo. "Missing file: trustagent.env"
 )
-echo. %MTWILSON_API_USERNAME%
 
 REM # this is a list of all the variables we expect to find in trustagent.env
 set TRUSTAGENT_ENV_VARS=MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USERNAME MTWILSON_API_PASSWORD TPM_OWNER_SECRET TPM_SRK_SECRET AIK_SECRET AIK_INDEX TPM_QUOTE_IPV4 TRUSTAGENT_HTTP_TLS_PORT TRUSTAGENT_TLS_CERT_DN TRUSTAGENT_TLS_CERT_IP TRUSTAGENT_TLS_CERT_DNS TRUSTAGENT_KEYSTORE_PASSWORD DAA_ENABLED TRUSTAGENT_PASSWORD JAVA_REQUIRED_VERSION HARDWARE_UUID
 
 REM export_vars $TRUSTAGENT_ENV_VARS
 FOR %%a in (%TRUSTAGENT_ENV_VARS%) do (
-  echo. %%a
+  ECHO. %%a
 )
 
 REM # before we start, clear the install log
+ECHO. ==Before start, clear the installation log file %logfile%==
 > "%logfile%" echo. %date%
 >> "%logfile%" echo. %time%
 
@@ -73,11 +65,11 @@ REM auto_install "TrustAgent requirements" "APPLICATION"
 REM ##### backup old files
 
 REM # backup configuration directory before unzipping our package
-IF EXIST %intel_conf_dir%\NUL (
-  echo. "%package_dir%.%time%""
+ECHO. ==Backup configuration directory==
+IF EXIST "%intel_conf_dir%\" (
+  ECHO. backed up to file "%intel_conf_dir%.bak"
   xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y
 )
-
 
 REM FIXIT ##### stop existing trust agent if running
 REM # before we stop the trust agent, remove it from the monit config (if applicable)
@@ -109,18 +101,20 @@ REM fi
 REM FIXIT java_install $JAVA_PACKAGE
 
 REM patch java.security file
-if exist %JAVA_HOME%\jre\lib\security\java.security (
-  echo "Replacing java.security file, existing file will be backed up"
+ECHO. ==Patch java.security file==
+if exist "%JAVA_HOME%\jre\lib\security\java.security" (
+  echo. "Replacing java.security file, existing file will be backed up"
   copy "%JAVA_HOME%\jre\lib\security\java.security" "%JAVA_HOME%\jre\lib\security\java.security.old"
-  copy "%TRUSTAGENT_HOME%\java.security" "%JAVA_HOME%\jre\lib\security\java.security"
+  copy "%package_dir%\java.security" "%JAVA_HOME%\jre\lib\security\java.security"
 )
 
 REM  # create trustagent.version file
+echo. create trustagent.version file
 > "%package_version_filename%"  echo. "# Installed Trust Agent on %date% %time%"
 >> "%package_version_filename%"  echo. "TRUSTAGENT_VERSION=%VERSION%"
 >> "%package_version_filename%"  echo "TRUSTAGENT_RELEASE=\"%BUILD%\""
 
-echo. "Registering tagent in start up"
+echo. ==Registering tagent in start up==
 REM register_startup_script /usr/local/bin/tagent tagent 21 >>$logfile 2>&1
 
 REM fix_existing_aikcert() {
@@ -139,6 +133,7 @@ REM fix_existing_aikcert
 
 REM # collect all the localhost ip addresses and make the list available as the
 REM # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
+ECHO. ==Find the IP address of the host==
 set DEFAULT_TRUSTAGENT_TLS_CERT_IP=
 for /f "tokens=14 delims= " %%a in ('ipconfig ^| findstr "IPv4"') do (
   IF "%DEFAULT_TRUSTAGENT_TLS_CERT_IP%"=="" (
@@ -151,22 +146,26 @@ for /f "tokens=14 delims= " %%a in ('ipconfig ^| findstr "IPv4"') do (
 IF "%TRUSTAGENT_TLS_CERT_IP%"=="" (
   set TRUSTAGENT_TLS_CERT_IP=%DEFAULT_TRUSTAGENT_TLS_CERT_IP%
 )
-echo. "TA IP Address: %TRUSTAGENT_TLS_CERT_IP%
+echo.   TA IP Address: %TRUSTAGENT_TLS_CERT_IP%
 
 REM # before running any tagent commands update the extensions cache file
-"%trustagent_cmd%" setup update-extensions-cache-file --force
+ECHO. ==Update the extensions cache file before running any tagent commands 
+>>"%logfile%" call "%trustagent_cmd%" setup update-extensions-cache-file --force
 
 REM # create a trustagent username "mtwilson" with no password and all privileges
 REM # which allows mtwilson to access it until mtwilson UI is updated to allow
 REM # entering username and password for accessing the trust agent
-"%trustagent_cmd%" password mtwilson --nopass *:*
+ECHO. ==Create a trustagent username "mtwilson" with no password
+REM call "%trustagent_cmd%" password mtwilson --nopass *:*
 
 REM # give tagent a chance to do any other setup (such as the .env file and pcakey)
 REM # and make sure it's successful before trying to start the trust agent
 REM # NOTE: only the output from start-http-server is redirected to the logfile;
-REm #       the stdout from the setup command will be displayed
-"%trustagent_cmd%" setup
->>%logfile% "%trustagent_cmd%" start
+REM #       the stdout from the setup command will be displayed
+ECHO. ==Call trustagent setup
+>>"%logfile%" call "%trustagent_cmd%" setup
+ECHO. ==Start trustagent service
+call "%trustagent_cmd%" start
 
 REM # optional: register tpm password with mtwilson so pull provisioning can
 REM #           be accomplished with less reboots (no ownership transfer)

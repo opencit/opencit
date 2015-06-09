@@ -10,7 +10,9 @@ REM ############################################################################
 
 
 set TRUSTAGENT_HOME=C:\Program Files (x86)\Intel\trustagent
-set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%
+set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
+set logfile=%TRUSTAGENT_HOME%\log\trustagent.log
+
 
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
 set TRUSTAGENT_JAVA=%TRUSTAGENT_HOME%\java
@@ -19,27 +21,31 @@ set TRUSTAGENT_ENV=%TRUSTAGENT_HOME%\env
 set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
 set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_VAR%\log\http.log
-set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
+REM set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
+set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate
 REM set TRUSTAGENT_TPM_TASKS=create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership
 REM set TRUSTAGENT_START_TASKS=create-keystore-password create-tls-keypair create-admin-user take-ownership
 set TRUSTAGENT_TPM_TASKS=create-aik-secret
 set TRUSTAGENT_START_TASKS=create-keystore-password create-tls-keypair create-admin-user
 REM set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=create-binding-key certify-binding-key create-signing-key certify-signing-key
 set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=
-REM set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user %TRUSTAGENT_TPM_TASKS% %TRUSTAGENT_AUTHORIZE_TASKS% %TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS%
-set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file
+set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user %TRUSTAGENT_TPM_TASKS% %TRUSTAGENT_AUTHORIZE_TASKS% %TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS%
+REM set TRUSTAGENT_SETUP_TASKS=update-extensions-cache-file create-keystore-password create-tls-keypair create-admin-user %TRUSTAGENT_TPM_TASKS%
 
-:: # load environment variables (these may override the defaults set above)
-if exist %TRUSTAGENT_ENV%\NUL (
-::  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
-::  for env_file in $TRUSTAGENT_ENV_FILES; do
-::    . $env_file
-::  done
+ECHO. ==Running tagent service==
+REM # load environment variables (these may override the defaults set above)
+if exist "%TRUSTAGENT_ENV%\" (
+REM  TRUSTAGENT_ENV_FILES=$(ls -1 $TRUSTAGENT_ENV/*)
+REM  for env_file in $TRUSTAGENT_ENV_FILES; do
+REM    . $env_file
+REM  done
   for /f  "delims=" %%a in ('dir "%TRUSTAGENT_ENV%" /b') do (
-  echo. %%a
-  cd "%TRUSTAGENT_ENV%"
-  call %%a
-  echo. %TEST_TA%
+    echo. hello0
+    echo. %%a
+    cd "%TRUSTAGENT_ENV%"
+    call %%a
+    echo. %TEST_TA%
+  )
 )
 
 REM # not including configure-from-environment because we are running it always before the user-chosen tasks
@@ -55,31 +61,27 @@ REM # generated variables
 for /f  "delims=" %%a in ('dir "%TRUSTAGENT_JAVA%" /s /b') do (
   set TA_JARS=%%a;!TA_JARS!
 )
-
-set CLASSPATH=%TRUSTAGENT_JAVA%\*
-
 REM set CLASSPATH=%TA_JARS%
 REM echo %CLASSPATH%
 
-echo. %JAVA_HOME%
+set CLASSPATH=%TRUSTAGENT_JAVA%\*
+REM echo. %JAVA_HOME%
 
-REM Before running any tagent commands update the extensions cache file 
-REM java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment update-extensions-cache-file --force
+REM parsing the command arguments
+set wcommand=%1
+set cmdparams=
+for /f "usebackq tokens=1*" %%i in (`echo %*`) DO @ set cmdparams=%%j
+REM echo. Running command: %wcommand% with %cmdparams%
 
-REM create a trustagent username "mtwilson" with no password and all privileges
-REM which allows mtwilson to access it until mtwilson UI is updated to allow
-REM entering username and password for accessing the trust agent
-REM /usr/local/bin/tagent password mtwilson --nopass *:*
-
-if "%1"=="start" (
-  call:trustagent_start BBBB
-) ELSE IF "%1"=="stop" (
+if "%wcommand%"=="start" (
+  call:trustagent_start
+) ELSE IF "%wcommand%"=="stop" (
   call:trustagent_stop
-) ELSE IF "%1"=="setup" (
-  call:trustagent_setup
-) ELSE IF "%1"=="authorize" (
+) ELSE IF "%wcommand%"=="setup" (
+  call:trustagent_setup %cmdparams%
+) ELSE IF "%wcommand%"=="authorize" (
   call:trustagent_authorize
-) ELSE IF "%1"=="help" (
+) ELSE IF "%wcommand%"=="help" (
   call:print_help
 ) ELSE (
   IF "%*"=="" (
@@ -93,7 +95,8 @@ GOTO:EOF
 
 REM functions
 :trustagent_start
-  echo. java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main start-http-server
+  echo. Starting trustagent service
+  >>"%logfile%" java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main start-http-server
 GOTO:EOF
 
 :trustagent_stop
@@ -102,8 +105,7 @@ GOTO:EOF
 GOTO:EOF
 
 :trustagent_setup
-  echo. setup the trust agent
-  echo. it could do a lot of things
+  echo.  Setup the trust agent
   set HARDWARE_UUID=
   for /f  "USEBACKQ" %%a in (`wmic csproduct get UUID /VALUE ^| findstr /C:"UUID"`) do ( 
     set _tmpvar=%%a
@@ -118,8 +120,7 @@ GOTO:EOF
       set tasklist=%TRUSTAGENT_SETUP_TASKS% --force
   )
   echo. %tasklist%
-  REM java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
-  exit /b
+  java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main setup configure-from-environment %tasklist%
 GOTO:EOF
 
 :trustagent_authorize
