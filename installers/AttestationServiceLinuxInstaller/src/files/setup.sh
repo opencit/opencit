@@ -84,7 +84,8 @@ fi
 mkdir -p /opt/mtwilson/bin
 cp asctl.sh /opt/mtwilson/bin/asctl
 chmod +x /opt/mtwilson/bin/asctl
-
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "$intel_conf_dir"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "$package_dir"
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME /opt/mtwilson/bin/
 
 /opt/mtwilson/bin/asctl setup
