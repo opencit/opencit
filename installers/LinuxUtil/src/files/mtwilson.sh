@@ -48,7 +48,7 @@ fi
 # if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $MTWILSON_USERNAME MTWILSON_USERNAME=$MTWILSON_USERNAME MTWILSON_PASSWORD=$MTWILSON_PASSWORD MTWILSON_HOME=$MTWILSON_HOME MTWILSON_SUDO=true mtwilson $*
+  (cd $MTWILSON_HOME && sudo -u $MTWILSON_USERNAME MTWILSON_USERNAME=$MTWILSON_USERNAME MTWILSON_PASSWORD=$MTWILSON_PASSWORD MTWILSON_HOME=$MTWILSON_HOME MTWILSON_SUDO=true mtwilson $*)
   exit $?
 fi
 
@@ -300,6 +300,8 @@ all_status() {
 setup_env() {
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
+  echo "MTWILSON_HOME=$MTWILSON_HOME"
+  echo "MTWILSON_USERNAME=$MTWILSON_USERNAME"
 #  java_detect > /dev/null
 #  echo "JAVA_HOME=$JAVA_HOME"
 #  echo "java_bindir=$java_bindir"
