@@ -64,7 +64,7 @@ public class HostInfoCmd implements ICommand {
      */
     
     private void getOsAndVersion() throws TAException, IOException {
-        CommandResult commandResult = CommandUtil.runCommand("lsb_release -a");
+        CommandResult commandResult = CommandUtil.runCommand("tagent system-info lsb_release -a");
         if (commandResult != null && commandResult.getStdout() != null) {
             String[] result = commandResult.getStdout().split("\n");
             for (String str : result) {
@@ -101,7 +101,7 @@ public class HostInfoCmd implements ICommand {
      * response of dmidecode -s bios-vendor -> S5500.86B.01.00.0060.090920111354
      */
     private void getBiosAndVersion() throws TAException, IOException {
-        CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
+        CommandResult result = CommandUtil.runCommand("tagent system-info dmidecode -s bios-vendor");
         List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
@@ -113,7 +113,7 @@ public class HostInfoCmd implements ICommand {
         }
         log.debug("Bios OEM: " + context.getBiosOem());
 
-        CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
+        CommandResult result2 = CommandUtil.runCommand("tagent system-info dmidecode -s bios-version");
         resultList = Arrays.asList(result2.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
@@ -136,7 +136,7 @@ public class HostInfoCmd implements ICommand {
 
     private void getVmmAndVersion() throws TAException, IOException {
 
-        CommandResult commandResult = CommandUtil.runCommand("virsh version");
+        CommandResult commandResult = CommandUtil.runCommand("tagent system-info virsh version");
         if (commandResult != null && commandResult.getStdout() != null) {
             String[] result = commandResult.getStdout().split("\n");
 
@@ -172,7 +172,7 @@ public class HostInfoCmd implements ICommand {
      */
        private void getProcessorInfo() throws TAException, IOException {
            
-            CommandResult commandResult = CommandUtil.runCommand("dmidecode --type processor");
+            CommandResult commandResult = CommandUtil.runCommand("tagent system-info dmidecode --type processor");
             if (commandResult != null && commandResult.getStdout() != null) {
                 String[] result = commandResult.getStdout().split("\n");
                 String processorInfo = "";
@@ -210,7 +210,7 @@ public class HostInfoCmd implements ICommand {
      * @throws IOException
      */
     public void getHostUUID() throws TAException, IOException {
-        CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
+        CommandResult result = CommandUtil.runCommand("tagent system-info dmidecode -s system-uuid");
         // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
         List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {

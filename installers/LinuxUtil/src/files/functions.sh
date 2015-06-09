@@ -153,20 +153,19 @@ function getUserProfileFile()
     "suse" )
         file=~/.bash_profile ;;    
     esac
-	if [ ! -f $file ]; then
-	   touch $file
-	fi
+	#if [ ! -f $file ]; then
+	#   touch $file
+	#fi
 	echo $file
 }
 
 function appendToUserProfileFile()
 {
     file=$(getUserProfileFile)
-	if grep -q  "$1" $file
-	then
-	   echo "$1 Already there in user profile"
-	else
+    if [ ! -f $file ] || ! grep -q  "$1" $file; then
        echo "$1" >> $file
+	else
+	   echo "$1 Already there in user profile"
     fi
 }
 
@@ -3515,9 +3514,9 @@ java_install_in_home() {
   fi
 
   # unpack the java archive
-    is_targz=`echo $java_package | grep ".tar.gz$"`
-    is_gzip=`echo $java_package | grep ".gz$"`
-    is_bin=`echo $java_package | grep ".bin$"`
+    is_targz=`echo $java_package | grep "\.tar.gz$"`
+    is_gzip=`echo $java_package | grep "\.gz$"`
+    is_bin=`echo $java_package | grep "\.bin$"`
     javaname=`echo $java_package | awk -F . '{ print $1 }'`
     if [ -n "$is_targz" ]; then
       tar xzvf $java_package 2>&1 >> $INSTALL_LOG_FILE

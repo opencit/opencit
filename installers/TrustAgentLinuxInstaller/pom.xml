@@ -55,6 +55,7 @@
       <version>${project.version}</version>
       <type>sh</type>
     </dependency>	
+    <!--
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>jdk</artifactId>
@@ -62,6 +63,15 @@
       <type>bin</type>
       <classifier>linux-x64</classifier>
     </dependency>	
+    -->
+    <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>jdk</artifactId>
+      <version>1.7.0_51</version>
+      <type>tar.gz</type>
+      <classifier>linux-x64</classifier>
+    </dependency>	
+    
   </dependencies>
             
   <build>
@@ -96,6 +106,7 @@
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>functions</destFileName>
                 </artifactItem>
+                <!--
                 <artifactItem>
                   <groupId>com.oracle</groupId>
                   <artifactId>jdk</artifactId>
@@ -105,6 +116,17 @@
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>jdk-1.7.0_51-linux-x64.bin</destFileName>
                 </artifactItem>
+                -->
+                <artifactItem>
+      <groupId>com.oracle</groupId>
+      <artifactId>jdk</artifactId>
+      <version>1.7.0_51</version>
+      <type>tar.gz</type>
+      <classifier>linux-x64</classifier>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
+                  <destFileName>jdk-1.7.0_51-linux-x64.tar.gz</destFileName>
+                </artifactItem>
+                
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
               <overWriteReleases>false</overWriteReleases>
