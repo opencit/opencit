@@ -48,7 +48,8 @@ fi
 # if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
-  (cd $MTWILSON_HOME && sudo -u $MTWILSON_USERNAME MTWILSON_USERNAME=$MTWILSON_USERNAME MTWILSON_PASSWORD=$MTWILSON_PASSWORD MTWILSON_HOME=$MTWILSON_HOME MTWILSON_SUDO=true mtwilson $*)
+  export MTWILSON_SUDO=true
+  (cd $MTWILSON_HOME && sudo -u $MTWILSON_USERNAME -E mtwilson $*)
   exit $?
 fi
 
