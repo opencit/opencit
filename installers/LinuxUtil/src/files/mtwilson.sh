@@ -628,7 +628,7 @@ case "$1" in
         # data files
         # control scripts
         echo "Removing Mt Wilson control scripts..."
-		if [ -w "/usr/local/bin/file" ]; then
+		if [ "$(whoami)" == "root" ]; then
             echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
 		else
 		    echo_warning "You must be root to remove the /usr/local/bin/mtwilson file"
