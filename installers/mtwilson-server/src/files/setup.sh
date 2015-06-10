@@ -171,7 +171,9 @@ if which mtwilson; then
 fi
 
 # if upgrading as non-root user, admin must grant read/write permission to /etc/intel/clousecurity before running installer
-if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/clousecurity ]; then
+if [ -L $MTWILSON_CONFIGURATION ]; then rm -f $MTWILSON_CONFIGURATION; fi
+if [ -L /etc/intel/cloudsecurity ]; then rm -f /etc/intel/cloudsecurity; fi
+if [ -d /etc/intel/cloudsecurity ]; then
   echo "Prior configuration exists:" >>$INSTALL_LOG_FILE
   ls -l /etc/intel >>$INSTALL_LOG_FILE
   if [ -w /etc/intel/cloudsecurity ]; then
@@ -185,7 +187,7 @@ if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/clousecurity ]; then
     echo_failure "Cannot migrate configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
     exit 1
   fi
-else
+else  
   mkdir -p $MTWILSON_CONFIGURATION
   if [ $? -ne 0 ]; then
     echo_failure "Cannot create directory: $MTWILSON_CONFIGURATION"
