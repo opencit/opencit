@@ -1816,23 +1816,26 @@ if postgres_server_detect ; then
   else
     echo "Creating database..."
     local detect_superuser="select rolcreatedb from pg_authid where rolname = '$POSTGRES_USERNAME'"
-    user_is_superuser=$(psql postgres -c "$detect_superuser" 2>&1 | grep "(1 row)")
-    if [ -z "$user_is_superuser" ]; then
-      if [ "$(whoami)" == "root" ]; then
+    if [ "$(whoami)" == "root" ]; then
+      user_is_superuser=$(sudo -u postgres psql postgres -c "$detect_superuser" 2>&1 | grep "(1 row)")
+      if [ -z "$user_is_superuser" ]; then
         local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
-        local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
         sudo -u postgres psql postgres -c "${create_user_sql}" 1>/dev/null
+        local superuser_sql="ALTER USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH SUPERUSER;"
         sudo -u postgres psql postgres -c "${superuser_sql}" 1>/dev/null
-      else
-        echo_failure "You must make '$POSTGRES_USERNAME' postgres user a superuser as root before proceeding"
+        local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
+        sudo -u postgres psql postgres -c "${create_sql}" 1>/dev/null
+        local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
+        sudo -u postgres psql postgres -c "${grant_sql}" 1>/dev/null
+      fi
+    else
+      user_is_superuser=$(psql postgres -U "${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}" -c "$detect_superuser" 2>&1 | grep "(1 row)")
+      if [ -z "$user_is_superuser" ]; then
+        echo_failure "You must make '$POSTGRES_USERNAME' postgres user a superuser as root"
         return 1
       fi
+      # add additional checks here? is db created? does user have privilege for db?
     fi
-
-    local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
-    local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
-    psql postgres -c "${create_sql}" 1>/dev/null
-    psql postgres -c "${grant_sql}" 1>/dev/null
   fi
 
   if [ "$(whoami)" == "root" ]; then

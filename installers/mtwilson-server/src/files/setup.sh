@@ -191,6 +191,7 @@ else
     echo_failure "Cannot create directory: $MTWILSON_CONFIGURATION"
     exit 1
   fi
+  mkdir -p /etc/intel
   ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
   if [ $? -ne 0 ]; then
     echo_failure "Cannot link configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
@@ -200,7 +201,7 @@ fi
 
 
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
-export MTWILSON_OPT_INTEL=/opt/intel 
+export MTWILSON_OPT_INTEL=/opt/intel
 # If configuration is already in /etc/intel/cloudsecurity (upgrade or reinstall)
 # then symlink /opt/mtwilson/configuration -> /etc/intel/cloudsecurity 
 
@@ -772,6 +773,10 @@ elif using_postgres; then
   if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
     postgres_create_database
+    if [ $? -ne 0 ]; then
+      echo_failure "Cannot create database"
+      exit 1
+    fi
     #postgres_restart >> $INSTALL_LOG_FILE
     #sleep 10
     #export is_postgres_available postgres_connection_error
