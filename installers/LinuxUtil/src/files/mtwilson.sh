@@ -230,14 +230,9 @@ Detected the following options on this server:"
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
     fi
-	if [ $(whoami) == "root" ]; then 
-	    pgpass_file=~/.pgpass
-	else
-	    pgpass_file=$MTWILSON_HOME/.pgpass
-	fi
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $pgpass_file
-    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $pgpass_file
-    chmod 0600 $pgpass_file
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
   fi
 
   # Attestation service auto-configuration

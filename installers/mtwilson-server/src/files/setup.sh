@@ -675,6 +675,7 @@ elif using_postgres; then
   postgres_installed=1
   touch ${MTWILSON_HOME}/.pgpass
   chmod 0600 ${MTWILSON_HOME}/.pgpass
+  chown ${MTWILSON_USERNAME}:${MTWILSON_USERNAME} ${MTWILSON_HOME}/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
     PGPASS_HOSTNAME=localhost
