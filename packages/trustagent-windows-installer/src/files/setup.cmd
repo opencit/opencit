@@ -159,7 +159,7 @@ ECHO. ==Create a trustagent username "mtwilson" with no password
 >>"%logfile%" call "%trustagent_cmd%" password mtwilson --nopass *:*
 
 REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
-ECHO. ==Create correct shiro.ini
+ECHO. ==Copy shiro-win.ini to shiro.ini
 copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini"
 
 REM # give tagent a chance to do any other setup (such as the .env file and pcakey)
