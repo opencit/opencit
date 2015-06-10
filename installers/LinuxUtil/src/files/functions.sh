@@ -814,7 +814,7 @@ register_startup_script() {
   if [ -d /etc/init.d ]; then
     (
       cd /etc/init.d
-      if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
+      if [ -f "${startup_name}" ] || [ -L "${startup_name}" ]; then rm -f "${startup_name}"; fi
       ln -s "${absolute_filename}" "${startup_name}"
     )
   fi
