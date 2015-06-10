@@ -47,7 +47,7 @@ export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
   export MTWILSON_SUDO=true
-  sudo -u $MTWILSON_USERNAME -E mtwilson $*
+  sudo -u $MTWILSON_USERNAME -H -E mtwilson $*
   exit $?
 fi
 
@@ -230,14 +230,9 @@ Detected the following options on this server:"
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
     fi
-	if [ $(whoami) == "root" ]; then 
-	    pgpass_file=~/.pgpass
-	else
-	    pgpass_file=$MTWILSON_HOME/.pgpass
-	fi
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $pgpass_file
-    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $pgpass_file
-    chmod 0600 $pgpass_file
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
   fi
 
   # Attestation service auto-configuration

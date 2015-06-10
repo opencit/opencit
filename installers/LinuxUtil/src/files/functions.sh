@@ -218,6 +218,10 @@ echo_warning() {
 
 function validate_path_configuration() {
   local file_path="${1}"
+  if [ -z "$file_path" ]; then
+    echo_failure "Path is missing"
+    return 1
+  fi
   if [[ "$file_path" == *..* ]]; then
     echo_warning "Path specified is not absolute: $file_path"
   fi
@@ -237,6 +241,10 @@ function validate_path_configuration() {
 
 function validate_path_data() {
   local file_path="${1}"
+  if [ -z "$file_path" ]; then
+    echo_failure "Path is missing"
+    return 1
+  fi
   if [[ "$file_path" == *..* ]]; then
     echo_warning "Path specified is not absolute: $file_path"
   fi
@@ -255,6 +263,10 @@ function validate_path_data() {
 
 function validate_path_executable() {
   local file_path="${1}"
+  if [ -z "$file_path" ]; then
+    echo_failure "Path is missing"
+    return 1
+  fi
   if [[ "$file_path" == *..* ]]; then
     echo_warning "Path specified is not absolute: $file_path"
   fi
@@ -4008,15 +4020,11 @@ set_config_db_properties() {
 # Caller can set setupconsole_dir to the directory where jars are found; default provided by DEFAULT_MTWILSON_JAVA_DIR
 # Caller can set conf_dir to the directory where logback-stderr.xml is found; default provided by DEFAULT_MTWILSON_CONF_DIR
 call_setupcommand() {
-  if [ ! -f "/opt/mtwilson/log/mtwilson.log" ]; then
-    mkdir -p "/opt/mtwilson/log"
-    touch "/opt/mtwilson/log/mtwilson.log"
-  fi
   local java_lib_dir=${setupconsole_dir:-$DEFAULT_MTWILSON_JAVA_DIR}
   if no_java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${java_required_version:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=($java_lib_dir/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/log/mtwilson.log
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/logs/mtwilson.log
   return $?
 }
 
@@ -4028,7 +4036,7 @@ call_tag_setupcommand() {
   mainclass=com.intel.dcsg.cpg.console.Main
   local jvm_memory=2048m
   local jvm_maxperm=512m
-  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/log/mtwilson.log
+  $java -Xmx${jvm_memory} -XX:MaxPermSize=${jvm_maxperm} -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir:-$DEFAULT_MTWILSON_CONF_DIR}/logback-stderr.xml $mainclass $@ --ext-java=$java_lib_dir | grep -vE "^\[EL Info\]|^\[EL Warning\]" 2> /opt/mtwilson/logs/mtwilson.log
   return $?
 }
 

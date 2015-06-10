@@ -128,7 +128,7 @@ compile_aikqverify() {
 if [ `whoami` == "root" ]; then 
  if [ -f /usr/local/bin/asctl -o -L /usr/local/bin/asctl ]; then
   echo "Deleting existing binary or link: /usr/local/bin/asctl"
-  rm /usr/local/bin/asctl 
+  rm -f /usr/local/bin/asctl 
  fi
  ln -s /opt/mtwilson/bin/asctl /usr/local/bin/asctl
  aikqverify_install_prereq

@@ -171,7 +171,9 @@ if which mtwilson; then
 fi
 
 # if upgrading as non-root user, admin must grant read/write permission to /etc/intel/clousecurity before running installer
-if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/clousecurity ]; then
+if [ -L $MTWILSON_CONFIGURATION ]; then rm -f $MTWILSON_CONFIGURATION; fi
+if [ -L /etc/intel/cloudsecurity ]; then rm -f /etc/intel/cloudsecurity; fi
+if [ -d /etc/intel/cloudsecurity ]; then
   echo "Prior configuration exists:" >>$INSTALL_LOG_FILE
   ls -l /etc/intel >>$INSTALL_LOG_FILE
   if [ -w /etc/intel/cloudsecurity ]; then
@@ -185,7 +187,7 @@ if [ -d /etc/intel/cloudsecurity ] && [ ! -L /etc/intel/clousecurity ]; then
     echo_failure "Cannot migrate configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
     exit 1
   fi
-else
+else  
   mkdir -p $MTWILSON_CONFIGURATION
   if [ $? -ne 0 ]; then
     echo_failure "Cannot create directory: $MTWILSON_CONFIGURATION"
@@ -585,7 +587,7 @@ chmod 755 $MTWILSON_BIN/*
 # with a symlink to /opt/mtwilson/bin/mtwilson
 if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
   echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
-  rm /usr/local/bin/mtwilson
+  rm -f /usr/local/bin/mtwilson
 fi
 
 ## link /usr/local/bin/mtwilson -> /opt/mtwilson/bin/mtwilson
@@ -675,6 +677,7 @@ elif using_postgres; then
   postgres_installed=1
   touch ${MTWILSON_HOME}/.pgpass
   chmod 0600 ${MTWILSON_HOME}/.pgpass
+  chown ${MTWILSON_USERNAME}:${MTWILSON_USERNAME} ${MTWILSON_HOME}/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
     PGPASS_HOSTNAME=localhost
@@ -927,8 +930,10 @@ update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.propert
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
 if [ ! -z "$opt_portals" ]; then
-  MTWILSON_TAG_HTML5_DIR_TEMP=`find /opt/mtwilson/ -name tag`
-  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson/ -name tag`
+  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$DEFAULT_MTWILSON_TAG_HTML5_DIR}
+  echo "MTWILSON_TAG_HTML5_DIR: $MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
+  echo "DEFAULT_MTWILSON_TAG_HTML5_DIR: $DEFAULT_MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
   if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
 fi
 
@@ -1005,7 +1010,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
     $LOG_COMPRESS
     $LOG_DELAYCOMPRESS
     $LOG_COPYTRUNCATE
-}" > /opt/mtwilson/log/mtwilson.logrotate
+}" > /opt/mtwilson/logs/mtwilson.logrotate
 fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
