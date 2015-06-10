@@ -166,9 +166,17 @@ if [ $? -eq 0 ] && [ "$(whoami)" == "root" ] && [ -d /etc/monit/conf.d ]; then
 fi
 
 # if an existing mtwilson is already running, stop it while we install
-if which mtwilson; then
-  mtwilson stop
+echo "Checking for previously-installed Mt Wilson..." >>$INSTALL_LOG_FILE
+prev_mtwilson="$(which mtwilson 2>/dev/null)"
+if [ -n "$prev_mtwilson" ] && [ "$(whoami)" == "root" ]; then
+  # stop mtwilson; this sometimes does not work
+  $prev_mtwilson stop
+  echo "After '$prev_mtwilson stop', checking status again..." >>$INSTALL_LOG_FILE
+  $prev_mtwilson status >>$INSTALL_LOG_FILE
+  # remove previous mtwilson script
+  rm -f $prev_mtwilson
 fi
+
 
 # if upgrading as non-root user, admin must grant read/write permission to /etc/intel/clousecurity before running installer
 if [ -L $MTWILSON_CONFIGURATION ]; then rm -f $MTWILSON_CONFIGURATION; fi
