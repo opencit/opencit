@@ -14,9 +14,6 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-#MTW_HOME=/opt/mtwilson
-#export MTW_USERNAME=mtwilson
-
 
 # the home directory must be defined before we load any environment or
 # configuration files; it is explicitly passed through the sudo command
@@ -42,6 +39,7 @@ if [ -z "$MTWILSON_USERNAME" ]; then
   mtw_load_env $MTWILSON_HOME/env.d/mtwilson-username
 fi
 
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 
 ###################################################################################################
 
@@ -262,6 +260,7 @@ Detected the following options on this server:"
   #        the environment variable MC_FIRST_PASSWORD defined; this is already
   #        done when running from the installer but if user runs 'mtwilson setup'
   #        outside the installer the may have to export MC_FIRST_PASSWORD first
+  echo "mtwilson setup tasks: create-certificate-authority-key create-admin-user..." >>$INSTALL_LOG_FILE
   call_tag_setupcommand setup-manager create-certificate-authority-key create-admin-user
 
   call_setupcommand EncryptDatabase

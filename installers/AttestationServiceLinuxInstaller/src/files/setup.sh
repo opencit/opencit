@@ -103,6 +103,7 @@ chmod +x /opt/mtwilson/bin/asctl
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}/
 chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
 
+echo "Attestation service installer calling asctl setup..." >>$INSTALL_LOG_FILE
 /opt/mtwilson/bin/asctl setup
 
 aikqverify_install_prereq() {
