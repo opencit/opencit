@@ -14,9 +14,6 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-#MTW_HOME=/opt/mtwilson
-#export MTW_USERNAME=mtwilson
-
 
 # the home directory must be defined before we load any environment or
 # configuration files; it is explicitly passed through the sudo command
@@ -42,6 +39,7 @@ if [ -z "$MTWILSON_USERNAME" ]; then
   mtw_load_env $MTWILSON_HOME/env.d/mtwilson-username
 fi
 
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 
 ###################################################################################################
 
@@ -232,9 +230,14 @@ Detected the following options on this server:"
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
     fi
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
-    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
-    chmod 0600 ~/.pgpass
+	if [ $(whoami) == "root" ]; then 
+	    pgpass_file=~/.pgpass
+	else
+	    pgpass_file=$MTWILSON_HOME/.pgpass
+	fi
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $pgpass_file
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $pgpass_file
+    chmod 0600 $pgpass_file
   fi
 
   # Attestation service auto-configuration
@@ -262,6 +265,7 @@ Detected the following options on this server:"
   #        the environment variable MC_FIRST_PASSWORD defined; this is already
   #        done when running from the installer but if user runs 'mtwilson setup'
   #        outside the installer the may have to export MC_FIRST_PASSWORD first
+  echo "mtwilson setup tasks: create-certificate-authority-key create-admin-user..." >>$INSTALL_LOG_FILE
   call_tag_setupcommand setup-manager create-certificate-authority-key create-admin-user
 
   call_setupcommand EncryptDatabase
@@ -606,7 +610,7 @@ case "$1" in
         webservice_uninstall ManagementService 2>&1 > /dev/null
         webservice_uninstall WLMService 2>&1 > /dev/null
 
-        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity , /etc/intel/cloudsecurity and /opt/mtwilson..."
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity, /etc/intel/cloudsecurity, /opt/mtwilson..."
         if [ -w "/opt/intel/cloudsecurity" ] && [ -w "/opt/mtwilson" ] && [ "$(whoami)" == "root" ]; then
             rm -rf /opt/intel/cloudsecurity
             rm -rf /opt/mtwilson
