@@ -65,7 +65,7 @@ if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(
   if [ -n "$trousers" ]; then $trousers; fi
 
   export TRUSTAGENT_SUDO=true
-  sudo -u $TRUSTAGENT_USERNAME -E $TRUSTAGENT_BIN/tagent $*
+  sudo -u $TRUSTAGENT_USERNAME -H -E $TRUSTAGENT_BIN/tagent $*
   exit $?
 fi
 

@@ -47,7 +47,7 @@ export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
   export MTWILSON_SUDO=true
-  sudo -u $MTWILSON_USERNAME -E mtwilson $*
+  sudo -u $MTWILSON_USERNAME -H -E mtwilson $*
   exit $?
 fi
 
