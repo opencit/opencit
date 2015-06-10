@@ -990,7 +990,7 @@ fi
 mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
- echo "/usr/share/glassfish4/glassfish/domains/domain1/logs/server.log {
+ echo "/opt/mtwilson/glassfish4/glassfish/domains/domain1/logs/server.log {
     missingok
     notifempty
     rotate $LOG_OLD
@@ -1001,7 +1001,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
     $LOG_COPYTRUNCATE
 }
 
-/usr/share/apache-tomcat-7.0.34/logs/catalina.out {
+/opt/mtwilson/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
     notifempty
     rotate $LOG_OLD
@@ -1027,15 +1027,15 @@ mkdir -p /opt/mtwilson/monit/conf.d
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
   if [ ! -a /opt/mtwilson/monit/conf.d/glassfish.mtwilson ]; then
     echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-      check file gf_installed with path "/usr/share/glassfish4/bin/asadmin"
+      check file gf_installed with path "/opt/mtwilson/glassfish4/bin/asadmin"
       group gf_server
       if does not exist then unmonitor
 
       # MtWilson Glassfish services
       check host mtwilson-version-glassfish with address 127.0.0.1
       group gf_server
-      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
@@ -1048,15 +1048,15 @@ fi
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
   if [ ! -a /opt/mtwilson/monit/conf.d/tomcat.mtwilson ]; then
     echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-      check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
+      check file tc_installed with path \"/opt/mtwilson/apache-tomcat-7.0.34/bin/catalina.sh\"
       group tc_server
       if does not exist then unmonitor
     
       # MtWilson Tomcat services
       check host mtwilson-version-tomcat with address 127.0.0.1
       group tc_server
-      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
