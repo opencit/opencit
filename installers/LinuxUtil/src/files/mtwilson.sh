@@ -230,9 +230,14 @@ Detected the following options on this server:"
     else
       PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
     fi
-    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $MTWILSON_HOME/.pgpass
-    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $MTWILSON_HOME/.pgpass
-    chmod 0600 $MTWILSON_HOME/.pgpass
+	if [ $(whoami) == "root" ]; then 
+	    pgpass_file=~/.pgpass
+	else
+	    pgpass_file=$MTWILSON_HOME/.pgpass
+	fi
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $pgpass_file
+    echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> $pgpass_file
+    chmod 0600 $pgpass_file
   fi
 
   # Attestation service auto-configuration
@@ -605,7 +610,7 @@ case "$1" in
         webservice_uninstall ManagementService 2>&1 > /dev/null
         webservice_uninstall WLMService 2>&1 > /dev/null
 
-        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity , /etc/intel/cloudsecurity and /opt/mtwilson..."
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity, /etc/intel/cloudsecurity, /opt/mtwilson..."
         if [ -w "/opt/intel/cloudsecurity" ] && [ -w "/opt/mtwilson" ] && [ "$(whoami)" == "root" ]; then
             rm -rf /opt/intel/cloudsecurity
             rm -rf /opt/mtwilson
