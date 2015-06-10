@@ -682,6 +682,7 @@ elif using_postgres; then
   fi
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ${MTWILSON_HOME}/.pgpass
   echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ${MTWILSON_HOME}/.pgpass
+  if [ $(whoami) == "root" ]; then cp ${MTWILSON_HOME}/.pgpass ~/.pgpass; fi
 fi
 
 # database root portion of executed code
@@ -793,6 +794,7 @@ elif using_postgres; then
       if [ -f ${MTWILSON_HOME}/.pgpass ]; then
         echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
         rm -f ${MTWILSON_HOME}/.pgpass
+        if [ $(whoami) == "root" ]; then rm -f ~/.pgpass; fi
       fi
     fi
   fi
