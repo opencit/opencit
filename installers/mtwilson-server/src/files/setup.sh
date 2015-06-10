@@ -191,6 +191,7 @@ else
     echo_failure "Cannot create directory: $MTWILSON_CONFIGURATION"
     exit 1
   fi
+  mkdir -p /etc/intel
   ln -s $MTWILSON_CONFIGURATION /etc/intel/cloudsecurity
   if [ $? -ne 0 ]; then
     echo_failure "Cannot link configuration from /etc/intel/cloudsecurity to $MTWILSON_CONFIGURATION"
@@ -200,7 +201,7 @@ fi
 
 
 export MTWILSON_SERVICE_PROPERTY_FILES=/etc/intel/cloudsecurity
-export MTWILSON_OPT_INTEL=/opt/intel 
+export MTWILSON_OPT_INTEL=/opt/intel
 # If configuration is already in /etc/intel/cloudsecurity (upgrade or reinstall)
 # then symlink /opt/mtwilson/configuration -> /etc/intel/cloudsecurity 
 
@@ -672,16 +673,17 @@ if using_mysql; then
   export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
 elif using_postgres; then
   postgres_installed=1
-  touch ~/.pgpass
-  chmod 0600 ~/.pgpass
+  touch ${MTWILSON_HOME}/.pgpass
+  chmod 0600 ${MTWILSON_HOME}/.pgpass
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
     PGPASS_HOSTNAME=localhost
   else
     PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
   fi
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ~/.pgpass
-  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ~/.pgpass
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ${MTWILSON_HOME}/.pgpass
+  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ${MTWILSON_HOME}/.pgpass
+  if [ $(whoami) == "root" ]; then cp ${MTWILSON_HOME}/.pgpass ~/.pgpass; fi
 fi
 
 # database root portion of executed code
@@ -771,6 +773,10 @@ elif using_postgres; then
   if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
     postgres_create_database
+    if [ $? -ne 0 ]; then
+      echo_failure "Cannot create database"
+      exit 1
+    fi
     #postgres_restart >> $INSTALL_LOG_FILE
     #sleep 10
     #export is_postgres_available postgres_connection_error
@@ -790,9 +796,10 @@ elif using_postgres; then
     fi
     #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
     if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
-      if [ -f ~/.pgpass ]; then
+      if [ -f ${MTWILSON_HOME}/.pgpass ]; then
         echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
-        rm -f ~/.pgpass
+        rm -f ${MTWILSON_HOME}/.pgpass
+        if [ $(whoami) == "root" ]; then rm -f ~/.pgpass; fi
       fi
     fi
   fi
