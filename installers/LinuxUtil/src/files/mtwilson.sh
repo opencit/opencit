@@ -605,7 +605,7 @@ case "$1" in
         webservice_uninstall ManagementService 2>&1 > /dev/null
         webservice_uninstall WLMService 2>&1 > /dev/null
 
-        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity , /etc/intel/cloudsecurity and /opt/mtwilson..."
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity, /etc/intel/cloudsecurity, /opt/mtwilson..."
         if [ -w "/opt/intel/cloudsecurity" ] && [ -w "/opt/mtwilson" ] && [ "$(whoami)" == "root" ]; then
             rm -rf /opt/intel/cloudsecurity
             rm -rf /opt/mtwilson

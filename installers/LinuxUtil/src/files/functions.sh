@@ -4387,7 +4387,7 @@ change_db_pass() {
     postgres_version
     postgres_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-    temp=$(sudo "$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
+    temp=$("$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
     echo ""
     if [ $? -ne 0 ]; then echo_failure "Issue building postgres or expect command."; exit; fi
     # Edit postgres password file if it exists
@@ -4485,7 +4485,7 @@ function erase_data() {
     for table in ${arr[*]}
     do
      
-     temp=$(sudo "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")
+     temp=$("$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")
     done
   fi 
 }
