@@ -1676,7 +1676,7 @@ postgres_version(){
   POSTGRES_CLIENT_VERSION_OK=""
 
   if [ -n "$psql" ]; then
-    POSTGRES_CLIENT_VERSION=`$psql --version |  head -n1 | awk '{print $3}'`
+    POSTGRES_CLIENT_VERSION=`cd /tmp && $psql --version |  head -n1 | awk '{print $3}'`
     echo "POSTGRES_CLIENT_VERSION: $POSTGRES_CLIENT_VERSION" >> $INSTALL_LOG_FILE
     if is_version_at_least "$POSTGRES_CLIENT_VERSION" "${min_version}"; then
       POSTGRES_CLIENT_VERSION_OK=yes
