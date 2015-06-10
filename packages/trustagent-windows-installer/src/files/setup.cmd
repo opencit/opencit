@@ -156,7 +156,11 @@ REM # create a trustagent username "mtwilson" with no password and all privilege
 REM # which allows mtwilson to access it until mtwilson UI is updated to allow
 REM # entering username and password for accessing the trust agent
 ECHO. ==Create a trustagent username "mtwilson" with no password
-REM call "%trustagent_cmd%" password mtwilson --nopass *:*
+>>"%logfile%" call "%trustagent_cmd%" password mtwilson --nopass *:*
+
+REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
+ECHO. ==Create correct shiro.ini
+copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini"
 
 REM # give tagent a chance to do any other setup (such as the .env file and pcakey)
 REM # and make sure it's successful before trying to start the trust agent

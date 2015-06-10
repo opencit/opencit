@@ -87,8 +87,9 @@ if "%wcommand%"=="start" (
   IF "%*"=="" (
     call:print_help
   ) ELSE (
-    echo. "%*"
-    java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main "%*"
+    echo. Running command: %*
+
+    java %JAVA_OPTS% com.intel.mtwilson.launcher.console.Main %*
   )
 )
 GOTO:EOF
