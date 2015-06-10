@@ -159,9 +159,13 @@ function getUserProfileFile()
 #requires two arguments first argument is data that needs to be appended and second argument is file path
 function appendToUserProfileFile()
 {
-    file_path=$2
-    if [ ! -f $file_path ] || ! grep -q  "$1" $file_path; then
-       echo "$1" >> $file_path
+    if [ "$#" == 2 ]; then
+	 file=$2
+	else
+	 file=$(getUserProfileFile)
+	fi
+    if [ ! -f $file ] || ! grep -q  "$1" $file; then
+       echo "$1" >> $file
 	else
 	   echo "$1 Already there in user profile"
     fi
