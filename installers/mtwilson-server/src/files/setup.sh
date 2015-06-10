@@ -585,7 +585,7 @@ chmod 755 $MTWILSON_BIN/*
 # with a symlink to /opt/mtwilson/bin/mtwilson
 if [ -f /usr/local/bin/mtwilson -o -L /usr/local/bin/mtwilson ] && [ "$(whoami)" == "root" ]; then
   echo "Deleting existing binary or link: /usr/local/bin/mtwilson"
-  rm /usr/local/bin/mtwilson
+  rm -f /usr/local/bin/mtwilson
 fi
 
 ## link /usr/local/bin/mtwilson -> /opt/mtwilson/bin/mtwilson
@@ -927,8 +927,10 @@ update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.propert
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
 if [ ! -z "$opt_portals" ]; then
-  MTWILSON_TAG_HTML5_DIR_TEMP=`find /opt/mtwilson/ -name tag`
-  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$MTWILSON_TAG_HTML5_DIR_TEMP}
+  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson/ -name tag`
+  prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$DEFAULT_MTWILSON_TAG_HTML5_DIR}
+  echo "MTWILSON_TAG_HTML5_DIR: $MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
+  echo "DEFAULT_MTWILSON_TAG_HTML5_DIR: $DEFAULT_MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
   if ! validate_path_executable "$MTWILSON_TAG_HTML5_DIR"; then exit -1; fi
 fi
 
@@ -1005,7 +1007,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
     $LOG_COMPRESS
     $LOG_DELAYCOMPRESS
     $LOG_COPYTRUNCATE
-}" > /opt/mtwilson/log/mtwilson.logrotate
+}" > /opt/mtwilson/logs/mtwilson.logrotate
 fi
 
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then

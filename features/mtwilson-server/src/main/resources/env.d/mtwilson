@@ -4,7 +4,7 @@ MTWILSON_HOME=/opt/mtwilson
 MTWILSON_CONF=/opt/mtwilson/configuration
 MTWILSON_JAVA=/opt/mtwilson/java
 
-MTWILSON_LOGFILE=/opt/mtwilson/log/mtwilson.log
+MTWILSON_LOGFILE=/opt/mtwilson/logs/mtwilson.log
 MTWILSON_PIDFILE=/opt/mtwilson/mtwilson.pid
 
 # the keystore location and password are stored in mtwilson.properties which may be encrypted...
