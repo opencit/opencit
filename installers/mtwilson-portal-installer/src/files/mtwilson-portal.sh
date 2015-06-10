@@ -58,11 +58,11 @@ bootstrap_first_user() {
   fi
   local datestr=`date +%Y-%m-%d.%H%M`
 
-#  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
   prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
-  export MC_FIRST_USERNAME="$MC_FIRST_USERNAME"
   prompt_with_default_password MC_FIRST_PASSWORD
-  export MC_FIRST_PASSWORD="$MC_FIRST_PASSWORD"
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
+
   $mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${MTWILSON_API_BASEURL}" "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
@@ -76,6 +76,7 @@ configure_keystore_dir() {
   #  update_property_in_file mtwilson.tdbp.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
   #fi
   mkdir -p ${package_keystore_users_dir}
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_keystore_users_dir}
 }
 
 

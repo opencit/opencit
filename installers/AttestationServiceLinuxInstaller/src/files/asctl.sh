@@ -19,6 +19,8 @@ webservice_application_name=mtwilson
 #webservice_application_name=AttestationService
 #java_required_version=1.7.0_51
 
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
@@ -125,8 +127,11 @@ bootstrap_first_user() {
   prompt_with_default_password MC_FIRST_PASSWORD
   export MC_FIRST_USERNAME
   export MC_FIRST_PASSWORD
+  echo "asctl setup create-certificate-authority-key..." >>$INSTALL_LOG_FILE
   mtwilson setup V2 create-certificate-authority-key
   cat /etc/intel/cloudsecurity/cacerts.pem >> /etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem
+  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME /etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem
+  echo "asctl setup create-admin-user..." >>$INSTALL_LOG_FILE
   mtwilson setup V2 create-admin-user
 }
 
