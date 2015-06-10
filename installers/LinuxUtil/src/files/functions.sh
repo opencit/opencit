@@ -812,11 +812,11 @@ register_startup_script() {
   
   # try to install it as a startup script
   if [ -d /etc/init.d ]; then
-    local prevdir=`pwd`
-    cd /etc/init.d
-    if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
-    ln -s "${absolute_filename}" "${startup_name}"
-    cd "$prevdir"
+    (
+      cd /etc/init.d
+      if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
+      ln -s "${absolute_filename}" "${startup_name}"
+    )
   fi
 
   # RedHat and SUSE
@@ -3656,7 +3656,6 @@ mtwilson_running_report_wait() {
 
 # parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
-  local path=`pwd`
   local webservice_application_name="$1"
 
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
@@ -4556,7 +4555,8 @@ key_restore() {
   /opt/mtwilson/bin/decrypt.sh -p MTWILSON_PASSWORD "$keyBackupFile" > /dev/null
   find "$keyBackupDir/" -name "*.sig" -type f -delete
   cp -R "$keyBackupDir"/* "$configDir"/
-  find "$keyBackupDir" -type f -exec shred -uzn 3 {} \;
+  # cd to make sure in readable directory to prevent find utility error on "sudo -u mtwilson ..."
+  (cd "$keyBackupDir" && find "$keyBackupDir" -type f -exec shred -uzn 3 {} \;)
   rm -rf "$keyBackupDir"
   shred -uzn 3 "$keyBackupFile.zip"
 
