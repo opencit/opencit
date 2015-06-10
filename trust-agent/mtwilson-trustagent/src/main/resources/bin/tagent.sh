@@ -59,6 +59,11 @@ fi
 # - 'uninstall' may require root access to delete users and certain directories
 # - 'update-system-info' requires root access to use dmidecode and virsh commands
 if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$TRUSTAGENT_SUDO" ] && [ "$1" != "uninstall" -a "$1" != "update-system-info" ]; then
+
+  # before we switch to non-root, check if tcsd is running and start it if necessary
+  trousers=$(which tcsd 2>/dev/null)
+  if [ -n "$trousers" ]; then $trousers; fi
+
   export TRUSTAGENT_SUDO=true
   sudo -u $TRUSTAGENT_USERNAME -E $TRUSTAGENT_BIN/tagent $*
   exit $?
@@ -236,6 +241,7 @@ trustagent_uninstall() {
     if [ -n "$TRUSTAGENT_HOME" ] && [ -d "$TRUSTAGENT_HOME" ]; then
       rm -rf $TRUSTAGENT_HOME
     fi
+    remove_startup_script tagent
 }
 
 # stops monit and removes its configuration
