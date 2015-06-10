@@ -3683,7 +3683,6 @@ webservice_running() {
       fi
     fi
   fi
-  cd $path
 }
 webservice_running_report() {
   local webservice_application_name="$1"
