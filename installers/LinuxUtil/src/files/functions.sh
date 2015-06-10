@@ -1676,7 +1676,7 @@ postgres_version(){
   POSTGRES_CLIENT_VERSION_OK=""
 
   if [ -n "$psql" ]; then
-    POSTGRES_CLIENT_VERSION=`cd /tmp && $psql --version |  head -n1 | awk '{print $3}'`
+    POSTGRES_CLIENT_VERSION=`(cd /tmp && $psql --version |  head -n1 | awk '{print $3}')`
     echo "POSTGRES_CLIENT_VERSION: $POSTGRES_CLIENT_VERSION" >> $INSTALL_LOG_FILE
     if is_version_at_least "$POSTGRES_CLIENT_VERSION" "${min_version}"; then
       POSTGRES_CLIENT_VERSION_OK=yes
@@ -4485,7 +4485,7 @@ function erase_data() {
     for table in ${arr[*]}
     do
      
-     temp=$("$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")
+     temp=`(cd /tmp && "$psql" -d "$DATABASE_SCHEMA" -c "DELETE from $table;")`
     done
   fi 
 }
