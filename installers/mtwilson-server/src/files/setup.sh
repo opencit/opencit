@@ -938,7 +938,7 @@ update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.propert
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
 if [ ! -z "$opt_portals" ]; then
-  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson/ -name tag`
+  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson/apache-* -name tag`
   prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$DEFAULT_MTWILSON_TAG_HTML5_DIR}
   echo "MTWILSON_TAG_HTML5_DIR: $MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
   echo "DEFAULT_MTWILSON_TAG_HTML5_DIR: $DEFAULT_MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
@@ -998,7 +998,7 @@ fi
 mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
- echo "/usr/share/glassfish4/glassfish/domains/domain1/logs/server.log {
+ echo "/opt/mtwilson/glassfish4/glassfish/domains/domain1/logs/server.log {
     missingok
     notifempty
     rotate $LOG_OLD
@@ -1009,7 +1009,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
     $LOG_COPYTRUNCATE
 }
 
-/usr/share/apache-tomcat-7.0.34/logs/catalina.out {
+/opt/mtwilson/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
     notifempty
     rotate $LOG_OLD
@@ -1035,15 +1035,15 @@ mkdir -p /opt/mtwilson/monit/conf.d
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
   if [ ! -a /opt/mtwilson/monit/conf.d/glassfish.mtwilson ]; then
     echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-      check file gf_installed with path "/usr/share/glassfish4/bin/asadmin"
+      check file gf_installed with path "/opt/mtwilson/glassfish4/bin/asadmin"
       group gf_server
       if does not exist then unmonitor
 
       # MtWilson Glassfish services
       check host mtwilson-version-glassfish with address 127.0.0.1
       group gf_server
-      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
@@ -1056,15 +1056,15 @@ fi
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
   if [ ! -a /opt/mtwilson/monit/conf.d/tomcat.mtwilson ]; then
     echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-      check file tc_installed with path \"/usr/share/apache-tomcat-7.0.34/bin/catalina.sh\"
+      check file tc_installed with path \"/opt/mtwilson/apache-tomcat-7.0.34/bin/catalina.sh\"
       group tc_server
       if does not exist then unmonitor
     
       # MtWilson Tomcat services
       check host mtwilson-version-tomcat with address 127.0.0.1
       group tc_server
-      start program = \"/usr/local/bin/mtwilson start\" with timeout 120 seconds
-      stop program = \"/usr/local/bin/mtwilson stop\" with timeout 120 seconds
+      start program = \"/opt/mtwilson/bin/mtwilson start\" with timeout 120 seconds
+      stop program = \"/opt/mtwilson/bin/mtwilson stop\" with timeout 120 seconds
       if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
         and request "/mtwilson/v2/version" for 2 cycles
       then restart
@@ -1151,7 +1151,7 @@ fi
 rm -f $MTWILSON_ENV/mtwilson-setup
 
 # ensure the mtwilson owns all the content created during setup
-for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS; do
+for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_JAVA $MTWILSON_BIN $MTWILSON_ENV $MTWILSON_REPOSITORY $MTWILSON_LOGS $MTWILSON_SERVICE_PROPERTY_FILES; do
   chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME $directory
 done
 

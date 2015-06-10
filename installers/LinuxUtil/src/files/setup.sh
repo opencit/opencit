@@ -28,6 +28,4 @@ if [ `whoami` == "root" ]; then
  #Remove symbolic link if already exist
  rm -f /usr/local/bin/mtwilson
  ln -s $MTWILSON_HOME/bin/mtwilson /usr/local/bin/mtwilson
-else
- appendToUserProfileFile "export PATH=$MTWILSON_HOME/bin:\$PATH"
 fi

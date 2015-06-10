@@ -155,9 +155,15 @@ function getUserProfileFile()
 	echo $file
 }
 
+#FUNCTION LIBRARY: appends data to a file
+#requires two arguments first argument is data that needs to be appended and second argument is file path
 function appendToUserProfileFile()
 {
-    file=$(getUserProfileFile)
+    if [ "$#" == 2 ]; then
+	 file=$2
+	else
+	 file=$(getUserProfileFile)
+	fi
     if [ ! -f $file ] || ! grep -q  "$1" $file; then
        echo "$1" >> $file
 	else
@@ -216,17 +222,14 @@ function validate_path_configuration() {
     echo_failure "Path is missing"
     return 1
   fi
-  if [[ "$file_path" == *..* ]]; then
-    echo_warning "Path specified is not absolute: $file_path"
-  fi
-  file_path=`readlink -f "$file_path"` #make file path absolute
+  file_path=`readlink -m "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/etc/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Configuration path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
-  if [[ -f "$file_path" ]]; then
+  if [ -f "$file_path" ] || [ -d "$file_path" ]; then
     echo "validate_path_configuration: chmod 600 $file_path" >>$INSTALL_LOG_FILE
     chmod 600 "${file_path}" >>$INSTALL_LOG_FILE 2>&1
   fi
@@ -239,17 +242,14 @@ function validate_path_data() {
     echo_failure "Path is missing"
     return 1
   fi
-  if [[ "$file_path" == *..* ]]; then
-    echo_warning "Path specified is not absolute: $file_path"
-  fi
-  file_path=`readlink -f "$file_path"` #make file path absolute
+  file_path=`readlink -m "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/var/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Data path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
-  if [[ -f "$file_path" ]]; then
+  if [ -f "$file_path" ] || [ -d "$file_path" ]; then
     chmod 600 "${file_path}"
   fi
   return 0
@@ -261,17 +261,14 @@ function validate_path_executable() {
     echo_failure "Path is missing"
     return 1
   fi
-  if [[ "$file_path" == *..* ]]; then
-    echo_warning "Path specified is not absolute: $file_path"
-  fi
-  file_path=`readlink -f "$file_path"` #make file path absolute
+  file_path=`readlink -m "$file_path"` #make file path absolute
 
   if [[ "$file_path" != '/usr/'* && "$file_path" != '/opt/'* ]]; then
     echo_failure "Executable path validation failed. Verify path meets acceptable directory constraints: $file_path"
     return 1
   fi
   
-  if [[ -f "$file_path" ]]; then
+  if [ -f "$file_path" ] || [ -d "$file_path" ]; then
     chmod 755 "${file_path}"
   fi
   return 0
@@ -449,9 +446,9 @@ prompt_with_default() {
   eval current_value="\$$resultvarname"
   eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
-  if [ -n "${!resultvarname}" ]; then
+  if [ -n "$current_value" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_CYAN}"; fi
-    echo "$userprompt [$default_value] ${!resultvarname:-$default_value}"
+    echo "$userprompt [$default_value] ${current_value:-$default_value}"
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
