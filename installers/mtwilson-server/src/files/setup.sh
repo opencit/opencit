@@ -938,7 +938,7 @@ update_property_in_file "mtwilson.tag.api.username" $CONFIG_DIR/mtwilson.propert
 update_property_in_file "mtwilson.tag.api.password" $CONFIG_DIR/mtwilson.properties "$MTWILSON_TAG_API_PASSWORD"
 
 if [ ! -z "$opt_portals" ]; then
-  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson/apache-* -name tag`
+  DEFAULT_MTWILSON_TAG_HTML5_DIR=`find /opt/mtwilson -name tag`
   prompt_with_default MTWILSON_TAG_HTML5_DIR "Mt Wilson Tag HTML5 Path: " ${MTWILSON_TAG_HTML5_DIR:-$DEFAULT_MTWILSON_TAG_HTML5_DIR}
   echo "MTWILSON_TAG_HTML5_DIR: $MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
   echo "DEFAULT_MTWILSON_TAG_HTML5_DIR: $DEFAULT_MTWILSON_TAG_HTML5_DIR" >> "$INSTALL_LOG_FILE"
