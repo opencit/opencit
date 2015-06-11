@@ -53,7 +53,7 @@ fi
 
 ###################################################################################################
 if [ -d $MTWILSON_ENV ]; then
-   mtw_load_env $(ls -l $MTWILSON_ENV/*)
+   mtw_load_env $(ls -1 $MTWILSON_ENV/*)
 fi
 
 # default directory layout follows the 'home' style
@@ -279,10 +279,10 @@ Detected the following options on this server:"
 all_status() {
   if using_glassfish; then
     glassfish_clear
-    glassfish_detect > /dev/null
+    #glassfish_detect > /dev/null
   elif using_tomcat; then
     tomcat_clear
-    tomcat_detect > /dev/null
+    #tomcat_detect > /dev/null
   fi
 
   if using_glassfish; then
