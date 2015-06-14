@@ -11,7 +11,7 @@ REM ############################################################################
 
 set TRUSTAGENT_HOME=C:\Program Files (x86)\Intel\trustagent
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
-set logfile=%TRUSTAGENT_HOME%\log\trustagent.log
+set logfile=%TRUSTAGENT_HOME%\logs\trustagent.log
 
 
 set TRUSTAGENT_CONF=%TRUSTAGENT_HOME%\configuration
