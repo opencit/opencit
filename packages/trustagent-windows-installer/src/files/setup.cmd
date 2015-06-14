@@ -11,7 +11,7 @@ set package_version_filename=%package_dir%\env.d\trustagent.version
 set ASSET_TAG_SETUP="y"
 set trustagent_cmd=%package_dir%\bin\tagent.cmd
 
-set logfile=%package_dir%\log\install.log
+set logfile=%package_dir%\logs\install.log
 
 REM # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 ECHO. ==Configure trust agent version and environment variables==
