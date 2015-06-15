@@ -7,6 +7,7 @@ package com.intel.mtwilson.trustagent.setup;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import gov.niarl.his.privacyca.IdentityOS;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
@@ -53,9 +54,17 @@ public class CreateTpmOwnerSecret extends AbstractSetupTask {
     }
     
     private boolean isTpmOwned() throws IOException {
-        File tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
-        String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
-        Integer number = Integer.valueOf(text.trim());
-        return number == 1;
+        if (IdentityOS.isWindows()) { 
+            /* return for now since Windows usually take the ownership of TPM be default 
+             * need to check later for exceptions
+            */
+            return true;
+        }
+        else { /* for Linux. Still need to distinguish between TPM 1.2 and TPM 2.0 */
+            File tpmOwned = new File("/sys/class/misc/tpm0/device/owned");
+            String text = FileUtils.readFileToString(tpmOwned); // "1" or "0"
+            Integer number = Integer.valueOf(text.trim());
+            return number == 1;
+        }
     }
 }
