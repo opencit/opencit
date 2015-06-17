@@ -12,10 +12,10 @@ import static com.intel.mtwilson.util.xml.dsig.XmlDsigVerify.isValid;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -68,9 +68,10 @@ public class VerifyTrustpolicySignature implements Command {
             throw e;
         }
         
-        String trustPolicyXml;
-        try {
-            trustPolicyXml = new String(Files.readAllBytes(Paths.get(trustPolicyXmlFile.getAbsolutePath())));
+        String trustPolicyXml = "";
+        File fileDir = new File(trustPolicyXmlFile.getAbsolutePath());
+        try(FileInputStream in = new FileInputStream(fileDir)) {
+            trustPolicyXml = IOUtils.toString(in, Charset.forName("UTF-8"));
         } catch (Exception e) {
             log.error("Error reading trust policy XML file");
             throw e;
@@ -78,7 +79,6 @@ public class VerifyTrustpolicySignature implements Command {
         if ( trustPolicyXml.isEmpty() ) {
             throw new IllegalArgumentException("Trust policy XML file is empty");
         }
-        
         if ( !isValid(trustPolicyXml, samlCert) ) {
             throw new IllegalArgumentException("Trust policy is not signed by MtWilson SAML");
         }
