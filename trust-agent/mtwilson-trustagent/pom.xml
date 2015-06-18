@@ -129,6 +129,11 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
+            <artifactId>mtwilson-trustagent-tpmmodules</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>mtwilson-trustagent-setup</artifactId>
             <version>${project.version}</version>
         </dependency>

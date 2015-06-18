@@ -22,7 +22,7 @@ set TRUSTAGENT_VAR=%TRUSTAGENT_HOME%\var
 set TRUSTAGENT_PID_FILE=%TRUSTAGENT_VAR%\run\trustagent.pid
 set TRUSTAGENT_HTTP_LOG_FILE=%TRUSTAGENT_VAR%\log\http.log
 REM set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate request-aik-certificate
-set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate
+set TRUSTAGENT_AUTHORIZE_TASKS=download-mtwilson-tls-certificate download-mtwilson-privacy-ca-certificate download-mtwilson-saml-certificate request-endorsement-certificate
 set TRUSTAGENT_TPM_TASKS=create-tpm-owner-secret create-tpm-srk-secret create-aik-secret take-ownership
 set TRUSTAGENT_START_TASKS=create-keystore-password create-tls-keypair create-admin-user take-ownership
 REM set TRUSTAGENT_VM_ATTESTATION_SETUP_TASKS=create-binding-key certify-binding-key create-signing-key certify-signing-key
@@ -107,9 +107,10 @@ GOTO:EOF
   set HARDWARE_UUID=
   for /f  "USEBACKQ" %%a in (`wmic csproduct get UUID /VALUE ^| findstr /C:"UUID"`) do ( 
     set _tmpvar=%%a
-    set HARDWARE_UUID=!_tmpvar:~5!
+    set _tmpvar1=!_tmpvar:~5!
+    set HARDWARE_UUID=!_tmpvar1:~0,-1!
   )
-  echo. %HARDWARE_UUID%
+  echo. HARDWARE_UUID: %HARDWARE_UUID%
   set tasklist=%*
   echo. %tasklist%
   IF "%tasklist%"=="" (
@@ -127,9 +128,10 @@ GOTO:EOF
   set HARDWARE_UUID=
   for /f  "USEBACKQ" %%a in (`wmic csproduct get UUID /VALUE ^| findstr /C:"UUID"`) do ( 
     set _tmpvar=%%a
-    set HARDWARE_UUID=!_tmpvar:~5!
+    set _tmpvar1=!_tmpvar:~5!
+    set HARDWARE_UUID=!_tmpvar1:~0,-1!
   )
-  echo. %HARDWARE_UUID%
+  echo. HARDWARE_UUID: %HARDWARE_UUID%
 
   REM set authorize_vars="TPM_OWNER_SECRET TPM_SRK_SECRET MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"
   set authorize_vars="MTWILSON_API_URL MTWILSON_API_USERNAME MTWILSON_API_PASSWORD MTWILSON_TLS_CERT_SHA1"

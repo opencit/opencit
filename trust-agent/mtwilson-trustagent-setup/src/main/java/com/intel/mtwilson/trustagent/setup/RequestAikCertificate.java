@@ -11,6 +11,7 @@ import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.CreateIdentity;
 import com.intel.mtwilson.trustagent.niarl.Util;
+import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
 import java.security.InvalidKeyException;
@@ -73,18 +74,26 @@ public class RequestAikCertificate extends AbstractSetupTask {
         }
         
         // we need an EC in order to request an AIK, so make sure we have it
-        try {
-            byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
-            if( ekCert == null || ekCert.length == 0 ) {
-                configuration("Endorsement Certificate is null or zero-length");
+        /* add the code to deal with Windows platform and TPM 2.0 in Linux */
+        if (IdentityOS.isWindows()) { 
+            /* return for now since Windows usually take the ownership of TPM be default 
+             * need to check later for exceptions
+            */
+            return;
+        } else { /* need to add the case if TPM is 2.0 since the APIs and utilities are different */
+            try {
+                byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+                if( ekCert == null || ekCert.length == 0 ) {
+                    configuration("Endorsement Certificate is null or zero-length");
+                }
             }
-        }
-        catch(TpmModule.TpmModuleException e) {
-            if( e.getErrorCode() == 2 ) {
-                configuration("Endorsement Certificate is missing");
-            }
-            else {
-                configuration("Cannot determine presence of Endorsement Certificate: %s", e.getMessage());
+            catch(TpmModule.TpmModuleException e) {
+                if( e.getErrorCode() == 2 ) {
+                    configuration("Endorsement Certificate is missing");
+                }
+                else {
+                    configuration("Cannot determine presence of Endorsement Certificate: %s", e.getMessage());
+                }
             }
         }
     }

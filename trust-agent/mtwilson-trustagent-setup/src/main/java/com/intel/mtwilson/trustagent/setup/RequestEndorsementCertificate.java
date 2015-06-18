@@ -21,6 +21,8 @@ import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.ProvisionTPM;
 import com.intel.mtwilson.trustagent.niarl.Util;
 import com.intel.mtwilson.trustagent.tpm.tasks.ReadEndorsementCertificate;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
+import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.io.File;
@@ -217,31 +219,65 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
     
     private void readEndorsementCertificate() throws Exception {
         byte[] ekCertBytes;
-        try {
-            ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
-            log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
-            ekCert = X509Util.decodeDerCertificate(ekCertBytes);
-        } catch (TpmModuleException e) {
-            ekCert = null;
-            if (e.getErrorCode() != null) {
-                switch (e.getErrorCode()) {
-                    case 1:
-                        throw new IllegalArgumentException("Incorrect TPM owner password");
-                    case 2:
-                        //throw new IllegalArgumentException("Endorsement certificate needs to be requested");
-                        return;
-                    default:
-                        throw new IllegalArgumentException(String.format("Error code %d while validating EC", e.getErrorCode()));
+        
+        /* add the case to read EC from TPM on Windows */
+        if (IdentityOS.isWindows()) { 
+            /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
+            try {
+                Tpm tpm = new Tpm();
+                ekCertBytes = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
+                ekCert = X509Util.decodeDerCertificate(ekCertBytes);
+            } catch (TpmModuleException e) {
+                ekCert = null;
+                if (e.getErrorCode() != null) {
+                    switch (e.getErrorCode()) {
+                        case 1:
+                            throw new IllegalArgumentException("Incorrect TPM owner password");
+                        case 2:
+                            //throw new IllegalArgumentException("Endorsement certificate needs to be requested");
+                            return;
+                        default:
+                            throw new IllegalArgumentException(String.format("Error code %d while validating EC", e.getErrorCode()));
+                    }
                 }
+                log.debug("Failed to get EC from TPM using NIARL_TPM_Module");
+                // try with tpm tools 
+                //   /root/tpm-tools-1.3.8-patched/src/tpm_mgmt/tpm_getpubek
+                //    that gets the EK modulus  but we still need the EC:
+                // tpm_nvinfo -i 0x1000f000
+                // tpm_nvread -i 0x1000f000 -x -t -pOWNER_AUTH -s 834 -f mfr.crt.tpm
+                // openssl x509 -in mfr.crt.tpm -inform der -text   (works for Nuvoton, will not work for some others if they wrapped EC in a TCG structure... then have to use dd to remove initial bytes, and sometimes do other corrections for invalid length fields)
+                throw new RuntimeException("Failed to get EC from TPM using NIARL_TPM_Module");
             }
-            log.debug("Failed to get EC from TPM using NIARL_TPM_Module");
-            // try with tpm tools 
-            //   /root/tpm-tools-1.3.8-patched/src/tpm_mgmt/tpm_getpubek
-            //    that gets the EK modulus  but we still need the EC:
-            // tpm_nvinfo -i 0x1000f000
-            // tpm_nvread -i 0x1000f000 -x -t -pOWNER_AUTH -s 834 -f mfr.crt.tpm
-            // openssl x509 -in mfr.crt.tpm -inform der -text   (works for Nuvoton, will not work for some others if they wrapped EC in a TCG structure... then have to use dd to remove initial bytes, and sometimes do other corrections for invalid length fields)
-            throw new RuntimeException("Failed to get EC from TPM using NIARL_TPM_Module");
+        }
+        else {  /* Linux -- Also need to distinguish between TPM 1.2 and TPM 2.0 */
+            try {
+                ekCertBytes = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+                log.debug("EC base64: {}", Base64.encodeBase64String(ekCertBytes));
+                ekCert = X509Util.decodeDerCertificate(ekCertBytes);
+            } catch (TpmModuleException e) {
+                ekCert = null;
+                if (e.getErrorCode() != null) {
+                    switch (e.getErrorCode()) {
+                        case 1:
+                            throw new IllegalArgumentException("Incorrect TPM owner password");
+                        case 2:
+                            //throw new IllegalArgumentException("Endorsement certificate needs to be requested");
+                            return;
+                        default:
+                            throw new IllegalArgumentException(String.format("Error code %d while validating EC", e.getErrorCode()));
+                    }
+                }
+                log.debug("Failed to get EC from TPM using NIARL_TPM_Module");
+                // try with tpm tools 
+                //   /root/tpm-tools-1.3.8-patched/src/tpm_mgmt/tpm_getpubek
+                //    that gets the EK modulus  but we still need the EC:
+                // tpm_nvinfo -i 0x1000f000
+                // tpm_nvread -i 0x1000f000 -x -t -pOWNER_AUTH -s 834 -f mfr.crt.tpm
+                // openssl x509 -in mfr.crt.tpm -inform der -text   (works for Nuvoton, will not work for some others if they wrapped EC in a TCG structure... then have to use dd to remove initial bytes, and sometimes do other corrections for invalid length fields)
+                throw new RuntimeException("Failed to get EC from TPM using NIARL_TPM_Module");
+            }
         }
     }
     
