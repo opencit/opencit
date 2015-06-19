@@ -11,6 +11,7 @@ import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
 import com.intel.mtwilson.trustagent.niarl.CreateIdentity;
 import com.intel.mtwilson.trustagent.niarl.Util;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmModule;
 import java.io.File;
@@ -23,6 +24,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -79,7 +81,21 @@ public class RequestAikCertificate extends AbstractSetupTask {
             /* return for now since Windows usually take the ownership of TPM be default 
              * need to check later for exceptions
             */
-            return;
+                        /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
+            try {
+                Tpm tpm = new Tpm();
+                byte[] ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+                if( ekCert == null || ekCert.length == 0 ) {
+                    configuration("Endorsement Certificate is null or zero-length");
+                }
+            } catch (TpmModule.TpmModuleException e) {
+                 if( e.getErrorCode() == 2 ) {
+                    configuration("Endorsement Certificate is missing");
+                }
+                else {
+                    configuration("Cannot determine presence of Endorsement Certificate: %s", e.getMessage());
+                }
+            }
         } else { /* need to add the case if TPM is 2.0 since the APIs and utilities are different */
             try {
                 byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");

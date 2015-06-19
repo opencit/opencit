@@ -18,6 +18,7 @@ import com.intel.mtwilson.privacyca.v2.model.IdentityChallenge;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeRequest;
 import com.intel.mtwilson.privacyca.v2.model.IdentityChallengeResponse;
 import com.intel.mtwilson.trustagent.TrustagentConfiguration;
+import com.intel.mtwilson.trustagent.tpmmodules.Tpm;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
@@ -32,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -62,7 +64,13 @@ public class CreateIdentity implements Configurable, Runnable {
             X509Certificate privacy = keystore.getX509Certificate("privacy", SimpleKeystore.CA);
             
             // encrypt the EC using the PCA's public key
-            byte[] ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
+            byte[] ekCert;
+            if (IdentityOS.isWindows()) { 
+                /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
+                Tpm tpm = new Tpm();
+                ekCert = tpm.getTpm().getCredential(config.getTpmOwnerSecret(), "EC");
+            } else
+                ekCert = TpmModule.getCredential(config.getTpmOwnerSecret(), "EC");
             TpmIdentityRequest encryptedEkCert = new TpmIdentityRequest(ekCert, (RSAPublicKey) privacy.getPublicKey(), false);
             
             // create the identity request
