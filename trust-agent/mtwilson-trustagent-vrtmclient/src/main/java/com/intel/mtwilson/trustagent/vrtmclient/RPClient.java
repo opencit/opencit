@@ -42,11 +42,11 @@ public class RPClient {
 		if(!rpSock.isConnected()){
 			rpSock.connect(rpcoreEndpoint);
 		}
-		String rpId = String.valueOf(outTCBuffer.getRpId());
 		ByteArrayOutputStream rpOutStream = new ByteArrayOutputStream();
+		/*String rpId = String.valueOf(outTCBuffer.getRpId());
 		byte[] arr = rpId.getBytes();
 		rpOutStream.write(arr);
-		rpOutStream.write('\0');
+		rpOutStream.write('\0');*/
 
 		OutputStream rpcoreOut = rpSock.getOutputStream();
 		rpOutStream.writeTo(rpcoreOut);
@@ -90,7 +90,7 @@ public class RPClient {
             String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary((vmInstanceId).getBytes()));
             log.debug("Sending {}", base64InputArgument);
 
-            TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.IS_VM_VERIFIED);	// Formuate tcbuffer structure
+            TCBuffer tcBuffer = Factory.newTCBuffer(RPCCall.IS_VM_VERIFIED);	// Formuate tcbuffer structure
             tcBuffer.setRPCPayload(base64InputArgument.getBytes());
             
             TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
@@ -140,10 +140,11 @@ public class RPClient {
                             +		"</param>"
                             +	"</params>"
                             + "</methodCall>";
-            String base64InputArgument = String.format(xmlRPCBlob, vmInstanceId, nonce);
+            String base64InputArgument = String.format(xmlRPCBlob, DatatypeConverter.printBase64Binary((vmInstanceId).getBytes()), 
+                    DatatypeConverter.printBase64Binary((nonce).getBytes()));
             log.debug("Sending {}", base64InputArgument);
 
-            TCBuffer tcBuffer = Factory.newTCBuffer(100, RPCCall.GET_VM_ATTESTATION_REPORT_PATH);	// Formuate tcbuffer structure
+            TCBuffer tcBuffer = Factory.newTCBuffer(RPCCall.GET_VM_ATTESTATION_REPORT_PATH);	// Formuate tcbuffer structure
             tcBuffer.setRPCPayload(base64InputArgument.getBytes());
             
             TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
