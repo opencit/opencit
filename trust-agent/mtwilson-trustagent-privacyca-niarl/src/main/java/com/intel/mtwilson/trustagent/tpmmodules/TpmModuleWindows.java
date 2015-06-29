@@ -7,19 +7,34 @@ package com.intel.mtwilson.trustagent.tpmmodules;
 
 import com.intel.mtwilson.Folders;
 import gov.niarl.his.privacyca.TpmIdentity;
+import gov.niarl.his.privacyca.TpmIdentityProof;
+import gov.niarl.his.privacyca.TpmIdentityRequest;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
+import gov.niarl.his.privacyca.TpmPubKey;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 /**
  *
@@ -90,11 +105,10 @@ public class TpmModuleWindows implements TpmModuleProvider {
         
         //String argument = "-owner_auth " + TpmUtils.byteArrayToHexString(ownerAuth) + " -cred_type " + credType;
         // TROUSERS MODE OPTIONAL
-        String argument = "";
         commandLineResult result;
         if (credType.equals("EC")) {
-            argument = "GetEkCert";
-            result = executeTpmCommand(argument, 1);
+            String[] cmdArgs = {"GetEkCert"}; 
+            result = executeTpmCommand(cmdArgs, 1);
             if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModule.getCredential returned nonzero error", result.getReturnCode());
             
             byte[] eccert = TpmUtils.hexStringToByteArray(result.getResult(0));
@@ -123,7 +137,84 @@ public class TpmModuleWindows implements TpmModuleProvider {
 
     @Override
     public TpmIdentity collateIdentityRequest(byte[] ownerAuth, byte[] keyAuth, String keyLabel, byte[] pcaPubKeyBlob, int keyIndex, X509Certificate endorsmentCredential, boolean useECinNvram) throws IOException, TpmModule.TpmModuleException, CertificateEncodingException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            /*
+            * Collate Identity Request
+            * NIARL_TPM_Module -mode 3 -owner_auth <40 char hex blob> -key_auth <40 char hex blob> -key_label <hex string in ASCII> -pcak <public key blob for Privacy CA> -key_index <integer index> [-ec_blob <hex blob of endorsement credential> -ec_nvram -trousers]
+            * return: <identity request> <aik modulus> <aik complete key blob>
+            */
+            
+            /*
+            String argument = "-owner_auth " + TpmUtils.byteArrayToHexString(ownerAuth)
+            + " -key_auth " + TpmUtils.byteArrayToHexString(keyAuth)
+            + " -key_label " + TpmUtils.byteArrayToHexString(keyLabel.getBytes())
+            + " -pcak " + TpmUtils.byteArrayToHexString(pcaPubKeyBlob)
+            + " -key_index " + keyIndex;
+            if (endorsmentCredential != null)
+            argument += " -ec_blob " + TpmUtils.byteArrayToHexString(endorsmentCredential.getEncoded());
+            if (useECinNvram)
+            argument += " -ec_nvram";
+            */
+            
+            /* argument should be "pcptool collateidentityrequest keyname keyIdBindingChoosenHash keyAuth
+             * KeyIdbindingChooseHash should be the hash of keyname (keylabel) + PCA's public key
+             */
+		MessageDigest md = MessageDigest.getInstance("SHA1");
+                byte [] idLabelBytes = keyLabel.getBytes();
+		byte [] chosenId = new byte[idLabelBytes.length + pcaPubKeyBlob.length];
+		System.arraycopy(idLabelBytes, 0, chosenId, 0, idLabelBytes.length);
+		System.arraycopy(pcaPubKeyBlob, 0, chosenId, idLabelBytes.length, pcaPubKeyBlob.length);
+		md.update(chosenId);
+		byte [] chosenIdHash = md.digest();
+                
+            String[] cmdArgs = {"CollateIdentityRequest", 
+                TpmUtils.byteArrayToHexString(keyLabel.getBytes()),
+                TpmUtils.byteArrayToHexString(chosenIdHash),
+                TpmUtils.byteArrayToHexString(keyAuth)
+                };
+            /*
+            argument.add(TpmUtils.byteArrayToHexString(pcaPubKeyBlob));
+            argument.add(TpmUtils.byteArrayToHexString(keyAuth));
+            */
+            // executeTpmCommand returns idbinding (IDENTITY_CONTENTS), AIK Pub key modulus, and AIK key blob
+            commandLineResult result = executeTpmCommand(cmdArgs, 3);
+            if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.collateIdentityRequest returned nonzero error", result.getReturnCode());
+            
+            /* executeTpmCommand returns 
+            * >> result.getResult(0) - idbinding (IDENTITY_CONTENTS) -- Note the TpmModule for Linux based on NIAL_TPM_MODULE returns TPM_IDENTITY_REQUEST strcuture, 
+            *     which is encrypted form of TPM_IDENTITY_PROOF. so we need to do some conversion.
+            * >> result.getResult(1) - AIK Pub key Modulus
+            * >> result.getResult(2) - AIK key blob
+            * Windows PCP does not create identityreqeust raw bytes. It only created an idbinding, but it is just the structure of TPM_IDENTITY_CONTENTS
+            * So we need to do some of the work specified in TSS spec
+            * 1. Create a TPM_IDENTITY_PROOF structure and assign its field with identitybinding, AIK pub, AIK blob, and EK cert, etc from PCPtool
+            * 2. Create TPM_IDENTITY_REQUEST structure based on TPM_IDENTITY_PROOF
+            */
+            //TpmIdentityProof(byte [] idLabel, byte [] idBinding, TpmPubKey AIK, byte [] ekCertBytes, byte [] platformCertBytes, byte [] conformanceCertBytes, boolean IV, boolean symKey, boolean oaep)
+            byte[] endCreBytes = null;
+            if (endorsmentCredential != null) endCreBytes = endorsmentCredential.getEncoded();
+            TpmIdentityProof idProof = new TpmIdentityProof(keyLabel.getBytes(),
+                    TpmUtils.hexStringToByteArray(result.getResult(0)),
+                    new TpmPubKey(TpmUtils.hexStringToByteArray(result.getResult(1))),
+                    endCreBytes, endCreBytes, endCreBytes, false, false, false);
+            TpmPubKey caPubKey = new TpmPubKey(new ByteArrayInputStream(pcaPubKeyBlob));
+            //TpmIdentityRequest(TpmIdentityProof newIdProof, RSAPublicKey caKey)
+            TpmIdentityRequest idReq = new TpmIdentityRequest(idProof, caPubKey.getKey()); // this does the encryption of idProof by using caPubKey
+            byte [] identityRequest = idReq.toByteArray();
+            
+            log.debug("identity request: {}", idReq.toString());
+            log.debug("identity request asym size: {}", idReq.getAsymBlob().length);
+            
+            byte [] aikModulus = TpmUtils.hexStringToByteArray(result.getResult(1));
+            byte [] aikKeyBlob = TpmUtils.hexStringToByteArray(result.getResult(2));
+            TpmIdentity toReturn = new TpmIdentity(identityRequest, aikModulus, aikKeyBlob);
+            return toReturn;
+        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | TpmUtils.TpmUnsignedConversionException | InvalidKeySpecException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TpmUtils.TpmBytestreamResouceException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     @Override
@@ -137,7 +228,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
     }
 
     
-    private static commandLineResult executeTpmCommand(String args, int returnCount)
+    private static commandLineResult executeTpmCommand(String[] args, int returnCount)
                     throws IOException {
 
         int returnCode;
@@ -145,8 +236,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
         final String newExeName = "PCPTool.exe";
 
         // Parse the args parameter to populate the environment variables array
-        String[] params = args.split(" ");
-        HashMap<String,String> environmentVars = new HashMap<String, String>();
+        //HashMap<String,String> environmentVars = new HashMap<String, String>();
         List<String> cmd = new ArrayList<String>();
         
         /* the command to be run should be
@@ -154,27 +244,19 @@ public class TpmModuleWindows implements TpmModuleProvider {
         */
         cmd.add("cmd.exe");
         cmd.add("/c");
-        cmd.add(newTpmModuleExePath + File.separator + newExeName);
-
-        for(int loop = 0; loop < params.length; loop++) {
-            String param = params[loop];
-            cmd.add(param);
-            /* Disable for now, the params of PCPTool is different from NIAL_TPM_MODULE on Linux
-            if(param.equals("-owner_auth") || param.equals("-nonce") || param.equals("-key_auth") ||
-                            param.equals("-pcak") ||  param.equals("-blob_auth")) {
-                    String envVarName = param.substring(1).toUpperCase();
-                    // Populate the environment variable hash map
-                    environmentVars.put(envVarName, params[++loop]);
-                    // update the params array with the env variable name
-                    //params[loop] = envVarName;
-                    cmd.add(envVarName);
-            }
-            */
+        cmd.add("PCPTool.exe");
+        for (String cmdArg : args) {
+            cmd.add(cmdArg);
         }
-
+        
+        // check the parameters
+        for (String temp: cmd) {
+            log.debug(temp);
+        }
+        
         /* create the process to run */
         ProcessBuilder pb = new ProcessBuilder(cmd);
-        pb.environment().putAll(environmentVars);
+        //pb.environment().putAll(environmentVars);
         Process p = pb.start();
         //Process p = Runtime.getRuntime().exec(commandLine);
         String line = "";
@@ -184,8 +266,9 @@ public class TpmModuleWindows implements TpmModuleProvider {
             try {
                     while ((newLine = input.readLine()) != null) {
                             line = newLine;
+                            log.debug("executeTPM output line: {}", line);
                     }
-                    log.debug("executeTPM output: {}", line);
+                    log.debug("executeTPM last line: {}", line);
 
                     input.close();
             } catch (Exception e) {
@@ -206,6 +289,8 @@ public class TpmModuleWindows implements TpmModuleProvider {
             log.debug("Interrupted while waiting for return value", e);
             returnCode = -1;
         }
+
+        log.debug("Return code: " + returnCode);
 
         commandLineResult toReturn = new commandLineResult(returnCode, returnCount);
         if ((returnCode == 0)&&(returnCount != 0)) {

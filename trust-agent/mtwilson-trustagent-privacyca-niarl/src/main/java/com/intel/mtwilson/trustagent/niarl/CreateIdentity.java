@@ -76,7 +76,15 @@ public class CreateIdentity implements Configurable, Runnable {
             // create the identity request
             boolean shortcut = true;
             String HisIdentityLabel = "HIS Identity Key"; 
-            TpmIdentity newId = TpmModule.collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, !shortcut);
+            
+            TpmIdentity newId;
+            if (IdentityOS.isWindows()) { 
+                /* Call Windows API to get the TPM EK certificate and assign it to "ekCert" */
+                Tpm tpm = new Tpm();
+                newId = tpm.getTpm().collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), X509Util.decodeDerCertificate(ekCert), !shortcut);
+
+            } else
+                newId = TpmModule.collateIdentityRequest(config.getTpmOwnerSecret(), config.getAikSecret(), HisIdentityLabel, new TpmPubKey((RSAPublicKey) privacy.getPublicKey(), 3, 1).toByteArray(), config.getAikIndex(), (X509Certificate) null, !shortcut);
 //             TpmKey aik = new TpmKey(newId.getAikBlob());
             
 //            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); 
