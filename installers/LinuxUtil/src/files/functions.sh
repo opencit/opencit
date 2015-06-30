@@ -2114,39 +2114,44 @@ glassfish_detect() {
         local java_bindir=`dirname $java`
       fi
   # start with GLASSFISH_HOME if it is already configured
-  if [[ -n "$GLASSFISH_HOME" ]]; then
-    if [[ -z "$glassfish_bin" ]]; then
-      glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
-    fi
-    if [[ -z "$glassfish" ]]; then
-      if [[ -n "$java" ]]; then    
-        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-        glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
-          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          if [ -n "$gfuser" ]; then
-            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+  if [ "$(whoami)" == "root" ]; then
+    if [[ -n "$GLASSFISH_HOME" ]]; then
+      if [[ -z "$glassfish_bin" ]]; then
+        glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
+      fi
+      if [[ -z "$glassfish" ]]; then
+        if [[ -n "$java" ]]; then    
+          # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+          glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+          if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
+            gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+            if [ -n "$gfuser" ]; then
+              glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+            fi
           fi
-        fi
-      else
-        glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
-        if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
-          gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
-          if [ -n "$gfuser" ]; then
-            glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+        else
+          glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+          if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
+            gfuser=`cat $GLASSFISH_HOME/config/admin.user | cut -d'=' -f2`
+            if [ -n "$gfuser" ]; then
+              glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
+            fi
           fi
         fi
       fi
-    fi
-    if [[ -n "$glassfish" ]]; then
-      GLASSFISH_VERSION=`glassfish_version`
-      if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
-        return 0
+      if [[ -n "$glassfish" ]]; then
+        GLASSFISH_VERSION=`glassfish_version`
+        if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
+          return 0
+        fi
       fi
     fi
+	searchdir=/
+  else
+    searchdir=/opt/mtwilson
   fi
 
-  GLASSFISH_CANDIDATES=`find / -name domains 2>/dev/null | grep glassfish/domains`
+  GLASSFISH_CANDIDATES=`find $searchdir -name domains 2>/dev/null | grep glassfish/domains`
 #  echo "Candidates: $GLASSFISH_CANDIDATES"
   for c in $GLASSFISH_CANDIDATES
   do
@@ -2218,16 +2223,25 @@ no_glassfish() {
 # Optional arguments:  one or more directories for glassfish user to own
 glassfish_permissions() {
   local chown_locations="$@"
-  local username=${glassfish_username:-glassfish}
+  local username=${MTWILSON_USERNAME:-mtwilson}
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then
-    useradd -c "Glassfish" -d "${GLASSFISH_HOME:-/usr/share/glassfish4}" -r -s /bin/bash "$username"
+    echo_failure "User $username does not exists"
+	return 1
   fi
   local file
   for file in $chown_locations
   do
     if [[ -n "$file" && -e "$file" ]]; then
-      chown -R "${username}:${username}" "$file"
+      owner=`stat -c '%U' $file`
+      if [ $owner != ${username} ]; then
+        if [ "$(whoami)" == "root" ]; then
+	      chown -R "${username}:${username}" "$file"
+        else
+		  echo_failure "Tomcat is not owned by $username"
+		  return 1
+		fi
+	  fi
     fi
   done
 }
