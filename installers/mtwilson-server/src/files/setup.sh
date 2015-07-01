@@ -134,7 +134,7 @@ if [ "$(whoami)" != "root" ]; then
   elif [ "${ulsmtw=`stat -c '%U' /usr/local/share/mtwilson`}" != "$MTWILSON_USERNAME" ]; then
    echo_failure "/usr/local/share/mtwilson is not owned by $MTWILSON_USERNAME. Please update the owner."
    exit 1
-  elif [ ! -d /etc/intel/cloudsecurity ]; then
+  elif ! [[ -d /etc/intel/cloudsecurity || -L /etc/intel/cloudsecurity ]]; then
    echo_failure "/etc/intel/cloudsecurity is not available. Please create one and change its owner to $MTWILSON_USERNAME."
    exit 1
   elif [ "${eics=`stat -c '%U' /etc/intel/cloudsecurity`}" != "$MTWILSON_USERNAME" ]; then
