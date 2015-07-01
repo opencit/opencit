@@ -9,9 +9,11 @@ import com.intel.mtwilson.Folders;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityProof;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
+import gov.niarl.his.privacyca.TpmKeyParams;
 import gov.niarl.his.privacyca.TpmModule;
 import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import gov.niarl.his.privacyca.TpmPubKey;
+import gov.niarl.his.privacyca.TpmSymmetricKey;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -202,7 +204,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
             TpmIdentityRequest idReq = new TpmIdentityRequest(idProof, caPubKey.getKey()); // this does the encryption of idProof by using caPubKey
             byte [] identityRequest = idReq.toByteArray();
             
-            log.debug("identity request: {}", idReq.toString());
+            //log.debug("identity request: {}", idReq.toString());
             log.debug("identity request asym size: {}", idReq.getAsymBlob().length);
             
             byte [] aikModulus = TpmUtils.hexStringToByteArray(result.getResult(1));
@@ -219,7 +221,75 @@ public class TpmModuleWindows implements TpmModuleProvider {
 
     @Override
     public HashMap<String, byte[]> activateIdentity2(byte[] ownerAuth, byte[] keyAuth, byte[] asymCaContents, byte[] symCaAttestation, int keyIndex) throws IOException, TpmModule.TpmModuleException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            
+            /*
+            * Activate Identity
+            * NIARL_TPM_Module -mode 4 -owner_auth <40 char hex blob> -key_auth <40 char hex blob> -asym <> -sym <> -key_index <integer index>
+            * return: <aik certificate>
+            */
+            /*
+            String argument = "-owner_auth " + TpmUtils.byteArrayToHexString(ownerAuth)
+            + " -key_auth " + TpmUtils.byteArrayToHexString(keyAuth)
+            + " -asym " + TpmUtils.byteArrayToHexString(asymCaContents)
+            + " -sym " + TpmUtils.byteArrayToHexString(symCaAttestation)
+            + " -key_index " + keyIndex;
+            */
+            String HisIdentityLabel = "HIS Identity Key";
+            
+            // form the command arguments. This commands only returns the secrect encrypted inside the asymCaContents.
+            String[] cmdArgs = {"ActivateIdentity",
+                TpmUtils.byteArrayToHexString(HisIdentityLabel.getBytes()),
+                TpmUtils.byteArrayToHexString(keyAuth),
+                TpmUtils.byteArrayToHexString(asymCaContents),
+            };
+            commandLineResult result = executeTpmCommand(cmdArgs, 2);
+            if (result.getReturnCode() != 0) throw new TpmModuleException("TpmModuleWindows.activateIdentity returned nonzero error", result.getReturnCode());
+            
+            // once get the secret, we need to decrypt the sysmCaAttestation to get the aikcert
+            /* the symCaAttestation is in the format of TPM_SYM_CA_ATTESTATION
+            * UINT32          credSize   -- size of the credential parameter
+            * TPM_KEY_PARMS   algorithm  -- indicator and parameters forthe symmetic algorithm
+            * BYTE *          credential -- result of encryption TPM_IDENTITY_CREDENTIAL using the session_key and the algorithm indicated "algorithm"
+            *          In this context it is: byte [] encryptedBlob = TpmUtils.concat(iv, TpmUtils.TCGSymEncrypt(challengeRaw, key, iv));
+            */
+            ByteArrayInputStream bs = new ByteArrayInputStream(symCaAttestation);
+            
+            byte [] key = TpmUtils.hexStringToByteArray(result.getResult(0));
+            int credsize  = TpmUtils.getUINT32(bs);
+            TpmKeyParams keyParms = new TpmKeyParams(bs);
+            byte[] iv = new byte[16];
+            bs.read(iv, 0, 16);
+            int ciphertextLen = credsize - 16;
+            byte [] ciphertext = new byte[ciphertextLen];
+            bs.read(ciphertext, 0, ciphertextLen);
+            
+            byte [] aikcert = TpmUtils.TCGSymDecrypt(ciphertext, key, iv);
+            
+            // return the results
+            HashMap<String,byte[]> results = new HashMap<String, byte[]>();
+            results.put("aikcert", aikcert);
+            results.put("aikblob", TpmUtils.hexStringToByteArray(result.getResult(1)));
+            return results;
+        } catch (TpmUtils.TpmUnsignedConversionException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TpmUtils.TpmBytestreamResouceException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchPaddingException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeyException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidAlgorithmParameterException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (BadPaddingException ex) {
+            Logger.getLogger(TpmModuleWindows.class.getName()).log(Level.SEVERE, null, ex);
+        }       
+        return null;
     }
 
     @Override
