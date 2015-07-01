@@ -867,21 +867,8 @@ if using_glassfish; then
   fi
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
-    if [ ! tomcat_detect >/dev/null ]; then
-      portInUse=`netstat -lnput | grep -E "8080|8443"`
-      if [ -n "$portInUse" ]; then 
-        #tomcat ports in use. exit install
-        echo_failure "Tomcat ports in use. Aborting install."
-        exit 1
-      fi
-    fi
-
-    # tomcat install here
-    echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    ./$tomcat_installer  >> $INSTALL_LOG_FILE
+    ./$tomcat_installer
     tomcat_create_ssl_cert_prompt
-    echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
-  # end tomcat install
   else
     echo_warning "Relying on an existing Tomcat installation"
   fi
@@ -1009,7 +996,7 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
     $LOG_COPYTRUNCATE
 }
 
-/opt/mtwilson/apache-tomcat-7.0.34/logs/catalina.out {
+/opt/mtwilson/share/apache-tomcat-7.0.34/logs/catalina.out {
     missingok
     notifempty
     rotate $LOG_OLD
@@ -1056,7 +1043,7 @@ fi
 if [ -z "$NO_TOMCAT_MONIT" ]; then 
   if [ ! -a /opt/mtwilson/monit/conf.d/tomcat.mtwilson ]; then
     echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
-      check file tc_installed with path \"/opt/mtwilson/apache-tomcat-7.0.34/bin/catalina.sh\"
+      check file tc_installed with path \"/opt/mtwilson/share/apache-tomcat-7.0.34/bin/catalina.sh\"
       group tc_server
       if does not exist then unmonitor
     

@@ -10,10 +10,73 @@ TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tar.gz 2>/dev/null | tail -n 1`
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
-if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; return 1; fi
-tomcat_install $TOMCAT_PACKAGE
+if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
 
-echo "Setting up Tomcat in $TOMCAT_HOME..."
+#tomcat_install $TOMCAT_PACKAGE
+MTWILSON_HOME=${MTWILSON_HOME:-"/opt/mtwilson"}
+tomcat_detect
+if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]] && tomcat_running; then
+  echo_warning "Existing tomcat installation detected"
+  OIFS=$IFS
+  IFS=$' \t\n' tomcatWebapps=(mtwilson mtwilson-portal AttestationService HisPrivacyCAWebServices2 ManagementService WLMService)
+  IFS=$OIFS
+  for i in "${tomcatWebapps[@]}"; do
+    warFile="$TOMCAT_HOME/webapps/${i}.war"
+    if [ -f "$warFile" ] && [ ! -w "$warFile" ]; then
+      echo_failure "Current user does not have permission to remove ${i} from previous tomcat installation"
+      exit 1
+    elif [ -f "$warFile" ]; then
+      echo "Removing ${i} from previous tomcat installation..."
+      webservice_uninstall "${i}" 2>&1 > /dev/null
+    fi
+  done
+  sleep 7  #uncomment if needed; may take a few seconds for tomcat to remove the deployed folder
+  additionalApplicationsInstalled=$(ls "$TOMCAT_HOME/webapps" | sed '/^docs$\|^examples$\|^host-manager$\|^manager$\|^ROOT$\|^$/d')
+  if [ -n "$additionalApplicationsInstalled" ]; then
+    echo_warning "Additional applications installed on the previous tomcat installation"
+    WEBSERVER_PORT_EVAL=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $3}' | awk -F: '{print $2}'`
+    WEBSERVER_PORT=${WEBSERVER_PORT:-${WEBSERVER_PORT_EVAL:-"8443"}}
+    OIFS=$IFS
+    IFS=$' \t\n' read -ra tomcatPorts <<< $(cat "$TOMCAT_CONF/server.xml" | grep "port=" | sed 's/.*port=//' | awk '{print $1}' | sed 's/"//g')
+    IFS=$OIFS
+    if [[ " ${tomcatPorts[*]} " == *" $WEBSERVER_PORT "* ]]; then
+      echo_failure "Existing tomcat installation running on configured port"
+      echo_failure "Remove old installation or choose a different port"
+      exit 1
+    fi
+  else
+    tomcat_stop
+  fi
+fi
+
+if [ -z "$TOMCAT_HOME" ] || [ -z "$tomcat" ] || [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then
+  if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
+    echo "Installing $TOMCAT_PACKAGE"
+    gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
+    tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
+    if [ -d "$tomcat_folder" ]; then
+      if [ -d "/opt/mtwilson/share/$tomcat_folder" ]; then
+        echo "Tomcat already installed at /opt/mtwilson/share/$tomcat_folder"
+        export TOMCAT_HOME="/opt/mtwilson/share/$tomcat_folder"
+      else
+        mkdir -p "/opt/mtwilson/share"
+        mv $tomcat_folder /opt/mtwilson/share && export TOMCAT_HOME="/opt/mtwilson/share/$tomcat_folder"
+      fi
+    fi
+    tomcat_detect
+  else
+    TOMCAT_YUM_PACKAGES="tomcat7"
+    TOMCAT_APT_PACKAGES="tomcat7"
+    auto_install "Tomcat via package manager" "TOMCAT"
+    tomcat_detect
+  fi
+fi
+
+if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
+  echo "Unable to auto-install Tomcat"
+  echo "  Tomcat download URL:"
+  echo "  http://tomcat.apache.org/"
+fi
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
 if [ ! -d ${TOMCAT_HOME}/endorsed ]; then
@@ -22,8 +85,6 @@ fi
 cp *.jar ${TOMCAT_HOME}/endorsed/
 cp setenv.sh ${TOMCAT_HOME}/bin/
 chmod +x $TOMCAT_HOME/bin/setenv.sh
-#Create SSL cert ###NOW DONE IN tomcat_install
-#tomcat_create_ssl_cert $MTWILSON_SERVER
 
 
 # on installations configured to use mysql, the customer is responsible for 
@@ -41,9 +102,7 @@ if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${TOMCAT_HOME}/endorsed/
 fi
 
-# Add the manager role give access to the tomcat user in the tomcat-users.xml
-echo "Editing tomcat-users.xml in $TOMCAT_CONF..."
-
+echo "Adding manager roles to tomcat admin account in tomcat-users.xml..."
 cd $TOMCAT_CONF
 userExists=`grep "username=\"$WEBSERVICE_MANAGER_USERNAME\"" tomcat-users.xml`
 mv tomcat-users.xml tomcat-users.xml.old
@@ -61,8 +120,8 @@ rm  -f tomcat-users.xml.old
 #               clientAuth="false" sslProtocol="TLS"
 #               keystoreFile="/usr/share/apache-tomcat-7.0.34/ssl/keystore.jks" keystorePass="changeit" />
 # release the connectors!
-echo "Editing server.xml in $TOMCAT_CONF..."
 
+echo "Editing server.xml in $TOMCAT_CONF..."
 cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml

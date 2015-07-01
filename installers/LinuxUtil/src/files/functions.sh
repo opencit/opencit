@@ -2875,7 +2875,10 @@ tomcat_detect() {
   #echo "tomcat variable is $tomcat"
   #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
-  TOMCAT_CANDIDATES=`find $searchdir -name tomcat-users.xml 2>/dev/null`
+  TOMCAT_CANDIDATES=`find /opt/mtwilson -name tomcat-users.xml 2>/dev/null`
+  if [ -z "$TOMCAT_CANDIDATES" ]; then
+    TOMCAT_CANDIDATES=`find $searchdir -name tomcat-users.xml 2>/dev/null`
+  fi
   tomcat_clear
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES
@@ -2904,43 +2907,7 @@ tomcat_detect() {
   return 1
 }
 
-tomcat_install() {
-  TOMCAT_HOME=""
-  tomcat=""
-  tomcat_detect
-  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
-    if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
-      echo "Installing $TOMCAT_PACKAGE"
-      #if [ -d "${tomcat_parent_dir}/${tomcat_name}" ]; then
-      #    local datestr=`date +%Y-%m-%d.%H%M`
-      #    echo "Renaming existing incomplete ${tomcat_parent_dir}/${tomcat_name} to ${tomcat_parent_dir}/${tomcat_name}.${datestr}"
-      #    mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
-      #fi
-      gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
-      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
-      if [ -d "$tomcat_folder" ]; then
-        if [ -d "/opt/mtwilson/$tomcat_folder" ]; then
-          echo "Tomcat already installed at /opt/mtwilson/$tomcat_folder"
-          export TOMCAT_HOME="/opt/mtwilson/$tomcat_folder"
-        else
-          mv $tomcat_folder /opt/mtwilson && export TOMCAT_HOME="/opt/mtwilson/$tomcat_folder"
-        fi
-      fi
-      tomcat_detect
-    else
-      TOMCAT_YUM_PACKAGES="tomcat7"
-      TOMCAT_APT_PACKAGES="tomcat7"
-      auto_install "Tomcat via package manager" "TOMCAT"
-      tomcat_detect
-    fi
-  fi
-  
-  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
-    echo "Unable to auto-install Tomcat"
-    echo "  Tomcat download URL:"
-    echo "  http://tomcat.apache.org/"
-  fi
-}
+
 
 # Run this AFTER tomcat_install
 # optional global variables:  
@@ -2980,7 +2947,8 @@ tomcat_running() {
     tomcat_detect 2>&1 > /dev/null
   fi
   if [ -n "$TOMCAT_HOME" ]; then
-    TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
+    #TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
+    TOMCAT_PID=$(ps aux | grep java | grep apache-tomcat | awk '{print $2}')
     echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
     if [ -n "$TOMCAT_PID" ]; then
       TOMCAT_RUNNING=yes
