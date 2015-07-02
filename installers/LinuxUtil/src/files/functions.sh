@@ -3878,8 +3878,8 @@ webservice_uninstall() {
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
-      rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
-      rm -rf $TOMCAT_HOME/webapps/${webservice_application_name}
+      rm -rf "$TOMCAT_HOME/webapps/$WAR_NAME"
+      rm -rf "$TOMCAT_HOME/webapps/${webservice_application_name}"
     fi
   else
     if using_glassfish; then
