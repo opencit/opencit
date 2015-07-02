@@ -15,8 +15,12 @@ if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "
 #tomcat_install $TOMCAT_PACKAGE
 MTWILSON_HOME=${MTWILSON_HOME:-"/opt/mtwilson"}
 tomcat_detect
+tomcatExistingInstallation=false
+tomcatExistingKeystoreFile=
+tomcatExistingKeystorePassword=
 if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then # && tomcat_running; then
   echo_warning "Existing tomcat installation detected"
+  tomcatExistingInstallation=true
   OIFS=$IFS
   IFS=$' \t\n' tomcatWebapps=(mtwilson mtwilson-portal AttestationService HisPrivacyCAWebServices2 ManagementService WLMService)
   IFS=$OIFS
@@ -43,6 +47,8 @@ if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then # &&
       exit 1
     fi
   fi
+  tomcatExistingKeystoreFile=$(cat "$TOMCAT_CONF/server.xml" | grep "keystoreFile=" | sed 's/.*keystoreFile=//' | awk '{print $1}' | sed 's/"//g')
+  tomcatExistingKeystorePassword=$(cat "$TOMCAT_CONF/server.xml" | grep "keystorePass=" | sed 's/.*keystorePass=//' | awk '{print $1}' | sed 's/"//g')
 fi
 
 if [ -z "$TOMCAT_HOME" ] || [ -z "$tomcat" ] || [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then
@@ -73,6 +79,25 @@ if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
   echo "Unable to auto-install Tomcat"
   echo "  Tomcat download URL:"
   echo "  http://tomcat.apache.org/"
+fi
+
+if $tomcatExistingInstallation; then
+  tomcatServerXml="$TOMCAT_CONF/server.xml"
+  tomcatKeystoreFile="$TOMCAT_HOME/ssl/.keystore"
+  tomcatKeystorePassword=${tomcatExistingKeystorePassword:-"changeit"}
+  if [ -n "$tomcatExistingKeystoreFile" ] && [ -f "$tomcatExistingKeystoreFile" ]; then
+    echo "Copying existing tomcat keystore and saving keystore location in server.xml..."
+    mkdir -p "$TOMCAT_HOME/ssl"
+    cp "$tomcatExistingKeystoreFile" "$tomcatKeystoreFile"
+    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
+    #sed -i 's/keystoreFile=.*\b/keystoreFile=\"'"$tomcatKeystoreFile"'/g' "$tomcatServerXml"
+    perl -p -i -e 's/keystoreFile=.*?\s/keystoreFile=\"'"$(sed_escape $tomcatKeystoreFile)"'\" /g' "$tomcatServerXml"
+  fi
+  if [ -n "$tomcatExistingKeystorePassword" ]; then
+    echo "Saving existing tomcat keystore password in server.xml..."
+    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
+    sed -i 's/keystorePass=.*\b/keystorePass=\"'"$tomcatKeystorePassword"'/g' "$tomcatServerXml"
+  fi
 fi
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
