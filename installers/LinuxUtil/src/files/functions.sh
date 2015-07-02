@@ -2830,46 +2830,43 @@ tomcat_detect() {
 
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
-
-      if [[ -n "$java" ]]; then    
-        local java_bindir=`dirname $java`
-      fi
+  if [[ -n "$java" ]]; then    
+    local java_bindir=`dirname $java`
+  fi
 
   # start with TOMCAT_HOME if it is already configured
   if [ "$(whoami)" == "root" ]; then
-   if [[ -n "$TOMCAT_HOME" ]]; then
-     if [[ -z "$tomcat_bin" ]]; then
-       tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
-     fi
-     if [[ -z "$tomcat" ]]; then
-       if [[ -n "$java" ]]; then    
-         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-         tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
-       else
-         tomcat="$tomcat_bin"
-       fi
-     fi
-     if [ -z "$TOMCAT_CONF" ]; then
-       if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
-         export TOMCAT_CONF="$TOMCAT_HOME/conf"
-       else
-         # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
-         # reset the "tomcat" variable to force a new detection below
-         tomcat=""
-       fi
-     fi
-     if [[ -n "$tomcat" ]]; then
-       #TOMCAT_VERSION=`tomcat_version`
-       tomcat_version
-       if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
-         return 0
-       fi
-     fi
-   fi
-   searchdir=/
+    if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" == /opt/mtwilson* ]]; then
+      if [ -z "$tomcat_bin" ]; then
+        tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
+      fi
+      if [ -z "$tomcat" ]; then
+        if [ -n "$java" ]; then    
+          # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+          tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
+        else
+          tomcat="$tomcat_bin"
+        fi
+      fi
+      if [ -d "$TOMCAT_HOME/conf" ] && [ -f "$TOMCAT_HOME/conf/tomcat-users.xml" ] && [ -f "$TOMCAT_HOME/conf/server.xml" ]; then
+        export TOMCAT_CONF="$TOMCAT_HOME/conf"
+      else
+        # we think we know TOMCAT_HOME but we can't find TOMCAT_CONF so
+        # reset the "tomcat" variable to force a new detection below
+        tomcat=""
+      fi
+      if [ -n "$tomcat" ]; then
+        #TOMCAT_VERSION=`tomcat_version`
+        tomcat_version
+        if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+          return 0
+        fi
+      fi
+    fi
+    searchdir=/
   else
-  #TODO update it to $MTWILSON_HOME
-   searchdir=/opt/mtwilson
+    #TODO update it to $MTWILSON_HOME
+    searchdir=/opt/mtwilson
   fi
   
   #echo "tomcat variable is $tomcat"
@@ -2881,8 +2878,7 @@ tomcat_detect() {
   fi
   tomcat_clear
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
-  for c in $TOMCAT_CANDIDATES
-  do
+  for c in $TOMCAT_CANDIDATES; do
     #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
       local conf_dir=`dirname $c`
@@ -2947,12 +2943,9 @@ tomcat_running() {
     tomcat_detect 2>&1 > /dev/null
   fi
   if [ -n "$TOMCAT_HOME" ]; then
-    #TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
-    TOMCAT_PID=$(ps aux | grep java | grep apache-tomcat | awk '{print $2}')
-    echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
+    TOMCAT_PID=$(ps gauwxx | grep java | grep "$TOMCAT_HOME" | awk '{ print $2 }')
     if [ -n "$TOMCAT_PID" ]; then
       TOMCAT_RUNNING=yes
-      echo TOMCAT_RUNNING: $TOMCAT_RUNNING >> $INSTALL_LOG_FILE
       return 0
     fi
   fi
@@ -3207,6 +3200,38 @@ tomcat_init_manager() {
   fi
 }
 
+tomcat_no_additional_webapps_exist() {
+  if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+  if [ -z "$TOMCAT_HOME" ]; then return 1; fi
+  TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED=$(ls "$TOMCAT_HOME/webapps" | sed '/^docs$\|^examples$\|^host-manager$\|^manager$\|^ROOT$\|^$/d')
+  if [ -n "$TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    return 1
+  fi
+  return 0
+}
+
+tomcat_no_additional_webapps_exist_wait() {
+  tomcat_no_additional_webapps_exist
+  if [[ "$TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED" == *".war"* ]]; then
+    echo_warning "Additional tomcat webapps exist: $TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  fi
+  echo -n "Checking if additional tomcat webapps exist..."
+  for (( c=1; c<=10; c++ )); do
+    if ! tomcat_no_additional_webapps_exist; then
+      echo -n "."
+      sleep 3
+    fi
+  done
+  if [ -n "$TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    echo
+    echo_warning "Additional tomcat webapps exist: $TOMCAT_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  else
+    echo
+    return 0
+  fi
+}
 
 ### FUNCTION LIBRARY: java
 
@@ -3674,6 +3699,9 @@ webservice_running() {
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
         WEBSERVICE_RUNNING=$(wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/text/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}:" | sed -e 's/:/\n/g' | grep "running")
       fi
+    else
+      if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+      WEBSERVICE_DEPLOYED=$(ls "$TOMCAT_HOME/webapps" | grep "${webservice_application_name}.war")
     fi
   fi
 }
@@ -3846,7 +3874,8 @@ webservice_uninstall() {
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
-      rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
+      rm -rf "$TOMCAT_HOME/webapps/$WAR_NAME"
+      rm -rf "$TOMCAT_HOME/webapps/${webservice_application_name}"
     fi
   else
     if using_glassfish; then

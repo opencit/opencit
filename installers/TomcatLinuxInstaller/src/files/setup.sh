@@ -15,25 +15,27 @@ if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "
 #tomcat_install $TOMCAT_PACKAGE
 MTWILSON_HOME=${MTWILSON_HOME:-"/opt/mtwilson"}
 tomcat_detect
-if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]] && tomcat_running; then
+tomcatExistingInstallation=false
+tomcatExistingKeystoreFile=
+tomcatExistingKeystorePassword=
+if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then # && tomcat_running; then
   echo_warning "Existing tomcat installation detected"
+  tomcatExistingInstallation=true
   OIFS=$IFS
   IFS=$' \t\n' tomcatWebapps=(mtwilson mtwilson-portal AttestationService HisPrivacyCAWebServices2 ManagementService WLMService)
   IFS=$OIFS
   for i in "${tomcatWebapps[@]}"; do
     warFile="$TOMCAT_HOME/webapps/${i}.war"
-    if [ -f "$warFile" ] && [ ! -w "$warFile" ]; then
-      echo_failure "Current user does not have permission to remove ${i} from previous tomcat installation"
-      exit 1
-    elif [ -f "$warFile" ]; then
+    if [ -f "$warFile" ]; then
+      if [ ! -w "$warFile" ]; then
+        echo_failure "Current user does not have permission to remove ${i} from previous tomcat installation"
+        exit 1
+      fi
       echo "Removing ${i} from previous tomcat installation..."
-      webservice_uninstall "${i}" 2>&1 > /dev/null
+      webservice_uninstall "${i}" #2>&1 > /dev/null
     fi
   done
-  sleep 7  #uncomment if needed; may take a few seconds for tomcat to remove the deployed folder
-  additionalApplicationsInstalled=$(ls "$TOMCAT_HOME/webapps" | sed '/^docs$\|^examples$\|^host-manager$\|^manager$\|^ROOT$\|^$/d')
-  if [ -n "$additionalApplicationsInstalled" ]; then
-    echo_warning "Additional applications installed on the previous tomcat installation"
+  if ! tomcat_no_additional_webapps_exist_wait; then   #additional apps exist
     WEBSERVER_PORT_EVAL=`echo $MTWILSON_API_BASEURL | awk -F/ '{print $3}' | awk -F: '{print $2}'`
     WEBSERVER_PORT=${WEBSERVER_PORT:-${WEBSERVER_PORT_EVAL:-"8443"}}
     OIFS=$IFS
@@ -44,23 +46,24 @@ if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]] && tomcat_
       echo_failure "Remove old installation or choose a different port"
       exit 1
     fi
-  else
-    tomcat_stop
   fi
+  tomcatExistingKeystoreFile=$(cat "$TOMCAT_CONF/server.xml" | grep "keystoreFile=" | sed 's/.*keystoreFile=//' | awk '{print $1}' | sed 's/"//g')
+  tomcatExistingKeystorePassword=$(cat "$TOMCAT_CONF/server.xml" | grep "keystorePass=" | sed 's/.*keystorePass=//' | awk '{print $1}' | sed 's/"//g')
 fi
 
 if [ -z "$TOMCAT_HOME" ] || [ -z "$tomcat" ] || [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then
   if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
-    echo "Installing $TOMCAT_PACKAGE"
     gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
     tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tar.gz '{ print $1 }'`
+    tomcat_folder_path="${MTWILSON_HOME}/share/$tomcat_folder"
     if [ -d "$tomcat_folder" ]; then
-      if [ -d "/opt/mtwilson/share/$tomcat_folder" ]; then
-        echo "Tomcat already installed at /opt/mtwilson/share/$tomcat_folder"
-        export TOMCAT_HOME="/opt/mtwilson/share/$tomcat_folder"
+      if [ -d "$tomcat_folder_path" ]; then
+        echo "Tomcat already installed at $tomcat_folder_path"
+        export TOMCAT_HOME="$tomcat_folder_path"
       else
-        mkdir -p "/opt/mtwilson/share"
-        mv $tomcat_folder /opt/mtwilson/share && export TOMCAT_HOME="/opt/mtwilson/share/$tomcat_folder"
+        echo "Installing tomcat in $tomcat_folder_path..."
+        mkdir -p "${MTWILSON_HOME}/share"
+        mv $tomcat_folder "${MTWILSON_HOME}/share" && export TOMCAT_HOME="$tomcat_folder_path"
       fi
     fi
     tomcat_detect
@@ -76,6 +79,25 @@ if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
   echo "Unable to auto-install Tomcat"
   echo "  Tomcat download URL:"
   echo "  http://tomcat.apache.org/"
+fi
+
+if $tomcatExistingInstallation; then
+  tomcatServerXml="$TOMCAT_CONF/server.xml"
+  tomcatKeystoreFile="$TOMCAT_HOME/ssl/.keystore"
+  tomcatKeystorePassword=${tomcatExistingKeystorePassword:-"changeit"}
+  if [ -n "$tomcatExistingKeystoreFile" ] && [ -f "$tomcatExistingKeystoreFile" ]; then
+    echo "Copying existing tomcat keystore and saving keystore location in server.xml..."
+    mkdir -p "$TOMCAT_HOME/ssl"
+    cp "$tomcatExistingKeystoreFile" "$tomcatKeystoreFile"
+    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
+    #sed -i 's/keystoreFile=.*\b/keystoreFile=\"'"$tomcatKeystoreFile"'/g' "$tomcatServerXml"
+    perl -p -i -e 's/keystoreFile=.*?\s/keystoreFile=\"'"$(sed_escape $tomcatKeystoreFile)"'\" /g' "$tomcatServerXml"
+  fi
+  if [ -n "$tomcatExistingKeystorePassword" ]; then
+    echo "Saving existing tomcat keystore password in server.xml..."
+    sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$tomcatKeystoreFile"'\" keystorePass=\"'"$tomcatKeystorePassword"'\" />|g' "$tomcatServerXml"
+    sed -i 's/keystorePass=.*\b/keystorePass=\"'"$tomcatKeystorePassword"'/g' "$tomcatServerXml"
+  fi
 fi
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
@@ -97,7 +119,7 @@ chmod +x $TOMCAT_HOME/bin/setenv.sh
 # # cp mysql-connector-java-5.1.x.jar /opt/intel/cloudsecurity/setup-console
 # so now we check to see if it's there, and copy it to TOMCAT so the apps
 # can use it:
-mysqlconnector_files=`ls -1 /opt/mtwilson/java/* | grep -i mysql`
+mysqlconnector_files=`ls -1 ${MTWILSON_HOME}/java/* | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${TOMCAT_HOME}/endorsed/
 fi
