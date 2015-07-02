@@ -93,7 +93,7 @@ public class HostInfoCmdWin implements ICommand {
             context.setBiosOem(biosManufacturer);
             log.debug("Bios OEM: " + context.getBiosOem());
             
-            String biosVersion = jWMI.getWMIValue("Select Name from Win32_BIOS", "Name");
+            String biosVersion = jWMI.getWMIValue("Select SMBIOSBIOSVersion from Win32_BIOS", "SMBIOSBIOSVersion");
             context.setBiosVersion(biosVersion);
             log.debug("Bios Version: " + context.getBiosVersion());
         } catch (Exception ex) {
