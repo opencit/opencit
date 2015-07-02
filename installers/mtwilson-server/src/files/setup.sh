@@ -868,6 +868,10 @@ if using_glassfish; then
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
     ./$tomcat_installer
+    if [ $? -ne 0 ]; then
+      echo_failure "Tomcat installation failed"
+      exit 1
+    fi
     tomcat_create_ssl_cert_prompt
   else
     echo_warning "Relying on an existing Tomcat installation"
