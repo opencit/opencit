@@ -41,20 +41,21 @@ fi
 
 export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
 
+if [ -d $MTWILSON_ENV ]; then
+   mtw_load_env $(ls -1 $MTWILSON_ENV/*)
+fi
+
 ###################################################################################################
 
 # if non-root execution is specified, and we are currently root, start over; the MTW_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$MTWILSON_USERNAME" ] && [ "$MTWILSON_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$MTWILSON_SUDO" ] && [ "$1" != "uninstall" ]; then
   export MTWILSON_SUDO=true
-  sudo -u $MTWILSON_USERNAME -H -E mtwilson $*
+  sudo -u $MTWILSON_USERNAME -H -E "$MTWILSON_BIN/mtwilson" $*
   exit $?
 fi
 
 ###################################################################################################
-if [ -d $MTWILSON_ENV ]; then
-   mtw_load_env $(ls -1 $MTWILSON_ENV/*)
-fi
 
 # default directory layout follows the 'home' style
 export MTWILSON_CONFIGURATION=${MTWILSON_CONFIGURATION:-${MTWILSON_CONF:-$MTWILSON_HOME/configuration}}

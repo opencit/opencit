@@ -2109,18 +2109,16 @@ glassfish_detect() {
   local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
+  if [[ -n "$java" ]]; then    
+    local java_bindir=`dirname $java`
+  fi
 
-      if [[ -n "$java" ]]; then    
-        local java_bindir=`dirname $java`
-      fi
   # start with GLASSFISH_HOME if it is already configured
   if [ "$(whoami)" == "root" ]; then
-    if [[ -n "$GLASSFISH_HOME" ]]; then
-      if [[ -z "$glassfish_bin" ]]; then
-        glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
-      fi
-      if [[ -z "$glassfish" ]]; then
-        if [[ -n "$java" ]]; then    
+    if [ -n "$GLASSFISH_HOME" ] && [[ "$GLASSFISH_HOME" == /opt/mtwilson* ]]; then
+      glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
+      if [ -z "$glassfish" ] || [[ "$glassfish" != *"$glassfish_bin"* ]]; then
+        if [ -n "$java" ]; then    
           # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
           glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
           if [ -f "$GLASSFISH_HOME/config/admin.passwd" ] && [ -f "$GLASSFISH_HOME/config/admin.user" ]; then
@@ -2139,24 +2137,25 @@ glassfish_detect() {
           fi
         fi
       fi
-      if [[ -n "$glassfish" ]]; then
+      if [ -n "$glassfish" ]; then
         GLASSFISH_VERSION=`glassfish_version`
         if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
           return 0
         fi
       fi
     fi
-	searchdir=/
+    searchdir=/
   else
     searchdir=/opt/mtwilson
   fi
 
-  GLASSFISH_CANDIDATES=`find $searchdir -name domains 2>/dev/null | grep glassfish/domains`
-#  echo "Candidates: $GLASSFISH_CANDIDATES"
-  for c in $GLASSFISH_CANDIDATES
-  do
+  GLASSFISH_CANDIDATES=`find /opt/mtwilson -name domains 2>/dev/null | grep glassfish/domains`
+  if [ -z "$GLASSFISH_CANDIDATES" ]; then
+    GLASSFISH_CANDIDATES=`find $searchdir -name domains 2>/dev/null | grep glassfish/domains`
+  fi
+  glassfish_clear
+  for c in $GLASSFISH_CANDIDATES; do
       local parent=`dirname $c`
- #     echo "Checking Glassfish: $parent"
       if [ -f "$parent/bin/asadmin" ]; then
         GLASSFISH_HOME="$parent"
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
@@ -2168,15 +2167,13 @@ glassfish_detect() {
             glassfish+=" --user=$gfuser --passwordfile=$GLASSFISH_HOME/config/admin.passwd"
           fi
         fi
-        echo "Found Glassfish: $GLASSFISH_HOME"
-#        echo "Found Glassfish: $glassfish"
         GLASSFISH_VERSION=`glassfish_version`
         if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
           return 0
         fi
       fi
   done
-  echo_failure "Cannot find Glassfish"
+  #echo_failure "Cannot find Glassfish"
   glassfish_clear
   return 1
   # read the admin username and pasword, if present. format of both files is shell  VARIABLE=VALUE
@@ -2227,21 +2224,20 @@ glassfish_permissions() {
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then
     echo_failure "User $username does not exists"
-	return 1
+    return 1
   fi
   local file
-  for file in $chown_locations
-  do
+  for file in $chown_locations; do
     if [[ -n "$file" && -e "$file" ]]; then
       owner=`stat -c '%U' $file`
       if [ $owner != ${username} ]; then
         if [ "$(whoami)" == "root" ]; then
-	      chown -R "${username}:${username}" "$file"
+          chown -R "${username}:${username}" "$file"
         else
-		  echo_failure "Tomcat is not owned by $username"
-		  return 1
-		fi
-	  fi
+          echo_failure "Tomcat is not owned by $username"
+          return 1
+        fi
+      fi
     fi
   done
 }
@@ -2299,95 +2295,6 @@ glassfish_memory() {
 # http://stackoverflow.com/questions/9373629/glassfish-3-1-1-suddenly-stopped-writing-to-server-log
 glassfish_enable_logging() {
   $glassfish set-log-levels com.sun.enterprise.server.logging.GFFileHandler=ALL
-}
-
-# must restart glassfish for enable-secure-admin and memory options to take effect, so call these after calling this function:
-#  glassfish_stop
-#  glassfish_start
-# (they are not done automatically in case the caller has other glassfish setup that would also require a restart)
-# Environment:
-# - glassfish_required_version
-glassfish_install() {
-  GLASSFISH_HOME=""
-  glassfish=""
-  local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
-  GLASSFISH_YUM_PACKAGES="unzip"
-  GLASSFISH_APT_PACKAGES="unzip"
-  GLASSFISH_YAST_PACKAGES="unzip"
-  GLASSFISH_ZYPPER_PACKAGES="unzip"
-  glassfish_detect
-
-  if glassfish_running; then glassfish_stop; fi
-
-  if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
-    if [ -d /usr/share/glassfish4 ]; then
-      # we do not remove it automatically in case there are applications or data in there that the user wants to save!!
-      echo_warning "Glassfish not detected but /usr/share/glassfish4 exists"
-      echo "Remove /usr/share/glassfish4 and try again"
-      return 1
-    fi
-    if [[ -z "$GLASSFISH_PACKAGE" || ! -f "$GLASSFISH_PACKAGE" ]]; then
-      echo_failure "Missing Glassfish installer: $GLASSFISH_PACKAGE"
-      return 1
-    fi
-    auto_install "Glassfish requirements" "GLASSFISH"
-    echo "Installing $GLASSFISH_PACKAGE"
-    unzip $GLASSFISH_PACKAGE 2>&1  >/dev/null
-    if [ -d "glassfish4" ]; then
-      if [ -d "/usr/share/glassfish4" ]; then
-        echo "Glassfish already installed at /usr/share/glassfish4"
-        export GLASSFISH_HOME="/usr/share/glassfish4/glassfish"
-      else
-        mv glassfish4 /usr/share && export GLASSFISH_HOME="/usr/share/glassfish4/glassfish"
-      fi
-    fi
-    # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
-    if [ -f "/etc/hosts" ]; then
-        local hostname=`hostname`
-        local found=`cat "/etc/hosts" | grep "^127.0.0.1" | grep "$hostname"`
-        if [ -z "$found" ]; then
-          local datestr=`date +%Y-%m-%d.%H%M`
-          cp /etc/hosts /etc/hosts.${datestr}
-          local updated=`sed -re "s/^(127.0.0.1\s.*)$/\1 ${hostname}/" /etc/hosts`
-          echo "$updated" > /etc/hosts
-        fi
-    fi
-    glassfish_detect
-    if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
-      echo_failure "Unable to auto-install Glassfish"
-      echo "Glassfish download URL:"
-      echo "http://glassfish.java.net/"
-      return 1
-    fi
-  else
-    echo "Glassfish is already installed in $GLASSFISH_HOME"
-  fi
-
-  #if [ -n "${MTWILSON_SERVER}" ]; then
-  #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-  #else
-  #  glassfish_create_ssl_cert_prompt
-  #fi
-
-  glassfish_permissions "${GLASSFISH_HOME}"
-  sleep 5
-  glassfish_start
-  #glassfish_admin_user
-  glassfish_memory 2048 512
-  glassfish_logback
-  
-  # set JAVA_HOME for glassfish
-  asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
-  if [ -n "$asenvFile" ]; then
-    if [ -f "$asenvFile" ] && ! grep -q "AS_JAVA=" "$asenvFile"; then
-      echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
-    fi
-  else
-    echo "warning: asenv.conf not found" >> $INSTALL_LOG_FILE
-  fi
-  
-  echo "Increasing glassfish max thread pool size to 200..."
-  $glassfish set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
@@ -2731,6 +2638,47 @@ glassfish_create_ssl_cert() {
   fi
 }
 
+glassfish_no_additional_webapps_exist() {
+  if [ -z "$GLASSFISH_HOME" ]; then glassfish_detect; fi
+  if [ -z "$GLASSFISH_HOME" ]; then return 1; fi
+  glassfishApplicationDirectories=($(find "$GLASSFISH_HOME/domains" -name "applications"))
+  for i in "${glassfishApplicationDirectories[@]}"; do
+    GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED=$(ls "${i}" | sed '/^__internal$\|^$/d')
+  done
+  glassfishInternalApplicationDirectories=($(find "$GLASSFISH_HOME/domains" -name "__internal"))
+  for i in "${glassfishInternalApplicationDirectories[@]}"; do
+    GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED+=" "$(ls "${i}" | sed '/^$/d')
+  done
+  GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED=$(echo "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+  if [ -n "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    return 1
+  fi
+  return 0
+}
+
+glassfish_no_additional_webapps_exist_wait() {
+  glassfish_no_additional_webapps_exist
+  if [[ "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" == *".war"* ]]; then
+    echo_warning "Additional glassfish webapps exist: $GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  fi
+  echo -n "Checking if additional glassfish webapps exist..."
+  for (( c=1; c<=10; c++ )); do
+    if ! glassfish_no_additional_webapps_exist; then
+      echo -n "."
+      sleep 3
+    fi
+  done
+  if [ -n "$GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED" ]; then
+    echo
+    echo_warning "Additional glassfish webapps exist: $GLASSFISH_ADDITIONAL_APPLICATIONS_INSTALLED"
+    return 1
+  else
+    echo
+    return 0
+  fi
+}
+
 ### FUNCTION LIBRARY: tomcat
 
 # tomcat 
@@ -2826,8 +2774,6 @@ tomcat_version_report() {
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
   local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
-  echo "min_version for tomcat_detect is $min_version" >>  $INSTALL_LOG_FILE
-
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
   if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
   if [[ -n "$java" ]]; then    
@@ -2837,9 +2783,7 @@ tomcat_detect() {
   # start with TOMCAT_HOME if it is already configured
   if [ "$(whoami)" == "root" ]; then
     if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" == /opt/mtwilson* ]]; then
-      if [ -z "$tomcat_bin" ]; then
-        tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
-      fi
+      tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
       if [ -z "$tomcat" ]; then
         if [ -n "$java" ]; then    
           # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
@@ -2868,18 +2812,13 @@ tomcat_detect() {
     #TODO update it to $MTWILSON_HOME
     searchdir=/opt/mtwilson
   fi
-  
-  #echo "tomcat variable is $tomcat"
-  #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
   TOMCAT_CANDIDATES=`find /opt/mtwilson -name tomcat-users.xml 2>/dev/null`
   if [ -z "$TOMCAT_CANDIDATES" ]; then
     TOMCAT_CANDIDATES=`find $searchdir -name tomcat-users.xml 2>/dev/null`
   fi
   tomcat_clear
-  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES; do
-    #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
       local conf_dir=`dirname $c`
       local parent=`dirname $conf_dir`
@@ -2898,7 +2837,7 @@ tomcat_detect() {
       fi
     fi
   done
-  echo_failure "Cannot find Tomcat"
+  #echo_failure "Cannot find Tomcat"
   tomcat_clear
   return 1
 }
@@ -3316,87 +3255,89 @@ java_detect() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   # start with JAVA_HOME if it is already configured
   if [ "$(whoami)" == "root" ]; then
-   if [[ -n "$JAVA_HOME" ]]; then
-     if [[ -z "$java" ]]; then
-       java=${JAVA_HOME}/bin/java
-     fi
-     JAVA_VERSION=`java_version`
-     if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-       return 0
-     fi
-   fi
-   searchdir=/
+    if [[ -n "$JAVA_HOME" ]]; then
+      if [[ -z "$java" ]]; then
+        java=${JAVA_HOME}/bin/java
+      fi
+      JAVA_VERSION=`java_version`
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
+    searchdir=/
   else
-  #TODO update it to $MTWILSON_HOME
-   searchdir=/opt/mtwilson
+    #TODO update it to $MTWILSON_HOME
+    searchdir=/opt/mtwilson
   fi
-  
 
-    JAVA_JDK_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
-    for c in $JAVA_JDK_CANDIDATES
-    do
-        local java_bindir=`dirname $c`
-        if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname $java_bindir`
-          java=$c
-          JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
-          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-            return 0
-          fi
+  JAVA_JDK_CANDIDATES=$(find /opt/mtwilson -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  if [ -z "$JAVA_JDK_CANDIDATES" ]; then
+    JAVA_JDK_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  fi
+  for c in $JAVA_JDK_CANDIDATES; do
+    local java_bindir=`dirname $c`
+    if [ -f "$java_bindir/java" ]; then
+      export JAVA_HOME=`dirname $java_bindir`
+      java=$c
+      JAVA_VERSION=`java_version`
+      echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
+  done
+  echo "Cannot find JDK"
+
+  JAVA_JRE_CANDIDATES=$(find /opt/mtwilson -name java 2>/dev/null | grep jre | grep bin/java)
+  if [ -z "$JAVA_JRE_CANDIDATES" ]; then
+    JAVA_JRE_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jre | grep bin/java)
+  fi
+  for c in $JAVA_JRE_CANDIDATES; do
+    java_bindir=`dirname $c`
+    if [ -f "$java_bindir/java" ]; then
+      export JAVA_HOME=`dirname $java_bindir`
+      java=$c
+      JAVA_VERSION=`java_version`
+      echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
+  done
+  echo "Cannot find JRE"
+
+  JAVA_BIN_CANDIDATES=$(find /opt/mtwilson -name java 2>/dev/null | grep bin/java)
+  if [ -z "$JAVA_BIN_CANDIDATES" ]; then
+    JAVA_BIN_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep bin/java)
+  fi
+  for c in $JAVA_BIN_CANDIDATES; do
+    java_bindir=`dirname $c`
+    # in non-JDK and non-JRE folders the "java" command may be a symlink:
+    if [ -f "$java_bindir/java" ]; then
+      export JAVA_HOME=`dirname $java_bindir`
+      java=$c
+      JAVA_VERSION=`java_version`
+      echo "Found Java: $c" >> $INSTALL_LOG_FILE
+      if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+        return 0
+      fi
+    elif [ -h "$java_bindir/java" ]; then
+      local javatarget=`readlink $c`
+      if [ -f "$javatarget" ]; then
+        java_bindir=`dirname $javatarget`
+        export JAVA_HOME=`dirname $java_bindir`
+        java=$javatarget
+        JAVA_VERSION=`java_version`
+        echo "Found Java: $java" >> $INSTALL_LOG_FILE
+        if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+          return 0
         fi
-    done
-    
-    echo "Cannot find JDK"
-
-    JAVA_JRE_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep jre | grep bin/java`
-    for c in $JAVA_JRE_CANDIDATES
-    do
-        java_bindir=`dirname $c`
-        if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname $java_bindir`
-          java=$c
-          JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
-          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-            return 0
-          fi
-        fi
-    done
-
-    echo "Cannot find JRE"
-
-    JAVA_BIN_CANDIDATES=`find $searchdir -name java 2>/dev/null | grep bin/java`
-    for c in $JAVA_BIN_CANDIDATES
-    do
-        java_bindir=`dirname $c`
-        # in non-JDK and non-JRE folders the "java" command may be a symlink:
-        if [ -f "$java_bindir/java" ]; then
-          export JAVA_HOME=`dirname $java_bindir`
-          java=$c
-          JAVA_VERSION=`java_version`
-          echo "Found Java: $c" >> $INSTALL_LOG_FILE
-          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-            return 0
-          fi
-        elif [ -h "$java_bindir/java" ]; then
-          local javatarget=`readlink $c`
-          if [ -f "$javatarget" ]; then
-            java_bindir=`dirname $javatarget`
-            export JAVA_HOME=`dirname $java_bindir`
-            java=$javatarget
-            JAVA_VERSION=`java_version`
-            echo "Found Java: $java" >> $INSTALL_LOG_FILE
-            if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
-              return 0
-            fi
-          else
-            echo_warning "Broken link $c -> $javatarget"
-          fi
-        fi
-    done
-
-    echo "Cannot find system Java"
+      else
+        echo_warning "Broken link $c -> $javatarget"
+      fi
+    fi
+  done
+  echo "Cannot find system Java"
 
   echo_failure "Cannot find Java"
   java_clear
@@ -3689,6 +3630,9 @@ webservice_running() {
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
         WEBSERVICE_RUNNING=$($glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled)
       fi
+    else
+      if [ -z "$GLASSFISH_HOME" ]; then glassfish_detect; fi
+      WEBSERVICE_DEPLOYED=$(ls -R "$GLASSFISH_HOME" | grep "${webservice_application_name}.war")
     fi
   elif using_tomcat; then
     tomcat_running
@@ -3870,10 +3814,30 @@ webservice_uninstall() {
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
       glassfish_detect
-      $glassfish undeploy ${WEBSERVICE_DEPLOYED}
+      if [ -n "$WEBSERVICE_RUNNING" ]; then
+        $glassfish undeploy ${WEBSERVICE_DEPLOYED}
+      else
+        applicationDirectoryPath=($(find "$GLASSFISH_HOME" -name "${webservice_application_name}"))
+        for i in "${applicationDirectoryPath[@]}"; do
+          if [ ! -w "$i" ]; then
+            echo_failure "Current user does not have permission to remove ${i} from glassfish installation"
+            return 1
+          fi
+        done
+        for i in "${applicationDirectoryPath[@]}"; do
+          rm -rf "$i"
+        done
+        glassfishDomainXmlFile=$(find "$GLASSFISH_HOME" -name domain.xml | head -1)
+        perl -0777 -p -i -e 's|(<application-ref .*?</application-ref>)|$1 =~ /'"${webservice_application_name}"'/?"":$1|gse' "$glassfishDomainXmlFile"
+        perl -0777 -p -i -e 's|(<application .*?</application>)|$1 =~ /'"${webservice_application_name}"'/?"":$1|gse' "$glassfishDomainXmlFile"
+      fi
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
       #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
+      if [ ! -w "$TOMCAT_HOME/webapps/$WAR_NAME" ] || [ ! -w "$TOMCAT_HOME/webapps/${webservice_application_name}" ]; then
+        echo_failure "Current user does not have permission to remove ${i} from tomcat installation"
+        return 1
+      fi
       rm -rf "$TOMCAT_HOME/webapps/$WAR_NAME"
       rm -rf "$TOMCAT_HOME/webapps/${webservice_application_name}"
     fi
