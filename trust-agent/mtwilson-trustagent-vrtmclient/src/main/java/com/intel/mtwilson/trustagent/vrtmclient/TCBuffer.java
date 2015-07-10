@@ -9,40 +9,40 @@ import java.nio.ByteOrder;
 public class TCBuffer {
 	public static final int SIZE = 20;
 	private static final String EMPTY = "EMPTY"; 
-	private ByteBuffer brpId;
+	//private ByteBuffer brpId;
 	private ByteBuffer brpcCallIndex;
 	private ByteBuffer brpcPayloadSize;
 	private ByteBuffer brpcCallStatus;
-	private ByteBuffer boriginalRpId;
+	//private ByteBuffer boriginalRpId;
 	private byte[]     rpcPayload;
 	
 	public TCBuffer(){
-		brpId 		  = ByteBuffer.allocate(4);
+		//brpId 		  = ByteBuffer.allocate(4);
 		brpcCallIndex = ByteBuffer.allocate(4);
 		brpcPayloadSize  = ByteBuffer.allocate(4);
 		brpcCallStatus   = ByteBuffer.allocate(4);
-		boriginalRpId = ByteBuffer.allocate(4);
+		//boriginalRpId = ByteBuffer.allocate(4);
 		rpcPayload    =  new String("EMPTY").getBytes();
 		// set buffer to little endian format
-		brpId.order(ByteOrder.LITTLE_ENDIAN);
+		//brpId.order(ByteOrder.LITTLE_ENDIAN);
 		brpcCallIndex.order(ByteOrder.LITTLE_ENDIAN);
 		brpcPayloadSize.order(ByteOrder.LITTLE_ENDIAN);
 		brpcCallStatus.order(ByteOrder.LITTLE_ENDIAN);
-		boriginalRpId.order(ByteOrder.LITTLE_ENDIAN);
+		//boriginalRpId.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	public TCBuffer(int rpId, int rpcCallIndex, int rpcCallStatus, int originalRpId, String rpcPayload){
+	public TCBuffer(int rpcCallIndex, int rpcCallStatus, String rpcPayload){
 		this();
-		setRpId(rpId);
+		//setRpId(rpId);
 		setRPCCallIndex(rpcCallIndex);
 		setRPCPayloadSize(rpcPayload.length());
 		setRPCCallStatus(rpcCallStatus);
-		setOriginalRpId(originalRpId);
+		//setOriginalRpId(originalRpId);
 		setRPCPayload(rpcPayload.getBytes());
 	}
 
-	public TCBuffer(int rpId, int rpcCallIndex, int rpcCallStatus, int originalRpId){
-		this(rpId, rpcCallIndex, rpcCallStatus, originalRpId, EMPTY);
+	public TCBuffer(int rpcCallIndex, int rpcCallStatus){
+		this(rpcCallIndex, rpcCallStatus, EMPTY);
 	}
 	
 	public String getRPCPayload() {
@@ -54,7 +54,7 @@ public class TCBuffer {
 		setRPCPayloadSize(this.rpcPayload.length);
 	}
 
-	public int getRpId() {
+/*	public int getRpId() {
 		if(null != brpId) {
 			brpId.rewind();
 			return brpId.getInt();
@@ -65,7 +65,7 @@ public class TCBuffer {
 		brpId.clear();
 		brpId.putInt(rpId);
 	}
-	
+*/	
 	public int getRPCCallIndex() {
 		if(null != brpcCallIndex){
 			brpcCallIndex.rewind();
@@ -90,7 +90,7 @@ public class TCBuffer {
 		brpcCallStatus.putInt(callStatus);
 	}
 	
-	public int getOriginalRpId() {
+	/*public int getOriginalRpId() {
 		if(null != boriginalRpId){
 			boriginalRpId.rewind();
 			return boriginalRpId.getInt();
@@ -100,7 +100,7 @@ public class TCBuffer {
 	public void setOriginalRpId(int originalRpId) {
 		boriginalRpId.clear();
 		boriginalRpId.putInt(originalRpId);
-	}
+	}*/
 	
 	
 	public void setRPCPayloadSize(int payloadSize){
@@ -117,11 +117,11 @@ public class TCBuffer {
 	
 	
 	public void serializeTCBuffer(OutputStream out) throws IOException{
-		out.write(brpId.array());
+		//out.write(brpId.array());
 		out.write(brpcCallIndex.array());
 		out.write(brpcPayloadSize.array());
 		out.write(brpcCallStatus.array());
-		out.write(boriginalRpId.array());
+		//out.write(boriginalRpId.array());
 		out.write(rpcPayload);
 		out.flush();
 	}
@@ -136,16 +136,16 @@ public class TCBuffer {
 	 */
 	public void deSerializeTCBuffer(InputStream in) throws IOException{
 		byte[] bigBytes = new byte[4];
-		in.read(bigBytes);
-		setInternalValues(brpId, bigBytes);
+		//in.read(bigBytes);
+		//setInternalValues(brpId, bigBytes);
 		in.read(bigBytes);
 		setInternalValues(brpcCallIndex, bigBytes);
 		in.read(bigBytes);
 		setInternalValues(brpcPayloadSize, bigBytes);
 		in.read(bigBytes);
 		setInternalValues(brpcCallStatus, bigBytes);
-		in.read(bigBytes);
-		setInternalValues(boriginalRpId, bigBytes);
+		//in.read(bigBytes);
+		//setInternalValues(boriginalRpId, bigBytes);
 		rpcPayload = new byte[getRPCPayloadSize()];
 		in.read(rpcPayload);
 	}

@@ -73,12 +73,9 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
     
     private Sha1Digest computeHistory(List<Measurement> list) {
         // start with a default value of zero...  that should be the initial value of every PCR ..  if a pcr is reset after boot the tpm usually sets its starting value at -1 so the end result is different , which we could then catch here when the hashes don't match
-        Sha1Digest result = null;
+        Sha1Digest result = Sha1Digest.ZERO;
         for(Measurement m : list) {
-            if (result == null)
-                result = Sha1Digest.digestOf(m.getValue().toString().getBytes());
-            else
-                result = result.extend(m.getValue().toString().getBytes());
+            result = result.extend(m.getValue().toString().getBytes());
         }
         return result;
     }
