@@ -50,9 +50,11 @@ import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.saml.TxtHostWithAssetTag;
+import com.intel.mtwilson.as.rest.v2.model.VMAttestation;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -62,11 +64,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
 import org.apache.commons.configuration.Configuration;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -2201,6 +2208,100 @@ public class HostTrustBO {
             log.error("Error during retrieval of host trust status.", ex);
             throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
+    }
+    
+    public VMAttestation getVMAttestationReport(TblHosts tblHosts, Map<String, String> vmMetaData) throws IOException {
+
+        VMAttestation vmAttestation = new VMAttestation();
+        SamlAssertion samlAssertion = null;
+        
+        HostAttestation hostAttestation = new HostAttestation(); 
+        log.debug("getVMAttestationReport: Getting trust for host: " + tblHosts.getName() + " & VM:" + vmMetaData.get("VM_Instance_Id"));
+        
+        try {
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            
+            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName());            
+            if (tblSamlAssertion != null) {
+                if (tblSamlAssertion.getErrorMessage() == null || tblSamlAssertion.getErrorMessage().isEmpty()) {
+                    log.debug("getVMAttestationReport: Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
+                    hostAttestation = buildHostAttestation(tblHosts, tblSamlAssertion);
+                } else {
+                    log.debug("getVMAttestationReport: Found assertion in cache with error set, returning that.");
+                    throw new ASException(new Exception("(" + tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString() + ")"));
+                }
+            }
+            
+            log.debug("getVMAttestationReport: Since the cached assertion is not valid, going through the complete attestation cycle.");
+            
+            String hostAttestationUuid = new UUID().toString();
+            log.debug("getVMAttestationReport: Generating new UUID for saml assertion record 2: {}", hostAttestationUuid);
+            
+            try {
+                
+                hostAttestation = getTrustWithSaml(tblHosts, tblHosts.getId().toString(), hostAttestationUuid, true);
+                
+            } catch (Exception e) {
+                tblSamlAssertion = new TblSamlAssertion();
+                tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
+                tblSamlAssertion.setHostId(tblHosts);                
+                tblSamlAssertion.setBiosTrust(false);
+                tblSamlAssertion.setVmmTrust(false);
+                
+                try {
+                    log.error("getVMAttestationReport: Caught exception, generating saml assertion with error");
+                    e.printStackTrace();
+                    tblSamlAssertion.setSaml("");
+                    int cacheTimeout = ASConfig.getConfiguration().getInt("saml.validity.seconds", 3600);
+                    tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.SECOND, cacheTimeout);
+                    tblSamlAssertion.setExpiryTs(cal.getTime());
+                    if (e instanceof ASException) {
+                        ASException ase = (ASException) e;
+                        log.debug("getVMAttestationReport: e is an instance of ASExpection: " + String.valueOf(ase.getErrorCode()));
+                        tblSamlAssertion.setErrorCode(String.valueOf(ase.getErrorCode()));
+                    } else {
+                        log.debug("getVMAttestationReport: e is NOT an instance of ASExpection: " + String.valueOf(ErrorCode.AS_HOST_TRUST_ERROR.getErrorCode()));
+                        tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.AS_HOST_TRUST_ERROR.getErrorCode()));
+                    }
+                    tblSamlAssertion.setErrorMessage(e.getClass().getSimpleName());
+                    My.jpa().mwSamlAssertion().create(tblSamlAssertion);
+                } catch (Exception ex) {
+                    log.error("getVMAttestationReport: getTrustwithSaml caught exception while generating error saml assertion", ex);
+                    String msg = ex.getClass().getSimpleName();
+                    throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, msg);
+                }                
+                log.error("getVMAttestationReport: Error during retrieval of host trust status.", e);
+                throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
+            }
+            
+            vmAttestation.setHostAttestation(hostAttestation);
+
+            // Now the host report is generated, we need to generate the VM SAML report
+            TxtHostRecord data = createTxtHostRecord(tblHosts);
+            TxtHost host = new TxtHost(data, hostAttestation.getHostTrustResponse().trust);
+            
+            if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
+            }
+            
+            try {
+                samlAssertion = getSamlGenerator().generateHostAssertion(host, null, vmMetaData);
+                vmAttestation.setSamlAssertion(samlAssertion.assertion);
+            } catch (MarshallingException | ConfigurationException | UnknownHostException | GeneralSecurityException | XMLSignatureException | MarshalException ex) {
+                log.error("getVMAttestationReport: Error during retrieval of host trust status.", ex);
+                throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
+            }            
+        } catch (ASException ae) {
+            throw ae;
+        } catch (Exception ex) {
+                log.error("getVMAttestationReport: Error during creation of VM attestation report.", ex);
+                throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
+        }
+        
+        return vmAttestation;
     }
     
     /*

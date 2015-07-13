@@ -20,10 +20,10 @@ import com.intel.mtwilson.vmquote.xml.TrustPolicy;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
 
-import com.intel.mtwilson.v2.vm.attestation.model.VMAttestation;
-import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationCollection;
-import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationFilterCriteria;
-import com.intel.mtwilson.v2.vm.attestation.model.VMAttestationLocator;
+import com.intel.mtwilson.as.rest.v2.model.VMAttestation;
+import com.intel.mtwilson.as.rest.v2.model.VMAttestationCollection;
+import com.intel.mtwilson.as.rest.v2.model.VMAttestationFilterCriteria;
+import com.intel.mtwilson.as.rest.v2.model.VMAttestationLocator;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.v2.vm.attestation.repository.VMAttestationRepository;
 import com.intel.mtwilson.jaxrs2.NoLinks;
@@ -297,7 +297,7 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
         return null;
     }
     
-    private static X509Certificate getSamlCertificate() {
+    public static X509Certificate getSamlCertificate() {
         X509Certificate samlCert = null;        
         byte[] samlPemBytes;
         try (FileInputStream samlPemFile = new FileInputStream(My.configuration().getSamlCertificateFile())) {
