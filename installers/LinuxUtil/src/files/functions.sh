@@ -2223,18 +2223,18 @@ glassfish_permissions() {
   local username=${MTWILSON_USERNAME:-mtwilson}
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then
-    echo_failure "User $username does not exists"
+    echo_failure "User [$username] does not exists"
     return 1
   fi
   local file
-  for file in $chown_locations; do
+  for file in $(find "${chown_locations}"); do
     if [[ -n "$file" && -e "$file" ]]; then
       owner=`stat -c '%U' $file`
       if [ $owner != ${username} ]; then
-        if [ "$(whoami)" == "root" ]; then
+        if [ -w "$file" ]; then
           chown -R "${username}:${username}" "$file"
         else
-          echo_failure "Tomcat is not owned by $username"
+          echo_failure "Current user [$(whoami)] does not have permission to change file [$file]"
           return 1
         fi
       fi
@@ -2857,22 +2857,21 @@ tomcat_permissions() {
   local username=${MTWILSON_USERNAME:-mtwilson}
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then    
-	echo_failure "User $username does not exists"
+	echo_failure "User [$username] does not exists"
 	return 1	
   fi
   local file
-  for file in $chown_locations
-  do
+  for file in $(find "${chown_locations}"); do
     if [[ -n "$file" && -e "$file" ]]; then
       owner=`stat -c '%U' $file`
       if [ $owner != ${username} ]; then
-        if [ "$(whoami)" == "root" ]; then
-	      chown -R "${username}:${username}" "$file"
+        if [ -w "$file" ]; then
+          chown -R "${username}:${username}" "$file"
         else
-		  echo_failure "Tomcat is not owned by $username"
-		  return 1
-		fi
-	  fi
+          echo_failure "Current user [$(whoami)] does not have permission to change file [$file]"
+          return 1
+        fi
+      fi
     fi
   done
 }
