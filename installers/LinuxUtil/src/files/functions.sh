@@ -2327,6 +2327,7 @@ glassfish_admin_user() {
 #  fi
 
   chmod 600 $GF_CONFIG_PATH/admin.user $GF_CONFIG_PATH/admin.passwd $GF_CONFIG_PATH/admin.passwd.old
+  glassfish_permissions "${GLASSFISH_HOME}"
   #echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
 
   #echo "Glassfish will now ask you for the same information:"
