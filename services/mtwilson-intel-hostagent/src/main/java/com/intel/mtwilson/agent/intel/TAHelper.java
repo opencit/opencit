@@ -41,8 +41,10 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.io.Platform;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.policy.factory.V1TlsPolicyFactory;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
+import com.intel.mtwilson.trustagent.model.HostInfo;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.io.StringReader;
@@ -102,6 +104,8 @@ public class TAHelper {
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
     private String[] openSourceHostSpecificModules = {"initrd","vmlinuz"};
+    private TxtHostRecord host = null;
+
     
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) throws IOException {
 
@@ -147,6 +151,63 @@ public class TAHelper {
         //        this.setEntityManagerFactory(entityManagerFactory);
     }
 
+    /* We need host info to be passed so we can verify the host quote based on the OS and TPM version
+     * Based on the host information, the command to call for quote verification will be different
+     * These are the 4 combination: Linux/TPM 1.2, Linux/TPM2.0, Windows/TPM1.2, Windows/TPM2.0
+     *    
+    */
+    public TAHelper(TxtHostRecord hostBeingVerified) throws IOException {
+
+        this.host = hostBeingVerified;
+        
+        log.debug("TA Helper getOsName: " + host.VMM_OSName);
+        boolean isHostWindows = host.VMM_OSName.toLowerCase().contains("windows");
+        
+        // check mtwilson 2.0 configuration first
+        String binPath = Folders.features("aikqverify") + File.separator + "bin"; //MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getBinPath();
+        String varPath = Folders.features("aikqverify") + File.separator + "data"; //Folders.application() + File.separator + "repository" + File.separator + "aikqverify";//MyFilesystem.getApplicationFilesystem().getBootstrapFilesystem().getVarPath() + File.separator + "aikqverify";
+        File bin = new File(binPath);
+        File var = new File(varPath);
+        if (bin.exists() && var.exists()) {
+            aikverifyhomeBin = binPath;
+            aikverifyhomeData = varPath;
+//            opensslCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "openssl" : "openssl.bat"); //My.configuration().getConfiguration().getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"));
+            if (isHostWindows)
+                aikverifyCmd = aikverifyhomeBin + File.separator + "aikqverifywin";
+            else
+                aikverifyCmd = aikverifyhomeBin + File.separator + (Platform.isUnix() ? "aikqverify" : "aikqverify.exe");
+        } else {
+            // mtwilson 1.2 configuration
+            Configuration config = ASConfig.getConfiguration();
+            String aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
+            aikverifyhomeData = aikverifyhome + File.separator + "data";
+            aikverifyhomeBin = aikverifyhome + File.separator + "bin";
+//            opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
+            aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
+        }
+        quoteWithIPAddress = My.configuration().getConfiguration().getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
+        boolean foundAllRequiredFiles = true;
+        String required[] = new String[]{aikverifyCmd, aikverifyhomeData};
+        for (String filename : required) {
+            File file = new File(filename);
+            if (!file.exists()) {
+                log.warn(String.format("Invalid service configuration: Cannot find %s", filename));
+                foundAllRequiredFiles = false;
+            }
+        }
+        if (!foundAllRequiredFiles) {
+            throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, "Cannot find aikverify files");
+        }
+
+        // we must be able to write to the data folder in order to save certificates, nones, public keys, etc.
+        File datafolder = new File(aikverifyhomeData);
+        if (!datafolder.canWrite()) {
+            throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));
+        }
+
+        //        this.setEntityManagerFactory(entityManagerFactory);
+    }
+    
     public void setTrustedAik(String pem) {
         trustedAik = pem;
     }

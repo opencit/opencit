@@ -81,6 +81,7 @@ public class HostBO {
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18";
     private static String CITRIX_PCRs = "18"; //"17,18";
+    private static String WINDOWS_PCRS = "12, 13, 14";
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
 

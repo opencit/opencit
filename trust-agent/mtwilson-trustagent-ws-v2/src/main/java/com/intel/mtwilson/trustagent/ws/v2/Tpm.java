@@ -25,12 +25,14 @@ import javax.ws.rs.core.MediaType;
 import com.intel.mtwilson.trustagent.model.TpmQuoteRequest;
 import com.intel.mtwilson.trustagent.model.TpmQuoteResponse;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+import java.io.File;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -96,16 +98,30 @@ public class Tpm {
             new ReadIdentityCmd(context).execute();  // trustagentrepository.getaikcertificate
 
             // Get the module information
-            new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
-            new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
+            String osName = System.getProperty("os.name");
+            context.setOsName(osName);
+            if (!osName.toLowerCase().contains("windows")) {
+                new GenerateModulesCmd(context).execute(); // String moduleXml = getXmlFromMeasureLog(configuration);
+                new RetrieveTcbMeasurement(context).execute(); //does nothing if measurement.xml does not exist
+            }
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
-            
+
 //            return context.getResponseXML();
             TpmQuoteResponse response = context.getTpmQuoteResponse();
             // delete temporary session directory
+            
+            // we should use more neutral ways to delete the folder
+            FileUtils.forceDelete(new File(context.getDataFolder()));
+            
+            /*
             CommandUtil.runCommand(String.format("rm -rf %s",
                     EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
+            
+            
+            CommandUtil.runCommand(String.format("rmdir /s /q %s",
+                    EscapeUtil.doubleQuoteEscapeShellArgument(context.getDataFolder())));
+            */
             return response;
     }
     

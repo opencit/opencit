@@ -12,6 +12,7 @@ import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.util.exec.EscapeUtil;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,18 @@ public class GenerateQuoteCmd implements ICommand {
         return data;
     }
     
+    public static String byteArrayToHexString(byte[] b) {
+        StringBuffer sb = new StringBuffer();
+        String returnStr = "";
+        for (int i = 0; i < b.length; i++) {
+                String singleByte = Integer.toHexString(b[i] & 0xff);
+                if (singleByte.length() != 2) singleByte = "0" + singleByte;
+//			returnStr += singleByte;
+                returnStr = sb.append(singleByte).toString();
+        }
+        return returnStr;
+    }
+    
     @Override
     public void execute() throws TAException {
         String identityAuthKey = context.getIdentityAuthKey();
@@ -57,15 +70,37 @@ public class GenerateQuoteCmd implements ICommand {
             log.error("Selected PCRs do not match correct format: {}", selectedPcrs);
             throw new IllegalArgumentException(String.format("Selected PCRs do not match correct format."));
         }
-        
-        String commandLine = String.format("aikquote -p %s -c %s %s %s %s",
+                
+        String osName = context.getOsName();
+        String commandLine = "";
+        String keyName = "HIS Identity Key";
+        byte[] nonce = Base64.decodeBase64(context.getNonce());
+
+        if (osName.toLowerCase().contains("windows")) {
+            // format is: "pcptool.exe [aik name] {attestation file} {nonce} {aikauth}" 
+            commandLine = String.format("pcptool.exe aikquote %s %s %s", // skip the authkey for now
+                byteArrayToHexString(keyName.getBytes()),
+                byteArrayToHexString(context.getQuoteFileName().getBytes()),
+                byteArrayToHexString(nonce));
+            /*
+            commandLine = String.format("pcptool.exe %s %s %s %s",
+                byteArrayToHexString(keyName.getBytes()),
+                EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName()),
+                byteArrayToHexString(nonce),
+                identityAuthKey);
+            */
+        } else {
+            commandLine = String.format("aikquote -p %s -c %s %s %s %s",
                 identityAuthKey,
                 EscapeUtil.doubleQuoteEscapeShellArgument(context.getNonceFileName()),
                 EscapeUtil.doubleQuoteEscapeShellArgument(context.getAikBlobFileName()),
                 selectedPcrs,
                 EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName())); // these are configured (trusted), they are NOT user input, but if that changes you can do CommandArg.escapeFilename(...)
+        }
         
-
+        //debug
+        log.debug("Command Line to be executed: " + commandLine);
+        
         try {
             CommandUtil.runCommand(commandLine);
 			log.debug("Create the quote {} ",
