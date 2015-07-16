@@ -64,8 +64,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.crypto.MarshalException;
@@ -2210,7 +2208,7 @@ public class HostTrustBO {
         }
     }
     
-    public VMAttestation getVMAttestationReport(TblHosts tblHosts, Map<String, String> vmMetaData) throws IOException {
+    public VMAttestation getVMAttestationReport(TblHosts tblHosts, Map<String, String> vmMetaData, boolean includeHostReport) throws IOException {
 
         VMAttestation vmAttestation = new VMAttestation();
         SamlAssertion samlAssertion = null;
@@ -2222,74 +2220,44 @@ public class HostTrustBO {
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
             
-            TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByHostAndExpiry(tblHosts.getName());            
-            if (tblSamlAssertion != null) {
-                if (tblSamlAssertion.getErrorMessage() == null || tblSamlAssertion.getErrorMessage().isEmpty()) {
-                    log.debug("getVMAttestationReport: Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
-                    hostAttestation = buildHostAttestation(tblHosts, tblSamlAssertion);
-                } else {
-                    log.debug("getVMAttestationReport: Found assertion in cache with error set, returning that.");
-                    throw new ASException(new Exception("(" + tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString() + ")"));
-                }
-            }
-            
-            log.debug("getVMAttestationReport: Since the cached assertion is not valid, going through the complete attestation cycle.");
-            
-            String hostAttestationUuid = new UUID().toString();
-            log.debug("getVMAttestationReport: Generating new UUID for saml assertion record 2: {}", hostAttestationUuid);
-            
-            try {
-                
-                hostAttestation = getTrustWithSaml(tblHosts, tblHosts.getId().toString(), hostAttestationUuid, true);
-                
-            } catch (Exception e) {
-                tblSamlAssertion = new TblSamlAssertion();
-                tblSamlAssertion.setAssertionUuid(hostAttestationUuid);
-                tblSamlAssertion.setHostId(tblHosts);                
-                tblSamlAssertion.setBiosTrust(false);
-                tblSamlAssertion.setVmmTrust(false);
-                
-                try {
-                    log.error("getVMAttestationReport: Caught exception, generating saml assertion with error");
-                    e.printStackTrace();
-                    tblSamlAssertion.setSaml("");
-                    int cacheTimeout = ASConfig.getConfiguration().getInt("saml.validity.seconds", 3600);
-                    tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.SECOND, cacheTimeout);
-                    tblSamlAssertion.setExpiryTs(cal.getTime());
-                    if (e instanceof ASException) {
-                        ASException ase = (ASException) e;
-                        log.debug("getVMAttestationReport: e is an instance of ASExpection: " + String.valueOf(ase.getErrorCode()));
-                        tblSamlAssertion.setErrorCode(String.valueOf(ase.getErrorCode()));
-                    } else {
-                        log.debug("getVMAttestationReport: e is NOT an instance of ASExpection: " + String.valueOf(ErrorCode.AS_HOST_TRUST_ERROR.getErrorCode()));
-                        tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.AS_HOST_TRUST_ERROR.getErrorCode()));
-                    }
-                    tblSamlAssertion.setErrorMessage(e.getClass().getSimpleName());
-                    My.jpa().mwSamlAssertion().create(tblSamlAssertion);
-                } catch (Exception ex) {
-                    log.error("getVMAttestationReport: getTrustwithSaml caught exception while generating error saml assertion", ex);
-                    String msg = ex.getClass().getSimpleName();
-                    throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, msg);
-                }                
-                log.error("getVMAttestationReport: Error during retrieval of host trust status.", e);
-                throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
-            }
-            
-            vmAttestation.setHostAttestation(hostAttestation);
-
-            // Now the host report is generated, we need to generate the VM SAML report
             TxtHostRecord data = createTxtHostRecord(tblHosts);
-            TxtHost host = new TxtHost(data, hostAttestation.getHostTrustResponse().trust);
+            TxtHost host = null;
+
+            String hostAttestationUuid = new UUID().toString();
+            
+            if (includeHostReport) {
+                log.debug("getVMAttestationReport: Generating the complete attestation report for the host - {}.", tblHosts.getName());
+                try {                
+                    log.debug("getVMAttestationReport: Generating new UUID for saml assertion record : {}", hostAttestationUuid);
+                    hostAttestation = getTrustWithSaml(tblHosts, tblHosts.getId().toString(), hostAttestationUuid, true);                
+                } catch (Exception e) {
+                    log.error("getVMAttestationReport: Error during retrieval of host trust status.", e);
+                    throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
+                }
+                log.debug("getVMAttestationReport: Successfully created the Host Attestation for {}", hostAttestation.getHostName());
+                vmAttestation.setHostAttestation(hostAttestation);
+                host = new TxtHost(data, hostAttestation.getHostTrustResponse().trust);
+            } else {
+                log.debug("getVMAttestationReport: Generating the basic trust report for the host - {}.", tblHosts.getName());
+                HostTrustStatus trustStatusWithCache = getTrustStatusWithCache(tblHosts.getName(), false);
+                host = new TxtHost(data, trustStatusWithCache);
+            }
+
+            log.debug("getVMAttestationReport: Retrieved the trust response of BIOS {} & VMM {}.", host.isBiosTrusted(), host.isVmmTrusted());
             
             if (tblHosts.getBindingKeyCertificate() != null && !tblHosts.getBindingKeyCertificate().isEmpty()) {
+                log.debug("getVMAttestationReport: Setting the binding key certificate for {}", hostAttestation.getHostName());
                 host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
             }
             
             try {
+                log.debug("getVMAttestationReport: About to generate SAML assertion for Host {} running VM {}.", 
+                        hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
                 samlAssertion = getSamlGenerator().generateHostAssertion(host, null, vmMetaData);
                 vmAttestation.setSamlAssertion(samlAssertion.assertion);
+                log.debug("getVMAttestationReport: Successfully generated SAML assertion for Host {} running VM {}.", 
+                        hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
+                
             } catch (MarshallingException | ConfigurationException | UnknownHostException | GeneralSecurityException | XMLSignatureException | MarshalException ex) {
                 log.error("getVMAttestationReport: Error during retrieval of host trust status.", ex);
                 throw new ASException(ex, ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());

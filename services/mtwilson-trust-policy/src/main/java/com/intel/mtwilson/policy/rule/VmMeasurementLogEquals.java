@@ -15,7 +15,6 @@ import com.intel.mtwilson.policy.fault.VmMeasurementLogContainsUnexpectedEntries
 import com.intel.mtwilson.policy.fault.VmMeasurementLogMissingExpectedEntries;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,13 @@ public class VmMeasurementLogEquals extends BaseRule {
 
     public VmMeasurementLogEquals() { } // for desearializing jackson
     
+    /**
+     * This function would verify the measured modules against the whitelist modules and appropriately raises any required
+     * faults in case of differences.
+     * @param actualModules
+     * @param whitelistModules
+     * @return 
+     */
     public RuleResult apply2(List<Measurement> actualModules, List<Measurement> whitelistModules) {
         log.debug("VmMeasurementLogEquals: About to apply the VmMeasurementLogEquals policy");
         RuleResult report = new RuleResult(this);
@@ -64,34 +70,42 @@ public class VmMeasurementLogEquals extends BaseRule {
         return report;
     }
     
+    /**
+     * This function raises the faults for the modules that were updated. The faults for missing and new modules would be raised
+     * by the calling function.
+     * @param vmActualUnexpected
+     * @param vmActualMissing
+     * @param report 
+     */
     private void RaiseFaultForModifiedEntries(ArrayList<Measurement> vmActualUnexpected, ArrayList<Measurement> vmActualMissing, RuleResult report) {
         ArrayList<Measurement> vmModifiedModules = new ArrayList<>();
+        ArrayList<Measurement> tempVMActualUnexpected = new ArrayList<>(vmActualUnexpected);
+        ArrayList<Measurement> tempVMActualMissing = new ArrayList<>(vmActualMissing);
         
         try {
-            Iterator unexpectedModules = vmActualUnexpected.iterator();
-            while (unexpectedModules.hasNext()) {
-                Measurement tempUnexpected = (Measurement) unexpectedModules.next();
-                Iterator missingModules = vmActualMissing.iterator();
-                while (missingModules.hasNext()) {
-                    Measurement tempMissing = (Measurement) missingModules.next();
+            for (Measurement tempUnexpected : tempVMActualUnexpected) {
+                for (Measurement tempMissing : tempVMActualMissing) {
                     log.debug("RaiseFaultForModifiedEntries: Comparing module {} with hash {} to module {} with hash {}.", tempUnexpected.getLabel(), 
                             tempUnexpected.getValue().toString(), tempMissing.getLabel(), tempMissing.getValue().toString());
                     if (tempUnexpected.getLabel().equalsIgnoreCase(tempMissing.getLabel())) {
                         log.debug("Adding the entry to the list of modified modules and deleting from the other 2 lists.");
                         vmModifiedModules.add(tempUnexpected);
-                        vmActualUnexpected.remove(tempUnexpected);
                         vmActualMissing.remove(tempMissing);
+                        vmActualUnexpected.remove(tempUnexpected);
                     }
                 }
             }                        
-            
+                       
             if (!vmModifiedModules.isEmpty()) {
-                log.debug("XmlMeasurementLogEquals : Host has updated #{} modules compared to the white list.", vmModifiedModules.size());
+                log.debug("RaiseFaultForModifiedEntries : Host has updated #{} modules compared to the white list.", vmModifiedModules.size());
                 report.fault(new VMMeasurementLogValueMismatchEntries(new HashSet<>(vmModifiedModules)));                
+            } else {
+                log.debug("RaiseFaultForModifiedEntries: No updated modules found.");
             }
             
         } catch (Exception ex) {
-            
+            log.error("RaiseFaultForModifiedEntries: Error during verification of changed modules.", ex);
+            log.error(ex.getMessage());
         }
     }    
 

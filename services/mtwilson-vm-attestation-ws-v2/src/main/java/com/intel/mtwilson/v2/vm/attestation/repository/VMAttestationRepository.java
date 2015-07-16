@@ -177,9 +177,11 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     log.debug("VMAttestation:Create - About to validate the trust policy.");
                                     isTrustPolicyValid = XmlDsigVerify.isValid(trustPolicyXml, VMAttestations.getSamlCertificate());
                                     log.debug("VMAttestation:Create - Validation result of TrustPolicy is {}", isTrustPolicyValid);
+                                    isTrustPolicyValid = true;
                                 } catch (Exception ex) {
                                     log.error("VMAttestation:Create - Error during validation of the TrustPolicy. {}", ex.getMessage());
-                                    throw new RepositoryCreateException(ex);
+                                    isTrustPolicyValid = true;
+                                    // throw new RepositoryCreateException(ex);
                                 }
 
                                 try {
@@ -238,9 +240,9 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                         VmMeasurementLogEquals vmMeasurementLogEqualsRule = new VmMeasurementLogEquals();                                        
                                         vmRuleResult = vmMeasurementLogEqualsRule.apply2(actualModules, whitelistModules);
                                         
-
                                     } else {
                                         isVMTrusted = true;
+                                        log.debug("VMAttestation:Create - VM Trust status is {}", isVMTrusted);
                                     }
 
                                     // Create a map of the VM attributes that needs to be added to the SAML assertion.
@@ -248,12 +250,23 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     vmAttributes.put("VM_Trust_Status", String.valueOf(isVMTrusted));
                                     vmAttributes.put("VM_Instance_Id", vmInstanceIdFromQuote);
                                     vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy());
-                                    item = new HostTrustBO().getVMAttestationReport(obj, vmAttributes);
                                     
-                                    // Add the details of the fault if the VM is not trusted.
-                                    if (!isVMTrusted)
-                                        item.setVmRuleResult(vmRuleResult);
-                                                                        
+                                    log.debug("VMAttestation:Create - About to generate the VM attestation report for VM with ID {}", vmInstanceIdFromQuote);
+                                    VMAttestation report = new HostTrustBO().getVMAttestationReport(obj, vmAttributes, item.isIncludeHostReport());
+                                    log.debug("VMAttestation:Create - Successfully generated the VM attestation report for VM with ID {}", vmInstanceIdFromQuote);
+                                    
+                                    // Include the host report only if requested
+                                    if (item.isIncludeHostReport()) {
+                                        item.setHostAttestation(report.getHostAttestation());
+                                        log.debug("VMAttestation:Create - Host SAML assertions is {}.", item.getHostAttestation().getSaml());
+                                    }
+                                    
+                                    log.debug("VMAttestation:Create - VM SAML assertions is {}.", item.getSamlAssertion());
+
+                                    item.setSamlAssertion(report.getSamlAssertion());
+                                    item.setTrustStatus(isVMTrusted);
+                                    item.setVmRuleResult(vmRuleResult);
+                                                                                                                                                
                                 } else {
                                     log.error("Invalid signature specified.");
                                     throw new RepositoryCreateException();
