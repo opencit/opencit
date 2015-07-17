@@ -81,7 +81,7 @@ public class HostBO {
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18";
     private static String CITRIX_PCRs = "18"; //"17,18";
-    private static String WINDOWS_PCRS = "12, 13, 14";
+    private static String WINDOWS_PCRS = "12,13,14";
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
 
@@ -703,6 +703,7 @@ public class HostBO {
 
                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
                 
+                log.debug("configWhiteListFromCustom vmmPCRs: " + hostConfigObj.getVmmPCRs());
 //        // debug only
 //        try {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -1441,6 +1442,9 @@ public class HostBO {
         // Location PCR (22) is added by default. We will check if PCR 22 is configured or not. If the digest value for PCR 22 exists, then
         // we will configure the location table as well.
         List<String> pcrsToWhiteList = Arrays.asList((hostConfigObj.getBiosPCRs() + "," + hostConfigObj.getVmmPCRs() + "," + "22").split(","));
+        List<String> biosPCRList = Arrays.asList(hostConfigObj.getBiosPCRs().split(","));
+        List<String> vmmPCRList = Arrays.asList(hostConfigObj.getVmmPCRs().split(","));
+
         try {
 
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
@@ -1520,7 +1524,8 @@ public class HostBO {
 
                             if (pcrObj.getPcrName() == null) {
                                 log.error("uploadToDB: PCR name is null: " + hostObj.toString());
-                            } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) <= MAX_BIOS_PCR)) {
+//                            } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) <= MAX_BIOS_PCR)) {
+                            } else if (biosPCRList.contains(reader.getAttributeValue(null, "ComponentName"))) {
 
                                 if (hostConfigObj.addBiosWhiteList() == true) {
                                     pcrObj.setMleName(hostObj.BIOS_Name);
@@ -1559,7 +1564,7 @@ public class HostBO {
                                         log.info("White list location entry using PCR 22 for location: {} with PCR value: {} already exists.", tblLoc.getLocation(), tblLoc.getPcrValue());
                                     }
                                 }
-                            } else if (hostConfigObj.addVmmWhiteList() == true) {
+                            } else if (vmmPCRList.contains(reader.getAttributeValue(null, "ComponentName")) && hostConfigObj.addVmmWhiteList() == true) {
                                 //log.info(String.format("Adding VMM white list: Name=%s Version=%s OsName=%s OsVersion=%s mleID=%s", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
                                 pcrObj.setMleName(hostObj.VMM_Name);
                                 pcrObj.setMleVersion(hostObj.VMM_Version);
