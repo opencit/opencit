@@ -15,10 +15,11 @@ if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "
 #tomcat_install $TOMCAT_PACKAGE
 MTWILSON_HOME=${MTWILSON_HOME:-"/opt/mtwilson"}
 tomcat_detect
+if tomcat_running; then tomcat_stop; fi
 tomcatExistingInstallation=false
 tomcatExistingKeystoreFile=
 tomcatExistingKeystorePassword=
-if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then # && tomcat_running; then
+if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then
   echo_warning "Existing tomcat installation detected"
   tomcatExistingInstallation=true
   OIFS=$IFS
@@ -32,7 +33,7 @@ if [ -n "$TOMCAT_HOME" ] && [[ "$TOMCAT_HOME" != ${MTWILSON_HOME}* ]]; then # &&
         exit 1
       fi
       echo "Removing ${i} from previous tomcat installation..."
-      webservice_uninstall "${i}" #2>&1 > /dev/null
+      webservice_uninstall "${i}"
     fi
   done
   if ! tomcat_no_additional_webapps_exist_wait; then   #additional apps exist
@@ -75,6 +76,7 @@ if [ -z "$TOMCAT_HOME" ] || [ -z "$tomcat" ] || [[ "$TOMCAT_HOME" != ${MTWILSON_
   fi
 fi
 
+tomcat_detect
 if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
   echo "Unable to auto-install Tomcat"
   echo "  Tomcat download URL:"

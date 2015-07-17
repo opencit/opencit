@@ -926,7 +926,11 @@ if using_glassfish; then
     
     echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
     # glassfish install here
-    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    ./$glassfish_installer
+    if [ $? -ne 0 ]; then
+      echo_failure "Glassfish installation failed"
+      exit 1
+    fi
     glassfish_create_ssl_cert_prompt
     echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
     # end glassfish installer

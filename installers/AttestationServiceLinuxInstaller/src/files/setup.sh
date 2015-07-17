@@ -107,9 +107,10 @@ echo "Attestation service installer calling asctl setup..." >>$INSTALL_LOG_FILE
 /opt/mtwilson/bin/asctl setup
 
 aikqverify_install_prereq() {
-  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
+  echo "Installing aikqverify prereqs..."
+  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev"
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
-  auto_install "Developer tools" "DEVELOPER"   
+  auto_install "Developer tools" "DEVELOPER" >> "$INSTALL_LOG_FILE"
 }
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
