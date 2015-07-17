@@ -73,7 +73,6 @@ setup_interactive_install() {
   if using_mysql; then   
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-      mysql_create_database
       mtwilson setup InitDatabase mysql
     fi
   elif using_postgres; then

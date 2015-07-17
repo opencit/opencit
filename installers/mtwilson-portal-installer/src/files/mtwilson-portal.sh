@@ -110,7 +110,6 @@ setup_interactive_install() {
       mysql_configure_connection "${package_config_filename}" mountwilson.mc.db
       mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-      mysql_create_database
       mtwilson setup InitDatabase mysql
     fi
   elif using_postgres; then
