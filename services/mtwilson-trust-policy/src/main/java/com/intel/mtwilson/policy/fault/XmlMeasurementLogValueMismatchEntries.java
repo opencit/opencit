@@ -19,16 +19,16 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class XmlMeasurementLogValueMismatchEntries extends Fault {
     private PcrIndex pcrIndex;
-    private Set<Measurement> missingEntries;
+    private Set<Measurement> mismatchEntries;
     
     public XmlMeasurementLogValueMismatchEntries() { } // for desearializing jackson
     
-    public XmlMeasurementLogValueMismatchEntries(PcrIndex pcrIndex, Set<Measurement> missingEntries) {
-        super("XML measurement log for PCR %d contains %d entries for which the values are modified.", pcrIndex.toInteger(), missingEntries.size());
+    public XmlMeasurementLogValueMismatchEntries(PcrIndex pcrIndex, Set<Measurement> mismatchEntries) {
+        super("XML measurement log for PCR %d contains %d entries for which the values are modified.", pcrIndex.toInteger(), mismatchEntries.size());
         this.pcrIndex = pcrIndex;
-        this.missingEntries = missingEntries;
+        this.mismatchEntries = mismatchEntries;
     }
     
     public PcrIndex getPcrIndex() { return pcrIndex; }
-    public Set<Measurement> getMissingEntries() { return missingEntries; }
+    public Set<Measurement> getMissingEntries() { return mismatchEntries; }
 }
