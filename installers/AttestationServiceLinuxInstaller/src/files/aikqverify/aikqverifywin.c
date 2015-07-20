@@ -87,6 +87,7 @@ main (int ac, char **av)
     UINT32 cbSignature = 0;
     BYTE *pbLog = NULL;
     UINT32 cbLog = 0;
+    BYTE *pbNonce = NULL;
     BYTE quoteDigest[20] = {0};
     UINT32 cbQuoteDigest = 0;
 
@@ -157,34 +158,43 @@ main (int ac, char **av)
     pAttestation = (PPCP_PLATFORM_ATTESTATION_BLOB)quote;
 
     // Unpack the attestation blob
-    cursor = pAttestation->HeaderSize;
+    cursor = pAttestation->HeaderSize;       //to the beginning of PcrValues
     pbPcrValues = &quote[cursor];
     cbPcrValues = pAttestation->cbPcrValues;
-    cursor += pAttestation->cbPcrValues;
+    cursor += pAttestation->cbPcrValues;     //to the beginning of TPM_QUOTE_INFO2
     if(pAttestation->cbQuote != 0)
     {
         pbQuote = &quote[cursor];
         cbQuote = pAttestation->cbQuote;
-        cursor += pAttestation->cbQuote;
+        pbNonce = &pbQuote[2+4];
+        cursor += pAttestation->cbQuote;     //to the beginning of Signature
     }
     if(pAttestation->cbSignature != 0)
     {
         pbSignature = &quote[cursor];
         cbSignature = pAttestation->cbSignature;
-        cursor += pAttestation->cbSignature;
+        cursor += pAttestation->cbSignature; //to the beginning of measurement log
     }
     pbLog = &quote[cursor];
     cbLog = pAttestation->cbLog;
-    cursor += pAttestation->cbLog;
+    cursor += pAttestation->cbLog;           //to the end of buffer
 
-    //step 1: calculate the digest of the quote
+    // Step 1: calculate the digest of the quote
     SHA1(pbQuote, cbQuote, quoteDigest);
 
-    // Step 2: Verify the signature with the public AIK
+    // Step 2: Validate the nonce
+    if (memcmp(chalmd, pbNonce, 20) != 0) {
+    	fprintf (stderr, "Error, bad Nonce in quote\n");
+		exit (2);
+    }
 
+    // Step 3: Verify the signature with the public AIK
+	if (1 != RSA_verify(NID_sha1, quoteDigest, sizeof(quoteDigest), pbSignature, cbSignature, aikRsa)) {
+		fprintf (stderr, "Error, bad RSA signature in quote\n");
+		exit (3);
+	}
 
 	/* Print out PCR values */
-
 	for (pcr=0; pcr < 24; pcr++) {
 		//if (select[pcr/8] & (1 << (pcr%8))) {
 			printf ("%2d ", pcr);
