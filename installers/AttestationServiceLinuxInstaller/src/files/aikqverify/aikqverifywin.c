@@ -206,49 +206,6 @@ main (int ac, char **av)
 		//}
 	}
 
-#if 0 // disable the verification and just print out the PCR values for debug purpose
-
-	/* Parse quote file */
-
-	if (quoteLen < 2)
-		goto badquote;
-	selectLen = ntohs (*(UINT16*)quote);
-	if (2 + selectLen + 4 > quoteLen)
-		goto badquote;
-	select = quote + 2;
-	pcrLen = ntohl (*(UINT32*)(quote+2+selectLen));
-	if (2 + selectLen + 4 + pcrLen + 20 > quoteLen)
-		goto badquote;
-	pcrs = select + selectLen + 4;
-	sig = pcrs + pcrLen;
-	sigLen = quote + quoteLen - sig;
-
-	/* Create TPM_QUOTE_INFO struct */
-	qinfo[0] = 1; qinfo[1] = 1; qinfo[2] = 0; qinfo[3] = 0;
-	qinfo[4] = 'Q'; qinfo[5] = 'U'; qinfo[6] = 'O'; qinfo[7] = 'T';
-	SHA1 (quote, 2+selectLen+4+pcrLen, qinfo+8);
-	memcpy (qinfo+8+20, chalmd, 20);
-
-	/* Verify RSA signature */
-	SHA1 (qinfo, sizeof(qinfo), md);
-	if (1 != RSA_verify(NID_sha1, md, sizeof(md), sig, sigLen, aikRsa)) {
-		fprintf (stderr, "Error, bad RSA signature in quote\n");
-		exit (2);
-	}
-
-	/* Print out PCR values */
-
-	for (pcr=0; pcr < 8*selectLen; pcr++) {
-		if (select[pcr/8] & (1 << (pcr%8))) {
-			printf ("%2d ", pcr);
-			for (i=0; i<20; i++) {
-				printf ("%02x", pcrs[20*pcri+i]);
-			}
-			printf ("\n");
-			pcri++;
-		}
-	}
-#endif
 	fflush (stdout);
 	fprintf (stderr, "Success!\n");
 
