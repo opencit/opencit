@@ -536,5 +536,56 @@ public class SamlGenerator {
                 signatureGenerator.signSAMLObject(assertion);                
             }
         }
-     
+        
+    public SamlAssertion generateVMAssertion(TxtHost host, Map<String, String> vmMetaData) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
+        samlAssertion = new SamlAssertion();
+
+        SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
+        Assertion assertion = (Assertion) assertionBuilder.buildObject();
+        assertion.setID("VMTrustAssertion"); 
+        assertion.setIssuer(createIssuer());
+        DateTime now = new DateTime();
+        assertion.setIssueInstant(now);
+        assertion.setVersion(SAMLVersion.VERSION_20);
+        assertion.setSubject(createSubject(host));
+        assertion.getAttributeStatements().add(createVMAttributes(host, vmMetaData));
+
+        AssertionMarshaller marshaller = new AssertionMarshaller();
+        Element plaintextElement = marshaller.marshall(assertion);
+
+        String originalAssertionString = XMLHelper.nodeToString(plaintextElement);
+        System.out.println("Assertion String: " + originalAssertionString);
+
+        // add signatures and/or encryption
+        signAssertion(plaintextElement);
+
+        samlAssertion.assertion = XMLHelper.nodeToString(plaintextElement);
+        System.out.println("Signed Assertion String: " + samlAssertion.assertion);
+        return samlAssertion;
+    }
+
+    private AttributeStatement createVMAttributes(TxtHost host, Map<String, String> vmMetaData) throws ConfigurationException {
+        // Builder Attributes
+        SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
+        AttributeStatement attrStatement = (AttributeStatement) attrStatementBuilder.buildObject();
+
+        attrStatement.getAttributes().add(createStringAttribute("Host_Name", host.getHostName().toString()));
+
+        if (host.getAikCertificate() != null) {
+            attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
+            attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+        } else if (host.getAikPublicKey() != null) {
+            attrStatement.getAttributes().add(createStringAttribute("AIK_PublicKey", host.getAikPublicKey()));
+            attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+        }
+
+        if (vmMetaData != null && !vmMetaData.isEmpty()) {
+            for (Map.Entry<String, String> entry : vmMetaData.entrySet()) {
+                attrStatement.getAttributes().add(createStringAttribute(entry.getKey(), entry.getValue()));
+            }
+        }
+
+        return attrStatement;
+
+    }
 }

@@ -2253,8 +2253,8 @@ public class HostTrustBO {
             try {
                 log.debug("getVMAttestationReport: About to generate SAML assertion for Host {} running VM {}.", 
                         hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
-                samlAssertion = getSamlGenerator().generateHostAssertion(host, null, vmMetaData);
-                vmAttestation.setSamlAssertion(samlAssertion.assertion);
+                samlAssertion = getSamlGenerator().generateVMAssertion(host, vmMetaData);
+                vmAttestation.setVmSaml(samlAssertion.assertion);
                 log.debug("getVMAttestationReport: Successfully generated SAML assertion for Host {} running VM {}.", 
                         hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
                 
