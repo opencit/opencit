@@ -8,8 +8,11 @@ REM ############################################################################
 REM #Set environment specific variables here 
 REM ###################################################################################################
 
+REM set the trustagent home directory
+REM set TRUSTAGENT_HOME=C:\Program Files (x86)\Intel\trustagent
+for %%i in ("%~dp0..") do set "parentfolder=%%~fi"
+set TRUSTAGENT_HOME=%parentfolder%
 
-set TRUSTAGENT_HOME=C:\Program Files (x86)\Intel\trustagent
 set DAEMON=%TRUSTAGENT_HOME%\bin\%NAME%.cmd
 set logfile=%TRUSTAGENT_HOME%\logs\trustagent.log
 

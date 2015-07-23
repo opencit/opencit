@@ -3,7 +3,10 @@ setlocal enabledelayedexpansion
 
 REM # SCRIPT CONFIGURATION:
 set package_name=trustagent
-set package_dir=C:\Program Files (x86)\Intel\trustagent
+
+REM the package directory should be where the setup.sh is installed (e.g. package_dir=C:\Program Files (x86)\Intel\trustagent)
+set package_dir=%~dp0
+
 set intel_conf_dir=%package_dir%\configuration
 set package_config_filename=%intel_conf_dir%\%package_name%.properties
 set package_env_filename=%package_dir%\%package_name%.env
