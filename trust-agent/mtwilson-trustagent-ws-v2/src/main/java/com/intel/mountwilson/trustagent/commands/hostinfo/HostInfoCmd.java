@@ -139,25 +139,49 @@ public class HostInfoCmd implements ICommand {
         CommandResult commandResult = CommandUtil.runCommand("virsh version");
         if (commandResult != null && commandResult.getStdout() != null) {
             String[] result = commandResult.getStdout().split("\n");
+            
+            //String[] result = "The program 'virsh' is currently not installed. You can install it by typing:\n apt-get install libvirt-bin".split("\n");
 
-            for (String str : result) {
-                String[] parts = str.split(":");
+            // For hosts where VMM is not installed, the output of the above command would look something like
+            // The program 'virsh' is currently not installed. You can install it by typing:
+            // apt-get install libvirt-bin 
+            // and 
+            // for hosts where VMM is installed the output would be
+            // Compiled against library: libvir 0.1.7
+            // Using library: libvir 0.1.7
+            // Using API: Xen 3.0.1
+            // Running hypervisor: Xen 3.0.0
 
-                if (parts != null && parts.length > 1) {
-                    if (parts[0].trim().equalsIgnoreCase("Running hypervisor")) {
-                        if (parts[1] != null) {
-                            String[] subParts = parts[1].trim().split(" ");
-                            if (subParts[0] != null) {
-                                context.setVmmName(subParts[0]);
-                            }
-                            if (subParts[1] != null) {
-                                context.setVmmVersion(subParts[1]);
+            // For cases where VMM is not installed, we would hardcode the VMM name and version as below. This is needed
+            // for supporting hosts without VMM
+            if (result.length > 0) {
+                String virshCmdSupport = result[0];
+                if (virshCmdSupport.startsWith("The program 'virsh' is currently not installed")) {
+                    context.setVmmName("Host_No_VMM");
+                    context.setVmmVersion("0.0");
+                } else {
+                    for (String str : result) {
+                        String[] parts = str.split(":");
+
+                        if (parts != null && parts.length > 1) {
+                            if (parts[0].trim().equalsIgnoreCase("Running hypervisor")) {
+                                if (parts[1] != null) {
+                                    String[] subParts = parts[1].trim().split(" ");
+                                    if (subParts[0] != null) {
+                                        context.setVmmName(subParts[0]);
+                                    }
+                                    if (subParts[1] != null) {
+                                        context.setVmmVersion(subParts[1]);
+                                    }
+                                }
                             }
                         }
+                        log.debug("VMM Name: " + context.getVmmName());
+                        log.debug("VMM Version: " + context.getVmmVersion());
                     }
                 }
-                log.debug("VMM Name: " + context.getVmmName());
-                log.debug("VMM Version: " + context.getVmmVersion());
+            } else {
+                log.error("Unable to execute virsh command to retrieve the hypervisor details");
             }
         } else {
             log.error("Error executing the virsh version command to retrieve the hypervisor details.");
