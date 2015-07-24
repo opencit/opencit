@@ -268,6 +268,11 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     }
                                     
                                     log.debug("VMAttestation:Create - VM SAML assertions is {}.", item.getVmSaml());
+                                    
+                                    // Check the trust status of the host as well. If it is false, then the VM trust also should be set to false.
+                                    if (!report.getHostAttestation().getHostTrustResponse().trust.bios || !report.getHostAttestation().getHostTrustResponse().trust.vmm) {
+                                        isVMTrusted = false;
+                                    }
 
                                     item.setVmSaml(report.getVmSaml());
                                     item.setTrustStatus(isVMTrusted);
