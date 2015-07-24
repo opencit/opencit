@@ -233,7 +233,7 @@ public class SamlGenerator {
             SAMLObjectBuilder subjectConfirmationBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
             SubjectConfirmation subjectConfirmation = (SubjectConfirmation) subjectConfirmationBuilder.buildObject();
             subjectConfirmation.setMethod(SubjectConfirmation.METHOD_SENDER_VOUCHES); 
-            subjectConfirmation.setSubjectConfirmationData(createSubjectConfirmationData(host));
+            subjectConfirmation.setSubjectConfirmationData(createSubjectConfirmationData());
             // Create the NameIdentifier
             SAMLObjectBuilder nameIdBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
             NameID nameId = (NameID) nameIdBuilder.buildObject();
@@ -255,7 +255,7 @@ public class SamlGenerator {
          * @throws ConfigurationException
          * @throws UnknownHostException 
          */
-        private SubjectConfirmationData createSubjectConfirmationData(TxtHost host) throws ConfigurationException, UnknownHostException {
+        private SubjectConfirmationData createSubjectConfirmationData() throws ConfigurationException, UnknownHostException {
             SAMLObjectBuilder confirmationMethodBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(SubjectConfirmationData.DEFAULT_ELEMENT_NAME);
             SubjectConfirmationData confirmationMethod = (SubjectConfirmationData) confirmationMethodBuilder.buildObject();
             DateTime now = new DateTime();
@@ -547,7 +547,27 @@ public class SamlGenerator {
         DateTime now = new DateTime();
         assertion.setIssueInstant(now);
         assertion.setVersion(SAMLVersion.VERSION_20);
-        assertion.setSubject(createSubject(host));
+        
+        // Create the Subject
+        SAMLObjectBuilder subjectBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Subject.DEFAULT_ELEMENT_NAME);
+        Subject subject = (Subject) subjectBuilder.buildObject();
+        subject.setNameID(createNameID(vmMetaData.get("VM_Instance_Id")));
+        
+        SAMLObjectBuilder subjectConfirmationBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(SubjectConfirmation.DEFAULT_ELEMENT_NAME);
+        SubjectConfirmation subjectConfirmation = (SubjectConfirmation) subjectConfirmationBuilder.buildObject();
+        subjectConfirmation.setMethod(SubjectConfirmation.METHOD_SENDER_VOUCHES); 
+        subjectConfirmation.setSubjectConfirmationData(createSubjectConfirmationData());
+        // Create the NameIdentifier
+        SAMLObjectBuilder nameIdBuilder = (SAMLObjectBuilder) builderFactory.getBuilder(NameID.DEFAULT_ELEMENT_NAME);
+        NameID nameId = (NameID) nameIdBuilder.buildObject();
+        nameId.setValue(issuerServiceName);
+        nameId.setFormat(NameID.UNSPECIFIED); // !!! CAN ALSO USE X509 SUBJECT FROM HOST CERTIFICATE instead of host name in database   
+        subjectConfirmation.setNameID(nameId);
+
+            
+        subject.getSubjectConfirmations().add(subjectConfirmation);
+        
+        assertion.setSubject(subject);
         assertion.getAttributeStatements().add(createVMAttributes(host, vmMetaData));
 
         AssertionMarshaller marshaller = new AssertionMarshaller();
