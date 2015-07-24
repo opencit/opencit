@@ -179,11 +179,9 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     log.debug("VMAttestation:Create - About to validate the trust policy.");
                                     isTrustPolicyValid = XmlDsigVerify.isValid(trustPolicyXml, VMAttestations.getSamlCertificate());
                                     log.debug("VMAttestation:Create - Validation result of TrustPolicy is {}", isTrustPolicyValid);
-                                    isTrustPolicyValid = true;
                                 } catch (Exception ex) {
                                     log.error("VMAttestation:Create - Error during validation of the TrustPolicy. {}", ex.getMessage());
-                                    isTrustPolicyValid = true;
-                                    // throw new RepositoryCreateException(ex);
+                                    throw new RepositoryCreateException(ex);
                                 }
 
                                 try {
@@ -192,11 +190,9 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     X509Certificate privacyCaCert = TpmUtils.certFromP12(My.configuration().getPrivacyCaIdentityP12().getAbsolutePath(), My.configuration().getPrivacyCaIdentityPassword());
                                     isVMQuoteValid = XmlDsigVerify.isValid(vmQuoteXml, privacyCaCert);
                                     log.debug("VMAttestation:Create - Validation result of VMQuote is {}", isVMQuoteValid);
-                                    isVMQuoteValid = true;
                                 } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | java.security.cert.CertificateException | ParserConfigurationException | SAXException | MarshalException | XMLSignatureException ex) {
                                     log.error("VMAttestation:Create - Error during validation of the VMQuote. {}", ex.getMessage());
-                                    isVMQuoteValid = true;
-                                    //throw new RepositoryCreateException(ex);
+                                    throw new RepositoryCreateException(ex);
                                 }
                                 
                                 // Once we have verified the integrity of the files, we need to ensure that the nonce is matching with what 
