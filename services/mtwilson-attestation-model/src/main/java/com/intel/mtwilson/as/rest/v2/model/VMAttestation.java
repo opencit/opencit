@@ -4,9 +4,12 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.policy.RuleResult;
+import com.intel.mtwilson.policy.VmTrustReport;
 
 /**
  *
@@ -19,9 +22,9 @@ public class VMAttestation extends Document {
     private String vmInstanceId;
     private boolean trustStatus;
     private String errorMessage;
-    private String samlAssertion;
+    private String vmSaml;
     private boolean includeHostReport;
-    private RuleResult vmRuleResult;
+    private VmTrustReport vmTrustReport;
     HostAttestation hostAttestation;
 
     public String getHostName() {
@@ -56,18 +59,20 @@ public class VMAttestation extends Document {
         this.errorMessage = errorMessage;
     }
 
-    public String getSamlAssertion() {
-        return samlAssertion;
+    public String getVmSaml() {
+        return vmSaml;
     }
 
-    public void setSamlAssertion(String samlAssertion) {
-        this.samlAssertion = samlAssertion;
+    public void setVmSaml(String vmSaml) {
+        this.vmSaml = vmSaml;
     }
 
-    public boolean isIncludeHostReport() {
+    @JsonIgnore
+    public boolean getIncludeHostReport() {
         return includeHostReport;
     }
 
+    @JsonProperty
     public void setIncludeHostReport(boolean includeHostReport) {
         this.includeHostReport = includeHostReport;
     }
@@ -80,12 +85,13 @@ public class VMAttestation extends Document {
         this.hostAttestation = hostAttestation;
     }
 
-    public RuleResult getVmRuleResult() {
-        return vmRuleResult;
+    public VmTrustReport getVmTrustReport() {
+        return vmTrustReport;
     }
 
-    public void setVmRuleResult(RuleResult vmRuleResult) {
-        this.vmRuleResult = vmRuleResult;
-    }        
+    public void setVmTrustReport(VmTrustReport vmTrustReport) {
+        this.vmTrustReport = vmTrustReport;
+    }
+
     
 }
