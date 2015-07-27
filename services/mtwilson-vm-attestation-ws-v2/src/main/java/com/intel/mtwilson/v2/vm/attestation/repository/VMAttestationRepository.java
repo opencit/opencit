@@ -110,6 +110,8 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
     @RequiresPermissions("vm_attestations:create")    
     public void create(VMAttestation item) {
         log.debug("VMAttestation:Create - Got request to create VM attestation with id {}.", item.getId().toString());  
+        log.debug("VMAttestation:Create - IncludeHostReport value is {}.", item.getIncludeHostReport());
+        
         String nonce;
         JAXB jaxb = new JAXB();        
         if (item.getId() == null) { item.setId(new UUID()); }        
@@ -227,29 +229,29 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     if (cumulativeHashFromQuote == null ? vmTrustPolicy.getImage().getImageHash().getValue() != null : 
                                             !cumulativeHashFromQuote.equals(vmTrustPolicy.getImage().getImageHash().getValue())) {
                                         log.error("VMAttestation:Create - Hash value of the VM {} does not match the white list value {} specified in the Trust Policy.",
-                                                cumulativeHashFromQuote, vmTrustPolicy.getImage().getImageHash().getValue());
-                                        
-                                        // Compare the measurements against the whitelists to see which module failed.
-                                        List<Measurement> actualModules = new ArrayList<>();
-                                        List<Measurement> whitelistModules = new ArrayList<>();
-                                        
-                                        actualModules = new XmlMeasurementLog(PcrIndex.PCR19, measurementXml).getMeasurements();
-                                        
-                                        String whiteListXml = trustPolicyXml.substring(trustPolicyXml.indexOf("<Whitelist"), (trustPolicyXml.indexOf("</Whitelist>") + "</Whitelist>".length()));
-                                        whiteListXml = whiteListXml.replaceFirst("<Whitelist", "<Measurements xmlns=\"mtwilson:trustdirector:measurements:1.1\"");
-                                        whiteListXml = whiteListXml.replaceAll("</Whitelist>", "</Measurements>");
-
-                                        whitelistModules = new XmlMeasurementLog(PcrIndex.PCR19, whiteListXml).getMeasurements();
-                                        
-                                        VmMeasurementLogEquals vmMeasurementLogEqualsRule = new VmMeasurementLogEquals();                                        
-                                        vmRuleResult = vmMeasurementLogEqualsRule.apply2(actualModules, whitelistModules);
-                                        
-                                        vmTrustReport.addResult(vmRuleResult);
-                                        
+                                                cumulativeHashFromQuote, vmTrustPolicy.getImage().getImageHash().getValue());                                                                                
                                     } else {
                                         isVMTrusted = true;
                                         log.debug("VMAttestation:Create - VM Trust status is {}", isVMTrusted);
                                     }
+                                    
+                                    // Compare the measurements against the whitelists to see which module failed.
+                                    List<Measurement> actualModules = new ArrayList<>();
+                                    List<Measurement> whitelistModules = new ArrayList<>();
+
+                                    actualModules = new XmlMeasurementLog(PcrIndex.PCR19, measurementXml).getMeasurements();
+
+                                    String whiteListXml = trustPolicyXml.substring(trustPolicyXml.indexOf("<Whitelist"), (trustPolicyXml.indexOf("</Whitelist>") + "</Whitelist>".length()));
+                                    whiteListXml = whiteListXml.replaceFirst("<Whitelist", "<Measurements xmlns=\"mtwilson:trustdirector:measurements:1.1\"");
+                                    whiteListXml = whiteListXml.replaceAll("</Whitelist>", "</Measurements>");
+
+                                    whitelistModules = new XmlMeasurementLog(PcrIndex.PCR19, whiteListXml).getMeasurements();
+
+                                    VmMeasurementLogEquals vmMeasurementLogEqualsRule = new VmMeasurementLogEquals();                                        
+                                    vmRuleResult = vmMeasurementLogEqualsRule.apply2(actualModules, whitelistModules);
+
+                                    vmTrustReport.addResult(vmRuleResult);
+                                    
 
                                     // Create a map of the VM attributes that needs to be added to the SAML assertion.
                                     Map<String, String> vmAttributes = new HashMap<>();
@@ -258,19 +260,21 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy());
                                     
                                     log.debug("VMAttestation:Create - About to generate the VM attestation report for VM with ID {}", vmInstanceIdFromQuote);
-                                    VMAttestation report = new HostTrustBO().getVMAttestationReport(obj, vmAttributes, item.isIncludeHostReport());
+                                    VMAttestation report = new HostTrustBO().getVMAttestationReport(obj, vmAttributes, item.getIncludeHostReport());
                                     log.debug("VMAttestation:Create - Successfully generated the VM attestation report for VM with ID {}", vmInstanceIdFromQuote);
                                     
                                     // Include the host report only if requested
-                                    if (item.isIncludeHostReport()) {
+                                    if (item.getIncludeHostReport()) {
                                         item.setHostAttestation(report.getHostAttestation());
                                         log.debug("VMAttestation:Create - Host SAML assertions is {}.", item.getHostAttestation().getSaml());
                                     }
                                     
-                                    log.debug("VMAttestation:Create - VM SAML assertions is {}.", item.getVmSaml());
+                                    log.debug("VMAttestation:Create - VM SAML assertions is {}.", report.getVmSaml());
                                     
-                                    // Check the trust status of the host as well. If it is false, then the VM trust also should be set to false.
-                                    if (!report.getHostAttestation().getHostTrustResponse().trust.bios || !report.getHostAttestation().getHostTrustResponse().trust.vmm) {
+                                    // While generating the VM Attestation report, it would have already been checked if the host is also trusted
+                                    // and accordingly the vm trust status flag would have been updated.
+                                    if (isVMTrusted && !report.isTrustStatus()) {
+                                        log.error("VMAttestation:Create - VM trust status is being set to false since the host is not trusted.");
                                         isVMTrusted = false;
                                     }
 

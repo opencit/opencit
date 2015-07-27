@@ -2252,8 +2252,10 @@ public class HostTrustBO {
             
             // Check if the host is trusted. If not, the VM metadata has to be modified to set the VM trust status to false
             if (!host.isBiosTrusted() || !host.isVmmTrusted()) {
-                boolean isHostTrusted = false;
-                vmMetaData.put("VM_Trust_Status", String.valueOf(isHostTrusted));
+                vmMetaData.put("VM_Trust_Status", String.valueOf(false));
+                vmAttestation.setTrustStatus(false);
+            } else {
+                vmAttestation.setTrustStatus(true);
             }
             
             try {
