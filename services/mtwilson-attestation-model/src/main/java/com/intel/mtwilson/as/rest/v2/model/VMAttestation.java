@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.mtwilson.jaxrs2.Document;
 import com.intel.mtwilson.policy.RuleResult;
@@ -67,10 +68,11 @@ public class VMAttestation extends Document {
     }
 
     @JsonIgnore
-    public boolean isIncludeHostReport() {
+    public boolean getIncludeHostReport() {
         return includeHostReport;
     }
 
+    @JsonProperty
     public void setIncludeHostReport(boolean includeHostReport) {
         this.includeHostReport = includeHostReport;
     }
