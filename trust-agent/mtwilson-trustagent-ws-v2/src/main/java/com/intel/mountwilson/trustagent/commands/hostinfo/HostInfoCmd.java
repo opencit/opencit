@@ -136,9 +136,24 @@ public class HostInfoCmd implements ICommand {
 
     private void getVmmAndVersion() throws TAException, IOException {
 
-        CommandResult commandResult = CommandUtil.runCommand("virsh version");
+        CommandResult commandResult = null;
+        try {
+            commandResult = CommandUtil.runCommand("virsh version");
+        } catch (TAException | IOException ex) {
+            log.error("getVmmAndVersion: Error while running virsh command. {}", ex.getMessage());
+            if (ex.getMessage().contains("error=2, No such file or directory")) {
+                    context.setVmmName("Host_No_VMM");
+                    context.setVmmVersion("0.0");
+                    return;
+            } else {
+                log.error("getVmmAndVersion: Unexpected error encountered while running virsh command on system that does not support VMM.");
+            }
+        }
+                
         if (commandResult != null && commandResult.getStdout() != null) {
-            String[] result = commandResult.getStdout().split("\n");
+            String cmdOutput = commandResult.getStdout();
+            log.debug("getVmmAndVersion: output of virsh version command is {}.", cmdOutput);
+            String[] result = cmdOutput.split("\n");
             
             //String[] result = "The program 'virsh' is currently not installed. You can install it by typing:\n apt-get install libvirt-bin".split("\n");
 
