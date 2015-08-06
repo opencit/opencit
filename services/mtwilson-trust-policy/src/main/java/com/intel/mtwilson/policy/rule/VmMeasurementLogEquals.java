@@ -28,7 +28,10 @@ import org.slf4j.LoggerFactory;
 public class VmMeasurementLogEquals extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public VmMeasurementLogEquals() { } // for desearializing jackson
+    public VmMeasurementLogEquals()
+    { 
+        this.setMarkers("VM");
+    } // for desearializing jackson
     
     /**
      * This function would verify the measured modules against the whitelist modules and appropriately raises any required

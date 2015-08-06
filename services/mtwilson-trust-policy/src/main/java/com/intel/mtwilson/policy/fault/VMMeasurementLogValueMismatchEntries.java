@@ -17,14 +17,14 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class VMMeasurementLogValueMismatchEntries extends Fault {
-    private Set<Measurement> missingEntries;
+    private Set<Measurement> mismatchEntries;
     
     public VMMeasurementLogValueMismatchEntries() { } // for desearializing jackson
     
-    public VMMeasurementLogValueMismatchEntries(Set<Measurement> missingEntries) {
-        super("VM measurement log contains %d entries for which the values are modified.", missingEntries.size());
-        this.missingEntries = missingEntries;
+    public VMMeasurementLogValueMismatchEntries(Set<Measurement> mismatchEntries) {
+        super("VM measurement log contains %d entries for which the values are modified.", mismatchEntries.size());
+        this.mismatchEntries = mismatchEntries;
     }
     
-    public Set<Measurement> getMissingEntries() { return missingEntries; }
+    public Set<Measurement> getMissingEntries() { return mismatchEntries; }
 }

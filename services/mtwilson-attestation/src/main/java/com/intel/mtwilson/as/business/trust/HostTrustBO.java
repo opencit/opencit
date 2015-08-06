@@ -2250,11 +2250,19 @@ public class HostTrustBO {
                 host.setBindingKeyCertificate(tblHosts.getBindingKeyCertificate());
             }
             
+            // Check if the host is trusted. If not, the VM metadata has to be modified to set the VM trust status to false
+            if (!host.isBiosTrusted() || !host.isVmmTrusted()) {
+                vmMetaData.put("VM_Trust_Status", String.valueOf(false));
+                vmAttestation.setTrustStatus(false);
+            } else {
+                vmAttestation.setTrustStatus(true);
+            }
+            
             try {
                 log.debug("getVMAttestationReport: About to generate SAML assertion for Host {} running VM {}.", 
                         hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
-                samlAssertion = getSamlGenerator().generateHostAssertion(host, null, vmMetaData);
-                vmAttestation.setSamlAssertion(samlAssertion.assertion);
+                samlAssertion = getSamlGenerator().generateVMAssertion(host, vmMetaData);
+                vmAttestation.setVmSaml(samlAssertion.assertion);
                 log.debug("getVMAttestationReport: Successfully generated SAML assertion for Host {} running VM {}.", 
                         hostAttestation.getHostName(), vmMetaData.get("VM_Instance_Id"));
                 
