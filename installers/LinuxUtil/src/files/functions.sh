@@ -1276,57 +1276,6 @@ mysql_configure_connection() {
 #      fi
 }
 
-# requires a mysql connection that can access the existing database, OR (if it doesn't exist)
-# requires a mysql connection that can create databases and grant privileges
-# call mysql_configure_connection before calling this function
-mysql_create_database() {
-
-  #we first need to find if the user has specified a different port than the once currently configured for mysql
-  # find the my.conf location
-  mysql_cnf=`find / -name my.cnf 2>/dev/null | head -n 1`
-  #echo "MySQL configuration file is located at $mysql_cnf"
-  # check the current port that is configured. There should be 2 instances, one for server and one for client. Both of them should be updated
-  if [ -f "$mysql_cnf" ]; then
-    current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
-    #echo "MySQL is currently configured with port $current_port"
-    # if the required port is already configured. If not, we need to reconfigure
-    has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
-    if [ -z "$has_correct_port" ]; then
-      echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
-      sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
-      echo "Restarting MySQL for port change update to take effect."
-      service mysql restart >> $INSTALL_LOG_FILE
-    fi
-  else
-    echo "warning: my.cnf not found" >> $INSTALL_LOG_FILE
-  fi
-	
-  mysql_test_connection
-  local create_sql="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
-  local grant_sql="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
-  if [ -z "$mysql_connection_error" ]; then
-    if [ -n "$is_mysql_available" ]; then
-      echo_success "Database \`${MYSQL_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
-      return 0
-    else
-      echo "Creating database..."    >> $INSTALL_LOG_FILE
-      $mysql_connect -e "${create_sql}"
-      $mysql_connect -e "${grant_sql}"
-      mysql_test_connection
-      if [ -z "$is_mysql_available" ]; then
-        echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
-        return 1
-      fi
-    fi
-  else
-    echo_failure "Cannot connect to database."  | tee -a $INSTALL_LOG_FILE
-    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
-    echo "${create_sql}" >> $INSTALL_LOG_FILE
-    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
-    return 1
-  fi
-}
-
 # before using this function, you must first set the connection variables mysql_*
 # example:  mysql_run_script /path/to/statements.sql
 mysql_run_script() {

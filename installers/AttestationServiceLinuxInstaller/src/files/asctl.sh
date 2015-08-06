@@ -180,7 +180,6 @@ setup_interactive_install() {
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
       mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
-      mysql_create_database
       mtwilson setup InitDatabase mysql
     fi
   elif using_postgres; then

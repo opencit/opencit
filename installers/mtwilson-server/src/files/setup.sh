@@ -707,11 +707,11 @@ if [ "$(whoami)" == "root" ]; then
         echo "Installing mysql server..."
         aptget_detect; dpkg_detect;
         if [[ -n "$aptget" ]]; then
-          echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
-          echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections
+          echo "mysql-server-5.1 mysql-server/root_password password $DATABASE_ROOT_PASSWORD" | debconf-set-selections
+          echo "mysql-server-5.1 mysql-server/root_password_again password $DATABASE_ROOT_PASSWORD" | debconf-set-selections
         fi
         mysql_server_install
-        mysql_start >> $INSTALL_LOG_FILE
+		mysql_start >> $INSTALL_LOG_FILE
         echo "Installation of mysql server complete..."
         # End mysql server install code here
       else
@@ -722,6 +722,7 @@ if [ "$(whoami)" == "root" ]; then
       mysql_install  
       echo "Installation of mysql client complete"
       # mysql client end
+
     fi
   elif using_postgres; then
     # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
@@ -765,18 +766,101 @@ if [ "$(whoami)" == "root" ]; then
   fi
 fi
 
+# Environment:
+# - MYSQL_REQUIRED_VERSION
+mysql_root_connection() {
+  mysql_require
+  mysql_root_connect="$mysql --batch --host=${MYSQL_HOSTNAME:-$DEFAULT_MYSQL_HOSTNAME} --port=${MYSQL_PORTNUM:-$DEFAULT_MYSQL_PORTNUM} --user=${MYSQL_ROOT_USERNAME:-$DEFAULT_MYSQL_ROOT_USERNAME} --password=${MYSQL_ROOT_PASSWORD:-$DEFAULT_MYSQL_ROOT_PASSWORD}"
+}
+
+# Environment:
+# - MYSQL_REQUIRED_VERSION
+# sets the is_mysql_available variable to "yes" or ""
+# sets the is_MYSQL_DATABASE_created variable to "yes" or ""
+mysql_test_root_connection() {
+  mysql_root_connection
+  is_mysql_available=""
+  local mysql_test_result=`$mysql_root_connect -e "show databases" 2>/tmp/intel.mysql.err | grep "^${MYSQL_DATABASE}\$" | wc -l`
+  if [ $mysql_test_result -gt 0 ]; then
+    is_mysql_available="yes"
+  fi
+  mysql_connection_error=`cat /tmp/intel.mysql.err`
+  rm -f /tmp/intel.mysql.err
+}
+
+# requires a mysql connection that can access the existing database, OR (if it doesn't exist)
+# requires a mysql connection that can create databases and grant privileges
+# call mysql_configure_connection before calling this function
+mysql_create_database_and_user() {
+
+  #we first need to find if the user has specified a different port than the once currently configured for mysql
+  # find the my.conf location
+  mysql_cnf=`find / -name my.cnf 2>/dev/null | head -n 1`
+  #echo "MySQL configuration file is located at $mysql_cnf"
+  # check the current port that is configured. There should be 2 instances, one for server and one for client. Both of them should be updated
+  if [ -f "$mysql_cnf" ]; then
+    current_port=`grep -E "port\s+=" $mysql_cnf | head -1 | awk '{print $3}'`
+    #echo "MySQL is currently configured with port $current_port"
+    # if the required port is already configured. If not, we need to reconfigure
+    has_correct_port=`grep $MYSQL_PORTNUM $mysql_cnf | head -1`
+    if [ -z "$has_correct_port" ]; then
+      echo "Port needs to be reconfigured from $current_port to $MYSQL_PORTNUM"
+      sed -i s/$current_port/$MYSQL_PORTNUM/g $mysql_cnf 
+      echo "Restarting MySQL for port change update to take effect."
+      service mysql restart >> $INSTALL_LOG_FILE
+    fi
+  else
+    echo "warning: my.cnf not found" >> $INSTALL_LOG_FILE
+  fi
+	
+  mysql_test_root_connection
+  local create_db="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
+  local find_user="SELECT user FROM mysql.user WHERE user='${MYSQL_USERNAME}';"
+  local create_user="CREATE USER \`$MYSQL_USERNAME\`@\`$MYSQL_HOSTNAME\` identified by '$MYSQL_PASSWORD';"
+  local grant_db="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\`@\`$MYSQL_HOSTNAME\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
+  if [ -z "$mysql_connection_error" ]; then
+    if [ -n "$is_mysql_available" ]; then
+      echo_success "Database \`${MYSQL_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
+      return 0
+    else
+      echo "Creating database..."    >> $INSTALL_LOG_FILE
+      $mysql_root_connect -e "${create_db}"
+	  user=`$mysql_root_connect -e "${find_user}"`
+      if [[ -n "$user" && ${user}=${MYSQL_USERNAME} ]]; then
+	    echo "Mysql user '$MYSQL_USERNAME' already exist"
+	  else
+	    echo "Creating new Mysql user $MYSQL_USERNAME..."
+	    $mysql_root_connect -e "${create_user}"
+	  fi
+	  $mysql_root_connect -e "${grant_db}"
+      mysql_test_root_connection
+      if [ -z "$is_mysql_available" ]; then
+        echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
+        return 1
+      fi
+    fi
+  else
+    echo_failure "Cannot connect to database."  | tee -a $INSTALL_LOG_FILE
+    echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
+    echo "${create_sql}" >> $INSTALL_LOG_FILE
+	echo "${create_user}" >> $INSTALL_LOG_FILE
+    echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+    return 1
+  fi
+}
+
 # after database root portion of executed code
 if using_mysql; then
   if [ -z "$SKIP_DATABASE_INIT" ]; then
     # mysql db init here
-    if ! mysql_create_database; then
+    if ! mysql_create_database_and_user; then
       mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --defaults-file=/etc/mysql/my.cnf
-      mysqladmin -u "$MYSQL_USERNAME" password "$MYSQL_PASSWORD"
-      mysql_create_database
+      mysqladmin -u "root" password "$MYSQL_ROOT_PASSWORD"
+      mysql_create_database_and_user
     fi
     # mysql db init end
   else
-    echo_warning "Skipping init of database"
+    echo_warning "Skipping init of database" 
   fi
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
