@@ -6,6 +6,7 @@ package com.intel.mtwilson.trustagent.ws.v2;
 
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.commands.SetAssetTag;
+import com.intel.mountwilson.trustagent.commands.SetAssetTagWindows;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.trustagent.model.TagWriteRequest;
@@ -33,10 +34,19 @@ public class Tag {
         log.debug("writeTag uuid {} sha1 {}", tagInfo.getHardwareUuid(), Hex.encodeHexString(tagInfo.getTag()));
         TADataContext context = new TADataContext();
         context.setAssetTagHash(Hex.encodeHexString(tagInfo.getTag()));
-        new SetAssetTag(context).execute();
+        
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("windows"))
+            new SetAssetTagWindows(context).execute();
+        else
+            new SetAssetTag(context).execute();
+        
         log.debug("writeTag returning 204 status");
         response.setStatus(Response.Status.NO_CONTENT.getStatusCode());
         log.debug("writeTag done");
+        
+
+
     }
     
 }
