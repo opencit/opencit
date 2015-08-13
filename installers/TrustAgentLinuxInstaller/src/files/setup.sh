@@ -257,23 +257,16 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
-TRUSTAGENT_REMOVE_YUM_PACKAGES="trousers trousers-devel"
-TRUSTAGENT_REMOVE_APT_PACKAGES="trousers trousers-dbg"
-TRUSTAGENT_REMOVE_YAST_PACKAGES="trousers trousers-devel"
-TRUSTAGENT_REMOVE_ZYPPER_PACKAGES="trousers trousers-devel"
-auto_uninstall "Removing Incompatible Packages" "TRUSTAGENT_REMOVE"
-if [ $? -ne 0 ]; then echo_failure "Failed to remove incompatible packages through package manager"; exit -1; fi
-
 # make sure unzip and authbind are installed
 #java_required_version=1.7.0_51
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc"
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
 # commented out from apt packages: libcurl4-openssl-dev 
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc"
-# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc"
-# SUSE uses zypper:.  omitting libtspi1 because already depends on a specific version of it which will be isntalled automatically
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+# SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
 # other packages in suse:  libopenssl0_9_8
 auto_install "Installer requirements" "TRUSTAGENT"
 if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
