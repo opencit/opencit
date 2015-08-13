@@ -24,6 +24,20 @@ public class ExecUtil {
         command.addArguments(args);
         return execute(command);
     }
+    /**
+     * Executes given command without modifying quotes if available. 
+     * @param executable
+     * @param args
+     * @return
+     * @throws ExecuteException
+     * @throws IOException 
+     */
+    public static Result executeQuoted(String executable, String... args) throws ExecuteException, IOException {
+        CommandLine command = new CommandLine(executable);
+        command.addArguments(args,false);
+        return execute(command);
+    }
+    
     public static Result executeQuietly(String executable, String... args) throws IOException {
         CommandLine command = new CommandLine(executable);
         command.addArguments(args);
