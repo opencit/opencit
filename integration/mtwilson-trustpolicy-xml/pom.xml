@@ -35,9 +35,9 @@
                             <schemaIncludes>
                                 <include>jaxb/mtwilson-trustpolicy-xml/*.xsd</include>
                             </schemaIncludes>
-                            <bindingIncludes>
+                            <!--<bindingIncludes>
                                 <include>jaxb/mtwilson-trustpolicy-xml/*.xjb</include>
-                            </bindingIncludes>
+                            </bindingIncludes>-->
                             <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/mtwilson-trustpolicy-xml.episode</episodeFile>
                             <generatePackage>com.intel.mtwilson.trustpolicy.xml</generatePackage>
                         </configuration>
