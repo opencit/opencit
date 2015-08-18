@@ -238,6 +238,14 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
   chmod 700 $directory
 done
 
+# make aikverify directories, set ownership and permissions
+
+if [ -w "/var/opt/intel" ]; then
+  mkdir -p "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
+  chown -R ${MTWILSON_USERNAME}:${MTWILSON_USERNAME} "/var/opt/intel"
+  chmod 700 "/var/opt/intel"
+fi
+
 mtwilson_backup_configuration() {
   if [ -n "$MTWILSON_CONFIGURATION" ] && [ -d "$MTWILSON_CONFIGURATION" ]; then
     datestr=`date +%Y%m%d.%H%M`
