@@ -239,11 +239,13 @@ for directory in $MTWILSON_HOME $MTWILSON_CONFIGURATION $MTWILSON_ENV $MTWILSON_
 done
 
 # make aikverify directories, set ownership and permissions
-
+if [ "$(whoami)" == "root" ]; then
+  mkdir -p "/var/opt/intel"
+fi
 if [ -w "/var/opt/intel" ]; then
   mkdir -p "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
   chown -R ${MTWILSON_USERNAME}:${MTWILSON_USERNAME} "/var/opt/intel"
-  chmod 700 "/var/opt/intel"
+  chmod 700 "/var/opt/intel" "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
 fi
 
 mtwilson_backup_configuration() {
@@ -1265,6 +1267,7 @@ fi
 
 # last chance to set permissions
 chmod 600 "$MTWILSON_CONFIGURATION/*.properties" 2>/dev/null
+chmod 700 "/var/opt/intel" "/var/opt/intel/aikverifyhome/bin" "/var/opt/intel/aikverifyhome/data"
 
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver

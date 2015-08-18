@@ -2176,7 +2176,7 @@ glassfish_permissions() {
     return 1
   fi
   local file
-  for file in $(find "${chown_locations}"); do
+  for file in $(find "${chown_locations}" 2>/dev/null); do
     if [[ -n "$file" && -e "$file" ]]; then
       owner=`stat -c '%U' $file`
       if [ $owner != ${username} ]; then
@@ -2810,7 +2810,7 @@ tomcat_permissions() {
 	return 1	
   fi
   local file
-  for file in $(find "${chown_locations}"); do
+  for file in $(find "${chown_locations}" 2>/dev/null); do
     if [[ -n "$file" && -e "$file" ]]; then
       owner=`stat -c '%U' $file`
       if [ $owner != ${username} ]; then
@@ -2864,7 +2864,7 @@ tomcat_start() {
 tomcat_shutdown() {
   if tomcat_running; then
     if [ -n "$TOMCAT_PID" ]; then
-      kill -9 $TOMCAT_PID
+      kill -9 $TOMCAT_PID 2>/dev/null
     fi
   fi
 }
