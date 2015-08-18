@@ -1273,12 +1273,14 @@ if using_glassfish; then
   update_property_in_file "glassfish.admin.username" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_USERNAME"
   update_property_in_file "glassfish.admin.password" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_PASSWORD"
   glassfish_admin_user
-  glassfish_restart
+  #glassfish_restart
+  /opt/mtwilson/bin/mtwilson restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" "$MTWILSON_CONFIGURATION/mtwilson.properties" "tomcat"
   update_property_in_file "tomcat.admin.username" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_USERNAME"
   update_property_in_file "tomcat.admin.password" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$WEBSERVICE_MANAGER_PASSWORD"
-  tomcat_restart
+  #tomcat_restart
+  /opt/mtwilson/bin/mtwilson restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
