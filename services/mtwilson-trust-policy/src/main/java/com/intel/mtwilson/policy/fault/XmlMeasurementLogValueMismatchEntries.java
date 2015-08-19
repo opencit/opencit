@@ -34,5 +34,5 @@ public class XmlMeasurementLogValueMismatchEntries extends Fault {
     }
     
     public PcrIndex getPcrIndex() { return pcrIndex; }
-    public Set<Measurement> getMissingEntries() { return mismatchEntries; }
+    public Set<Measurement> getMismatchEntries() { return mismatchEntries; }
 }
