@@ -27,39 +27,39 @@ and open the template in the editor.
       </xs:sequence>
     </xs:complexType>
   
-    <xs:element name="Director" type="directorType"/>
-    <xs:complexType name="directorType">
+    <xs:element name="Director" type="director"/>
+    <xs:complexType name="director">
       <xs:sequence>
         <xs:element type="xs:string" name="CustomerId"/>
       </xs:sequence>
     </xs:complexType>
     
-    <xs:element name="Image" type="imageType"/>
-    <xs:complexType name="imageType">
+    <xs:element name="Image" type="image"/>
+    <xs:complexType name="image">
         <xs:sequence>
           <xs:element name="ImageId" type="uuidType"/>
           <xs:element name="ImageHash" type="digestAlgorithmType"/>
         </xs:sequence>
     </xs:complexType>
     
-    <xs:element name="LaunchControlPolicy" type="launchControlPolicyType"/>
-    <xs:simpleType name="launchControlPolicyType">
+    <xs:element name="LaunchControlPolicy" type="launchControlPolicy"/>
+    <xs:simpleType name="launchControlPolicy">
         <xs:restriction base="xs:string">
           <xs:enumeration value="MeasureOnly"/>
           <xs:enumeration value="MeasureAndEnforce"/>
         </xs:restriction>
     </xs:simpleType>
     
-    <xs:element name="Encryption" type="encryptionType"/>
-    <xs:complexType name="encryptionType">
+    <xs:element name="Encryption" type="encryption"/>
+    <xs:complexType name="encryption">
         <xs:sequence>
             <xs:element name="Key" type="keyType"/>
             <xs:element name="Checksum" type="digestAlgorithmType"/>
         </xs:sequence>
     </xs:complexType>
         
-    <xs:element name="Geotag" type="geoTagType"/>          
-    <xs:complexType name="geoTagType">
+    <xs:element name="Geotag" type="geotag"/>          
+    <xs:complexType name="geotag">
       <xs:sequence>
         <xs:element name="Attribute" maxOccurs="unbounded" minOccurs="0">
           <xs:complexType>
@@ -72,8 +72,8 @@ and open the template in the editor.
       </xs:sequence>
     </xs:complexType>
     
-    <xs:element name="Whitelist" type="whitelistType"/>
-    <xs:complexType name="whitelistType">
+    <xs:element name="Whitelist" type="whitelist"/>
+    <xs:complexType name="whitelist">
       <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                     <xs:element name="File" type="fileMeasurementType"/>
