@@ -14,8 +14,8 @@ and open the template in the editor.
            <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
 				schemaLocation="xmldsig-core-schema.xsd"/>    
 
-    <xs:element name="TrustPolicy" type="trustPolicyType"/>
-    <xs:complexType name="trustPolicyType">
+    <xs:element name="TrustPolicy" type="trustPolicy"/>
+    <xs:complexType name="trustPolicy">
       <xs:sequence>
         <xs:element ref="Director"/>
         <xs:element ref="Image"  minOccurs="0"/>
@@ -37,8 +37,8 @@ and open the template in the editor.
     <xs:element name="Image" type="image"/>
     <xs:complexType name="image">
         <xs:sequence>
-          <xs:element name="ImageId" type="uuidType"/>
-          <xs:element name="ImageHash" type="digestAlgorithmType"/>
+          <xs:element name="ImageId" type="uuid"/>
+          <xs:element name="ImageHash" type="imageHash"/>
         </xs:sequence>
     </xs:complexType>
     
@@ -53,8 +53,9 @@ and open the template in the editor.
     <xs:element name="Encryption" type="encryption"/>
     <xs:complexType name="encryption">
         <xs:sequence>
-            <xs:element name="Key" type="keyType"/>
-            <xs:element name="Checksum" type="digestAlgorithmType"/>
+            <xs:element name="Key" type="decryptionKey"/>
+            <xs:element name="Checksum" type="checksum">                
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
         
@@ -76,22 +77,30 @@ and open the template in the editor.
     <xs:complexType name="whitelist">
       <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                    <xs:element name="File" type="fileMeasurementType"/>
-                    <xs:element name="Dir" type="directoryMeasurementType"/>
+                    <xs:element name="File" type="fileMeasurement"/>
+                    <xs:element name="Dir" type="directoryMeasurement"/>
             </xs:choice>
       </xs:sequence>
-      <xs:attribute type="xs:string" name="DigestAlg"/>
+      <xs:attribute type="digestAlgorithm" name="DigestAlg"/>
     </xs:complexType>    
     
     <xs:complexType name="digestAlgorithmType">
-        <xs:simpleContent>
-            <xs:extension base="xs:string">
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
                 <xs:attribute type="xs:string" name="DigestAlg"/>                        
-            </xs:extension>
-        </xs:simpleContent>
-    </xs:complexType>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>    
     
-    <xs:complexType name="measurementType" abstract="true">
+    <xs:simpleType name="digestAlgorithm">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="sha1"/>
+          <xs:enumeration value="sha256"/>
+          <xs:enumeration value="md5"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:complexType name="measurement" abstract="true">
         <xs:simpleContent>
         <xs:extension base="xs:string">
             <xs:attribute type="xs:string" name="Path" use="required"/>
@@ -99,22 +108,22 @@ and open the template in the editor.
         </xs:simpleContent>
     </xs:complexType>
 
-    <xs:complexType name="fileMeasurementType">
+    <xs:complexType name="fileMeasurement">
         <xs:simpleContent>
-            <xs:extension base="measurementType"/>
+            <xs:extension base="measurement"/>
         </xs:simpleContent>
     </xs:complexType>
 
-    <xs:complexType name="directoryMeasurementType">
+    <xs:complexType name="directoryMeasurement">
         <xs:simpleContent>
-            <xs:extension base="measurementType">
+            <xs:extension base="measurement">
                 <xs:attribute type="xs:string" name="Include" use="optional"/>
                 <xs:attribute type="xs:string" name="Exclude" use="optional"/>                      
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
     
-    <xs:complexType name="keyType">
+    <xs:complexType name="decryptionKey">
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute type="xs:string" name="URL"/>                        
@@ -122,7 +131,23 @@ and open the template in the editor.
         </xs:simpleContent>
     </xs:complexType>
     
-    <xs:simpleType name="uuidType">
+    <xs:complexType name="checksum">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="digestAlgorithm" name="DigestAlg"/>                        
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    
+    <xs:complexType name="imageHash">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="digestAlgorithm" name="DigestAlg"/>                        
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    
+    <xs:simpleType name="uuid">
         <xs:restriction base="xs:string">
             <xs:length value="36" fixed="true" />
             <xs:pattern value="[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"/>
