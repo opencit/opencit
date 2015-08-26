@@ -14,8 +14,8 @@ and open the template in the editor.
            <xs:import namespace="http://www.w3.org/2000/09/xmldsig#"
 				schemaLocation="xmldsig-core-schema.xsd"/>    
 
-    <xs:element name="TrustPolicy" type="trustPolicy"/>
-    <xs:complexType name="trustPolicy">
+    <xs:element name="TrustPolicy" >
+    <xs:complexType>
       <xs:sequence>
         <xs:element ref="Director"/>
         <xs:element ref="Image"  minOccurs="0"/>
@@ -26,7 +26,7 @@ and open the template in the editor.
         <xs:element ref="ds:Signature" minOccurs="0"/>	
       </xs:sequence>
     </xs:complexType>
-  
+    </xs:element>
     <xs:element name="Director" type="director"/>
     <xs:complexType name="director">
       <xs:sequence>
@@ -118,7 +118,8 @@ and open the template in the editor.
         <xs:simpleContent>
             <xs:extension base="measurement">
                 <xs:attribute type="xs:string" name="Include" use="optional"/>
-                <xs:attribute type="xs:string" name="Exclude" use="optional"/>                      
+                <xs:attribute type="xs:string" name="Exclude" use="optional"/>
+                <xs:attribute type="xs:boolean" name="Recursive" use="optional"/>                      
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
