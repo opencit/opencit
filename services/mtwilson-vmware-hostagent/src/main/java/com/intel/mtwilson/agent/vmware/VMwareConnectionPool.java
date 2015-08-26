@@ -8,10 +8,11 @@ package com.intel.mtwilson.agent.vmware;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class VMwareConnectionPool {
     private Logger log = LoggerFactory.getLogger(getClass());
 //    public static final int DEFAULT_MAX_SIZE = 10;
-    private ConcurrentHashMap<TlsConnection,VMwareClient> pool = new ConcurrentHashMap<TlsConnection,VMwareClient>();
+    private ConcurrentHashMap<String,VMwareClient> pool = new ConcurrentHashMap<String,VMwareClient>();
 //    private ConcurrentHashMap<String,Long> lastAccess = new ConcurrentHashMap<String,Long>();
 //    private int maxSize = DEFAULT_MAX_SIZE;
     private VmwareClientFactory factory = null;
@@ -75,7 +76,7 @@ public class VMwareConnectionPool {
      */
     public VMwareClient reuseClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
 //        log.debug("VMwareConnectionPool searching for existing connection {}", tlsConnection.getConnectionString());
-        VMwareClient client = pool.get(tlsConnection);
+        VMwareClient client = pool.get(tlsConnection.getURL().toExternalForm());
         if( client == null ) { return null; }
 //        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
 //        lastAccess.put(connectionString, System.currentTimeMillis());
@@ -92,7 +93,7 @@ public class VMwareConnectionPool {
             log.error("Error while trying to disconnect from vcenter", e);
         }
         finally {
-            pool.remove(tlsConnection); // remove it from the pool, we'll recreate it later
+            pool.remove(tlsConnection.getURL().toExternalForm()); // remove it from the pool, we'll recreate it later
             
         }
         return null;
@@ -116,7 +117,7 @@ public class VMwareConnectionPool {
             VMwareClient client = factory.makeObject(tlsConnection);
             if( factory.validateObject(tlsConnection, client) ) {
 //                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
-                pool.put(tlsConnection, client);
+                pool.put(tlsConnection.getURL().toExternalForm(), client);
 //                log.debug("Opening new vCenter connection for "+client.getEndpoint());
                 return client;
             }
@@ -179,20 +180,22 @@ public class VMwareConnectionPool {
 //            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString()); // removed to prevent leaking secrets
             log.error("Failed to connect to vcenter: "+e.toString(),e);
             e.printStackTrace(System.err);
-            throw new VMwareConnectionException("Cannot connect to vcenter: "+tlsConnection.getURL().getHost(), e);
+            throw new VMwareConnectionException("Cannot connect to vcenter: " + tlsConnection.getURL().getHost(), e);
         }
         throw new VMwareConnectionException("Failed to connect to vcenter: unknown error");
     }
     
     public void close() {
-        Set<TlsConnection> tlsConnections = pool.keySet();
-        for(TlsConnection tlsConnection : tlsConnections) {
-            VMwareClient client = pool.get(tlsConnection);
+        Set<String> tlsConnectionUrls = pool.keySet();
+        for(String tlsConnectionUrl : tlsConnectionUrls) {
+            VMwareClient client = pool.get(tlsConnectionUrl);
+            TlsConnection tlsConnection = null;
             try {
+                tlsConnection = new TlsConnection(new URL(tlsConnectionUrl), new InsecureTlsPolicy()); // This TlsConnection is not being used.
                 factory.destroyObject(tlsConnection, client);
             }
             catch(Exception e) {
-                log.error("Failed to disconnect from vcenter: "+tlsConnection.getURL().getHost(), e);
+                log.error("Failed to disconnect from vcenter: " + tlsConnection.getURL().getHost(), e);
             }
         }
     }
