@@ -166,7 +166,7 @@ public class MlePcrRepository implements DocumentRepository<MlePcr, MlePcrCollec
     private MlePcr convert(TblPcrManifest obj) {
         MlePcr convObj = new MlePcr();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
-        convObj.setMleUuid(obj.getUuid_hex());
+        convObj.setMleUuid(obj.getMle_uuid_hex());
         convObj.setPcrIndex(obj.getName());
         convObj.setPcrValue(obj.getValue());
         convObj.setDescription(obj.getPCRDescription());
