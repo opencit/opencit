@@ -26,6 +26,8 @@ import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.repository.RepositoryStoreException;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyDAO;
+import com.intel.mtwilson.tls.policy.jdbi.TlsPolicyJdbiFactory;
 
 import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -114,15 +116,45 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
         
         TxtHostRecord obj = new TxtHostRecord();
         try {
-            
-            obj.HostName = item.getName();
-            obj.AddOn_Connection_String = item.getConnectionUrl();
-            obj.Description = item.getDescription();
-            obj.Email = item.getEmail();
-            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
-            tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
-            obj.tlsPolicyChoice = tlsPolicyChoice;
+            TblHostsJpaController hostJpaController = My.jpa().mwHosts();
+            TblHosts tblHost = hostJpaController.findHostByUuid(item.getId().toString());
+            if (tblHost == null) {
+                log.error("Host:Store - Host specified with UUID {} is not valid.", item.getId().toString());
+                throw new RepositoryInvalidInputException(locator);                                        
+            }
 
+            // Bug: 4391 - We should not allow the update to host name
+            if (!tblHost.getName().equals(item.getName())) {
+                log.error("Host:Store - Host name specified {} does not exist. Host name cannot be updated.", item.getName());
+                throw new RepositoryInvalidInputException(locator);                                                        
+            }
+            
+            obj.HostName = tblHost.getName();
+            if (item.getConnectionUrl() != null && !item.getConnectionUrl().isEmpty())
+                obj.AddOn_Connection_String = item.getConnectionUrl();
+            if (item.getDescription() != null && !item.getDescription().isEmpty())
+                obj.Description = item.getDescription();
+            if (item.getEmail() != null && !item.getEmail().isEmpty())
+                obj.Email = item.getEmail();
+
+            // Bug: 4390 - Validate the TLS Policy before updating.
+            TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
+            if (("TRUST_FIRST_CERTIFICATE".equals(item.getTlsPolicyId())) || ("INSECURE".equals(item.getTlsPolicyId()))) {
+                tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
+            } else {
+                // Validate the tls policy against the DB
+                try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+                    if ((dao.findTlsPolicyById(item.getId()) != null) || (dao.findTlsPolicyByNameEqualTo(item.getName()) != null)) {
+                        tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
+                    } else {
+                        log.error("Host:Store - TLSPolicy specified {} is not valid.", item.getTlsPolicyId());
+                        throw new RepositoryInvalidInputException(locator);                        
+                    }
+
+                }
+
+                obj.tlsPolicyChoice = tlsPolicyChoice;
+            }
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object
             if (item.getBiosMleUuid() != null && !item.getBiosMleUuid().isEmpty()) {
