@@ -151,10 +151,10 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
                         throw new RepositoryInvalidInputException(locator);                        
                     }
 
-                }
-
-                obj.tlsPolicyChoice = tlsPolicyChoice;
+                }                
             }
+            obj.tlsPolicyChoice = tlsPolicyChoice;            
+            
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object
             if (item.getBiosMleUuid() != null && !item.getBiosMleUuid().isEmpty()) {
@@ -209,14 +209,29 @@ public class HostRepository implements DocumentRepository<Host,HostCollection,Ho
 
         TxtHostRecord obj = new TxtHostRecord();
         try {
-            
+
             obj.HostName = item.getName();
             obj.AddOn_Connection_String = item.getConnectionUrl();
             obj.Description = item.getDescription();
             obj.Email = item.getEmail();
+
+            // Validate the TLS Policy before updating.
             TlsPolicyChoice tlsPolicyChoice = new TlsPolicyChoice();
-            tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
-            obj.tlsPolicyChoice = tlsPolicyChoice;
+            if (("TRUST_FIRST_CERTIFICATE".equals(item.getTlsPolicyId())) || ("INSECURE".equals(item.getTlsPolicyId()))) {
+                tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
+            } else {
+                // Validate the tls policy against the DB
+                try (TlsPolicyDAO dao = TlsPolicyJdbiFactory.tlsPolicyDAO()) {
+                    if ((dao.findTlsPolicyById(item.getId()) != null) || (dao.findTlsPolicyByNameEqualTo(item.getName()) != null)) {
+                        tlsPolicyChoice.setTlsPolicyId(item.getTlsPolicyId());
+                    } else {
+                        log.error("Host:Store - TLSPolicy specified {} is not valid.", item.getTlsPolicyId());
+                        throw new RepositoryInvalidInputException(locator);                        
+                    }
+
+                }                
+            }
+            obj.tlsPolicyChoice = tlsPolicyChoice;            
 
             // Since the user would have passed in the UUID of the BIOS and VMM MLEs, they need to be verified and the
             // data has to be populated into the the TxtHostRecord object
