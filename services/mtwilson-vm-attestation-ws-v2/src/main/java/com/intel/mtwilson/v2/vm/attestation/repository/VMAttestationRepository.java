@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
@@ -13,11 +14,13 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
+import com.intel.mtwilson.as.data.MwVmAttestationReport;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestation;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationLocator;
+import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
@@ -43,6 +46,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +116,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
         log.debug("VMAttestation:Create - Got request to create VM attestation with id {}.", item.getId().toString());  
         log.debug("VMAttestation:Create - IncludeHostReport value is {}.", item.getIncludeHostReport());
         
+        ObjectMapper mapper;
         String nonce;
         JAXB jaxb = new JAXB();        
         if (item.getId() == null) { item.setId(new UUID()); }        
@@ -281,7 +286,24 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     item.setVmSaml(report.getVmSaml());
                                     item.setTrustStatus(isVMTrusted);
                                     item.setVmTrustReport(vmTrustReport);
-                                                                                                                                                
+                                                                  
+                                    // Store the VM attestation report in the DB
+                                    try {
+                                        mapper = JacksonObjectMapperProvider.createDefaultMapper();
+
+                                        log.debug("getVMAttestationReport: About to store the VM attestation report in the DB");
+                                        MwVmAttestationReport mwVmAttestationReport = new MwVmAttestationReport();
+                                        mwVmAttestationReport.setId(new UUID().toString());
+                                        mwVmAttestationReport.setVmInstanceId(vmInstanceIdFromQuote);
+                                        mwVmAttestationReport.setHostId(obj);
+                                        mwVmAttestationReport.setVmSaml(report.getVmSaml());
+                                        mwVmAttestationReport.setVmTrustReport(mapper.writeValueAsString(vmTrustReport));
+                                        mwVmAttestationReport.setCreatedTs(Calendar.getInstance().getTime());
+                                    } catch (Exception ex) {
+                                        // Do we throw the exception or just log it since we are anyway returning back the report
+                                        log.error("VMAttestation:Create - Error during storing the VM attestation report in the DB.", ex);                                        
+                                    }
+                                    
                                 } else {
                                     log.error("Invalid signature specified.");
                                     throw new RepositoryCreateException();

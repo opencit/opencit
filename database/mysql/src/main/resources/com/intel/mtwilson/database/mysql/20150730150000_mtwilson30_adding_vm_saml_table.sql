@@ -1,8 +1,8 @@
 -- created 2015-07-30
 
--- This script creates the table to store the VM SAML assertion and associated trust report
+-- This script creates the table to store the VM attestation report
 
-CREATE  TABLE `mw_vm_saml_assertion` (
+CREATE  TABLE `mw_vm_attestation_report` (
   `id` CHAR(36) NOT NULL,
   `host_id` INT(11) NOT NULL,
   `vm_instance_id` CHAR(36) NOT NULL,

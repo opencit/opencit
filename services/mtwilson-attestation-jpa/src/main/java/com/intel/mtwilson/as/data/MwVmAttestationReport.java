@@ -24,18 +24,18 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author ssbangal
  */
 @Entity
-@Table(name = "mw_vm_saml_assertion")
+@Table(name = "mw_vm_attestation_report")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "MwVmSamlAssertion.findAll", query = "SELECT m FROM MwVmSamlAssertion m"),
-    @NamedQuery(name = "MwVmSamlAssertion.findById", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.id = :id"),
-    @NamedQuery(name = "MwVmSamlAssertion.findByVmInstanceId", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.vmInstanceId = :vmInstanceId"),
-    @NamedQuery(name = "MwVmSamlAssertion.findByVmSaml", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.vmSaml = :vmSaml"),
-    @NamedQuery(name = "MwVmSamlAssertion.findByVmTrustReport", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.vmTrustReport = :vmTrustReport"),
-    @NamedQuery(name = "MwVmSamlAssertion.findByCreatedTs", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.createdTs = :createdTs"),
-    @NamedQuery(name = "MwVmSamlAssertion.findByErrorCode", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.errorCode = :errorCode"),
-    @NamedQuery(name = "MwVmSamlAssertion.findByErrorMessage", query = "SELECT m FROM MwVmSamlAssertion m WHERE m.errorMessage = :errorMessage")})
-public class MwVmSamlAssertion implements Serializable {
+    @NamedQuery(name = "MwVmAttestationReport.findAll", query = "SELECT m FROM MwVmAttestationReport m"),
+    @NamedQuery(name = "MwVmAttestationReport.findById", query = "SELECT m FROM MwVmAttestationReport m WHERE m.id = :id"),
+    @NamedQuery(name = "MwVmAttestationReport.findByVmInstanceId", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmInstanceId = :vmInstanceId"),
+    @NamedQuery(name = "MwVmAttestationReport.findByVmSaml", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmSaml = :vmSaml"),
+    @NamedQuery(name = "MwVmAttestationReport.findByVmTrustReport", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmTrustReport = :vmTrustReport"),
+    @NamedQuery(name = "MwVmAttestationReport.findByErrorCode", query = "SELECT m FROM MwVmAttestationReport m WHERE m.errorCode = :errorCode"),
+    @NamedQuery(name = "MwVmAttestationReport.findByErrorMessage", query = "SELECT m FROM MwVmAttestationReport m WHERE m.errorMessage = :errorMessage"),
+    @NamedQuery(name = "MwVmAttestationReport.findByCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.createdTs = :createdTs")})
+public class MwVmAttestationReport implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -48,25 +48,25 @@ public class MwVmSamlAssertion implements Serializable {
     private String vmSaml;
     @Column(name = "vm_trust_report")
     private String vmTrustReport;
-    @Column(name = "created_ts")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdTs;
     @Column(name = "error_code")
     private String errorCode;
     @Column(name = "error_message")
     private String errorMessage;
+    @Column(name = "created_ts")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdTs;
     @JoinColumn(name = "host_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private TblHosts hostId;
 
-    public MwVmSamlAssertion() {
+    public MwVmAttestationReport() {
     }
 
-    public MwVmSamlAssertion(String id) {
+    public MwVmAttestationReport(String id) {
         this.id = id;
     }
 
-    public MwVmSamlAssertion(String id, String vmInstanceId) {
+    public MwVmAttestationReport(String id, String vmInstanceId) {
         this.id = id;
         this.vmInstanceId = vmInstanceId;
     }
@@ -103,14 +103,6 @@ public class MwVmSamlAssertion implements Serializable {
         this.vmTrustReport = vmTrustReport;
     }
 
-    public Date getCreatedTs() {
-        return createdTs;
-    }
-
-    public void setCreatedTs(Date createdTs) {
-        this.createdTs = createdTs;
-    }
-
     public String getErrorCode() {
         return errorCode;
     }
@@ -125,6 +117,14 @@ public class MwVmSamlAssertion implements Serializable {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public Date getCreatedTs() {
+        return createdTs;
+    }
+
+    public void setCreatedTs(Date createdTs) {
+        this.createdTs = createdTs;
     }
 
     public TblHosts getHostId() {
@@ -145,10 +145,10 @@ public class MwVmSamlAssertion implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof MwVmSamlAssertion)) {
+        if (!(object instanceof MwVmAttestationReport)) {
             return false;
         }
-        MwVmSamlAssertion other = (MwVmSamlAssertion) object;
+        MwVmAttestationReport other = (MwVmAttestationReport) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -157,7 +157,7 @@ public class MwVmSamlAssertion implements Serializable {
 
     @Override
     public String toString() {
-        return "com.intel.mtwilson.as.data.MwVmSamlAssertion[ id=" + id + " ]";
+        return "com.intel.mtwilson.as.data.MwVmAttestationReport[ id=" + id + " ]";
     }
     
 }
