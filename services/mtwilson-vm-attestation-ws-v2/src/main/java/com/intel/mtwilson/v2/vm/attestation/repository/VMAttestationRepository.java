@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
@@ -46,6 +47,7 @@ import com.intel.mtwilson.v2.vm.attestation.resource.VMAttestations;
 import com.intel.mtwilson.vmquote.xml.TrustPolicy;
 import com.intel.mtwilson.vmquote.xml.VMQuote;
 import gov.niarl.his.privacyca.TpmUtils;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -199,8 +201,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
     @Override
     @RequiresPermissions("vm_attestations:create")    
     public void create(VMAttestation item) {
-        log.debug("VMAttestation:Create - Got request to create VM attestation with id {}.", item.getId().toString());  
-        log.debug("VMAttestation:Create - IncludeHostReport value is {}.", item.getIncludeHostReport());
+        log.debug("VMAttestation:Create - Got request to create VM attestation report.");  
         
         String nonce;
         JAXB jaxb = new JAXB();        
@@ -269,7 +270,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                 try {
                                     // Validate the TrustPolicy signature and the certificate that was used to sign the TrustPolicy
                                     log.debug("VMAttestation:Create - About to validate the trust policy.");
-                                    isTrustPolicyValid = XmlDsigVerify.isValid(trustPolicyXml, VMAttestations.getSamlCertificate());
+                                    isTrustPolicyValid = XmlDsigVerify.isValid(trustPolicyXml, getSamlCertificate());
                                     log.debug("VMAttestation:Create - Validation result of TrustPolicy is {}", isTrustPolicyValid);
                                 } catch (Exception ex) {
                                     log.error("VMAttestation:Create - Error during validation of the TrustPolicy. {}", ex.getMessage());
@@ -487,5 +488,22 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
             throw new RepositorySearchException(ex);
         }
     }
-        
+     
+    public static X509Certificate getSamlCertificate() {
+        X509Certificate samlCert = null;        
+        byte[] samlPemBytes;
+        try (FileInputStream samlPemFile = new FileInputStream(My.configuration().getSamlCertificateFile())) {
+
+            samlPemBytes = IOUtils.toByteArray(samlPemFile);
+            samlCert = X509Util.decodePemCertificate(new String(samlPemBytes));
+            log.debug("Successfully retrieved the SAML certificate for verification. {}", samlCert.getIssuerX500Principal().getName());
+
+            
+        } catch (IOException | java.security.cert.CertificateException ex) {
+            log.error("Error during verification of the certificate that signed the data. {}", ex.getMessage());
+        } 
+                
+        return samlCert;
+    }
+    
 }

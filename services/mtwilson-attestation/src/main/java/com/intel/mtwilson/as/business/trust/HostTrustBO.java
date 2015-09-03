@@ -2229,7 +2229,7 @@ public class HostTrustBO {
                 log.debug("getVMAttestationReport: Generating the complete attestation report for the host - {}.", tblHosts.getName());
                 try {                
                     log.debug("getVMAttestationReport: Generating new UUID for saml assertion record : {}", hostAttestationUuid);
-                    hostAttestation = getTrustWithSaml(tblHosts, tblHosts.getId().toString(), hostAttestationUuid, true);                
+                    hostAttestation = getTrustWithSaml(tblHosts, tblHosts.getId().toString(), hostAttestationUuid, false); // We do not want to force the host attestation everytime                
                 } catch (Exception e) {
                     log.error("getVMAttestationReport: Error during retrieval of host trust status.", e);
                     throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
