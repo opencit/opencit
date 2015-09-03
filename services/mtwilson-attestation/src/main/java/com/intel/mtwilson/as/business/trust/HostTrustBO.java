@@ -2235,7 +2235,7 @@ public class HostTrustBO {
                     throw new ASException(e, ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
                 }
                 log.debug("getVMAttestationReport: Successfully created the Host Attestation for {}", hostAttestation.getHostName());
-                vmAttestation.setHostAttestation(hostAttestation);
+                vmAttestation.setHostAttestationReport(hostAttestation);
                 host = new TxtHost(data, hostAttestation.getHostTrustResponse().trust);
             } else {
                 log.debug("getVMAttestationReport: Generating the basic trust report for the host - {}.", tblHosts.getName());

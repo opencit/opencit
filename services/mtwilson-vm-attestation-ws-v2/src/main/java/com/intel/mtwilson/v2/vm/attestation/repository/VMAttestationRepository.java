@@ -4,9 +4,11 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.repository;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mtwilson.My;
@@ -16,6 +18,7 @@ import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.MwVmAttestationReport;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestation;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationFilterCriteria;
@@ -30,8 +33,10 @@ import com.intel.mtwilson.policy.VmReport;
 import com.intel.mtwilson.policy.VmTrustReport;
 import com.intel.mtwilson.policy.rule.VmMeasurementLogEquals;
 import com.intel.mtwilson.repository.RepositoryCreateException;
+import com.intel.mtwilson.repository.RepositoryDeleteException;
+import com.intel.mtwilson.repository.RepositoryException;
 import com.intel.mtwilson.repository.RepositoryInvalidInputException;
-import com.intel.mtwilson.trustagent.model.VMAttestationResponse;
+import com.intel.mtwilson.repository.RepositoryRetrieveException;
 import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
@@ -45,11 +50,15 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.security.cert.CertificateException;
 import javax.xml.bind.JAXBException;
 import javax.xml.crypto.MarshalException;
@@ -68,31 +77,98 @@ import org.xml.sax.SAXException;
 public class VMAttestationRepository implements DocumentRepository<VMAttestation, VMAttestationCollection, VMAttestationFilterCriteria, VMAttestationLocator> {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VMAttestationRepository.class);
+    private ObjectMapper mapper = JacksonObjectMapperProvider.createDefaultMapper();
             
     @Override
     @RequiresPermissions("vm_attestations:search")    
     public VMAttestationCollection search(VMAttestationFilterCriteria criteria) {
-        log.debug("HostAttestation:Search - Got request to search for VM attestations.");        
+        log.debug("VMAttestation:Search - Got request to search for VM attestations.");
         VMAttestationCollection objCollection = new VMAttestationCollection();
         try {
-            if (criteria.hostName != null && !criteria.hostName.isEmpty() && 
-                    criteria.vmInstanceId != null && !criteria.vmInstanceId.isEmpty()) {
-
-                TblHostsJpaController jpaController = My.jpa().mwHosts();
-                TblHosts obj = jpaController.findByName(criteria.hostName);
+            if (criteria.id != null) {
+                log.debug("VMAttestation:Search - User has specified the UUID of the VM attestation request as the search criteria. {}", criteria.id.toString());
+                MwVmAttestationReport obj = My.jpa().mwVmAttestationReport().findById(criteria.id.toString());
                 if (obj != null) {
-                    HostAgentFactory factory = new HostAgentFactory();
-                    HostAgent agent = factory.getHostAgent(obj);
-                    VMAttestationResponse vmAttestationReport = agent.getVMAttestationStatus(criteria.vmInstanceId);
-                    objCollection.getVMAttestations().add(convert(vmAttestationReport, criteria));
+                    objCollection.getVMAttestations().add(convert(obj));
                 }
+            } else if (criteria.numberOfDays == 0 && criteria.fromDate == null) {
+                // No date criteria is specified. We can check if the user has specified the details of the VM or host
+                if (criteria.vmInstanceId != null && !criteria.vmInstanceId.isEmpty()) {
+                    log.debug("VMAttestation:Search - User has specified the VM instance ID as the search criteria. {}", criteria.vmInstanceId);
+                    List<MwVmAttestationReport> objList = My.jpa().mwVmAttestationReport().findByVMInstanceId(criteria.vmInstanceId);
+                    if (objList != null && objList.size() > 0) {
+                        for (MwVmAttestationReport obj : objList) {
+                            objCollection.getVMAttestations().add(convert(obj));
+                        }
+                    }
+                } else if (criteria.hostName != null && !criteria.hostName.isEmpty()) {
+                    log.debug("VMAttestation:Search - User has specified the Host name as the search criteria. {}", criteria.hostName);
+                    List<MwVmAttestationReport> objList = My.jpa().mwVmAttestationReport().findByHostName(criteria.hostName);
+                    if (objList != null && objList.size() > 0) {
+                        for (MwVmAttestationReport obj : objList) {
+                            objCollection.getVMAttestations().add(convert(obj));
+                        }
+                    }
+                }
+            } else {
+                // Lets check if the user has specified the date criteria
+                log.debug("VMAttestation:Search - User has specified date criteria for searching the VM attestations.");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Calendar cal = Calendar.getInstance();
+                Date toDate, fromDate;
+
+                if (criteria.numberOfDays != 0) {
+                    log.debug("VMAttestation:Search - Number of days criteria is specified with value {}.", criteria.numberOfDays);
+                    // calculate from and to dates
+                    toDate = new Date(); // Get the current date and time
+                    cal.setTime(toDate);
+                    toDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                    // To get the fromDate, we substract the number of days fromm the current date.
+                    cal.add(Calendar.DATE, -(criteria.numberOfDays));
+                    fromDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                } else {
+                    if (criteria.fromDate != null && !criteria.fromDate.isEmpty() && criteria.toDate != null && !criteria.toDate.isEmpty()) {
+                        log.debug("VMAttestation:Search - Dates are specified for the search criteria with values {} - {}.", criteria.fromDate, criteria.toDate);
+                        Iso8601Date fromIso8601Date = Iso8601Date.valueOf(criteria.fromDate);
+                        cal.setTime(fromIso8601Date); // This would set the time to ex:2015-05-30 00:00:00
+                        fromDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+
+                        Iso8601Date toIso8601Date = Iso8601Date.valueOf(criteria.toDate);
+                        cal.setTime(toIso8601Date);
+                        toDate = dateFormat.parse(dateFormat.format(cal.getTime()));
+                    } else {
+                        String errorMsg = "VMAttestation:Search - Invalid date search criteria specified for attestation search.";
+                        log.error(errorMsg);
+                        throw new RepositoryInvalidInputException(errorMsg);
+                    }
+                }
+                log.debug("HostAttestation:Search - Calculated the date values {} - {}.", dateFormat.format(fromDate), dateFormat.format(toDate));
                 
+                if (criteria.vmInstanceId != null && !criteria.vmInstanceId.isEmpty()) {
+                    log.debug("VMAttestation:Search - User has specified the VM instance ID as the search criteria for the specified date range. {}", criteria.vmInstanceId);
+                    List<MwVmAttestationReport> objList = My.jpa().mwVmAttestationReport().getListByVMAndDateRange(criteria.vmInstanceId, fromDate, toDate);
+                    if (objList != null && objList.size() > 0) {
+                        for (MwVmAttestationReport obj : objList) {
+                            objCollection.getVMAttestations().add(convert(obj));
+                        }
+                    }
+                } else if (criteria.hostName != null && !criteria.hostName.isEmpty()) {
+                    log.debug("VMAttestation:Search - User has specified the Host name as the search criteria for the specified date range. {}", criteria.hostName);
+                    List<MwVmAttestationReport> objList = My.jpa().mwVmAttestationReport().getListByHostAndDateRange(criteria.hostName, fromDate, toDate);
+                    if (objList != null && objList.size() > 0) {
+                        for (MwVmAttestationReport obj : objList) {
+                            objCollection.getVMAttestations().add(convert(obj));
+                        }
+                    }
+                }
             }
-        } catch (IOException | CryptographyException ex) {
-            log.error("Host:Retrieve - Error during search for hosts.", ex);
+        } catch (RepositoryException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("VMAttestation:Search - Error during search for hosts.", ex);
             throw new RepositorySearchException(ex, criteria);
         }
-        
+
         return objCollection;
     }
 
@@ -100,7 +176,17 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
     @RequiresPermissions("vm_attestations:retrieve")    
     public VMAttestation retrieve(VMAttestationLocator locator) {
         if (locator == null || locator.id == null) { return null;}
-        log.debug("HostAttestation:Retrieve - Got request to retrieve the host attestation with id {}.", locator.id.toString());        
+        log.debug("VMAttestation:Retrieve - Got request to retrieve the host attestation with id {}.", locator.id.toString());   
+        String id = locator.id.toString();
+        try {
+            MwVmAttestationReport obj = My.jpa().mwVmAttestationReport().findById(id);
+            if (obj != null) {
+                return convert(obj);
+            }
+        } catch (Exception ex) {
+            log.error("VMAttestation:Retrieve -  - Error during VM attestation report retrieval.", ex);
+            throw new RepositoryRetrieveException(ex, locator);
+        }        
         return null;
     }
         
@@ -116,7 +202,6 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
         log.debug("VMAttestation:Create - Got request to create VM attestation with id {}.", item.getId().toString());  
         log.debug("VMAttestation:Create - IncludeHostReport value is {}.", item.getIncludeHostReport());
         
-        ObjectMapper mapper;
         String nonce;
         JAXB jaxb = new JAXB();        
         if (item.getId() == null) { item.setId(new UUID()); }        
@@ -270,8 +355,8 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                     
                                     // Include the host report only if requested
                                     if (item.getIncludeHostReport()) {
-                                        item.setHostAttestation(report.getHostAttestation());
-                                        log.debug("VMAttestation:Create - Host SAML assertions is {}.", item.getHostAttestation().getSaml());
+                                        item.setHostAttestationReport(report.getHostAttestationReport());
+                                        log.debug("VMAttestation:Create - Host SAML assertions is {}.", item.getHostAttestationReport().getSaml());
                                     }
                                     
                                     log.debug("VMAttestation:Create - VM SAML assertions is {}.", report.getVmSaml());
@@ -289,23 +374,33 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                                                   
                                     // Store the VM attestation report in the DB
                                     try {
-                                        mapper = JacksonObjectMapperProvider.createDefaultMapper();
-
+                                        
                                         log.debug("getVMAttestationReport: About to store the VM attestation report in the DB");
                                         MwVmAttestationReport mwVmAttestationReport = new MwVmAttestationReport();
-                                        mwVmAttestationReport.setId(new UUID().toString());
+                                        mwVmAttestationReport.setId(item.getId().toString());
                                         mwVmAttestationReport.setVmInstanceId(vmInstanceIdFromQuote);
+                                        mwVmAttestationReport.setVmTrustStatus(isVMTrusted);
                                         mwVmAttestationReport.setHostId(obj);
                                         mwVmAttestationReport.setVmSaml(report.getVmSaml());
                                         mwVmAttestationReport.setVmTrustReport(mapper.writeValueAsString(vmTrustReport));
+                                        if (item.getIncludeHostReport() && report.getHostAttestationReport() != null)
+                                            mwVmAttestationReport.setHostAttestationReport(mapper.writeValueAsString(report.getHostAttestationReport()));
+                                        
                                         mwVmAttestationReport.setCreatedTs(Calendar.getInstance().getTime());
+                                        
+                                        Integer samlExpiry = My.configuration().getSamlValidityTimeInSeconds();
+                                        Calendar cal = Calendar.getInstance();
+                                        cal.add(Calendar.SECOND, samlExpiry);
+                                        mwVmAttestationReport.setExpiryTs(cal.getTime());
+                                        
+                                        My.jpa().mwVmAttestationReport().create(mwVmAttestationReport);
                                     } catch (Exception ex) {
                                         // Do we throw the exception or just log it since we are anyway returning back the report
                                         log.error("VMAttestation:Create - Error during storing the VM attestation report in the DB.", ex);                                        
                                     }
                                     
                                 } else {
-                                    log.error("Invalid signature specified.");
+                                    log.error("VMAttestation:Create - Invalid signature specified.");
                                     throw new RepositoryCreateException();
                                 }
                             default:
@@ -315,11 +410,11 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                     } catch (RepositoryCreateException ex) {
                         throw ex;
                     } catch (IOException | JAXBException | XMLStreamException ex ){ //| ParserConfigurationException | SAXException | MarshalException | XMLSignatureException ex) {
-                        log.error("Error during validation of the VM attestation report. {}", ex.getMessage());
+                        log.error("VMAttestation:Create - Error during validation of the VM attestation report. {}", ex.getMessage());
                         throw new RepositoryCreateException(ex);
                     }
                 } else {
-                    log.error("Host specified {} does not exist in the system. Please verify the input parameters.", item.getHostName());
+                    log.error("VMAttestation:Create - Host specified {} does not exist in the system. Please verify the input parameters.", item.getHostName());
                     throw new RepositoryInvalidInputException();
                 }
                 
@@ -330,7 +425,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
         } catch (RepositoryCreateException | RepositoryInvalidInputException ex) {
             throw ex;
         } catch (Exception ex) {
-            log.error("Error during generation of host saml assertion. {} ", ex.getMessage());
+            log.error("VMAttestation:Create - Error during generation of host saml assertion. {} ", ex.getMessage());
             throw new RepositoryCreateException(ex);
         } 
     }
@@ -338,21 +433,59 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
     @Override
     @RequiresPermissions("vm_attestations:delete")    
     public void delete(VMAttestationLocator locator) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if( locator == null || locator.id == null ) { return; }
+        log.debug("VMAttestation:Delete - Got request to delete VM attestation report with id {}.", locator.id.toString());        
+        try {
+            VMAttestation obj = retrieve(locator);
+            My.jpa().mwVmAttestationReport().destroy(obj.getId().toString());
+            log.debug("VMAttestation:Delete - Deleted the VM attestation report with id {} successfully.", locator.id.toString());
+        } catch (RepositoryException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("VMAttestation:Delete - Error during VM attestation report deletion.", ex);
+            throw new RepositoryDeleteException(ex, locator);
+        }
     }
 
     @Override
     @RequiresPermissions("vm_attestations:delete")    
     public void delete(VMAttestationFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        log.debug("VMAttestation:DeleteBySearch - Got request to delete VM attestation report by search criteria.");        
+        VMAttestationCollection objCollection = search(criteria);
+        try { 
+            for (VMAttestation obj : objCollection.getVMAttestations()) {
+                VMAttestationLocator locator = new VMAttestationLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        } catch (RepositoryException re) {
+            throw re;
+        } catch (Exception ex) {
+            log.error("VMAttestation:DeleteBySearch - Error during deletion of VM attestation report by search criteria.", ex);
+            throw new RepositoryDeleteException(ex);
+        }
     }
    
-    private VMAttestation convert(VMAttestationResponse obj, VMAttestationFilterCriteria criteria) {
-        VMAttestation convObj = new VMAttestation();
-        convObj.setHostName(criteria.hostName);
-        convObj.setVmInstanceId(criteria.vmInstanceId);
-        convObj.setTrustStatus(obj.isTrustStatus());
-        return convObj;
+    private VMAttestation convert(MwVmAttestationReport obj) {
+        try {
+            VMAttestation convObj = new VMAttestation();
+            convObj.setId(UUID.valueOf(obj.getId()));
+            convObj.setVmInstanceId(obj.getVmInstanceId());
+            convObj.setTrustStatus(obj.isVmTrustStatus());
+            convObj.setHostName(obj.getHostId().getName());
+            if (obj.getVmSaml() != null)
+                convObj.setVmSaml(obj.getVmSaml());
+            if (obj.getVmTrustReport() != null)
+                convObj.setVmTrustReport(mapper.readValue(obj.getVmTrustReport(), VmTrustReport.class));
+            if (obj.getHostAttestationReport() != null)
+                convObj.setHostAttestationReport(mapper.readValue(obj.getHostAttestationReport(), HostAttestation.class));
+            if (obj.getErrorMessage()!= null)
+                convObj.setErrorMessage(obj.getErrorMessage());
+            return convObj;
+        } catch (Exception ex) {
+            log.error("VMAttestation:Search - Error during search for hosts.", ex);
+            throw new RepositorySearchException(ex);
+        }
     }
         
 }
