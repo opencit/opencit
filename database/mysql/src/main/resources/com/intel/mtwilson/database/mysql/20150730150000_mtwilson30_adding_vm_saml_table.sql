@@ -4,13 +4,16 @@
 
 CREATE  TABLE `mw_vm_attestation_report` (
   `id` CHAR(36) NOT NULL,
-  `host_id` INT(11) NOT NULL,
   `vm_instance_id` CHAR(36) NOT NULL,
+  `vm_trust_status` BOOLEAN NOT NULL,
+  `host_id` INT(11) NOT NULL,
   `vm_saml` TEXT DEFAULT NULL ,
   `vm_trust_report` TEXT DEFAULT NULL,
+  `host_attestation_report` TEXT DEFAULT NULL,
   `error_code` varchar(50) DEFAULT NULL,
   `error_message` varchar(200) DEFAULT NULL,
   `created_ts` timestamp DEFAULT NULL,
+  `expiry_ts` timestamp DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `vm_saml_host_id` FOREIGN KEY (`host_id`) REFERENCES `mw_hosts` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
   );
