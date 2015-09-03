@@ -30,10 +30,15 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwVmAttestationReport.findAll", query = "SELECT m FROM MwVmAttestationReport m"),
     @NamedQuery(name = "MwVmAttestationReport.findById", query = "SELECT m FROM MwVmAttestationReport m WHERE m.id = :id"),
     @NamedQuery(name = "MwVmAttestationReport.findByVmInstanceId", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmInstanceId = :vmInstanceId"),
+    @NamedQuery(name = "MwVmAttestationReport.findByHostName", query = "SELECT m FROM MwVmAttestationReport m WHERE m.hostId.name = :hostName"),
     @NamedQuery(name = "MwVmAttestationReport.findByVmSaml", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmSaml = :vmSaml"),
     @NamedQuery(name = "MwVmAttestationReport.findByVmTrustReport", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmTrustReport = :vmTrustReport"),
     @NamedQuery(name = "MwVmAttestationReport.findByErrorCode", query = "SELECT m FROM MwVmAttestationReport m WHERE m.errorCode = :errorCode"),
     @NamedQuery(name = "MwVmAttestationReport.findByErrorMessage", query = "SELECT m FROM MwVmAttestationReport m WHERE m.errorMessage = :errorMessage"),
+    @NamedQuery(name = "MwVmAttestationReport.findByVMAndExpiry", query = "SELECT m FROM MwVmAttestationReport m WHERE m.expiryTs > :now and m.vmInstanceId = :vmInstanceId ORDER BY m.expiryTs DESC"),    
+    @NamedQuery(name = "MwVmAttestationReport.findByHostAndExpiry", query = "SELECT m FROM MwVmAttestationReport m WHERE m.expiryTs > :now and m.hostId.name = :hostName ORDER BY m.expiryTs DESC"),    
+    @NamedQuery(name = "MwVmAttestationReport.findByHostAndRangeOfCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.hostId.name = :hostName and m.createdTs >= :fromCreatedTs and m.createdTs < :toCreatedTs ORDER BY m.createdTs ASC"),
+    @NamedQuery(name = "MwVmAttestationReport.findByVMAndRangeOfCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmInstanceId = :vmInstanceId and m.createdTs >= :fromCreatedTs and m.createdTs < :toCreatedTs ORDER BY m.createdTs ASC"),
     @NamedQuery(name = "MwVmAttestationReport.findByCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.createdTs = :createdTs")})
 public class MwVmAttestationReport implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -44,10 +49,15 @@ public class MwVmAttestationReport implements Serializable {
     @Basic(optional = false)
     @Column(name = "vm_instance_id")
     private String vmInstanceId;
+    @Basic(optional = false)
+    @Column(name = "vm_trust_status")
+    private boolean vmTrustStatus;    
     @Column(name = "vm_saml")
     private String vmSaml;
     @Column(name = "vm_trust_report")
     private String vmTrustReport;
+    @Column(name = "host_attestation_report")
+    private String hostAttestationReport;
     @Column(name = "error_code")
     private String errorCode;
     @Column(name = "error_message")
@@ -55,6 +65,9 @@ public class MwVmAttestationReport implements Serializable {
     @Column(name = "created_ts")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdTs;
+    @Column(name = "expiry_ts")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expiryTs;
     @JoinColumn(name = "host_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private TblHosts hostId;
@@ -87,6 +100,14 @@ public class MwVmAttestationReport implements Serializable {
         this.vmInstanceId = vmInstanceId;
     }
 
+    public boolean isVmTrustStatus() {
+        return vmTrustStatus;
+    }
+
+    public void setVmTrustStatus(boolean vmTrustStatus) {
+        this.vmTrustStatus = vmTrustStatus;
+    }
+    
     public String getVmSaml() {
         return vmSaml;
     }
@@ -101,6 +122,14 @@ public class MwVmAttestationReport implements Serializable {
 
     public void setVmTrustReport(String vmTrustReport) {
         this.vmTrustReport = vmTrustReport;
+    }
+
+    public String getHostAttestationReport() {
+        return hostAttestationReport;
+    }
+
+    public void setHostAttestationReport(String hostAttestationReport) {
+        this.hostAttestationReport = hostAttestationReport;
     }
 
     public String getErrorCode() {
@@ -125,6 +154,14 @@ public class MwVmAttestationReport implements Serializable {
 
     public void setCreatedTs(Date createdTs) {
         this.createdTs = createdTs;
+    }
+
+    public Date getExpiryTs() {
+        return expiryTs;
+    }
+
+    public void setExpiryTs(Date expiryTs) {
+        this.expiryTs = expiryTs;
     }
 
     public TblHosts getHostId() {
