@@ -7,6 +7,7 @@ package com.intel.mtwilson.policy.rule;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
@@ -52,6 +53,10 @@ public class XmlMeasurementLogEquals extends BaseRule {
         this.expected = expected;
     }
     
+    public PcrIndex getPcrIndex() {
+        return expected.getPcrIndex();
+    }
+ 
     public XmlMeasurementLog getXmlMeasurementLog() { return expected; }
     
     @Override
@@ -107,14 +112,12 @@ public class XmlMeasurementLogEquals extends BaseRule {
     
     private void RaiseFaultForModifiedEntries(ArrayList<Measurement> hostActualUnexpected, ArrayList<Measurement> hostActualMissing, RuleResult report) {
         ArrayList<Measurement> hostModifiedModules = new ArrayList<>();
+        ArrayList<Measurement> tempHostActualUnexpected = new ArrayList<>(hostActualUnexpected);
+        ArrayList<Measurement> tempHostActualMissing = new ArrayList<>(hostActualMissing);
         
         try {
-            Iterator unexpectedModules = hostActualUnexpected.iterator();
-            while (unexpectedModules.hasNext()) {
-                Measurement tempUnexpected = (Measurement) unexpectedModules.next();
-                Iterator missingModules = hostActualMissing.iterator();
-                while (missingModules.hasNext()) {
-                    Measurement tempMissing = (Measurement) missingModules.next();
+            for (Measurement tempUnexpected : tempHostActualUnexpected) {
+                for (Measurement tempMissing : tempHostActualMissing) {
                     log.debug("RaiseFaultForModifiedEntries: Comparing module {} with hash {} to module {} with hash {}.", tempUnexpected.getLabel(), 
                             tempUnexpected.getValue().toString(), tempMissing.getLabel(), tempMissing.getValue().toString());
                     if (tempUnexpected.getLabel().equalsIgnoreCase(tempMissing.getLabel())) {
@@ -129,10 +132,12 @@ public class XmlMeasurementLogEquals extends BaseRule {
             if (!hostModifiedModules.isEmpty()) {
                 log.debug("XmlMeasurementLogEquals : Host has updated #{} modules compared to the white list.", hostModifiedModules.size());
                 report.fault(new XmlMeasurementLogValueMismatchEntries(expected.getPcrIndex(), new HashSet<>(hostModifiedModules)));                
+            } else {
+                log.debug("RaiseFaultForModifiedEntries: No updated modules found.");
             }
             
         } catch (Exception ex) {
-            
+            log.error("RaiseFaultForModifiedEntries: Error during verification of changed modules.", ex);            
         }
     }    
 }

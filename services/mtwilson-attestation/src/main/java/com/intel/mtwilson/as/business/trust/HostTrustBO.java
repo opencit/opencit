@@ -51,6 +51,9 @@ import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.saml.TxtHostWithAssetTag;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestation;
+import com.intel.mtwilson.policy.fault.XmlMeasurementLogValueMismatchEntries;
+import com.intel.mtwilson.policy.rule.XmlMeasurementLogEquals;
+import com.intel.mtwilson.policy.rule.XmlMeasurementLogIntegrity;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -1304,6 +1307,149 @@ public class HostTrustBO {
                                 }
                             }
                         }                    
+                    }                    
+                }
+                // Now process the XmlMeasurementLogIntegrity rule
+                if( rule instanceof XmlMeasurementLogIntegrity ) { 
+                    XmlMeasurementLogIntegrity xmlMeasurementLogIntegrity = (XmlMeasurementLogIntegrity)rule;
+                    TblTaLog pcr = taLogMap.get(xmlMeasurementLogIntegrity.getPcrIndex());
+                    if (pcr != null) {
+                        pcr.setTrustStatus(result.isTrusted()); 
+                        if( !result.isTrusted() ) {
+                            pcr.setError("No integrity in XmlMeasurementLog getting extended to PCR " + xmlMeasurementLogIntegrity.getPcrIndex().toString());
+                        }
+                    }
+                }
+                
+                // Now process the XmlMeasurementLogEquals rule
+                if( rule instanceof XmlMeasurementLogEquals ) { 
+                    log.debug("Processing the XmlMeasurementLogEquals rule");
+                    TblTaLog pcr;
+                    List<Fault> faults = result.getFaults();
+                    for(Fault fault : faults) {
+                        if( fault instanceof XmlMeasurementLogValueMismatchEntries ) { 
+                            log.debug("Host is having modules for which the values are not matching the configured white list.");
+                            XmlMeasurementLogValueMismatchEntries mismatchEntriesFault = (XmlMeasurementLogValueMismatchEntries)fault;
+
+                            pcr = taLogMap.get(mismatchEntriesFault.getPcrIndex());
+                            if (pcr != null) {
+                                if (pcr.getId() != null) {
+                                    log.debug("TaTblLog ID {} already exists.", pcr.getId());
+                                    pcr = talogJpa.findTblTaLog(pcr.getId());
+                                }
+                                pcr.setTrustStatus(false); 
+                                if (pcr.getError()== null || pcr.getError().isEmpty())
+                                    pcr.setError("Mismatch modules");
+                                else
+                                    pcr.setError(pcr.getError() + " and " + " Mismatch modules");
+                                if (pcr.getId() == null) {
+                                    log.debug("TaTblLog ID does not exist. Creating a new one. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                    talogJpa.create(pcr);
+                                } else {                            
+                                    try {
+                                        log.debug("Editing the existing TaTblLog ID. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                        talogJpa.edit(pcr);
+                                    } catch (IllegalOrphanException | NonexistentEntityException | ASDataException ex) {
+                                        log.error("Error updating the status in the TaLog table.", ex);
+                                    }
+                                }
+                                taLogMap.put(mismatchEntriesFault.getPcrIndex(), pcr);
+
+                                Set<Measurement> mismatchEntries = mismatchEntriesFault.getMissingEntries();
+                                for(Measurement m : mismatchEntries) {
+                                    log.debug("Updated entry : " + m.getLabel() + "||" + m.getValue().toString());
+                                    // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getMeasurementXml() == null ) {
+                                        throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
+                                    }
+
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getLabel());
+                                    if (findByTaLogIdAndName == null) {
+                                        TblModuleManifestLog event = new TblModuleManifestLog();
+                                        event.setName(m.getLabel());
+                                        event.setTaLogId(pcr);
+                                        event.setValue(m.getValue().toString());
+                                        event.setWhitelistValue(m.getValue().toString());
+                                        moduleLogJpa.create(event);
+                                    } 
+                                }
+                            }
+                        }
+                       /* if( fault instanceof PcrEventLogContainsUnexpectedEntries ) { 
+                            log.debug("Host is having additional modules compared to the white list");
+                            PcrEventLogContainsUnexpectedEntries unexpectedEntriesFault = (PcrEventLogContainsUnexpectedEntries)fault;
+
+                            pcr = taLogMap.get(unexpectedEntriesFault.getPcrIndex());
+                            if (pcr != null) {
+                                if (pcr.getId() != null) {
+                                    log.debug("TaTblLog ID {} already exists.", pcr.getId());
+                                    pcr = talogJpa.findTblTaLog(pcr.getId());
+                                }
+                                pcr.setTrustStatus(false);
+                                if (pcr.getError() == null || pcr.getError().isEmpty())
+                                    pcr.setError("Additional modules");
+                                else
+                                    pcr.setError(pcr.getError() + " and " + "Additional modules");
+                                if (pcr.getId() == null) {
+                                    log.debug("TaTblLog ID does not exist. Creating a new one. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                    talogJpa.create(pcr);
+                                } else {
+                                    try {
+                                        log.debug("Editing the existing TaTblLog ID. {}-{}", pcr.getTrustStatus(), pcr.getError());
+                                        talogJpa.edit(pcr);
+                                    } catch (Exception ex) {
+                                        log.error("Error updating the status in the TaLog table.", ex);
+                                    }
+                                }
+                                taLogMap.put(unexpectedEntriesFault.getPcrIndex(), pcr);
+
+                                List<Measurement> unexpectedEntries = unexpectedEntriesFault.getUnexpectedEntries();
+                                for(Measurement m : unexpectedEntries) {
+                                    String mFullComponentName = m.getInfo().get("FullComponentName");
+                                    log.debug("Unexpected Entry : " + mFullComponentName);
+                                    // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()) == null ) {
+                                        throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
+                                    }
+                                    Measurement found = null;
+                                    List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(unexpectedEntriesFault.getPcrIndex()).getEventLog();
+                                    if (actualEntries != null) {
+                                        for(Measurement a : actualEntries) {
+                                            String aFullComponentName = a.getInfo().get("FullComponentName");
+                                            if ( a != null && a.getInfo() != null && (!a.getInfo().isEmpty())) {
+                                                //log.debug("Actual Entries : " + a.getLabel() + "||" + a.getInfo().get("ComponentName") + "||" + 
+                                                 //       a.getValue().toString() + "||" + a.getInfo().get("FullComponentName"));
+                                                if( aFullComponentName != null && mFullComponentName != null && 
+                                                        aFullComponentName.equals(mFullComponentName) ) {
+                                                    found = a;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.
+                                    TblModuleManifestLog findByTaLogIdAndName = moduleLogJpa.findByTaLogIdAndName(pcr, m.getInfo().get("ComponentName"));
+                                    if (findByTaLogIdAndName == null) {
+                                        TblModuleManifestLog event = new TblModuleManifestLog();
+                                        event.setName(m.getInfo().get("FullComponentName"));
+                                        event.setTaLogId(pcr);
+                                        event.setValue( found == null ? "" : found.getValue().toString() ); // we don't know from our report what the "actual" value is since we only logged that an expected value was missing... so maybe there's a module with the same name and wrong value in the host report, which we don't know here... see comment above,  this probably needs to change.
+                                        event.setWhitelistValue(""); // since this is a additional module on the host, the white list would be null
+                                        moduleLogJpa.create(event);
+                                    } else {
+                                        if (findByTaLogIdAndName.getValue() == null || findByTaLogIdAndName.getValue().isEmpty())
+                                            findByTaLogIdAndName.setValue(found == null ? "" : found.getValue().toString() );
+                                        if (findByTaLogIdAndName.getWhitelistValue() == null || findByTaLogIdAndName.getWhitelistValue().isEmpty())
+                                            findByTaLogIdAndName.setWhitelistValue("");
+                                        try {
+                                            moduleLogJpa.edit(findByTaLogIdAndName);
+                                        } catch (NonexistentEntityException | ASDataException ex) {
+                                            log.error("Exception while updating the module manifest log record.", ex);
+                                        }
+                                    }
+                                }
+                            }
+                        }    */                
                     }                    
                 }
 

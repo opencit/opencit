@@ -426,72 +426,112 @@ function byProperty(property) {
 }
 
 function getFailureReportSuccess(responseJSON) {
-	$('#disabledDiv').remove();
-	if(responseJSON.result){
+    $('#disabledDiv').remove();
+    if (responseJSON.result) {
         var reportdata = responseJSON.reportdata;
-        var str ="";
-        str+='<div class="tableDisplay"><table width="100%" cellpadding="0" cellspacing="0">'+
-              '<thead><tr>'+
-              '<th class="failureReportRow1"></th>'+
-              '<th class="failureReportRow2" data-i18n="table.pcr_name">PCR Name</th>'+
-              '<th class="failureReportRow3" data-i18n="table.pcr_value">PCR Value</th>'+
-              '<th class="failureReportRow4" data-i18n="table.whitelist_value">WhiteList Value</th>'+
-              '</tr></thead></table></div>';
-          
-          str+='<div class="" style="overflow: auto;">'+
-              '<table width="100%" cellpadding="0" cellspacing="0"><tbody>';
-          
-          var classValue = null;
-          
-          // PCRs should be ordered. issue #460 
-          reportdata.sort(byProperty("name")); // name is PCR Name
-          
-        for(var item in reportdata){
-			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
-			var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
-            str+='<tr class="'+classValue+'">'+
-                        '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+            	
-            	'<td class="failureReportRow2">'+reportdata[item].name+'</td>'+
-                '<td class="failureReportRow3" style="'+styleUntrusted+'" >'+reportdata[item].value+'</td>'+
-                '<td class="failureReportRow4" >'+reportdata[item].whiteListValue+'</td>'+
-                '</tr>';
-            
+        var str = "";
+        str += '<div class="tableDisplay"><table width="100%" cellpadding="0" cellspacing="0">' +
+                '<thead><tr>' +
+                '<th class="failureReportRow1"></th>' +
+                '<th class="failureReportRow2" data-i18n="table.pcr_name">PCR Name</th>' +
+                '<th class="failureReportRow3" data-i18n="table.pcr_value">PCR Value</th>' +
+                '<th class="failureReportRow4" data-i18n="table.whitelist_value">WhiteList Value</th>' +
+                '</tr></thead></table></div>';
+
+        str += '<div class="" style="overflow: auto;">' +
+                '<table width="100%" cellpadding="0" cellspacing="0"><tbody>';
+
+        var classValue = null;
+
+        // PCRs should be ordered. issue #460 
+        reportdata.sort(byProperty("name")); // name is PCR Name
+
+        for (var item in reportdata) {
+            if (item % 2 === 0) {
+                classValue = 'evenRow';
+            } else {
+                classValue = 'oddRow';
+            }
+            var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
+            str += '<tr class="' + classValue + '">' +
+                    '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>' +
+                    '<td class="failureReportRow2">' + reportdata[item].name + '</td>' +
+                    '<td class="failureReportRow3" style="' + styleUntrusted + '" >' + reportdata[item].value + '</td>' +
+                    '<td class="failureReportRow4" >' + reportdata[item].whiteListValue + '</td>' +
+                    '</tr>';
+
             var moduleLog = reportdata[item].moduleLogs;
-            str+='<tr style="display: none;">';
+            str += '<tr style="display: none;">';
             if (moduleLog.length > 0) {
-    			str+='<td class="'+classValue+'" colspan="4">'+
-    	             '<div class="subTableDivFailureReport" >'+
-    	             '<table width="100%" cellpadding="0" cellspacing="0">'+
-    	             '<thead><tr>'+
-    	              '<th class="failureReportSubRow1">Component Name</th>'+
-    	              '<th class="failureReportSubRow2">Value</th>'+
-    	              '<th class="failureReportSubRow3">WhiteList Value</th>'+
-    	              '</tr></thead>';
-    			
-    			for(var logs in moduleLog){
-    				var logclass = null;
-    				if(logs % 2 === 0){logclass='evenRow';}else{logclass='oddRow';}
-    				styleUntrusted = moduleLog[logs].trustStatus == 0 ? "color:red;" : "";
-    	            str+='<tr class="'+logclass+'">'+
-    	                '<td class="failureReportSubRow1" name="mleName">'+moduleLog[logs].componentName+'</td>'+
-    	                '<td class="failureReportSubRow2" name="mleName" style="'+styleUntrusted+'" >'+moduleLog[logs].value+'</td>'+
-    	                '<td class="failureReportSubRow3" name="mleName">'+moduleLog[logs].whitelistValue+'</td>'+
-    	                '</tr>';
-    	        }
-    			
-    			str+='</table></div>';
-    			
-            }else {
-    			str+='<td class="'+classValue+'" colspan="4">'+
-    				'<div class="subTableDiv" style="text-align: left;" data-i18n="label.no_module_logs">This PCR does not have any Module Logs.</div></td>';
-			}
-            str+="</tr>";
+                str += '<td class="' + classValue + '" colspan="4">' +
+                        '<div class="subTableDivFailureReport" >' +
+                        '<table width="100%" cellpadding="0" cellspacing="0">' +
+                        '<thead><tr>' +
+                        '<th class="failureReportSubRow0"></th>'+
+                        '<th class="failureReportSubRow1">Component Name</th>' +
+                        '<th class="failureReportSubRow2">Value</th>' +
+                        '<th class="failureReportSubRow3">WhiteList Value</th>' +
+                        '</tr></thead>';
+
+                for (var logs in moduleLog) {
+                    var logclass = null;
+                    if (logs % 2 === 0) {
+                        logclass = 'evenRow';
+                    } else {
+                        logclass = 'oddRow';
+                    }
+                    styleUntrusted = moduleLog[logs].trustStatus == 0 ? "color:red;" : "";
+                    str += '<tr class="' + logclass + '">' +
+                            '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+                            '<td class="failureReportSubRow1" name="mleName">' + moduleLog[logs].componentName + '</td>' +
+                            '<td class="failureReportSubRow2" name="mleName" style="' + styleUntrusted + '" >' + moduleLog[logs].value + '</td>' +
+                            '<td class="failureReportSubRow3" name="mleName">' + moduleLog[logs].whitelistValue + '</td>' +
+                            '</tr>';
+                    
+                    var subModuleLog = moduleLog[logs].moduleLogs;
+                    str+='<tr style="display: none;">';
+                    if (subModuleLog.length > 0) {
+                    str += '<td class="' + classValue + '" colspan="4">' +
+                            '<div class="subTableDivFailureReport" >' +
+                            '<table width="100%" cellpadding="0" cellspacing="0">' +
+                            '<thead><tr>' +
+                            '<th class="failureReportSubRow1">Component Name</th>' +
+                            '<th class="failureReportSubRow2">Value</th>' +
+                            '<th class="failureReportSubRow3">WhiteList Value</th>' +
+                            '</tr></thead>';
+
+                            for (var subModulelogs in subModuleLog){
+                                var logclass = null;
+                                if (subModulelogs % 2 === 0){logclass = 'evenRow'; } else{logclass = 'oddRow'; }
+                                styleUntrusted = subModuleLog[subModulelogs].trustStatus == 0 ? "color:red;" : "";
+                                str += '<tr class="' + logclass + '">' +
+                                '<td class="failureReportSubRow1" name="mleName">' + subModuleLog[subModulelogs].componentName + '</td>' +
+                                '<td class="failureReportSubRow2" name="mleName" style="' + styleUntrusted + '" >' + subModuleLog[subModulelogs].value + '</td>' +
+                                '<td class="failureReportSubRow3" name="mleName">' + subModuleLog[subModulelogs].whitelistValue + '</td>' +
+                                '</tr>';
+                            }
+                        str+='</table></div>';
+
+                    } else {
+                         str+='<td class="'+classValue+'" colspan="4">'+
+                            '<div class="subTableDiv" style="text-align: left;" >This module does not have any additional modules.</div></td>';
+                    }
+                    str+="</tr>";                                            
+                }
+
+                str += '</table></div>';
+
+            } else {
+                str += '<td class="' + classValue + '" colspan="4">' +
+                        '<div class="subTableDiv" style="text-align: left;" data-i18n="label.no_module_logs">This PCR does not have any Module Logs.</div></td>';
+            }
+            str += "</tr>";
         }
-       
-        str+='</tbody> </table></div>';
-        $('#showFailureReportTable').html('<div>'+str+'</div>');
-    }else{
-        $('#showFailureReportTable').html('<div class="errorMessage">'+responseJSON.message+'</div>');
+
+        str += '</tbody> </table></div>';
+        $('#showFailureReportTable').html('<div>' + str + '</div>');
+    } else {
+        $('#showFailureReportTable').html('<div class="errorMessage">' + responseJSON.message + '</div>');
     }
 }
 

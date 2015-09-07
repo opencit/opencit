@@ -42,7 +42,11 @@ public class XmlMeasurementLogIntegrity extends BaseRule {
     }
     
     public Sha1Digest getSha1Digest() { return expectedValue; }
-    
+
+    public PcrIndex getPcrIndex() {
+        return pcrIndex;
+    }
+
     @Override
     public RuleResult apply(HostReport hostReport) {
         log.debug("XmlMeasurementLogIntegrity: About to apply the XmlMeasurementLogIntegrity policy");

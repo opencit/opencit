@@ -23,7 +23,12 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
+import com.intel.mtwilson.as.data.MwApiClientHttpBasic;
+import com.intel.mtwilson.as.data.MwMeasurementXml;
 import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.model.Measurement;
+import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.XmlMeasurementLog;
 import java.util.*;
 import java.io.IOException;
 
@@ -329,6 +334,7 @@ public class ReportsBO {
         if(log.getTblModuleManifestLogCollection() != null){
             logger.debug("addManifestLogs - This is module based attestation with {} of modules.", log.getTblModuleManifestLogCollection().size());
             for (TblModuleManifestLog moduleManifestLog : log.getTblModuleManifestLogCollection()) {
+                logger.debug("addManifestLogs - {} - {}", moduleManifestLog.getName(), moduleManifestLog.getValue());
                 moduleReports.put(moduleManifestLog.getName(), new ModuleLogReport(moduleManifestLog.getName(),
                         moduleManifestLog.getValue(), moduleManifestLog.getWhitelistValue(),0));
             }
@@ -337,6 +343,8 @@ public class ReportsBO {
         if(!failureOnly){
             logger.debug("FailureOnly flag is false. Adding all manifests.");
             for(TblModuleManifest moduleManifest : tblPcrManifest.getMleId().getTblModuleManifestCollection()){
+                logger.debug("addManifestLogs - {} - {}", moduleManifest.getComponentName(), moduleManifest.getDigestValue());
+
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
                         !moduleReports.containsKey(moduleManifest.getComponentName())){
                     
@@ -347,10 +355,23 @@ public class ReportsBO {
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }
-                    else {
-                        moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
-                                moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); 
+                    else {                        
+                        if (moduleManifest.getComponentName().equalsIgnoreCase("tbootxm")) {
+                            ModuleLogReport moduleLogReport = new ModuleLogReport(moduleManifest.getComponentName(),
+                                    moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1);
+                            MwMeasurementXml findByMleId = My.jpa().mwMeasurementXml().findByMleId(tblPcrManifest.getMleId().getId());
+                            List<Measurement> measurements = new XmlMeasurementLog(PcrIndex.valueOf(tblPcrManifest.getName()), findByMleId.getContent()).getMeasurements();
+                            for(Measurement m : measurements) {
+                                moduleLogReport.getModuleLogs().add(new ModuleLogReport(m.getLabel(), m.getValue().toString(), m.getValue().toString(),1));
+                            }
+                            moduleReports.put(moduleManifest.getComponentName(), moduleLogReport);
+                        } else {
+
+                            moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
+                                    moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); 
+                        }
                     }
+                    
                 }
             }
         }
