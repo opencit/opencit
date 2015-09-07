@@ -21,7 +21,7 @@ function fnDeleteRegistrationDetailsSuccess(responseJSON) {
 					'<td class="deleteRequestRow1" name="name">'+ getHTMLEscapedMessage(request[item].name) +'</td>'+
 					'<td class="deleteRequestRow2" name="requestedRoles">'+roles+'</td>'+
 					'<td class="deleteRequestRow3" name="expires">'+fnGetFormatedDate(request[item].expires)+'</td>'+
-					'<td class="deleteRequestRow4"><input type="button" value="Delete" onclick="fnDeleteSelectedRequest(this)" data-i18n="[value]button.delete"></td>'+
+					'<td class="deleteRequestRow4"><a href="" onclick="fnDeleteSelectedRequest(this)" data-i18n="[value]button.delete" data-toggle="tooltip" title="Delete"><span class="glyphicon glyphicon-trash"></span></a></td>'+
 				'</tr>';
 		}
 		$('#deleteRegisterHostTableContent').html(str);

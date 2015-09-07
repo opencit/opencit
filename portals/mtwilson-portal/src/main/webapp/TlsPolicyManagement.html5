@@ -8,11 +8,11 @@
     <script type="text/javascript" src="Scripts/handlebars-v1.3.0.js" ></script>
 	<script type="text/javascript" src="Scripts/tls_policy.js"></script>
     <!-- requires jquery (assumes its present on containing page) -->
-    <style media="screen" type="text/css">
+    <!--<style media="screen" type="text/css">
     table.tableDisplay tbody tr.hover {
         background: #ccc;
     }
-    </style>
+    </style>-->
 </head>
 <body>
 <div id="notifications_container" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px;"></div>
@@ -27,11 +27,13 @@
                 <th class="tlspolicy_policy_type" data-i18n="table.policy_type">Policy Type</th>
                 <th class="tlspolicy_comment" data-i18n="table.comment">Comment</th>
                 <th class="tlspolicy_private" style="display: none;" data-i18n="table.policy_scope">Scope</th>
+		<th>Options</th>
             </tr>
         </thead>
         <tbody>
         </tbody>
     </table>
+	<br>
     <div>
         <button id="tlspolicy_create_button" data-i18n="action.create_tls_policy" onclick="onCreateNewTlsPolicy()";>Create new policy</button>
     </div>
@@ -39,7 +41,7 @@
         {{#each tls_policies}}
             <tr data-id="{{id}}">
                 <td class="tlspolicy_id" style="display: none;">{{id}}</td>
-                <td class="tlspolicy_name">{{name}}</td>
+                <td class="tlspolicy_name"><a href="#" onclick="onEditCurrentTlsPolicy()" data-toggle="tooltip" title="Edit policy">{{name}}</a></td>
                 <td class="tlspolicy_policy_type">{{descriptor.policy_type}}</td>
                 <td class="tlspolicy_comment">{{comment}}</td>
                 <td class="tlspolicy_private" style="display: none;">
@@ -49,11 +51,14 @@
                         <span data-i18n="tlspolicy.scope.shared">Shared</span>
                     {{/if}}
                 </td>
+		<td>
+			<a href="#" onclick="onDeleteCurrentTlsPolicy()" data-toggle="tooltip" title="Delete policy"><span class="glyphicon glyphicon-trash"></span></a>
+		</td>
             </tr>
         {{else}}
             <tr>
                 <td style="display: none;"></td>
-                <td colspan="3" data-i18n="[html]tlspolicy.browse.nodata">
+                <td colspan="4" data-i18n="[html]tlspolicy.browse.nodata">
                     <span>
                     There are no TLS policies defined at this time. <br/>
                     Create a TLS policy.
@@ -343,12 +348,12 @@ function onLoadTlsPolicyData(data) {
             $(this).removeClass("hover");
         }
     );
-    tbody.contextMenu({
-        selector: "tr",
-        trigger: 'left',
-        autoHide: true,
-        items: $.contextMenu.fromMenu($('#tlspolicy_browse_item_context_menu'))
-    }); // end contextMenu definition
+    //tbody.contextMenu({
+        //selector: "tr",
+        //trigger: 'left',
+        //autoHide: true,
+        //items: $.contextMenu.fromMenu($('#tlspolicy_browse_item_context_menu'))
+    //}); // end contextMenu definition
 } 
 
 $.getJSON("v2proxy/tls-policies.json", {"privateEqualTo":"false"}, onLoadTlsPolicyData);

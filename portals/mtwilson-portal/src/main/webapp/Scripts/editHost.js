@@ -25,8 +25,7 @@ function populateEditHostDataIntoTable(hostDetails) {
                 var vCenterDetails = hostDetails[item].vCenterDetails;
                 if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
 		str+='<tr class="'+classValue+'">'+
-			'<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
-			'<td class="editRow1">' + getHTMLEscapedMessage(hostDetails[item].hostName) + '</td>'+
+			'<td class="editRow1"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-toggle="tooltip" title="Edit Host">' + getHTMLEscapedMessage(hostDetails[item].hostName) + '</a></td>'+
 			//'<td class="editRow2">'+hostDetails[item].hostIPAddress+'&nbsp;</td>'+
 			'<td class="editRow3">'+ getHTMLEscapedMessage(hostDetails[item].hostPort) + '&nbsp;</td>'+
 			'<td class="editRow10">'+ getHTMLEscapedMessage(hostDetails[item].hostDescription) + '&nbsp;</td>'+
@@ -36,6 +35,7 @@ function populateEditHostDataIntoTable(hostDetails) {
 			'<td class="editRow7">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo) +'&nbsp;</td>'+
 			'<td class="editRow8">'+ getHTMLEscapedMessage(hostDetails[item].emailAddress) +'&nbsp;</td>'+
 			'<td class="editRow9">'+ getHTMLEscapedMessage(vCenterDetails) +'&nbsp;</td>'+
+	                '<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0"><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-toggle="tooltip" title="Delete Host"><span class="glyphicon glyphicon-trash"></span></a></td>'+
 		'</tr>';
 	}
 	$('#mainEditHostDetailsContent table').html(str);

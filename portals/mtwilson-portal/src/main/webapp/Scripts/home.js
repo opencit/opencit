@@ -575,13 +575,28 @@ function updateHostInfo() {
 */
 
 function fnDeleteHostInfo(element) {
-	if(confirm($("#alert_delete_host").text())){
-		var selectedHost = $(element).parent().attr('hostID');
-		var hostName = $(element).parent().parent().find('td:eq(1)').text();
-		$('#mainAddHostContainer').prepend(disabledDiv);
-		$('#mleMessage').html('');
-		sendJSONAjaxRequest(false, 'getData/deleteHostDetails.html', "hostID="+selectedHost+"&hostName="+hostName+"&selectedPageNo="+selectedPageNo, fnDeleteHostInfoSuccess,null,element);
-	}
+        //$("#dialog-confirm").html($("#alert_delete_host").text());
+	$("#dialog-confirm").dialog("open");
+        // Define the Dialog and its properties.
+        $("#dialog-confirm").dialog({
+                resizable: false,
+                modal: true,
+                height: 250,
+                width: 400,
+                buttons: {
+                        "Delete": function () {
+                                $(this).dialog('close');
+				var selectedHost = $(element).parent().attr('hostID');
+				var hostName = $(element).parent().parent().find('td:eq(1)').text();
+                		$('#mainAddHostContainer').prepend(disabledDiv);
+                		$('#mleMessage').html('');
+                		sendJSONAjaxRequest(false, 'getData/deleteHostDetails.html', "hostID="+selectedHost+"&hostName="+hostName+"&selectedPageNo="+selectedPageNo, fnDeleteHostInfoSuccess,null,element);
+                        },
+                                "Cancel": function () {
+                                $(this).dialog('close');
+                        }
+                }
+        });	
 }
 
 function fnDeleteHostInfoSuccess(response,element) {

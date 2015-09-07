@@ -29,6 +29,10 @@
         <script type="text/javascript">
             var console=console||{"log":function(){}};
         </script>
+        <link rel="stylesheet" type="text/css" href="CSS/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/dashboard.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/intel.css" />
+        <script type="text/javascript" src="Scripts/bootstrap.min.js"></script>
         <script type="text/javascript" src="JQuery/jquery-1.7.2.js"></script>
         <script type="text/javascript" src="JQuery/jquery.json-1.3.min.js"></script>
         <script type="text/javascript" src="JQuery/jquery.ui.core.js"></script>
@@ -390,8 +394,8 @@ function isNumber(n) {
                                             </ul>
                                         </td>
                                         <td align="center" class="col_del_link">
-                                            <a data-bind-oid="item.oid" data-bind-id="item.id" data-bind-name="item.name" data-bind-tagValue="item.value" href="#" data-i18n="link.edit" onclick="javascript:tag_create_edit_tag(this.getAttribute('id'), this.getAttribute('name'), this.getAttribute('tagValue')); return false;">Edit</a>
-                                            <a data-bind-oid="item.oid" data-bind-id="item.id"  href="#" data-i18n="link.delete" onclick="javascript:ws.removeTag(this.getAttribute('id')); return false;">Delete</a>
+                                            <a data-bind-oid="item.oid" data-bind-id="item.id" data-bind-name="item.name" data-bind-tagValue="item.value" href="#" onclick="javascript:tag_create_edit_tag(this.getAttribute('id'), this.getAttribute('name'), this.getAttribute('tagValue')); return false;" data-toggle="tooltip" title="Edit Tag"><span class="glyphicon glyphicon-edit"></span></a>
+                                            <a data-bind-oid="item.oid" data-bind-id="item.id"  href="#" onclick="javascript:ws.removeTag(this.getAttribute('id')); return false;" data-toggle="tooltip" title="Delete Tag"><span class="glyphicon glyphicon-trash"></span></a>
                                         </td>
                                     </tr>
                                 </tbody>

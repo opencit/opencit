@@ -19,6 +19,7 @@
 						<td class="viewRow3" data-i18n="table.roles">Roles</td>
 						<td class="viewRow4" data-i18n="table.expires">Expires</td>
 						<td class="viewRow5Header" data-i18n="table.comments">Comments</td>
+	                                        <td>Options</td>
 					</tr>
 				</table>
 				<div class="requestDetailsTableContent">
@@ -31,6 +32,10 @@
 			<div id="successMessage"></div>
 			
 		</div>
+		<span id="alert_delete_request" data-i18n="alert.delete_request" style="display: none;">Are you sure you want to delete this request?</span>
+   	<div id="dialog-confirm" title="Delete User?" style="display:none;">
+		<p>Are you sure you want to delete this request?</p>
+	</div> 
 	</div>
 	<script type="text/javascript" src="Scripts/ViewRequest.js"></script>
 </body>
