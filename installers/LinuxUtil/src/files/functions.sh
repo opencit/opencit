@@ -839,6 +839,28 @@ auto_install() {
   fi
 }
 
+# automatically uninstall packages
+# takes arguments: component name (string), package list prefix (string)
+auto_uninstall() {
+  local component=${1}
+  local cprefix=${2}
+  local yum_packages=$(eval "echo \$${cprefix}_YUM_PACKAGES")
+  local apt_packages=$(eval "echo \$${cprefix}_APT_PACKAGES")
+  local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
+  local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  if [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+        zypper remove $zypper_packages
+  elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+        yast --remove $yast_packages
+  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+        yum -y erase $yum_packages
+  elif [[ -n "$aptget" && -n "$apt_packages" ]]; then
+        apt-get -y remove $apt_packages
+  fi
+}
+
 # this was used in setup.sh when we installed complete rpm or deb packages via the self-extracting installer.
 # not currently used, but will be used again when we return to rpm and deb package descriptors
 # in conjunction with the self-extracting installer 

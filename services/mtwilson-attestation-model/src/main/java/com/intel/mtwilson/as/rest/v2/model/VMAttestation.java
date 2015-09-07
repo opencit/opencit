@@ -25,7 +25,7 @@ public class VMAttestation extends Document {
     private String vmSaml;
     private boolean includeHostReport;
     private VmTrustReport vmTrustReport;
-    HostAttestation hostAttestation;
+    HostAttestation hostAttestationReport;
 
     public String getHostName() {
         return hostName;
@@ -77,12 +77,12 @@ public class VMAttestation extends Document {
         this.includeHostReport = includeHostReport;
     }
         
-    public HostAttestation getHostAttestation() {
-        return hostAttestation;
+    public HostAttestation getHostAttestationReport() {
+        return hostAttestationReport;
     }
 
-    public void setHostAttestation(HostAttestation hostAttestation) {
-        this.hostAttestation = hostAttestation;
+    public void setHostAttestationReport(HostAttestation hostAttestationReport) {
+        this.hostAttestationReport = hostAttestationReport;
     }
 
     public VmTrustReport getVmTrustReport() {

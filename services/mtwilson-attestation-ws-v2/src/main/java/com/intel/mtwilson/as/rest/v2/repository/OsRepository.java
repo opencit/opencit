@@ -89,6 +89,8 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
                 Os os = convert(tblOs);
                 return os;
             }
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Os:Retrieve - Error during Os retrieval.", ex);
             throw new RepositoryRetrieveException(ex, locator);
@@ -106,10 +108,19 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
         
         OsData obj = new OsData();
         try {
+            TblOsJpaController osJpaController = My.jpa().mwOs();
+            TblOs tblOs = osJpaController.findTblOsByUUID(item.getId().toString());
+            if (tblOs == null) {
+                log.error("Os:Store - OS specified with UUID {} is not valid.", item.getId().toString());
+                throw new RepositoryInvalidInputException(locator);                                                        
+            }
+            
             obj.setName(item.getName());
             obj.setDescription(item.getDescription());
             new OsBO().updateOs(obj, item.getId().toString());
             log.debug("Os:Store - Updated the Os with id {} successfully.", item.getId().toString());                    
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Os:Store - Error during Os update.", ex);
             throw new RepositoryStoreException(ex, locator);
@@ -125,11 +136,25 @@ public class OsRepository implements DocumentRepository<Os, OsCollection, OsFilt
 
         OsData obj = new OsData();
         try {
+            TblOsJpaController osJpaController = My.jpa().mwOs();
+            TblOs tblOs = osJpaController.findTblOsByUUID(item.getId().toString());
+            if (tblOs != null) {
+                log.error("Os:Store - OS specified with UUID {} already exists.", item.getId().toString());
+                throw new RepositoryInvalidInputException(locator);                                                        
+            }
+
+            if (item.getName() == null || item.getName().isEmpty() || item.getVersion() == null || item.getVersion().isEmpty()) {
+                log.error("Os:Store - Some of the required input parameters are missing.");
+                throw new RepositoryInvalidInputException(locator);                                                                        
+            }
+            
             obj.setName(item.getName());
             obj.setVersion(item.getVersion());
             obj.setDescription(item.getDescription());
             new OsBO().createOs(obj, item.getId().toString());
             log.debug("Os:Store - Created the Os {} successfully.", item.getName());                                
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Os:Create - Error during Os creation.", ex);
             throw new RepositoryCreateException(ex, locator);
