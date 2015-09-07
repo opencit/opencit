@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.policy.Fault;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -19,12 +20,14 @@ import java.util.Set;
 public class VMMeasurementLogValueMismatchEntries extends Fault {
     private Set<Measurement> mismatchEntries;
     
-    public VMMeasurementLogValueMismatchEntries() { } // for desearializing jackson
+    public VMMeasurementLogValueMismatchEntries() {
+        mismatchEntries = new HashSet<>();
+    } // for desearializing jackson
     
     public VMMeasurementLogValueMismatchEntries(Set<Measurement> mismatchEntries) {
         super("VM measurement log contains %d entries for which the values are modified.", mismatchEntries.size());
         this.mismatchEntries = mismatchEntries;
     }
     
-    public Set<Measurement> getMissingEntries() { return mismatchEntries; }
+    public Set<Measurement> getMismatchEntries() { return mismatchEntries; }
 }

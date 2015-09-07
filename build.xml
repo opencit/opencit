@@ -13,7 +13,8 @@
 	</target>
 	
 	<target name="init">
-		<condition property="cmd.maven" value="mvn.bat">
+		<!-- maven 3.3.3 has mvn.cmd instead of mvn.bat -->
+		<condition property="cmd.maven" value="mvn.cmd">
 			<os family="windows"/>
 		</condition>
 		<condition property="cmd.maven" value="mvn">

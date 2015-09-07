@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.policy.Fault;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,9 @@ public class XmlMeasurementLogContainsUnexpectedEntries extends Fault {
     private PcrIndex pcrIndex;
     private List<Measurement> unexpectedEntries;
     
-    public XmlMeasurementLogContainsUnexpectedEntries() { } // for desearializing jackson
+    public XmlMeasurementLogContainsUnexpectedEntries() {
+        unexpectedEntries = new ArrayList<Measurement>() {};
+    } // for desearializing jackson
     
     public XmlMeasurementLogContainsUnexpectedEntries(PcrIndex pcrIndex, List<Measurement> unexpectedEntries) {
         super("XML measurement log for PCR %d contains %d unexpected entries", pcrIndex.toInteger(), unexpectedEntries.size());
