@@ -18,7 +18,7 @@ public class ModuleLogReport {
     private String componentName;
     private String value;
     private String whitelistValue;
-    private List<ModuleLogReport> moduleLogs = new ArrayList<ModuleLogReport>();
+    private List<ModuleLogReport> moduleLogs = new ArrayList<>();
     
     public ModuleLogReport(){
         

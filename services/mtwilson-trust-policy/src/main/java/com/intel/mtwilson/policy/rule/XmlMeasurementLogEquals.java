@@ -17,6 +17,7 @@ import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissing;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissingExpectedEntries;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogValueMismatchEntries;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -122,7 +123,13 @@ public class XmlMeasurementLogEquals extends BaseRule {
                             tempUnexpected.getValue().toString(), tempMissing.getLabel(), tempMissing.getValue().toString());
                     if (tempUnexpected.getLabel().equalsIgnoreCase(tempMissing.getLabel())) {
                         log.debug("Adding the entry to the list of modified modules and deleting from the other 2 lists.");
-                        hostModifiedModules.add(tempUnexpected);
+                        
+                        // We are storing the whitelist value and the actual value so that we do not need to compare again when generating the reports.
+                        HashMap<String, String> tempHashMapToAdd = new HashMap<>();
+                        tempHashMapToAdd.put("Actual_Value", tempUnexpected.getValue().toString());
+                        Measurement toMeasurementToAdd = new Measurement(tempMissing.getValue(), tempMissing.getLabel(), tempHashMapToAdd);
+                        
+                        hostModifiedModules.add(toMeasurementToAdd);
                         hostActualUnexpected.remove(tempUnexpected);
                         hostActualMissing.remove(tempMissing);
                     }
