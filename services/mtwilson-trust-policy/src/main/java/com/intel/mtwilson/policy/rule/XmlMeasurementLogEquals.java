@@ -47,15 +47,19 @@ import org.slf4j.LoggerFactory;
 public class XmlMeasurementLogEquals extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
     private XmlMeasurementLog expected;
+    private PcrIndex pcrIndex; 
 
-    protected XmlMeasurementLogEquals() { } // for desearializing jackson
+    protected XmlMeasurementLogEquals() {
+        this.expected = new XmlMeasurementLog(PcrIndex.PCR19);
+    } // for desearializing jackson
     
     public XmlMeasurementLogEquals(XmlMeasurementLog expected) {
         this.expected = expected;
+        this.pcrIndex = expected.getPcrIndex();
     }
     
     public PcrIndex getPcrIndex() {
-        return expected.getPcrIndex();
+        return this.pcrIndex;
     }
  
     public XmlMeasurementLog getXmlMeasurementLog() { return expected; }
