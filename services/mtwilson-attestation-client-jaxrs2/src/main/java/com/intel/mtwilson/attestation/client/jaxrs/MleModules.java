@@ -44,6 +44,10 @@ public class MleModules extends MtWilsonClient {
      * For creating Module whitelists user has to specify the Name, Version, OsUUID (UUID of the OS that needs to be associated), ComponentName, DigestValue,
      * EventName, ExtendedToPCR & UseHostSpecificDigest have to be specified. The PackageName, PackageVendor, PackageVersion, Description are optional.
      * The UseHostSpecificDigest flag has to be set only for modules that vary across hosts (each host will have a unique value).
+     * The possible values for EventName include
+     * Vim25Api.HostTpmSoftwareComponentEventDetails,Vim25Api.HostTpmOptionEventDetails,Vim25Api.HostTpmBootSecurityOptionEventDetails,
+     * Vim25Api.HostTpmCommandEventDetails & OpenSource.EventName.
+     * Note that the first 4 event types are for ESXi host type. For the linux hosts, the last event name needs to be used.
      * @return - Created MleModule object.
      * @since Mt.Wilson 2.0
      * @mtwRequiresPermissions mle_modules:create
