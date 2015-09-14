@@ -714,6 +714,9 @@ public class MyConfiguration {
         return conf.getString("saml.key.alias"); 
     }
 
+    public Integer getSamlValidityTimeInSeconds() {
+        return conf.getInteger("saml.validity.seconds", 3600);
+    }
     ///////////////////////// tls policy  //////////////////////////////////
     public String getGlobalTlsPolicyId() {
         return conf.getString("mtwilson.global.tls.policy.id"); // no default - when a value is present it means all per-host and default tls policy settings will be ignored

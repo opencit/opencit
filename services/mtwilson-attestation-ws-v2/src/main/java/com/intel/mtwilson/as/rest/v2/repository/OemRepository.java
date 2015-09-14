@@ -105,9 +105,18 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
         
         OemData obj = new OemData();
         try {            
+            TblOemJpaController oemJpaController = My.jpa().mwOem();
+            TblOem tblOem = oemJpaController.findTblOemByUUID(item.getId().toString());
+            if (tblOem == null) {
+                log.error("Oem:Store - OEM specified with UUID {} is not valid.", item.getId().toString());
+                throw new RepositoryInvalidInputException(locator);                                        
+            }
+
             obj.setDescription(item.getDescription());
             new OemBO().updateOem(obj, item.getId().toString());
             log.debug("Oem:Store - Updated the Oem with id {} successfully.", item.getId().toString()); 
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Oem:Store - Error during Oem update.", ex);
             throw new RepositoryStoreException(ex, locator);
@@ -122,10 +131,24 @@ public class OemRepository implements DocumentRepository<Oem, OemCollection, Oem
         locator.id = item.getId();
         OemData obj = new OemData();
         try {
+            TblOemJpaController oemJpaController = My.jpa().mwOem();
+            TblOem tblOem = oemJpaController.findTblOemByName(item.getName());
+            if (tblOem != null) {
+                log.error("Oem:Create - OEM specified {} already exists.", item.getId().toString());
+                throw new RepositoryInvalidInputException(locator);                                        
+            }
+            
+            if (item.getName()==null || item.getName().isEmpty()) {
+                log.error("Oem:Create - Invalid name specified for the OEM.");
+                throw new RepositoryInvalidInputException(locator);                                                        
+            }
+            
             obj.setName(item.getName());
             obj.setDescription(item.getDescription());
             new OemBO().createOem(obj, item.getId().toString());
             log.debug("Oem:Create - Created the Oem {} successfully.", item.getName()); 
+        } catch (RepositoryException re) {
+            throw re;
         } catch (Exception ex) {
             log.error("Oem:Create - Error during role creation.", ex);
             throw new RepositoryCreateException(ex, locator);

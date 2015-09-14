@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.policy.Fault;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -19,7 +20,9 @@ import java.util.Set;
 public class VmMeasurementLogMissingExpectedEntries extends Fault {
     private Set<Measurement> missingEntries;
     
-    public VmMeasurementLogMissingExpectedEntries() { } // for desearializing jackson
+    public VmMeasurementLogMissingExpectedEntries() {
+        missingEntries = new HashSet<>();
+    } // for desearializing jackson
     
     public VmMeasurementLogMissingExpectedEntries(Set<Measurement> missingEntries) {
         super("VM measurement log missing %d expected entries", missingEntries.size());

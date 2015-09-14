@@ -5,6 +5,8 @@
 package com.intel.mtwilson.datatypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
 //import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -16,6 +18,7 @@ public class ModuleLogReport {
     private String componentName;
     private String value;
     private String whitelistValue;
+    private List<ModuleLogReport> moduleLogs = new ArrayList<>();
     
     public ModuleLogReport(){
         
@@ -67,6 +70,16 @@ public class ModuleLogReport {
     @JsonProperty("TrustStatus")
     public void setTrustStatus(Integer trustStatus) {
         this.trustStatus = trustStatus;
+    }
+    
+    @JsonProperty("ModuleLogs")
+    public void setModuleLogs(List<ModuleLogReport> moduleLogs) {
+        this.moduleLogs = moduleLogs;
+    }
+
+    @JsonProperty("ModuleLogs")
+    public List<ModuleLogReport> getModuleLogs() {
+        return moduleLogs;
     }
     
 }

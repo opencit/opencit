@@ -7,6 +7,7 @@ package com.intel.mtwilson.policy.rule;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.XmlMeasurementLog;
 import com.intel.mtwilson.policy.BaseRule;
 import com.intel.mtwilson.policy.HostReport;
@@ -16,6 +17,7 @@ import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissing;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogMissingExpectedEntries;
 import com.intel.mtwilson.policy.fault.XmlMeasurementLogValueMismatchEntries;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -45,13 +47,21 @@ import org.slf4j.LoggerFactory;
 public class XmlMeasurementLogEquals extends BaseRule {
     private Logger log = LoggerFactory.getLogger(getClass());
     private XmlMeasurementLog expected;
+    private PcrIndex pcrIndex; 
 
-    protected XmlMeasurementLogEquals() { } // for desearializing jackson
+    protected XmlMeasurementLogEquals() {
+        this.expected = new XmlMeasurementLog(PcrIndex.PCR19);
+    } // for desearializing jackson
     
     public XmlMeasurementLogEquals(XmlMeasurementLog expected) {
         this.expected = expected;
+        this.pcrIndex = expected.getPcrIndex();
     }
     
+    public PcrIndex getPcrIndex() {
+        return this.pcrIndex;
+    }
+ 
     public XmlMeasurementLog getXmlMeasurementLog() { return expected; }
     
     @Override
@@ -107,19 +117,23 @@ public class XmlMeasurementLogEquals extends BaseRule {
     
     private void RaiseFaultForModifiedEntries(ArrayList<Measurement> hostActualUnexpected, ArrayList<Measurement> hostActualMissing, RuleResult report) {
         ArrayList<Measurement> hostModifiedModules = new ArrayList<>();
+        ArrayList<Measurement> tempHostActualUnexpected = new ArrayList<>(hostActualUnexpected);
+        ArrayList<Measurement> tempHostActualMissing = new ArrayList<>(hostActualMissing);
         
         try {
-            Iterator unexpectedModules = hostActualUnexpected.iterator();
-            while (unexpectedModules.hasNext()) {
-                Measurement tempUnexpected = (Measurement) unexpectedModules.next();
-                Iterator missingModules = hostActualMissing.iterator();
-                while (missingModules.hasNext()) {
-                    Measurement tempMissing = (Measurement) missingModules.next();
+            for (Measurement tempUnexpected : tempHostActualUnexpected) {
+                for (Measurement tempMissing : tempHostActualMissing) {
                     log.debug("RaiseFaultForModifiedEntries: Comparing module {} with hash {} to module {} with hash {}.", tempUnexpected.getLabel(), 
                             tempUnexpected.getValue().toString(), tempMissing.getLabel(), tempMissing.getValue().toString());
                     if (tempUnexpected.getLabel().equalsIgnoreCase(tempMissing.getLabel())) {
                         log.debug("Adding the entry to the list of modified modules and deleting from the other 2 lists.");
-                        hostModifiedModules.add(tempUnexpected);
+                        
+                        // We are storing the whitelist value and the actual value so that we do not need to compare again when generating the reports.
+                        HashMap<String, String> tempHashMapToAdd = new HashMap<>();
+                        tempHashMapToAdd.put("Actual_Value", tempUnexpected.getValue().toString());
+                        Measurement toMeasurementToAdd = new Measurement(tempMissing.getValue(), tempMissing.getLabel(), tempHashMapToAdd);
+                        
+                        hostModifiedModules.add(toMeasurementToAdd);
                         hostActualUnexpected.remove(tempUnexpected);
                         hostActualMissing.remove(tempMissing);
                     }
@@ -129,10 +143,12 @@ public class XmlMeasurementLogEquals extends BaseRule {
             if (!hostModifiedModules.isEmpty()) {
                 log.debug("XmlMeasurementLogEquals : Host has updated #{} modules compared to the white list.", hostModifiedModules.size());
                 report.fault(new XmlMeasurementLogValueMismatchEntries(expected.getPcrIndex(), new HashSet<>(hostModifiedModules)));                
+            } else {
+                log.debug("RaiseFaultForModifiedEntries: No updated modules found.");
             }
             
         } catch (Exception ex) {
-            
+            log.error("RaiseFaultForModifiedEntries: Error during verification of changed modules.", ex);            
         }
     }    
 }
