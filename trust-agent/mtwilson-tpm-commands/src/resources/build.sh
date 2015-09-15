@@ -11,11 +11,11 @@ install_openssl() {
   echo "openssl: $OPENSSL_FILE"
   if [ -n "$OPENSSL_FILE" ] && [ -f "$OPENSSL_FILE" ]; then
     tar fxz $OPENSSL_FILE
-    (cd $OPENSSL && ./config --shared && make && make install)
+    (cd $OPENSSL && ./config --shared && make && sudo -n make install)
     if [ -d /etc/ld.so.conf.d ]; then
-      echo /usr/local/ssl/lib/ > /etc/ld.so.conf.d/openssl.conf
+      echo /usr/local/ssl/lib/ | sudo -n tee /etc/ld.so.conf.d/openssl.conf
     fi
-    ldconfig
+    sudo -n ldconfig
   fi
 }
 
@@ -24,11 +24,11 @@ install_trousers() {
   echo "trousers: $TROUSERS_FILE"
   if [ -n "$TROUSERS_FILE" ] && [ -f "$TROUSERS_FILE" ]; then
     tar fxz $TROUSERS_FILE
-    (cd $TROUSERS && ./configure --prefix=/usr/local --with-openssl=/usr/local/ssl && make && make install)
+    (cd $TROUSERS && ./configure --prefix=/usr/local --with-openssl=/usr/local/ssl && make && sudo -n make install)
     if [ -d /etc/ld.so.conf.d ]; then
-      echo /usr/local/lib > /etc/ld.so.conf.d/trousers.conf
+      echo /usr/local/lib | sudo -n tee /etc/ld.so.conf.d/trousers.conf
     fi
-    ldconfig
+    sudo -n ldconfig
   fi
 }
 
@@ -38,7 +38,7 @@ install_tpm_tools() {
   if [ -n "$TPM_TOOLS_FILE" ] && [ -f "$TPM_TOOLS_FILE" ]; then
     tar fxz $TPM_TOOLS_FILE
     patch $TPM_TOOLS/src/tpm_mgmt/tpm_nvread.c tpm-tools-1.3.8_src_tpm_nvread.patch
-    (cd $TPM_TOOLS && LDFLAGS="-L/usr/local/lib" ./configure --prefix=/usr/local && make && make install)
+    (cd $TPM_TOOLS && LDFLAGS="-L/usr/local/lib" ./configure --prefix=/usr/local && make && sudo -n make install)
   fi
 }
 
@@ -47,11 +47,11 @@ install_openssl_tpm_engine() {
   echo "openssl-tpm-engine: $OPENSSL_TPM_ENGINE_FILE"
   if [ -n "$OPENSSL_TPM_ENGINE_FILE" ] && [ -f "$OPENSSL_TPM_ENGINE_FILE" ]; then
     tar fxz $OPENSSL_TPM_ENGINE_FILE
-    (cd $OPENSSL_TPM_ENGINE && LDFLAGS="-L/usr/local/lib" ./configure --with-openssl=/usr/local/ssl && make && make install)
+    (cd $OPENSSL_TPM_ENGINE && LDFLAGS="-L/usr/local/lib" ./configure --with-openssl=/usr/local/ssl && make && sudo -n make install)
     if [ -d /etc/ld.so.conf.d ]; then
-      echo /usr/local/lib/openssl/engines > /etc/ld.so.conf.d/openssl-engines.conf
+      echo /usr/local/lib/openssl/engines | sudo -n tee /etc/ld.so.conf.d/openssl-engines.conf
     fi
-    ldconfig
+    sudo -n ldconfig
     export LD_LIBRARY_PATH=/usr/local/lib/openssl/engines
   fi
 }
@@ -61,7 +61,7 @@ install_hex2bin() {
   echo "hex2bin: $HEX2BIN"
   if [ -n "$HEX2BIN_FILE" ] && [ -f "$HEX2BIN_FILE" ]; then
     unzip $HEX2BIN_FILE
-    (cd $HEX2BIN && make && make install)
+    (cd $HEX2BIN && make && sudo -n make install)
   fi
 }
 
