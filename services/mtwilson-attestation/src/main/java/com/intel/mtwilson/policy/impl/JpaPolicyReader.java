@@ -193,7 +193,15 @@ public class JpaPolicyReader {
         // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
         // Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
         //PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
-        PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+        
+        //PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR23.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+        /* set asset tag PCR to 23 if it is Windows */
+        int assetTagPCR = 22;
+        if (tblHosts.getVmmMleId().getName().toLowerCase().contains("windows")) {
+            assetTagPCR = 23;
+        }           
+        PcrMatchesConstant tagPcrRule = new PcrMatchesConstant(new Pcr(assetTagPCR, Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+
         tagPcrRule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(tagPcrRule);   
         
