@@ -231,4 +231,17 @@ public class Hosts extends MtWilsonClient {
         return objCollection;
     }
     
+    public void preRegisterHostDetails(String hostName, String userName, String password) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("host_name", hostName);
+        map.put("user_name", userName);
+        map.put("password", password);
+        Response obj = getTarget().path("rpc/store-host-pre-registration-details")
+                .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(map));
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Pre-registration of host details failed");
+        }
+    }
 }
