@@ -27,7 +27,8 @@ public class ConnectionString {
     private static final String httpDelimiter = "//";
     private static final String parameterDelimiter = ":";
     private static final String urlOptionsDelimiter = ";";
-    private static final String intelVendorRegEx = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*(;)+(.)*(;)+(.)*$";
+    private static final String intelVendorRegEx = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*$";
+    private static final String intelVendorRegEx2 = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*(;)+(.)*(;)+(.)*$";
     private String addOnConnectionString;
     private Vendor vendor;
     private InternetAddress hostname;
