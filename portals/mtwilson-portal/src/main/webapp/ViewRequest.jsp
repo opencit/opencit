@@ -19,7 +19,7 @@
 						<td class="viewRow3" data-i18n="table.roles">Roles</td>
 						<td class="viewRow4" data-i18n="table.expires">Expires</td>
 						<td class="viewRow5Header" data-i18n="table.comments">Comments</td>
-	                                        <td>Options</td>
+	                                        <td></td>
 					</tr>
 				</table>
 				<div class="requestDetailsTableContent">

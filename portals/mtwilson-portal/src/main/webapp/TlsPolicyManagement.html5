@@ -27,7 +27,7 @@
                 <th class="tlspolicy_policy_type" data-i18n="table.policy_type">Policy Type</th>
                 <th class="tlspolicy_comment" data-i18n="table.comment">Comment</th>
                 <th class="tlspolicy_private" style="display: none;" data-i18n="table.policy_scope">Scope</th>
-		<th>Options</th>
+		<th></th>
             </tr>
         </thead>
         <tbody>

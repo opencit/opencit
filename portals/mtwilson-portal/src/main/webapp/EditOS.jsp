@@ -15,7 +15,7 @@
 				<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
-							<th class="row1" data-i18n="table.options">Options</th>
+							<th class="row1"></th>
 							<th class="row1" data-i18n="table.os_name">OS Name</th>
 							<th class="row1" data-i18n="table.version">Version</th>
 							<th class="row1" data-i18n="table.description">Description</th>
@@ -34,6 +34,9 @@
 		</div>
 				<div id="messageSpace"></div>
 			    <div id="errorEditOS" class="errorMessage">	</div>
+                <div id="dialog-confirm" title="Delete OS?" style="display:none;">
+                        <p>Are you sure you want to delete this OS?</p>
+                </div>
 			
 	</div>
 		

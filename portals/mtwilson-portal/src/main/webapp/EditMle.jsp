@@ -23,7 +23,7 @@
 						<th class="rowr4" data-i18n="table.os_info">OS Info</th>
 						<th class="rowr2" data-i18n="table.oem_name">OEM Name</th>
 						<th class="rowr3" data-i18n="table.description">Description</th>
-						<th class="row1" data-i18n="table.options">Options</th>
+						<th class="row1"></th>
 					</tr>
 				</thead>
 				</table>

@@ -25,7 +25,7 @@
 						<th class="editRow7" data-i18n="table.vmm_build">VMM Build</th>
 						<th class="editRow8" data-i18n="table.email">Email Address</th>
 						<th class="editRow9" data-i18n="table.connection_details">Connection Details</th>
-						<th class="editRow0">Options</th>
+						<th class="editRow0"></th>
 					</tr>
 				</thead>
 				</table>

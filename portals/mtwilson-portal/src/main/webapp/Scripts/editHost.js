@@ -35,7 +35,7 @@ function populateEditHostDataIntoTable(hostDetails) {
 			'<td class="editRow7">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo) +'&nbsp;</td>'+
 			'<td class="editRow8">'+ getHTMLEscapedMessage(hostDetails[item].emailAddress) +'&nbsp;</td>'+
 			'<td class="editRow9">'+ getHTMLEscapedMessage(vCenterDetails) +'&nbsp;</td>'+
-	                '<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0"><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-toggle="tooltip" title="Delete Host"><span class="glyphicon glyphicon-trash"></span></a></td>'+
+	                '<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0" style="background-color: white"><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-toggle="tooltip" title="Delete Host"><span class="glyphicon glyphicon-trash"></span></a></td>'+
 		'</tr>';
 	}
 	$('#mainEditHostDetailsContent table').html(str);
