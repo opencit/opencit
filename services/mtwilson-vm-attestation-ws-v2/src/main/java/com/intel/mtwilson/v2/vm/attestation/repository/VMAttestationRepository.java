@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.v2.vm.attestation.repository;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
@@ -43,7 +41,6 @@ import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import static com.intel.mtwilson.trustagent.model.VMQuoteResponse.QuoteType.XML_DSIG;
 import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
-import com.intel.mtwilson.v2.vm.attestation.resource.VMAttestations;
 import com.intel.mtwilson.vmquote.xml.TrustPolicy;
 import com.intel.mtwilson.vmquote.xml.VMQuote;
 import gov.niarl.his.privacyca.TpmUtils;
@@ -59,8 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.security.cert.CertificateException;
 import javax.xml.bind.JAXBException;
 import javax.xml.crypto.MarshalException;
@@ -381,7 +376,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
                                         mwVmAttestationReport.setId(item.getId().toString());
                                         mwVmAttestationReport.setVmInstanceId(vmInstanceIdFromQuote);
                                         mwVmAttestationReport.setVmTrustStatus(isVMTrusted);
-                                        mwVmAttestationReport.setHostId(obj);
+                                        mwVmAttestationReport.setHostName(obj.getName());
                                         mwVmAttestationReport.setVmSaml(report.getVmSaml());
                                         mwVmAttestationReport.setVmTrustReport(mapper.writeValueAsString(vmTrustReport));
                                         if (item.getIncludeHostReport() && report.getHostAttestationReport() != null)
@@ -473,7 +468,7 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
             convObj.setId(UUID.valueOf(obj.getId()));
             convObj.setVmInstanceId(obj.getVmInstanceId());
             convObj.setTrustStatus(obj.isVmTrustStatus());
-            convObj.setHostName(obj.getHostId().getName());
+            convObj.setHostName(obj.getHostName());
             if (obj.getVmSaml() != null)
                 convObj.setVmSaml(obj.getVmSaml());
             if (obj.getVmTrustReport() != null)
