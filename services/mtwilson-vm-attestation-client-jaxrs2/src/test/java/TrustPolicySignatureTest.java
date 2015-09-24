@@ -32,18 +32,6 @@ public class TrustPolicySignatureTest{
     public static void setUpClass()throws Exception {
         Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
         Properties p = My.configuration().getClientProperties();
-
-        System.out.println("SAVY001: " + p.getProperty("MTWILSON_API_URL"));
-        System.out.println("SAVY001: " + p.getProperty("mtwilson.api.url"));
-        
-        System.out.println("SAVY001: " + p.getProperty("MTWILSON_API_USERNAME"));
-        System.out.println("SAVY001: " + p.getProperty("mtwilson.api.username"));
-        
-        System.out.println("SAVY001: " + p.getProperty("MTWILSON_API_PASSWORD"));
-        System.out.println("SAVY001: " + p.getProperty("mtwilson.api.password"));
-        
-        System.out.println("SAVY001: " + p.getProperty("MTWILSON_API_TLS_POLICY_CERTIFICATE_SHA1"));
-        System.out.println("SAVY001: " + p.getProperty("mtwilson.api.tls.policy.certificate.sha1"));
         client = new TrustPolicySignature(p);
     }
     
