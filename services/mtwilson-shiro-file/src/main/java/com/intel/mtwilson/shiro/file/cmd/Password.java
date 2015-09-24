@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import org.apache.commons.configuration.BaseConfiguration;
 /**
  * NOTE: this task is deprecated by mtwilson-shiro-file including a similar
  * task but without trustagent specific permissions.
@@ -77,8 +78,11 @@ public class Password implements Command {
         File userFile = new File(Folders.configuration()+File.separator+"users.txt");
         File permissionFile = new File(Folders.configuration()+File.separator+"permissions.txt");
         
+        if (options == null)
+            options = new BaseConfiguration();
+        
         // store or replace the user record
-        log.debug("Loading users and permissions");
+        log.debug("Loading users and permissions from {} & {}", userFile.getAbsolutePath(), permissionFile.getAbsolutePath());
         dao = new LoginDAO(userFile, permissionFile);
         
         if( options.getBoolean("list", false) ) {

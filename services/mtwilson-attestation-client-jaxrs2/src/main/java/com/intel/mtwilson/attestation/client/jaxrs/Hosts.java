@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
@@ -32,6 +33,10 @@ public class Hosts extends MtWilsonClient {
 
     public Hosts(Properties properties) throws Exception {
         super(properties);
+    }
+    
+    public Hosts(Properties properties, TlsConnection tlsConnection) throws Exception {
+        super(properties, tlsConnection);
     }
     
     /**
