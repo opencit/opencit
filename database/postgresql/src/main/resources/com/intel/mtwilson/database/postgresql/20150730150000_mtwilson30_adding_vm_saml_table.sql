@@ -6,7 +6,7 @@ CREATE  TABLE mw_vm_attestation_report (
   id CHAR(36) NOT NULL,
   vm_instance_id CHAR(36) NOT NULL,
   vm_trust_status BOOLEAN NOT NULL,
-  host_id INTEGER NOT NULL,
+  host_name VARCHAR(255) NOT NULL,
   vm_saml TEXT DEFAULT NULL ,
   vm_trust_report TEXT DEFAULT NULL,
   host_attestation_report TEXT DEFAULT NULL,
@@ -14,8 +14,7 @@ CREATE  TABLE mw_vm_attestation_report (
   error_message varchar(200) DEFAULT NULL,
   created_ts timestamp DEFAULT NULL,
   expiry_ts timestamp DEFAULT NULL,
-  PRIMARY KEY (id),
-  CONSTRAINT vm_saml_host_id FOREIGN KEY (host_id) REFERENCES mw_hosts (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  PRIMARY KEY (id)
   );
     
 INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20150730150000, NOW(), 'Patch for creating the table for storing vm attestation data.');

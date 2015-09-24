@@ -241,7 +241,7 @@ public class APIClient {
             }
             // Removing the roles as well
             apiClientRequest.roles = new String[]{}; //info.roles; 
-            bo.update(apiClientRequest, null);
+            bo.delete(apiClientRequest, null);
         } else {
             log.debug("Did not find the user with fingerprint {} in the system. ", fingerprintHex);
         }
