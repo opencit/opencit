@@ -187,7 +187,10 @@ public class MleBO {
             setTblMle(tblMle, mleData);
 
             mleJpaController.edit(tblMle);
-            updatePcrManifest(tblMle, mleData);
+            
+            // Bug: 4393 - Update the PCR list only if the user has specified an empty or valid PCRs
+            if (mleData.getManifestList() != null)
+                updatePcrManifest(tblMle, mleData);
 
         } catch (ASException ase) {
             throw ase;
@@ -534,8 +537,9 @@ public class MleBO {
         // tblMle.setMLEType(mleData.getMleType().toString());
         // tblMle.setAttestationType(mleData.getAttestationType().toString());
         tblMle.setDescription(mleData.getDescription());
-        tblMle.setRequiredManifestList(getRequiredManifestList(mleData
-                .getManifestList()));
+        // Bug: 4393 : Do not update the PCR list if the user has not specified PCR manifest list.
+        if (mleData.getManifestList()!= null)
+            tblMle.setRequiredManifestList(getRequiredManifestList(mleData.getManifestList()));
     }
 
     /**

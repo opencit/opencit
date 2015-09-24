@@ -84,6 +84,17 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
     @Produces(CryptoMediaType.APPLICATION_SAML)    
     @SuppressWarnings("empty-statement")
     public String createSamlAssertion(VMAttestation item) {
+        VMAttestationRepository vmAttestationRepo = new VMAttestationRepository();
+        vmAttestationRepo.create(item);
+        String samlAssertion = item.getVmSaml();
+        return samlAssertion;
+    }
+    
+/*    @POST
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})
+    @Produces(CryptoMediaType.APPLICATION_SAML)    
+    @SuppressWarnings("empty-statement")
+    public String createSamlAssertion(VMAttestation item) {
         String nonce;
         JAXB jaxb = new JAXB();
         
@@ -295,25 +306,8 @@ public class VMAttestations extends AbstractJsonapiResource<VMAttestation, VMAtt
             throw new RepositoryCreateException(ex);
         } 
         return null;
-    }
+    }*/
     
-    public static X509Certificate getSamlCertificate() {
-        X509Certificate samlCert = null;        
-        byte[] samlPemBytes;
-        try (FileInputStream samlPemFile = new FileInputStream(My.configuration().getSamlCertificateFile())) {
-
-            samlPemBytes = IOUtils.toByteArray(samlPemFile);
-            samlCert = X509Util.decodePemCertificate(new String(samlPemBytes));
-            log.debug("Successfully retrieved the SAML certificate for verification. {}", samlCert.getIssuerX500Principal().getName());
-
-            
-        } catch (IOException | CertificateException ex) {
-            log.error("Error during verification of the certificate that signed the data. {}", ex.getMessage());
-        } 
-                
-        return samlCert;
-    }
-
     
 /*    @GET
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, DataMediaType.APPLICATION_YAML, DataMediaType.TEXT_YAML})

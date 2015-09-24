@@ -195,10 +195,10 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 echo "Installing packages: $LIST"
 
-APICLIENT_YUM_PACKAGES="zip unzip openssl"
-APICLIENT_APT_PACKAGES="zip unzip openssl"
-APICLIENT_YAST_PACKAGES="zip unzip openssl"
-APICLIENT_ZYPPER_PACKAGES="zip unzip openssl"
+APICLIENT_YUM_PACKAGES="zip unzip openssl xmlstarlet"
+APICLIENT_APT_PACKAGES="zip unzip openssl xmlstarlet"
+APICLIENT_YAST_PACKAGES="zip unzip openssl xmlstarlet"
+APICLIENT_ZYPPER_PACKAGES="zip unzip openssl xmlstarlet"
 auto_install "Installer requirements" "APICLIENT"
 
 

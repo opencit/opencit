@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.policy.Fault;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -21,7 +22,9 @@ public class XmlMeasurementLogMissingExpectedEntries extends Fault {
     private PcrIndex pcrIndex;
     private Set<Measurement> missingEntries;
     
-    public XmlMeasurementLogMissingExpectedEntries() { } // for desearializing jackson
+    public XmlMeasurementLogMissingExpectedEntries() {
+        missingEntries = new HashSet<>();
+    } // for desearializing jackson
     
     public XmlMeasurementLogMissingExpectedEntries(PcrIndex pcrIndex, Set<Measurement> missingEntries) {
         super("XML measurement log for PCR %d missing %d expected entries", pcrIndex.toInteger(), missingEntries.size());
