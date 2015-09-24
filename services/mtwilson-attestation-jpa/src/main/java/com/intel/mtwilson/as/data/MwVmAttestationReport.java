@@ -10,8 +10,6 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -30,14 +28,14 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwVmAttestationReport.findAll", query = "SELECT m FROM MwVmAttestationReport m"),
     @NamedQuery(name = "MwVmAttestationReport.findById", query = "SELECT m FROM MwVmAttestationReport m WHERE m.id = :id"),
     @NamedQuery(name = "MwVmAttestationReport.findByVmInstanceId", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmInstanceId = :vmInstanceId"),
-    @NamedQuery(name = "MwVmAttestationReport.findByHostName", query = "SELECT m FROM MwVmAttestationReport m WHERE m.hostId.name = :hostName"),
+    @NamedQuery(name = "MwVmAttestationReport.findByHostName", query = "SELECT m FROM MwVmAttestationReport m WHERE m.hostName = :hostName"),
     @NamedQuery(name = "MwVmAttestationReport.findByVmSaml", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmSaml = :vmSaml"),
     @NamedQuery(name = "MwVmAttestationReport.findByVmTrustReport", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmTrustReport = :vmTrustReport"),
     @NamedQuery(name = "MwVmAttestationReport.findByErrorCode", query = "SELECT m FROM MwVmAttestationReport m WHERE m.errorCode = :errorCode"),
     @NamedQuery(name = "MwVmAttestationReport.findByErrorMessage", query = "SELECT m FROM MwVmAttestationReport m WHERE m.errorMessage = :errorMessage"),
     @NamedQuery(name = "MwVmAttestationReport.findByVMAndExpiry", query = "SELECT m FROM MwVmAttestationReport m WHERE m.expiryTs > :now and m.vmInstanceId = :vmInstanceId ORDER BY m.expiryTs DESC"),    
-    @NamedQuery(name = "MwVmAttestationReport.findByHostAndExpiry", query = "SELECT m FROM MwVmAttestationReport m WHERE m.expiryTs > :now and m.hostId.name = :hostName ORDER BY m.expiryTs DESC"),    
-    @NamedQuery(name = "MwVmAttestationReport.findByHostAndRangeOfCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.hostId.name = :hostName and m.createdTs >= :fromCreatedTs and m.createdTs < :toCreatedTs ORDER BY m.createdTs ASC"),
+    @NamedQuery(name = "MwVmAttestationReport.findByHostAndExpiry", query = "SELECT m FROM MwVmAttestationReport m WHERE m.expiryTs > :now and m.hostName = :hostName ORDER BY m.expiryTs DESC"),    
+    @NamedQuery(name = "MwVmAttestationReport.findByHostAndRangeOfCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.hostName = :hostName and m.createdTs >= :fromCreatedTs and m.createdTs < :toCreatedTs ORDER BY m.createdTs ASC"),
     @NamedQuery(name = "MwVmAttestationReport.findByVMAndRangeOfCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.vmInstanceId = :vmInstanceId and m.createdTs >= :fromCreatedTs and m.createdTs < :toCreatedTs ORDER BY m.createdTs ASC"),
     @NamedQuery(name = "MwVmAttestationReport.findByCreatedTs", query = "SELECT m FROM MwVmAttestationReport m WHERE m.createdTs = :createdTs")})
 public class MwVmAttestationReport implements Serializable {
@@ -68,9 +66,9 @@ public class MwVmAttestationReport implements Serializable {
     @Column(name = "expiry_ts")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiryTs;
-    @JoinColumn(name = "host_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private TblHosts hostId;
+    @Basic(optional = false)
+    @Column(name = "host_name")
+    private String hostName;
 
     public MwVmAttestationReport() {
     }
@@ -164,14 +162,15 @@ public class MwVmAttestationReport implements Serializable {
         this.expiryTs = expiryTs;
     }
 
-    public TblHosts getHostId() {
-        return hostId;
+    public String getHostName() {
+        return hostName;
     }
 
-    public void setHostId(TblHosts hostId) {
-        this.hostId = hostId;
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 
+    
     @Override
     public int hashCode() {
         int hash = 0;
