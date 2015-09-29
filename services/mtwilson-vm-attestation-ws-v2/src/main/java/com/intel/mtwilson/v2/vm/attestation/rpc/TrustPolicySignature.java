@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.v2.vm.attestation.resource;
+package com.intel.mtwilson.v2.vm.attestation.rpc;
 
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ws.rs.POST;
@@ -55,8 +55,8 @@ import org.xml.sax.InputSource;
  */
 @V2
 @Path("/trustpolicy-signature")
-public class ManifestSignatureRpc {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManifestSignatureRpc.class);
+public class TrustPolicySignature {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TrustPolicySignature.class);
     
     @POST
     @Consumes({MediaType.APPLICATION_XML})

@@ -15,7 +15,6 @@
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
-						<th class="editRow0"></th>
 						<th class="editRow1" data-i18n="table.host_name">Host Name</th>
 						<!-- <th class="editRow2">Host IP Address</th> -->
 						<th class="editRow3" data-i18n="table.host_port">Host Port</th>
@@ -26,6 +25,7 @@
 						<th class="editRow7" data-i18n="table.vmm_build">VMM Build</th>
 						<th class="editRow8" data-i18n="table.email">Email Address</th>
 						<th class="editRow9" data-i18n="table.connection_details">Connection Details</th>
+						<th class="editRow0"></th>
 					</tr>
 				</thead>
 				</table>
@@ -39,7 +39,9 @@
 		</div>
 			<div id="mleMessage" class="errorDiv"></div>
 		</div>
-		
+		<div id="dialog-confirm" title="Delete Host?" style="display:none;">
+                	<p>Are you sure you want to delete this host?</p>
+        	</div>
 	</div>
 	<script type="text/javascript" src="Scripts/editHost.js"></script>
 </body>

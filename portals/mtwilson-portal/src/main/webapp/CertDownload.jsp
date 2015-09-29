@@ -19,17 +19,12 @@ response.setHeader("Content-Disposition",
 		<div id="nameOfPage" class="NameHeader" data-i18n="header.cert_download">Certificate Download</div>
 		<div id="mainLoadingDiv" class="mainContainer">                
               
-            <div  id ="fdownloadRCA"class="registerUser"><span data-i18n="label.dl_root_ca">Click on Download icon to download Root Ca Certificate</span>
-			<input type="image" onclick="fnforRootCACertificate()" src="images/download.jpg"></div>
-            <div  id ="fdownload"class="registerUser"><span data-i18n="label.dl_privacy_ca">Click on Download icon to download the Privacy CA Certificates</span>
-			<input type="image" onclick="fnforPrivacyCACertificate()" src="images/download.jpg"></div>
-            <!-- <div  id ="fdownload"class="registerUser">Click on Download icon to download all trusted Privacy CA Certificates
-			<input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div> -->
-            <div  id ="fdownload"class="registerUser"><span data-i18n="label.dl_tls">Click on Download icon to download TLS Certificate</span>
-			<input type="image" onclick="fnforTLSCertificate()" src="images/download.jpg"></div>
-            <div  id ="fdownload"class="registerUser"><span data-i18n="label.dl_saml">Click on Download icon to download SAML Certificate</span>
-			<input type="image" onclick="fnforSAMLCertificate()" src="images/download.jpg"></div>
-                
+		<div  id ="fdownloadRCA"><a href="" onclick="fnforRootCACertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download Root Ca Certificate</a></div>
+	        <div  id ="fdownload"><a href="" onclick="fnforPrivacyCACertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download the Privacy CA Certificates</a></div>
+            <!-- <div  id ="fdownload"class="registerUser">Download all trusted Privacy CA Certificates
+                        <input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div> -->
+                <div  id ="fdownload"><a href="" onclick="fnforTLSCertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download TLS Certificate</a></div>
+                 <div  id ="fdownload"><a href="" onclick="fnforSAMLCertificate()"><span class="glyphicon glyphicon-download-alt"></span> Download SAML Certificate</a></div>                
 			<div id="successMessage"></div>
 			
 		</div>
