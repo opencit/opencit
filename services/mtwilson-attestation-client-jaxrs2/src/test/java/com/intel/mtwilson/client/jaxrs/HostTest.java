@@ -13,6 +13,8 @@ import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -81,7 +83,10 @@ public class HostTest {
     @Test
     public void testHostPreRegistration() {
         log.debug("About to pre-register host details");
-        client.preRegisterHostDetails("mhsbubu1404", "apiclient", "apipwd");
+        List<String> hostNames = new  ArrayList<>();
+        hostNames.add("FQDN");
+        hostNames.add("IPAddress");
+        client.preRegisterHostDetails(hostNames, "apiclient", "apipwd");
         log.debug("Registered successfully");
     }
     

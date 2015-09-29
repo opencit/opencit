@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.data.MwHostPreRegistrationDetails;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.repository.RepositoryCreateException;
 import java.util.Calendar;
+import java.util.List;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 /**
@@ -23,16 +24,16 @@ public class StoreHostPreRegistrationDetailsRunnable implements Runnable {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StoreHostPreRegistrationDetailsRunnable.class);
     
-    private String hostName;
+    private List<String> hostNames;
     private String userName;
     private String password;
 
-    public String getHostName() {
-        return hostName;
+    public List<String> getHostNames() {
+        return hostNames;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
+    public void setHostNames(List<String> hostNames) {
+        this.hostNames = hostNames;
     }
 
     public String getUserName() {
@@ -56,20 +57,21 @@ public class StoreHostPreRegistrationDetailsRunnable implements Runnable {
     @RequiresPermissions({"store_host_pre_registration_details:create"})
     public void run() {
         try {
-            if (hostName != null && !hostName.isEmpty() && userName != null && !userName.isEmpty()) {
+            if (hostNames != null && !hostNames.isEmpty() && userName != null && !userName.isEmpty()) {
 
-                log.debug("About to store the pre-registration data for host {} with user name '{}' & password '{}'.", hostName, userName, password);
+                log.debug("About to store the pre-registration data for hosts {} with user name '{}' & password '{}'.", hostNames.toString(), userName, password);
 
-                MwHostPreRegistrationDetails host = new MwHostPreRegistrationDetails();
-                host.setId(new UUID().toString());
-                host.setName(hostName);
-                host.setLogin(userName);
-                host.setPassword(password);
-                host.setCreatedTs(Calendar.getInstance().getTime());
+                for(String hostName : hostNames) {
+                    MwHostPreRegistrationDetails host = new MwHostPreRegistrationDetails();
+                    host.setId(new UUID().toString());
+                    host.setName(hostName);
+                    host.setLogin(userName);
+                    host.setPassword(password);
+                    host.setCreatedTs(Calendar.getInstance().getTime());
 
-                My.jpa().mwHostPreRegistrationDetails().create(host);
-                log.debug("Successfully registered the host data");
-
+                    My.jpa().mwHostPreRegistrationDetails().create(host);
+                    log.debug("Successfully registered for host {}", hostName);
+                }
             } else {
                 throw new Exception("Invalid input specified or input value missing.");
             }
