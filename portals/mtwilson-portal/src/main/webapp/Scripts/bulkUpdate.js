@@ -19,6 +19,7 @@ function populateHostBulkDetails(responseJSON) {
 function populateBulkHostDataIntoTable(hostDetails) {
 	var str = "";
 		for ( var item in hostDetails) {
+			alert(hostDetails[item].hostName);
 			selectedHost[hostDetails[item].hostName] = true;
 			var classValue = null;
 			var checked = "";
@@ -54,11 +55,14 @@ function fnUpdateBulkTableForPage(responseJSON) {
 function fnGetBulkUpdateForHost() {
 	var data = "selectedHost=";
 	for ( var host in selectedHost) {
+		alert(host);
 		if (selectedHost[host]) {
 			data+=host+";";
 		}
 	}
+	alert(data);
 	data=data.substring(0,data.length-1);
+	alert(data);
 	$('#mainConatinerForBulkPage').prepend(disabledDiv);
 	sendJSONAjaxRequest(false, 'getData/updateTrustForSelected.html', data, fnUpdateTrustForSelectedSuccess, null);
 }
