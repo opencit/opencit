@@ -28,7 +28,7 @@ public class ConnectionString {
     private static final String parameterDelimiter = ":";
     private static final String urlOptionsDelimiter = ";";
     private static final String intelVendorRegEx = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*$";
-    private static final String intelVendorRegEx2 = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*(;)+(.)*(;)+(.)*$";
+    private static final String intelVendorRegEx2 = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*(;)*(.)*(;)*(.)*$";
     private String addOnConnectionString;
     private Vendor vendor;
     private InternetAddress hostname;
@@ -342,9 +342,13 @@ public class ConnectionString {
     public static class IntelConnectionString {
         private InternetAddress hostAddress;
         private int port;
-        
+        private String username;
+        private String password;
         public InternetAddress getHost() { return hostAddress; }
         public int getPort() { return port; }
+        public String getUsername() { return username; }
+        public String getPassword() { return password; }
+        
         public URL toURL() {
             try {
                 return new URL(String.format("https://%s:%d", hostAddress.toString(), port));
@@ -357,7 +361,7 @@ public class ConnectionString {
         
         @Override
         public String toString() {
-            return String.format("https://%s:%d", hostAddress.toString(), port);
+            return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         
         public static IntelConnectionString forURL(String url) throws MalformedURLException {
@@ -370,6 +374,10 @@ public class ConnectionString {
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
+            if( info.options != null ) {
+                cs.username = info.options.getString(OPT_USERNAME); // usernameFromURL(url);
+                cs.password = info.options.getString(OPT_PASSWORD); // passwordFromURL(url);
+            }
             return cs;
         }
     }
