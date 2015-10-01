@@ -346,7 +346,7 @@ public class ReportsBO {
                 } else if (moduleManifestLog.getName().startsWith("tbootxm-")) {
                     logger.debug("addManifestLogs - Adding the sub module {} for tbootxm module with errors.", moduleManifestLog.getName());                    
                     ModuleLogReport subModuleLogReport = new ModuleLogReport(moduleManifestLog.getName().substring(("tbootxm-").length()),
-                                                              moduleManifestLog.getValue().toString(), moduleManifestLog.getWhitelistValue().toString(),0);
+                                                              moduleManifestLog.getValue(), moduleManifestLog.getWhitelistValue(),0);
                     temptbootxmSubModuleReport.put(subModuleLogReport.getComponentName(), subModuleLogReport);
                 } else {
                     logger.debug("addManifestLogs - Adding the sub module {} for non-tbootxm module with errors.", moduleManifestLog.getName());                    

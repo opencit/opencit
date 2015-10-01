@@ -92,7 +92,8 @@ public class TrustPolicySignature {
         //2. Load the KeyStore and get the signing key and certificate.
         //TODO saml key and keystore password are same
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(My.configuration().getSamlKeystoreFile()), My.configuration().getSamlKeystorePassword().toCharArray());
+        FileInputStream fin = new FileInputStream(My.configuration().getSamlKeystoreFile());
+        ks.load(fin, My.configuration().getSamlKeystorePassword().toCharArray());
         KeyStore.PrivateKeyEntry keyEntry =
             (KeyStore.PrivateKeyEntry) ks.getEntry
                 (My.configuration().getSamlKeyAlias(), new KeyStore.PasswordProtection(My.configuration().getSamlKeystorePassword().toCharArray()));
@@ -127,6 +128,7 @@ public class TrustPolicySignature {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer trans = tf.newTransformer();
         trans.transform(new DOMSource(doc), new StreamResult(result));
+        fin.close();
         log.debug("Signed TP is: "+result.toString());
         return result.toString();        
    }

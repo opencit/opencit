@@ -189,13 +189,13 @@ public class VMwareConnectionPool {
         Set<String> tlsConnectionUrls = pool.keySet();
         for(String tlsConnectionUrl : tlsConnectionUrls) {
             VMwareClient client = pool.get(tlsConnectionUrl);
-            TlsConnection tlsConnection = null;
+            TlsConnection tlsConnection;
             try {
                 tlsConnection = new TlsConnection(new URL(tlsConnectionUrl), new InsecureTlsPolicy()); // This TlsConnection is not being used.
                 factory.destroyObject(tlsConnection, client);
             }
             catch(Exception e) {
-                log.error("Failed to disconnect from vcenter: " + tlsConnection.getURL().getHost(), e);
+                log.error("Failed to disconnect from vcenter.", e);
             }
         }
     }

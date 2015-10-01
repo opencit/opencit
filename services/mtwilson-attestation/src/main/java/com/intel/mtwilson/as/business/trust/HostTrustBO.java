@@ -104,9 +104,7 @@ public class HostTrustBO {
     
     public HostTrustBO() {
         super();
-        JacksonObjectMapperProvider provider = new JacksonObjectMapperProvider();
-        provider = new JacksonObjectMapperProvider();
-        mapper = provider.createDefaultMapper();
+        mapper = JacksonObjectMapperProvider.createDefaultMapper();
         loadSamlSigningKey();
     }
     
@@ -2368,17 +2366,14 @@ public class HostTrustBO {
     public VMAttestation getVMAttestationReport(TblHosts tblHosts, Map<String, String> vmMetaData, boolean includeHostReport) throws IOException {
 
         VMAttestation vmAttestation = new VMAttestation();
-        SamlAssertion samlAssertion = null;
+        SamlAssertion samlAssertion;
         
         HostAttestation hostAttestation = new HostAttestation(); 
         log.debug("getVMAttestationReport: Getting trust for host: " + tblHosts.getName() + " & VM:" + vmMetaData.get("VM_Instance_Id"));
         
-        try {
-            HostAgentFactory factory = new HostAgentFactory();
-            HostAgent agent = factory.getHostAgent(tblHosts);
-            
+        try {            
             TxtHostRecord data = createTxtHostRecord(tblHosts);
-            TxtHost host = null;
+            TxtHost host;
 
             String hostAttestationUuid = new UUID().toString();
             

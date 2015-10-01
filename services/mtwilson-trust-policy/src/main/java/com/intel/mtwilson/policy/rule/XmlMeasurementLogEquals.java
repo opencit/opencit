@@ -95,7 +95,7 @@ public class XmlMeasurementLogEquals extends BaseRule {
 
                 hostActualMissing.removeAll(actualModules); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
 
-                RaiseFaultForModifiedEntries(hostActualUnexpected, hostActualMissing, report);
+                raiseFaultForModifiedEntries(hostActualUnexpected, hostActualMissing, report);
                 
                 if( !hostActualUnexpected.isEmpty() ) {
                     log.debug("XmlMeasurementLogEquals : Host is having #{} additional modules compared to the white list.", hostActualUnexpected.size());
@@ -115,7 +115,7 @@ public class XmlMeasurementLogEquals extends BaseRule {
         return report;
     }
     
-    private void RaiseFaultForModifiedEntries(ArrayList<Measurement> hostActualUnexpected, ArrayList<Measurement> hostActualMissing, RuleResult report) {
+    private void raiseFaultForModifiedEntries(ArrayList<Measurement> hostActualUnexpected, ArrayList<Measurement> hostActualMissing, RuleResult report) {
         ArrayList<Measurement> hostModifiedModules = new ArrayList<>();
         ArrayList<Measurement> tempHostActualUnexpected = new ArrayList<>(hostActualUnexpected);
         ArrayList<Measurement> tempHostActualMissing = new ArrayList<>(hostActualMissing);
