@@ -158,7 +158,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
             argument += " -ec_nvram";
             */
             
-            /* argument should be "pcptool collateidentityrequest keyname keyIdBindingChoosenHash keyAuth
+            /* argument should be "tpmtool collateidentityrequest keyname keyIdBindingChoosenHash keyAuth
              * KeyIdbindingChooseHash should be the hash of keyname (keylabel) + PCA's public key
              */
 		MessageDigest md = MessageDigest.getInstance("SHA1");
@@ -189,7 +189,7 @@ public class TpmModuleWindows implements TpmModuleProvider {
             * >> result.getResult(2) - AIK key blob
             * Windows PCP does not create identityreqeust raw bytes. It only created an idbinding, but it is just the structure of TPM_IDENTITY_CONTENTS
             * So we need to do some of the work specified in TSS spec
-            * 1. Create a TPM_IDENTITY_PROOF structure and assign its field with identitybinding, AIK pub, AIK blob, and EK cert, etc from PCPtool
+            * 1. Create a TPM_IDENTITY_PROOF structure and assign its field with identitybinding, AIK pub, AIK blob, and EK cert, etc from tpmtool
             * 2. Create TPM_IDENTITY_REQUEST structure based on TPM_IDENTITY_PROOF
             */
             //TpmIdentityProof(byte [] idLabel, byte [] idBinding, TpmPubKey AIK, byte [] ekCertBytes, byte [] platformCertBytes, byte [] conformanceCertBytes, boolean IV, boolean symKey, boolean oaep)
@@ -303,18 +303,18 @@ public class TpmModuleWindows implements TpmModuleProvider {
 
         int returnCode;
         final String newTpmModuleExePath = Folders.application() + File.separator + "bin" ; // "./exe";
-        final String newExeName = "PCPTool.exe";
+        final String newExeName = "TPMTool.exe";
 
         // Parse the args parameter to populate the environment variables array
         //HashMap<String,String> environmentVars = new HashMap<String, String>();
         List<String> cmd = new ArrayList<String>();
         
         /* the command to be run should be
-         * "cmd.exe /c path_to_pcptool.exe arguments"
+         * "cmd.exe /c path_to_tpmtool.exe arguments"
         */
         cmd.add("cmd.exe");
         cmd.add("/c");
-        cmd.add("PCPTool.exe");
+        cmd.add(newExeName);
         for (String cmdArg : args) {
             cmd.add(cmdArg);
         }

@@ -81,14 +81,6 @@
                                             <outputDirectory>${makeself.directory}</outputDirectory>
                                             <destFileName>trustagent-${project.version}.zip</destFileName>
                                         </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.intel.mtwilson.linux</groupId>
-                                            <artifactId>mtwilson-linux-util</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>sh</type>
-                                            <outputDirectory>${makeself.directory}</outputDirectory>
-                                            <destFileName>functions</destFileName>
-                                        </artifactItem>
                                     </artifactItems>
                                     <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
                                     <overWriteReleases>false</overWriteReleases>
@@ -121,6 +113,32 @@
                                         </resource>
                                         <resource>
                                             <directory>src/files</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                        <resource>
+                                            <directory>src/installersolution</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
+                            <execution>
+                                <id>copy-resources_tpmtool</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.directory}/tpmtool</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/tpmtool</directory>
                                             <includes>
                                                 <include>**/*</include>
                                             </includes>
@@ -184,6 +202,7 @@
                                     <arguments>
                                         <argument>makezip-auto.sh</argument>
                                         <argument>${makeself.directory}</argument>
+                                        <argument>${project.version}</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

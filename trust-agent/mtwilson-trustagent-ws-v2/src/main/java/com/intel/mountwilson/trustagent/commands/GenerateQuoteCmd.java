@@ -77,13 +77,13 @@ public class GenerateQuoteCmd implements ICommand {
         byte[] nonce = Base64.decodeBase64(context.getNonce());
 
         if (osName.toLowerCase().contains("windows")) {
-            // format is: "pcptool.exe [aik name] {attestation file} {nonce} {aikauth}" 
-            commandLine = String.format("pcptool.exe aikquote %s %s %s", // skip the authkey for now
+            // format is: "tpmtool.exe [aik name] {attestation file} {nonce} {aikauth}" 
+            commandLine = String.format("tpmtool.exe aikquote %s %s %s", // skip the authkey for now
                 byteArrayToHexString(keyName.getBytes()),
                 byteArrayToHexString(context.getQuoteFileName().getBytes()),
                 byteArrayToHexString(nonce));
             /*
-            commandLine = String.format("pcptool.exe %s %s %s %s",
+            commandLine = String.format("tpmtool.exe %s %s %s %s",
                 byteArrayToHexString(keyName.getBytes()),
                 EscapeUtil.doubleQuoteEscapeShellArgument(context.getQuoteFileName()),
                 byteArrayToHexString(nonce),

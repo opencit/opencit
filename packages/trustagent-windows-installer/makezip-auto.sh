@@ -8,6 +8,7 @@
 
 # workspace is typically "target" and must contain the files to package in the installer including the setup script
 workspace="${1}"
+projectVersion="${2}"
 # installer name
 projectNameVersion=`basename "${workspace}"`
 # where to save the installer (parent of directory containing files)
@@ -31,6 +32,12 @@ if [ -z "$makezip" ]; then
     echo "Missing zip tool"
     exit 1
 fi
+
+# unzip the trustagent-3.0-SNAPSHOT.zip since we are going to zip it again
+trustagentZip="trustagent-${projectVersion}.zip"
+cd $targetDir/${projectNameVersion}
+unzip ${trustagentZip}
+rm -rf ${trustagentZip}
 
 export TMPDIR=~/.tmp
 cd $targetDir

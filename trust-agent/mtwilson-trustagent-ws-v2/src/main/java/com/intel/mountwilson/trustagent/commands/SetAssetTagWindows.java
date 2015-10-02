@@ -88,7 +88,7 @@ public class SetAssetTagWindows implements ICommand {
                 throw new IllegalArgumentException(String.format("NvramPassword is not in hex format: %s", NvramPassword));
             }
             
-            String cmd = "pcptool nvwrite " + index + " " + NvramPassword + " " + context.getAssetTagHash();
+            String cmd = "tpmtool nvwrite " + index + " " + NvramPassword + " " + context.getAssetTagHash();
             log.debug("running command: " + cmd);
             CommandUtil.runCommand(cmd);
         }catch(TAException ex) {
@@ -124,7 +124,7 @@ public class SetAssetTagWindows implements ICommand {
                 throw new IllegalArgumentException(String.format("tpmOwnerPass is not in hex format: %s", tpmOwnerPass));
             }
             //String tpmNvramPass = TAConfig.getConfiguration().getString("TpmNvramAuth");
-            String cmd = "pcptool nvdefine " + index + " 0x14 " + NvramPassword + " AUTHWRITE";
+            String cmd = "tpmtool nvdefine " + index + " 0x14 " + NvramPassword + " AUTHWRITE";
             log.debug("running command: " + cmd);
             CommandUtil.runCommand(cmd);
         }catch(TAException ex) {
@@ -141,7 +141,7 @@ public class SetAssetTagWindows implements ICommand {
                 log.error("tpmOwnerPass is not in hex format: {}", tpmOwnerPass);
                 throw new IllegalArgumentException(String.format("tpmOwnerPass is not in hex format: %s", tpmOwnerPass));
             }
-            String cmd = "pcptool nvrelease " + index;
+            String cmd = "tpmtool nvrelease " + index;
             log.debug("running command: " + cmd);
             CommandUtil.runCommand(cmd);
         }catch(TAException ex) {
@@ -157,7 +157,7 @@ public class SetAssetTagWindows implements ICommand {
     
     private boolean indexExists() throws TAException, IOException {     
         try {
-            CommandResult result = CommandUtil.runCommand("pcptool nvinfo " + index);
+            CommandResult result = CommandUtil.runCommand("tpmtool nvinfo " + index);
             if (result != null && result.getStdout() != null) {
                 if(result.getStdout().contains("NVRAM index")) 
                     return true;
