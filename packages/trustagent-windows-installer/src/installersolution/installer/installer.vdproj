@@ -321,6 +321,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_387C8B33D3174F82B9348EE3159413D9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_3A5492653B3B400381857A49EC256BB2"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1537,6 +1543,20 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_539C5914612F41938FE52C6B09881F85"
+            {
+            "Name" = "8:vcredist_x64.exe"
+            "Condition" = "8:"
+            "Object" = "8:_387C8B33D3174F82B9348EE3159413D9"
+            "FileType" = "3:2"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:/Install"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_3373F2D6_51BA_4DDC_AC73_8843A596DF11"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
         }
         "DefaultFeature"
         {
@@ -2549,6 +2569,26 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_387C8B33D3174F82B9348EE3159413D9"
+            {
+            "SourcePath" = "8:..\\tpmtool\\vcredist_x64.exe"
+            "TargetName" = "8:vcredist_x64.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_604B78EC695D486BBC2E646DFB299FC6"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
