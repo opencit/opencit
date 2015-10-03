@@ -138,15 +138,31 @@ public class TCBuffer {
 		byte[] bigBytes = new byte[4];
 		//in.read(bigBytes);
 		//setInternalValues(brpId, bigBytes);
-		in.read(bigBytes);
-		setInternalValues(brpcCallIndex, bigBytes);
-		in.read(bigBytes);
+		int brpcCallIndexreturnValue = in.read(bigBytes);
+                if (brpcCallIndexreturnValue != 4) {
+                    throw new IOException("Error reading BRPC call index");
+                }
+                setInternalValues(brpcCallIndex, bigBytes);
+		
+		int brpcPayloadSizeReturnValue = in.read(bigBytes);
+                if (brpcPayloadSizeReturnValue != 4) {
+                    throw new IOException("Error reading BRPC payload size");
+                }
 		setInternalValues(brpcPayloadSize, bigBytes);
-		in.read(bigBytes);
+                
+		int brpcCallStatusReturnValue = in.read(bigBytes);
+                if (brpcCallStatusReturnValue != 4) {
+                    throw new IOException("Error reading BRPC call status");
+                }
 		setInternalValues(brpcCallStatus, bigBytes);
+                
 		//in.read(bigBytes);
 		//setInternalValues(boriginalRpId, bigBytes);
-		rpcPayload = new byte[getRPCPayloadSize()];
-		in.read(rpcPayload);
+		
+                rpcPayload = new byte[getRPCPayloadSize()];
+		int rpcPayloadReturnValue = in.read(rpcPayload);
+                if (rpcPayloadReturnValue != rpcPayload.length && rpcPayloadReturnValue != -1) {
+                    throw new IOException("Error reading RPC payload");
+                }
 	}
 }

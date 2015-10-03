@@ -241,7 +241,7 @@ public class HostTrustBO {
             } else {
                 
                 String targetType = hostConfigObj.getBiosWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigObj.getBiosWLTarget()) {
                     case BIOS_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -316,7 +316,7 @@ public class HostTrustBO {
                 
             } else {
                 String targetType = hostConfigObj.getVmmWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigObj.getVmmWLTarget()) {
                     case VMM_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2127,7 +2127,7 @@ public class HostTrustBO {
                 // adding this filter criteria of HostName, for the Host #2 we would match the Whitelist of Host #1 and hence we would not create
                 // a new white list. 
                 String targetType = hostConfigData.getBiosWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigData.getBiosWLTarget()) {
                     case BIOS_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2210,7 +2210,7 @@ public class HostTrustBO {
                 // the OEM of the box from which the first whitelist was created. Otherwise it would match with the whitelist of Host #1 and
                 // we would not create the second white list.
                 String targetType = hostConfigData.getVmmWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigData.getVmmWLTarget()) {
                     case VMM_OEM :
                         targetValue = hostObj.BIOS_Oem;

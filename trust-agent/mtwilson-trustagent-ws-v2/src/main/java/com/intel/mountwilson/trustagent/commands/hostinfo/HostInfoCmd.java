@@ -91,10 +91,10 @@ public class HostInfoCmd implements ICommand {
             
     }
     
-    private String trim(String text) {
-        if( text == null ) { return null; }
-        return text.trim();
-    }
+//    private String trim(String text) {
+//        if( text == null ) { return null; }
+//        return text.trim();
+//    }
 
     /*
      * Sample response of dmidecode -s bios-vendor -> Intel Corp. Sample
@@ -102,6 +102,7 @@ public class HostInfoCmd implements ICommand {
      */
     private void getBiosAndVersion() throws TAException, IOException {
         CommandResult result = CommandUtil.runCommand("dmidecode -s bios-vendor");
+        if (result == null || result.getStdout() == null) { throw new IOException("Command \"dmidecode -s bios-vendor\" gave a null response"); }
         List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
@@ -114,6 +115,7 @@ public class HostInfoCmd implements ICommand {
         log.debug("Bios OEM: " + context.getBiosOem());
 
         CommandResult result2 = CommandUtil.runCommand("dmidecode -s bios-version");
+        if (result2 == null || result2.getStdout() == null) { throw new IOException("Command \"dmidecode -s bios-version\" gave a null response"); }
         resultList = Arrays.asList(result2.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
@@ -251,6 +253,7 @@ public class HostInfoCmd implements ICommand {
     public void getHostUUID() throws TAException, IOException {
         CommandResult result = CommandUtil.runCommand("dmidecode -s system-uuid");
         // sample output would look like: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
+        if (result == null || result.getStdout() == null) { throw new IOException("Command \"dmidecode -s system-uuid\" gave a null response"); }
         List<String> resultList = Arrays.asList(result.getStdout().split("\n"));
         if (resultList != null && resultList.size() > 0) {
             for (String data : resultList) {
