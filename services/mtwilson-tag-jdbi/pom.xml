@@ -10,6 +10,17 @@
 		<artifactId>mtwilson-services</artifactId>
 		<version>3.0-SNAPSHOT</version>
     </parent>
+    
+    <repositories>
+        <repository>
+            <id>Restlet-public</id>
+            <name>Restlet maven repository</name>
+            <url>http://maven.restlet.org/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 <!--
 IMPORTANT NOTE ON BUILDING THIS PROJECT:
