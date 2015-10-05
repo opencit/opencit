@@ -37,12 +37,12 @@ public class PublicKeyDigestTlsPolicy extends PublicKeyTlsPolicy {
                 final String algorithm = trustedPublicKeyDigest.getAlgorithm();
                 // first check if we have a direct match on the public key
                 byte[] publicKeyDigest = MessageDigest.getInstance(algorithm).digest(publicKeyCertificate.getPublicKey().getEncoded());
-                if (Arrays.equals(trustedPublicKeyDigest.toByteArray(), publicKeyDigest)) {
+                if (Arrays.equals(trustedPublicKeyDigest.getBytes(), publicKeyDigest)) {
                     return true; // server public key is in our trusted public keys repository
                 }
                 // second check if we have a match on the public key certificate, so we can trust the public key is the same, but ignore the certificate details
                 byte[] publicKeyCertificateDigest = MessageDigest.getInstance(algorithm).digest(publicKeyCertificate.getEncoded());
-                if (Arrays.equals(trustedPublicKeyDigest.toByteArray(), publicKeyCertificateDigest)) {
+                if (Arrays.equals(trustedPublicKeyDigest.getBytes(), publicKeyCertificateDigest)) {
                     return true; // server public key is in our trusted public keys repository
                 }
             } catch (Exception e) {
