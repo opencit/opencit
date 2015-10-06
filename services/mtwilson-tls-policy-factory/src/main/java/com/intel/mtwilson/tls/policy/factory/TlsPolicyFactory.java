@@ -4,9 +4,11 @@
  */
 package com.intel.mtwilson.tls.policy.factory;
 
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.Plugins;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
@@ -23,10 +25,13 @@ import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.codec.impl.JsonTlsPolicyReader;
 import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * You can instantiate subclasses directly:
@@ -233,33 +238,6 @@ public abstract class TlsPolicyFactory {
         return createTlsPolicy(report.getDescriptor());
     }
     
-    /**
-     * 
-     * @param tlsPolicyDescriptor comprised of policy type and policy-specific data
-     * @return 
-     */
-    public static TlsPolicy createTlsPolicy(TlsPolicyDescriptor tlsPolicyDescriptor) {
-        String policyType = tlsPolicyDescriptor.getPolicyType();
-        log.debug("Trying to read TlsPolicy type {}", policyType);
-        List<TlsPolicyCreator> creators = Extensions.findAll(TlsPolicyCreator.class);
-        for(TlsPolicyCreator creator : creators ) {
-            try {
-                log.debug("Trying to read TlsPolicy with {}", creator.getClass().getName());
-                TlsPolicy tlsPolicy = creator.createTlsPolicy(tlsPolicyDescriptor); // throws IllegalArgumentException
-                if( tlsPolicy == null ) {
-                    continue; // creator does not support the given descriptor
-                }
-                log.debug("Successfully created TlsPolicy with {}", creator.getClass().getName());
-                return tlsPolicy;
-            }
-            catch(TlsPolicyDescriptorInvalidException e) { throw e; }
-            catch(IllegalArgumentException e) {
-                throw new TlsPolicyDescriptorInvalidException(e, tlsPolicyDescriptor);
-            }
-        }
-        
-        throw new IllegalArgumentException("Unsupported TLS policy choice");
-    }
     
     /**
      * Can be used to instantiate a TlsPolicy from an abbreviated descriptor
@@ -328,4 +306,32 @@ public abstract class TlsPolicyFactory {
         */
     }
 
+    public static TlsPolicyDescriptor createTlsPolicyDescriptorFromKeystore(SimpleKeystore tlsKeystore) {
+        TlsPolicyDescriptor tlsPolicyDescriptor = new TlsPolicyDescriptor();
+        tlsPolicyDescriptor.setPolicyType("certificate");
+        tlsPolicyDescriptor.setProtection(TlsPolicyFactoryUtil.getAllTlsProtection());
+        ArrayList<String> encodedCertificates = new ArrayList<>();
+        tlsPolicyDescriptor.setData(encodedCertificates);
+        ArrayList<X509Certificate> certificates = new ArrayList<>();
+        certificates.addAll(V1TlsPolicyFactory.getMtWilsonTrustedTlsCertificates());
+        certificates.addAll(TlsPolicyFactoryUtil.getTrustedTlsCertificatesFromSimpleKeystore(tlsKeystore));
+        for (X509Certificate cert : certificates) {
+            log.debug("Adding trusted TLS certs and cacerts: {}", cert.getSubjectX500Principal().getName());
+            try {
+                encodedCertificates.add(Base64.encodeBase64String(cert.getEncoded()));
+            } catch (CertificateEncodingException e) {
+                throw new IllegalArgumentException("Invalid certificate", e);
+            }
+        }
+        return tlsPolicyDescriptor;
+    }
+
+    public static TlsPolicyDescriptor getTlsPolicyDescriptorFromResource(Resource resource) {
+        return getTlsPolicyDescriptorFromResource(resource, My.configuration().getTlsKeystorePassword());
+    }
+
+    public static TlsPolicyDescriptor getTlsPolicyDescriptorFromResource(Resource resource, String password) {
+        return getTlsPolicyDescriptorFromResource(resource, password);
+    }
+    
 }

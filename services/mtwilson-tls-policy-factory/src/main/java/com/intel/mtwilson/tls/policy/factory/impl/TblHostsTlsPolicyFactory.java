@@ -14,8 +14,7 @@ import com.intel.mtwilson.tls.policy.TlsPolicyChoice;
 import com.intel.mtwilson.tls.policy.TlsPolicyDescriptor;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyChoiceReport;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory;
-import static com.intel.mtwilson.tls.policy.factory.TlsPolicyFactory.createTlsPolicy;
-import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
+//import com.intel.mtwilson.tls.policy.factory.TlsPolicyFactoryUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredTlsPolicyProvider;
 import com.intel.mtwilson.tls.policy.provider.StoredVendorTlsPolicyProvider;
@@ -130,12 +129,12 @@ public class TblHostsTlsPolicyFactory extends TlsPolicyFactory {
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_KNOWN_CERTIFICATE")) {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
-                    tlsPolicyNameChoice.setTlsPolicyDescriptor(TlsPolicyFactoryUtil.getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.setTlsPolicyDescriptor(TlsPolicyFactory.getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
                     tlsPolicyNameChoice.getTlsPolicyDescriptor().setPolicyType("public-key"); // will cause the certs in the data section to be read only for their public keys. without hostname verification
                     return tlsPolicyNameChoice;
                 } else if (host.getTlsPolicyName().equals("TRUST_CA_VERIFY_HOSTNAME")) {
                     TlsPolicyChoice tlsPolicyNameChoice = new TlsPolicyChoice();
-                    tlsPolicyNameChoice.setTlsPolicyDescriptor(TlsPolicyFactoryUtil.getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
+                    tlsPolicyNameChoice.setTlsPolicyDescriptor(TlsPolicyFactory.getTlsPolicyDescriptorFromResource(host.getTlsKeystoreResource()));
                     return tlsPolicyNameChoice;
                 } else {
                     log.debug("TblHostsObjectTlsPolicy: unsupported policy name {}", host.getTlsPolicyName());
