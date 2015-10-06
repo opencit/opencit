@@ -104,9 +104,7 @@ public class HostTrustBO {
     
     public HostTrustBO() {
         super();
-        JacksonObjectMapperProvider provider = new JacksonObjectMapperProvider();
-        provider = new JacksonObjectMapperProvider();
-        mapper = provider.createDefaultMapper();
+        mapper = JacksonObjectMapperProvider.createDefaultMapper();
         loadSamlSigningKey();
     }
     
@@ -243,7 +241,7 @@ public class HostTrustBO {
             } else {
                 
                 String targetType = hostConfigObj.getBiosWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigObj.getBiosWLTarget()) {
                     case BIOS_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -318,7 +316,7 @@ public class HostTrustBO {
                 
             } else {
                 String targetType = hostConfigObj.getVmmWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigObj.getVmmWLTarget()) {
                     case VMM_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2129,7 +2127,7 @@ public class HostTrustBO {
                 // adding this filter criteria of HostName, for the Host #2 we would match the Whitelist of Host #1 and hence we would not create
                 // a new white list. 
                 String targetType = hostConfigData.getBiosWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigData.getBiosWLTarget()) {
                     case BIOS_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2212,7 +2210,7 @@ public class HostTrustBO {
                 // the OEM of the box from which the first whitelist was created. Otherwise it would match with the whitelist of Host #1 and
                 // we would not create the second white list.
                 String targetType = hostConfigData.getVmmWLTarget().getValue();
-                String targetValue = "";
+                String targetValue;
                 switch(hostConfigData.getVmmWLTarget()) {
                     case VMM_OEM :
                         targetValue = hostObj.BIOS_Oem;
@@ -2368,17 +2366,14 @@ public class HostTrustBO {
     public VMAttestation getVMAttestationReport(TblHosts tblHosts, Map<String, String> vmMetaData, boolean includeHostReport) throws IOException {
 
         VMAttestation vmAttestation = new VMAttestation();
-        SamlAssertion samlAssertion = null;
+        SamlAssertion samlAssertion;
         
         HostAttestation hostAttestation = new HostAttestation(); 
         log.debug("getVMAttestationReport: Getting trust for host: " + tblHosts.getName() + " & VM:" + vmMetaData.get("VM_Instance_Id"));
         
-        try {
-            HostAgentFactory factory = new HostAgentFactory();
-            HostAgent agent = factory.getHostAgent(tblHosts);
-            
+        try {            
             TxtHostRecord data = createTxtHostRecord(tblHosts);
-            TxtHost host = null;
+            TxtHost host;
 
             String hostAttestationUuid = new UUID().toString();
             

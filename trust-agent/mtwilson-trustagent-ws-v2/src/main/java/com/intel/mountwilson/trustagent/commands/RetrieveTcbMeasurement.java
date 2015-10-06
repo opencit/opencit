@@ -52,10 +52,11 @@ public class RetrieveTcbMeasurement implements ICommand {
 
         try {
             log.debug("Processing the TCB measurement XML file @ {}.", tcbMeasurementFile.getAbsolutePath());
-            InputStream in = new FileInputStream(tcbMeasurementFile);
-            String tcbMeasurementString = IOUtils.toString(in, Charset.forName("UTF-8"));
-            log.info("TCB measurement XML string: {}", tcbMeasurementString);
-            context.setTcbMeasurement(tcbMeasurementString);
+            try (InputStream in = new FileInputStream(tcbMeasurementFile)) {
+                String tcbMeasurementString = IOUtils.toString(in, Charset.forName("UTF-8"));
+                log.info("TCB measurement XML string: {}", tcbMeasurementString);
+                context.setTcbMeasurement(tcbMeasurementString);
+            }
         } catch (IOException e) {
             log.warn("IOException, invalid measurement.xml: {}", e.getMessage());
             throw new TAException(ErrorCode.BAD_REQUEST, "Invalid measurement.xml file. Cannot unmarshal/marshal object using jaxb.");

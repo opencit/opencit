@@ -575,8 +575,6 @@ public class HostBO {
      * @return : True if success or else an exception.
      */
     public boolean registerHostFromCustomData(HostConfigData hostConfigObj) {
-
-        boolean registerStatus = false;
         try {
             log.debug("Starting to process the registration for host: " + hostConfigObj.getTxtHostRecord().HostName);
 
@@ -585,7 +583,7 @@ public class HostBO {
             new HostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostConfigObj);
             
             log.debug("Successfully registered the host: " + hostConfigObj.getTxtHostRecord().HostName);
-            registerStatus = true;
+            return true;
 
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -595,7 +593,6 @@ public class HostBO {
             log.error("Unexpected errror during host registration. ", ex);
             throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
-        return registerStatus;
     }
 
     /**

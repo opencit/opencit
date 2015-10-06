@@ -29,8 +29,7 @@ public class JsonTlsPolicyReader implements TlsPolicyReader {
     @Override
     public TlsPolicyDescriptor read(byte[] content) {
         try {
-            JacksonObjectMapperProvider mapperProvider = new JacksonObjectMapperProvider();
-            ObjectMapper json = mapperProvider.createDefaultMapper();
+            ObjectMapper json = JacksonObjectMapperProvider.createDefaultMapper();
             TlsPolicyDescriptor tlsPolicyDescriptor = json.readValue(new String(content, Charset.forName("UTF-8")), TlsPolicyDescriptor.class);
             return tlsPolicyDescriptor;
         }
