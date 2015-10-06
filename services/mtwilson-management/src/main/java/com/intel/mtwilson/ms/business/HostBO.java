@@ -344,6 +344,8 @@ public class HostBO {
                 log.error("Unexpected error in registerHostFromCustomData: {}", te);
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
             }
+            // Update the connnection string if needed.
+            hostObj.AddOn_Connection_String = new ConnectionString(factory.getHostConnectionString()).getConnectionStringWithPrefix();
             
             // Let us verify if we got all the data back correctly or not 
             if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
@@ -745,6 +747,12 @@ public class HostBO {
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
                 }
 
+                // Update the connnection string if needed.
+                String updateAddOnConnectionString = new ConnectionString(factory.getHostConnectionString()).getConnectionStringWithPrefix();
+                gkvHost.AddOn_Connection_String = updateAddOnConnectionString;
+                tblHosts.setAddOnConnectionInfo(updateAddOnConnectionString);
+                
+                
                 log.debug("TIMETAKEN: for getting host information is: {}",  (System.currentTimeMillis() - configWLStart));                
                 System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
 
