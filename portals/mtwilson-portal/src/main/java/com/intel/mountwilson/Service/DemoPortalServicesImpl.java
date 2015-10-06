@@ -291,13 +291,15 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 //		boolean result = false;
 		try {
             ConnectionString connStr;
+            connStr = new ConnectionString(dataVO.getvCenterDetails());
+            /*
             if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
                //log.debug("saveNewHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
                 connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
             } 
             else {
                 connStr = new ConnectionString(dataVO.getvCenterDetails());
-            }
+            }*/
             /*else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
                 //log.debug("saveNewHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
                 connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:",""));
@@ -334,13 +336,15 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 //		boolean result = false;
 		try {
             ConnectionString connStr;
+            connStr = new ConnectionString(dataVO.getvCenterDetails());
+            /*
             if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
                log.debug("updateHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
                 connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
             } 
             else {
                 connStr = new ConnectionString(dataVO.getvCenterDetails());
-            }
+            }*/
             /* else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
                 log.debug("updateHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
                 connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:", ""));

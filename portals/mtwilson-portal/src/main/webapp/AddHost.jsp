@@ -60,7 +60,26 @@
 				</div>
 			</div>
 						            
-                                    <div id="citrixStringElement">
+                        <div id="openSourceStringElement">
+				<div class="singleDiv">
+					<div class="labelDiv" data-i18n="input.opensource_details">Server Details:</div>
+					<div class="valueDiv">&nbsp;
+					</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv" data-i18n="input.login_id">Login ID:</div>
+						<div class="valueDiv">
+							<input type="text" maxlength="200" id="MainContent_tbVopensourceLoginId" class="textBoxClass">
+						</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv" data-i18n="input.password">Password:</div>
+						<div class="valueDiv">
+							<input type="password" maxlength="200" id="MainContent_tbVopensourcePass" class="textBoxClass">
+						</div>
+				</div>
+			</div>
+                        <div id="citrixStringElement">
 				<div class="singleDiv">
 					<div class="labelDiv" data-i18n="input.xen_details">XenServer Details:</div>
 					<div class="valueDiv">&nbsp;
