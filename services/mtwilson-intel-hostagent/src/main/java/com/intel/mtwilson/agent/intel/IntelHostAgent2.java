@@ -91,7 +91,7 @@ public class IntelHostAgent2 implements HostAgent {
         }
         catch(Exception e) {
             log.debug("Cannot retrieve AIK certificate: {}", e.toString(), e);
-            return null;
+            throw e;
         }
     }
 
@@ -104,7 +104,7 @@ public class IntelHostAgent2 implements HostAgent {
         }
         catch(Exception e) {
             log.debug("Cannot retrieve Privacy CA certificate: {}", e.toString(), e);
-            return null;
+            throw e;
         }
     }
 
