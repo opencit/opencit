@@ -147,7 +147,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
      * @return 
      */
     public List<MwVmAttestationReport> findByVMInstanceId(String vmInstanceId) {
-        List<MwVmAttestationReport> mwVmAttestationReportList = null;
+        List<MwVmAttestationReport> mwVmAttestationReportList;
         EntityManager em = getEntityManager();
         try {
 
@@ -191,7 +191,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
      * @return 
      */
     public List<MwVmAttestationReport> findListByVMAndExpiry(String vmInstanceId) {
-        List<MwVmAttestationReport> mwVmAttestationReportList = null;
+        List<MwVmAttestationReport> mwVmAttestationReportList;
         EntityManager em = getEntityManager();
         try {
 
@@ -214,7 +214,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
      * @return 
      */
     public List<MwVmAttestationReport> getListByVMAndDateRange(String vmInstanceId, Date fromDate, Date toDate) {
-        List<MwVmAttestationReport> mwVmAttestationReportList = null;
+        List<MwVmAttestationReport> mwVmAttestationReportList;
         EntityManager em = getEntityManager();
         try {
             Query query = em.createNamedQuery("MwVmAttestationReport.findByVMAndRangeOfCreatedTs");
@@ -235,7 +235,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
      * @return 
      */
     public List<MwVmAttestationReport> findByHostName(String hostName) {
-        List<MwVmAttestationReport> mwVmAttestationReportList = null;
+        List<MwVmAttestationReport> mwVmAttestationReportList;
         EntityManager em = getEntityManager();
         try {
 
@@ -255,7 +255,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
      * @return 
      */
     public List<MwVmAttestationReport> findListByHostAndExpiry(String hostName) {
-        List<MwVmAttestationReport> mwVmAttestationReportList = null;
+        List<MwVmAttestationReport> mwVmAttestationReportList;
         EntityManager em = getEntityManager();
         try {
 
@@ -279,7 +279,7 @@ public class MwVmAttestationReportJpaController implements Serializable {
      * @return 
      */
     public List<MwVmAttestationReport> getListByHostAndDateRange(String hostName, Date fromDate, Date toDate) {
-        List<MwVmAttestationReport> mwVmAttestationReportList = null;
+        List<MwVmAttestationReport> mwVmAttestationReportList;
         EntityManager em = getEntityManager();
         try {
             Query query = em.createNamedQuery("MwVmAttestationReport.findByHostAndRangeOfCreatedTs");

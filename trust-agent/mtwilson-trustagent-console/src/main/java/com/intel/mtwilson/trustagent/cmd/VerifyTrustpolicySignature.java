@@ -59,16 +59,22 @@ public class VerifyTrustpolicySignature implements Command {
         
         try {
             samlCert = keystore.getX509Certificate(SAML_CERTIFICATE_ALIAS);
+            if (samlCert == null || samlCert.getSubjectX500Principal() == null 
+                    || samlCert.getSubjectX500Principal().getName() == null) {
+                log.error("Invalid SAML certificate: credential contains null value");
+                throw new NullPointerException("Invalid SAML certificate: credential contains null value");
+            }
             log.debug("Found key {}", samlCert.getSubjectX500Principal().getName());
         } catch(java.security.UnrecoverableKeyException e) {
             log.error("Incorrect password for existing key: {}", e.getMessage());
             throw e;
-        } catch(NullPointerException e) {
-            log.error("Invalid certificate");
-            throw e;
         }
+//        } catch(NullPointerException e) {
+//            log.error("Invalid certificate");
+//            throw e;
+//        }
         
-        String trustPolicyXml = "";
+        String trustPolicyXml;
         File fileDir = new File(trustPolicyXmlFile.getAbsolutePath());
         try(FileInputStream in = new FileInputStream(fileDir)) {
             trustPolicyXml = IOUtils.toString(in, Charset.forName("UTF-8"));

@@ -159,7 +159,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
             validation("No endorsement authorities");
         }
         else {
-            String errorMessage = "";
+            String errorMessage;
             log.debug("Found {} endorsement authorities in {}", endorsementAuthorities.size(), endorsementAuthoritiesFile.getAbsolutePath());
             // if we find one certificate authority that can verify our current EC, then we don't need to request a new EC
             if(!isEkSignedByEndorsementAuthority()) {
@@ -270,9 +270,11 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
         for(X509Certificate ca : endorsementAuthorities) {
             try {
                 log.debug("Trying to verify EC with {}", ca.getSubjectX500Principal().getName());
-                ekCert.verify(ca.getPublicKey());
-                log.debug("Verified EC with {}", ca.getSubjectX500Principal().getName());
-                return true;
+                if (ekCert != null) {
+                    ekCert.verify(ca.getPublicKey());
+                    log.debug("Verified EC with {}", ca.getSubjectX500Principal().getName());
+                    return true;
+                }
             } catch (SignatureException e) {
                 log.debug("Endorsement CA '{}' did not sign TPM EC: {}", ca.getSubjectX500Principal().getName(), e.getMessage());
             } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | NullPointerException e) {

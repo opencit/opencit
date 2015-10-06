@@ -62,7 +62,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
                     hostAttestationCollection.getHostAttestations().add(new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion));
                 }
             } else {
-                TblHosts tblHosts = new TblHosts();
+                TblHosts tblHosts;
                 if (criteria.hostUuid != null) {
                     tblHosts = My.jpa().mwHosts().findHostByUuid(criteria.hostUuid.toString());
                 } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
@@ -99,7 +99,7 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
         try {
             TblSamlAssertion tblSamlAssertion = My.jpa().mwSamlAssertion().findByAssertionUuid(id);
             TblHosts tblHosts = My.jpa().mwHosts().findHostById(tblSamlAssertion.getHostId().getId());
-            if (tblSamlAssertion != null && tblHosts != null) {
+            if (tblHosts != null) {   //no need to check tblSamlAssertion; can't be null
                 log.debug("HostAttestation:Retrieve - Retrieved the details from mw_hosts and mw_saml_assertion for host with id {}.", tblHosts.getId());
                 return new HostTrustBO().buildHostAttestation(tblHosts, tblSamlAssertion);
             }
@@ -191,29 +191,29 @@ public class HostAttestationRepository implements DocumentRepository<HostAttesta
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    private HostAttestation convert(TblTaLog obj, String hostName) {
-        HostAttestation convObj = new HostAttestation();
-        convObj.setId(UUID.valueOf(obj.getUuid_hex()));
-        convObj.setHostUuid(obj.getHost_uuid_hex());
-        convObj.setHostName(hostName);
-        convObj.setHostTrustResponse(new HostTrustResponse(new Hostname(hostName), getHostTrustStatusObj(obj)));
-        return convObj;
-    }
+//    private HostAttestation convert(TblTaLog obj, String hostName) {
+//        HostAttestation convObj = new HostAttestation();
+//        convObj.setId(UUID.valueOf(obj.getUuid_hex()));
+//        convObj.setHostUuid(obj.getHost_uuid_hex());
+//        convObj.setHostName(hostName);
+//        convObj.setHostTrustResponse(new HostTrustResponse(new Hostname(hostName), getHostTrustStatusObj(obj)));
+//        return convObj;
+//    }
 
-    private HostTrustStatus getHostTrustStatusObj(TblTaLog tblTaLog) {
-        HostTrustStatus hostTrustStatus = new HostTrustStatus();
-        
-        String[] parts = tblTaLog.getError().split(",");
-        
-        for(String part : parts){
-            String[] subparts = part.split(":");
-            if(subparts[0].equalsIgnoreCase("BIOS")){
-                hostTrustStatus.bios = (Integer.valueOf(subparts[1]) != 0);
-            }else{
-                hostTrustStatus.vmm = (Integer.valueOf(subparts[1]) != 0);
-            }
-        }
-        return hostTrustStatus;
-    }    
+//    private HostTrustStatus getHostTrustStatusObj(TblTaLog tblTaLog) {
+//        HostTrustStatus hostTrustStatus = new HostTrustStatus();
+//        
+//        String[] parts = tblTaLog.getError().split(",");
+//        
+//        for(String part : parts){
+//            String[] subparts = part.split(":");
+//            if(subparts[0].equalsIgnoreCase("BIOS")){
+//                hostTrustStatus.bios = (Integer.valueOf(subparts[1]) != 0);
+//            }else{
+//                hostTrustStatus.vmm = (Integer.valueOf(subparts[1]) != 0);
+//            }
+//        }
+//        return hostTrustStatus;
+//    }    
 
 }

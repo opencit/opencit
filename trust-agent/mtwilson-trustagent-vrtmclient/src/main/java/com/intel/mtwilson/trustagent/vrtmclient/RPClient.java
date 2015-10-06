@@ -68,7 +68,7 @@ public class RPClient {
 			rpSock.shutdownInput();
 			rpSock.close();
 		}catch(Exception e){
-			// we don't need to care about it 
+                    log.error("Error during socket close.", e);
 		}
 	}
         
@@ -91,35 +91,37 @@ public class RPClient {
             log.debug("Sending {}", base64InputArgument);
 
             TCBuffer tcBuffer = Factory.newTCBuffer(RPCCall.IS_VM_VERIFIED);	// Formuate tcbuffer structure
-            tcBuffer.setRPCPayload(base64InputArgument.getBytes());
-            
-            TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
-            /* Sample Output:
-             <?xml version='1.0'?>
-                <methodResponse>
-                    <params>
-                        <param>
-                            <value><string>MQ==</string></value>
-                        </param>
-                    </params>
-                </methodResponse>
-            //decode MQ== to get vm status
-            */
+            if (tcBuffer != null) {
+                tcBuffer.setRPCPayload(base64InputArgument.getBytes());
 
-            if (resultTcb.getRPCPayloadSize() != 0) {
-                String xml = resultTcb.getRPCPayload();
-                log.debug("Method response: {}", xml);
+                TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
+                /* Sample Output:
+                 <?xml version='1.0'?>
+                    <methodResponse>
+                        <params>
+                            <param>
+                                <value><string>MQ==</string></value>
+                            </param>
+                        </params>
+                    </methodResponse>
+                //decode MQ== to get vm status
+                */
 
-                XmlMapper mapper = new XmlMapper();
-                MethodResponse response = mapper.readValue(xml, MethodResponse.class);
-                Param param[] = response.getParams();
-                Value value = param[0].getValue();
-                byte[] retBytes = DatatypeConverter.parseBase64Binary(value.getString());
-                String retValue = new String(retBytes, "UTF-8");
+                if (resultTcb.getRPCPayloadSize() != 0) {
+                    String xml = resultTcb.getRPCPayload();
+                    log.debug("Method response: {}", xml);
 
-                log.debug("vrtm return value: {}", retValue);  
-                if (retValue.equals("1"))
-                    retStatus = true;
+                    XmlMapper mapper = new XmlMapper();
+                    MethodResponse response = mapper.readValue(xml, MethodResponse.class);
+                    Param param[] = response.getParams();
+                    Value value = param[0].getValue();
+                    byte[] retBytes = DatatypeConverter.parseBase64Binary(value.getString());
+                    String retValue = new String(retBytes, "UTF-8");
+
+                    log.debug("vrtm return value: {}", retValue);  
+                    if (retValue.equals("1"))
+                        retStatus = true;
+                }
             }
             
             return retStatus;
@@ -145,25 +147,28 @@ public class RPClient {
             log.debug("Sending {}", base64InputArgument);
 
             TCBuffer tcBuffer = Factory.newTCBuffer(RPCCall.GET_VM_ATTESTATION_REPORT_PATH);	// Formuate tcbuffer structure
-            tcBuffer.setRPCPayload(base64InputArgument.getBytes());
-            
-            TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
+            if (tcBuffer != null) {
+                tcBuffer.setRPCPayload(base64InputArgument.getBytes());
 
-            if (resultTcb.getRPCPayloadSize() != 0) {
-                String xml = resultTcb.getRPCPayload();
-                log.debug("Method response: {}", xml);
+                TCBuffer resultTcb = send(tcBuffer);    // send tcBuffer to rpcore 
 
-                XmlMapper mapper = new XmlMapper();
-                MethodResponse response = mapper.readValue(xml, MethodResponse.class);
-                Param param[] = response.getParams();
-                Value value = param[0].getValue();
-                byte[] retBytes = DatatypeConverter.parseBase64Binary(value.getString());
-                String retValue = new String(retBytes, "UTF-8");
+                if (resultTcb.getRPCPayloadSize() != 0) {
+                    String xml = resultTcb.getRPCPayload();
+                    log.debug("Method response: {}", xml);
 
-                log.debug("vrtm return value: {}", retValue);  
-                return retValue;
-            } else {
-                return null;
-            }                            
+                    XmlMapper mapper = new XmlMapper();
+                    MethodResponse response = mapper.readValue(xml, MethodResponse.class);
+                    Param param[] = response.getParams();
+                    Value value = param[0].getValue();
+                    byte[] retBytes = DatatypeConverter.parseBase64Binary(value.getString());
+                    String retValue = new String(retBytes, "UTF-8");
+
+                    log.debug("vrtm return value: {}", retValue);  
+                    return retValue;
+                } else {
+                    return null;
+                }
+            }
+            return null;
         }
 }

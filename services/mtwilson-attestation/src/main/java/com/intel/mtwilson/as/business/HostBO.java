@@ -1251,7 +1251,6 @@ public class HostBO {
             String bindingKeyCertificate = X509Util.encodePemCertificate(cert);
             tblHosts.setBindingKeyCertificate(bindingKeyCertificate);
             log.debug("Updated the host: {} with binding key certificate: {}", tblHosts.getName(), bindingKeyCertificate);
-        } catch (UnsupportedOperationException ex) {
         } catch (Exception ex) {
             log.error("Error during retrieval of the binding key certificate from the host {}.", tblHosts.getName());
         }        
