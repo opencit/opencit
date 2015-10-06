@@ -144,7 +144,7 @@ public class ConnectionString {
     private static Vendor guessVendorFromURL(String url) {
         Vendor v;
         // In this case we do not have the prefix
-        if (url.matches(intelVendorRegEx)) {
+        if (url.matches(intelVendorRegEx2)) {
             v = Vendor.INTEL;
         } else {
             if (url.contains("/sdk")) {
@@ -183,6 +183,8 @@ public class ConnectionString {
                     hostname = intelConnection.getHost();
                     port = intelConnection.getPort();
                     managementServerName = hostname.toString();
+                    userName = intelConnection.username;
+                    password = intelConnection.password;
                     break;
                 case CITRIX:
                     CitrixConnectionString citrixConnection = CitrixConnectionString.forURL(connectionString);
@@ -233,7 +235,9 @@ public class ConnectionString {
         String connectionString;
 
         if (this.vendor == Vendor.INTEL) {
-            connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
+            connectionString = (this.addOnConnectionString.isEmpty()) ? 
+                    String.format("https://%s:%d/;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
+                    String.format("%s", this.addOnConnectionString);
         } else if (this.vendor == Vendor.VMWARE) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
                     String.format("https://%s:%d/sdk;%s;%s;h=%s", this.managementServerName, this.port, this.userName, this.password, this.hostname.toString()) : 
@@ -261,7 +265,11 @@ public class ConnectionString {
     public URL getURL() {
         try {
             if (this.vendor == Vendor.INTEL) {
-                return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
+                if( this.addOnConnectionString.isEmpty() ) {
+                    return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
+                } else {
+                    return new URL(this.addOnConnectionString);
+                }
             } 
             else if (this.vendor == Vendor.VMWARE) {
                 if( this.addOnConnectionString.isEmpty() ) {
@@ -365,10 +373,9 @@ public class ConnectionString {
         }
         
         public static IntelConnectionString forURL(String url) throws MalformedURLException {
-            log.debug("IntelConnectionString forURL {}", url);
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
-            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }
+            if( info.url == null ) { throw new IllegalArgumentException("Missing host address in URL"); }            
             if( info.vendor !=  Vendor.INTEL ) {
                 throw new IllegalArgumentException("Not an Intel Host URL: "+info.url.toExternalForm());
             }
@@ -520,6 +527,16 @@ public class ConnectionString {
         return forIntel(new Hostname(hostname), port);
     }
 
+    public static ConnectionString forIntel(String hostname, Integer port, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.INTEL;
+        conn.hostname = new InternetAddress(hostname.toString());
+        conn.managementServerName = hostname.toString();
+        conn.port = port;
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
     
     /**
      * Creates a connection string for an Intel host with specified port

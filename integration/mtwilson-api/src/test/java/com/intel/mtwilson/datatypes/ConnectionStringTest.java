@@ -30,10 +30,10 @@ public class ConnectionStringTest {
         }        
     }
     
-    
-    @Test
+     
+    @Test 
     public void testParseIntelVendorConnectionString() throws MalformedURLException {
-        String url = "intel:https://server.com:9999";
+        String url = "intel:https://server.com:1443;user;password";
         ConnectionString.VendorConnection vc = ConnectionString.parseConnectionString(url);
         log.debug("Intel vendor: {}", vc.vendor);
         log.debug("Intel url: {}", vc.url);
