@@ -17,6 +17,8 @@ import java.net.URL;
  * @author stdalex
  */
 public class CitrixHostAgentFactory implements VendorHostAgentFactory {
+    private String citrixVendorConnectionString = "";
+    
     @Override
     public String getVendorProtocol() { return "citrix"; }
     
@@ -24,7 +26,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-          
+          citrixVendorConnectionString = vendorConnectionString;
           URL url = new URL(vendorConnectionString);
           
           CitrixClient client = new CitrixClient(new TlsConnection(url, tlsPolicy));
@@ -39,7 +41,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-          
+          citrixVendorConnectionString = vendorConnectionString;
           URL url = new URL(vendorConnectionString);
           
           CitrixClient client = new CitrixClient(new TlsConnection(url, tlsPolicy));
@@ -49,6 +51,11 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
         catch(Exception e) {
             throw new IOException("Cannot get trust agent client for host connection: "+vendorConnectionString+": "+e.toString(), e);
         }
+    }
+
+    @Override
+    public String getVendorConnectionString() {
+        return citrixVendorConnectionString;
     }
     
 }
