@@ -24,7 +24,7 @@ public class MethodResponse {
     public String toString() {
         String str ="<params>";
         for (Param param : params) {
-            str = str + param.toString();
+            str = str.concat(param.toString());
         }
         str = str + "</params>";
         return str;

@@ -55,7 +55,7 @@ public class VmMeasurementLogEquals extends BaseRule {
 
         vmActualMissing.removeAll(actualModules);
 
-        RaiseFaultForModifiedEntries(vmActualUnexpected, vmActualMissing, report);        
+        raiseFaultForModifiedEntries(vmActualUnexpected, vmActualMissing, report);        
                 
         if( !vmActualUnexpected.isEmpty() ) {
             log.debug("VmMeasurementLogEquals : VM is having #{} additional modules compared to the white list.", vmActualUnexpected.size());
@@ -80,7 +80,7 @@ public class VmMeasurementLogEquals extends BaseRule {
      * @param vmActualMissing
      * @param report 
      */
-    private void RaiseFaultForModifiedEntries(ArrayList<Measurement> vmActualUnexpected, ArrayList<Measurement> vmActualMissing, RuleResult report) {
+    private void raiseFaultForModifiedEntries(ArrayList<Measurement> vmActualUnexpected, ArrayList<Measurement> vmActualMissing, RuleResult report) {
         ArrayList<Measurement> vmModifiedModules = new ArrayList<>();
         ArrayList<Measurement> tempVMActualUnexpected = new ArrayList<>(vmActualUnexpected);
         ArrayList<Measurement> tempVMActualMissing = new ArrayList<>(vmActualMissing);

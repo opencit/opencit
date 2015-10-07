@@ -21,8 +21,7 @@ public class JsonTlsPolicyWriter {
 
     public byte[] write(TlsPolicyDescriptor tlsPolicyDescriptor) {
         try {
-            JacksonObjectMapperProvider mapperProvider = new JacksonObjectMapperProvider();
-            ObjectMapper json = mapperProvider.createDefaultMapper();
+            ObjectMapper json = JacksonObjectMapperProvider.createDefaultMapper();
             return json.writeValueAsString(tlsPolicyDescriptor).getBytes(Charset.forName("UTF-8"));
         }
         catch(IOException e) {

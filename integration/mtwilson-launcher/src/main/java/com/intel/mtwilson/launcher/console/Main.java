@@ -10,6 +10,7 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.configuration.PropertiesConfiguration;
 import com.intel.dcsg.cpg.configuration.ReadonlyConfiguration;
 import com.intel.mtwilson.Folders;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.LogManager;
@@ -81,18 +82,21 @@ public class Main {
      */
     private static Configuration loadApplicationProperties() {
         Configuration defaults = getApplicationDefaultProperties();
-        InputStream in = Main.class.getResourceAsStream(APPLICATION_PROPERTIES);
-        if( in == null ) {
-            return new ReadonlyConfiguration(defaults);
-        }
-        try {
-            Properties properties = new Properties();
-            properties.load(in);
-            return new ReadonlyConfiguration(new LayeredConfiguration(new PropertiesConfiguration(properties), defaults));
-        }
-        catch(Exception e) {
-            log.error("Cannot load application.properties", e);
-            return defaults;
+        try (InputStream in = Main.class.getResourceAsStream(APPLICATION_PROPERTIES)) {
+            if( in == null ) {
+                return new ReadonlyConfiguration(defaults);
+            }
+            try {
+                Properties properties = new Properties();
+                properties.load(in);
+                return new ReadonlyConfiguration(new LayeredConfiguration(new PropertiesConfiguration(properties), defaults));
+            } catch(Exception e) {
+                log.error("Cannot load application.properties", e);
+                return defaults;
+            }
+        } catch (IOException ex) {
+                log.error("Cannot load application.properties", ex);
+                return defaults;
         }
     }
     

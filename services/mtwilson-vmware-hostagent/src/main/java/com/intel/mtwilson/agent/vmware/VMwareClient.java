@@ -299,7 +299,9 @@ public class VMwareClient implements TlsClient {
     }
     public Object getMEProperty(String meType, String meName, String propertyName)
             throws InvalidProperty, RuntimeFault, RemoteException {
-        return getMEProperties(meType, meName, new String[]{propertyName}).get(propertyName);
+        Object value = getMEProperties(meType, meName, new String[]{propertyName}).get(propertyName);
+        if (value == null) { throw new InvalidProperty(); }
+        return value;
     }
     
     protected Hashtable getMEProperties(String meType, String meName, String[] properties)

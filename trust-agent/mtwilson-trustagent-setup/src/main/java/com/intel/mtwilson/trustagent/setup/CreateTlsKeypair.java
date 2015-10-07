@@ -67,6 +67,13 @@ public class CreateTlsKeypair extends AbstractSetupTask {
         RsaCredentialX509 credential;
         try {
             credential = keystore.getRsaCredentialX509(TLS_ALIAS, keystorePassword);
+            if (credential == null || credential.getCertificate() == null 
+                    || credential.getCertificate().getSubjectX500Principal() == null 
+                    || credential.getCertificate().getSubjectX500Principal().getName() == null) {
+                log.debug("Invalid TLS certificate: credential contains null value");
+                validation("Certificate must be recreated: credential contains null value");
+                return;
+            }
             log.debug("Found TLS key {}", credential.getCertificate().getSubjectX500Principal().getName());
         } catch (FileNotFoundException e) {
             log.warn("Keystore does not contain the specified key [{}]", TLS_ALIAS);
@@ -78,11 +85,11 @@ public class CreateTlsKeypair extends AbstractSetupTask {
             validation("Key must be recreated");
             return;
         }
-        catch(NullPointerException e) {
-            log.debug("Invalid TLS certificate");
-            validation("Certificate must be recreated");
-            return;
-        }
+//        catch(NullPointerException e) {
+//            log.debug("Invalid TLS certificate");
+//            validation("Certificate must be recreated");
+//            return;
+//        }
 //        log.debug("credential {}", credential);
 //        log.debug("credential certificate {}", credential.getCertificate());
 //        log.debug("credential certificate encoded {}", credential.getCertificate().getEncoded());

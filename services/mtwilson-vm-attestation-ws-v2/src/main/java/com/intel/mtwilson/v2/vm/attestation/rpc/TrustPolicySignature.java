@@ -92,41 +92,42 @@ public class TrustPolicySignature {
         //2. Load the KeyStore and get the signing key and certificate.
         //TODO saml key and keystore password are same
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(My.configuration().getSamlKeystoreFile()), My.configuration().getSamlKeystorePassword().toCharArray());
-        KeyStore.PrivateKeyEntry keyEntry =
-            (KeyStore.PrivateKeyEntry) ks.getEntry
-                (My.configuration().getSamlKeyAlias(), new KeyStore.PasswordProtection(My.configuration().getSamlKeystorePassword().toCharArray()));
-        X509Certificate cert = (X509Certificate) keyEntry.getCertificate();
+        StringWriter result;
+        try (FileInputStream fin = new FileInputStream(My.configuration().getSamlKeystoreFile())) {
+           ks.load(fin, My.configuration().getSamlKeystorePassword().toCharArray());
+           KeyStore.PrivateKeyEntry keyEntry
+                   = (KeyStore.PrivateKeyEntry) ks.getEntry(My.configuration().getSamlKeyAlias(), new KeyStore.PasswordProtection(My.configuration().getSamlKeystorePassword().toCharArray()));
+           X509Certificate cert = (X509Certificate) keyEntry.getCertificate();
 
-        // Create the KeyInfo containing the X509Data.
-        KeyInfoFactory kif = fac.getKeyInfoFactory();
-        List x509Content = new ArrayList();
-        x509Content.add(cert.getSubjectX500Principal().getName());
-        x509Content.add(cert);
-        X509Data xd = kif.newX509Data(x509Content);
-        KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
-        
-        //3. Instantiate the document to be signed.
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        Document doc = dbf.newDocumentBuilder().parse(new InputSource( new StringReader(xml)));
+           // Create the KeyInfo containing the X509Data.
+           KeyInfoFactory kif = fac.getKeyInfoFactory();
+           List x509Content = new ArrayList();
+           x509Content.add(cert.getSubjectX500Principal().getName());
+           x509Content.add(cert);
+           X509Data xd = kif.newX509Data(x509Content);
+           KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
+
+           //3. Instantiate the document to be signed.
+           DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+           dbf.setNamespaceAware(true);
+           Document doc = dbf.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
 
         // Create a DOMSignContext and specify the RSA PrivateKey and
-        // location of the resulting XMLSignature's parent element.
-        DOMSignContext dsc = new DOMSignContext
-            (keyEntry.getPrivateKey(), doc.getDocumentElement());
+           // location of the resulting XMLSignature's parent element.
+           DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), doc.getDocumentElement());
 
-        // Create the XMLSignature, but don't sign it yet.
-        XMLSignature signature = fac.newXMLSignature(si, ki);
-        
-        // Marshal, generate, and sign the enveloped signature.
-        signature.sign(dsc);        
-        
-        //4. Output the resulting document.
-        StringWriter result = new StringWriter();
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer trans = tf.newTransformer();
-        trans.transform(new DOMSource(doc), new StreamResult(result));
+           // Create the XMLSignature, but don't sign it yet.
+           XMLSignature signature = fac.newXMLSignature(si, ki);
+
+           // Marshal, generate, and sign the enveloped signature.
+           signature.sign(dsc);
+
+           //4. Output the resulting document.
+           result = new StringWriter();
+           TransformerFactory tf = TransformerFactory.newInstance();
+           Transformer trans = tf.newTransformer();
+           trans.transform(new DOMSource(doc), new StreamResult(result));
+        }
         log.debug("Signed TP is: "+result.toString());
         return result.toString();        
    }
