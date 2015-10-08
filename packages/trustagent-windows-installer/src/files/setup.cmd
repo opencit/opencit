@@ -4,8 +4,17 @@ setlocal enabledelayedexpansion
 REM # SCRIPT CONFIGURATION:
 set package_name=trustagent
 
-REM the package directory should be where the setup.sh is installed (e.g. package_dir=C:\Program Files (x86)\Intel\trustagent)
-set package_dir=%~dp0
+REM the package directory should be where the trust agent installed (e.g. package_dir=C:\Program Files (x86)\Intel\trustagent)
+set package_bin=%~dp0
+for %%a in ("%package_bin:~0,-1%") do set package_dir=%%~dpa
+
+REM echo. %package_bin%
+echo. Trust Agent located at: %package_dir%
+
+REM ==set PATH for the current cmd 
+set PATH=%PATH%;%package_bin%
+REM ==set global PATH
+setx PATH "%PATH%;%package_bin" /M
 
 set intel_conf_dir=%package_dir%\configuration
 set package_config_filename=%intel_conf_dir%\%package_name%.properties
@@ -19,7 +28,7 @@ set logfile=%package_dir%\logs\install.log
 REM # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 ECHO. ==Configure trust agent version and environment variables==
 cd %package_dir%
-IF EXIST "%package_dir%/version" (
+IF EXIST "%package_dir%\version" (
   echo. "Version file found"
   for /f  "tokens=*" %%a in (version) do (
     set %%a
