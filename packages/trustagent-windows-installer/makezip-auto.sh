@@ -38,6 +38,7 @@ trustagentZip="trustagent-${projectVersion}.zip"
 cd $targetDir/${projectNameVersion}
 unzip ${trustagentZip}
 rm -rf ${trustagentZip}
+mv tasetup.cmd bin/
 
 export TMPDIR=~/.tmp
 cd $targetDir

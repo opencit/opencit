@@ -381,6 +381,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_44CD344469BB4624A52E0EE0579D02A9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_472EE77014514308AA7197562222148E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1306,12 +1312,6 @@
         "Entry"
         {
         "MsmKey" = "8:_E94B11C957A94C039682D936091727D9"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_EB5CB673105C44BFB75281569B5436A6"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2758,6 +2758,26 @@
             "TargetName" = "8:jackson-databind-2.5.1.jar"
             "Tag" = "8:"
             "Folder" = "8:_31D607B5D0AF43949D36F6226662E19C"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_44CD344469BB4624A52E0EE0579D02A9"
+            {
+            "SourcePath" = "8:..\\bin\\tasetup.cmd"
+            "TargetName" = "8:tasetup.cmd"
+            "Tag" = "8:"
+            "Folder" = "8:_AA47519A1F624C73AAA3EE675844FFD6"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -5858,26 +5878,6 @@
             "TargetName" = "8:tpm_createkey"
             "Tag" = "8:"
             "Folder" = "8:_AA47519A1F624C73AAA3EE675844FFD6"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EB5CB673105C44BFB75281569B5436A6"
-            {
-            "SourcePath" = "8:..\\setup.cmd"
-            "TargetName" = "8:setup.cmd"
-            "Tag" = "8:"
-            "Folder" = "8:_D5096178F78A4D159C69B3C4AC5EA6E5"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"

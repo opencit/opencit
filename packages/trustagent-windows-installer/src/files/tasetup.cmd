@@ -14,7 +14,7 @@ echo. Trust Agent located at: %package_dir%
 REM ==set PATH for the current cmd 
 set PATH=%PATH%;%package_bin%
 REM ==set global PATH
-setx PATH "%PATH%;%package_bin" /M
+REM setx PATH "%PATH%;%package_bin" /M
 
 set intel_conf_dir=%package_dir%\configuration
 set package_config_filename=%intel_conf_dir%\%package_name%.properties
