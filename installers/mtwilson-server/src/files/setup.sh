@@ -345,7 +345,7 @@ load_defaults
 # mtwilson requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-# in 2.0.6, java home is now under trustagent home by default
+# in 3.0, java home is now under trustagent home by default
 JAVA_HOME=${JAVA_HOME:-$MTWILSON_HOME/share/jdk1.7.0_51}
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 echo "Installing Java ($JAVA_PACKAGE) into $JAVA_HOME..." >> $INSTALL_LOG_FILE

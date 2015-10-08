@@ -42,8 +42,8 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # The version script is automatically generated at build time and looks like this:
 #ARTIFACT=mtwilson-trustagent-installer
-#VERSION=2.0.6
-#BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-2.0.6)"
+#VERSION=3.0
+#BUILD="Fri, 5 Jun 2015 15:55:20 PDT (release-3.0)"
 
 
 
@@ -329,7 +329,7 @@ if [[ ! -h $TRUSTAGENT_BIN/tagent ]]; then
 fi
 chmod +x $TRUSTAGENT_BIN/*
 
-# in 2.0.6, java home is now under trustagent home by default
+# in 3.0, java home is now under trustagent home by default
 JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
 mkdir -p $JAVA_HOME
 #java_install $JAVA_PACKAGE
