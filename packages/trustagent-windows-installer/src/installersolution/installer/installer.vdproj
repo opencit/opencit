@@ -75,6 +75,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_1636166F94F24312A2B1F7414637902E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_17F5D9A5B6A4483A9649027D601DCF4E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -879,6 +885,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_9632133BCA2148CABCDF89A831259DC3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_980FBDA93A6942619C049E991C1CE879"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -898,6 +910,12 @@
         "Entry"
         {
         "MsmKey" = "8:_9D9681571B8946A3AEB4DA092CEDE0FA"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A06503197E3B4E23BBF7462010563981"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1192,6 +1210,12 @@
         "Entry"
         {
         "MsmKey" = "8:_DA0940D850F84609B996EEAA79E5846A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DA4C7BD6550E4EDC82D466F6D4BAC67A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1758,6 +1782,26 @@
             "TargetName" = "8:joda-time-2.3.jar"
             "Tag" = "8:"
             "Folder" = "8:_31D607B5D0AF43949D36F6226662E19C"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1636166F94F24312A2B1F7414637902E"
+            {
+            "SourcePath" = "8:..\\bootdriver\\citbootdriversetup.exe"
+            "TargetName" = "8:citbootdriversetup.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_63981DF4A13E4C71B30428E3F85E13A0"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -4432,6 +4476,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9632133BCA2148CABCDF89A831259DC3"
+            {
+            "SourcePath" = "8:..\\bootdriver\\citbootdriver.sys"
+            "TargetName" = "8:citbootdriver.sys"
+            "Tag" = "8:"
+            "Folder" = "8:_63981DF4A13E4C71B30428E3F85E13A0"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_980FBDA93A6942619C049E991C1CE879"
             {
             "SourcePath" = "8:..\\java\\commons-beanutils-1.9.2.jar"
@@ -4498,6 +4562,26 @@
             "TargetName" = "8:jetty-deploy-9.0.0.v20130308.jar"
             "Tag" = "8:"
             "Folder" = "8:_31D607B5D0AF43949D36F6226662E19C"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A06503197E3B4E23BBF7462010563981"
+            {
+            "SourcePath" = "8:..\\bootdriver\\citbootdriver.inf"
+            "TargetName" = "8:citbootdriver.inf"
+            "Tag" = "8:"
+            "Folder" = "8:_63981DF4A13E4C71B30428E3F85E13A0"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -5478,6 +5562,26 @@
             "TargetName" = "8:javax.annotation-api-1.2.jar"
             "Tag" = "8:"
             "Folder" = "8:_31D607B5D0AF43949D36F6226662E19C"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DA4C7BD6550E4EDC82D466F6D4BAC67A"
+            {
+            "SourcePath" = "8:..\\bootdriver\\WdfCoinstaller01011.dll"
+            "TargetName" = "8:WdfCoinstaller01011.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_63981DF4A13E4C71B30428E3F85E13A0"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -6481,6 +6585,17 @@
                                 {
                                 }
                             }
+                        }
+                    }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_63981DF4A13E4C71B30428E3F85E13A0"
+                    {
+                    "Name" = "8:bootdriver"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_E37084A0DF6B485AAF1A71A34FDF8C3D"
+                        "Folders"
+                        {
                         }
                     }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_9C38DFD66CC04C5DA889B03096F41FCF"
