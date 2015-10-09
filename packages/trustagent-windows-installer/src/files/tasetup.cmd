@@ -22,6 +22,7 @@ set package_env_filename=%package_dir%\%package_name%.env
 set package_version_filename=%package_dir%\env.d\trustagent.version
 set ASSET_TAG_SETUP="y"
 set trustagent_cmd=%package_dir%\bin\tagent.cmd
+set bootdriver_dir=%package_dir%\bootdriver
 
 set logfile=%package_dir%\logs\install.log
 
@@ -173,6 +174,11 @@ ECHO. ==Create a trustagent username "mtwilson" with no password
 REM FIXIT setup correct shiro.ini (should not hardcode the path in shiro.ini setup correct shiro.ini)
 ECHO. ==Copy shiro-win.ini to shiro.ini
 copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini"
+
+REM # INSTALL the citbootdriver to support geotag
+cd "%bootdriver_dir%"
+start /d "%bootdriver_dir%\" /b citbootdriversetup.exe install
+cd "%package_bin%"
 
 REM # give tagent a chance to do any other setup (such as the .env file and pcakey)
 REM # and make sure it's successful before trying to start the trust agent

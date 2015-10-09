@@ -147,6 +147,25 @@
                                     </resources>
                                 </configuration>            
                             </execution>
+                            <execution>
+                                <id>copy-resources_bootdriver</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${makeself.directory}/bootdriver</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/bootdriver</directory>
+                                            <includes>
+                                                <include>**/*</include>
+                                            </includes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>            
+                            </execution>
                         </executions>
                     </plugin>
                     <!-- end copy other resources plugin -->
