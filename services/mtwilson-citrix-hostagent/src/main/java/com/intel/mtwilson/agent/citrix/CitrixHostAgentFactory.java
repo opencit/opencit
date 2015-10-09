@@ -9,6 +9,8 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.Vendor;
 import java.io.IOException;
 import java.net.URL;
 
@@ -26,7 +28,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-          citrixVendorConnectionString = vendorConnectionString;
+          citrixVendorConnectionString = new ConnectionString(Vendor.CITRIX, vendorConnectionString).getConnectionStringWithPrefix();
           URL url = new URL(vendorConnectionString);
           
           CitrixClient client = new CitrixClient(new TlsConnection(url, tlsPolicy));
@@ -41,7 +43,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-          citrixVendorConnectionString = vendorConnectionString;
+          citrixVendorConnectionString = new ConnectionString(Vendor.CITRIX, vendorConnectionString).getConnectionStringWithPrefix();
           URL url = new URL(vendorConnectionString);
           
           CitrixClient client = new CitrixClient(new TlsConnection(url, tlsPolicy));

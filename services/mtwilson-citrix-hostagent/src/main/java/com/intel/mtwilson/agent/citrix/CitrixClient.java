@@ -78,6 +78,9 @@ public class CitrixClient {
 //        log.info("CitrixClient connectionString == " + connectionString);
         // connectionString == citrix:https://xenserver:port;username;password  or citrix:https://xenserver:port;u=username;p=password  or the same w/o the citrix prefix
         try {
+            // We need to explicitly add citrix since both Intel and Citrix hosts have the same connection string format.
+            if (!connectionString.toLowerCase().startsWith("citrix:"))
+                connectionString = "citrix:" + connectionString; 
             ConnectionString.CitrixConnectionString citrixConnection = ConnectionString.CitrixConnectionString.forURL(connectionString);
             hostIpAddress = citrixConnection.getHost().toString();
             port = citrixConnection.getPort();

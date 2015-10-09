@@ -9,6 +9,7 @@ import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.datatypes.Vendor;
 import java.io.IOException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public VmwareHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-            vmwareVendorConnectionString = vendorConnectionString;
+            vmwareVendorConnectionString = new ConnectionString(Vendor.VMWARE, vendorConnectionString).getConnectionStringWithPrefix();
             // If the connection string does not include the host address, add it here so that if there is an exception in the client layer the hostname will appear when printing the connection string
             ConnectionString.VmwareConnectionString connStr = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
             if( connStr.getHost() == null ) {

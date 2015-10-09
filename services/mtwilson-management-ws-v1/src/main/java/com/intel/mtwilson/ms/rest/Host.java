@@ -82,7 +82,7 @@ public class Host {
         long regHostStart = System.currentTimeMillis(); 
         boolean result = MSComponentFactory.getHostBO().registerHost(hostObj);
         long regHostStop = System.currentTimeMillis();
-        log.debug("savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); 
+        log.debug("Performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); 
         return Boolean.toString(result);
     }
 
@@ -97,7 +97,7 @@ public class Host {
         long regHostStart = System.currentTimeMillis(); 
         boolean result = MSComponentFactory.getHostBO().registerHostFromCustomData(hostConfigObj);
         long regHostStop = System.currentTimeMillis();
-        log.debug("savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); 
+        log.debug("Performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); 
         return Boolean.toString(result);
     }
 

@@ -143,6 +143,12 @@ public class ConnectionString {
      */
     private static Vendor guessVendorFromURL(String url) {
         Vendor v;
+        if (url.contains("/sdk")) {
+               v = Vendor.VMWARE;
+           } else {
+               v = Vendor.INTEL;
+           }
+        /*
         // In this case we do not have the prefix
         if (url.matches(intelVendorRegEx2)) {
             v = Vendor.INTEL;
@@ -152,7 +158,7 @@ public class ConnectionString {
             } else {
                 v = Vendor.CITRIX;
             }
-        }
+        }*/
         return v;
     }
 
@@ -187,7 +193,8 @@ public class ConnectionString {
                     password = intelConnection.password;
                     break;
                 case CITRIX:
-                    CitrixConnectionString citrixConnection = CitrixConnectionString.forURL(connectionString);
+                    // Need to add the vendor explicitly since Intel and Citrix hosts have the exact same connection string.
+                    CitrixConnectionString citrixConnection = CitrixConnectionString.forURL(vendor.CITRIX+":"+connectionString);
                     hostname = citrixConnection.getHost();
                     port = citrixConnection.getPort();
                     managementServerName = hostname.toString();

@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.MwHostPreRegistrationDetails;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.trustagent.client.jaxrs.TrustAgentClient;
 import java.io.IOException;
 import java.net.URL;
@@ -53,6 +54,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
                     intelConnectionString = ConnectionString.IntelConnectionString.forURL(tempConnectionString.getConnectionString());
                 }
             }
+            intelVendorConnectionString = new ConnectionString(Vendor.INTEL, intelVendorConnectionString).getConnectionStringWithPrefix();
             URL url = intelConnectionString.toURL();
             if( url.getPort() == 1443 || url.getPath().contains("/v2") ) {
                 // assume trust agent v2
