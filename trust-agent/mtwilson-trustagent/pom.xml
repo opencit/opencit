@@ -6,9 +6,17 @@
     <packaging>jar</packaging>
     <name>mtwilson-trustagent</name>
     <description>Mt Wilson Trust Agent</description>
+    <!--
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-maven-package</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    -->
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-dist-feature</artifactId>
         <version>3.0-SNAPSHOT</version>
         <relativePath />
     </parent>
