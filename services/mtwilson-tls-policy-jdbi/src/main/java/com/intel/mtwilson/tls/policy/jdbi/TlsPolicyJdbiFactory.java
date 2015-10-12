@@ -5,6 +5,7 @@
 package com.intel.mtwilson.tls.policy.jdbi;
 
 import com.intel.mtwilson.jdbi.util.JdbiUtil;
+import com.intel.mtwilson.My;
 
 /**
  *
@@ -13,6 +14,11 @@ import com.intel.mtwilson.jdbi.util.JdbiUtil;
 public class TlsPolicyJdbiFactory {
 
     public static TlsPolicyDAO tlsPolicyDAO() {
-        return JdbiUtil.getDBI().open(TlsPolicyDAO.class);
+        try {
+            return JdbiUtil.getDBI(My.jdbc().connection()).open(TlsPolicyDAO.class);
+        }
+        catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
