@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.xensource</groupId>
             <artifactId>citrix-sdk</artifactId>
-            <version>6.1</version>
+            <version>6.1.FINAL</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
