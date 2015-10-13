@@ -24,6 +24,29 @@
 	<module>LogRotateLinuxInstaller</module>
   </modules>
 
+  <properties>
+        <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
+  </properties>
+  
+  <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.intel.mtwilson.maven</groupId>
+                <artifactId>mtwilson-maven-bom-coreutil</artifactId>
+                <version>${mtwilson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.maven</groupId>
+                <artifactId>mtwilson-maven-bom-external</artifactId>
+                <version>${mtwilson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+  </dependencyManagement>
+    
   <profiles>
       <profile>
           <activation>
