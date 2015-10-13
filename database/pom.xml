@@ -7,13 +7,6 @@
     <packaging>pom</packaging>
 
   <name>Mt Wilson Database Support</name>
-
-	<parent>
-  <groupId>com.intel.mtwilson.maven</groupId>
-  <artifactId>mtwilson-maven-root</artifactId>
-		<version>3.0-SNAPSHOT</version>
-        <relativePath/>
-	</parent>
   
   <modules>
     <module>mysql</module>
