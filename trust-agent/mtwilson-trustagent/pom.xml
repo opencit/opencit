@@ -68,10 +68,10 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <mkdir dir="${project.build.directory}/application/features/bin"/>
+                                        <mkdir dir="${project.build.directory}/application/bin"/>
                                 
                                         <!-- extract mtwilson-tpm-commands.zip -->
-                                        <unzip dest="${project.build.directory}/application/features/bin">
+                                        <unzip dest="${project.build.directory}/application/bin">
                                             <fileset dir="${project.build.directory}">
                                                 <include name="mtwilson-tpm-commands.zip"/>
                                             </fileset>
@@ -79,7 +79,7 @@
                                 
                                         <!-- permissions -->
                                         <chmod perm="700">
-                                            <fileset dir="${project.build.directory}/application/features/bin">
+                                            <fileset dir="${project.build.directory}/application/bin">
                                                 <include name="**/*"/>
                                             </fileset>
                                         </chmod>

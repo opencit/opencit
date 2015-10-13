@@ -38,12 +38,16 @@ date > $INSTALL_LOG_FILE
 if [ -f /root/mtwilson.env ]; then
   . /root/mtwilson.env
   env_file_exports=$(cat /root/mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  eval export $env_file_exports
+  if [ -n "$env_file_exports" ]; then
+    eval export $env_file_exports
+  fi
 fi
 if [ -f mtwilson.env ]; then
   . mtwilson.env
   env_file_exports=$(cat mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  eval export $env_file_exports
+  if [ -n "$env_file_exports" ]; then
+    eval export $env_file_exports
+  fi
 fi
 
 export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
