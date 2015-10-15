@@ -14,7 +14,7 @@ public enum HostVMMType {
     KVM("KVM","0,17,18"),
     VMWARE("VMware ESXi","0,17,18,19,20"),
     XEN("Xen","0,17,18"),
-    WINDOWS("WINDOWS", "0,12,13,14");
+    WINDOWS("WINDOWS", "0,13,14");
     
     private String value;
     private String pcrs;
