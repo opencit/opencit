@@ -52,14 +52,14 @@ public class PreRegisterHostAccessDetails extends AbstractSetupTask {
         if( url == null || url.isEmpty() ) {
             configuration("Mt Wilson URL is not set");
         }
-        /*username = trustagentConfiguration.getMtWilsonApiUsername();
+        username = trustagentConfiguration.getMtWilsonApiUsername();
         password = trustagentConfiguration.getMtWilsonApiPassword();
         if( username == null || username.isEmpty() ) {
             configuration("Mt Wilson username is not set");
         }
         if( password == null || password.isEmpty() ) {
             configuration("Mt Wilson password is not set");
-        }*/
+        }
         
         keystoreFile = trustagentConfiguration.getTrustagentKeystoreFile();
         if( keystoreFile == null || !keystoreFile.exists() ) {
@@ -133,8 +133,8 @@ public class PreRegisterHostAccessDetails extends AbstractSetupTask {
                 TlsConnection tlsConnection = new TlsConnection(new URL(url), tlsPolicy);
 
                 Properties clientConfiguration = new Properties();
-                clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, "admin");
-                clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, "password");
+                clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_USERNAME, username);
+                clientConfiguration.setProperty(TrustagentConfiguration.MTWILSON_API_PASSWORD, password);
 
                 Hosts hostClientObj = new Hosts(clientConfiguration, tlsConnection);
                 List<String> hostNames = new ArrayList<>();
