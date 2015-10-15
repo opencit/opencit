@@ -72,7 +72,7 @@
                 </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
-                    <artifactId>tbootxm-linux-makeself</artifactId>
+                    <artifactId>tbootxm</artifactId>
                     <version>0.1-SNAPSHOT</version>
                     <type>bin</type>
                 </dependency>
@@ -131,7 +131,7 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
-                                            <artifactId>tbootxm-linux-makeself</artifactId>
+                                            <artifactId>tbootxm</artifactId>
                                             <version>0.1-SNAPSHOT</version>
                                             <type>bin</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
