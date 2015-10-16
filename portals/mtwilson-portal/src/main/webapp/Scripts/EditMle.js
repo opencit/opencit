@@ -69,7 +69,7 @@ function fuCreateEditMleTable(mleData) {
 		str+='<td class="rowr2" name="oemName">'+ getHTMLEscapedMessage(val1) +'&nbsp;</td>';
 		val1 = mleData[items].mleDescription == undefined ? ' ' : mleData[items].mleDescription;
 		str+='<td class="rowr3"  style="word-wrap: break-word;max-width:170px;"name="mleDescription">'+ getHTMLEscapedMessage(val1)+'&nbsp;</td>';
-		str+='<td class="row1" style="background-color: white"><a href="javascript:;" onclick="fnDeleteMleInfo(this)" data-toggle="tooltip" title="Delete Mle"><span class="glyphicon glyphicon-trash"></span></a></td>';
+		str+='<td class="row1"><a href="javascript:;" onclick="fnDeleteMleInfo(this)" data-toggle="tooltip" title="Delete Mle"><span class="glyphicon glyphicon-trash"></span></a></td>';
 		str+='</tr>';
 	}
 	$('#editMleContentDiv table tbody').html(str);
@@ -79,7 +79,7 @@ function fnEditMleInfo(element) {
 	$('#messageSpace').html('');
 	var data = [] ;
     var row = $(element).parent().parent();
-    $(row).find("td:not(:first-child)").each(function(){
+    $(row).find("td").each(function(){
         var val = $.trim($(this).text());
         var name = $.trim($(this).attr('name'));
         data[name]=val;
@@ -290,7 +290,7 @@ function fnDeleteMleInfo(element) {
           			$('#messageSpace').html('');
                 		var data = [] ;
             			var row = $(element).parent().parent();
-            			row.find("td:not(:first-child)").each(function(){
+            			row.find("td").each(function(){
                 			var val = $.trim($(this).text());
                 			var name = $(this).attr('name');
                 			data[name]=val;
