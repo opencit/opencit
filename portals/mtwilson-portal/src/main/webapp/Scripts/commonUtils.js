@@ -635,9 +635,9 @@ function updateMlePageForBIOS() {
     var row = $('#manifestListDiv table');
     row.html('');
     for (var i = 0; i < 6; i++) {
-        var str = '<tr><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
+        var str = '<tr style="height: 23px"><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border_Mle" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
         if (i == 0) {
-            str += '<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
+            str += '<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="20" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
         } else if (i == 1) {
             str += '<td><div id="successMessage"></div></td><td></td>';
         } else {
@@ -648,8 +648,8 @@ function updateMlePageForBIOS() {
     }
     
     var i = 17;
-    var str = '<tr><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
-    str += '<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
+    var str = '<tr style="height: 23px"><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border_Mle" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
+    str += '<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="20" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
     str += '</tr>';
     row.append(str);
     

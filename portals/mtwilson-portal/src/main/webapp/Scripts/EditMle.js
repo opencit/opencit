@@ -84,8 +84,8 @@ function fnEditMleInfo(element) {
         var name = $.trim($(this).attr('name'));
         data[name]=val;
     });
-   	data["osVersion"]=$(row).find("td:eq(5)").attr('version');
-   	data["osName"]=$(row).find("td:eq(5)").attr('osName');
+   	data["osVersion"]=$(row).find("td:eq(4)").attr('version');
+   	data["osName"]=$(row).find("td:eq(4)").attr('osName');
     setLoadImage('mainContainer');
 	sendHTMLAjaxRequest(false, 'getView/getAddMLEPage.html', null, fnEditMleData, null,data);
 }

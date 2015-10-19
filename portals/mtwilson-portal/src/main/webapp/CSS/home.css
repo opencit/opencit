@@ -555,6 +555,16 @@ h5, h6
 	padding-right: 20px;
 	float: left;
 }
+.labelDivEditMle{
+    width: 155px;
+    padding-right: 20px;
+    float: left;
+}
+.labelDivEditMleManifest{
+    width: 160px;
+    padding-right: 20px;
+    float: left;
+}
 .labelDivConfig{
 	width: 180px;
 	padding-right: 25px;
@@ -631,6 +641,7 @@ h5, h6
 }
 .uploadForm{
 	float: left;
+	margin-left: 2px;
 }
 .subLabelDivgkv{
 text-align: center;	
@@ -779,6 +790,12 @@ text-align: center;
 	width: 500px;
 	height: 22px;
 	float: left;
+}
+.textBox_Border_Mle{
+    width: 500px;
+    height: 23px;
+    float: left;
+	margin-left: 2px;
 }
 .registerHostTable{
 	float: left;
