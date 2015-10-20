@@ -235,7 +235,8 @@ public abstract class TlsPolicyFactory {
      * @return 
      */
     protected TlsPolicy createTlsPolicy(TlsPolicyChoiceReport report) {
-        return createTlsPolicy(report.getDescriptor());
+//        return createTlsPolicy(report.getDescriptor());
+        return TlsPolicyFactoryUtil.createTlsPolicy(report.getDescriptor());   //called new TlsPolicyFactoryUtil from common-java for method createTlsPolicy to accommodate for descriptor with value: com.intel.mtwilson.tls.policy.TlsPolicyDescriptor
     }
     
     

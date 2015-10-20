@@ -1,0 +1,4 @@
+ARTIFACT=${project.artifactId}
+VERSION=${project.version}
+#BUILD=${svn.revision}
+BUILD="${git.commit.time} (${git.branch})"

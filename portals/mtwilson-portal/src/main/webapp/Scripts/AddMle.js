@@ -201,7 +201,7 @@ function showDialogManifestList() {
 //	for ( var iteam in pcrHelp) {
 //		str+='<div class="pcrDivHelp">'+pcrHelp[iteam]+'</div>';
 //	}
-        var str = '<div class="pcrDivHelp" data-i18n="[html]help.pcr_help"></div>';
+    	var str = '<div class="pcrDivHelp" data-i18n="[html]help.pcr_help"></div>';
 	fnOpenDialog(str,"manifest_list_help",780,430,false);
 }
 
