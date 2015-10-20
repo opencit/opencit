@@ -295,9 +295,9 @@ function fnDeleteMleInfo(element) {
                 			var name = $(this).attr('name');
                 			data[name]=val;
             			});
-				data["osVersion"]=row.find("td:eq(5)").attr('version');
-                		data["osName"]=row.find("td:eq(5)").attr('osName');
-                		var mleName = $.trim(row.find("td:eq(1)").text()); 
+				data["osVersion"]=row.find("td:eq(4)").attr('version');
+                		data["osName"]=row.find("td:eq(4)").attr('osName');
+                		var mleName = $.trim(row.find("td:eq(0)").text()); 
                 		var dataToSend = fnGetMleDataForDelete(data);
                 		$('#mainTableDivEditMle').prepend(disabledDiv);
                 		//$('#messageSpace').html('<div >* deleteing data. Please Wait....</div>');

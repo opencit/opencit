@@ -20,7 +20,7 @@
 </head>
 <body>
 
-	<nav class="navbar navbar-inverse navbar-fixed-top">
+	<nav class="navbar navbar-inverse">
 				<div class="container-fluid">
 					<div class="navbar-header">
 						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -58,24 +58,24 @@
 					<table cellpadding="3" cellspacing="5">
                  	<tbody>
                  		<tr>
-                 			<td ><label data-i18n="input.username">User Name: </label></td>
+                 			<td style="padding-right: 5px"><label  style="font-weight: normal" data-i18n="input.username">User Name: </label></td>
 	                    	<td> <input type="text" class="textBox_Border" name="userNameTXT" id="userNameValue"></td>
 	                     	<td><span class="requiredField">*</span></td>
 	                    </tr>
 	                	<tr>
-                 			<td ><label data-i18n="input.password">Password: </label></td>
+                 			<td style="padding-right: 5px"><label style="font-weight: normal" data-i18n="input.password">Password: </label></td>
 	                    	<td> <input type="password" class="textBox_Border" name="passwordTXT" id="passwordValue"></td>
 	                     	<td><span class="requiredField">*</span></td>
 	                    </tr>
 	                	<tr>
                  			<td ><label></label></td>
-	                    	<td><input type="submit" class="button" value="Login" data-i18n="[value]button.login"><input class="button" type="reset" value="Clear" data-i18n="[value]button.clear"></td>
+	                    	<td style="padding-top: 5px"><input type="submit" class="button" value="Login" data-i18n="[value]button.login"><input class="button" type="reset" value="Clear" data-i18n="[value]button.clear"></td>
 	                    	<td></td>
 	                    </tr>
 	                </tbody>
                 </table>
 				</form>
-				<div class="errorMessage" data-i18n="${message}">${message}</div>
+				<div style="padding-top: 5px" class="errorMessage" data-i18n="${message}">${message}</div>
         	</div>
         </div>
         <div class="footer">
