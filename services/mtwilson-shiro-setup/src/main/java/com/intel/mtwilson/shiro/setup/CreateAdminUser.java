@@ -501,7 +501,7 @@ public class CreateAdminUser extends DatabaseSetupTask {
                     RsaCredentialX509 credential = tlsKeystore.getRsaCredentialX509(alias, My.configuration().getTlsKeystorePassword());   //"changeit");
                     log.debug("TLS certificate: {}", credential.getCertificate().getSubjectX500Principal().getName());
                     return credential.getCertificate();
-                } else {
+                } else if (!"glassfish-instance".equals(alias)) {
                     log.warn("Cannot find TLS certificate with correct matching alias.");
                 }
             } catch (IOException | KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException | CryptographyException e) {

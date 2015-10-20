@@ -58,11 +58,11 @@ bootstrap_first_user() {
   fi
   local datestr=`date +%Y-%m-%d.%H%M`
 
-#  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
   prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
-  export MC_FIRST_USERNAME="$MC_FIRST_USERNAME"
   prompt_with_default_password MC_FIRST_PASSWORD
-  export MC_FIRST_PASSWORD="$MC_FIRST_PASSWORD"
+  export MC_FIRST_USERNAME
+  export MC_FIRST_PASSWORD
+
   $mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${MTWILSON_API_BASEURL}" "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
@@ -76,6 +76,7 @@ configure_keystore_dir() {
   #  update_property_in_file mtwilson.tdbp.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
   #fi
   mkdir -p ${package_keystore_users_dir}
+  chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_keystore_users_dir}
 }
 
 
@@ -109,7 +110,6 @@ setup_interactive_install() {
       mysql_configure_connection "${package_config_filename}" mountwilson.mc.db
       mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
       mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-      mysql_create_database
       # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
       #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
@@ -135,12 +135,14 @@ setup_interactive_install() {
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
-      glassfish_start_report
+      #glassfish_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   elif [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
-      tomcat_start_report
+      #tomcat_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   fi  
  
@@ -250,7 +252,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-        rm /usr/local/bin/${script_name}
+        rm -f /usr/local/bin/${script_name} 2>/dev/null
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"

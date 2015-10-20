@@ -124,7 +124,6 @@ setup_interactive_install() {
   if using_mysql; then   
     if [ -n "$mysql" ]; then
       mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
-      mysql_create_database
       # NOTE: the InitDatabase command is being migrated from a mtwilson-console Command to a mtwilson-setup SetupTask;
       #       if this line stops working, revise to "mtwilson setup init-database mysql"
       mtwilson setup InitDatabase mysql
@@ -147,12 +146,14 @@ setup_interactive_install() {
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
-      glassfish_start_report
+      #glassfish_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   elif [ -n "$TOMCAT_HOME" ]; then
     tomcat_running
     if [ -z "$TOMCAT_RUNNING" ]; then
-      tomcat_start_report
+      #tomcat_start_report
+      /opt/mtwilson/bin/mtwilson start
     fi
   fi
    
@@ -238,7 +239,7 @@ case "$1" in
   show)
         read_property_from_file "${2}" "${package_config_filename}"
         ;;
-  #uninstall)
+  uninstall)
   #      datestr=`date +%Y-%m-%d.%H%M`
   #      webservice_uninstall "${webservice_application_name}"
   #      mkdir -p "${intel_conf_dir}"
@@ -248,8 +249,8 @@ case "$1" in
   #      if [[ "${package_dir}" == /opt/intel/* ]]; then
   #        rm -rf "${package_dir}"
   #      fi
-  #rm /usr/local/bin/${script_name}
-  #      ;;
+        rm -f /usr/local/bin/${script_name} 2>/dev/null
+        ;;
   help)
         echo "Usage: ${script_name} {setup}"
         ;;

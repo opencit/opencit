@@ -3,6 +3,26 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
+
+export INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-/tmp/mtwilson-install.log}
+
+echo "ATTESTATION SERVICE setup.sh" >>$INSTALL_LOG_FILE
+
+# this script is only run as part of the larger installation, so
+# the following variables must be defined. exit early if there is
+# a problem.
+if [ -z "$MTWILSON_HOME" ]; then
+  echo_failure "Missing environment variable: MTWILSON_HOME"
+  exit 1
+fi
+if [ -z "$MTWILSON_USERNAME" ]; then
+  echo_failure "Missing environment variable: MTWILSON_USERNAME"
+  exit 1
+fi
+
 # SCRIPT CONFIGURATION:
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=attestation-service
@@ -16,11 +36,7 @@ aikqverify_dir=${package_features_dir}/aikqverify
 #glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 
-export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
-# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 
 # if there's already a previous version installed, uninstall it
@@ -44,6 +60,7 @@ mkdir -p "${package_dir}"
 chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME "${package_dir}"
 
 # select appropriate war file
 if using_glassfish; then
@@ -80,18 +97,26 @@ fi
 #glassfish_install $GLASSFISH_PACKAGE
 
 
-# copy control script to /usr/local/bin and finish setup
-mkdir -p /usr/local/bin
-cp asctl.sh /usr/local/bin/asctl
-chmod +x /usr/local/bin/asctl
-/usr/local/bin/asctl setup
-#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
+# copy control script to $MTWILSON_HOME/bin and finish setup
+mkdir -p /opt/mtwilson/bin
+cp asctl.sh /opt/mtwilson/bin/asctl
+chmod +x /opt/mtwilson/bin/asctl
+#while changing owner of ${intel_conf_dir} need to put '/' at the end as ${intel_conf_dir} is sym link
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${intel_conf_dir}/
+chown -R $MTWILSON_USERNAME:$MTWILSON_USERNAME ${package_dir}
+
+echo "Attestation service installer calling asctl setup..." >>$INSTALL_LOG_FILE
+/opt/mtwilson/bin/asctl setup
+
+aikqverify_install_prereq() {
+  echo "Installing aikqverify prereqs..."
+  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev"
+  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
+  auto_install "Developer tools" "DEVELOPER" >> "$INSTALL_LOG_FILE"
+}
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
 compile_aikqverify() {
-  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
-  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
-  auto_install "Developer tools" "DEVELOPER" 
   AIKQVERIFY_OK=''
   cd ${aikqverify_dir}/bin
   make  2>&1 > /dev/null
@@ -102,6 +127,16 @@ compile_aikqverify() {
     AIKQVERIFY_OK=yes
   fi
 }
+
+if [ `whoami` == "root" ]; then 
+ if [ -f /usr/local/bin/asctl -o -L /usr/local/bin/asctl ]; then
+  echo "Deleting existing binary or link: /usr/local/bin/asctl"
+  rm -f /usr/local/bin/asctl 
+ fi
+ ln -s /opt/mtwilson/bin/asctl /usr/local/bin/asctl
+ aikqverify_install_prereq
+fi
+#register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
 
 mkdir -p ${aikqverify_dir}/bin
 mkdir -p ${aikqverify_dir}/data
@@ -115,9 +150,11 @@ else
   echo "Compile FAILED" >> $INSTALL_LOG_FILE
 fi
 
-chown -R $MTWILSON_OWNER "${aikqverify_dir}"
-chmod -R 700 "${aikqverify_dir}"
-chmod -R 600 "${aikqverify_dir}/data"
+#change user if root "CODE REVIEW"
+if [ `whoami` == "root" ]; then
+ chown -R $MTWILSON_USERNAME "${aikqverify_dir}"
+ chmod -R 700 "${aikqverify_dir}"
+ chmod -R 600 "${aikqverify_dir}/data"
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
@@ -130,4 +167,3 @@ elif using_tomcat; then
   #tomcat_permissions "${aikqverify_dir}"
   #tomcat_permissions "${package_var_bin_dir}" 
 fi
-
