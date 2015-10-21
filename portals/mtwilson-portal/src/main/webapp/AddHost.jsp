@@ -52,7 +52,7 @@
 					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
 				</div>
 			</div>
-		    -->
+		    --><br>
 			<div class="singleDiv" id="hostPortDisplayDiv">
 				<div class="labelDiv" data-i18n="input.host_port">Host Port:</div>
 				<div class="valueDiv" >
