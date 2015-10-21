@@ -4,7 +4,7 @@
 
 /* Move down content because we have a fixed navbar that is 72px tall */
 body {
-  padding-top: 72px;
+  padding-top: 0px;
 }
 
 
