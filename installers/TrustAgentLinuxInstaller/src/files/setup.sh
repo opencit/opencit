@@ -440,7 +440,7 @@ register_startup_script $TRUSTAGENT_BIN/tagent.sh tagent 21
 
 ### INSTALL MEASUREMENT AGENT
 echo "Installing measurement agent..."
-TBOOTXM_PACKAGE=`ls -1 tbootxm-linux-makeself-*.bin 2>/dev/null | tail -n 1`
+TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
 if [ -z "$TBOOTXM_PACKAGE" ]; then
   echo_failure "Failed to find measurement agent installer package"
   exit -1
