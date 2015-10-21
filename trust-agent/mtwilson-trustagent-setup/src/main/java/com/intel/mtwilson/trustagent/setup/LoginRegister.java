@@ -27,13 +27,13 @@ import java.util.Properties;
  *
  * @author ssbangal
  */
-public class PreRegisterHostAccessDetails extends AbstractSetupTask {
+public class LoginRegister extends AbstractSetupTask {
     
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PreRegisterHostAccessDetails.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginRegister.class);
     private static final String ipv6RegEx = "^([0-9A-Fa-f]{1,4}:){7}(.)*$";
     private TrustagentConfiguration trustagentConfiguration;
-    private String trustagentUserName;
-    private String trustagentPassword;
+    private String trustagentLoginUserName;
+    private String trustagentLoginPassword;
     private String url;
     private String username;
     private String password;
@@ -84,9 +84,9 @@ public class PreRegisterHostAccessDetails extends AbstractSetupTask {
     protected void validate() throws Exception {
         trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
 
-        trustagentUserName = trustagentConfiguration.getTrustAgentLoginId();
-        log.debug("Retrieving username {} from the configuration file.", trustagentUserName);        
-        if( trustagentUserName == null || trustagentUserName.isEmpty() ) {
+        trustagentLoginUserName = trustagentConfiguration.getTrustAgentLoginUserName();
+        log.debug("Retrieving username {} from the configuration file.", trustagentLoginUserName);        
+        if( trustagentLoginUserName == null || trustagentLoginUserName.isEmpty() ) {
             validation("TrustAgent User name is not set.");
         }
         
@@ -96,13 +96,13 @@ public class PreRegisterHostAccessDetails extends AbstractSetupTask {
         log.debug("Verifying user & his permissions @ {} & {}.", userFile.getAbsolutePath(), permissionFile.getAbsolutePath());
         
         LoginDAO loginDAO = new LoginDAO(userFile, permissionFile);
-        UserPassword userPassword = loginDAO.findUserByName(trustagentUserName);
+        UserPassword userPassword = loginDAO.findUserByName(trustagentLoginUserName);
         if( userPassword == null ) {
-            validation("User does not exist: %s", trustagentUserName);
+            validation("User does not exist: %s", trustagentLoginUserName);
         }
-        List<UserPermission> userPermissionList = loginDAO.getPermissions(trustagentUserName);
+        List<UserPermission> userPermissionList = loginDAO.getPermissions(trustagentLoginUserName);
         if( userPermissionList == null ||  userPermissionList.isEmpty() ) {
-            validation("User does not have permissions assigned: %s", trustagentUserName);
+            validation("User does not have permissions assigned: %s", trustagentLoginUserName);
         }  
     }
 
@@ -110,23 +110,29 @@ public class PreRegisterHostAccessDetails extends AbstractSetupTask {
     protected void execute() throws Exception {
         log.info("Starting the process to create and pre-register the host login and password with attestation service.");
 
-        if( System.getenv("AUTO_GENERATE_LOGIN_DETAILS") != null && System.getenv("AUTO_GENERATE_LOGIN_DETAILS").equalsIgnoreCase("true")) {
-            trustagentUserName = RandomUtil.randomHexString(20);
-            log.debug("Generated random user name {}", trustagentUserName);         
+        // First check if the user has provided the login name and password
+        if (System.getenv("TRUSTAGENT_LOGIN_USERNAME") != null) 
+            trustagentLoginUserName = System.getenv("TRUSTAGENT_LOGIN_USERNAME");
 
-            trustagentPassword = RandomUtil.randomHexString(20);
-            log.debug("Generated random password {}", trustagentPassword); 
-        } else {
-            if (System.getenv("LOGIN_ID") != null) 
-                trustagentUserName = System.getenv("LOGIN_ID");
-
-            if (System.getenv("LOGIN_PASSWORD") != null) 
-                trustagentPassword = System.getenv("LOGIN_PASSWORD");            
-        }
+        if (System.getenv("TRUSTAGENT_LOGIN_PASSWORD") != null) 
+            trustagentLoginPassword = System.getenv("TRUSTAGENT_LOGIN_PASSWORD");            
         
-        if (trustagentUserName != null && trustagentPassword != null) {
+        if ((trustagentLoginUserName == null || trustagentLoginUserName.isEmpty()) && (trustagentLoginPassword == null || trustagentLoginPassword.isEmpty())) {
+            log.info("Administrator has not specified the login username and password. Checking if TRUSTAGENT_LOGIN_REGISTER flag is set or not");
             
-            if( System.getenv("PRE_REGISTER_HOST") != null && System.getenv("PRE_REGISTER_HOST").equalsIgnoreCase("true")) {
+            if (System.getenv("TRUSTAGENT_LOGIN_REGISTER") != null && System.getenv("TRUSTAGENT_LOGIN_REGISTER").equalsIgnoreCase("true")) {                
+                log.info("Generating random user name and password for trust agent access since administrator has not specified the username and password.");
+                trustagentLoginUserName = RandomUtil.randomHexString(20);
+                log.debug("Generated random user name {}", trustagentLoginUserName);         
+
+                trustagentLoginPassword = RandomUtil.randomHexString(20);
+                log.debug("Generated random password.");                 
+            }            
+        }
+                
+        if (trustagentLoginUserName != null && !trustagentLoginUserName.isEmpty() && trustagentLoginPassword != null && !trustagentLoginPassword.isEmpty()) {
+            
+            if( System.getenv("TRUSTAGENT_LOGIN_REGISTER") != null && System.getenv("TRUSTAGENT_LOGIN_REGISTER").equalsIgnoreCase("true")) {
             
                 TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
                         trustagentConfiguration.getTrustagentKeystorePassword()).build();
@@ -146,22 +152,24 @@ public class PreRegisterHostAccessDetails extends AbstractSetupTask {
                     if (hostName.equalsIgnoreCase("localhost") || hostName.equalsIgnoreCase("127.0.0.1") || hostName.matches(ipv6RegEx))
                         iterator.remove();
                 }
-                hostClientObj.preRegisterHostDetails(hostNames, trustagentUserName, trustagentPassword);
+                hostClientObj.preRegisterHostDetails(hostNames, trustagentLoginUserName, trustagentLoginPassword);
 
                 log.info("Successfully registered the host access information with attestation service.");
             }
                         
             // Store the user and its corresponding permissions
             Password pwd = new Password();
-            pwd.execute(new String[] {trustagentUserName, trustagentPassword, "*:*"});
+            pwd.execute(new String[] {trustagentLoginUserName, trustagentLoginPassword, "*:*"});
             
             // We need to store the user name here so that we can use for validation. Password will not be stored in the property file
-            log.debug("Setting username {} in the configuration file.", trustagentUserName);
-            getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_LOGIN_ID, trustagentUserName);
+            log.debug("Setting username {} in the configuration file.", trustagentLoginUserName);
+            getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_LOGIN_USERNAME, trustagentLoginUserName);
             
             log.info("Successfully updated the property file with the username and shiro files with username and password.");
         } else {
-            log.error("PreRegisterHostAccessDetails: Invalid user name or password specified.");
+            log.error("PreRegisterHostAccessDetails: Invalid user name or password specified. Either specify both TRUSTAGENT_LOGIN_USERNAME & TRUSTAGENT_LOGIN_PASSWORD "
+                    + "or don't specify them so that it would be autogenerated. If the login and password is not specified, ensure TRUSTAGENT_LOGIN_REGISTER flag is set"
+                    + "to true.");
         }
     }    
 }
