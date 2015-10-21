@@ -555,6 +555,16 @@ h5, h6
 	padding-right: 20px;
 	float: left;
 }
+.labelDivEditMle{
+    width: 155px;
+    padding-right: 20px;
+    float: left;
+}
+.labelDivEditMleManifest{
+    width: 160px;
+    padding-right: 20px;
+    float: left;
+}
 .labelDivConfig{
 	width: 180px;
 	padding-right: 25px;
@@ -631,6 +641,7 @@ h5, h6
 }
 .uploadForm{
 	float: left;
+	margin-left: 2px;
 }
 .subLabelDivgkv{
 text-align: center;	
@@ -697,9 +708,11 @@ text-align: center;
 	border:1px solid #3A4F63;
 }
 .textAreaBoxClass{
-	width:300px; 
+	width:235px; 
 	border: 1px solid #3A4F63;
-        height: 35px;;
+    height: 40px;
+	text-align: left;
+	overflow-y: scroll;
 }
 
 .getReportButton{
@@ -725,7 +738,7 @@ text-align: center;
 .ui-dialog .ui-dialog-titlebar-close { position: absolute; right: .3em; top: 50%; width: 19px; margin: -16px 0 0 0; padding: 1px; height: 18px;padding: 0;font-size: large;color: black; }
 .ui-dialog .ui-dialog-titlebar-close span { display: block; margin: 1px;}
 .ui-dialog .ui-dialog-titlebar-close:hover, .ui-dialog .ui-dialog-titlebar-close:focus { padding: 0; }
-.ui-dialog .ui-dialog-content { border: 0; padding: .5em 1em; background-color: white; overflow: initial;}
+.ui-dialog .ui-dialog-content { border: 0; padding: .5em 1em; background-color: white; overflow: auto;}
 .ui-dialog .ui-dialog-buttonpane { text-align: left; border-width: 1px 0 0 0; background-image: none;/* margin: .5em 0 0 0; */padding: .3em 1em .5em .4em; }
 .ui-dialog .ui-dialog-buttonpane button { float: right; margin: .5em .4em .5em 0; cursor: pointer; /*padding: .2em .6em .3em .6em;*/ line-height: 1.4em; width:auto; overflow:visible; }
 .ui-dialog .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
@@ -779,6 +792,12 @@ text-align: center;
 	width: 500px;
 	height: 22px;
 	float: left;
+}
+.textBox_Border_Mle{
+    width: 500px;
+    height: 23px;
+    float: left;
+	margin-left: 2px;
 }
 .registerHostTable{
 	float: left;

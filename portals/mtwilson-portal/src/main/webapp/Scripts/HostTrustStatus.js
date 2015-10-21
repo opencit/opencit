@@ -77,10 +77,10 @@ function populateHostTrustDataIntoTable(hostDetails) {
 				}*/
 				
 				str+='<td class="row9">'+ getHTMLEscapedMessage(hostDetails[item].updatedOn) +'</td>'+
-				'<td nowrap align="center" class="row10"><a href="" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh" data-toggle="tooltip" title="Refresh"><span class="glyphicon glyphicon-refresh"></span></a></td>'+
+				'<td nowrap align="center" class="row10"><a href="#" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh" data-toggle="tooltip" title="Refresh"><span class="glyphicon glyphicon-refresh"></span></a></td>'+
 				'<td align="center" class="row11"><a><img src="images/trust_assertion.png" onclick="fnGetTrustSamlDetails(\''+hostDetails[item].hostName+'\')"/></a></td>'+
-			    '<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
-				'<td class="row12">';
+			    '<td class="rowHelp" style="text-align: center"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
+				'<td class="row12" style="text-align: center">';
 				
 				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+ getHTMLEscapedMessage(hostDetails[item].errorMessage) +'</textarea>';}
 				str+='</td>'+
