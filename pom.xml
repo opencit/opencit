@@ -21,7 +21,6 @@
   <modules>
     <!--<module>maven</module>-->
     <module>common</module>
-    <module>util</module>
     <module>database</module>
     <module>integration</module>
     <module>trust-agent</module>

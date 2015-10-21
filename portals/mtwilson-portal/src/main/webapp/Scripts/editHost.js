@@ -25,17 +25,17 @@ function populateEditHostDataIntoTable(hostDetails) {
                 var vCenterDetails = hostDetails[item].vCenterDetails;
                 if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
 		str+='<tr class="'+classValue+'">'+
-			'<td class="editRow1"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-toggle="tooltip" title="Edit Host">' + getHTMLEscapedMessage(hostDetails[item].hostName) + '</a></td>'+
+			'<td class="editRow1"><a href="javascript:;" onclick="fnEditHostPageInfo(this)" data-toggle="tooltip" title="Edit Host">' + getHTMLEscapedMessage(hostDetails[item].hostName) + '</a></td>'+
 			//'<td class="editRow2">'+hostDetails[item].hostIPAddress+'&nbsp;</td>'+
-			'<td class="editRow3">'+ getHTMLEscapedMessage(hostDetails[item].hostPort) + '&nbsp;</td>'+
-			'<td class="editRow10">'+ getHTMLEscapedMessage(hostDetails[item].hostDescription) + '&nbsp;</td>'+
-			'<td class="editRow4">'+ getHTMLEscapedMessage(hostDetails[item].biosName) + '&nbsp;</td>'+
-			'<td class="editRow5">'+ getHTMLEscapedMessage(hostDetails[item].biosBuildNo) +'&nbsp;</td>'+
-			'<td class="editRow6">'+ getHTMLEscapedMessage(hostDetails[item].vmmName) +'&nbsp;</td>'+
-			'<td class="editRow7">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo) +'&nbsp;</td>'+
-			'<td class="editRow8">'+ getHTMLEscapedMessage(hostDetails[item].emailAddress) +'&nbsp;</td>'+
-			'<td class="editRow9">'+ getHTMLEscapedMessage(vCenterDetails) +'&nbsp;</td>'+
-	                '<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0" style="background-color: white"><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-toggle="tooltip" title="Delete Host"><span class="glyphicon glyphicon-trash"></span></a></td>'+
+			'<td class="editRow3">'+ getHTMLEscapedMessage(hostDetails[item].hostPort) + '</td>'+
+			'<td class="editRow10">'+ getHTMLEscapedMessage(hostDetails[item].hostDescription) + '</td>'+
+			'<td class="editRow4">'+ getHTMLEscapedMessage(hostDetails[item].biosName) + '</td>'+
+			'<td class="editRow5">'+ getHTMLEscapedMessage(hostDetails[item].biosBuildNo) +'</td>'+
+			'<td class="editRow6">'+ getHTMLEscapedMessage(hostDetails[item].vmmName) +'</td>'+
+			'<td class="editRow7">'+ getHTMLEscapedMessage(hostDetails[item].vmmBuildNo) +'</td>'+
+			'<td class="editRow8">'+ getHTMLEscapedMessage(hostDetails[item].emailAddress) +'</td>'+
+			'<td class="editRow9">'+ getHTMLEscapedMessage(vCenterDetails) +'</td>'+
+	                '<td hostID="' + getHTMLEscapedMessage(hostDetails[item].hostId) +'" class="editRow0"><a href="javascript:;" onclick="fnDeleteHostInfo(this)" data-toggle="tooltip" title="Delete Host"><span class="glyphicon glyphicon-trash"></span></a></td>'+
 		'</tr>';
 	}
 	$('#mainEditHostDetailsContent table').html(str);

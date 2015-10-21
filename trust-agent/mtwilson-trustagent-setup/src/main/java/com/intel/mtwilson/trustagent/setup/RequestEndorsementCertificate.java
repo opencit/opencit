@@ -112,6 +112,7 @@ public class RequestEndorsementCertificate extends AbstractSetupTask {
             tpmEndorsementsClient = new TpmEndorsements(config.getMtWilsonClientProperties());
         }
         catch(Exception e) {
+            log.error("Cannot configure TPM Endorsements API client", e);
             configuration(e, "Cannot configure TPM Endorsements API client");
         }
         
