@@ -708,9 +708,11 @@ text-align: center;
 	border:1px solid #3A4F63;
 }
 .textAreaBoxClass{
-	width:300px; 
+	width:235px; 
 	border: 1px solid #3A4F63;
-        height: 35px;;
+    height: 40px;
+	text-align: left;
+	overflow-y: scroll;
 }
 
 .getReportButton{
