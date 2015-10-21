@@ -149,9 +149,9 @@ function SetRequired(element) {
 			$(this).parent().find('.validationErrorDiv').remove();
 		});
 		$('#vcenterStringElement').hide();
-                $('#openSourceStringElement').find('input').each(function() {
-                    $(this).parent().append(reqStr);
-                });
+//                $('#openSourceStringElement').find('input').each(function() {
+//                    $(this).parent().append(reqStr);
+//                });
                 $('#openSourceStringElement').show();
 		$('#citrixStringElement').hide();
                 $('#MainContent_tbHostPort').val("1443");
@@ -225,8 +225,8 @@ function chechAddHostValidation() {
 	var valid4 = true;
 	if (isVmware == 0) { // TA
 		valid2 = fnTestValidation('MainContent_tbHostPort',normalReg);
-                valid3 =  fnTestValidation('MainContent_tbVopensourceLoginId',new RegExp());
-                valid3 =  fnTestValidation('MainContent_tbVopensourcePass',new RegExp());
+                //valid3 =  fnTestValidation('MainContent_tbVopensourceLoginId',new RegExp());
+                //valid3 =  fnTestValidation('MainContent_tbVopensourcePass',new RegExp());
 		//valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
 		/* Soni_Begin_27/09/2012_for_validating IP address */
 		//valid4 = isValidIPAddress('MainContent_tbHostIP');

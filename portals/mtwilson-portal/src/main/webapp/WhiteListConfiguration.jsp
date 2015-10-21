@@ -105,14 +105,14 @@
                                 <div class="labelDiv" data-i18n="input.username">User Name:</div>
                                 <div class="valueDiv">
                                     <input type="text" class="textBox_Border" id="whiteListOpenSource_userName">
-                                    <span class="requiredField">*</span>
+                                    <span>&nbsp;***</span>
                                 </div>
                             </div>
                             <div class="singleDiv">
                                 <div class="labelDiv" data-i18n="input.password">Password:</div>
                                 <div class="valueDiv">
                                     <input type="password" class="textBox_Border" id="whiteListOpenSource_password">
-                                    <span class="requiredField">*</span>
+                                    <span>&nbsp;***</span>
                                 </div>
                             </div>
                         </div>
