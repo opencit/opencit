@@ -41,7 +41,7 @@ function fnViewRequestSuccess(responseJSON) {
 function fnDeleteSelectedRequest(element) {
         $('#successMessage').html('');
         var row = $(element).parent().parent();
-        var data="fingerprint="+$(row).attr('fingerprint');
+        var data="fingerprint="+$(row).find("td:eq(0)").attr('title');
 	$("#dialog-confirm").dialog("open");
 	//$("#dialog-confirm").dialog("option", "title", "Confirm Delete");
 	//$("#dialog-confirm").html($("#alert_delete_request").text());
