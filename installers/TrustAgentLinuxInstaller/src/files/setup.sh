@@ -57,7 +57,7 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-$DEFAULT_TRUSTAGENT_HOME}
 TRUSTAGENT_LAYOUT=${TRUSTAGENT_LAYOUT:-home}
 
-# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env and the
+# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env.d and the
 # administrator may use a symlink if necessary to place it anywhere else
 export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
 

@@ -24,6 +24,9 @@ import com.intel.mtwilson.as.rest.v2.model.VMAttestationFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.VMAttestationLocator;
 import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import com.intel.mtwilson.jaxrs2.server.resource.DocumentRepository;
+import com.intel.mtwilson.measurement.xml.FileMeasurementType;
+import com.intel.mtwilson.measurement.xml.DirectoryMeasurementType;
+import com.intel.mtwilson.measurement.xml.MeasurementType;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.XmlMeasurementLog;
@@ -40,8 +43,10 @@ import com.intel.mtwilson.repository.RepositorySearchException;
 import com.intel.mtwilson.trustagent.model.VMAttestationRequest;
 import com.intel.mtwilson.trustagent.model.VMQuoteResponse;
 import static com.intel.mtwilson.trustagent.model.VMQuoteResponse.QuoteType.XML_DSIG;
+import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.util.xml.dsig.XmlDsigVerify;
-import com.intel.mtwilson.vmquote.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
+import com.intel.mtwilson.measurement.xml.Measurements;
 import com.intel.mtwilson.vmquote.xml.VMQuote;
 import gov.niarl.his.privacyca.TpmUtils;
 import java.io.FileInputStream;
@@ -50,7 +55,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -327,23 +331,38 @@ public class VMAttestationRepository implements DocumentRepository<VMAttestation
 
                                     actualModules = new XmlMeasurementLog(PcrIndex.PCR19, measurementXml).getMeasurements();
 
-                                    String whiteListXml = trustPolicyXml.substring(trustPolicyXml.indexOf("<Whitelist"), (trustPolicyXml.indexOf("</Whitelist>") + "</Whitelist>".length()));
-                                    whiteListXml = whiteListXml.replaceFirst("<Whitelist", "<Measurements xmlns=\"mtwilson:trustdirector:measurements:1.1\"");
-                                    whiteListXml = whiteListXml.replaceAll("</Whitelist>", "</Measurements>");
-
+                                    // creating Measurements Object which will be converted into measurement xml string
+                                    Measurements whitelistObj = new Measurements();
+                                    List<MeasurementType> measurements = whitelistObj.getMeasurements();
+                                    for (com.intel.mtwilson.trustpolicy.xml.Measurement measurement: vmTrustPolicy.getWhitelist().getMeasurements()){
+                                        MeasurementType measurementType;
+                                        if(measurement instanceof DirectoryMeasurement){
+                                            DirectoryMeasurementType dirMeasurementType = new DirectoryMeasurementType();
+                                            com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement dirMeasurement = (com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement) measurement;
+                                            dirMeasurementType.setExclude(dirMeasurement.getExclude());
+                                            dirMeasurementType.setInclude(dirMeasurement.getInclude());
+                                            measurementType = dirMeasurementType;
+                                        }
+                                        else{
+                                            measurementType = new FileMeasurementType();
+                                        }
+                                        measurementType.setPath(measurement.getPath());
+                                        measurementType.setValue(measurement.getValue());
+                                        measurements.add(measurementType);
+                                    }
+                                    String whiteListXml = jaxb.write(whitelistObj);
+                                    
                                     whitelistModules = new XmlMeasurementLog(PcrIndex.PCR19, whiteListXml).getMeasurements();
-
                                     VmMeasurementLogEquals vmMeasurementLogEqualsRule = new VmMeasurementLogEquals();                                        
                                     vmRuleResult = vmMeasurementLogEqualsRule.apply2(actualModules, whitelistModules);
 
                                     vmTrustReport.addResult(vmRuleResult);
-                                    
 
                                     // Create a map of the VM attributes that needs to be added to the SAML assertion.
                                     Map<String, String> vmAttributes = new HashMap<>();
                                     vmAttributes.put("VM_Trust_Status", String.valueOf(isVMTrusted));
                                     vmAttributes.put("VM_Instance_Id", vmInstanceIdFromQuote);
-                                    vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy());
+                                    vmAttributes.put("VM_Trust_Policy", vmTrustPolicy.getLaunchControlPolicy().value());
                                     
                                     log.debug("VMAttestation:Create - About to generate the VM attestation report for VM with ID {}", vmInstanceIdFromQuote);
                                     VMAttestation report = new HostTrustBO().getVMAttestationReport(obj, vmAttributes, item.getIncludeHostReport());
