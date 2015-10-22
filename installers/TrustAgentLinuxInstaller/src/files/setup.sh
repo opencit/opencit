@@ -111,14 +111,20 @@ else
   echo_warning "Installing as $TRUSTAGENT_USERNAME into $TRUSTAGENT_HOME"  
 fi
 
-# define location variables but do not export them yet
-TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
-TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
-TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
-TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
-TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
-TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
-TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
+# define application directory layout
+if [ "$TRUSTAGENT_LAYOUT" == "linux" ]; then
+  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-/etc/trustagent}
+  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-/var/opt/trustagent}
+  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-/var/log/trustagent}
+elif [ "$TRUSTAGENT_LAYOUT" == "home" ]; then
+  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
+  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
+  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
+fi
+export TRUSTAGENT_VAR=${TRUSTAGENT_VAR:-$TRUSTAGENT_HOME/var}
+export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
+export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
+export TRUSTAGENT_BACKUP=${TRUSTAGENT_BACKUP:-$TRUSTAGENT_REPOSITORY/backup}
 
 # before we start, clear the install log (directory must already exist; created above)
 export INSTALL_LOG_FILE=$TRUSTAGENT_LOGS/install.log
@@ -178,22 +184,6 @@ if [ -f "$existing_tagent" ]; then
   $existing_tagent stop
 fi
 
-# define application directory layout
-if [ "$TRUSTAGENT_LAYOUT" == "linux" ]; then
-  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-/etc/trustagent}
-  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-/var/opt/trustagent}
-  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-/var/log/trustagent}
-elif [ "$TRUSTAGENT_LAYOUT" == "home" ]; then
-  export TRUSTAGENT_CONFIGURATION=${TRUSTAGENT_CONFIGURATION:-$TRUSTAGENT_HOME/configuration}
-  export TRUSTAGENT_REPOSITORY=${TRUSTAGENT_REPOSITORY:-$TRUSTAGENT_HOME/repository}
-  export TRUSTAGENT_LOGS=${TRUSTAGENT_LOGS:-$TRUSTAGENT_HOME/logs}
-fi
-export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
-export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
-
-# note that the env dir is not configurable; it is defined as "env" under home
-export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env
-
 trustagent_backup_configuration() {
   if [ -n "$TRUSTAGENT_CONFIGURATION" ] && [ -d "$TRUSTAGENT_CONFIGURATION" ]; then
     mkdir -p $TRUSTAGENT_BACKUP
@@ -207,11 +197,23 @@ trustagent_backup_configuration() {
     cp -r $TRUSTAGENT_CONFIGURATION $backupdir
   fi
 }
+trustagent_backup_repository() {
+  if [ -n "$TRUSTAGENT_REPOSITORY" ] && [ -d "$TRUSTAGENT_REPOSITORY" ]; then
+    mkdir -p $TRUSTAGENT_BACKUP
+    if [ $? -ne 0 ]; then
+      echo_warning "Cannot create backup directory: $TRUSTAGENT_BACKUP"
+      echo_warning "Backup will be stored in /tmp"
+      TRUSTAGENT_BACKUP=/tmp
+    fi
+    datestr=`date +%Y%m%d.%H%M`
+    backupdir=$TRUSTAGENT_BACKUP/trustagent.repository.$datestr
+    cp -r $TRUSTAGENT_REPOSITORY $backupdir
+  fi
+}
 
-# backup current configuration, if present
+# backup current configuration and data, if they exist
 trustagent_backup_configuration
-
-
+#trustagent_backup_repository
 
 # store directory layout in env file
 echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-layout
@@ -249,55 +251,21 @@ TRUSTAGENT_V_1_2_CONFIGURATION=/etc/intel/cloudsecurity
 package_config_filename=${TRUSTAGENT_V_1_2_CONFIGURATION}/trustagent.properties
 ASSET_TAG_SETUP="y"
 
-# commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-APPLICATION_YUM_PACKAGES="openssl  trousers trousers-devel tpm-tools make gcc unzip authbind"
-# commented out from apt packages: libcurl4-openssl-dev 
-APPLICATION_APT_PACKAGES="openssl libssl-dev libtspi-dev libtspi1 trousers make gcc unzip authbind"
-# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
-APPLICATION_YAST_PACKAGES="openssl libopenssl-devel trousers trousers-devel tpm-tools make gcc unzip authbind"
-# SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
-APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers-devel authbind"
-# other packages in suse:  libopenssl0_9_8 
-
-
-# Automatic install steps:
-# 1. Install prereqs
-# 2. Backup old files
-# 3. Create directory structure
-# 4. Install Mt Wilson Linux utilities (and use them in this script)
-# 5. Install JDK
-# 6. Compile TPM commands
-# 7. Install Trust Agent files
+# make sure unzip and authbind are installed
+#java_required_version=1.7.0_51
+TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
+TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
+TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
 
 ##### install prereqs can only be done as root
 if [ "$(whoami)" == "root" ]; then
-  auto_install "TrustAgent requirements" "APPLICATION"
+  auto_install "Installer requirements" "TRUSTAGENT"
+  if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 else
   echo_warning "Required packages:"
-  auto_install_preview "TrustAgent requirements" "APPLICATION"
+  auto_install_preview "TrustAgent requirements" "TRUSTAGENT"
 fi
-
-##### create directory structure
-
-trustagent_backup_repository() {
-  if [ -n "$TRUSTAGENT_REPOSITORY" ] && [ -d "$TRUSTAGENT_REPOSITORY" ]; then
-    datestr=`date +%Y%m%d.%H%M`
-    backupdir=/var/backup/trustagent.repository.$datestr
-    cp -r $TRUSTAGENT_REPOSITORY $backupdir
-  fi
-}
-
-# backup current configuration and data, if they exist
-#trustagent_backup_configuration
-trustagent_backup_repository
-
-unzip -DD -o $ZIP_PACKAGE -d "$TRUSTAGENT_HOME" >> $logfile  2>&1
-# create application directories (chown will be repeated near end of this script, after setup)
-for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_LOGS $TRUSTAGENT_BIN $TRUSTAGENT_JAVA; do
-  mkdir -p $directory
-  chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory
-  chmod 700 $directory
-done
 
 # update logback.xml with configured trustagent log directory
 if [ -f "$TRUSTAGENT_CONFIGURATION/logback.xml" ]; then
@@ -384,20 +352,6 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
-# make sure unzip and authbind are installed
-#java_required_version=1.7.0_51
-# commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
-TRUSTAGENT_YUM_PACKAGES="zip unzip authbind openssl tpm-tools make gcc trousers trousers-devel"
-# commented out from apt packages: libcurl4-openssl-dev 
-TRUSTAGENT_APT_PACKAGES="zip unzip authbind openssl libssl-dev libtspi-dev libtspi1 make gcc trousers trousers-dbg"
-# commented out from YAST packages: libcurl-devel tpm-tools-devel.  also zlib and zlib-devel are dependencies of either openssl or trousers-devel
-TRUSTAGENT_YAST_PACKAGES="zip unzip authbind openssl libopenssl-devel tpm-tools make gcc trousers trousers-devel"
-# SUSE uses zypper:.  omitting libtspi1 because trousers-devel already depends on a specific version of it which will be isntalled automatically
-TRUSTAGENT_ZYPPER_PACKAGES="zip unzip authbind openssl libopenssl-devel libopenssl1_0_0 openssl-certs trousers trousers-devel"
-# other packages in suse:  libopenssl0_9_8
-auto_install "Installer requirements" "TRUSTAGENT"
-if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
-
 # setup authbind to allow non-root trustagent to listen on ports 80 and 443
 if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
   touch /etc/authbind/byport/80 /etc/authbind/byport/443
@@ -418,7 +372,11 @@ unzip -oq $TRUSTAGENT_ZIPFILE -d $TRUSTAGENT_HOME
 
 ## copy utilities script file to application folder
 #cp $UTIL_SCRIPT_FILE $TRUSTAGENT_HOME/bin/functions.sh
-cp functions $TRUSTAGENT_BIN
+#cp functions $TRUSTAGENT_BIN
+mkdir -p "$TRUSTAGENT_HOME"/share/scripts
+cp version "$TRUSTAGENT_HOME"/share/scripts/version.sh
+cp functions "$TRUSTAGENT_HOME"/share/scripts/functions.sh
+chmod -R 700 "$TRUSTAGENT_HOME"/share/scripts
 
 # set permissions
 chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $TRUSTAGENT_HOME
@@ -859,7 +817,6 @@ for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRU
   echo "chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory" >>$logfile
   chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory 2>>$logfile
 done
-
 
 if [ "$(whoami)" == "root" ]; then
   echo "Updating system information"

@@ -2827,6 +2827,7 @@ tomcat_detect() {
           return 0
         fi
       fi
+    fi
   done
   #echo_failure "Cannot find Tomcat"
   tomcat_clear
