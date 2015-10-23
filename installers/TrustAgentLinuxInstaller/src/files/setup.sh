@@ -782,10 +782,13 @@ else
   echo_warning "Skipping updating system information"
 fi
 
-# create a trustagent username "mtwilson" with no password and all privileges
-# which allows mtwilson to access it until mtwilson UI is updated to allow
-# entering username and password for accessing the trust agent
-tagent password mtwilson --nopass *:*
+  # create a trustagent username "mtwilson" with no password and all privileges
+  # which allows mtwilson to access it until mtwilson UI is updated to allow
+  # entering username and password for accessing the trust agent
+  
+  # Starting with 3.0, we have a separate task that creates a new user name and password per host
+  # So we do not need to create this user without password. This is would address the security issue as well
+  #/usr/local/bin/tagent password mtwilson --nopass *:*
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey)
 # and make sure it's successful before trying to start the trust agent

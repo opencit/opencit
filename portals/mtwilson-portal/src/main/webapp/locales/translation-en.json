@@ -261,6 +261,7 @@
         "vmware_cluster": "VMware Cluster:",
         "vcenter_server": "vCenter Server:",
         "xen_details": "XenServer Details:",
+        "opensource_details": "Server Details",
         "wl_host": "Whitelist Host:",
         "manifest_list": "Manifest List:",
         "required_manifests": "Required Manifests:",
