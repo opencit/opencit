@@ -3330,13 +3330,27 @@ java_detect() {
     searchdir=/
   else
     #TODO update it to $MTWILSON_HOME
-    searchdir=/opt/mtwilson
+    if [ -d "/opt/mtwilson" ]; then
+      searchdir="/opt/mtwilson"
+    elif [ -d "/opt/trustagent" ]; then
+      searchdir="/opt/trustagent"
+    else
+      searchdir="/opt/mtwilson"
+    fi
   fi
 
-  JAVA_JDK_CANDIDATES=$(find /opt/mtwilson -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
-  if [ -z "$JAVA_JDK_CANDIDATES" ]; then
-    JAVA_JDK_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  if [ -d "/opt/mtwilson" ]; then
+    javaDefaultSearchDir="/opt/mtwilson"
+  elif [ -d "/opt/trustagent" ]; then
+    javaDefaultSearchDir="/opt/trustagent"
+  else
+    javaDefaultSearchDir="/opt/mtwilson"
   fi
+
+  JAVA_JDK_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  #if [ -z "$JAVA_JDK_CANDIDATES" ]; then
+  #  JAVA_JDK_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java)
+  #fi
   for c in $JAVA_JDK_CANDIDATES; do
     local java_bindir=`dirname $c`
     if [ -f "$java_bindir/java" ]; then
@@ -3351,10 +3365,10 @@ java_detect() {
   done
   echo "Cannot find JDK"
 
-  JAVA_JRE_CANDIDATES=$(find /opt/mtwilson -name java 2>/dev/null | grep jre | grep bin/java)
-  if [ -z "$JAVA_JRE_CANDIDATES" ]; then
-    JAVA_JRE_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jre | grep bin/java)
-  fi
+  JAVA_JRE_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep jre | grep bin/java)
+  #if [ -z "$JAVA_JRE_CANDIDATES" ]; then
+  #  JAVA_JRE_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep jre | grep bin/java)
+  #fi
   for c in $JAVA_JRE_CANDIDATES; do
     java_bindir=`dirname $c`
     if [ -f "$java_bindir/java" ]; then
@@ -3369,10 +3383,10 @@ java_detect() {
   done
   echo "Cannot find JRE"
 
-  JAVA_BIN_CANDIDATES=$(find /opt/mtwilson -name java 2>/dev/null | grep bin/java)
-  if [ -z "$JAVA_BIN_CANDIDATES" ]; then
-    JAVA_BIN_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep bin/java)
-  fi
+  JAVA_BIN_CANDIDATES=$(find "$javaDefaultSearchDir" -name java 2>/dev/null | grep bin/java)
+  #if [ -z "$JAVA_BIN_CANDIDATES" ]; then
+  #  JAVA_BIN_CANDIDATES=$(find $searchdir -name java 2>/dev/null | grep bin/java)
+  #fi
   for c in $JAVA_BIN_CANDIDATES; do
     java_bindir=`dirname $c`
     # in non-JDK and non-JRE folders the "java" command may be a symlink:
@@ -3492,7 +3506,11 @@ java_install() {
     do
       #echo "$f"
       if [ -d "$f" ]; then
-        mv "$f" /opt/mtwilson
+        if [ -d "/opt/mtwilson/share" ]; then
+          mv "$f" "/opt/mtwilson/share"
+        elif [ -d "/opt/trustagent/share" ]; then
+          mv "$f" "/opt/trustagent/share"
+        fi
       fi
     done
     java_detect  >> $INSTALL_LOG_FILE
@@ -3549,10 +3567,11 @@ java_install_in_home() {
     elif [ -n "$is_gzip" ]; then
       gunzip $java_package 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
       chmod +x $javaname
-      ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
+      ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"
     elif [ -n "$is_bin" ]; then
       chmod +x $java_package
-      ./$java_package | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"  
+      ./$java_package | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"
+      return
     fi
     # java gets unpacked in current directory but they cleverly
     # named the folder differently than the archive, so search for it:

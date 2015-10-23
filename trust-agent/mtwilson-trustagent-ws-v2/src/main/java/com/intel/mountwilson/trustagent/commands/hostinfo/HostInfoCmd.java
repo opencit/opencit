@@ -140,7 +140,7 @@ public class HostInfoCmd implements ICommand {
 
         CommandResult commandResult = null;
         try {
-            commandResult = CommandUtil.runCommand("virsh version");
+            commandResult = CommandUtil.runCommand("tagent system-info virsh version");
         } catch (TAException | IOException ex) {
             log.error("getVmmAndVersion: Error while running virsh command. {}", ex.getMessage());
             if (ex.getMessage().contains("error=2, No such file or directory")) {

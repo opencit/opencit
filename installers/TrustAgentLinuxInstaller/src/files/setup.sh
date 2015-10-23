@@ -307,58 +307,6 @@ do
   echo "export $env_file_var_name=$env_file_var_value" >> $TRUSTAGENT_ENV/trustagent-setup
 done
 
-# install java
-JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-java_detect 2>&1 >/dev/null
-if ! java_ready; then
-  # java not installed, check if we have the bundle
-  JAVA_INSTALL_REQ_BUNDLE=`ls -1 java-*.bin 2>/dev/null | head -n 1`
-  JAVA_INSTALL_REQ_TGZ=`ls -1 jdk*.tar.gz 2>/dev/null | head -n 1`
-  if [ -n "$JAVA_INSTALL_REQ_BUNDLE" ]; then
-    chmod +x $JAVA_INSTALL_REQ_BUNDLE
-    ./$JAVA_INSTALL_REQ_BUNDLE
-    java_detect
-  elif [ -n "$JAVA_INSTALL_REQ_TGZ" ]; then
-    tar xzf $JAVA_INSTALL_REQ_TGZ
-    JAVA_INSTALL_REQ_TGZ_UNPACKED=`ls -1d jdk* jre* 2>/dev/null`
-    for f in $JAVA_INSTALL_REQ_TGZ_UNPACKED
-    do
-      #echo "$f"
-      if [ -d "$f" ]; then
-        if [ -d "/usr/share/$f" ]; then
-          echo "Java already installed at /usr/share/$f"
-          export JAVA_HOME="/usr/share/$f"
-        else
-          mv "$f" /usr/share && export JAVA_HOME="/usr/share/$f"
-        fi
-      fi
-    done
-    java_detect
-  fi
-fi
-if java_ready_report; then
-  # store java location in env file
-  echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
-  echo "export JAVA_CMD=$java" >> $TRUSTAGENT_ENV/trustagent-java
-else
-  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
-  exit 1
-fi
-
-if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
-  echo "Replacing java.security file, existing file will be backed up"
-  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
-  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
-fi
-
-# setup authbind to allow non-root trustagent to listen on ports 80 and 443
-if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
-  touch /etc/authbind/byport/80 /etc/authbind/byport/443
-  chmod 500 /etc/authbind/byport/80 /etc/authbind/byport/443
-  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
-fi
-
 # delete existing java files, to prevent a situation where the installer copies
 # a newer file but the older file is also there
 if [ -d $TRUSTAGENT_HOME/java ]; then
@@ -445,7 +393,6 @@ fi
 # Redefine the variables to the new locations
 package_config_filename=$TRUSTAGENT_CONFIGURATION/trustagent.properties
 
-
 # setup authbind to allow non-root trustagent to listen on port 1443
 mkdir -p /etc/authbind/byport
 if [ ! -f /etc/authbind/byport/1443 ]; then
@@ -458,6 +405,12 @@ if [ ! -f /etc/authbind/byport/1443 ]; then
   else
     echo_warning "You must be root to setup authbind configuration"
   fi
+fi
+# setup authbind to allow non-root trustagent to listen on ports 80 and 443
+if [ -n "$TRUSTAGENT_USERNAME" ] && [ "$TRUSTAGENT_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+  touch /etc/authbind/byport/80 /etc/authbind/byport/443
+  chmod 500 /etc/authbind/byport/80 /etc/authbind/byport/443
+  chown $TRUSTAGENT_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
 fi
 
 ### symlinks
@@ -517,30 +470,26 @@ if [[ ! -h "$TRUSTAGENT_BIN/tpm_nvdefine" ]]; then
 fi
 
 #tpm_bindaeskey
-tpmbindaeskey=`which tpm_bindaeskey 2>/dev/null`
-if [ -n "$tpmbindaeskey" ]; then
-  rm -f "$tpmbindaeskey"
+if [ -h "/usr/local/bin/tpm_bindaeskey" ]; then
+  rm -f "/usr/local/bin/tpm_bindaeskey"
 fi
 ln -s "$TRUSTAGENT_BIN/tpm_bindaeskey" /usr/local/bin/tpm_bindaeskey
 
 #tpm_unbindaeskey
-tpmunbindaeskey=`which tpm_unbindaeskey 2>/dev/null`
-if [ -n "$tpmunbindaeskey" ]; then
-  rm -f "$tpmunbindaeskey"
+if [ -h "/usr/local/bin/tpm_unbindaeskey" ]; then
+  rm -f "/usr/local/bin/tpm_unbindaeskey"
 fi
 ln -s "$TRUSTAGENT_BIN/tpm_unbindaeskey" /usr/local/bin/tpm_unbindaeskey
 
 #tpm_createkey
-tpmcreatekey=`which tpm_createkey 2>/dev/null`
-if [ -n "$tpmcreatekey" ]; then
-  rm -f "$tpmcreatekey"
+if [ -h "/usr/local/bin/tpm_createkey" ]; then
+  rm -f "/usr/local/bin/tpm_createkey"
 fi
 ln -s "$TRUSTAGENT_BIN/tpm_createkey" /usr/local/bin/tpm_createkey
 
 #tpm_signdata
-tpmsigndata=`which tpm_signdata 2>/dev/null`
-if [ -n "$tpmsigndata" ]; then
-  rm -f "$tpmsigndata"
+if [ -h "/usr/local/bin/tpm_signdata" ]; then
+  rm -f "/usr/local/bin/tpm_signdata"
 fi
 ln -s "$TRUSTAGENT_BIN/tpm_signdata" /usr/local/bin/tpm_signdata
 
@@ -555,7 +504,12 @@ hex2bin_install() {
 hex2bin_install
 
 hex2bin=`which hex2bin 2>/dev/null`
-if [[ ! -h "$TRUSTAGENT_BIN/hex2bin" ]]; then
+if [ -z "$hex2bin" ]; then
+  echo_failure "Cannot find hex2bin"
+  echo_failure "hex2bin must be installed"
+  exit -1
+fi
+if [[ ! -h "$TRUSTAGENT_BIN/hex2bin" ]] && [[ ! -f "$TRUSTAGENT_BIN/hex2bin" ]]; then
   ln -s "$hex2bin" "$TRUSTAGENT_BIN"
 fi
 
@@ -576,9 +530,11 @@ chmod +x $TRUSTAGENT_BIN/*
 
 # in 3.0, java home is now under trustagent home by default
 JAVA_HOME=${JAVA_HOME:-$TRUSTAGENT_HOME/share/jdk1.7.0_51}
-mkdir -p $JAVA_HOME
+mkdir -p "$TRUSTAGENT_HOME/share"   #$JAVA_HOME
 #java_install $JAVA_PACKAGE
+JAVA_PACKAGE=$(ls -1 jdk-* jre-* java-* 2>/dev/null | tail -n 1)
 java_install_in_home $JAVA_PACKAGE
+
 # store java location in env file
 echo "# $(date)" > $TRUSTAGENT_ENV/trustagent-java
 echo "export JAVA_HOME=$JAVA_HOME" >> $TRUSTAGENT_ENV/trustagent-java
@@ -798,8 +754,6 @@ else
   echo_warning "Skipping monit installation"
 fi
 
-
-
 # collect all the localhost ip addresses and make the list available as the
 # default if the user has not already set the TRUSTAGENT_TLS_CERT_IP variable
 DEFAULT_TRUSTAGENT_TLS_CERT_IP=`hostaddress_list_csv`
@@ -817,6 +771,9 @@ for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_ENV $TRU
   echo "chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory" >>$logfile
   chown -R $TRUSTAGENT_USERNAME:$TRUSTAGENT_USERNAME $directory 2>>$logfile
 done
+
+# before running any tagent commands update the extensions cache file
+tagent setup update-extensions-cache-file --force 2>/dev/null
 
 if [ "$(whoami)" == "root" ]; then
   echo "Updating system information"
@@ -842,17 +799,13 @@ tagent start >>$logfile  2>&1
 #           default is not to register the password.
 prompt_with_default REGISTER_TPM_PASSWORD       "Register TPM password with service to support asset tag automation? [y/n]" ${REGISTER_TPM_PASSWORD:-no}
 if [[ "$REGISTER_TPM_PASSWORD" == "y" || "$REGISTER_TPM_PASSWORD" == "Y" || "$REGISTER_TPM_PASSWORD" == "yes" ]]; then 
-#	prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
-	prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
-	prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
-    export MTWILSON_API_USERNAME MTWILSON_API_PASSWORD
-    export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
-    tagent setup register-tpm-password
-  fi
+  #prompt_with_default ASSET_TAG_URL "Asset Tag Server URL: (https://[SERVER]:[PORT]/mtwilson/v2)" ${ASSET_TAG_URL}
+  prompt_with_default MTWILSON_API_USERNAME "Username:" ${MTWILSON_API_USERNAME}
+  prompt_with_default_password MTWILSON_API_PASSWORD "Password:" ${MTWILSON_API_PASSWORD}
+  export MTWILSON_API_USERNAME MTWILSON_API_PASSWORD
+  export HARDWARE_UUID=`dmidecode |grep UUID | awk '{print $2}'`
+  tagent setup register-tpm-password
 fi
-
-# delete the temporary setup environment variables file
-rm -f $TRUSTAGENT_ENV/trustagent-setup
 
 # ensure the trustagent owns all the content created during setup
 for directory in $TRUSTAGENT_HOME $TRUSTAGENT_CONFIGURATION $TRUSTAGENT_JAVA $TRUSTAGENT_BIN $TRUSTAGENT_ENV $TRUSTAGENT_REPOSITORY $TRUSTAGENT_LOGS; do
