@@ -729,6 +729,13 @@ text-align: center;
 	margin-top: 12px;
 }
 
+#dialog-confirm{
+	width: inherit !important;
+}
+
+#dialog-confirm-selection{
+	width: inherit !important;
+}
 /*dialog classs*/
 
 .ui-widget-content { border: 1px solid #dddddd; /*background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;*/ color: #333333; }
