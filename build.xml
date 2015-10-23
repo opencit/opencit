@@ -31,6 +31,7 @@
 			<arg value="install"/>
 		</exec>
 		-->
+		<!--
 		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-root" resultproperty="mavenExitInstallPom">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
@@ -38,14 +39,9 @@
 		<fail message="Failed to install top level pom.xml file" status="${mavenExitInstallPom}">
 			<condition><not><equals arg1="${mavenExitInstallPom}" arg2="0"/></not></condition>
 		</fail>
-		<exec executable="${cmd.maven}" dir="maven/mtwilson-maven-java" resultproperty="mavenExitInstallJavaPom">
-			<arg value="-DskipTests=true"/>
-			<arg value="install"/>
-		</exec>
-		<fail message="Failed to install top level java pom.xml file" status="${mavenExitInstallJavaPom}">
-			<condition><not><equals arg1="${mavenExitInstallJavaPom}" arg2="0"/></not></condition>
-		</fail>
+		-->
 		<!-- the maven archetypes depend on root pom -->
+		<!--
 		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallParents">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
@@ -53,6 +49,7 @@
 		<fail message="Failed to install parent pom.xml files" status="${mavenExitInstallParents}">
 			<condition><not><equals arg1="${mavenExitInstallParents}" arg2="0"/></not></condition>
 		</fail>
+		-->
 	</target>
 	
 	<target name="clean" depends="init">

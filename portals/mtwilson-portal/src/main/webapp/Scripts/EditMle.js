@@ -55,8 +55,7 @@ function fuCreateEditMleTable(mleData) {
                             displayAttestationTypeValue = moduleAttestationDisplayString;
                         }
 		str+='<tr class="'+classValue+'">'+
-		'<td class="row1"><a href="javascript:;" onclick="fnEditMleInfo(this)" data-i18n="link.edit"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteMleInfo(this)" data-i18n="link.delete"> Delete </a></td>'+
-		'<td class="rowr3" style="word-wrap: break-word;max-width:170px;" name="mleName">'+ getHTMLEscapedMessage(mleData[items].mleName) +'</td>'+
+		'<td class="rowr3" style="word-wrap: break-word;max-width:170px;" name="mleName"><a href="javascript:;" onclick="fnEditMleInfo(this)" data-toggle="tooltip" title="Edit Mle">'+ getHTMLEscapedMessage(mleData[items].mleName) +'</a></td>'+
 		'<td class="row2" name="mleVersion">'+getHTMLEscapedMessage(mleData[items].mleVersion) +'</td>'+
 		'<td class="rowr3" name="attestation_Type">'+ getHTMLEscapedMessage(displayAttestationTypeValue) +'</td>';
 		var val1 = mleData[items].manifestList == undefined ? ' ' : mleData[items].manifestList;
@@ -69,7 +68,9 @@ function fuCreateEditMleTable(mleData) {
 		val1 = mleData[items].oemName == undefined ? ' ' : mleData[items].oemName;
 		str+='<td class="rowr2" name="oemName">'+ getHTMLEscapedMessage(val1) +'&nbsp;</td>';
 		val1 = mleData[items].mleDescription == undefined ? ' ' : mleData[items].mleDescription;
-		str+='<td class="rowr3"  style="word-wrap: break-word;max-width:170px;"name="mleDescription">'+ getHTMLEscapedMessage(val1)+'&nbsp;</td></tr>';
+		str+='<td class="rowr3"  style="word-wrap: break-word;max-width:170px;"name="mleDescription">'+ getHTMLEscapedMessage(val1)+'&nbsp;</td>';
+		str+='<td class="row1"><a href="javascript:;" onclick="fnDeleteMleInfo(this)" data-toggle="tooltip" title="Delete Mle"><span class="glyphicon glyphicon-trash"></span></a></td>';
+		str+='</tr>';
 	}
 	$('#editMleContentDiv table tbody').html(str);
 }
@@ -78,13 +79,13 @@ function fnEditMleInfo(element) {
 	$('#messageSpace').html('');
 	var data = [] ;
     var row = $(element).parent().parent();
-    $(row).find("td:not(:first-child)").each(function(){
+    $(row).find("td").each(function(){
         var val = $.trim($(this).text());
         var name = $.trim($(this).attr('name'));
         data[name]=val;
     });
-   	data["osVersion"]=$(row).find("td:eq(5)").attr('version');
-   	data["osName"]=$(row).find("td:eq(5)").attr('osName');
+   	data["osVersion"]=$(row).find("td:eq(4)").attr('version');
+   	data["osName"]=$(row).find("td:eq(4)").attr('osName');
     setLoadImage('mainContainer');
 	sendHTMLAjaxRequest(false, 'getView/getAddMLEPage.html', null, fnEditMleData, null,data);
 }
@@ -275,23 +276,38 @@ $('#disabledDiv').remove();
 
 
 function fnDeleteMleInfo(element) {
-	if (confirm($("#alert_delete_mle").text())) {
-		$('#messageSpace').html('');
-		var data = [] ;
-	    var row = $(element).parent().parent();
-	    row.find("td:not(:first-child)").each(function(){
-	        var val = $.trim($(this).text());
-	        var name = $(this).attr('name');
-	        data[name]=val;
-	    });
-	   	data["osVersion"]=row.find("td:eq(5)").attr('version');
-	   	data["osName"]=row.find("td:eq(5)").attr('osName');
-	   	var mleName = $.trim(row.find("td:eq(1)").text()); 
-		var dataToSend = fnGetMleDataForDelete(data);
-		$('#mainTableDivEditMle').prepend(disabledDiv);
-		//$('#messageSpace').html('<div >* deleteing data. Please Wait....</div>');
-		sendJSONAjaxRequest(false, 'getData/deleteMLEData.html', dataToSend+"&selectedPageNo="+selectedPageNo, fnDeleteMleInfoSuccess , null,element,mleName);
-	}
+	//$("#dialog-confirm").html($("#alert_delete_mle").text());
+	$("#dialog-confirm").dialog("open");
+        // Define the Dialog and its properties.
+        $("#dialog-confirm").dialog({
+                resizable: false,
+                modal: true,
+                height: 250,
+                width: 400,
+                buttons: {
+                        "Delete": function () {
+                                $(this).dialog('close');
+          			$('#messageSpace').html('');
+                		var data = [] ;
+            			var row = $(element).parent().parent();
+            			row.find("td").each(function(){
+                			var val = $.trim($(this).text());
+                			var name = $(this).attr('name');
+                			data[name]=val;
+            			});
+				data["osVersion"]=row.find("td:eq(4)").attr('version');
+                		data["osName"]=row.find("td:eq(4)").attr('osName');
+                		var mleName = $.trim(row.find("td:eq(0)").text()); 
+                		var dataToSend = fnGetMleDataForDelete(data);
+                		$('#mainTableDivEditMle').prepend(disabledDiv);
+                		//$('#messageSpace').html('<div >* deleteing data. Please Wait....</div>');
+                		sendJSONAjaxRequest(false, 'getData/deleteMLEData.html', dataToSend+"&selectedPageNo="+selectedPageNo, fnDeleteMleInfoSuccess , null,element,mleName);  
+                        },
+                                "Cancel": function () {
+                                $(this).dialog('close');
+                        }
+                }
+        });	
 }
 
 function fnGetMleDataForDelete(data) {

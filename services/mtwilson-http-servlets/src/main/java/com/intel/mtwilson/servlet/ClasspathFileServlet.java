@@ -39,16 +39,18 @@ public class ClasspathFileServlet extends HttpServlet
         System.out.println("Scheme: "+req.getScheme()); // Scheme: https
         System.out.println("ServletPath: "+req.getServletPath()); // ServletPath: /file
         System.out.println("ServerName: "+req.getServerName()); // ServerName: 127.0.0.1
-        
-            InputStream in = getClass().getResourceAsStream(relativePath+req.getPathInfo()); // no path separator because getPathInfo() always has leading slash
+        try (InputStream in = getClass().getResourceAsStream(relativePath+req.getPathInfo())) {
             if( in == null ) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
             else {
                 resp.setStatus(HttpServletResponse.SC_OK);
-                OutputStream out = resp.getOutputStream();
-                IOUtils.copy(in, out);
+                try (OutputStream out = resp.getOutputStream()) {
+                    IOUtils.copy(in, out);
+                }
             }
+        }
+
     }
 	
 

@@ -48,8 +48,11 @@ public class ConfigurationResource extends AbstractJsonapiResource<Configuration
     @RequiresPermissions("configurations:search")        
     protected ConfigurationDocumentCollection search(ConfigurationDocumentFilterCriteria criteria) {
         ConfigurationDocumentCollection configurations = new ConfigurationDocumentCollection();
-        Configuration configuration = retrieve("local");
+//        Configuration configuration = retrieve("local");
         ConfigurationDocument settings = new ConfigurationDocument();
+        if (configurations.getDocuments() == null) {
+            throw new IllegalArgumentException("Failed to retrieve configuration documents");
+        }
         configurations.getDocuments().add(settings);
         return configurations;
     }

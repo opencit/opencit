@@ -3,11 +3,13 @@ var locationPolicyError = false;
 //This variable will contains name of all VMWare Host type. 
 var VMWareHost = [];
 var VMWareHostLocation = [];
+var selectedHost = [];
 
 //Called on load of HostTrustStatus..jsp
 $(function() {
 	$('#mainTrustDetailsDiv').prepend(disabledDiv);
 	sendJSONAjaxRequest(false, 'getData/getDashBoardData.html', null, populateHostTrustDetails, null);
+	sendJSONAjaxRequest(false, 'getData/getAllHostForView.html', null, processAllHostDetails, null);
 	
 });
 
@@ -56,7 +58,7 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			str+='<tr class="'+classValue+'" hostID="'+ escapeForHTMLAttributes(hostDetails[item].hostID) +'" id="host_div_id_'+ escapeForHTMLAttributes(hostDetails[item].hostName.replace(/\./g,'_'))+'">'+
                                                 //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
 				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
-				'<td class="row2">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</td>'+
+				'<td class="row2"><a href="javascript:;" onclick="fnEditHostInfo(this)" data-toggle="tooltip" title="Edit Host">'+ getHTMLEscapedMessage(hostDetails[item].hostName)+'</a></td>'+
 				'<td align="center" class="row3"><img border="0" src="'+ hostDetails[item].osName +'"></td>';
 				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+ hostDetails[item].hypervisorName+'">' : '';
 				str+='<td align="center" class="row4">'+ value +'</td>';
@@ -75,10 +77,10 @@ function populateHostTrustDataIntoTable(hostDetails) {
 				}*/
 				
 				str+='<td class="row9">'+ getHTMLEscapedMessage(hostDetails[item].updatedOn) +'</td>'+
-				'<td nowrap align="center" class="row10"><input class="tableButton" type="button"  value="Refresh" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh"></td>'+
+				'<td nowrap align="center" class="row10"><a href="#" onclick="fnUpdateTrustForHost(this)" data-i18n="[value]button.refresh" data-toggle="tooltip" title="Refresh"><span class="glyphicon glyphicon-refresh"></span></a></td>'+
 				'<td align="center" class="row11"><a><img src="images/trust_assertion.png" onclick="fnGetTrustSamlDetails(\''+hostDetails[item].hostName+'\')"/></a></td>'+
-			    '<td class="rowHelp"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
-				'<td class="row12">';
+			    '<td class="rowHelp" style="text-align: center"><input type="image" onclick="showFailureReport(\''+hostDetails[item].hostName+'\')" src="images/trust_report.png" alt="Failure Report"></td>'+
+				'<td class="row12" style="text-align: center">';
 				
 				if(hostDetails[item].errorMessage != null){str+='<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+ getHTMLEscapedMessage(hostDetails[item].errorMessage) +'</textarea>';}
 				str+='</td>'+
@@ -596,3 +598,30 @@ function updateTrustStatusSuccess(response,element,host) {
 	}
       // alert(response.toSource());
 }
+
+// Added new scriplets for refresh all option
+function processAllHostDetails(responseJSON) {
+        if (responseJSON.result) {
+		selectedHost = responseJSON.hostVo;
+        }else {
+                $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responseJSON.message)+'</span>');
+        }
+}
+
+function fnGetUpdateForAllHosts() {
+        var data = "selectedHost=";
+        for ( var host in selectedHost) {
+            data+=selectedHost[host].hostName+";";
+        }
+        data=data.substring(0,data.length-1);
+        sendJSONAjaxRequest(false, 'getData/updateTrustForSelected.html', data, fnUpdateTrustForSelectedSuccess, null);
+}
+
+function fnUpdateTrustForSelectedSuccess(responseJSON) {
+        if (responseJSON.result) {
+                getDashBoardPage();
+        }else {
+                $('#errorMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(responseJSON.message)+'</div>');
+        }
+}
+

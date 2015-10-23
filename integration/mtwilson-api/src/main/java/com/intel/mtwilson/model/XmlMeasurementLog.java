@@ -51,7 +51,7 @@ public class XmlMeasurementLog extends ObjectModel {
         log.debug("XmlMeasurementLog Constructor: About to parse {} for PCR {}", xmlMeasurementLog, pcrIndex.toString());
         this.pcrIndex = pcrIndex;
         parseXmlMeasurementLog(xmlMeasurementLog);
-        log.debug("XmlMeasurementLog Constructor: Parsed with output {}.", xmlMeasurementLog.toString());
+        log.debug("XmlMeasurementLog Constructor: Parsed with output {}.", xmlMeasurementLog);
     }
     
     private void parseXmlMeasurementLog(String xmlMeasurements) {

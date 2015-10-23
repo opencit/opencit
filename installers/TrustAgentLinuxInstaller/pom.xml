@@ -46,6 +46,7 @@
                 <dependency>
                     <groupId>com.intel.mtwilson.trustagent</groupId>
                     <artifactId>mtwilson-trustagent</artifactId>
+                    <classifier>application</classifier>
                     <version>${project.version}</version>
                     <type>zip</type>
                 </dependency>	
@@ -71,7 +72,7 @@
                 </dependency>
                 <dependency>
                     <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
-                    <artifactId>tbootxm-linux-makeself</artifactId>
+                    <artifactId>tbootxm</artifactId>
                     <version>0.1-SNAPSHOT</version>
                     <type>bin</type>
                 </dependency>
@@ -96,6 +97,7 @@
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.trustagent</groupId>
                                             <artifactId>mtwilson-trustagent</artifactId>
+                                            <classifier>application</classifier>
                                             <version>${project.version}</version>
                                             <type>zip</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>
@@ -129,7 +131,7 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.intel.mtwilson.tbootxm.packages</groupId>
-                                            <artifactId>tbootxm-linux-makeself</artifactId>
+                                            <artifactId>tbootxm</artifactId>
                                             <version>0.1-SNAPSHOT</version>
                                             <type>bin</type>
                                             <outputDirectory>${makeself.directory}</outputDirectory>

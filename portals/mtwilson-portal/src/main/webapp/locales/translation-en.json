@@ -9,7 +9,7 @@
         "branch": "Branch",
         "build_timestamp": "Built on",
         "greeting": "Welcome",
-        "greeting2": "Welcome to Mt.Wilson"
+        "greeting2": "Intel Cloud Integrity Technology"
     },
     "nav": {
         "first": "First",
@@ -338,10 +338,10 @@
         "whitelist_value": "Whitelist Value"
     },
     "label": {
-        "dl_root_ca": "Click on Download icon to download Root CA Certificate",
-        "dl_privacy_ca": "Click on Download icon to download Privacy CA Certificate",
-        "dl_tls": "Click on Download icon to download TLS Certificate",
-        "dl_saml": "Click on Download icon to download SAML Certificate",
+        "dl_root_ca": "Download Root CA Certificate",
+        "dl_privacy_ca": "Download Privacy CA Certificate",
+        "dl_tls": "Download TLS Certificate",
+        "dl_saml": "Download SAML Certificate",
         "oem_bios": "OEM BIOS",
         "hypervisor": "Hypervisor (VMM)",
         "configured_pcr22": "(If configured in TPM PCR 22)",

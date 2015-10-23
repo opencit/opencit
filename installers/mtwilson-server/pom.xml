@@ -383,6 +383,13 @@
                                     <outputDirectory>${makeself.basic}</outputDirectory>
                                     <resources>
                                         <resource>
+			                                <directory>src/etc</directory>
+                                            <includes>
+                                                <include>version</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                        <resource>
                                             <directory>src/files</directory>
                                             <includes>
                                                 <include>**/*</include>
@@ -401,6 +408,13 @@
                                 <configuration>
                                     <outputDirectory>${makeself.jdk_glassfish_monit}</outputDirectory>
                                     <resources>
+									    <resource>
+                                            <directory>src/etc</directory>
+                                            <includes>
+                                                <include>version</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
                                         <resource>
                                             <directory>src/files</directory>
                                             <includes>

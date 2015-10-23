@@ -38,12 +38,16 @@ date > $INSTALL_LOG_FILE
 if [ -f /root/mtwilson.env ]; then
   . /root/mtwilson.env
   env_file_exports=$(cat /root/mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  eval export $env_file_exports
+  if [ -n "$env_file_exports" ]; then
+    eval export $env_file_exports
+  fi
 fi
 if [ -f mtwilson.env ]; then
   . mtwilson.env
   env_file_exports=$(cat mtwilson.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  eval export $env_file_exports
+  if [ -n "$env_file_exports" ]; then
+    eval export $env_file_exports
+  fi
 fi
 
 export MTWILSON_OWNER=${MTWILSON_OWNER:-mtwilson}
@@ -195,10 +199,10 @@ export java_required_version=${JAVA_REQUIRED_VERSION}
 
 echo "Installing packages: $LIST"
 
-APICLIENT_YUM_PACKAGES="zip unzip openssl"
-APICLIENT_APT_PACKAGES="zip unzip openssl"
-APICLIENT_YAST_PACKAGES="zip unzip openssl"
-APICLIENT_ZYPPER_PACKAGES="zip unzip openssl"
+APICLIENT_YUM_PACKAGES="zip unzip openssl xmlstarlet"
+APICLIENT_APT_PACKAGES="zip unzip openssl xmlstarlet"
+APICLIENT_YAST_PACKAGES="zip unzip openssl xmlstarlet"
+APICLIENT_ZYPPER_PACKAGES="zip unzip openssl xmlstarlet"
 auto_install "Installer requirements" "APICLIENT"
 
 

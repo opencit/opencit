@@ -243,17 +243,33 @@ function fnCancelOSInfo(element) {
 }
 
 function fnDeleteOSInfo(element) {
-	if (confirm($("#alert_delete_os").text())) {
-		var data ='';
-		var row = $(element).parent().parent();
-		row.find("td:not(:first-child)").each(function(){
-			var id=$(this).attr('id');
-			data+=id+'='+$(this).attr('value')+"&";
-		});
-		$('#mainEditTable').prepend(disabledDiv);
-		//$('#messageSpace').html('<div >* deleteing data. Please Wait....</div>');
-		sendJSONAjaxRequest(false, 'getData/deleteOSData.html', data+"&selectedPageNo="+selectedPageNo, fnDeleteOSInfoSuccess , null,element,"OS \""+row.find("td:eq(1)").text()+"\"",true);
-	}
+        $("#dialog-confirm").dialog("open");
+        // Define the Dialog and its properties.
+        $("#dialog-confirm").dialog({
+                resizable: false,
+                modal: true,
+                height: 250,
+                width: 400,
+                buttons: {
+                        "Delete": function () {
+                                $(this).dialog('close');
+                		var data ='';
+                		var row = $(element).parent().parent();
+                		row.find("td:not(:first-child)").each(function(){
+                        		var id=$(this).attr('id');
+                        		data+=id+'='+$(this).attr('value')+"&";
+                		});
+                		$('#mainEditTable').prepend(disabledDiv);
+                		//$('#messageSpace').html('<div >* deleteing data. Please Wait....</div>');
+		                sendJSONAjaxRequest(false, 'getData/deleteOSData.html', data+"&selectedPageNo="+selectedPageNo, fnDeleteOSInfoSuccess , null,element,"OS \""+row.find("td:eq(1)").text()+"\"",true);
+
+                                
+                        },
+                                "Cancel": function () {
+                                $(this).dialog('close');
+                        }
+                }
+        });	
 }
 
 function fnDeleteOSInfoSuccess(response,element,dataName,isOS) {
@@ -438,16 +454,30 @@ function fnUpdateOEMInfo(element) {
 }
 
 function fnDeleteOemInfo(element) {
-	if (confirm($("#alert_delete_oem").text())) {
-		var data ='';
-		var row = $(element).parent().parent();
-		row.find("td:not(:first-child)").each(function(){
-			var id=$(this).attr('id');
-			data+=id+'='+$.trim($(this).attr('value'))+"&";
-		});
-		$('#mainEditTable').prepend(disabledDiv);
-		sendJSONAjaxRequest(false, 'getData/deleteOEMData.html', data+"&selectedPageNo="+selectedPageNo, fnDeleteOSInfoSuccess , null,element,"OEM \""+row.find("td:eq(1)").text()+"\"",false);
-	}
+        $("#dialog-confirm").dialog("open");
+        // Define the Dialog and its properties.
+        $("#dialog-confirm").dialog({
+                resizable: false,
+                modal: true,
+                height: 250,
+                width: 400,
+                buttons: {
+                        "Delete": function () {
+                                $(this).dialog('close');
+                           	var data ='';
+               	 		var row = $(element).parent().parent();
+                		row.find("td:not(:first-child)").each(function(){
+                        		var id=$(this).attr('id');
+                        		data+=id+'='+$.trim($(this).attr('value'))+"&";
+                		});
+                		$('#mainEditTable').prepend(disabledDiv);
+		                sendJSONAjaxRequest(false, 'getData/deleteOEMData.html', data+"&selectedPageNo="+selectedPageNo, fnDeleteOSInfoSuccess , null,element,"OEM \""+row.find("td:eq(1)").text()+"\"",false);
+                        },
+                                "Cancel": function () {
+                                $(this).dialog('close');
+                        }
+                }
+        });	
 }
 
 
@@ -460,6 +490,13 @@ function fnEditHostInfo(element) {
 	selectedHostID = $(element).parent().parent().find('td:eq(1)').text();
 	setLoadImage('mainContainer', '40px', '500px');
 	sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnEditGetAddHostSuccess, null,element);
+}
+
+function fnEditHostPageInfo(element) {
+        isAddHostPage = false;
+        selectedHostID = $(element).parent().parent().find('td:eq(0)').text();
+        setLoadImage('mainContainer', '40px', '500px');
+        sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnEditGetAddHostSuccess, null,element);
 }
 
 function fnEditGetAddHostSuccess(response,element) {
@@ -575,13 +612,28 @@ function updateHostInfo() {
 */
 
 function fnDeleteHostInfo(element) {
-	if(confirm($("#alert_delete_host").text())){
-		var selectedHost = $(element).parent().attr('hostID');
-		var hostName = $(element).parent().parent().find('td:eq(1)').text();
-		$('#mainAddHostContainer').prepend(disabledDiv);
-		$('#mleMessage').html('');
-		sendJSONAjaxRequest(false, 'getData/deleteHostDetails.html', "hostID="+selectedHost+"&hostName="+hostName+"&selectedPageNo="+selectedPageNo, fnDeleteHostInfoSuccess,null,element);
-	}
+        //$("#dialog-confirm").html($("#alert_delete_host").text());
+	$("#dialog-confirm").dialog("open");
+        // Define the Dialog and its properties.
+        $("#dialog-confirm").dialog({
+                resizable: false,
+                modal: true,
+                height: 250,
+                width: 400,
+                buttons: {
+                        "Delete": function () {
+                                $(this).dialog('close');
+				var selectedHost = $(element).parent().attr('hostID');
+				var hostName = $(element).parent().parent().find('td:eq(0)').text();
+                		$('#mainAddHostContainer').prepend(disabledDiv);
+                		$('#mleMessage').html('');
+                		sendJSONAjaxRequest(false, 'getData/deleteHostDetails.html', "hostID="+selectedHost+"&hostName="+hostName+"&selectedPageNo="+selectedPageNo, fnDeleteHostInfoSuccess,null,element);
+                        },
+                                "Cancel": function () {
+                                $(this).dialog('close');
+                        }
+                }
+        });	
 }
 
 function fnDeleteHostInfoSuccess(response,element) {

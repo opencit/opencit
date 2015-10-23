@@ -495,6 +495,103 @@ public class ApiClientBO {
         }
     }
 
+        public void delete(ApiClientUpdateRequest apiClientRequest, String uuid) {
+        ApiClientX509 apiClientX509;
+        String userName;
+        try {
+            if (uuid != null && !uuid.isEmpty()) {
+                apiClientX509 = apiClientX509JpaController.findApiClientX509ByUUID(uuid);
+                userName = uuid;
+            } else {
+                apiClientX509 = apiClientX509JpaController.findApiClientX509ByFingerprint(apiClientRequest.fingerprint);
+                userName = apiClientRequest.fingerprint.toString();
+            }
+
+            if (apiClientX509 != null) {
+                log.info("ApiClientBO:Delete - Specified user has been created using the V1 APIs.");
+
+                // Clear the roles.
+                clearRolesForApiClient(apiClientX509);
+                userName = apiClientX509.getUserNameFromName();                
+                
+                apiClientX509JpaController.destroy(apiClientX509.getId()); // IllegalOrphanException, NonexistentEntityException, Exception
+                log.debug("ApiClientBO:Delete - Deleted the Api client X509 table");
+                
+            } else {
+                // Check if the user is in the V2 table. Otherwise we need to throw an error
+                log.debug("ApiClientBO:Delete - Looking up user login certificate {}", Hex.encodeHexString(apiClientRequest.fingerprint));
+                try (LoginDAO loginDao = MyJdbi.authz()) {
+                    UserLoginCertificate userLoginCertificate = loginDao.findUserLoginCertificateBySha256(apiClientRequest.fingerprint);
+                    if (userLoginCertificate == null) {
+                        log.error("ApiClientBO:Delete - User with fingerprint {} is not configured in the system.", Sha1Digest.valueOf(apiClientRequest.fingerprint).toHexString());
+                        throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
+                    } else {
+                        User user = loginDao.findUserById(userLoginCertificate.getUserId());
+                        if (user != null) {
+                            userName = user.getUsername();
+                        }
+                    }
+                }
+            }
+                                    
+            MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser();
+            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(userName);
+            if(portalUser != null) {
+                log.debug("ApiClientBO:Delete - About to delete the portal user {}.", portalUser.getUsername());
+                mwPortalUserJpaController.destroy(portalUser.getId());
+                log.info("ApiClientBO:Delete - Deleted the portal user successfully.");
+            }
+            
+            //updateShiroUserTables(apiClientRequest, userName);
+            log.debug("Deleting v2 user tables for {}", userName);
+            try(LoginDAO loginDAO = MyJdbi.authz()) {
+                log.debug("Looking up user login certificate {}", Hex.encodeHexString(apiClientRequest.fingerprint));
+
+                UserLoginCertificate userLoginCertificate = loginDAO.findUserLoginCertificateBySha256(apiClientRequest.fingerprint);
+                if (userLoginCertificate != null) {
+                    log.debug("Found user login certificate {}", userLoginCertificate.getId());
+                    
+                    log.debug("Looking for existing roles for user login certificate {}", userLoginCertificate.getId());
+                    List<com.intel.mtwilson.user.management.rest.v2.model.Role> rolesByUserLoginCertificateId = loginDAO.findRolesByUserLoginCertificateId(userLoginCertificate.getId());
+                    for (com.intel.mtwilson.user.management.rest.v2.model.Role roleMapping : rolesByUserLoginCertificateId) {
+                        log.debug("Removing role {} from user {}", roleMapping.getRoleName(), userName);
+                        loginDAO.deleteUserLoginCertificateRole(userLoginCertificate.getId(), roleMapping.getId());
+                    }
+
+                    log.debug("ApiClientBO:Delete - About to delete the user login certificate entry for {}.", userName);
+                    loginDAO.deleteUserLoginCertificateById(userLoginCertificate.getId());
+                    log.info("ApiClientBO:Delete - Deleted the user login certificate entry for user {}.", userName);
+                }
+
+                log.debug("Looking up user {}", userName);
+                User user = loginDAO.findUserByName(userName);
+                if (user != null) {
+                    log.debug("Found user {}", user.getId());
+                    loginDAO.deleteUser(user.getId());
+                    log.info("ApiClientBO:Delete - Deleted the user {} successfully.", userName);
+                }
+
+            } catch (Exception ex) {
+                log.error("Error while deleting the V2 user tables. ", ex);
+                throw new MSException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            }
+            
+            
+            // Capture the change in the syslog
+            Object[] paramArray = {userName, Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            log.debug(sysLogMarker, "Deleted the user {} with roles: {} to {}.", paramArray);
+
+        } catch (MSException me) {
+            log.error("Error during API Client delete. " + me.getErrorMessage());
+            throw me;
+            
+        } catch (Exception ex) {
+            // throw new MSException(ex);
+            log.error("Error during API user delete. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_DELETION_ERROR, ex.getClass().getSimpleName());
+        }
+    }
+        
     /**
      * 
      * @param apiClientX509

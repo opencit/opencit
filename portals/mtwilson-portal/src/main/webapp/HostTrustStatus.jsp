@@ -9,6 +9,7 @@
 <body>
 <div class="container">
         		<div class="mainHeader"><span class="labelPageTitle" id="MainContent_lblPageTitle" data-i18n="header.host_trust_status">Trust Dashboard</span></div> <!-- was: "Trust Status Dash Board" -->
+			<a href="#" onclick="fnGetUpdateForAllHosts(this)" data-toggle="tooltip" title="Refresh All Hosts" style="float: right"><span class="glyphicon glyphicon-refresh"></span>Refresh all</a><br>
         		<div class="mainTableDiv" id="mainTrustDetailsDiv">
         		<div id="mainTrustDetailsDivHidden" style="display: none;" class="mainTableDisplayDiv">
         			<div class="tableDisplay">
