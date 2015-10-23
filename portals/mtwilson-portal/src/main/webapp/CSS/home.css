@@ -526,7 +526,7 @@ h5, h6
 
 .dataTableMle{
 	/*width: 550px;*/
-	font-size: medium;
+	font-size: 14px;
     font-weight: inherit;
     margin-left: 61px;
     color: black;
@@ -728,6 +728,21 @@ text-align: center;
 	margin-top: 12px;
 }
 
+#dialog{
+	width: inherit !important;
+}
+
+#tlspolicy_edit_form{
+	width: inherit !important;
+}
+
+#tlspolicy_delete_confirmation{
+	width: inherit !important;
+}
+
+#dialog-confirm{
+	width: inherit !important;
+}
 /*dialog classs*/
 
 .ui-widget-content { border: 1px solid #dddddd; /*background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;*/ color: #333333; }
