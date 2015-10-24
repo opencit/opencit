@@ -579,13 +579,6 @@ sed -i '/'"$hostAllowPropertyName"'/ s/^\([^#]\)/#\1/g' "$MTWILSON_CONFIGURATION
 # This property is needed by the UpdateSslPort command to determine the port # that should be used in the shiro.ini file
  update_property_in_file "mtwilson.api.url" "$MTWILSON_CONFIGURATION/mtwilson.properties" "$MTWILSON_API_BASEURL"
 
-# copy extensions.cache file
-if [ ! -f /opt/mtwilson/configuration/extensions.cache ]; then
-  chmod 600 extensions.cache
-  chown $MTWILSON_USERNAME:$MTWILSON_USERNAME extensions.cache
-  cp extensions.cache $MTWILSON_CONFIGURATION
-fi
-
 # extract mtwilson
 echo "Extracting application..."
 MTWILSON_ZIPFILE=`ls -1 mtwilson-server*.zip 2>/dev/null | tail -n 1`
@@ -593,7 +586,9 @@ unzip -oq $MTWILSON_ZIPFILE -d $MTWILSON_HOME >>$INSTALL_LOG_FILE 2>&1
 
 # copy utilities script file to application folder
 mkdir -p $MTWILSON_HOME/share/scripts
-cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
+
+#this is now done in LinuxUtil setup.sh
+#cp functions "$MTWILSON_HOME/share/scripts/functions.sh"
 
 # deprecated:  remove when references have been updated to $MTWILSON_HOME/share/scripts/functions.sh
 cp functions "$MTWILSON_BIN/functions.sh"
@@ -921,6 +916,20 @@ chmod +x *.bin
 echo "Installing Mt Wilson linux utility..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson linux utility installation done" | tee -a  $INSTALL_LOG_FILE
+
+mkdir -p /opt/mtwilson/logs
+touch /opt/mtwilson/logs/mtwilson.log
+chown mtwilson:mtwilson /opt/mtwilson/logs/mtwilson.log
+touch /opt/mtwilson/logs/mtwilson-audit.log
+chown mtwilson:mtwilson /opt/mtwilson/logs/mtwilson-audit.log
+
+# use of "mtwilson config" method will be required when mtwilson setup is 
+# revised to use the "mtwilson" command itself for java setup tasks and
+# when the "mtwilson" command automatically switches to the "mtwilson" user
+# because then it won't have access to the environment variables.
+## mtwilson config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson'}" >/dev/null
+export MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS=${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson'}
+call_tag_setupcommand setup-manager update-extensions-cache-file --force 2> /dev/null
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"

@@ -12,6 +12,8 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 package_keystore_users_dir=/var/opt/intel/${package_name}/users
+scripts_dir=/opt/mtwilson/share/scripts
+config_dir=/opt/mtwilson/configuration
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
@@ -20,8 +22,8 @@ webservice_application_name=ManagementService
 #java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f "/usr/local/share/mtwilson/util/functions" ]; then . "/usr/local/share/mtwilson/util/functions"; else echo "Missing file: /usr/local/share/mtwilson/util/functions"; exit 1; fi
-if [ -f "/usr/local/share/mtwilson/util/version" ]; then . "/usr/local/share/mtwilson/util/version"; else echo_warning "Missing file: /usr/local/share/mtwilson/util/version"; fi
+if [ -f "${scripts_dir}/functions" ]; then . "${scripts_dir}/functions"; else echo "Missing file: ${scripts_dir}/functions"; exit 1; fi
+if [ -f "${config_dir}/version" ]; then . "${config_dir}/version"; else echo_warning "Missing file: ${config_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null

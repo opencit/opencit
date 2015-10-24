@@ -11,7 +11,6 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 
 # SCRIPT EXECUTION
 if no_java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-$DEFAULT_JAVA_REQUIRED_VERSION} or later"; exit 1; fi
-tomcat_install $TOMCAT_PACKAGE
 
 #tomcat_install $TOMCAT_PACKAGE
 MTWILSON_HOME=${MTWILSON_HOME:-"/opt/mtwilson"}

@@ -3028,8 +3028,17 @@ tomcat_create_ssl_cert() {
       if [ -f "$keystore" ]; then
         $keytool -storepass "$keystorePasswordOld" -storepasswd -new "$keystorePassword" -keystore "$keystore"
       fi
-      sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
-      sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
+      #sed -i.bak 's|sslProtocol=\"TLS\" />|sslEnabledProtocols=\"TLSv1,TLSv1.1,TLSv1.2\" keystoreFile=\"'"$keystore"'\" keystorePass=\"'"$keystorePassword"'\" />|g' "$tomcatServerXml"
+      #sed -i 's/keystorePass=.*\b/keystorePass=\"'"$keystorePassword"'/g' "$tomcatServerXml"
+      xmlstarlet ed --inplace --delete '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@sslProtocol' "$tomcatServerXml"
+      xmlstarlet ed --inplace --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@sslEnabledProtocols)]' --type attr -n sslEnabledProtocols -v 'TLSv1,TLSv1.1,TLSv1.2' "$tomcatServerXml"
+      xmlstarlet ed --inplace --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@keystoreFile)]' --type attr -n keystoreFile -v "$keystore" "$tomcatServerXml"
+      xmlstarlet ed --inplace --insert '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"][not(@keystorePass)]' --type attr -n keystorePass -v "$keystorePassword" "$tomcatServerXml"
+      #update for upgrades; attribute already exists
+      xmlstarlet ed --inplace --update '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@sslEnabledProtocols' -v 'TLSv1,TLSv1.1,TLSv1.2' "$tomcatServerXml"
+      xmlstarlet ed --inplace --update '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@keystoreFile' -v "$keystore" "$tomcatServerXml"
+      xmlstarlet ed --inplace --update '/Server/Service/Connector[@SSLEnabled="true"][@protocol="HTTP/1.1"]/@keystorePass' -v "$keystorePassword" "$tomcatServerXml"
+
       echo "Restarting Tomcat as a new Tomcat keystore password was set..."
       tomcat_restart >/dev/null
       update_property_in_file "mtwilson.tls.keystore.password" "${mtwilsonPropertiesFile}" "$keystorePassword"

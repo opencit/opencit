@@ -156,14 +156,15 @@ if [ `whoami` == "root" ]; then
  chmod -R 700 "${aikqverify_dir}"
  chmod -R 600 "${aikqverify_dir}/data"
 
-if using_glassfish; then
-  glassfish_permissions "${intel_conf_dir}"
-  glassfish_permissions "${package_dir}"
-  #glassfish_permissions "${aikqverify_dir}"
-  #glassfish_permissions "${package_var_bin_dir}"
-elif using_tomcat; then
-  tomcat_permissions "${intel_conf_dir}"
-  tomcat_permissions "${package_dir}"
-  #tomcat_permissions "${aikqverify_dir}"
-  #tomcat_permissions "${package_var_bin_dir}" 
+  if using_glassfish; then
+    glassfish_permissions "${intel_conf_dir}"
+    glassfish_permissions "${package_dir}"
+    #glassfish_permissions "${aikqverify_dir}"
+    #glassfish_permissions "${package_var_bin_dir}"
+  elif using_tomcat; then
+    tomcat_permissions "${intel_conf_dir}"
+    tomcat_permissions "${package_dir}"
+    #tomcat_permissions "${aikqverify_dir}"
+    #tomcat_permissions "${package_var_bin_dir}" 
+  fi
 fi
