@@ -492,6 +492,13 @@ function fnEditHostInfo(element) {
 	sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnEditGetAddHostSuccess, null,element);
 }
 
+function fnEditHostPageInfo(element) {
+        isAddHostPage = false;
+        selectedHostID = $(element).parent().parent().find('td:eq(0)').text();
+        setLoadImage('mainContainer', '40px', '500px');
+        sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnEditGetAddHostSuccess, null,element);
+}
+
 function fnEditGetAddHostSuccess(response,element) {
 	$('#mainContainer').html(response);
 	$('#mainHeader').text("Update Host Configuration");
@@ -617,7 +624,7 @@ function fnDeleteHostInfo(element) {
                         "Delete": function () {
                                 $(this).dialog('close');
 				var selectedHost = $(element).parent().attr('hostID');
-				var hostName = $(element).parent().parent().find('td:eq(1)').text();
+				var hostName = $(element).parent().parent().find('td:eq(0)').text();
                 		$('#mainAddHostContainer').prepend(disabledDiv);
                 		$('#mleMessage').html('');
                 		sendJSONAjaxRequest(false, 'getData/deleteHostDetails.html', "hostID="+selectedHost+"&hostName="+hostName+"&selectedPageNo="+selectedPageNo, fnDeleteHostInfoSuccess,null,element);

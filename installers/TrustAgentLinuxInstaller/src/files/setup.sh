@@ -60,9 +60,9 @@ package_version_filename=/opt/trustagent/env.d/trustagent.version
 export TRUSTAGENT_HOME=${TRUSTAGENT_HOME:-/opt/trustagent}
 TRUSTAGENT_LAYOUT=${TRUSTAGENT_LAYOUT:-home}
 
-# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env and the
+# the env directory is not configurable; it is defined as TRUSTAGENT_HOME/env.d and the
 # administrator may use a symlink if necessary to place it anywhere else
-export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env
+export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
 
 # load application environment variables if already defined
 if [ -d $TRUSTAGENT_ENV ]; then
@@ -144,7 +144,7 @@ export TRUSTAGENT_BIN=${TRUSTAGENT_BIN:-$TRUSTAGENT_HOME/bin}
 export TRUSTAGENT_JAVA=${TRUSTAGENT_JAVA:-$TRUSTAGENT_HOME/java}
 
 # note that the env dir is not configurable; it is defined as "env" under home
-export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env
+export TRUSTAGENT_ENV=$TRUSTAGENT_HOME/env.d
 
 trustagent_backup_configuration() {
   if [ -n "$TRUSTAGENT_CONFIGURATION" ] && [ -d "$TRUSTAGENT_CONFIGURATION" ]; then
@@ -313,7 +313,7 @@ register_startup_script $TRUSTAGENT_BIN/tagent.sh tagent 21
 
 ### INSTALL MEASUREMENT AGENT
 echo "Installing measurement agent..."
-TBOOTXM_PACKAGE=`ls -1 tbootxm-linux-makeself-*.bin 2>/dev/null | tail -n 1`
+TBOOTXM_PACKAGE=`ls -1 tbootxm-*.bin 2>/dev/null | tail -n 1`
 if [ -z "$TBOOTXM_PACKAGE" ]; then
   echo_failure "Failed to find measurement agent installer package"
   exit -1
@@ -693,7 +693,10 @@ if [ -z "$TRUSTAGENT_NOSETUP" ]; then
   # create a trustagent username "mtwilson" with no password and all privileges
   # which allows mtwilson to access it until mtwilson UI is updated to allow
   # entering username and password for accessing the trust agent
-  /usr/local/bin/tagent password mtwilson --nopass *:*
+  
+  # Starting with 3.0, we have a separate task that creates a new user name and password per host
+  # So we do not need to create this user without password. This is would address the security issue as well
+  #/usr/local/bin/tagent password mtwilson --nopass *:*
 
   # give tagent a chance to do any other setup (such as the .env file and pcakey)
   # and make sure it's successful before trying to start the trust agent

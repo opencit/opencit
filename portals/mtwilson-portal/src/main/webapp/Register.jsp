@@ -25,7 +25,7 @@
 
 </head>
 <body>
-        <nav class="navbar navbar-inverse navbar-fixed-top">
+        <nav class="navbar navbar-inverse">
                                 <div class="container-fluid">
                                         <div class="navbar-header">
                                                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -66,12 +66,12 @@
                             <table cellpadding="3" cellspacing="5">
                             <tbody>
                                     <tr>
-                                        <td ><label data-i18n="input.username">User Name:</label></td>
+                                        <td style="padding-right: 5px"><label style="font-weight: normal" data-i18n="input.username">User Name:</label></td>
                                         <td><input type="text" class="textBoxClass" name="userNameTXT" id="userNameValue"></td>
                                         <td><span class="requiredField">*</span></td>
                                     </tr>
                                     <tr>
-                                        <td ><label data-i18n="input.locale">Locale:</label></td>
+                                        <td style="padding-right: 5px"><label style="font-weight: normal" data-i18n="input.locale">Locale:</label></td>
                                         <!--<td><select type="text" class="textBoxClass" name="userNameTXT" id="userNameValue"></td>-->
                                         <td><select class="textBoxClass" id="ddlLocales" > <!-- onchange="fnChangehostType(this, true)" > -->
                                             <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">
@@ -81,18 +81,18 @@
                                         <!--<td><span class="requiredField">*</span></td>-->
                                     </tr>
                                     <tr>
-                                        <td><label data-i18n="input.password">Password:</label></td>
+                                        <td style="padding-right: 5px"><label style="font-weight: normal" data-i18n="input.password">Password:</label></td>
                                         <td><input type="password" class="textBoxClass" name="passwordTXT" id="passwordValue"></td>
                                         <td><span class="requiredField">*</span></td>
                                      </tr>
                                     <tr>
-                                        <td><label data-i18n="input.confirm_password">Confirm Password:</label></td>
+                                        <td style="padding-right: 5px"><label style="font-weight: normal" data-i18n="input.confirm_password">Confirm Password:</label></td>
                                         <td><input type="password" class="textBoxClass" name="confirmPasswordTXT" id="confirmPasswordValue"></td>
                                         <td><span class="requiredField">*</span></td>
                                      </tr>
                                     <tr>
                                             <td ><label></label></td>
-                                            <td><input type="button" class="button" value="Create User" onclick="registerUser()" data-i18n="[value]button.create_user"><input class="button" type="reset" value="Clear" data-i18n="[value]button.clear"></td>
+                                            <td style="padding-top: 5px"><input type="button" class="button" value="Create User" onclick="registerUser()" data-i18n="[value]button.create_user"><input class="button" type="reset" value="Clear" data-i18n="[value]button.clear"></td>
                                     <td></td>
                                 </tr>
                             </tbody>

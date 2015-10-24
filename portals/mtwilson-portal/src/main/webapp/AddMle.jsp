@@ -12,7 +12,7 @@
 		<div id="nameOfPage" class="NameHeader" data-i18n="header.add_mle">New Measured Launch Environment (MLE) Configuration</div>
 		<div class="dataTableMle" id="mainDataTableMle">
 			<div class="singleDiv">
-				<div class="labelDiv" data-i18n="input.mle_type">MLE Type:</div>
+				<div class="labelDivEditMle" data-i18n="input.mle_type">MLE Type:</div>
 				<div class="valueDiv">
                                     <select class="textBox_Border" id="MainContent_ddlMLEType" onchange="fnChangeleType(this)" >
                                         <option value="VMM" selected="selected" data-i18n="select.vmm">VMM</option>
@@ -22,7 +22,7 @@
 			</div>
 					
 			<div class="singleDiv">
-				<div class="labelDiv" id="mleSubTypeLable" data-i18n="input.host_os">Host OS:</div>
+				<div class="labelDivEditMle" id="mleSubTypeLable" data-i18n="input.host_os">Host OS:</div>
 				<div class="valueDiv">
 					<select class="textBox_Border" id="MainContent_ddlHostOs" onchange="fnOnChangeVmmName(this)">
 					</select>
@@ -30,7 +30,7 @@
 			</div>
 					
 			<div class="singleDiv">
-				<div class="labelDiv" id="mleTypeNameLabel" data-i18n="input.vmm_name">VMM Name:</div>
+				<div class="labelDivEditMle" id="mleTypeNameLabel" data-i18n="input.vmm_name">VMM Name:</div>
 				<div class="valueDiv" id="mleTypeNameValue">
 					<select class="textBox_Border" id="MainContent_ddlMLEName">
 					</select>
@@ -38,12 +38,12 @@
 			</div>
 			
 			<!-- <div id="mleVmmLableInfo">
-				<div class="labelDiv">&nbsp;</div>
+				<div class="labelDivEditMle">&nbsp;</div>
 				<div class="valueDiv textInfo" >Enable logging=memory</div>
 			</div> -->
 					
 			<div class="singleDiv">
-				<div class="labelDiv" id="mleTypeVerLabel" data-i18n="input.vmm_version">VMM Version:</div>
+				<div class="labelDivEditMle" id="mleTypeVerLabel" data-i18n="input.vmm_version">VMM Version:</div>
 				<div class="valueDiv">
 					<input type="text" class="inputs textBox_Border" id="MainContent_tbVersion" maxlength="200" >
 					<span class="requiredField">*</span>
@@ -51,7 +51,7 @@
 			</div>
 			
 			<div class="singleDiv">
-				<div class="labelDiv" data-i18n="input.attestation_type">Attestation Type:</div>
+				<div class="labelDivEditMle" data-i18n="input.attestation_type">Attestation Type:</div>
 				<div class="valueDiv">
 					<select class="textBox_Border" disabled="disabled" id="MainContent_ddlAttestationType">
 					</select>
@@ -59,28 +59,28 @@
 			</div>
 			
 			<div class="singleDiv">
-				<div class="labelDiv" data-i18n="input.description">Description:</div>
+				<div class="labelDivEditMle" data-i18n="input.description">Description:</div>
 				<div class="valueDiv">
 					<input type="text" class="inputs textBox_Border" id="MainContent_tbDesc" maxlength="200">
 				</div>
 			</div>
 			
 			<div class="singleDiv" id="mleSourceHost">
-				<div class="labelDiv" data-i18n="input.wl_host">White List Host:</div>
+				<div class="labelDivEditMle" data-i18n="input.wl_host">White List Host:</div>
 				<div class="valueDiv">
 					<input type="text"  class="inputs textBox_Border" disabled="disabled" id="MainContent_tbMleSourceHost" maxlength="200">
 				</div>
 			</div>
 
                         <!-- <div class="singleDiv" id="mainfestGKVSCheck">
-				<div class="labelDiv">&nbsp;</div>
+				<div class="labelDivEditMle">&nbsp;</div>
 				<div class="valueDiv">
 					<input type="checkbox" id="" onclick="fnToggelManifestList(checked)"><span>Uplaod GKVs directly from a trusted host</span>
 				</div>
 			</div> -->
 			
 			<div class="manifestListClass" id="manifestListDiv" >
-				<div class="labelDiv"><span data-i18n="input.manifest_list">Manifest List:</span>
+				<div class="labelDivEditMle"><span data-i18n="input.manifest_list">Manifest List:</span>
 					<input type="image" onclick="showDialogManifestList()" src="images/helpicon.png">
 				</div>
 				<table>
@@ -117,7 +117,7 @@
 				
 			</div>
 			<div id="uploadGkvs" class="singleDiv" style="display: none;">
-					<div class="labelDiv" data-i18n="required_manifests">Required Manifests:</div>
+					<div class="labelDivEditMleManifest" data-i18n="required_manifests">Required Manifests:</div>
 					<div class="valueDiv" id="gkvs_register_checkbox">
 						<!-- <input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span> -->
 						<input type="checkbox" id="MainContent_check_gkvs18" name="18"><span>18</span>

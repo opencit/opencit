@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tpm.endorsement.jdbi;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.jdbi.util.JdbiUtil;
 
 /**
@@ -13,6 +14,11 @@ import com.intel.mtwilson.jdbi.util.JdbiUtil;
 public class TpmEndorsementJdbiFactory {
 
     public static TpmEndorsementDAO tpmEndorsementDAO() {
-        return JdbiUtil.getDBI().open(TpmEndorsementDAO.class);
+        try {
+            return JdbiUtil.getDBI(My.jdbc().connection()).open(TpmEndorsementDAO.class);
+        }
+        catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

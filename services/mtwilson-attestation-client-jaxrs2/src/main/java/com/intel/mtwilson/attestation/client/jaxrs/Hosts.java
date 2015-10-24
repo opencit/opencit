@@ -4,12 +4,14 @@
  */
 package com.intel.mtwilson.attestation.client.jaxrs;
 
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.mtwilson.jaxrs2.client.MtWilsonClient;
 import com.intel.mtwilson.as.rest.v2.model.Host;
 import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Entity;
@@ -32,6 +34,10 @@ public class Hosts extends MtWilsonClient {
 
     public Hosts(Properties properties) throws Exception {
         super(properties);
+    }
+    
+    public Hosts(Properties properties, TlsConnection tlsConnection) throws Exception {
+        super(properties, tlsConnection);
     }
     
     /**
@@ -231,4 +237,17 @@ public class Hosts extends MtWilsonClient {
         return objCollection;
     }
     
+    public void preRegisterHostDetails(List<String> hostNames, String userName, String password) {
+        log.debug("target: {}", getTarget().getUri().toString());
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("host_names", hostNames);
+        map.put("user_name", userName);
+        map.put("password", password);
+        Response obj = getTarget().path("rpc/store-host-pre-registration-details")
+                .request().accept(MediaType.APPLICATION_JSON).post(Entity.json(map));
+        
+        if( !obj.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
+            throw new WebApplicationException("Pre-registration of host details failed");
+        }
+    }
 }

@@ -207,15 +207,18 @@ function fnUploadWhiteListConfigurationData() {
 
                 var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
                 var valid2 = fnMWValidatePort('whiteListOpenSource_portNO', true); //fnValidateEmptyValue('whiteListOpenSource_portNO');
+                var valid2 = fnValidateEmptyValue('whiteListOpenSource_userName');
+                var valid3 = fnValidateEmptyValue('whiteListOpenSource_password');
 
-                if (valid1 && valid2) {
+                if (valid1 && valid2 && valid2 && valid3) {
                     validation = true;
                     hostVo.vmWareType = false;
-                    hostVo.vCenterString = "";
                     hostVo.hostType = "intel";
                     hostVo.hostName = $('#whiteListOpenSource_Host').val();
                     hostVo.hostPortNo = $('#whiteListOpenSource_portNO').val();
-
+                    hostVo.vCenterString = "https://" + $('#whiteListOpenSource_Host').val() + ":" + $('#whiteListOpenSource_portNO').val() +
+                            "/;" + $('#whiteListOpenSource_userName').val() + ";" + $('#whiteListOpenSource_password').val();
+                    
                     hostVo.biosWLTarget = null;
                     hostVo.vmmWLtarget = null;
                     hostVo.registered = false;

@@ -345,6 +345,9 @@ public class HostBO {
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
             }
             
+            // Update the connnection string if needed.
+            String updatedConnectionString = factory.getHostConnectionString();
+            hostObj.AddOn_Connection_String = updatedConnectionString;
             // Let us verify if we got all the data back correctly or not 
             if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
                 throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
@@ -706,16 +709,16 @@ public class HostBO {
 //        log.debug("configureWhiteListFromCustomData TxtHostRecord2: {}", mapper.writeValueAsString(gkvHost)); //This statement may contain clear text passwords
 //        } catch(Exception e) { log.error("configureWhiteListFromCustomData cannot serialize TxtHostRecord2" ,e); }
 //        // debug only
-                
+                ConnectionString cs;
                 if(gkvHost.AddOn_Connection_String == null) {
-                    ConnectionString cs = ConnectionString.from(gkvHost);
+                    cs = ConnectionString.from(gkvHost);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 } else {
                     // Oct 23, 2013: We just make sure that the connection string has the prefix. Otherwise the agent factory will not be
                     // able to instantiate the correct one.
-                    ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
+                    cs = new ConnectionString(gkvHost.AddOn_Connection_String);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
-                }
+                }                
                 TblHosts tblHosts = new TblHosts();
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
@@ -742,6 +745,12 @@ public class HostBO {
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
                 }
 
+                // Update the connnection string if needed.
+                String updateAddOnConnectionString = factory.getHostConnectionString();
+                gkvHost.AddOn_Connection_String = updateAddOnConnectionString;
+                tblHosts.setAddOnConnectionInfo(updateAddOnConnectionString);
+                
+                
                 log.debug("TIMETAKEN: for getting host information is: {}",  (System.currentTimeMillis() - configWLStart));                
                 System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
 
