@@ -19,5 +19,7 @@ public class HostUuidFilterCriteria extends DefaultFilterCriteria implements Fil
     public UUID id;
     @QueryParam("hostId")
     public String hostId;
+    @QueryParam("hostNameEqualTo")
+    public String hostNameEqualTo;
     
 }
