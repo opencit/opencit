@@ -154,7 +154,7 @@ fi
 if [ `whoami` == "root" ]; then
  chown -R $MTWILSON_USERNAME "${aikqverify_dir}"
  chmod -R 700 "${aikqverify_dir}"
- chmod -R 600 "${aikqverify_dir}/data"
+ chmod -R 700 "${aikqverify_dir}/data"
 
   if using_glassfish; then
     glassfish_permissions "${intel_conf_dir}"
