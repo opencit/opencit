@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.attestation.client.jaxrs.Hosts;
 import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.shiro.file.LoginDAO;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -38,7 +40,9 @@ public class LoginRegister extends AbstractSetupTask {
     private String username;
     private String password;
     private File keystoreFile;
+    private File passwordFile;
     private String keystorePassword;
+    private boolean isRegistered;
 
     private String dn;
     private String[] ip;
@@ -47,6 +51,19 @@ public class LoginRegister extends AbstractSetupTask {
     @Override
     protected void configure() throws Exception {
         trustagentConfiguration = new TrustagentConfiguration(getConfiguration()); 
+        isRegistered = false;
+        
+        trustagentLoginUserName = trustagentConfiguration.getTrustAgentLoginUserName();
+        if( trustagentLoginUserName == null || trustagentLoginUserName.isEmpty() ) {
+            configuration("TrustAgent User name is not set. Please run the create-admin-user setup task first.");
+        }
+        
+        File privateDir = new File(Folders.configuration() + File.separator + "private");
+        passwordFile = privateDir.toPath().resolve("password.txt").toFile();
+        trustagentLoginPassword = FileUtils.readFileToString(passwordFile);
+        if( trustagentLoginPassword == null || trustagentLoginPassword.isEmpty() ) {
+            configuration("TrustAgent password is not set. Please run the create-admin-user setup task first.");
+        }
         
         url = trustagentConfiguration.getMtWilsonApiUrl();
         if( url == null || url.isEmpty() ) {
@@ -82,53 +99,15 @@ public class LoginRegister extends AbstractSetupTask {
 
     @Override
     protected void validate() throws Exception {
-        trustagentConfiguration = new TrustagentConfiguration(getConfiguration());
 
-        trustagentLoginUserName = trustagentConfiguration.getTrustAgentLoginUserName();
-        log.debug("Retrieving username {} from the configuration file.", trustagentLoginUserName);        
-        if( trustagentLoginUserName == null || trustagentLoginUserName.isEmpty() ) {
-            validation("TrustAgent User name is not set.");
-        }
-        
-        File userFile = trustagentConfiguration.getTrustagentUserFile();
-        File permissionFile = trustagentConfiguration.getTrustagentPermissionsFile();
-        
-        log.debug("Verifying user & his permissions @ {} & {}.", userFile.getAbsolutePath(), permissionFile.getAbsolutePath());
-        
-        LoginDAO loginDAO = new LoginDAO(userFile, permissionFile);
-        UserPassword userPassword = loginDAO.findUserByName(trustagentLoginUserName);
-        if( userPassword == null ) {
-            validation("User does not exist: %s", trustagentLoginUserName);
-        }
-        List<UserPermission> userPermissionList = loginDAO.getPermissions(trustagentLoginUserName);
-        if( userPermissionList == null ||  userPermissionList.isEmpty() ) {
-            validation("User does not have permissions assigned: %s", trustagentLoginUserName);
-        }  
+        // No need to validate anything. There will not be any issue registering the same login id and password with MTW multiple times.
+        if (!isRegistered)
+            validation("User has not been registered with attestation service yet: %s", trustagentLoginUserName);
     }
 
     @Override
     protected void execute() throws Exception {
-        log.info("Starting the process to create and pre-register the host login and password with attestation service.");
-
-        // First check if the user has provided the login name and password
-        if (System.getenv("TRUSTAGENT_LOGIN_USERNAME") != null) 
-            trustagentLoginUserName = System.getenv("TRUSTAGENT_LOGIN_USERNAME");
-
-        if (System.getenv("TRUSTAGENT_LOGIN_PASSWORD") != null) 
-            trustagentLoginPassword = System.getenv("TRUSTAGENT_LOGIN_PASSWORD");            
-        
-        if ((trustagentLoginUserName == null || trustagentLoginUserName.isEmpty()) && (trustagentLoginPassword == null || trustagentLoginPassword.isEmpty())) {
-            log.info("Administrator has not specified the login username and password. Checking if TRUSTAGENT_LOGIN_REGISTER flag is set or not");
-            
-            if (System.getenv("TRUSTAGENT_LOGIN_REGISTER") != null && System.getenv("TRUSTAGENT_LOGIN_REGISTER").equalsIgnoreCase("true")) {                
-                log.info("Generating random user name and password for trust agent access since administrator has not specified the username and password.");
-                trustagentLoginUserName = RandomUtil.randomHexString(20);
-                log.debug("Generated random user name {}", trustagentLoginUserName);         
-
-                trustagentLoginPassword = RandomUtil.randomHexString(20);
-                log.debug("Generated random password.");                 
-            }            
-        }
+        log.info("Starting the process to pre-register the host login and password with attestation service.");
                 
         if (trustagentLoginUserName != null && !trustagentLoginUserName.isEmpty() && trustagentLoginPassword != null && !trustagentLoginPassword.isEmpty()) {
             
@@ -155,21 +134,12 @@ public class LoginRegister extends AbstractSetupTask {
                 hostClientObj.preRegisterHostDetails(hostNames, trustagentLoginUserName, trustagentLoginPassword);
 
                 log.info("Successfully registered the host access information with attestation service.");
+
+                FileUtils.deleteQuietly(passwordFile);
+                
+                isRegistered = true;
             }
-                        
-            // Store the user and its corresponding permissions
-            Password pwd = new Password();
-            pwd.execute(new String[] {trustagentLoginUserName, trustagentLoginPassword, "*:*"});
-            
-            // We need to store the user name here so that we can use for validation. Password will not be stored in the property file
-            log.debug("Setting username {} in the configuration file.", trustagentLoginUserName);
-            getConfiguration().set(TrustagentConfiguration.TRUSTAGENT_LOGIN_USERNAME, trustagentLoginUserName);
-            
-            log.info("Successfully updated the property file with the username and shiro files with username and password.");
-        } else {
-            log.error("PreRegisterHostAccessDetails: Invalid user name or password specified. Either specify both TRUSTAGENT_LOGIN_USERNAME & TRUSTAGENT_LOGIN_PASSWORD "
-                    + "or don't specify them so that it would be autogenerated. If the login and password is not specified, ensure TRUSTAGENT_LOGIN_REGISTER flag is set"
-                    + "to true.");
-        }
+                                    
+        } 
     }    
 }
