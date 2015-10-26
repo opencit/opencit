@@ -1010,6 +1010,12 @@ public class HostBO {
 
                         if (searchCriteria != null && !searchCriteria.isEmpty()) {
                                 tblHostList = tblHostsJpaController.findHostsByNameSearchCriteria(searchCriteria);
+                                // See if the user has specified the Host UUID instead of name
+                                if (tblHostList == null || tblHostList.isEmpty()) {
+                                    TblHosts findHostByUuid = tblHostsJpaController.findHostByUuid(searchCriteria);
+                                    tblHostList = new ArrayList<>();
+                                    tblHostList.add(findHostByUuid);
+                                }
                         } else {
                                 tblHostList = tblHostsJpaController.findTblHostsEntities();
                         }
