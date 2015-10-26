@@ -155,7 +155,7 @@ public class Bootstrap {
         X509Certificate[] certs = TlsUtil.getServerCertificates(server, tlsProtocol);
         String aliasBasename = server.getHost();
         if( certs.length == 1 ) {
-            System.out.println("Adding trusted certificate with SHA-1 fingerprint: "+Hex.encodeHexString(sha1fingerprint(certs[0])));
+            System.out.println("Adding trusted certificate with SHA-256 fingerprint: "+Hex.encodeHexString(sha256fingerprint(certs[0])));
             keystore.addTrustedSslCertificate(certs[0], aliasBasename);     
         }
         if( certs.length > 1 ) {
@@ -164,13 +164,13 @@ public class Bootstrap {
                 certificateNumber++;
                 String alias = String.format("%s-%d", aliasBasename, certificateNumber);
                 keystore.addTrustedSslCertificate(cert, alias);
-                System.out.println("Added certificate to keystore: "+alias+" with fingerprint: "+Hex.encodeHexString(sha1fingerprint(cert)));
+                System.out.println("Added certificate to keystore: "+alias+" with SHA-256 fingerprint: "+Hex.encodeHexString(sha256fingerprint(cert)));
             }        
         }
     }
     
-    public static byte[] sha1fingerprint(X509Certificate certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
-        MessageDigest hash = MessageDigest.getInstance("SHA-1"); // NoSuchAlgorithmException
+    public static byte[] sha256fingerprint(X509Certificate certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
+        MessageDigest hash = MessageDigest.getInstance("SHA-256"); // NoSuchAlgorithmException
         byte[] digest = hash.digest(certificate.getEncoded()); // CertificateEncodingException
         return digest;
     }
