@@ -151,8 +151,15 @@ public class HostInfoCmd implements ICommand {
                 log.error("getVmmAndVersion: Unexpected error encountered while running virsh command on system that does not support VMM.");
             }
         }
+        
+        if (commandResult == null || commandResult.getStdout() == null || commandResult.getStdout().isEmpty()) {
+            log.info("getVmmAndVersion: empty virsh version file, assuming no VMM installed");
+            context.setVmmName("Host_No_VMM");
+            context.setVmmVersion("0.0");
+            return;
+        }
                 
-        if (commandResult != null && commandResult.getStdout() != null) {
+        if (commandResult.getStdout() != null ) {
             String cmdOutput = commandResult.getStdout();
             log.debug("getVmmAndVersion: output of virsh version command is {}.", cmdOutput);
             String[] result = cmdOutput.split("\n");
