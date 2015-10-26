@@ -33,8 +33,20 @@ public class HostUuidRepository implements DocumentRepository<HostUuid, HostUuid
         HostUuidCollection objCollection = new HostUuidCollection();
         log.debug("HostUuid:Search - Got request to search for the host UUID.");  
         try {
-            String ip = criteria.hostId;
-            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip,true);
+            // We had initially named the hostNameEqualTo search criteria as hostId, which users might confuse with host UUID.
+            // So, adding additional search criteria to support host names.
+            String hostName;
+            if (criteria.hostId != null && !criteria.hostId.isEmpty())
+                hostName = criteria.hostId;
+            else if (criteria.hostNameEqualTo != null && !criteria.hostNameEqualTo.isEmpty())
+                hostName = criteria.hostNameEqualTo;
+            else {
+                String errorMessage = "HostUuid:Search - Invalid search criteria specified.";
+                log.error(errorMessage);
+                throw new RepositorySearchException(errorMessage);
+            }
+                
+            List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(hostName,true);
             if(hostList != null && !hostList.isEmpty()) {
                 log.debug("Search for host uuid returned " + hostList.get(0).Hardware_Uuid);
                 HostUuid obj = new HostUuid();

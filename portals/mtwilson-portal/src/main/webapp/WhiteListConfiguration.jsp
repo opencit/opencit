@@ -36,7 +36,7 @@
                                 </div>
                                 <div class="valueDivConfig">
                                     <input type="checkbox" id="Hypervisor_Checkbox" onclick="fnChangeApplicableFor(checked, 'Hypervisor_bios_applicable_for', 'Oem_Bios_Checkbox')">
-                                    <span data-i18n="label.hypervisor">Hypervisor (VMM)</span>
+                                    <span data-i18n="label.hypervisor" name="Hypervisor_Checkbox_lbl" id="Hypervisor_Checkbox_lbl" >Hypervisor (VMM)</span>
                                 </div>
                             </div>
                             <div class="singleDiv" style="height: 66px;">
