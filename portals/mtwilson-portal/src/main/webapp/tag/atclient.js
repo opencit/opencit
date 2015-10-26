@@ -1019,13 +1019,18 @@ mtwilson.atag = mtwilson.atag || {};
     // removes all tags with this oid
     mtwilson.atag.removeTag = function(uuid) {
 	uuid_new = uuid
-        jQuery("#dialog-confirm").dialog("open");
+		jQuery("#dialog-confirm").remove();
+		var str = '<div id="dialog-confirm" title="Delete Tag?" style="display:none; width: inherit;"><p>Are you sure you want to delete this tag?</p></div>';
+		jQuery('#main').append(str);
         // Define the Dialog and its properties.
         jQuery("#dialog-confirm").dialog({
                 resizable: false,
                 modal: true,
-                height: 250,
+                height: 150,
                 width: 400,
+				open: function(event, ui) {
+					  		jQuery(event.target).parent().css('top', '200px');
+					  },
                 buttons: {
                         "Delete": function () {
                                 jQuery(this).dialog('close');
@@ -1061,13 +1066,18 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.removeSelection = function(uuid) {
         log.debug("removeSelection: " + uuid);
 	uuid_selection = uuid
-        jQuery("#dialog-confirm-selection").dialog("open");
+		jQuery("#dialog-confirm-selection").remove();
+		var str = '<div id="dialog-confirm-selection" title="Delete Selection?" style="display:none; width: inherit;"><p>Are you sure you want to delete this selection?</p></div>';
+		jQuery('#main').append(str);
         // Define the Dialog and its properties.
         jQuery("#dialog-confirm-selection").dialog({
                 resizable: false,
                 modal: true,
-                height: 250,
+                height: 150,
                 width: 400,
+				open: function(event, ui) {
+                            jQuery(event.target).parent().css('top', '200px');
+				        },
                 buttons: {
                         "Delete": function () {
                                 jQuery(this).dialog('close');
