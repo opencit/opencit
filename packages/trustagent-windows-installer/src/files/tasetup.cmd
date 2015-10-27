@@ -54,7 +54,7 @@ set TRUSTAGENT_ENV_VARS=MTWILSON_API_URL MTWILSON_TLS_CERT_SHA1 MTWILSON_API_USE
 
 REM export_vars $TRUSTAGENT_ENV_VARS
 FOR %%a in (%TRUSTAGENT_ENV_VARS%) do (
-  ECHO. %%a
+REM  ECHO. %%a
 )
 
 REM # before we start, clear the install log
@@ -80,8 +80,7 @@ REM ##### backup old files
 REM # backup configuration directory before unzipping our package
 ECHO. ==Backup configuration directory==
 IF EXIST "%intel_conf_dir%\" (
-  ECHO. backed up to file "%intel_conf_dir%.bak"
-  xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y
+  xcopy "%intel_conf_dir%" "%intel_conf_dir%.bak" /E /I /Y /Q
 )
 
 REM FIXIT ##### stop existing trust agent if running
@@ -111,18 +110,23 @@ REM if [[ ! -h "${package_dir}/bin/hex2bin" ]]; then
 REM  ln -s "$hex2bin" "${package_dir}/bin"
 REM fi
 
-REM FIXIT java_install $JAVA_PACKAGE
+REM ##Private Java install $JAVA_PACKAGE
+ECHO. ==Unpack JAVA JRE==
+  cd "%package_dir%\jre"
+  jre.exe -qo
+  set JAVA_HOME=%package_dir%\jre
+  cd "%package_bin%" 
 
 REM patch java.security file
 ECHO. ==Patch java.security file==
-if exist "%JAVA_HOME%\jre\lib\security\java.security" (
+if exist "%JAVA_HOME%\lib\security\java.security" (
   echo. "Replacing java.security file, existing file will be backed up"
-  copy "%JAVA_HOME%\jre\lib\security\java.security" "%JAVA_HOME%\jre\lib\security\java.security.old"
-  copy "%package_dir%\java.security" "%JAVA_HOME%\jre\lib\security\java.security"
+  copy "%JAVA_HOME%\lib\security\java.security" "%JAVA_HOME%\lib\security\java.security.old"
+  copy "%package_dir%\java.security" "%JAVA_HOME%\lib\security\java.security"
 )
 
 REM  # create trustagent.version file
-echo. create trustagent.version file
+echo. ==Create trustagent.version==
 > "%package_version_filename%"  echo. "# Installed Trust Agent on %date% %time%"
 >> "%package_version_filename%"  echo. "TRUSTAGENT_VERSION=%VERSION%"
 >> "%package_version_filename%"  echo "TRUSTAGENT_RELEASE=\"%BUILD%\""

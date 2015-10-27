@@ -969,6 +969,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_AA5CCD75E547408BB2AEBBD1603B8530"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_AAC355D3CE244972B3BAE0F02B56D1C8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -4756,6 +4762,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AA5CCD75E547408BB2AEBBD1603B8530"
+            {
+            "SourcePath" = "8:..\\jre\\jre.exe"
+            "TargetName" = "8:jre.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_DD0BFD059EEB4E5A9AE7D607A30E5A20"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AAC355D3CE244972B3BAE0F02B56D1C8"
             {
             "SourcePath" = "8:..\\tpmtool\\TPMTool.exe"
@@ -6638,6 +6664,17 @@
                     "Condition" = "8:"
                     "Transitive" = "11:FALSE"
                     "Property" = "8:_007024C71D47484E905CFF29F8B954CE"
+                        "Folders"
+                        {
+                        }
+                    }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_DD0BFD059EEB4E5A9AE7D607A30E5A20"
+                    {
+                    "Name" = "8:jre"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_356BE20DE6E24CEB974DF5E0A2512CA7"
                         "Folders"
                         {
                         }
