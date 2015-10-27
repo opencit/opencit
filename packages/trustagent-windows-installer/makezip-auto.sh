@@ -39,6 +39,7 @@ cd $targetDir/${projectNameVersion}
 unzip ${trustagentZip}
 rm -rf ${trustagentZip}
 mv tasetup.cmd bin/
+unzip -oq jre.zip -d java/
 
 export TMPDIR=~/.tmp
 cd $targetDir
