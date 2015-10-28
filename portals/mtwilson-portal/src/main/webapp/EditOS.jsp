@@ -34,9 +34,6 @@
 		</div>
 				<div id="messageSpace"></div>
 			    <div id="errorEditOS" class="errorMessage">	</div>
-                <div id="dialog-confirm" title="Delete OS?" style="display:none;">
-                        <p>Are you sure you want to delete this OS?</p>
-                </div>
 			
 	</div>
 		

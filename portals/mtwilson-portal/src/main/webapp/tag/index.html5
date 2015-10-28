@@ -308,9 +308,9 @@ function isNumber(n) {
                                             <input type="button" class="uploadButton" value="Save" data-i18n="[value]button.save" onclick="tag_create_form_addValue(); ws.createTag(this); return false;">
                                             <input type="text" class="textBox_Border" id="tag-create-id" data-bind-value="input.id" data-i18n="[placeholder]label.tag_oid" size="1" style="display:none">
                                             <span style="display: none;" class="validation-advice" id="advice-tag-create-values" data-i18n="label.one_value_required">You must add at least one value.</span>
-                                            <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
+                                            <!-- <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
                                                 <li style="display: inline-block; border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="input.values"><span data-bind-text="item"></span> <a data-bind-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:tag_create_form_removeValue(this.getAttribute('tagValue'));">X</a></li>
-                                            </ul>
+                                            </ul> -->
 
 
                                         </div>
@@ -404,9 +404,6 @@ function isNumber(n) {
 
                             <!-- end tags tab  -->
                         </div>
-                <div id="dialog-confirm" title="Delete Tag?" style="display:none;">
-                        <p>Are you sure you want to delete this tag?</p>
-                </div>
                         <div id="selections" >
                             <div class="nagPanel"><span data-i18n="title.tag_selection_management">Tag Selection</span> &gt;</div>
                             <div id="nameOfPage" class="NameHeader" data-i18n="header.selection_creation">Create New Selection</div> 
@@ -727,9 +724,6 @@ function isNumber(n) {
 
                             <!-- end selections tab -->
                         </div>
-                	<div id="dialog-confirm-selection" title="Delete Selection?" style="display:none;">
-                        	<p>Are you sure you want to delete this selection?</p>
-                	</div>
                         <div id="certificates">
                             <div class="nagPanel"><span data-i18n="title.tag_certificate_management">Manage Certificates</span> &gt;</div>
                             <div id="nameOfPage" class="NameHeader" data-i18n="header.certificate_creation">Create New Certificate</div> 
