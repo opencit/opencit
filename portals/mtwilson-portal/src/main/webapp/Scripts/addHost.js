@@ -149,6 +149,10 @@ function SetRequired(element) {
 			$(this).parent().find('.validationErrorDiv').remove();
 		});
 		$('#vcenterStringElement').hide();
+//                $('#openSourceStringElement').find('input').each(function() {
+//                    $(this).parent().append(reqStr);
+//                });
+                $('#openSourceStringElement').show();
 		$('#citrixStringElement').hide();
                 $('#MainContent_tbHostPort').val("1443");
 	}else if(isVmware == 1){  // VMWARE
@@ -163,7 +167,7 @@ function SetRequired(element) {
 		//$('#MainContent_tbHostIP').parent().find('.validationErrorDiv').remove();
 		$('#MainContent_tbHostPort').parent().find('.validationErrorDiv').remove();
 		$('#hostPortDisplayDiv').hide();
-      
+                $('#openSourceStringElement').hide();      
 		$('#citrixStringElement').hide();
 	}else { //CITRIX
                 $('#hostPortDisplayDiv').show();
@@ -178,6 +182,7 @@ function SetRequired(element) {
                     $(this).parent().append(reqStr);
                 });
                 $('#citrixStringElement').show();
+                $('#openSourceStringElement').hide();                      
                 $('#MainContent_tbHostPort').val("443");
     }
 }
@@ -220,6 +225,8 @@ function chechAddHostValidation() {
 	var valid4 = true;
 	if (isVmware == 0) { // TA
 		valid2 = fnTestValidation('MainContent_tbHostPort',normalReg);
+                //valid3 =  fnTestValidation('MainContent_tbVopensourceLoginId',new RegExp());
+                //valid3 =  fnTestValidation('MainContent_tbVopensourcePass',new RegExp());
 		//valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
 		/* Soni_Begin_27/09/2012_for_validating IP address */
 		//valid4 = isValidIPAddress('MainContent_tbHostIP');
@@ -304,7 +311,8 @@ function fnGetNewHostData() {
 	hostVo.hostIPAddress = hostVo.hostName; //$.trim($('#MainContent_tbHostIP').val());
 	if (isVmware == 0) { // TA
 		hostVo.hostPort =$.trim($('#MainContent_tbHostPort').val());
-		hostVo.vCenterDetails = "";
+		hostVo.vCenterDetails = "intel:https://"+$('#MainContent_tbHostName').val()+":"+$('#MainContent_tbHostPort').val()+
+                                             "/;"+$('#MainContent_tbVopensourceLoginId').val()+";"+$('#MainContent_tbVopensourcePass').val();
 	}else if(isVmware == 1) { // VMWARE
 	//	hostVo.hostIPAddress = "";
 		hostVo.hostPort =0;

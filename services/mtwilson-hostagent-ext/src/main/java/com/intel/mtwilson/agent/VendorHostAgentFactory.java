@@ -15,6 +15,10 @@ import java.io.IOException;
 public interface VendorHostAgentFactory {
     String getVendorProtocol(); // returns the protocol for connection string like "intel", "citrix", "vmware"  , for example  "intel:https://192.168.1.100:9999"
     
+    // returns the connection string if modified. In case of IntelConnection strings, instead of specifying in the connection string, users might pre-register the host
+    // Need to return back this modified connection string.
+    String getVendorConnectionString(); 
+    
     /**
      * On success, a HostAgent object should be returned for the specified hostAddress
      * which is able to obtain information about the host.

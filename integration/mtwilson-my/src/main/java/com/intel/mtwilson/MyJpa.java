@@ -63,6 +63,7 @@ public class MyJpa {
     MwProcessorMappingJpaController mwProcessorMapping;
     MwAssetTagCertificateJpaController mwAssetTagCertificate;
     MwVmAttestationReportJpaController mwVmAttestationReportJpaController;
+    MwHostPreRegistrationDetailsJpaController mwHostPreRegistrationDetailsJpaController;
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
     
     public MyJpa(MyPersistenceManager pm) { 
@@ -213,4 +214,9 @@ public class MyJpa {
     public MwVmAttestationReportJpaController mwVmAttestationReport() throws IOException {
         return new MwVmAttestationReportJpaController(pm.getASData());
     }
+    
+    public MwHostPreRegistrationDetailsJpaController mwHostPreRegistrationDetails() throws IOException {
+        return new MwHostPreRegistrationDetailsJpaController(pm.getASData());
+    }
+    
 }
