@@ -111,7 +111,8 @@ public class LoginRegister extends AbstractSetupTask {
                 
         if (trustagentLoginUserName != null && !trustagentLoginUserName.isEmpty() && trustagentLoginPassword != null && !trustagentLoginPassword.isEmpty()) {
             
-            if( System.getenv("TRUSTAGENT_LOGIN_REGISTER") != null && System.getenv("TRUSTAGENT_LOGIN_REGISTER").equalsIgnoreCase("true")) {
+            if( System.getenv("TRUSTAGENT_LOGIN_REGISTER") == null || System.getenv("TRUSTAGENT_LOGIN_REGISTER").isEmpty() ||
+                    System.getenv("TRUSTAGENT_LOGIN_REGISTER").equalsIgnoreCase("true")) {
             
                 TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().strictWithKeystore(trustagentConfiguration.getTrustagentKeystoreFile(), 
                         trustagentConfiguration.getTrustagentKeystorePassword()).build();
@@ -138,6 +139,8 @@ public class LoginRegister extends AbstractSetupTask {
                 FileUtils.deleteQuietly(passwordFile);
                 
                 isRegistered = true;
+            } else {
+                log.info("The TA username and password are not registered with attestation service since user has not opted for pre-registration.");
             }
                                     
         } 
