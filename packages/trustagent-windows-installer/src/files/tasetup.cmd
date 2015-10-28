@@ -180,9 +180,13 @@ ECHO. ==Copy shiro-win.ini to shiro.ini
 copy /Y "%intel_conf_dir%\shiro-win.ini" "%intel_conf_dir%\shiro.ini"
 
 REM # INSTALL the citbootdriver to support geotag
-cd "%bootdriver_dir%"
-start /d "%bootdriver_dir%\" /b citbootdriversetup.exe install
-cd "%package_bin%"
+  cd "%bootdriver_dir%"
+  REM #Remove the old driver first in case it is still there
+  start /d "%bootdriver_dir%\" /b citbootdriversetup.exe uninstall
+  del /F /Q "C:\Windows\System32\Drivers\citbootdriver.sys"
+  REM #install the new one
+  start /d "%bootdriver_dir%\" /b citbootdriversetup.exe install
+  cd "%package_bin%"
 
 REM # give tagent a chance to do any other setup (such as the .env file and pcakey)
 REM # and make sure it's successful before trying to start the trust agent
