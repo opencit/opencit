@@ -18,6 +18,7 @@ function populateHostTrustDetails(responsJSON) {
 	$('#disabledDiv').remove();
 	if (responsJSON.result) {
 		$('#mainTrustDetailsDivHidden').show();
+		$('#refresh_all').show();
 		populateHostTrustDataIntoTable(responsJSON.hostVo);
 		//This statement will create pagination div based on the no_of_pages
 		applyPagination('hostTrustPaginationDiv',responsJSON.noOfPages,fngetHostTrustNextPage,1);
