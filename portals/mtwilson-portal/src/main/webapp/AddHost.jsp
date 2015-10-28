@@ -59,7 +59,7 @@
                                     <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="1443"-->
 				</div>
 			</div>
-						            
+			<div  name="opensource_credentials" id ="opensource_credentials"><a href="#" onclick="fnShowLoginCredentials()">Show login credentials</a></div>			            
                         <div id="openSourceStringElement">
 				<div class="singleDiv">
 					<div class="labelDiv" data-i18n="input.opensource_details">Server Details:</div>
