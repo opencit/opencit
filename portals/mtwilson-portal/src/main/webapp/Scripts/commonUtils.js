@@ -374,6 +374,8 @@ function fnChangehostType(element,isWhiteListConfigPage) {
         $('#vmwareHostType').hide();
         $('#citrixHostType').hide();
         $('#openSourcesHostType').show();
+        $('#openSourcesHostType_username').hide();
+        $('#openSourcesHostType_password').hide();
         
         if (type == "Linux") {
             document.getElementById('Hypervisor_Checkbox_lbl').innerHTML = "Kernel and OS";
