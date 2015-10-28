@@ -33,9 +33,6 @@
 			
 		</div>
 		<span id="alert_delete_request" data-i18n="alert.delete_request" style="display: none;">Are you sure you want to delete this request?</span>
-   	<div id="dialog-confirm" title="Delete User?" style="display:none;">
-		<p>Are you sure you want to delete this request?</p>
-	</div> 
 	</div>
 	<script type="text/javascript" src="Scripts/ViewRequest.js"></script>
 </body>

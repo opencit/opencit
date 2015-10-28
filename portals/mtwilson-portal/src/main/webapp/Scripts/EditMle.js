@@ -276,13 +276,14 @@ $('#disabledDiv').remove();
 
 
 function fnDeleteMleInfo(element) {
-	//$("#dialog-confirm").html($("#alert_delete_mle").text());
-	$("#dialog-confirm").dialog("open");
+	$("#dialog-confirm").remove();
+	var str = '<div id="dialog-confirm" title="Delete MLE?" style="display:none;"><p>Are you sure you want to delete this MLE?</p></div>';
+    $('.container').append(str);
         // Define the Dialog and its properties.
         $("#dialog-confirm").dialog({
                 resizable: false,
                 modal: true,
-                height: 250,
+                height: 150,
                 width: 400,
                 buttons: {
                         "Delete": function () {
@@ -290,18 +291,18 @@ function fnDeleteMleInfo(element) {
           			$('#messageSpace').html('');
                 		var data = [] ;
             			var row = $(element).parent().parent();
-            			row.find("td").each(function(){
+            			row.find("td:not(:last-child)").each(function(){
                 			var val = $.trim($(this).text());
                 			var name = $(this).attr('name');
                 			data[name]=val;
             			});
-				data["osVersion"]=row.find("td:eq(4)").attr('version');
+						data["osVersion"]=row.find("td:eq(4)").attr('version');
                 		data["osName"]=row.find("td:eq(4)").attr('osName');
                 		var mleName = $.trim(row.find("td:eq(0)").text()); 
                 		var dataToSend = fnGetMleDataForDelete(data);
                 		$('#mainTableDivEditMle').prepend(disabledDiv);
                 		//$('#messageSpace').html('<div >* deleteing data. Please Wait....</div>');
-                		sendJSONAjaxRequest(false, 'getData/deleteMLEData.html', dataToSend+"&selectedPageNo="+selectedPageNo, fnDeleteMleInfoSuccess , null,element,mleName);  
+                		sendJSONAjaxRequest(false, 'getData/deleteMLEData.html', dataToSend+"&selectedPageNo="+selectedPageNo, fnDeleteMleInfoSuccess , null,element,mleName); 
                         },
                                 "Cancel": function () {
                                 $(this).dialog('close');
