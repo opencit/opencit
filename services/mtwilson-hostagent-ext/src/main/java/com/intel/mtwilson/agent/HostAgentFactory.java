@@ -130,6 +130,12 @@ public class HostAgentFactory {
             throw new IllegalArgumentException("Connection info missing"); 
         }
         String vendorProtocol = cs.getVendor().name().toLowerCase(); // INTEL, CITRIX, VMWARE becomes intel, citrix, vmware
+        
+        //treat use intel host agent for microsoft
+        if (vendorProtocol.compareTo("microsoft") == 0) {
+            vendorProtocol = "intel";
+        }
+        
         VendorHostAgentFactory factory = Plugins.findByAttribute(VendorHostAgentFactory.class, "vendorProtocol", vendorProtocol);
         if( factory != null ) {
             return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);

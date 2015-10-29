@@ -82,7 +82,8 @@ public class HostBO {
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18";
     private static String CITRIX_PCRs = "18"; //"17,18";
-    private static String WINDOWS_PCRS = "12,13,14";
+    private static String WINDOWS_BIOS_PCRs = "0";
+    private static String WINDOWS_PCRs = "13,14";
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HostBO.class);
 
@@ -625,7 +626,9 @@ public class HostBO {
                 if (connString.getVendor().equals(Vendor.VMWARE)) {
                     vmmPCRs = VMWARE_PCRs;
                 } else if (connString.getVendor().equals(Vendor.CITRIX)) {
-                    vmmPCRs = CITRIX_PCRs;                    
+                    vmmPCRs = CITRIX_PCRs;
+                } else if (connString.getVendor().equals(Vendor.MICROSOFT)) {
+                    vmmPCRs = WINDOWS_PCRs;
                 } else {
                     vmmPCRs = OPENSOURCE_PCRs;                    
                 }
@@ -640,7 +643,11 @@ public class HostBO {
                 hostConfigObj.setOverWriteWhiteList(false);
                 hostConfigObj.setRegisterHost(false);
 
-                hostConfigObj.setBiosPCRs(BIOS_PCRs);
+                if (vmmPCRs == WINDOWS_PCRs) {
+                    hostConfigObj.setBiosPCRs(WINDOWS_BIOS_PCRs);
+                } else {
+                    hostConfigObj.setBiosPCRs(BIOS_PCRs);
+                }
                 hostConfigObj.setVmmPCRs(vmmPCRs);
             }
 

@@ -199,6 +199,12 @@ public class ConnectionString {
                     userName = vmwareConnection.getUsername();
                     password = vmwareConnection.getPassword();
                     break;
+                case MICROSOFT:
+                    IntelConnectionString microsoftConnection = IntelConnectionString.forURL(connectionString);
+                    hostname = microsoftConnection.getHost();
+                    port = microsoftConnection.getPort();
+                    managementServerName = hostname.toString();
+                    break;
                 default:
                     throw new UnsupportedOperationException("Vendor not supported yet: "+vendor.toString());
             }
@@ -241,6 +247,8 @@ public class ConnectionString {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
                     String.format("https://%s:%d/;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
                     String.format("%s", this.addOnConnectionString);
+        } else if (this.vendor == Vendor.MICROSOFT) {
+            connectionString = String.format("https://%s:%d", this.managementServerName, this.port);
         } else {
             connectionString = "";
         }
@@ -259,7 +267,7 @@ public class ConnectionString {
      */
     public URL getURL() {
         try {
-            if (this.vendor == Vendor.INTEL) {
+            if (this.vendor == Vendor.INTEL || this.vendor == Vendor.MICROSOFT) {
                 return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
             } 
             else if (this.vendor == Vendor.VMWARE) {
@@ -886,7 +894,7 @@ public class ConnectionString {
             }
             throw new IllegalArgumentException("Host does not have a connection string or hostname set");
         }
-        else if (connectionString.startsWith("intel") ) {
+        else if (connectionString.startsWith("intel") || connectionString.startsWith("microsoft") ) {
             return new ConnectionString(connectionString);
         }
         else if ( connectionString.startsWith("vmware")  || connectionString.startsWith("citrix") ) {
