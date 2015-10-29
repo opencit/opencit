@@ -238,7 +238,7 @@ public class TblSamlAssertionJpaController implements Serializable {
      * @return 
      */
     public List<TblSamlAssertion> getListByDate(String host, Date fromDate, Date toDate) {
-        List<TblSamlAssertion> tblSamlAssertionList = null;
+        List<TblSamlAssertion> tblSamlAssertionList;
         EntityManager em = getEntityManager();
         try {
             Query query = em.createNamedQuery("TblSamlAssertion.findByRangeOfCreatedTs");
